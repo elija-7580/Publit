@@ -29,6 +29,20 @@ struct CompareMapView: View {
 
 struct ItineraryDetailView: View {
     let itinerary: Itinerary
+    var fromName: String = ""
+    var toName: String = ""
+    /// Shown above the summary for saved trips ("On time", "Leave in 6 min", …).
+    var status: TripStatus? = nil
+    var refreshedAt: Date? = nil
+
+    private var resolvedFrom: String { fromName.isEmpty ? Self.placeName(itinerary.legs.first?.from) : fromName }
+    private var resolvedTo: String { toName.isEmpty ? Self.placeName(itinerary.legs.last?.to) : toName }
+
+    /// MOTIS names coordinate endpoints "START"/"END".
+    static func placeName(_ p: Place?) -> String {
+        guard let p, p.name != "START", p.name != "END" else { return "Destination" }
+        return p.name
+    }
 
     var body: some View {
         List {
@@ -56,6 +70,9 @@ struct ItineraryDetailView: View {
             }
 
             Section {
+                if let status {
+                    StatusBanner(status: status, refreshedAt: refreshedAt)
+                }
                 HStack {
                     VStack(alignment: .leading) {
                         Text("\(Fmt.time(itinerary.startTime, tz: itinerary.legs.first?.from.tz)) – \(Fmt.time(itinerary.endTime, tz: itinerary.legs.last?.to.tz))")
@@ -82,10 +99,14 @@ struct ItineraryDetailView: View {
                 }
             }
 
-            Section { AttributionFooter() }
+            TripActionsSection(itinerary: itinerary, fromName: resolvedFrom, toName: resolvedTo)
+
         }
         .navigationTitle("Route")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) { ShowTicketButton() }
+        }
     }
 }
 
@@ -191,5 +212,37 @@ struct GetOffButton: View {
         case .denied:
             note = "Allow notifications for Publit in Settings."
         }
+    }
+}
+
+/// Live state of a saved trip.
+struct StatusBanner: View {
+    let status: TripStatus
+    let refreshedAt: Date?
+
+    private var color: Color {
+        switch status.phase {
+        case .cancelled: return .danger
+        default: return status.delayMinutes > 0 ? .delay : .live
+        }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text(status.headline).font(.headline)
+                Spacer()
+                if status.phase != .arrived && status.phase != .cancelled {
+                    Text(status.delayMinutes > 0 ? "+\(status.delayMinutes) min" : "On time")
+                        .font(.subheadline.weight(.semibold)).foregroundStyle(color)
+                }
+            }
+            Text(status.detail).font(.subheadline).foregroundStyle(status.phase == .cancelled ? Color.danger : .secondary)
+            if let refreshedAt {
+                Text("Updated \(refreshedAt.formatted(date: .omitted, time: .shortened))")
+                    .font(.caption2).foregroundStyle(.secondary)
+            }
+        }
+        .accessibilityElement(children: .combine)
     }
 }

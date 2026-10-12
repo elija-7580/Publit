@@ -27,6 +27,11 @@ targets:
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
         NSLocationWhenInUseUsageDescription: Publit uses your location to show departures near you and to plan trips from where you are.
+        NSCalendarsWriteOnlyAccessUsageDescription: Publit adds the trips you choose to your calendar.
+        NSSupportsLiveActivities: true
+        CFBundleURLTypes:
+          - CFBundleURLName: io.github.publit.app
+            CFBundleURLSchemes: [publit]
         ITSAppUsesNonExemptEncryption: false
         # Contact sent in the User-Agent, required by the Transitous usage policy.
         PublitContact: https://github.com/elija-7580/Publit-
@@ -35,6 +40,28 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: io.github.publit.app
         TARGETED_DEVICE_FAMILY: "1"
         CODE_SIGN_STYLE: Automatic
+    dependencies:
+      - target: PublitWidgets
+  PublitWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - Widgets
+      - Sources/Shared
+    info:
+      path: Config/Widgets-Info.plist
+      properties:
+        CFBundleDisplayName: Publit
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.publit.app.widgets
+        TARGETED_DEVICE_FAMILY: "1"
+        CODE_SIGN_STYLE: Automatic
+        SKIP_INSTALL: YES
   PublitTests:
     type: bundle.unit-test
     platform: iOS

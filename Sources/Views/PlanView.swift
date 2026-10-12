@@ -4,6 +4,7 @@ struct PlanView: View {
     @Environment(AppState.self) private var app
     @Environment(LocationManager.self) private var location
     @Environment(FavoritesStore.self) private var favorites
+    @Environment(TripStore.self) private var trips
     @State private var picking: PickTarget?
     @State private var showMap = false
     @State private var selectedId: String?
@@ -19,26 +20,37 @@ struct PlanView: View {
             Section {
                 endpointButton(label: "From", endpoint: plan.from, target: .from)
                 endpointButton(label: "To", endpoint: plan.to, target: .to)
+                // Plan is for later (tonight, next week). "From here, now" lives in Nearby.
                 Picker("When", selection: $plan.timeMode) {
-                    ForEach(TimeMode.allCases) { Text($0.rawValue).tag($0) }
+                    Text("Depart").tag(TimeMode.departAt)
+                    Text("Arrive").tag(TimeMode.arriveBy)
                 }
                 .pickerStyle(.segmented)
-                if plan.timeMode != .now {
-                    DatePicker("Time", selection: $plan.date)
-                }
+                DatePicker(plan.timeMode == .arriveBy ? "Arrive by" : "Depart at", selection: $plan.date)
             }
 
             if plan.to == nil {
                 quickDestinations
+                savedTrips
             } else {
                 resultsSection(plan)
             }
         }
         .navigationTitle("Plan")
+        .withSettingsButton()
+        .onAppear {
+            if plan.timeMode == .now { plan.timeMode = .departAt }
+            if plan.date < .now.addingTimeInterval(-60) { plan.date = .now }
+        }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button { app.plan.swap() } label: { Label("Swap", systemImage: "arrow.up.arrow.down") }
                     .disabled(plan.to == nil)
+            }
+            if plan.to != nil {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { app.plan.to = nil } label: { Label("Clear destination", systemImage: "xmark.circle") }
+                }
             }
         }
         .sheet(item: $picking) { target in
@@ -82,6 +94,53 @@ struct PlanView: View {
         }
     }
 
+    @ViewBuilder
+    private var savedTrips: some View {
+        let upcoming = trips.upcoming()
+        let past = trips.past()
+        Section {
+            if upcoming.isEmpty {
+                Text("Save a route to see it here, add it to your calendar and get a reminder when to leave.")
+                    .font(.footnote).foregroundStyle(.secondary)
+            }
+            ForEach(upcoming) { t in
+                NavigationLink { SavedTripView(tripId: t.id) } label: { SavedTripRow(trip: t) }
+            }
+            .onDelete { idx in idx.map { upcoming[$0].id }.forEach { id in
+                LeaveReminder.cancel(id); Task { await LiveTripActivity.end(id) }; trips.remove(id)
+            } }
+        } header: {
+            Text("Upcoming trips")
+        }
+        if !past.isEmpty {
+            Section("Past trips") {
+                ForEach(past.prefix(20)) { t in
+                    NavigationLink { SavedTripView(tripId: t.id) } label: { SavedTripRow(trip: t).opacity(0.7) }
+                        .swipeActions(edge: .leading) {
+                            Button {
+                                // Same route again: same places, next week at the same time.
+                                app.plan.from = .place(SavedPlace(id: "trip-from-\(t.id)", name: t.fromName, subtitle: nil,
+                                    lat: t.itinerary.legs.first?.from.lat ?? 0, lon: t.itinerary.legs.first?.from.lon ?? 0, stopId: nil))
+                                app.plan.to = .place(SavedPlace(id: "trip-to-\(t.id)", name: t.toName, subtitle: nil,
+                                    lat: t.itinerary.legs.last?.to.lat ?? 0, lon: t.itinerary.legs.last?.to.lon ?? 0, stopId: nil))
+                                app.plan.timeMode = .departAt
+                                app.plan.date = Self.nextOccurrence(of: t.startTime)
+                            } label: { Label("Plan again", systemImage: "arrow.clockwise") }
+                            .tint(.blue)
+                        }
+                }
+                .onDelete { idx in idx.map { past[$0].id }.forEach(trips.remove) }
+            }
+        }
+    }
+
+    /// Same weekday and time, next time it comes round.
+    static func nextOccurrence(of date: Date, after now: Date = .now) -> Date {
+        var d = date
+        while d < now { d = Calendar.current.date(byAdding: .day, value: 7, to: d) ?? now }
+        return d
+    }
+
     private func endpointButton(label: String, endpoint: Endpoint?, target: PickTarget) -> some View {
         Button { picking = target } label: {
             HStack {
@@ -98,6 +157,10 @@ struct PlanView: View {
             }
         }
         .accessibilityLabel("\(label): \(endpoint?.title ?? "not set")")
+    }
+
+    private func detail(_ it: Itinerary) -> some View {
+        ItineraryDetailView(itinerary: it, fromName: app.plan.from.title, toName: app.plan.to?.title ?? "")
     }
 
     @ViewBuilder
@@ -118,6 +181,9 @@ struct PlanView: View {
                 CompareMapView(itineraries: its, selectedId: selectedId ?? its.first?.id)
                     .frame(height: 320)
                     .listRowInsets(EdgeInsets())
+                if let sel = its.first(where: { $0.id == (selectedId ?? its.first?.id) }) {
+                    NavigationLink("Details of selected route") { detail(sel) }
+                }
                 ForEach(its) { it in
                     Button { selectedId = it.id } label: {
                         ItineraryRow(itinerary: it, windowStart: windowStart, windowEnd: windowEnd)
@@ -131,13 +197,10 @@ struct PlanView: View {
                     .buttonStyle(.plain)
                     .accessibilityAddTraits(it.id == (selectedId ?? its.first?.id) ? .isSelected : [])
                 }
-                if let sel = its.first(where: { $0.id == (selectedId ?? its.first?.id) }) {
-                    NavigationLink("Details of selected route") { ItineraryDetailView(itinerary: sel) }
-                }
             } else {
                 ForEach(its) { it in
                     NavigationLink {
-                        ItineraryDetailView(itinerary: it)
+                        detail(it)
                     } label: {
                         ItineraryRow(itinerary: it, windowStart: windowStart, windowEnd: windowEnd)
                     }
@@ -168,7 +231,6 @@ struct PlanView: View {
             if !its.isEmpty {
                 VStack(alignment: .leading, spacing: 6) {
                     if let zoneNote { Label(zoneNote, systemImage: "clock") }
-                    AttributionFooter()
                 }
                 .padding(.top, 8)
             }

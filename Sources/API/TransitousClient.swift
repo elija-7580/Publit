@@ -55,15 +55,48 @@ final class TransitousClient: @unchecked Sendable {
         return try await get("/api/v1/geocode", q)
     }
 
-    func plan(from: LatLon, to: LatLon, time: Date?, arriveBy: Bool, pageCursor: String? = nil) async throws -> PlanResponse {
+    /// Walking limits for the first and last leg and for walk-only routes (seconds).
+    /// The server default of 15 min drops many real connections, e.g. to airports or
+    /// stations at the edge of town; 30 min matches what people actually walk.
+    static let walkLimits = (prePost: 1800, direct: 3600)
+    /// Second attempt when nothing was found (limited by the server config).
+    static let widerWalkLimit = 2700
+
+    func plan(from: LatLon, to: LatLon, time: Date?, arriveBy: Bool, pageCursor: String? = nil,
+              maxWalk: Int = TransitousClient.walkLimits.prePost) async throws -> PlanResponse {
+        try await get("/api/v6/plan", Self.planQuery(from: from, to: to, time: time, arriveBy: arriveBy,
+                                                     pageCursor: pageCursor, maxWalk: maxWalk))
+    }
+
+    static func planQuery(from: LatLon, to: LatLon, time: Date?, arriveBy: Bool,
+                          pageCursor: String? = nil, maxWalk: Int = walkLimits.prePost) -> [URLQueryItem] {
         var q = [
             URLQueryItem(name: "fromPlace", value: from.apiValue),
             URLQueryItem(name: "toPlace", value: to.apiValue),
             URLQueryItem(name: "arriveBy", value: arriveBy ? "true" : "false"),
+            // Footpaths between platforms and stations routed on OpenStreetMap, not just feed transfers.
+            URLQueryItem(name: "useRoutedTransfers", value: "true"),
+            URLQueryItem(name: "maxPreTransitTime", value: String(maxWalk)),
+            URLQueryItem(name: "maxPostTransitTime", value: String(maxWalk)),
+            URLQueryItem(name: "maxDirectTime", value: String(walkLimits.direct)),
         ]
         if let time { q.append(URLQueryItem(name: "time", value: DateParsing.format(time))) }
         if let pageCursor { q.append(URLQueryItem(name: "pageCursor", value: pageCursor)) }
-        return try await get("/api/v6/plan", q)
+        return q
+    }
+
+    /// Fresh real-time state of a saved route (same vehicles, current delays and cancellations).
+    func refresh(itineraryId: String) async throws -> Itinerary {
+        try await get("/api/v6/refresh-itinerary", [URLQueryItem(name: "itineraryId", value: itineraryId)])
+    }
+
+    /// Stops inside a map rectangle, for the interactive station map.
+    func mapStops(min: LatLon, max: LatLon, zoom: Int) async throws -> [MapStop] {
+        try await get("/api/v6/map/stops", [
+            URLQueryItem(name: "min", value: min.apiValue),
+            URLQueryItem(name: "max", value: max.apiValue),
+            URLQueryItem(name: "zoom", value: String(zoom)),
+        ])
     }
 
     func departures(near center: LatLon, radius: Int, count: Int) async throws -> StopTimesResponse {

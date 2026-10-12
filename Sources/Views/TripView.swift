@@ -41,12 +41,12 @@ struct TripView: View {
                 } else {
                     HStack { Spacer(); ProgressView(); Spacer() }
                 }
-                Section { AttributionFooter() }
             }
         }
         .navigationTitle(stopTime.headsign.isEmpty ? stopTime.lineName : "\(stopTime.lineName) → \(stopTime.headsign)")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            ToolbarItem(placement: .topBarTrailing) { ShowTicketButton() }
             ToolbarItem(placement: .topBarTrailing) {
                 Button { favorites.toggle(savedLine) } label: {
                     Label(favorites.containsLine(savedLine.id) ? "Saved line" : "Save line",
@@ -185,7 +185,6 @@ struct LineDeparturesView: View {
             } header: {
                 HStack { LineBadge(line); Text("at \(line.stopName)").textCase(nil) }
             }
-            Section { AttributionFooter() }
         }
         .navigationTitle(line.lineName)
         .navigationBarTitleDisplayMode(.inline)

@@ -1,0 +1,70 @@
+import Foundation
+import UserNotifications
+
+/// "Time to leave" notification for a saved trip, 5 minutes before the walk to the first stop starts.
+/// Tapping it opens the trip; the Live Activity takes over from there.
+enum LeaveReminder {
+    static func identifier(_ tripId: String) -> String { "leave|\(tripId)" }
+    static func followIdentifier(_ tripId: String) -> String { "follow|\(tripId)" }
+
+    enum Result: Equatable { case scheduled(Date), tooLate, denied }
+
+    static func schedule(_ trip: SavedTrip) async -> Result {
+        let fire = TripStatus.reminderTime(trip.itinerary)
+        guard trip.startTime > Date().addingTimeInterval(30) else { return .tooLate }
+        let center = UNUserNotificationCenter.current()
+        let granted = (try? await center.requestAuthorization(options: [.alert, .sound])) ?? false
+        guard granted else { return .denied }
+
+        let status = TripStatus.at(fire, trip.itinerary)
+        let content = UNMutableNotificationContent()
+        content.title = "Leave at \(Fmt.time(trip.startTime, tz: trip.itinerary.legs.first?.from.tz)) for \(trip.toName)"
+        content.body = status.detail
+        content.sound = .default
+        content.interruptionLevel = .active
+        content.userInfo = ["url": trip.deepLink.absoluteString]
+        let date = max(fire, Date().addingTimeInterval(5))
+        try? await center.add(request(identifier(trip.id), content, at: date))
+
+        // Live Activities can only start from the app and last 8 hours: for trips further ahead,
+        // a second notification an hour before leaving opens the app, which then starts it.
+        if trip.startTime.timeIntervalSinceNow > 8 * 3600 {
+            let follow = UNMutableNotificationContent()
+            follow.title = "\(trip.title) in 1 hour"
+            follow.body = "Open to follow it live on the lock screen."
+            follow.userInfo = ["url": trip.deepLink.absoluteString]
+            try? await center.add(request(followIdentifier(trip.id), follow, at: trip.startTime.addingTimeInterval(-3600)))
+        }
+        return .scheduled(date)
+    }
+
+    static func cancel(_ tripId: String) {
+        UNUserNotificationCenter.current().removePendingNotificationRequests(
+            withIdentifiers: [identifier(tripId), followIdentifier(tripId)])
+    }
+
+    static func isScheduled(_ tripId: String) async -> Bool {
+        let pending = await UNUserNotificationCenter.current().pendingNotificationRequests()
+        return pending.contains { $0.identifier == identifier(tripId) }
+    }
+
+    private static func request(_ id: String, _ content: UNNotificationContent, at date: Date) -> UNNotificationRequest {
+        let comps = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: date)
+        return UNNotificationRequest(identifier: id, content: content,
+                                     trigger: UNCalendarNotificationTrigger(dateMatching: comps, repeats: false))
+    }
+}
+
+/// Opens `publit://` links attached to notifications and shows banners while the app is open.
+final class NotificationRouter: NSObject, UNUserNotificationCenterDelegate, @unchecked Sendable {
+    static let shared = NotificationRouter()
+    var open: (@MainActor (URL) -> Void)?
+
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification) async
+        -> UNNotificationPresentationOptions { [.banner, .sound] }
+
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
+        guard let s = response.notification.request.content.userInfo["url"] as? String, let url = URL(string: s) else { return }
+        await MainActor.run { open?(url) }
+    }
+}

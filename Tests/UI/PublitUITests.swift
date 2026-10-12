@@ -50,7 +50,8 @@ final class PublitUITests: XCTestCase {
         snap("stop")
         app.buttons["Save"].tap()
         app.tabBars.buttons["Saved"].tap()
-        XCTAssertTrue(app.staticTexts["Stops"].waitForExistence(timeout: 5), "saved stop not listed")
+        let saved = app.descendants(matching: .any).matching(NSPredicate(format: "label == 'Marienplatz'")).firstMatch
+        XCTAssertTrue(saved.waitForExistence(timeout: 5), "saved stop not listed")
     }
 
     /// F02 Plan and compare: routes on one timeline, map overlay, route detail.
@@ -108,5 +109,58 @@ final class PublitUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["No matches."].waitForExistence(timeout: timeout))
         app.buttons["Cancel"].tap()
         XCTAssertTrue(app.navigationBars["Saved"].waitForExistence(timeout: 5))
+    }
+
+    /// F05 Nearby "Where to now?": routes from the current location, leaving now.
+    func testF05GoNowFromNearby() {
+        let app = launch()
+        app.tap()
+        let whereTo = app.buttons["Where to now? Route from your location"]
+        XCTAssertTrue(whereTo.waitForExistence(timeout: 10))
+        whereTo.tap()
+        let field = app.searchFields.firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout: 5))
+        field.tap()
+        field.typeText("Sendlinger Tor")
+        let hit = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Sendlinger Tor'")).firstMatch
+        XCTAssertTrue(hit.waitForExistence(timeout: timeout))
+        hit.tap()
+        let leave = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'Leave' OR label == 'Walk all the way'")).firstMatch
+        XCTAssertTrue(leave.waitForExistence(timeout: timeout), "no routes from here")
+        sleep(2)
+        snap("gonow")
+    }
+
+    /// F06 Station map opens and shows stations around the location.
+    func testF06StationMap() {
+        let app = launch()
+        app.tap()
+        let mapButton = app.buttons["Station map"]
+        XCTAssertTrue(mapButton.waitForExistence(timeout: 10))
+        mapButton.tap()
+        XCTAssertTrue(app.navigationBars["Stations"].waitForExistence(timeout: 10))
+        sleep(6) // tiles and stops
+        snap("stationmap")
+    }
+
+    /// F07 Save a planned route: it appears under Upcoming trips, with ticket links in the details.
+    func testF07SaveTripAndTickets() {
+        let app = launch(["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "plan"])
+        let routes = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'from Marienplatz'"))
+        XCTAssertTrue(routes.firstMatch.waitForExistence(timeout: timeout), "no routes found")
+        routes.firstMatch.tap()
+        XCTAssertTrue(app.navigationBars["Route"].waitForExistence(timeout: 10))
+        let save = app.buttons["Save trip"]
+        for _ in 0..<6 where !save.isHittable { app.swipeUp() }
+        XCTAssertTrue(save.exists, "Save trip missing")
+        save.tap()
+        XCTAssertTrue(app.collectionViews.buttons["Saved"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["Add ticket for this trip"].exists)
+        snap("tripactions")
+        app.navigationBars["Route"].buttons.firstMatch.tap()
+        app.buttons["Clear destination"].tap()
+        let row = app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS 'Flughafen München'")).firstMatch
+        XCTAssertTrue(row.waitForExistence(timeout: 5), "saved trip not under Upcoming")
+        snap("trips")
     }
 }

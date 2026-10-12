@@ -12,6 +12,8 @@ struct PlaceSearchView: View {
     @State private var results: [GeocodeMatch] = []
     @State private var errorMessage: String?
     @State private var isSearching = false
+    /// Query the current results belong to; "No matches." only after a real search.
+    @State private var searched: String?
 
     var body: some View {
         NavigationStack {
@@ -34,7 +36,7 @@ struct PlaceSearchView: View {
                 } else {
                     if let errorMessage {
                         Text(errorMessage).foregroundStyle(.secondary)
-                    } else if results.isEmpty && !isSearching {
+                    } else if results.isEmpty && !isSearching && searched == query.trimmingCharacters(in: .whitespaces) {
                         Text("No matches.").foregroundStyle(.secondary)
                     }
                     ForEach(results) { m in
@@ -70,7 +72,7 @@ struct PlaceSearchView: View {
 
     private func search() async {
         let text = query.trimmingCharacters(in: .whitespaces)
-        guard text.count >= 2 else { results = []; errorMessage = nil; return }
+        guard text.count >= 2 else { results = []; errorMessage = nil; searched = nil; return }
         // Debounce: the task is cancelled when the query changes again.
         try? await Task.sleep(for: .milliseconds(300))
         guard !Task.isCancelled else { return }
@@ -81,6 +83,7 @@ struct PlaceSearchView: View {
             guard !Task.isCancelled else { return }
             results = r
             errorMessage = nil
+            searched = text
         } catch {
             if !(error is CancellationError) && (error as? URLError)?.code != .cancelled {
                 errorMessage = error.localizedDescription

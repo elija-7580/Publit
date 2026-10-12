@@ -10,7 +10,7 @@ struct LatLon: Hashable, Codable, Sendable {
 }
 
 /// Google-encoded polyline as returned by MOTIS (`precision` 6 for /v2+).
-struct EncodedPolyline: Decodable, Sendable {
+struct EncodedPolyline: Codable, Sendable {
     let points: String
     let precision: Int
     let length: Int
@@ -25,9 +25,23 @@ struct EncodedPolyline: Decodable, Sendable {
         length = try c.decodeIfPresent(Int.self, forKey: .length) ?? 0
         coordinates = Polyline.decode(points, precision: precision)
     }
+
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(points, forKey: .points)
+        try c.encode(precision, forKey: .precision)
+        try c.encode(length, forKey: .length)
+    }
 }
 
-struct Place: Decodable, Hashable, Sendable {
+/// Booking links per platform, when the feed provides them.
+struct TicketUrls: Codable, Hashable, Sendable {
+    let web: String?
+    let ios: String?
+    let android: String?
+}
+
+struct Place: Codable, Hashable, Sendable {
     let name: String
     let stopId: String?
     let parentId: String?
@@ -49,13 +63,13 @@ struct Place: Decodable, Hashable, Sendable {
     var stationId: String { parentId ?? stopId ?? "\(name)@\(lat),\(lon)" }
 }
 
-struct Alert: Decodable, Hashable, Sendable {
+struct Alert: Codable, Hashable, Sendable {
     let headerText: String
     let descriptionText: String
     let url: String?
 }
 
-struct Leg: Decodable, Sendable, RouteStyled {
+struct Leg: Codable, Sendable, RouteStyled {
     let mode: String
     let from: Place
     let to: Place
@@ -72,6 +86,10 @@ struct Leg: Decodable, Sendable, RouteStyled {
     let routeShortName: String?
     let displayName: String?
     let agencyName: String?
+    let agencyUrl: String?
+    let agencyFareUrl: String?
+    let routeUrl: String?
+    let ticketUrls: TicketUrls?
     let routeId: String?
     let tripId: String?
     let cancelled: Bool?
@@ -85,7 +103,7 @@ struct Leg: Decodable, Sendable, RouteStyled {
     var allStops: [Place] { [from] + (intermediateStops ?? []) + [to] }
 }
 
-struct Itinerary: Decodable, Identifiable, Sendable {
+struct Itinerary: Codable, Identifiable, Sendable {
     let id: String
     let duration: Int
     let startTime: Date
@@ -97,6 +115,10 @@ struct Itinerary: Decodable, Identifiable, Sendable {
     var firstTransitLeg: Leg? { legs.first(where: \.isTransit) }
     var hasRealtime: Bool { legs.contains { $0.isTransit && $0.realTime } }
     var isCancelled: Bool { legs.contains { $0.cancelled == true } }
+    /// Walking (or cycling) only, no public transport.
+    var isDirect: Bool { transitLegs.isEmpty }
+    /// Departure of the first vehicle (the moment that cannot be missed).
+    var firstDeparture: Date? { firstTransitLeg?.startTime }
 }
 
 struct PlanResponse: Decodable, Sendable {
@@ -164,4 +186,19 @@ struct GeocodeMatch: Decodable, Identifiable, Hashable, Sendable {
         if let country { parts.append(country) }
         return parts.joined(separator: ", ")
     }
+}
+
+/// A stop on the station map (`/api/v6/map/stops`).
+struct MapStop: Decodable, Identifiable, Hashable, Sendable {
+    let name: String
+    let stopId: String
+    let parentId: String?
+    let lat: Double
+    let lon: Double
+    let importance: Double?
+    let modes: [String]?
+
+    var id: String { stopId }
+    var coordinate: LatLon { LatLon(lat: lat, lon: lon) }
+    var stationId: String { parentId ?? stopId }
 }

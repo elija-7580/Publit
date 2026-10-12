@@ -2,6 +2,12 @@ import SwiftUI
 
 struct NearbyView: View {
     @Environment(LocationManager.self) private var location
+    @Environment(AppState.self) private var app
+    @Environment(FavoritesStore.self) private var favorites
+    @Environment(TripStore.self) private var trips
+    @State private var searching = false
+    @State private var goNow = false
+    @State private var showMap = false
     @State private var groups: [StopGroup] = []
     @State private var isLoading = false
     @State private var errorMessage: String?
@@ -14,6 +20,7 @@ struct NearbyView: View {
 
     var body: some View {
         List {
+            goSection
             if location.isDenied {
                 ContentUnavailableView("Location is off",
                                        systemImage: "location.slash",
@@ -56,16 +63,56 @@ struct NearbyView: View {
                 }
             }
 
-            if !groups.isEmpty {
-                Section { AttributionFooter() }
-            }
         }
         .navigationTitle("Nearby")
+        .withSettingsButton()
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button { showMap = true } label: { Label("Station map", systemImage: "map") }
+            }
+        }
+        .sheet(isPresented: $searching) {
+            PlaceSearchView(title: "Where to?", allowCurrentLocation: false) { endpoint in go(endpoint) }
+        }
+        .navigationDestination(isPresented: $goNow) { GoNowView() }
+        .fullScreenCover(isPresented: $showMap) { StationMapView() }
         .refreshable { await load() }
         .task(id: locationKey) {
             while !Task.isCancelled {
                 await load()
                 try? await Task.sleep(for: .seconds(30))
+            }
+        }
+    }
+
+    /// "I have to get there now": route from the current location, leaving now.
+    private func go(_ destination: Endpoint) {
+        app.goNow.from = .currentLocation
+        app.goNow.to = destination
+        app.goNow.timeMode = .now
+        goNow = true
+    }
+
+    @ViewBuilder
+    private var goSection: some View {
+        Section {
+            Button { searching = true } label: {
+                Label("Where to now?", systemImage: "magnifyingglass").foregroundStyle(.secondary)
+            }
+            .accessibilityLabel("Where to now? Route from your location")
+            ForEach(favorites.pinned) { p in
+                Button { go(.place(p)) } label: {
+                    Label { Text(p.role?.title ?? p.name) + Text("  \(p.name)").foregroundStyle(.secondary) }
+                        icon: { Image(systemName: p.role?.symbol ?? "mappin") }
+                }
+            }
+            if let next = trips.upcoming().first, next.startTime.timeIntervalSinceNow < 3 * 3600 {
+                NavigationLink { SavedTripView(tripId: next.id) } label: {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Next trip: \(next.toName)").font(.subheadline.weight(.semibold))
+                        Text(TripStatus.at(.now, next.itinerary).headline).font(.caption).foregroundStyle(.secondary)
+                    }
+                }
             }
         }
     }
@@ -140,7 +187,6 @@ struct StopDeparturesView: View {
                     } label: { DepartureRow(stopTime: st) }
                 }
             }
-            Section { AttributionFooter() }
         }
         .navigationTitle(name)
         .navigationBarTitleDisplayMode(.inline)

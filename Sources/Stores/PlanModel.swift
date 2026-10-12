@@ -48,7 +48,7 @@ final class PlanModel {
     private(set) var errorMessage: String?
 
     private var nextCursor: String?
-    @ObservationIgnored private var lastRequest: (from: LatLon, to: LatLon, time: Date?, arriveBy: Bool)?
+    @ObservationIgnored private var lastRequest: (from: LatLon, to: LatLon, time: Date?, arriveBy: Bool, maxWalk: Int)?
     @ObservationIgnored private var token = UUID()
 
     var canLoadMore: Bool { nextCursor != nil && !itineraries.isEmpty }
@@ -84,11 +84,17 @@ final class PlanModel {
         let time: Date? = timeMode == .now ? nil : date
         let arriveBy = timeMode == .arriveBy
         do {
-            let res = try await TransitousClient.shared.plan(from: f, to: t, time: time, arriveBy: arriveBy)
+            var maxWalk = TransitousClient.walkLimits.prePost
+            var res = try await TransitousClient.shared.plan(from: f, to: t, time: time, arriveBy: arriveBy, maxWalk: maxWalk)
+            if res.itineraries.isEmpty {
+                // Nothing within 30 min walk of a stop: try once more with a longer walk.
+                maxWalk = TransitousClient.widerWalkLimit
+                res = try await TransitousClient.shared.plan(from: f, to: t, time: time, arriveBy: arriveBy, maxWalk: maxWalk)
+            }
             guard token == myToken else { return }
-            itineraries = res.itineraries.isEmpty ? res.direct : res.itineraries
+            itineraries = Self.merge(transit: res.itineraries, direct: res.direct)
             nextCursor = arriveBy ? res.previousPageCursor : res.nextPageCursor
-            lastRequest = (f, t, time, arriveBy)
+            lastRequest = (f, t, time, arriveBy, maxWalk)
             if itineraries.isEmpty { errorMessage = "No connections found." }
         } catch {
             guard token == myToken, !Self.isCancellation(error) else { return }
@@ -108,7 +114,7 @@ final class PlanModel {
         defer { isLoadingMore = false }
         do {
             let res = try await TransitousClient.shared.plan(from: req.from, to: req.to, time: req.time,
-                                                             arriveBy: req.arriveBy, pageCursor: cursor)
+                                                             arriveBy: req.arriveBy, pageCursor: cursor, maxWalk: req.maxWalk)
             // A new search started meanwhile: these results belong to the old query.
             guard token == myToken else { return }
             let known = Set(itineraries.map(\.id))
@@ -118,6 +124,14 @@ final class PlanModel {
         } catch {
             if !Self.isCancellation(error) { errorMessage = error.localizedDescription }
         }
+    }
+
+    /// Walking there is listed first when it is about as fast as the best ride, or the only way.
+    nonisolated static func merge(transit: [Itinerary], direct: [Itinerary]) -> [Itinerary] {
+        guard let walk = direct.min(by: { $0.duration < $1.duration }) else { return transit }
+        guard let best = transit.map(\.duration).min() else { return [walk] }
+        let worthIt = Double(walk.duration) <= Double(best) * 1.25 || walk.duration <= 10 * 60
+        return worthIt ? [walk] + transit : transit
     }
 
     private static func isCancellation(_ error: Error) -> Bool {
@@ -133,7 +147,25 @@ enum AppTab: Hashable { case nearby, plan, favorites }
 @Observable
 final class AppState {
     var tab: AppTab = .nearby
-    let plan = PlanModel()
+    /// Plan tab: trips for later (tonight, next week).
+    let plan: PlanModel = {
+        let m = PlanModel()
+        m.timeMode = .departAt
+        return m
+    }()
+    /// Nearby tab: "from here, now".
+    let goNow = PlanModel()
+    /// Set by publit:// links (calendar events, Live Activity buttons).
+    var deepLink: DeepLink?
+
+    func open(_ url: URL) {
+        guard let link = DeepLink(url: url) else { return }
+        switch link {
+        case .trip: tab = .plan
+        case .ticket, .tripTickets: break
+        }
+        deepLink = link
+    }
 
     func route(to place: SavedPlace) {
         plan.to = .place(place)

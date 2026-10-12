@@ -18,6 +18,13 @@ let core = [
     "Stores/StopGrouping.swift",
     "Stores/FavoritesStore.swift",
     "Stores/PlanModel.swift",
+    "Stores/JSONFileStore.swift",
+    "Stores/TripStore.swift",
+    "Stores/TicketStore.swift",
+    "Models/DeepLink.swift",
+    "Models/TripStatus.swift",
+    "Util/TicketLinks.swift",
+    "Stores/MapStations.swift",
 ]
 
 let package = Package(

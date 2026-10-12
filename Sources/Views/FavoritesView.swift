@@ -80,15 +80,9 @@ struct FavoritesView: View {
                     .onDelete { idx in favorites.remove(idx.map { favorites.places[$0].id }) }
                 }
             }
-            Section("About") {
-                AttributionFooter()
-                Text("Publit is open source and free. No account, no ads, no tracking. Saved places stay on this device.")
-                    .font(.footnote).foregroundStyle(.secondary)
-                Link("Source code and feedback", destination: AppInfo.repositoryURL)
-                    .font(.footnote)
-            }
         }
         .navigationTitle("Saved")
+        .withSettingsButton()
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button { adding = true } label: { Label("Add", systemImage: "plus") }
