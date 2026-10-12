@@ -11,8 +11,8 @@ settings:
     SWIFT_VERSION: "5.0"
     MARKETING_VERSION: "0.1.0"
     CURRENT_PROJECT_VERSION: "1"
-    # Set your Apple team ID here or in Xcode > Signing & Capabilities.
-    DEVELOPMENT_TEAM: ""
+    # Personal Team — Automatic Signing for local device installs.
+    DEVELOPMENT_TEAM: "3D6S8GFSGK"
 targets:
   Publit:
     type: application
