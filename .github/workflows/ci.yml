@@ -1,0 +1,93 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  core:
+    name: Core tests (Linux)
+    runs-on: ubuntu-latest
+    container: swift:6.0
+    steps:
+      - uses: actions/checkout@v4
+      - run: swift test -Xlinker --allow-shlib-undefined
+
+  feeds:
+    name: Feed converters
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - working-directory: feeds/amtab-gtfsrt
+        run: |
+          pip install -r requirements.txt
+          python -m unittest discover -s tests -v
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+      - working-directory: feeds/amtab-gtfsrt/worker
+        run: node --test
+
+  ios:
+    name: iOS build, unit and UI tests
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate project
+        run: brew install xcodegen && xcodegen generate
+      - name: Simulator
+        id: sim
+        run: |
+          UDID=$(xcrun simctl list devices available -j | python3 -c "import json,sys; d=json.load(sys.stdin)['devices']; c=[x for k in sorted(d, reverse=True) if 'iOS' in k for x in d[k] if x['name'].startswith('iPhone 16 Pro') and 'Max' not in x['name']]; print(c[0]['udid'])")
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl status_bar "$UDID" override --time "9:41" --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3 || true
+          xcrun simctl location "$UDID" set 48.13715,11.57540
+          xcrun simctl privacy "$UDID" grant location io.github.publit.app || true
+      - name: Build
+        run: |
+          mkdir -p ci
+          set -o pipefail
+          xcodebuild build-for-testing -project Publit.xcodeproj -scheme Publit \
+            -destination "id=${{ steps.sim.outputs.udid }}" -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO 2>&1 | tee ci/build.log | grep -E "error:|warning: .*deprecated|BUILD" || true
+          if ! grep -q "TEST BUILD SUCCEEDED" ci/build.log; then
+            grep -E ": error:" ci/build.log | sed -E "s#${GITHUB_WORKSPACE}/##" | sort -u | head -40 > ci/errors.txt
+            sed -E 's#^([^:]+):([0-9]+):([0-9]+): error: (.*)#::error file=\1,line=\2,col=\3::\4#' ci/errors.txt
+            exit 1
+          fi
+      - name: Unit tests
+        run: |
+          set -o pipefail
+          xcodebuild test-without-building -project Publit.xcodeproj -scheme Publit \
+            -destination "id=${{ steps.sim.outputs.udid }}" -derivedDataPath build \
+            -only-testing:PublitTests 2>&1 | tee ci/unit.log | grep -E "Test Case|error:|Executed" || true
+          grep -q "TEST EXECUTE SUCCEEDED" ci/unit.log
+      - name: UI tests and screenshots
+        run: |
+          set -o pipefail
+          xcodebuild test-without-building -project Publit.xcodeproj -scheme Publit \
+            -destination "id=${{ steps.sim.outputs.udid }}" -derivedDataPath build \
+            -only-testing:PublitUITests 2>&1 | tee ci/ui.log | grep -E "Test Case|error:|Executed" || true
+          mkdir -p ci/screenshots && cp ~/publit-shots/*.png ci/screenshots/ 2>/dev/null || true
+          grep -q "TEST EXECUTE SUCCEEDED" ci/ui.log
+      - name: Publish results to the ci-results branch
+        if: always() && github.event_name != 'pull_request'
+        run: |
+          mkdir -p ci
+          for f in ci/*.log; do [ -f "$f" ] && tail -n 400 "$f" > "$f.tail" && mv "$f.tail" "$f"; done
+          echo "${{ github.sha }} ${{ job.status }}" > ci/RESULT
+          cd ci
+          git init -q -b ci-results
+          git config user.name "github-actions"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -qm "CI results for ${{ github.sha }}"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ci-results
