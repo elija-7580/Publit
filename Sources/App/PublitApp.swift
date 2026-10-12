@@ -12,7 +12,13 @@ struct PublitApp: App {
                 .environment(app)
                 .environment(location)
                 .environment(favorites)
-                .onAppear { location.start() }
+                .onAppear {
+                    app.applyDemo(ProcessInfo.processInfo.environment["PUBLIT_DEMO"])
+                    if let tab = ProcessInfo.processInfo.environment["PUBLIT_TAB"] {
+                        app.tab = tab == "plan" ? .plan : tab == "saved" ? .favorites : .nearby
+                    }
+                    location.start()
+                }
         }
     }
 }

@@ -36,6 +36,7 @@ struct DepartureTimeView: View {
     let delayMinutes: Int
     let realTime: Bool
     let cancelled: Bool
+    var tz: String? = nil
 
     var body: some View {
         TimelineView(.periodic(from: .now, by: 15)) { ctx in
@@ -47,7 +48,7 @@ struct DepartureTimeView: View {
                     } else if minutes < 60 {
                         Text("\(minutes) min")
                     } else {
-                        Text(Fmt.time(actual))
+                        Text(Fmt.time(actual, tz: tz))
                     }
                 }
                 .font(.body.weight(.semibold).monospacedDigit())
@@ -58,7 +59,12 @@ struct DepartureTimeView: View {
                     if delayMinutes > 0 {
                         Text("+\(delayMinutes)").foregroundStyle(.orange)
                     }
-                    Text(Fmt.time(actual)).foregroundStyle(.secondary)
+                    if !realTime && !cancelled {
+                        Image(systemName: "calendar")
+                            .foregroundStyle(.secondary)
+                            .accessibilityHidden(true)
+                    }
+                    Text(Fmt.time(actual, tz: tz)).foregroundStyle(.secondary)
                 }
                 .font(.caption2.monospacedDigit())
             }

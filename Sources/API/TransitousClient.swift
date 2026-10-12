@@ -74,12 +74,15 @@ final class TransitousClient: @unchecked Sendable {
         ])
     }
 
-    func departures(stopId: String, count: Int) async throws -> StopTimesResponse {
-        try await get("/api/v6/stoptimes", [
+    /// Departures at a stop. `radius` (metres) also includes nearby platforms of the same station.
+    func departures(stopId: String, count: Int, radius: Int? = nil) async throws -> StopTimesResponse {
+        var q = [
             URLQueryItem(name: "stopId", value: stopId),
             URLQueryItem(name: "n", value: String(count)),
             URLQueryItem(name: "withAlerts", value: "true"),
-        ])
+        ]
+        if let radius { q.append(URLQueryItem(name: "radius", value: String(radius))) }
+        return try await get("/api/v6/stoptimes", q)
     }
 
     // MARK: Transport

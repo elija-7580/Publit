@@ -65,17 +65,21 @@ final class PlanModel {
         from = t
     }
 
-    func search(current: LatLon?) async {
+    /// - Parameter silent: refresh in place without a spinner (periodic live update).
+    func search(current: LatLon?, locationDenied: Bool = false, silent: Bool = false) async {
         guard let to else {
             itineraries = []; errorMessage = nil; return
         }
         guard let f = from.coordinate(current: current), let t = to.coordinate(current: current) else {
-            errorMessage = "Waiting for your location…"
+            itineraries = []
+            errorMessage = locationDenied
+                ? "Location is off. Choose a start point, or allow location access in Settings."
+                : "Waiting for your location…"
             return
         }
         let myToken = UUID()
         token = myToken
-        isLoading = true
+        if !silent { isLoading = true }
         errorMessage = nil
         let time: Date? = timeMode == .now ? nil : date
         let arriveBy = timeMode == .arriveBy
@@ -88,19 +92,25 @@ final class PlanModel {
             if itineraries.isEmpty { errorMessage = "No connections found." }
         } catch {
             guard token == myToken, !Self.isCancellation(error) else { return }
-            itineraries = []
-            errorMessage = error.localizedDescription
+            // A failed background refresh keeps the routes already on screen.
+            if !silent || itineraries.isEmpty {
+                itineraries = []
+                errorMessage = error.localizedDescription
+            }
         }
         if token == myToken { isLoading = false }
     }
 
     func loadMore() async {
         guard let req = lastRequest, let cursor = nextCursor, !isLoadingMore else { return }
+        let myToken = token
         isLoadingMore = true
         defer { isLoadingMore = false }
         do {
             let res = try await TransitousClient.shared.plan(from: req.from, to: req.to, time: req.time,
                                                              arriveBy: req.arriveBy, pageCursor: cursor)
+            // A new search started meanwhile: these results belong to the old query.
+            guard token == myToken else { return }
             let known = Set(itineraries.map(\.id))
             let fresh = res.itineraries.filter { !known.contains($0.id) }
             itineraries = (itineraries + fresh).sorted { $0.startTime < $1.startTime }
@@ -128,5 +138,14 @@ final class AppState {
     func route(to place: SavedPlace) {
         plan.to = .place(place)
         tab = .plan
+    }
+
+    /// Preset state for UI tests and store screenshots (`PUBLIT_DEMO=munich`).
+    func applyDemo(_ name: String?) {
+        guard name == "munich" else { return }
+        plan.from = .place(SavedPlace(id: "demo-marienplatz", name: "Marienplatz", subtitle: "München",
+                                      lat: 48.1372, lon: 11.5755, stopId: nil))
+        plan.to = .place(SavedPlace(id: "demo-muc", name: "Flughafen München", subtitle: nil,
+                                    lat: 48.3537, lon: 11.7861, stopId: nil))
     }
 }

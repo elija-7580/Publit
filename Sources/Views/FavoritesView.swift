@@ -4,12 +4,40 @@ struct FavoritesView: View {
     @Environment(FavoritesStore.self) private var favorites
     @Environment(AppState.self) private var app
     @State private var adding = false
+    @State private var settingRole: PlaceRole?
 
     var body: some View {
         List {
-            if favorites.items.isEmpty {
-                ContentUnavailableView("Nothing saved yet", systemImage: "star",
-                                       description: Text("Save stops from their departure board, or add places here."))
+            Section("Home and Work") {
+                ForEach(PlaceRole.allCases, id: \.self) { role in
+                    if let p = favorites.place(for: role) {
+                        Button { app.route(to: p) } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: role.symbol).foregroundStyle(.blue).frame(width: 24)
+                                VStack(alignment: .leading, spacing: 1) {
+                                    Text(role.title).foregroundStyle(.primary)
+                                    Text(p.name).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                                }
+                            }
+                        }
+                        .swipeActions {
+                            Button(role: .destructive) { favorites.clear(role) } label: { Label("Remove", systemImage: "trash") }
+                            Button { settingRole = role } label: { Label("Change", systemImage: "pencil") }
+                        }
+                        .accessibilityHint("Plans a route to \(role.title)")
+                    } else {
+                        Button { settingRole = role } label: {
+                            Label("Set \(role.title)", systemImage: role.symbol)
+                        }
+                    }
+                }
+            }
+
+            if favorites.stops.isEmpty && favorites.places.isEmpty {
+                Section {
+                    ContentUnavailableView("Nothing else saved yet", systemImage: "star",
+                                           description: Text("Save stops from their departure board, or add places with +."))
+                }
             }
             if !favorites.stops.isEmpty {
                 Section("Stops") {
@@ -29,14 +57,20 @@ struct FavoritesView: View {
                         Button { app.route(to: p) } label: {
                             PlaceLabel(name: p.name, subtitle: p.subtitle, isStop: false)
                         }
+                        .swipeActions(edge: .leading) {
+                            Button { favorites.set(p, as: .home) } label: { Label("Home", systemImage: "house") }.tint(.blue)
+                            Button { favorites.set(p, as: .work) } label: { Label("Work", systemImage: "briefcase") }.tint(.indigo)
+                        }
                     }
                     .onDelete { idx in favorites.remove(idx.map { favorites.places[$0].id }) }
                 }
             }
             Section("About") {
                 AttributionFooter()
-                Text("Publit is open source and free. No account, no ads, no tracking. Favorites stay on this device.")
+                Text("Publit is open source and free. No account, no ads, no tracking. Saved places stay on this device.")
                     .font(.footnote).foregroundStyle(.secondary)
+                Link("Source code and feedback", destination: AppInfo.repositoryURL)
+                    .font(.footnote)
             }
         }
         .navigationTitle("Saved")
@@ -48,6 +82,11 @@ struct FavoritesView: View {
         .sheet(isPresented: $adding) {
             PlaceSearchView(title: "Save a place", allowCurrentLocation: false) { endpoint in
                 if case .place(let p) = endpoint, !favorites.contains(p.id) { favorites.toggle(p) }
+            }
+        }
+        .sheet(item: $settingRole) { role in
+            PlaceSearchView(title: "Set \(role.title)", allowCurrentLocation: false) { endpoint in
+                if case .place(let p) = endpoint { favorites.set(p, as: role) }
             }
         }
     }

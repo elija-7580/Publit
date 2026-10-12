@@ -1,13 +1,5 @@
 import SwiftUI
 
-struct StopGroup: Identifiable {
-    let id: String
-    let name: String
-    let coordinate: LatLon
-    var departures: [StopTime]
-    var distance: Double?
-}
-
 struct NearbyView: View {
     @Environment(LocationManager.self) private var location
     @State private var groups: [StopGroup] = []
@@ -78,7 +70,7 @@ struct NearbyView: View {
             if res.stopTimes.isEmpty {
                 res = try await TransitousClient.shared.departures(near: here, radius: 1500, count: 80)
             }
-            groups = Self.group(res.stopTimes, around: here)
+            groups = StopGrouping.group(res.stopTimes, around: here)
             errorMessage = nil
         } catch {
             if !(error is CancellationError) && (error as? URLError)?.code != .cancelled {
@@ -86,25 +78,12 @@ struct NearbyView: View {
             }
         }
     }
-
-    static func group(_ stopTimes: [StopTime], around here: LatLon) -> [StopGroup] {
-        var byId: [String: StopGroup] = [:]
-        var order: [String] = []
-        for st in stopTimes.sorted(by: { $0.departureTime < $1.departureTime }) {
-            let key = st.place.stationId
-            if byId[key] == nil {
-                byId[key] = StopGroup(id: key, name: st.place.name, coordinate: st.place.coordinate,
-                                      departures: [], distance: here.distance(to: st.place.coordinate))
-                order.append(key)
-            }
-            byId[key]?.departures.append(st)
-        }
-        return order.compactMap { byId[$0] }
-            .sorted { ($0.distance ?? .infinity) < ($1.distance ?? .infinity) }
-    }
 }
 
 struct StopDeparturesView: View {
+    /// Includes the other platforms of the station (feeds often split them across IDs).
+    static let stationRadius = 150
+
     let stopId: String
     let name: String
     let coordinate: LatLon
@@ -173,7 +152,7 @@ struct StopDeparturesView: View {
 
     private func load() async {
         do {
-            let res = try await TransitousClient.shared.departures(stopId: stopId, count: 40)
+            let res = try await TransitousClient.shared.departures(stopId: stopId, count: 40, radius: Self.stationRadius)
             departures = res.stopTimes
             alerts = Array(Set(res.place?.alertsList ?? []))
             errorMessage = nil

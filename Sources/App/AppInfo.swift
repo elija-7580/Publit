@@ -12,6 +12,7 @@ enum AppInfo {
 
     static var userAgent: String { "Publit/\(version) (iOS; +\(contact))" }
 
+    static var repositoryURL: URL { URL(string: contact) ?? URL(string: "https://github.com")! }
     static let sourcesURL = URL(string: "https://transitous.org/sources/")!
     static let osmCopyrightURL = URL(string: "https://www.openstreetmap.org/copyright")!
 }

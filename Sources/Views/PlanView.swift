@@ -3,9 +3,13 @@ import SwiftUI
 struct PlanView: View {
     @Environment(AppState.self) private var app
     @Environment(LocationManager.self) private var location
+    @Environment(FavoritesStore.self) private var favorites
     @State private var picking: PickTarget?
     @State private var showMap = false
     @State private var selectedId: String?
+
+    /// Live refresh interval while planning for "now".
+    static let refreshInterval: Duration = .seconds(60)
 
     enum PickTarget: String, Identifiable { case from, to; var id: String { rawValue } }
 
@@ -24,7 +28,9 @@ struct PlanView: View {
                 }
             }
 
-            if plan.to != nil {
+            if plan.to == nil {
+                quickDestinations
+            } else {
                 resultsSection(plan)
             }
         }
@@ -42,12 +48,36 @@ struct PlanView: View {
         }
         .task(id: app.plan.queryKey) {
             selectedId = nil
-            await app.plan.search(current: location.coordinate)
+            await app.plan.search(current: location.coordinate, locationDenied: location.isDenied)
+            // Keep "now" results live: delays, cancellations and departed trips change by the minute.
+            while app.plan.timeMode == .now, app.plan.to != nil, !Task.isCancelled {
+                try? await Task.sleep(for: Self.refreshInterval)
+                guard !Task.isCancelled else { break }
+                await app.plan.search(current: location.coordinate, locationDenied: location.isDenied, silent: true)
+            }
         }
         .onChange(of: location.coordinate == nil) { _, isNil in
             // Retry once the first location fix arrives.
             if !isNil, app.plan.itineraries.isEmpty, app.plan.to != nil {
                 Task { await app.plan.search(current: location.coordinate) }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var quickDestinations: some View {
+        Section("Quick") {
+            ForEach(PlaceRole.allCases, id: \.self) { role in
+                if let p = favorites.place(for: role) {
+                    Button { app.plan.to = .place(p) } label: {
+                        Label { Text(role.title) + Text("  \(p.name)").foregroundStyle(.secondary) }
+                            icon: { Image(systemName: role.symbol) }
+                    }
+                }
+            }
+            if favorites.pinned.count < PlaceRole.allCases.count {
+                Text("Set Home and Work in Saved to plan there with one tap.")
+                    .font(.footnote).foregroundStyle(.secondary)
             }
         }
     }
@@ -67,6 +97,7 @@ struct PlanView: View {
                 Spacer()
             }
         }
+        .accessibilityLabel("\(label): \(endpoint?.title ?? "not set")")
     }
 
     @ViewBuilder
@@ -74,6 +105,7 @@ struct PlanView: View {
         let its = plan.itineraries
         let windowStart = its.map(\.startTime).min() ?? .now
         let windowEnd = its.map(\.endTime).max() ?? .now
+        let zoneNote = its.first.flatMap { Fmt.foreignZoneNote(tz: $0.legs.first?.from.tz, at: $0.startTime) }
 
         Section {
             if plan.isLoading && its.isEmpty {
@@ -97,6 +129,7 @@ struct PlanView: View {
                             }
                     }
                     .buttonStyle(.plain)
+                    .accessibilityAddTraits(it.id == (selectedId ?? its.first?.id) ? .isSelected : [])
                 }
                 if let sel = its.first(where: { $0.id == (selectedId ?? its.first?.id) }) {
                     NavigationLink("Details of selected route") { ItineraryDetailView(itinerary: sel) }
@@ -132,7 +165,13 @@ struct PlanView: View {
                 }
             }
         } footer: {
-            if !its.isEmpty { AttributionFooter().padding(.top, 8) }
+            if !its.isEmpty {
+                VStack(alignment: .leading, spacing: 6) {
+                    if let zoneNote { Label(zoneNote, systemImage: "clock") }
+                    AttributionFooter()
+                }
+                .padding(.top, 8)
+            }
         }
     }
 }
@@ -143,10 +182,13 @@ struct ItineraryRow: View {
     let windowStart: Date
     let windowEnd: Date
 
+    private var tz: String? { itinerary.legs.first?.from.tz }
+
     var body: some View {
+        let warnings = TransferRisk.warnings(for: itinerary)
         VStack(alignment: .leading, spacing: 6) {
             HStack(alignment: .firstTextBaseline) {
-                Text("\(Fmt.time(itinerary.startTime)) – \(Fmt.time(itinerary.endTime))")
+                Text("\(Fmt.time(itinerary.startTime, tz: tz)) – \(Fmt.time(itinerary.endTime, tz: itinerary.legs.last?.to.tz))")
                     .font(.headline.monospacedDigit())
                 if itinerary.hasRealtime {
                     Image(systemName: "dot.radiowaves.left.and.right")
@@ -160,8 +202,7 @@ struct ItineraryRow: View {
             TimelineBar(itinerary: itinerary, windowStart: windowStart, windowEnd: windowEnd)
                 .frame(height: 20)
             HStack(spacing: 8) {
-                Text(itinerary.transfers == 0 ? "Direct" :
-                        itinerary.transfers == 1 ? "1 change" : "\(itinerary.transfers) changes")
+                Text(Fmt.changes(itinerary.transfers))
                 if let first = itinerary.firstTransitLeg {
                     Text("· \(first.lineName) from \(first.from.name)").lineLimit(1)
                 }
@@ -171,6 +212,11 @@ struct ItineraryRow: View {
             }
             .font(.caption)
             .foregroundStyle(.secondary)
+            ForEach(warnings, id: \.self) { w in
+                Label(w.message, systemImage: "exclamationmark.triangle.fill")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(w.level == .missed ? Color.red : Color.orange)
+            }
         }
         .padding(.vertical, 4)
     }

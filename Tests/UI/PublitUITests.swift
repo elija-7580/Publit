@@ -1,0 +1,112 @@
+import XCTest
+
+/// End-to-end flows against the live Transitous API. Each test saves a screenshot
+/// (`$SIMULATOR_HOST_HOME/publit-shots/<name>.png` on CI) for the README and website.
+final class PublitUITests: XCTestCase {
+    private let timeout: TimeInterval = 45
+
+    override func setUp() {
+        continueAfterFailure = false
+        addUIInterruptionMonitor(withDescription: "Location") { alert in
+            for label in ["Allow While Using App", "Allow Once", "Allow"] where alert.buttons[label].exists {
+                alert.buttons[label].tap(); return true
+            }
+            return false
+        }
+    }
+
+    private func launch(_ env: [String: String] = [:]) -> XCUIApplication {
+        let app = XCUIApplication()
+        app.launchEnvironment = env
+        app.launch()
+        return app
+    }
+
+    private func snap(_ name: String) {
+        let shot = XCUIScreen.main.screenshot()
+        let attachment = XCTAttachment(screenshot: shot)
+        attachment.name = name
+        attachment.lifetime = .keepAlways
+        add(attachment)
+        if let home = ProcessInfo.processInfo.environment["SIMULATOR_HOST_HOME"] {
+            let dir = URL(fileURLWithPath: home).appendingPathComponent("publit-shots")
+            try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+            try? shot.pngRepresentation.write(to: dir.appendingPathComponent("\(name).png"))
+        }
+    }
+
+    /// F01 Nearby: live departures around the (simulated) location.
+    func testF01NearbyShowsDepartures() {
+        let app = launch()
+        app.tap() // lets the interruption monitor handle a permission alert
+        XCTAssertTrue(app.navigationBars["Nearby"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["All departures"].firstMatch.waitForExistence(timeout: timeout),
+                      "no departure board loaded")
+        sleep(1)
+        snap("nearby")
+
+        app.buttons["All departures"].firstMatch.tap()
+        XCTAssertTrue(app.buttons["Save"].waitForExistence(timeout: 10))
+        snap("stop")
+        app.buttons["Save"].tap()
+        app.tabBars.buttons["Saved"].tap()
+        XCTAssertTrue(app.staticTexts["Stops"].waitForExistence(timeout: 5), "saved stop not listed")
+    }
+
+    /// F02 Plan and compare: routes on one timeline, map overlay, route detail.
+    func testF02PlanCompareAndDetail() {
+        let app = launch(["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "plan"])
+        XCTAssertTrue(app.navigationBars["Plan"].waitForExistence(timeout: 10))
+        let routes = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'from Marienplatz'"))
+        XCTAssertTrue(routes.firstMatch.waitForExistence(timeout: timeout), "no routes found")
+        sleep(1)
+        snap("plan")
+
+        app.buttons["Map"].tap()
+        XCTAssertTrue(app.buttons["Details of selected route"].waitForExistence(timeout: 10))
+        sleep(3) // map tiles
+        snap("compare")
+
+        app.buttons["Details of selected route"].tap()
+        XCTAssertTrue(app.navigationBars["Route"].waitForExistence(timeout: 10))
+        sleep(3)
+        snap("detail")
+        XCTAssertTrue(app.buttons["Remind me to get off"].firstMatch.exists)
+    }
+
+    /// F03 Search and Home: find a stop, set it as Home, plan there with one tap.
+    func testF03SetHomeAndPlan() {
+        let app = launch(["PUBLIT_TAB": "saved"])
+        XCTAssertTrue(app.buttons["Set Home"].waitForExistence(timeout: 10))
+        app.buttons["Set Home"].tap()
+        let field = app.searchFields.firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout: 5))
+        field.tap()
+        field.typeText("Sendlinger Tor")
+        let hit = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Sendlinger Tor'")).firstMatch
+        XCTAssertTrue(hit.waitForExistence(timeout: timeout), "no geocoding result")
+        snap("search")
+        hit.tap()
+        XCTAssertTrue(app.staticTexts["Home"].waitForExistence(timeout: 5))
+        snap("saved")
+
+        app.tabBars.buttons["Plan"].tap()
+        let quick = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Home'")).firstMatch
+        XCTAssertTrue(quick.waitForExistence(timeout: 5), "Home quick destination missing")
+    }
+
+    /// F04 Edge: empty and nonsense search input must not crash and must say so.
+    func testF04SearchEdgeCases() {
+        let app = launch(["PUBLIT_TAB": "saved"])
+        app.navigationBars["Saved"].buttons["Add"].tap()
+        let field = app.searchFields.firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout: 5))
+        field.tap()
+        field.typeText("x")
+        XCTAssertFalse(app.staticTexts["No matches."].waitForExistence(timeout: 2), "searched with 1 character")
+        field.typeText("qzqzqzqzqzqz😀ä")
+        XCTAssertTrue(app.staticTexts["No matches."].waitForExistence(timeout: timeout))
+        app.buttons["Cancel"].tap()
+        XCTAssertTrue(app.navigationBars["Saved"].waitForExistence(timeout: 5))
+    }
+}

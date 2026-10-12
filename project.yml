@@ -40,17 +40,32 @@ targets:
     platform: iOS
     sources:
       - path: Tests
+        excludes:
+          - "UI/**"
     dependencies:
       - target: Publit
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES
+  PublitUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: Tests/UI
+    dependencies:
+      - target: Publit
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: Publit
 schemes:
   Publit:
     build:
       targets:
         Publit: all
         PublitTests: [test]
+        PublitUITests: [test]
     test:
       targets:
         - PublitTests
+        - PublitUITests

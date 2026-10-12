@@ -53,9 +53,6 @@ final class LocationManager: NSObject, CLLocationManagerDelegate {
 
 extension LatLon {
     var clCoordinate: CLLocationCoordinate2D { CLLocationCoordinate2D(latitude: lat, longitude: lon) }
-    func distance(to other: LatLon) -> Double {
-        CLLocation(latitude: lat, longitude: lon).distance(from: CLLocation(latitude: other.lat, longitude: other.lon))
-    }
 }
 
 extension EncodedPolyline {

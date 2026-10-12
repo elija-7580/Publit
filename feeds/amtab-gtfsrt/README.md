@@ -45,6 +45,19 @@ rt.example.org {
 }
 ```
 
+## Run without a server: Cloudflare Worker
+
+`worker/` is a dependency-free JavaScript port that runs on Cloudflare Workers' free plan. Its output is byte-identical to the Python service (checked in `worker/test/` against fixtures and, on 2026-10-12, against the live AMTAB feed).
+
+```bash
+cd worker
+node --test               # tests
+npx wrangler login        # once, opens the Cloudflare login
+npx wrangler deploy       # prints https://amtab-gtfsrt.<your-subdomain>.workers.dev
+```
+
+Responses are cached for 20 s at the edge, so Transitous polling every 30–60 s causes at most a few upstream requests per minute.
+
 ## Status
 
 Not yet deployed. Once a public URL exists, the feed will be proposed to Transitous under the same `name` as the static AMTAB feed (`Puglia-Bari`).

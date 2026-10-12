@@ -2,10 +2,7 @@ import XCTest
 @testable import Publit
 
 final class DecodingTests: XCTestCase {
-    private func fixture(_ name: String) throws -> Data {
-        let url = try XCTUnwrap(Bundle(for: Self.self).url(forResource: name, withExtension: "json"))
-        return try Data(contentsOf: url)
-    }
+    private func fixture(_ name: String) throws -> Data { try Fixtures.data(name) }
 
     func testPolylineGoogleReferenceExample() {
         let coords = Polyline.decode("_p~iF~ps|U_ulLnnqC_mqNvxq`@", precision: 5)

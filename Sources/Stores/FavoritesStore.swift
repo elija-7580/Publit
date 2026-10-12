@@ -1,6 +1,14 @@
 import Foundation
 import Observation
 
+/// Home and Work get a fixed slot so they are one tap away in the planner.
+enum PlaceRole: String, Codable, CaseIterable, Identifiable, Sendable {
+    case home, work
+    var id: String { rawValue }
+    var title: String { self == .home ? "Home" : "Work" }
+    var symbol: String { self == .home ? "house.fill" : "briefcase.fill" }
+}
+
 /// A saved place or stop. Stored locally on the device only.
 struct SavedPlace: Codable, Hashable, Identifiable {
     var id: String
@@ -9,6 +17,7 @@ struct SavedPlace: Codable, Hashable, Identifiable {
     var lat: Double
     var lon: Double
     var stopId: String?
+    var role: PlaceRole?
 
     var isStop: Bool { stopId != nil }
     var coordinate: LatLon { LatLon(lat: lat, lon: lon) }
@@ -44,8 +53,25 @@ final class FavoritesStore {
         }
     }
 
-    var stops: [SavedPlace] { items.filter(\.isStop) }
-    var places: [SavedPlace] { items.filter { !$0.isStop } }
+    var stops: [SavedPlace] { items.filter { $0.isStop && $0.role == nil } }
+    var places: [SavedPlace] { items.filter { !$0.isStop && $0.role == nil } }
+    var pinned: [SavedPlace] { PlaceRole.allCases.compactMap(place(for:)) }
+
+    func place(for role: PlaceRole) -> SavedPlace? { items.first { $0.role == role } }
+
+    /// Sets `place` as Home or Work, replacing any earlier one for that role.
+    func set(_ place: SavedPlace, as role: PlaceRole) {
+        for i in items.indices where items[i].role == role { items[i].role = nil }
+        var p = place
+        p.role = role
+        if let i = items.firstIndex(where: { $0.id == place.id }) { items[i] = p } else { items.append(p) }
+        persist()
+    }
+
+    func clear(_ role: PlaceRole) {
+        items.removeAll { $0.role == role }
+        persist()
+    }
 
     func contains(_ id: String) -> Bool { items.contains { $0.id == id } }
 

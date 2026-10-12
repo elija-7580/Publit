@@ -58,13 +58,21 @@ struct ItineraryDetailView: View {
             Section {
                 HStack {
                     VStack(alignment: .leading) {
-                        Text("\(Fmt.time(itinerary.startTime)) – \(Fmt.time(itinerary.endTime))")
+                        Text("\(Fmt.time(itinerary.startTime, tz: itinerary.legs.first?.from.tz)) – \(Fmt.time(itinerary.endTime, tz: itinerary.legs.last?.to.tz))")
                             .font(.title3.weight(.semibold).monospacedDigit())
-                        Text(itinerary.transfers == 0 ? "Direct" : "\(itinerary.transfers) changes")
+                        Text(Fmt.changes(itinerary.transfers))
                             .font(.subheadline).foregroundStyle(.secondary)
                     }
                     Spacer()
                     Text(Fmt.duration(seconds: itinerary.duration)).font(.title3.weight(.semibold))
+                }
+                ForEach(TransferRisk.warnings(for: itinerary), id: \.self) { w in
+                    Label(w.message, systemImage: "exclamationmark.triangle.fill")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(w.level == .missed ? Color.red : Color.orange)
+                }
+                if let note = Fmt.foreignZoneNote(tz: itinerary.legs.first?.from.tz, at: itinerary.startTime) {
+                    Label(note, systemImage: "clock").font(.footnote).foregroundStyle(.secondary)
                 }
             }
 
@@ -97,14 +105,14 @@ struct LegRow: View {
                         Text("live").font(.caption2.weight(.bold)).foregroundStyle(.green)
                     }
                 }
-                stopLine(time: leg.startTime, delay: leg.delayMinutes, name: leg.from.name, track: leg.from.track)
+                stopLine(time: leg.startTime, delay: leg.delayMinutes, name: leg.from.name, track: leg.from.track, tz: leg.from.tz)
                 let stops = leg.intermediateStops?.count ?? 0
-                Text("\(stops == 0 ? "No stops" : stops == 1 ? "1 stop" : "\(stops) stops") · \(Fmt.duration(seconds: leg.duration))")
+                Text("\(Fmt.stops(stops)) · \(Fmt.duration(seconds: leg.duration))")
                     .font(.caption).foregroundStyle(.secondary)
                     .padding(.leading, 52)
                 stopLine(time: leg.endTime,
                          delay: Int((leg.endTime.timeIntervalSince(leg.scheduledEndTime) / 60).rounded()),
-                         name: leg.to.name, track: leg.to.track)
+                         name: leg.to.name, track: leg.to.track, tz: leg.to.tz)
                 if leg.cancelled == true {
                     Text("This trip is cancelled.").font(.caption.weight(.semibold)).foregroundStyle(.red)
                 }
@@ -112,6 +120,8 @@ struct LegRow: View {
                     Label(a.headerText, systemImage: "exclamationmark.triangle.fill")
                         .font(.caption).foregroundStyle(.orange)
                 }
+                GetOffButton(leg: leg)
+                    .padding(.leading, 52)
             }
             .padding(.vertical, 4)
         } else {
@@ -127,9 +137,9 @@ struct LegRow: View {
         }
     }
 
-    private func stopLine(time: Date, delay: Int, name: String, track: String?) -> some View {
+    private func stopLine(time: Date, delay: Int, name: String, track: String?, tz: String?) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
-            Text(Fmt.time(time)).font(.subheadline.weight(.semibold).monospacedDigit()).frame(width: 44, alignment: .leading)
+            Text(Fmt.time(time, tz: tz)).font(.subheadline.weight(.semibold).monospacedDigit()).frame(width: 52, alignment: .leading)
             if delay > 0 {
                 Text("+\(delay)").font(.caption.monospacedDigit()).foregroundStyle(.orange)
             }
@@ -138,6 +148,48 @@ struct LegRow: View {
             if let track, !track.isEmpty {
                 Text("Pl. \(track)").font(.caption).foregroundStyle(.secondary)
             }
+        }
+    }
+}
+
+/// "Remind me to get off" for one transit leg.
+struct GetOffButton: View {
+    let leg: Leg
+    @State private var scheduled = false
+    @State private var note: String?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Button {
+                Task { await toggle() }
+            } label: {
+                Label(scheduled ? "Reminder set" : "Remind me to get off",
+                      systemImage: scheduled ? "bell.fill" : "bell")
+                    .font(.caption.weight(.semibold))
+            }
+            .buttonStyle(.borderless)
+            if let note {
+                Text(note).font(.caption2).foregroundStyle(.secondary)
+            }
+        }
+        .task { scheduled = await GetOffReminder.isScheduled(leg) }
+    }
+
+    private func toggle() async {
+        if scheduled {
+            GetOffReminder.cancel(for: leg)
+            scheduled = false
+            note = nil
+            return
+        }
+        switch await GetOffReminder.schedule(for: leg) {
+        case .scheduled(let date):
+            scheduled = true
+            note = "We'll notify you at \(Fmt.time(date, tz: leg.to.tz))."
+        case .tooLate:
+            note = "This stop is less than two minutes away."
+        case .denied:
+            note = "Allow notifications for Publit in Settings."
         }
     }
 }

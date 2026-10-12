@@ -4,3 +4,8 @@ __pycache__/
 *.xcodeproj/
 DerivedData/
 build/
+.build/
+.swiftpm/
+Package.resolved
+node_modules/
+.wrangler/
