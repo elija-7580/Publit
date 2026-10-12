@@ -29,6 +29,10 @@ struct NearbyView: View {
                                            description: Text("No public transport stops within 1.5 km."))
                 }
             }
+            if !groups.isEmpty, errorMessage != nil {
+                Label("Couldn't refresh. Times may be out of date.", systemImage: "exclamationmark.triangle")
+                    .font(.footnote).foregroundStyle(.secondary)
+            }
 
             ForEach(groups) { group in
                 Section {
@@ -99,6 +103,7 @@ struct StopDeparturesView: View {
     @State private var alerts: [Alert] = []
     @State private var errorMessage: String?
     @State private var loaded = false
+    @State private var lastUpdated: Date?
 
     private var saved: SavedPlace {
         SavedPlace(id: stopId, name: name, subtitle: nil, lat: coordinate.lat, lon: coordinate.lon, stopId: stopId)
@@ -121,6 +126,9 @@ struct StopDeparturesView: View {
             Section {
                 if let errorMessage, departures.isEmpty {
                     Text(errorMessage).foregroundStyle(.secondary)
+                } else if errorMessage != nil, let lastUpdated {
+                    Label("Couldn't refresh. Showing times from \(Fmt.time(lastUpdated)).", systemImage: "exclamationmark.triangle")
+                        .font(.footnote).foregroundStyle(.secondary)
                 } else if !loaded {
                     HStack { Spacer(); ProgressView(); Spacer() }
                 } else if departures.isEmpty {
@@ -146,7 +154,7 @@ struct StopDeparturesView: View {
                 Button {
                     favorites.toggle(saved)
                 } label: {
-                    Label("Save", systemImage: favorites.contains(stopId) ? "star.fill" : "star")
+                    Label("Save", systemImage: favorites.contains(saved) ? "star.fill" : "star")
                 }
             }
         }
@@ -165,6 +173,7 @@ struct StopDeparturesView: View {
             departures = res.stopTimes
             alerts = Array(Set(res.place?.alertsList ?? []))
             errorMessage = nil
+            lastUpdated = Date()
         } catch {
             if !(error is CancellationError) && (error as? URLError)?.code != .cancelled {
                 errorMessage = error.localizedDescription

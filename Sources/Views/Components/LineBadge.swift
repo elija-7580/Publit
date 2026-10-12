@@ -53,11 +53,11 @@ struct DepartureTimeView: View {
                 }
                 .font(.body.weight(.semibold).monospacedDigit())
                 .strikethrough(cancelled)
-                .foregroundStyle(cancelled ? Color.secondary : (realTime ? Color.green : Color.primary))
+                .foregroundStyle(cancelled ? Color.secondary : (realTime ? Color.live : Color.primary))
 
                 HStack(spacing: 4) {
                     if delayMinutes > 0 {
-                        Text("+\(delayMinutes)").foregroundStyle(.orange)
+                        Text("+\(delayMinutes)").foregroundStyle(Color.delay)
                     }
                     if !realTime && !cancelled {
                         Image(systemName: "calendar")

@@ -16,3 +16,23 @@ extension RouteStyled {
 extension ModeStyle {
     static func color(_ mode: String) -> Color { Color(hex: defaultHex(mode)) ?? .gray }
 }
+
+#if canImport(UIKit)
+import UIKit
+
+extension Color {
+    /// Light/dark adaptive colour from a `Palette.Tone`.
+    init(_ tone: Palette.Tone) {
+        let l = LineColors.RGB(hex: tone.light)!
+        let d = LineColors.RGB(hex: tone.dark) ?? l
+        self.init(uiColor: UIColor { trait in
+            let c = trait.userInterfaceStyle == .dark ? d : l
+            return UIColor(red: c.r, green: c.g, blue: c.b, alpha: 1)
+        })
+    }
+    static let live = Color(Palette.live)
+    static let delay = Color(Palette.delay)
+    static let danger = Color(Palette.danger)
+    static let appAccent = Color(Palette.accent)
+}
+#endif

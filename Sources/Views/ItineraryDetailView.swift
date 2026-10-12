@@ -69,7 +69,7 @@ struct ItineraryDetailView: View {
                 ForEach(TransferRisk.warnings(for: itinerary), id: \.self) { w in
                     Label(w.message, systemImage: "exclamationmark.triangle.fill")
                         .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(w.level == .missed ? Color.red : Color.orange)
+                        .foregroundStyle(w.level == .missed ? Color.danger : Color.delay)
                 }
                 if let note = Fmt.foreignZoneNote(tz: itinerary.legs.first?.from.tz, at: itinerary.startTime) {
                     Label(note, systemImage: "clock").font(.footnote).foregroundStyle(.secondary)
@@ -102,7 +102,7 @@ struct LegRow: View {
                     }
                     Spacer()
                     if leg.realTime {
-                        Text("live").font(.caption2.weight(.bold)).foregroundStyle(.green)
+                        Text("live").font(.caption2.weight(.bold)).foregroundStyle(Color.live)
                     }
                 }
                 stopLine(time: leg.startTime, delay: leg.delayMinutes, name: leg.from.name, track: leg.from.track, tz: leg.from.tz)
@@ -114,11 +114,11 @@ struct LegRow: View {
                          delay: Int((leg.endTime.timeIntervalSince(leg.scheduledEndTime) / 60).rounded()),
                          name: leg.to.name, track: leg.to.track, tz: leg.to.tz)
                 if leg.cancelled == true {
-                    Text("This trip is cancelled.").font(.caption.weight(.semibold)).foregroundStyle(.red)
+                    Text("This trip is cancelled.").font(.caption.weight(.semibold)).foregroundStyle(Color.danger)
                 }
                 ForEach(leg.alerts ?? [], id: \.self) { a in
                     Label(a.headerText, systemImage: "exclamationmark.triangle.fill")
-                        .font(.caption).foregroundStyle(.orange)
+                        .font(.caption).foregroundStyle(Color.delay)
                 }
                 GetOffButton(leg: leg)
                     .padding(.leading, 52)
@@ -141,7 +141,7 @@ struct LegRow: View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
             Text(Fmt.time(time, tz: tz)).font(.subheadline.weight(.semibold).monospacedDigit()).frame(width: 52, alignment: .leading)
             if delay > 0 {
-                Text("+\(delay)").font(.caption.monospacedDigit()).foregroundStyle(.orange)
+                Text("+\(delay)").font(.caption.monospacedDigit()).foregroundStyle(Color.delay)
             }
             Text(name).font(.subheadline).lineLimit(1)
             Spacer()

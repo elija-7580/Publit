@@ -167,6 +167,20 @@ final class FavoritesTests: XCTestCase {
         return FavoritesStore(defaults: d)
     }
 
+    /// Search gives the S-Bahn platform ID, Nearby the station ID: still one favourite.
+    func testSameStationDifferentStopIdIsOneFavourite() async {
+        let s = store()
+        let fromSearch = SavedPlace(id: "de-DELFI_de:09162:2:40:81", name: "Marienplatz", subtitle: "München", lat: 48.13725, lon: 11.57585, stopId: "de-DELFI_de:09162:2:40:81")
+        let fromNearby = SavedPlace(id: "de-DELFI_de:09162:2", name: "Marienplatz", subtitle: nil, lat: 48.13716, lon: 11.57549, stopId: "de-DELFI_de:09162:2")
+        s.toggle(fromSearch)
+        XCTAssertTrue(s.contains(fromNearby))
+        s.toggle(fromNearby)
+        XCTAssertTrue(s.stops.isEmpty)
+        let farAway = SavedPlace(id: "x", name: "Marienplatz", subtitle: nil, lat: 48.3, lon: 11.7, stopId: "x")
+        s.toggle(fromSearch)
+        XCTAssertFalse(s.contains(farAway))
+    }
+
     private let a = SavedPlace(id: "a", name: "Flat", subtitle: nil, lat: 48.2, lon: 16.3, stopId: nil)
     private let b = SavedPlace(id: "b", name: "Office", subtitle: nil, lat: 48.4, lon: 15.6, stopId: nil)
 
@@ -283,5 +297,19 @@ final class SavedLineTests: XCTestCase {
         XCTAssertTrue(store.containsLine(line.id))
         store.toggle(line)
         XCTAssertTrue(store.lines.isEmpty)
+    }
+}
+
+final class PaletteTests: XCTestCase {
+    /// Live, delay, cancelled and link colours must stay readable (WCAG AA, 4.5:1) in both modes.
+    func testStatusColoursMeetAA() {
+        for tone in Palette.all {
+            for bg in Palette.lightBackgrounds {
+                XCTAssertGreaterThanOrEqual(LineColors.contrast(LineColors.RGB(hex: tone.light)!, LineColors.RGB(hex: bg)!), 4.5, "\(tone.light) on \(bg)")
+            }
+            for bg in Palette.darkBackgrounds {
+                XCTAssertGreaterThanOrEqual(LineColors.contrast(LineColors.RGB(hex: tone.dark)!, LineColors.RGB(hex: bg)!), 4.5, "\(tone.dark) on \(bg)")
+            }
+        }
     }
 }

@@ -84,7 +84,7 @@ struct TripView: View {
         }()
         Label(text, systemImage: leg.realTime ? "dot.radiowaves.left.and.right" : "calendar")
             .font(.subheadline)
-            .foregroundStyle(leg.realTime ? Color.green : Color.secondary)
+            .foregroundStyle(leg.realTime ? Color.live : Color.secondary)
         if !leg.realTime {
             Text("No live data for this trip. Position estimated from the timetable.")
                 .font(.caption).foregroundStyle(.secondary)
@@ -144,7 +144,7 @@ private struct StopTimeRow: View {
                 .font(.subheadline.weight(isFocus ? .bold : .regular).monospacedDigit())
                 .frame(width: 52, alignment: .leading)
             if realTime && delay > 0 {
-                Text("+\(delay)").font(.caption.monospacedDigit()).foregroundStyle(.orange)
+                Text("+\(delay)").font(.caption.monospacedDigit()).foregroundStyle(Color.delay)
             }
             Text(stop.name)
                 .font(.subheadline.weight(isFocus ? .bold : .regular))

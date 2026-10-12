@@ -96,7 +96,7 @@ struct FavoritesView: View {
         }
         .sheet(isPresented: $adding) {
             PlaceSearchView(title: "Save a place", allowCurrentLocation: false) { endpoint in
-                if case .place(let p) = endpoint, !favorites.contains(p.id) { favorites.toggle(p) }
+                if case .place(let p) = endpoint, !favorites.contains(p) { favorites.toggle(p) }
             }
         }
         .sheet(item: $settingRole) { role in

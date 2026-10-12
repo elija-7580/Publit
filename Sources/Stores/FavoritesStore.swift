@@ -20,6 +20,16 @@ struct SavedPlace: Codable, Hashable, Identifiable {
     var role: PlaceRole?
 
     var isStop: Bool { stopId != nil }
+
+    /// Same saved thing: same ID, or the same station reached via a different stop ID
+    /// (search returns one platform, Nearby another).
+    func isSame(as other: SavedPlace) -> Bool {
+        if id == other.id { return true }
+        guard isStop, other.isStop else { return false }
+        if stopId == other.stopId { return true }
+        return StopGrouping.normalizedName(name) == StopGrouping.normalizedName(other.name)
+            && coordinate.distance(to: other.coordinate) < StopGrouping.mergeRadius
+    }
     var coordinate: LatLon { LatLon(lat: lat, lon: lon) }
 
     init(id: String, name: String, subtitle: String?, lat: Double, lon: Double, stopId: String?) {
@@ -129,9 +139,10 @@ final class FavoritesStore {
     }
 
     func contains(_ id: String) -> Bool { items.contains { $0.id == id } }
+    func contains(_ place: SavedPlace) -> Bool { items.contains { $0.isSame(as: place) } }
 
     func toggle(_ place: SavedPlace) {
-        if contains(place.id) { items.removeAll { $0.id == place.id } } else { items.append(place) }
+        if contains(place) { items.removeAll { $0.isSame(as: place) } } else { items.append(place) }
         persist()
     }
 

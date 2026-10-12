@@ -15,7 +15,7 @@ struct DepartureRow: View {
                         Text("Platform \(track)")
                     }
                     if stopTime.isCancelled {
-                        Text("Cancelled").foregroundStyle(.red)
+                        Text("Cancelled").foregroundStyle(Color.danger)
                     }
                 }
                 .font(.caption)

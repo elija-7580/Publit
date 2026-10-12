@@ -12,6 +12,7 @@ struct PublitApp: App {
                 .environment(app)
                 .environment(location)
                 .environment(favorites)
+                .tint(Color.appAccent)
                 .onAppear {
                     app.applyDemo(ProcessInfo.processInfo.environment["PUBLIT_DEMO"])
                     if let tab = ProcessInfo.processInfo.environment["PUBLIT_TAB"] {

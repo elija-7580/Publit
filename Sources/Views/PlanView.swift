@@ -92,7 +92,7 @@ struct PlanView: View {
                     }
                     Text(endpoint.title).foregroundStyle(.primary).lineLimit(1)
                 } else {
-                    Text("Where to?").foregroundStyle(.tertiary)
+                    Text("Where to?").foregroundStyle(.secondary)
                 }
                 Spacer()
             }
@@ -192,7 +192,7 @@ struct ItineraryRow: View {
                     .font(.headline.monospacedDigit())
                 if itinerary.hasRealtime {
                     Image(systemName: "dot.radiowaves.left.and.right")
-                        .font(.caption).foregroundStyle(.green)
+                        .font(.caption).foregroundStyle(Color.live)
                         .accessibilityLabel("Live data")
                 }
                 Spacer()
@@ -207,7 +207,7 @@ struct ItineraryRow: View {
                     Text("· \(first.lineName) from \(first.from.name)").lineLimit(1)
                 }
                 if itinerary.isCancelled {
-                    Text("Cancelled").foregroundStyle(.red)
+                    Text("Cancelled").foregroundStyle(Color.danger)
                 }
             }
             .font(.caption)
@@ -215,7 +215,7 @@ struct ItineraryRow: View {
             ForEach(warnings, id: \.self) { w in
                 Label(w.message, systemImage: "exclamationmark.triangle.fill")
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(w.level == .missed ? Color.red : Color.orange)
+                    .foregroundStyle(w.level == .missed ? Color.danger : Color.delay)
             }
         }
         .padding(.vertical, 4)

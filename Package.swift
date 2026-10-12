@@ -14,6 +14,7 @@ let core = [
     "Util/LineColors.swift",
     "Util/Geo.swift",
     "Util/Formatting.swift",
+    "Util/Palette.swift",
     "Stores/StopGrouping.swift",
     "Stores/FavoritesStore.swift",
     "Stores/PlanModel.swift",

@@ -44,7 +44,7 @@ struct PlaceSearchView: View {
                         }
                         .swipeActions {
                             Button { favorites.toggle(saved) } label: {
-                                Label("Save", systemImage: favorites.contains(saved.id) ? "star.slash" : "star")
+                                Label("Save", systemImage: favorites.contains(saved) ? "star.slash" : "star")
                             }
                             .tint(.yellow)
                         }
