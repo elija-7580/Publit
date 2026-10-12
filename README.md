@@ -6,15 +6,15 @@
 
 No ads, no account, no tracking.
 
-![Publit on iPhone](docs/images/hero.svg)
+![Publit on iPhone](docs/images/hero.jpg)
 
 | Nearby | Plan | Compare | Route |
 | --- | --- | --- | --- |
-| ![Nearby departures](docs/images/nearby.svg) | ![Trip planning](docs/images/plan.svg) | ![Route comparison on a map](docs/images/compare.svg) | ![Route detail](docs/images/detail.svg) |
+| ![Nearby departures](docs/images/nearby.jpg) | ![Trip planning](docs/images/plan.jpg) | ![Route comparison on a map](docs/images/compare.jpg) | ![Route detail](docs/images/detail.jpg) |
 
 | Departures | Active trip | Ticket | Widgets |
 | --- | --- | --- | --- |
-| ![Departure board with live and timetable times](docs/images/board-light.svg) | ![Active trip with start and end controls](docs/images/workflow-live.svg) | ![Stored ticket copy](docs/images/ticket-embedded.svg) | ![Small and medium widget](docs/images/widget-small-medium.svg) |
+| ![Departure board with live and timetable times](docs/images/board-light.jpg) | ![Active trip with start and end controls](docs/images/workflow-live.jpg) | ![Stored ticket copy](docs/images/ticket-embedded.jpg) | ![Small and medium widget](docs/images/widget-small-medium.jpg) |
 
 <sub>Screenshots from the automated UI tests on the iPhone 16 Pro simulator (October 2026). The first row shows live Transitous data with a simulated location in Munich. The second row uses labelled demo data in German; the ticket is a test image, not a valid ticket.</sub>
 
