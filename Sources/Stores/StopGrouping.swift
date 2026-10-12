@@ -24,15 +24,17 @@ enum StopGrouping {
 
     static func group(_ stopTimes: [StopTime], around here: LatLon?) -> [StopGroup] {
         var groups: [StopGroup] = []
+        var candidates: [String: [Int]] = [:]
+        var names: [String: String] = [:]
         for st in stopTimes.sorted(by: { $0.departureTime < $1.departureTime }) {
-            let name = normalizedName(st.place.name)
+            let name = names[st.place.name] ?? normalizedName(st.place.name)
+            names[st.place.name] = name
             let c = st.place.coordinate
-            if let i = groups.firstIndex(where: {
-                normalizedName($0.name) == name && $0.coordinate.distance(to: c) <= mergeRadius
-            }) {
+            if let i = candidates[name]?.first(where: { groups[$0].coordinate.distance(to: c) <= mergeRadius }) {
                 groups[i].departures.append(st)
                 if let sid = st.place.stopId, !groups[i].stopIds.contains(sid) { groups[i].stopIds.append(sid) }
             } else {
+                candidates[name, default: []].append(groups.count)
                 groups.append(StopGroup(id: st.place.stationId, name: st.place.name, coordinate: c,
                                         stopIds: st.place.stopId.map { [$0] } ?? [],
                                         departures: [st], distance: here?.distance(to: c)))

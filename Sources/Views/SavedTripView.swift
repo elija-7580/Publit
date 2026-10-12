@@ -35,7 +35,7 @@ struct SavedTripView: View {
 
     private func refresh(_ t: SavedTrip) async {
         do {
-            let fresh = try await TransitousClient.shared.refresh(itineraryId: t.itinerary.id)
+            let fresh = try await TripRefreshCoordinator.shared.refresh(t.itinerary.id)
             trips.update(t.id, with: fresh)
             errorMessage = nil
             if let updated = trips.trip(t.id) { await LiveTripActivity.update(updated) }

@@ -35,8 +35,8 @@ enum LineColors {
     static let black = RGB(hex: "000000")!
 
     /// Minimum ratio we accept for an operator's own text colour on its line colour
-    /// (bold badge text; WCAG large/bold text threshold).
-    static let minimumOperatorContrast = 3.0
+    /// (badge text is small, so WCAG AA requires 4.5:1, even when bold).
+    static let minimumOperatorContrast = 4.5
 
     static func normalized(_ hex: String) -> String {
         hex.trimmingCharacters(in: .whitespaces).replacingOccurrences(of: "#", with: "").uppercased()

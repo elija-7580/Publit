@@ -5,8 +5,10 @@ struct LineBadge: View {
     let mode: String
     let color: Color
     let textColor: Color
+    let compact: Bool
 
-    init(_ route: some RouteStyled) {
+    init(_ route: some RouteStyled, compact: Bool = false) {
+        self.compact = compact
         name = route.lineName
         mode = route.mode
         color = route.lineColor
@@ -14,23 +16,27 @@ struct LineBadge: View {
     }
 
     var body: some View {
-        HStack(spacing: 3) {
+        HStack(spacing: 4) {
             Image(systemName: ModeStyle.symbol(mode))
-                .font(.caption2.weight(.bold))
-            Text(name)
-                .font(.caption.weight(.bold))
-                .lineLimit(1)
+                .font(.caption.weight(.semibold))
+                .accessibilityHidden(true)
+            Text(verbatim: name)
+                .font(compact ? .caption.weight(.bold) : .subheadline.weight(.bold))
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
         }
-        .padding(.horizontal, 6)
-        .padding(.vertical, 3)
+        .padding(.horizontal, compact ? 6 : 8)
+        .padding(.vertical, compact ? 2 : 4)
+        .frame(minWidth: 44)
         .foregroundStyle(textColor)
-        .background(color, in: RoundedRectangle(cornerRadius: 5, style: .continuous))
-        .accessibilityElement(children: .combine)
+        .background(color, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.primary.opacity(0.12), lineWidth: 0.5))
+        .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(ModeStyle.label(mode)) \(name)")
     }
 }
 
-/// Countdown plus delay and live indicator, refreshed every 15 s.
+/// Clock time is primary; countdown, delay and provenance are always secondary.
 struct DepartureTimeView: View {
     let actual: Date
     let delayMinutes: Int
@@ -40,34 +46,32 @@ struct DepartureTimeView: View {
 
     var body: some View {
         TimelineView(.periodic(from: .now, by: 15)) { ctx in
-            let minutes = Int(floor(actual.timeIntervalSince(ctx.date) / 60))
-            VStack(alignment: .trailing, spacing: 2) {
-                Group {
+            let minutes = Int(ceil(actual.timeIntervalSince(ctx.date) / 60))
+            VStack(alignment: .trailing, spacing: 4) {
+                Text(Fmt.time(actual, tz: tz))
+                    .font(.headline.monospacedDigit())
+                    .foregroundStyle(cancelled ? Color.secondary : Color.primary)
+                    .strikethrough(cancelled)
+                    .lineLimit(1).fixedSize()
+                if cancelled {
+                    Text("Cancelled").font(.caption.weight(.semibold)).foregroundStyle(Color.danger)
+                } else {
                     if minutes <= 0 {
-                        Text("now")
+                        Text("now").font(.caption.weight(.semibold))
                     } else if minutes < 60 {
-                        Text("\(minutes) min")
-                    } else {
-                        Text(Fmt.time(actual, tz: tz))
+                        Text(L10n.f("In %lld min", minutes)).font(.caption.monospacedDigit())
                     }
-                }
-                .font(.body.weight(.semibold).monospacedDigit())
-                .strikethrough(cancelled)
-                .foregroundStyle(cancelled ? Color.secondary : (realTime ? Color.live : Color.primary))
-
-                HStack(spacing: 4) {
                     if delayMinutes > 0 {
-                        Text("+\(delayMinutes)").foregroundStyle(Color.delay)
+                        Text(L10n.f("+%lld min", delayMinutes))
+                            .font(.caption.weight(.semibold).monospacedDigit()).foregroundStyle(Color.delay)
                     }
-                    if !realTime && !cancelled {
-                        Image(systemName: "calendar")
-                            .foregroundStyle(.secondary)
-                            .accessibilityHidden(true)
-                    }
-                    Text(Fmt.time(actual, tz: tz)).foregroundStyle(.secondary)
+                    Label(realTime ? L10n.t("Live") : L10n.t("Timetable"),
+                          systemImage: realTime ? "dot.radiowaves.left.and.right" : "calendar")
+                        .font(.caption2)
+                        .foregroundStyle(realTime ? Color.live : Color.secondary)
                 }
-                .font(.caption2.monospacedDigit())
             }
+            .fixedSize(horizontal: true, vertical: false)
         }
     }
 }

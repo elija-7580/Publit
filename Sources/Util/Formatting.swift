@@ -10,10 +10,18 @@ enum Fmt {
 
     static func distance(meters: Double) -> String {
         if meters < 1000 { return "\(Int(meters.rounded())) m" }
-        let f = NumberFormatter()
-        f.locale = Locale.current
-        f.minimumFractionDigits = 1
-        f.maximumFractionDigits = 1
+        numberLock.lock(); defer { numberLock.unlock() }
+        let locale = Locale.current
+        let f: NumberFormatter
+        if let cached = numberFormatters[locale.identifier] { f = cached }
+        else {
+            f = NumberFormatter()
+            f.locale = locale
+            f.minimumFractionDigits = 1
+            f.maximumFractionDigits = 1
+            if numberFormatters.count >= 8 { numberFormatters.removeAll() }
+            numberFormatters[locale.identifier] = f
+        }
         return (f.string(from: NSNumber(value: meters / 1000)) ?? String(format: "%.1f", meters / 1000)) + " km"
     }
 
@@ -25,17 +33,21 @@ enum Fmt {
         n == 0 ? L10n.t("No stops") : n == 1 ? L10n.t("1 stop") : L10n.f("%lld stops", n)
     }
 
+    private static let numberLock = NSLock()
+    private static var numberFormatters: [String: NumberFormatter] = [:]
     private static let lock = NSLock()
     private static var formatters: [String: DateFormatter] = [:]
 
     private static func formatter(_ tz: TimeZone) -> DateFormatter {
         lock.lock(); defer { lock.unlock() }
-        if let f = formatters[tz.identifier] { return f }
+        let key = Locale.current.identifier + "|" + tz.identifier
+        if let f = formatters[key] { return f }
         let f = DateFormatter()
         f.locale = Locale.current
         f.timeZone = tz
         f.setLocalizedDateFormatFromTemplate("jmm")
-        formatters[tz.identifier] = f
+        if formatters.count >= 32 { formatters.removeAll() }
+        formatters[key] = f
         return f
     }
 

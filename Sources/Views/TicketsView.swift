@@ -39,20 +39,11 @@ struct TicketsView: View {
     }
 
     private func row(_ t: Ticket) -> some View {
-        Button { showing = t } label: {
-            HStack(spacing: 12) {
-                Image(systemName: t.imageFile != nil ? "photo" : "arrow.up.forward.app")
-                    .frame(width: 24).foregroundStyle(.secondary)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(t.name).foregroundStyle(.primary)
-                    if let until = t.validUntil {
-                        Text(t.isValid() ? L10n.f("Valid until %@", until.formatted(date: .abbreviated, time: .omitted)) : L10n.t("Expired"))
-                            .font(.caption).foregroundStyle(t.isValid() ? Color.secondary : Color.danger)
-                    }
-                }
-            }
-        }
+        Button { showing = t } label: { TicketSummaryCard(ticket: t) }
+            .buttonStyle(.plain)
+            .padding(.vertical, 4)
     }
+
 }
 
 /// Add a ticket: screenshot and/or app link.
@@ -68,6 +59,8 @@ struct AddTicketView: View {
     @State private var imageData: Data?
     @State private var appLink = ""
     @State private var hasExpiry = false
+    @State private var isSaving = false
+    @State private var saveError: String?
     @State private var validUntil = Calendar.current.date(byAdding: .year, value: 1, to: .now) ?? .now
 
     init(tripId: String?, kind: Ticket.Kind? = nil) {
@@ -120,28 +113,35 @@ struct AddTicketView: View {
                     }
                 }
             }
+            .overlay { if isSaving { ProgressView().padding(20).background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12)) } }
+            .alert("Ticket could not be saved", isPresented: Binding(get: { saveError != nil }, set: { if !$0 { saveError = nil } })) {
+                Button("Done") { saveError = nil }
+            } message: { Text(saveError ?? "") }
             .navigationTitle("Add ticket")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
-                        store.add(name: name, kind: kind, image: imageData, appLink: appLink,
-                                  validUntil: kind == .pass && hasExpiry ? validUntil : nil, tripId: tripId)
-                        dismiss()
+                        isSaving = true
+                        Task {
+                            do {
+                                try await store.addAsync(name: name, kind: kind, image: imageData, appLink: appLink,
+                                                         validUntil: kind == .pass && hasExpiry ? validUntil : nil, tripId: tripId)
+                                dismiss()
+                            } catch { saveError = L10n.t("Couldn't save ticket. Please try again.") }
+                            isSaving = false
+                        }
                     }
-                    .disabled(!canSave)
+                    .disabled(!canSave || isSaving)
                 }
             }
+            .interactiveDismissDisabled(isSaving)
             .onChange(of: photo) { _, item in
                 Task {
                     guard let item, let data = try? await item.loadTransferable(type: Data.self) else { return }
-                    // Re-encode so very large photos do not bloat storage.
-                    if let img = UIImage(data: data), let jpg = img.jpegData(compressionQuality: 0.9) {
-                        imageData = jpg
-                    } else {
-                        imageData = data
-                    }
+                    // Preserve the original file: JPEG recompression can damage QR/barcode detail.
+                    if UIImage(data: data) != nil { imageData = data }
                 }
             }
         }
@@ -155,6 +155,7 @@ struct TicketDisplayView: View {
     @Environment(\.openURL) private var openURL
     @Environment(TicketStore.self) private var store
     @State private var previousBrightness: CGFloat?
+    @State private var original: Ticket?
 
     var body: some View {
         NavigationStack {
@@ -187,25 +188,55 @@ struct TicketDisplayView: View {
 
     @ViewBuilder
     private func page(_ t: Ticket) -> some View {
-        VStack(spacing: 16) {
-            if let url = store.imageURL(t), let img = UIImage(contentsOfFile: url.path) {
-                Image(uiImage: img).resizable().scaledToFit()
-                    .accessibilityLabel("Ticket \(t.name)")
-            }
-            if let app = t.appURL {
-                Button { openURL(app) } label: {
-                    Label("Open ticket app", systemImage: "arrow.up.forward.app").frame(maxWidth: .infinity)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                TicketSummaryCard(ticket: t)
+                if let url = store.imageURL(t) {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Label("Stored copy", systemImage: "doc").font(.subheadline.weight(.semibold))
+                        TicketAttachmentView(url: url, label: L10n.f("Ticket %@", t.name))
+                            .frame(maxWidth: .infinity)
+                            .padding(12)
+                            .background(Color.white)
+                            .accessibilityLabel(L10n.f("Ticket %@", t.name))
+                        Button { original = t } label: {
+                            Label("Show original", systemImage: "arrow.up.left.and.arrow.down.right")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+                    }
+                    .padding(16)
+                    .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14))
+                    .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.primary.opacity(0.10), lineWidth: 1))
                 }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
+                if let app = t.appURL {
+                    Button { openURL(app) } label: {
+                        Label("Open ticket app", systemImage: "arrow.up.forward.app").frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent).controlSize(.large)
+                }
+                if t.imageFile == nil && t.appURL == nil {
+                    Text("This ticket has no screenshot or link.").foregroundStyle(.secondary)
+                }
+                Text("A stored screenshot may not be accepted. Use the operator's live ticket when required.")
+                    .font(.footnote).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             }
-            if t.imageFile == nil && t.appURL == nil {
-                Text("This ticket has no screenshot or link.").foregroundStyle(.secondary)
+            .padding(16).padding(.bottom, 32)
+        }
+        .background(Color(uiColor: .systemGroupedBackground))
+        .sheet(item: $original) { ticket in
+            NavigationStack {
+                if let url = store.imageURL(ticket) {
+                    TicketAttachmentView(url: url, label: L10n.f("Ticket %@", ticket.name), original: true)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .padding(8).background(Color.white)
+                        .accessibilityLabel(L10n.f("Ticket %@", ticket.name))
+                        .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { original = nil } } }
+                }
             }
         }
-        .padding()
-        .padding(.bottom, 24)
     }
+
 }
 
 /// Operator → the user's own ticket app or shop. Used for "Buy ticket" in every route.

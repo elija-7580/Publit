@@ -82,6 +82,7 @@ final class TransitousClient: @unchecked Sendable {
             // Footpaths between platforms and stations routed on OpenStreetMap, not just feed transfers.
             URLQueryItem(name: "useRoutedTransfers", value: "true"),
             URLQueryItem(name: "maxPreTransitTime", value: String(maxWalk)),
+            URLQueryItem(name: "withFares", value: "true"),
             URLQueryItem(name: "maxPostTransitTime", value: String(maxWalk)),
             URLQueryItem(name: "maxDirectTime", value: String(walkLimits.direct)),
         ]
@@ -92,7 +93,8 @@ final class TransitousClient: @unchecked Sendable {
 
     /// Fresh real-time state of a saved route (same vehicles, current delays and cancellations).
     func refresh(itineraryId: String) async throws -> Itinerary {
-        try await get("/api/v6/refresh-itinerary", [URLQueryItem(name: "itineraryId", value: itineraryId)], cache: .noStore)
+        try await get("/api/v6/refresh-itinerary", [URLQueryItem(name: "itineraryId", value: itineraryId),
+                                                                  URLQueryItem(name: "withFares", value: "true")], cache: .noStore)
     }
 
     /// Stops inside a map rectangle, for the interactive station map.
@@ -107,6 +109,7 @@ final class TransitousClient: @unchecked Sendable {
     func departures(near center: LatLon, radius: Int, count: Int) async throws -> StopTimesResponse {
         try await get("/api/v6/stoptimes", [
             URLQueryItem(name: "center", value: center.apiValue),
+            URLQueryItem(name: "withAlerts", value: "true"),
             URLQueryItem(name: "radius", value: String(radius)),
             URLQueryItem(name: "n", value: String(count)),
         ], cache: CachePolicy(maxAge: 20, persist: true, slot: "nearby"))
@@ -131,7 +134,7 @@ final class TransitousClient: @unchecked Sendable {
     // MARK: Transport
 
     /// Last "departures near me" response and where it was asked, for an instant first screen.
-    func lastNearby(maxAge: TimeInterval) -> (response: StopTimesResponse, center: LatLon, date: Date)? {
+    func lastNearby(maxAge: TimeInterval) async -> (response: StopTimesResponse, center: LatLon, date: Date)? {
         guard let e = cache.stale("nearby"), Date().timeIntervalSince(e.date) < maxAge,
               let res = try? decoder.decode(StopTimesResponse.self, from: e.data),
               let center = URLComponents(string: e.url)?.queryItems?.first(where: { $0.name == "center" })?.value
@@ -140,6 +143,8 @@ final class TransitousClient: @unchecked Sendable {
     }
 
     private func get<T: Decodable>(_ path: String, _ query: [URLQueryItem], cache policy: CachePolicy) async throws -> T {
+        let trace = PerformanceTrace.begin("Transit request")
+        defer { PerformanceTrace.end(trace, "Transit request") }
         var comps = URLComponents(url: base.appendingPathComponent(path), resolvingAgainstBaseURL: false)!
         comps.queryItems = query
         let url = comps.url!

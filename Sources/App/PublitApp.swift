@@ -8,6 +8,7 @@ struct PublitApp: App {
     @State private var favorites = FavoritesStore()
     @State private var trips = TripStore()
     @State private var tickets = TicketStore()
+    @State private var history = SearchHistoryStore.shared
 
     init() {
         UNUserNotificationCenter.current().delegate = NotificationRouter.shared
@@ -15,14 +16,25 @@ struct PublitApp: App {
         DispatchQueue.global(qos: .utility).async { TransitousClient.shared.cache.prune(olderThan: 7 * 24 * 3600) }
     }
 
+    @ViewBuilder
+    private var appContent: some View {
+        #if DEBUG
+        if ProcessInfo.processInfo.environment["PUBLIT_UI_SAMPLE"] != nil { PresentationSampleView() }
+        else { RootView() }
+        #else
+        RootView()
+        #endif
+    }
+
     var body: some Scene {
         WindowGroup {
-            RootView()
+            appContent
                 .environment(app)
                 .environment(location)
                 .environment(favorites)
                 .environment(trips)
                 .environment(tickets)
+                .environment(history)
                 .tint(Color.appAccent)
                 .onOpenURL { app.open($0) }
                 .onAppear {
@@ -140,8 +152,8 @@ struct RootView: View {
 
     private func refreshLiveTrips() async {
         let now = Date()
-        for trip in trips.upcoming(now: now.addingTimeInterval(-15 * 60)) where LiveTripActivity.isRunning(trip.id) {
-            if let fresh = try? await TransitousClient.shared.refresh(itineraryId: trip.itinerary.id) {
+        for trip in trips.upcoming(now: now.addingTimeInterval(-15 * 60)) where LiveTripActivity.isRunning(trip.id) || trips.activeTripId == trip.id {
+            if let fresh = try? await TripRefreshCoordinator.shared.refresh(trip.itinerary.id) {
                 trips.update(trip.id, with: fresh)
             }
             if let t = trips.trip(trip.id) { await LiveTripActivity.update(t) }

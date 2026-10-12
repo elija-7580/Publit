@@ -46,7 +46,8 @@ enum DepartureSpeech {
         guard !list.isEmpty else { return L10n.f("No departures from %@ in the next hour.", stopName) }
         let parts = list.prefix(3).map { st -> String in
             let mins = Int(floor(st.departureTime.timeIntervalSince(now) / 60))
-            let dest = st.headsign.isEmpty ? st.lineName : L10n.f("%@ to %@", st.lineName, st.headsign)
+            let identity = st.serviceDetail ?? st.lineName
+            let dest = st.directionName.map { L10n.f("%@ to %@", identity, $0) } ?? identity
             if st.isCancelled { return L10n.f("%@ is cancelled", dest) }
             return mins <= 0 ? L10n.f("%@ now", dest) : L10n.f("%@ in %lld min", dest, mins)
         }
@@ -62,7 +63,10 @@ private struct DeparturesSnippet: View {
             ForEach(departures) { st in
                 HStack(spacing: 8) {
                     LineBadge(st)
-                    Text(st.headsign).lineLimit(1)
+                    VStack(alignment: .leading, spacing: 4) {
+                        if let detail = st.serviceDetail { Text(verbatim: detail).font(.caption) }
+                        DirectionLabel(direction: st.directionName)
+                    }
                     Spacer()
                     Text(Fmt.time(st.departureTime, tz: st.place.tz))
                         .monospacedDigit()

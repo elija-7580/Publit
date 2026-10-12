@@ -2,7 +2,7 @@ import Foundation
 
 /// Small JSON file persistence in Application Support (kept out of iCloud/iTunes backups is not needed:
 /// these are the user's own trips and tickets, so they *should* be backed up with the device).
-struct JSONFile<Value: Codable> {
+struct JSONFile<Value: Codable>: Sendable {
     let url: URL
 
     init(name: String, directory: URL? = nil) {
@@ -27,12 +27,26 @@ struct JSONFile<Value: Codable> {
     }
 
     func load() -> Value? {
+        JSONPersistence.flush()
         guard let data = try? Data(contentsOf: url) else { return nil }
         return try? TransitousClient.makeDecoder().decode(Value.self, from: data)
     }
 
+    /// Immutable snapshots are encoded and written in order, away from the UI thread.
+    func saveInBackground(_ value: Value) where Value: Sendable {
+        JSONPersistence.queue.async { save(value) }
+    }
+
     func save(_ value: Value) {
+        let trace = PerformanceTrace.begin("Save local data")
+        defer { PerformanceTrace.end(trace, "Save local data") }
         guard let data = try? Self.encoder.encode(value) else { return }
         try? data.write(to: url, options: .atomic)
     }
+}
+
+/// Reads on launch/reload wait for pending snapshots. Ordinary writes never block the UI.
+enum JSONPersistence {
+    static let queue = DispatchQueue(label: "io.github.publit.persistence", qos: .utility)
+    static func flush() { queue.sync { } }
 }

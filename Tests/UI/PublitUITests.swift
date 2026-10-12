@@ -66,6 +66,87 @@ final class PublitUITests: XCTestCase {
         snap("de-saved")
     }
 
+    private func sample(_ kind: String, dark: Bool = false, large: Bool = false) -> XCUIApplication {
+        let app = XCUIApplication()
+        app.launchArguments = ["-AppleLanguages", "(de)", "-AppleLocale", "de_AT"]
+        app.launchEnvironment = ["PUBLIT_UI_SAMPLE": kind, "PUBLIT_UI_DARK": dark ? "1" : "0", "PUBLIT_UI_LARGE": large ? "1" : "0"]
+        app.launch()
+        return app
+    }
+
+    func testF09TransitPresentationLightDarkAndAccessibility() {
+        for (name, dark, large) in [("board-light", false, false), ("board-dark", true, false), ("board-large", false, true)] {
+            let app = sample("board", dark: dark, large: large)
+            XCTAssertTrue(app.navigationBars["Abfahrten"].waitForExistence(timeout: 10))
+            XCTAssertTrue(app.otherElements["departureRow"].firstMatch.exists || app.cells.firstMatch.exists)
+            snap(name)
+            if !large { app.swipeUp(); snap(name + "-edge-cases") }
+            app.terminate()
+        }
+        let app = sample("leg")
+        XCTAssertTrue(app.staticTexts["Einsteigen"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Aussteigen"].exists)
+        XCTAssertTrue(app.staticTexts["Nordfriedhof"].exists)
+        snap("direction-versus-alighting")
+        app.terminate()
+        let widgets = sample("widget")
+        XCTAssertTrue(widgets.navigationBars["Fahrt"].waitForExistence(timeout: 5))
+        snap("widget-small-medium")
+        widgets.terminate()
+    }
+
+    func testF10StartEndTripAndEmbeddedTicket() {
+        let app = sample("workflow")
+        let start = app.buttons["startTrip"]
+        XCTAssertTrue(start.waitForExistence(timeout: 10))
+        snap("workflow-start")
+        start.tap()
+        XCTAssertTrue(app.navigationBars["Aktive Fahrt"].waitForExistence(timeout: 10))
+        let end = app.buttons["endTrip"]
+        for _ in 0..<4 where !end.isHittable { app.swipeUp() }
+        XCTAssertTrue(end.isHittable)
+        snap("workflow-live")
+        end.tap()
+        XCTAssertTrue(app.buttons["startTrip"].waitForExistence(timeout: 5))
+        app.buttons["Fertig"].tap()
+        let ticket = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Ticket-Beispiel")).firstMatch
+        for _ in 0..<4 where !ticket.isHittable { app.swipeUp() }
+        XCTAssertTrue(ticket.isHittable)
+        ticket.tap()
+        XCTAssertTrue(app.buttons["Original anzeigen"].waitForExistence(timeout: 10))
+        sleep(1)
+        snap("ticket-embedded")
+        app.buttons["Original anzeigen"].tap()
+        sleep(1)
+        snap("ticket-original")
+        app.terminate()
+        for (name, dark, large) in [("ticket-dark", true, false), ("ticket-large", false, true)] {
+            let extra = sample("workflow", dark: dark, large: large)
+            let card = extra.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Ticket-Beispiel")).firstMatch
+            for _ in 0..<6 where !card.isHittable { extra.swipeUp() }
+            XCTAssertTrue(card.isHittable)
+            card.tap()
+            XCTAssertTrue(extra.navigationBars["Ticket-Beispiel"].waitForExistence(timeout: 5))
+            sleep(1)
+            snap(name)
+            extra.terminate()
+        }
+    }
+
+    func testF11DisruptionDetailsAndConditionalFareEstimate() {
+        var app = sample("alerts")
+        let alert = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Demo: U3")).firstMatch
+        XCTAssertTrue(alert.waitForExistence(timeout: 5))
+        alert.tap()
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "Testmeldung")).firstMatch.waitForExistence(timeout: 5))
+        snap("disruption-details")
+        app.terminate()
+        app = sample("fare")
+        XCTAssertTrue(app.staticTexts["Preisschätzung"].waitForExistence(timeout: 5))
+        snap("fare-conditional-demo")
+        app.terminate()
+    }
+
     /// F01 Nearby: live departures around the (simulated) location.
     func testF01NearbyShowsDepartures() {
         let app = launch()

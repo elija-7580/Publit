@@ -13,6 +13,7 @@ struct PlaceSearchView: View {
     @State private var errorMessage: String?
     @State private var isSearching = false
     /// Query the current results belong to; "No matches." only after a real search.
+    @State private var searchToken = UUID()
     @State private var searched: String?
 
     var body: some View {
@@ -71,20 +72,23 @@ struct PlaceSearchView: View {
     }
 
     private func search() async {
+        let token = UUID()
+        searchToken = token
         let text = query.trimmingCharacters(in: .whitespaces)
-        guard text.count >= 2 else { results = []; errorMessage = nil; searched = nil; return }
+        guard text.count >= 2 else { results = []; errorMessage = nil; searched = nil; isSearching = false; return }
         // Debounce: the task is cancelled when the query changes again.
         try? await Task.sleep(for: .milliseconds(300))
         guard !Task.isCancelled else { return }
         isSearching = true
-        defer { isSearching = false }
+        defer { if searchToken == token { isSearching = false } }
         do {
             let r = try await TransitousClient.shared.geocode(text, near: location.coordinate)
-            guard !Task.isCancelled else { return }
+            guard !Task.isCancelled, searchToken == token else { return }
             results = r
             errorMessage = nil
             searched = text
         } catch {
+            guard !Task.isCancelled, searchToken == token else { return }
             if !(error is CancellationError) && (error as? URLError)?.code != .cancelled {
                 errorMessage = error.localizedDescription
             }

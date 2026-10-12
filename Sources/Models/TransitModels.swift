@@ -75,6 +75,10 @@ struct Alert: Codable, Hashable, Sendable {
     let headerText: String
     let descriptionText: String
     let url: String?
+    var effect: String? = nil
+    var severityLevel: String? = nil
+    var communicationPeriod: [AlertPeriod]? = nil
+    var impactPeriod: [AlertPeriod]? = nil
 }
 
 struct Leg: Codable, Sendable, RouteStyled {
@@ -104,7 +108,10 @@ struct Leg: Codable, Sendable, RouteStyled {
     let intermediateStops: [Place]?
     let alerts: [Alert]?
     let legGeometry: EncodedPolyline
+    var fareTransferIndex: Int? = nil
+    var effectiveFareLegIndex: Int? = nil
 
+    var directionName: String? { TransitLabels.clean(headsign) }
     var isTransit: Bool { ModeStyle.isTransit(mode) }
     var delayMinutes: Int { Int((startTime.timeIntervalSince(scheduledStartTime) / 60).rounded()) }
     /// Boarding stop, every stop in between, and the alighting stop.
@@ -118,6 +125,7 @@ struct Itinerary: Codable, Identifiable, Sendable {
     let endTime: Date
     let transfers: Int
     let legs: [Leg]
+    var fareTransfers: [FareTransfer]? = nil
 
     var transitLegs: [Leg] { legs.filter(\.isTransit) }
     var firstTransitLeg: Leg? { legs.first(where: \.isTransit) }
@@ -152,6 +160,7 @@ struct StopTime: Decodable, Identifiable, Sendable, RouteStyled {
     let tripCancelled: Bool?
 
     var id: String { "\(tripId)|\(place.stopId ?? place.name)|\(departureTime.timeIntervalSince1970)" }
+    var directionName: String? { TransitLabels.clean(headsign) }
     var departureTime: Date { place.departure ?? place.arrival ?? .distantPast }
     var scheduledDepartureTime: Date? { place.scheduledDeparture ?? place.scheduledArrival }
     var isCancelled: Bool { cancelled == true || tripCancelled == true || place.cancelled == true }

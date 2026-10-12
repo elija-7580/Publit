@@ -32,6 +32,7 @@ struct PlanView: View {
             if plan.to == nil {
                 quickDestinations
                 savedTrips
+                RecentSearchesSection()
             } else {
                 resultsSection(plan)
             }
@@ -288,6 +289,10 @@ struct ItineraryRow: View {
             }
             .font(.caption)
             .foregroundStyle(.secondary)
+            if itinerary.transitLegs.contains(where: { !$0.serviceAlerts.isEmpty || $0.isReplacementBus }) {
+                Label("Service changes on this route", systemImage: "exclamationmark.triangle.fill")
+                    .font(.caption.weight(.semibold)).foregroundStyle(Color.delay)
+            }
             ForEach(warnings, id: \.self) { w in
                 Label(w.message, systemImage: "exclamationmark.triangle.fill")
                     .font(.caption.weight(.semibold))

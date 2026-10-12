@@ -70,12 +70,36 @@ final class TicketStore {
             fileName = "\(id).img"
             try? image.write(to: imageDirectory.appendingPathComponent(fileName!), options: [.atomic, .completeFileProtection])
         }
-        let t = Ticket(id: id, name: name.isEmpty ? (kind == .pass ? "Pass" : "Ticket") : name, kind: kind,
+        let t = Ticket(id: id, name: name.isEmpty ? (kind == .pass ? L10n.t("Pass") : L10n.t("Ticket")) : name, kind: kind,
                        imageFile: fileName, appLink: appLink?.nilIfEmpty, validUntil: validUntil,
                        tripId: kind == .single ? tripId : nil, addedAt: now)
         tickets.append(t)
         persist()
         return t
+    }
+
+    /// Production import: image writes do not block the main actor, and failures are visible.
+    @discardableResult
+    func addAsync(name: String, kind: Ticket.Kind, image: Data?, appLink: String?, validUntil: Date?,
+                  tripId: String? = nil, now: Date = .now) async throws -> Ticket {
+        let id = UUID().uuidString
+        let fileName = image == nil ? nil : "\(id).img"
+        if let image, let fileName {
+            let url = imageDirectory.appendingPathComponent(fileName)
+            try await Task.detached(priority: .userInitiated) {
+                let trace = PerformanceTrace.begin("Import ticket image")
+                defer { PerformanceTrace.end(trace, "Import ticket image") }
+                try image.write(to: url, options: [.atomic, .completeFileProtection])
+            }.value
+        }
+        let ticket = Ticket(id: id, name: name.isEmpty ? (kind == .pass ? L10n.t("Pass") : L10n.t("Ticket")) : name,
+                            kind: kind, imageFile: fileName, appLink: appLink?.nilIfEmpty, validUntil: validUntil,
+                            tripId: kind == .single ? tripId : nil, addedAt: now)
+        tickets.append(ticket)
+        persist()
+        // Finish critical metadata before dismissing the import UI.
+        await Task.detached(priority: .userInitiated) { JSONPersistence.flush() }.value
+        return ticket
     }
 
     func update(_ t: Ticket) {
@@ -97,8 +121,8 @@ final class TicketStore {
         } else {
             linkedApps[key] = nil
         }
-        appsFile.save(linkedApps)
+        appsFile.saveInBackground(linkedApps)
     }
 
-    private func persist() { file.save(tickets) }
+    private func persist() { file.saveInBackground(tickets) }
 }

@@ -19,6 +19,8 @@ targets:
     platform: iOS
     sources:
       - Sources
+      # Render the real widget view in DEBUG-only UI QA.
+      - Widgets/DeparturesWidget.swift
     info:
       path: Config/Info.plist
       properties:
@@ -43,6 +45,9 @@ targets:
         TARGETED_DEVICE_FAMILY: "1"
         CODE_SIGN_STYLE: Automatic
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+      configs:
+        Release:
+          EXCLUDED_SOURCE_FILE_NAMES: DeparturesWidget.swift
     preBuildScripts:
       # Icon PNGs are stored as base64 text in Config/AppIcon (see the README there).
       - name: Decode app icon
@@ -74,16 +79,20 @@ targets:
       - Sources/API
       - Sources/App/AppInfo.swift
       - Sources/Models/TransitModels.swift
+      - Sources/Models/ServiceAlerts.swift
+      - Sources/Models/Fares.swift
       - Sources/Models/ModeStyle.swift
       - Sources/Models/RouteStyle.swift
       - Sources/Models/DeepLink.swift
       - Sources/Models/PlaceRole.swift
+      - Sources/Views/Components/LineBadge.swift
       - Sources/Util/Geo.swift
       - Sources/Util/Polyline.swift
       - Sources/Util/LineColors.swift
       - Sources/Util/Formatting.swift
       - Sources/Util/Palette.swift
       - Sources/Util/L10n.swift
+      - Sources/Util/PerformanceTrace.swift
     info:
       path: Config/Widgets-Info.plist
       properties:

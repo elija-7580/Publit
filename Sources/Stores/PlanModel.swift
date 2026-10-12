@@ -1,7 +1,7 @@
 import Foundation
 import Observation
 
-enum Endpoint: Hashable {
+enum Endpoint: Hashable, Codable, Sendable {
     case currentLocation
     case place(SavedPlace)
 
@@ -27,7 +27,7 @@ enum Endpoint: Hashable {
     }
 }
 
-enum TimeMode: String, CaseIterable, Identifiable {
+enum TimeMode: String, Codable, CaseIterable, Identifiable, Sendable {
     case now = "Now"
     case departAt = "Depart"
     case arriveBy = "Arrive"
@@ -50,6 +50,7 @@ final class PlanModel {
     private var nextCursor: String?
     @ObservationIgnored private var lastRequest: (from: LatLon, to: LatLon, time: Date?, arriveBy: Bool, maxWalk: Int)?
     @ObservationIgnored private var token = UUID()
+    @ObservationIgnored var history: SearchHistoryStore = .shared
 
     var canLoadMore: Bool { nextCursor != nil && !itineraries.isEmpty }
 
@@ -77,9 +78,13 @@ final class PlanModel {
                 : L10n.t("Waiting for your location…")
             return
         }
+        let searchedFrom = from
+        let searchedMode = timeMode
+        let searchedDate = date
         let myToken = UUID()
         token = myToken
         if !silent { isLoading = true }
+        defer { if token == myToken { isLoading = false } }
         errorMessage = nil
         let time: Date? = timeMode == .now ? nil : date
         let arriveBy = timeMode == .arriveBy
@@ -95,6 +100,7 @@ final class PlanModel {
             itineraries = Self.merge(transit: res.itineraries, direct: res.direct)
             nextCursor = arriveBy ? res.previousPageCursor : res.nextPageCursor
             lastRequest = (f, t, time, arriveBy, maxWalk)
+            if !silent { history.record(from: searchedFrom, to: to, mode: searchedMode, date: searchedDate) }
             if itineraries.isEmpty { errorMessage = L10n.t("No connections found.") }
         } catch {
             guard token == myToken, !Self.isCancellation(error) else { return }
@@ -104,7 +110,6 @@ final class PlanModel {
                 errorMessage = error.localizedDescription
             }
         }
-        if token == myToken { isLoading = false }
     }
 
     func loadMore() async {

@@ -10,6 +10,7 @@ struct TripActionsSection: View {
 
     @Environment(TripStore.self) private var trips
     @Environment(TicketStore.self) private var tickets
+    @Environment(AppState.self) private var app
     @State private var calendarTrip: SavedTrip?
     @State private var reminderOn = false
     @State private var note: String?
@@ -20,8 +21,23 @@ struct TripActionsSection: View {
 
     var body: some View {
         Section {
+            if let saved, trips.activeTripId == saved.id {
+                Button { Task { await stopTrip(saved) } } label: {
+                    Label("End trip", systemImage: "stop.circle")
+                }
+                .accessibilityIdentifier("endTrip")
+            } else {
+                Button { Task { await startTrip() } } label: {
+                    Label("Start trip", systemImage: "location.north.circle.fill")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                .disabled(itinerary.isCancelled || itinerary.endTime < .now)
+                .accessibilityIdentifier("startTrip")
+            }
             Button {
-                if let saved { trips.remove(saved.id); LeaveReminder.cancel(saved.id); reminderOn = false }
+                if let saved { trips.remove(saved.id); LeaveReminder.cancel(saved.id); Task { await LiveTripActivity.end(saved.id) }; reminderOn = false }
                 else { trips.save(itinerary, from: fromName, to: toName) }
             } label: {
                 Label(saved == nil ? L10n.t("Save trip") : L10n.t("Saved"), systemImage: saved == nil ? "bookmark" : "bookmark.fill")
@@ -48,17 +64,40 @@ struct TripActionsSection: View {
             Text("The calendar entry links back to this trip with its live status.")
         }
         .task(id: saved?.id) {
-            if let id = saved?.id { reminderOn = await LeaveReminder.isScheduled(id) || LiveTripActivity.isRunning(id) }
+            if let id = saved?.id { reminderOn = await LeaveReminder.isScheduled(id) }
         }
         .sheet(item: $calendarTrip) { trip in
             CalendarEventSheet(trip: trip).ignoresSafeArea()
         }
 
+        FareSection(itinerary: itinerary)
         TicketSection(itinerary: itinerary, tripId: saved?.id, onAddTicket: {
             _ = ensureSaved()
             addingTicket = true
         })
         .sheet(isPresented: $addingTicket) { AddTicketView(tripId: saved?.id) }
+    }
+
+    private func startTrip() async {
+        let trip = ensureSaved()
+        if let previous = trips.start(trip.id), previous != trip.id {
+            LeaveReminder.cancel(previous)
+            await LiveTripActivity.end(previous)
+        }
+        switch LiveTripActivity.start(trip, hasTicket: !tickets.tickets(forTrip: trip.id).isEmpty) {
+        case .started: note = L10n.t("Follow it on the lock screen.")
+        case .tooEarly: note = L10n.t("Live updates on the lock screen start 8 hours before.")
+        case .unavailable, .failed: note = L10n.t("Live tracking is active in the app. Lock screen updates may be unavailable.")
+        }
+        app.open(trip.deepLink)
+    }
+
+    private func stopTrip(_ trip: SavedTrip) async {
+        trips.stop(trip.id)
+        LeaveReminder.cancel(trip.id)
+        await LiveTripActivity.end(trip.id)
+        reminderOn = false
+        note = L10n.t("Trip ended")
     }
 
     private func ensureSaved() -> SavedTrip {
@@ -69,8 +108,10 @@ struct TripActionsSection: View {
         let trip = ensureSaved()
         if reminderOn {
             LeaveReminder.cancel(trip.id)
-            trips.setFollowLive(trip.id, false)
-            await LiveTripActivity.end(trip.id)
+            if trips.activeTripId != trip.id {
+                trips.setFollowLive(trip.id, false)
+                await LiveTripActivity.end(trip.id)
+            }
             reminderOn = false
             note = nil
             return
@@ -102,18 +143,16 @@ struct TicketSection: View {
     let onAddTicket: () -> Void
 
     @Environment(TicketStore.self) private var tickets
-    @State private var showing = false
+    @State private var showing: Ticket?
 
     var body: some View {
         let links = TicketLinks.links(for: itinerary, userLinked: tickets.linkedApps)
         let mine = tickets.tickets(forTrip: tripId)
         if !itinerary.isDirect {
             Section {
-                if !mine.isEmpty {
-                    Button { showing = true } label: {
-                        Label(mine.count == 1 ? L10n.f("Show ticket: %@", mine[0].name) : L10n.f("Show my tickets (%lld)", mine.count),
-                              systemImage: "ticket.fill")
-                    }
+                ForEach(mine.prefix(2)) { ticket in
+                    Button { showing = ticket } label: { TicketSummaryCard(ticket: ticket) }
+                        .buttonStyle(.plain)
                 }
                 ForEach(links) { l in
                     Link(destination: l.url) {
@@ -130,7 +169,7 @@ struct TicketSection: View {
                     Text("The operator publishes no ticket link. Link your ticket app in Settings → Ticket apps.")
                 }
             }
-            .fullScreenCover(isPresented: $showing) { TicketDisplayView(tickets: mine) }
+            .fullScreenCover(item: $showing) { ticket in TicketDisplayView(tickets: [ticket]) }
         }
     }
 }

@@ -25,6 +25,12 @@ struct TripView: View {
                     let stops = leg.allStops
                     let progress = TripProgress.at(ctx.date, stops: stops)
                     Section {
+                        VStack(alignment: .leading, spacing: 8) {
+                            LineBadge(stopTime)
+                            if let detail = stopTime.serviceDetail { Text(verbatim: detail).font(.subheadline) }
+                            DirectionLabel(direction: stopTime.directionName)
+                        }
+                        ServiceAlertsView(alerts: leg.serviceAlerts)
                         OfflineNote()
                         tripMap(leg: leg, stops: stops, progress: progress)
                             .frame(height: 240)
@@ -44,7 +50,7 @@ struct TripView: View {
                 }
             }
         }
-        .navigationTitle(stopTime.headsign.isEmpty ? stopTime.lineName : "\(stopTime.lineName) → \(stopTime.headsign)")
+        .navigationTitle(stopTime.lineName)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) { ShowTicketButton() }

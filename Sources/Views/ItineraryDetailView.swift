@@ -115,61 +115,62 @@ struct LegRow: View {
 
     var body: some View {
         if leg.isTransit {
-            VStack(alignment: .leading, spacing: 6) {
-                HStack(spacing: 8) {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
                     LineBadge(leg)
-                    if let h = leg.headsign, !h.isEmpty {
-                        Text("→ \(h)").font(.subheadline).lineLimit(1)
+                    if let detail = leg.serviceDetail {
+                        Text(verbatim: detail).font(.caption.weight(.semibold))
                     }
-                    Spacer()
-                    if leg.realTime {
-                        Text("live").font(.caption2.weight(.bold)).foregroundStyle(Color.live)
-                    }
+                    Spacer(minLength: 4)
+                    Text(leg.realTime && !Connectivity.shared.isOffline ? L10n.t("Live") : L10n.t("Timetable"))
+                        .font(.caption).foregroundStyle(.secondary)
                 }
-                stopLine(time: leg.startTime, delay: leg.delayMinutes, name: leg.from.name, track: leg.from.track, tz: leg.from.tz)
-                let stops = leg.intermediateStops?.count ?? 0
-                Text("\(Fmt.stops(stops)) · \(Fmt.duration(seconds: leg.duration))")
+                DirectionLabel(direction: leg.directionName)
+                if leg.isReplacementBus { Label("Rail replacement bus", systemImage: "bus.fill").font(.subheadline.weight(.semibold)).foregroundStyle(Color.delay) }
+                stopLine(label: "Board here", time: leg.startTime, delay: leg.delayMinutes,
+                         name: leg.from.name, track: leg.from.track, tz: leg.from.tz)
+                Text("\(Fmt.stops(leg.intermediateStops?.count ?? 0)) · \(Fmt.duration(seconds: leg.duration))")
                     .font(.caption).foregroundStyle(.secondary)
-                    .padding(.leading, 76)
-                stopLine(time: leg.endTime,
+                stopLine(label: "Get off here", time: leg.endTime,
                          delay: Int((leg.endTime.timeIntervalSince(leg.scheduledEndTime) / 60).rounded()),
                          name: leg.to.name, track: leg.to.track, tz: leg.to.tz)
                 if leg.cancelled == true {
                     Text("This trip is cancelled.").font(.caption.weight(.semibold)).foregroundStyle(Color.danger)
                 }
-                ForEach(leg.alerts ?? [], id: \.self) { a in
-                    Label(a.headerText, systemImage: "exclamationmark.triangle.fill")
-                        .font(.caption).foregroundStyle(Color.delay)
-                }
+                ServiceAlertsView(alerts: leg.serviceAlerts)
                 GetOffButton(leg: leg)
-                    .padding(.leading, 76)
             }
-            .padding(.vertical, 4)
+            .padding(.vertical, 6)
+            .accessibilityIdentifier("transitLeg")
         } else {
-            HStack(spacing: 8) {
+            HStack(alignment: .top, spacing: 8) {
                 Image(systemName: ModeStyle.symbol(leg.mode)).foregroundStyle(.secondary).frame(width: 24)
-                Text("\(ModeStyle.label(leg.mode)) \(Fmt.duration(seconds: leg.duration))")
-                if let d = leg.distance, d > 0 {
-                    Text("· \(Fmt.distance(meters: d))").foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("\(ModeStyle.label(leg.mode)) \(Fmt.duration(seconds: leg.duration))")
+                    if let d = leg.distance, d > 0 { Text(Fmt.distance(meters: d)).foregroundStyle(.secondary) }
                 }
-                Spacer()
+                Spacer(minLength: 0)
             }
             .font(.subheadline)
         }
     }
 
-    private func stopLine(time: Date, delay: Int, name: String, track: String?, tz: String?) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 8) {
-            Text(Fmt.time(time, tz: tz)).font(.subheadline.weight(.semibold).monospacedDigit()).lineLimit(1).fixedSize()
-                .frame(minWidth: 68, alignment: .leading)
-            if delay > 0 {
-                Text("+\(delay)").font(.caption.monospacedDigit()).foregroundStyle(Color.delay)
+    private func stopLine(label: LocalizedStringKey, time: Date, delay: Int, name: String,
+                          track: String?, tz: String?) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(Fmt.time(time, tz: tz)).font(.subheadline.weight(.semibold).monospacedDigit())
+                    .lineLimit(1).fixedSize()
+                if delay > 0 { Text(L10n.f("+%lld min", delay)).font(.caption).foregroundStyle(Color.delay) }
             }
-            Text(name).font(.subheadline).lineLimit(1)
-            Spacer()
-            if let track, !track.isEmpty {
-                Text("Pl. \(track)").font(.caption).foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(label).font(.caption).foregroundStyle(.secondary)
+                Text(verbatim: name).font(.subheadline.weight(.semibold)).fixedSize(horizontal: false, vertical: true)
+                if let track = TransitLabels.clean(track) {
+                    Text(L10n.f("Platform %@", track)).font(.caption).foregroundStyle(.secondary)
+                }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 }

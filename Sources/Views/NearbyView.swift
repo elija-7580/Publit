@@ -20,6 +20,8 @@ struct NearbyView: View {
     var body: some View {
         List {
             goSection
+            activeTripSection
+            RecentSearchesSection(goNow: true)
             OfflineNote()
             if location.isDenied {
                 ContentUnavailableView("Location is off",
@@ -78,10 +80,26 @@ struct NearbyView: View {
         .fullScreenCover(isPresented: $showMap) { StationMapView() }
         .refreshable { await load() }
         .task(id: locationKey) {
-            showLastBoard()
+            await showLastBoard()
             while !Task.isCancelled {
                 await load()
                 try? await Task.sleep(for: .seconds(30))
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var activeTripSection: some View {
+        if let trip = trips.activeTrip {
+            Section("Active trip") {
+                NavigationLink { SavedTripView(tripId: trip.id) } label: {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Label(trip.toName, systemImage: "location.north.circle.fill").font(.headline)
+                        Text(TripStatus.at(.now, trip.itinerary).headline).font(.subheadline).foregroundStyle(.secondary)
+                        if let leg = trip.itinerary.firstTransitLeg { LineBadge(leg) }
+                    }
+                }
+                .accessibilityIdentifier("activeTrip")
             }
         }
     }
@@ -120,8 +138,8 @@ struct NearbyView: View {
     }
 
     /// The last board (up to 10 min old) right away, so the screen is not empty while GPS and network start.
-    private func showLastBoard() {
-        guard groups.isEmpty, let last = TransitousClient.shared.lastNearby(maxAge: 600) else { return }
+    private func showLastBoard() async {
+        guard groups.isEmpty, let last = await TransitousClient.shared.lastNearby(maxAge: 600) else { return }
         let here = location.coordinate ?? last.center
         guard here.distance(to: last.center) < 400 else { return }
         groups = StopGrouping.group(StopTime.upcoming(last.response.stopTimes), around: here)
@@ -170,14 +188,7 @@ struct StopDeparturesView: View {
         List {
             if !alerts.isEmpty {
                 Section("Alerts") {
-                    ForEach(alerts, id: \.self) { a in
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(a.headerText).font(.subheadline.weight(.semibold))
-                            if !a.descriptionText.isEmpty {
-                                Text(a.descriptionText).font(.caption).foregroundStyle(.secondary)
-                            }
-                        }
-                    }
+                    ServiceAlertsView(alerts: alerts)
                 }
             }
             Section {
@@ -228,7 +239,7 @@ struct StopDeparturesView: View {
         do {
             let res = try await TransitousClient.shared.departures(stopId: stopId, count: 40, radius: Self.stationRadius)
             departures = StopTime.upcoming(res.stopTimes)
-            alerts = Array(Set(res.place?.alertsList ?? []))
+            alerts = Alert.relevant((res.place?.alertsList ?? []) + res.stopTimes.flatMap { $0.place.alertsList })
             errorMessage = nil
             lastUpdated = Date()
         } catch {

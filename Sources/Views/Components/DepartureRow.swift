@@ -3,39 +3,77 @@ import SwiftUI
 struct DepartureRow: View {
     let stopTime: StopTime
 
+    @Environment(\.dynamicTypeSize) private var typeSize
+
     var body: some View {
-        HStack(spacing: 10) {
-            LineBadge(stopTime)
-                .frame(minWidth: 64, alignment: .leading)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(stopTime.headsign.isEmpty ? "—" : stopTime.headsign)
-                    .lineLimit(1)
-                HStack(spacing: 6) {
-                    if let track = stopTime.place.track, !track.isEmpty {
-                        Text("Platform \(track)")
-                    }
-                    if stopTime.isCancelled {
-                        Text("Cancelled").foregroundStyle(Color.danger)
-                    }
+        Group {
+            if typeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: 10) {
+                    identity
+                    DirectionLabel(direction: stopTime.directionName)
+                    platform
+                    serviceNote
+                    time
                 }
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            } else {
+                HStack(alignment: .top, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        identity
+                        DirectionLabel(direction: stopTime.directionName)
+                        platform
+                        serviceNote
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    time
+                }
             }
-            Spacer(minLength: 4)
-            DepartureTimeView(actual: stopTime.departureTime,
-                              delayMinutes: stopTime.delayMinutes,
-                              realTime: stopTime.realTime,
-                              cancelled: stopTime.isCancelled,
-                              tz: stopTime.place.tz)
         }
-        .padding(.vertical, 2)
+        .padding(.vertical, 6)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityText)
+        .accessibilityIdentifier("departureRow")
+    }
+
+    private var identity: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            LineBadge(stopTime)
+            if let detail = stopTime.serviceDetail {
+                Text(verbatim: detail).font(.caption.weight(.semibold))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var platform: some View {
+        if let track = TransitLabels.clean(stopTime.place.track) {
+            Text(L10n.f("Platform %@", track)).font(.caption).foregroundStyle(.secondary)
+        }
+    }
+
+    @ViewBuilder
+    private var serviceNote: some View {
+        if stopTime.isReplacementBus { Label("Rail replacement bus", systemImage: "bus.fill").font(.caption.weight(.semibold)).foregroundStyle(Color.delay) }
+        if let alert = stopTime.serviceAlerts.first {
+            Label(alert.headerText, systemImage: "exclamationmark.triangle.fill")
+                .font(.caption).foregroundStyle(alert.priority == 0 ? Color.danger : Color.delay)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var time: some View {
+        DepartureTimeView(actual: stopTime.departureTime, delayMinutes: stopTime.delayMinutes,
+                          realTime: stopTime.realTime && !Connectivity.shared.isOffline,
+                          cancelled: stopTime.isCancelled, tz: stopTime.place.tz)
     }
 
     private var accessibilityText: String {
         var parts = ["\(ModeStyle.label(stopTime.mode)) \(stopTime.lineName)"]
-        if !stopTime.headsign.isEmpty { parts.append(L10n.f("to %@", stopTime.headsign)) }
+        if let detail = stopTime.serviceDetail { parts.append(detail) }
+        if let direction = stopTime.directionName { parts.append(L10n.f("Towards %@", direction)) }
+        else { parts.append(L10n.t("Direction unavailable")) }
+        if stopTime.isReplacementBus { parts.append(L10n.t("Rail replacement bus")) }
+        parts.append(contentsOf: stopTime.serviceAlerts.map(\.headerText))
         parts.append(L10n.f("at %@", Fmt.time(stopTime.departureTime, tz: stopTime.place.tz)))
         if stopTime.isCancelled { parts.append(L10n.t("cancelled")) }
         else if stopTime.realTime {

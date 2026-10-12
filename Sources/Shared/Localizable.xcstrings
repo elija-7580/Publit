@@ -3153,6 +3153,101 @@
     }
    }
   },
+  "A stored screenshot may not be accepted. Use the operator's live ticket when required.": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "A stored screenshot may not be accepted. Use the operator's live ticket when required."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ein Screenshot wird nicht immer akzeptiert. Verwende bei Bedarf das aktive Ticket in der Betreiber-App."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Une capture d'écran stockée peut ne pas être acceptée. Utilisez le ticket en direct de l'opérateur si nécessaire."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Uno screenshot memorizzato potrebbe non essere accettato. Utilizza il biglietto live dell'operatore quando richiesto."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Es posible que no se acepte una captura de pantalla almacenada. Utilice el ticket en vivo del operador cuando sea necesario."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Uma captura de tela armazenada pode não ser aceita. Use o ticket ao vivo da operadora quando necessário."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Een opgeslagen screenshot wordt mogelijk niet geaccepteerd. Gebruik indien nodig het liveticket van de operator."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Zapisany zrzut ekranu może nie zostać zaakceptowany. W razie potrzeby użyj biletu na żywo operatora."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Збережений знімок екрана може бути неприйнятим. Використовуйте квиток оператора в реальному часі, коли потрібно."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Este posibil ca o captură de ecran stocată să nu fie acceptată. Folosiți biletul live al operatorului atunci când este necesar."
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Uložený snímek obrazovky nemusí být přijat. V případě potřeby použijte živou vstupenku operátora."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "En lagrad skärmdump kanske inte accepteras. Använd operatörens livebiljett vid behov."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Ένα αποθηκευμένο στιγμιότυπο οθόνης ενδέχεται να μην γίνει αποδεκτό. Χρησιμοποιήστε το ζωντανό εισιτήριο του χειριστή όταν απαιτείται."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Előfordulhat, hogy a tárolt képernyőkép nem fogadható el. Szükség esetén használja az üzemeltető élő jegyét."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Saklanan bir ekran görüntüsü kabul edilmeyebilir. Gerektiğinde operatörün canlı biletini kullanın."
+     }
+    }
+   }
+  },
   "A web address (many ticket apps open from their website link) or the app's own link, e.g. appname://.": {
    "extractionState": "manual",
    "localizations": {
@@ -3339,6 +3434,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "Hakkında"
+     }
+    }
+   }
+  },
+  "Active trip": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Active trip"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Aktive Fahrt"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Voyage actif"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Viaggio attivo"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "viaje activo"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Viagem ativa"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Actieve reis"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Aktywna wycieczka"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Активна подорож"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Călătoria activă"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Aktivní výlet"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Aktiv resa"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Ενεργό ταξίδι"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Aktív utazás"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Aktif yolculuk"
      }
     }
    }
@@ -5243,6 +5433,101 @@
     }
    }
   },
+  "Board here": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Board here"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Einsteigen"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Embarquez ici"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Sali qui"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Junta aquí"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Embarque aqui"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Bestuur hier"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Wejdź tutaj"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Дошка тут"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Imbarcați-vă aici"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Nastupte zde"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Styrelse här"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Επιβιβαστείτε εδώ"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Tábla ide"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Burada kurul"
+     }
+    }
+   }
+  },
   "Bus": {
    "extractionState": "manual",
    "localizations": {
@@ -6288,6 +6573,196 @@
     }
    }
   },
+  "Clear history": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Clear history"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Verlauf löschen"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Effacer l'historique"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Cancella cronologia"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Borrar historial"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Limpar histórico"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Geschiedenis wissen"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Wyczyść historię"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Очистити історію"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Ștergeți istoricul"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Vymazat historii"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Rensa historik"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Εκκαθάριση ιστορικού"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Törölje az előzményeket"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Geçmişi temizle"
+     }
+    }
+   }
+  },
+  "Clear search history?": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Clear search history?"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Suchverlauf löschen?"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Effacer l'historique des recherches ?"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Cancellare la cronologia delle ricerche?"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "¿Borrar historial de búsqueda?"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Limpar histórico de pesquisa?"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Zoekgeschiedenis wissen?"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Wyczyścić historię wyszukiwania?"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Очистити історію пошуку?"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Ștergeți istoricul căutărilor?"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Vymazat historii vyhledávání?"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Rensa sökhistorik?"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Διαγραφή ιστορικού αναζήτησης;"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Törli a keresési előzményeket?"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Arama geçmişi temizlensin mi?"
+     }
+    }
+   }
+  },
   "Coach": {
    "extractionState": "manual",
    "localizations": {
@@ -6664,6 +7139,101 @@
      "stringUnit": {
       "state": "needs_review",
       "value": "Yenilenemedi. Zamanlar güncel olmayabilir."
+     }
+    }
+   }
+  },
+  "Couldn't save ticket. Please try again.": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Couldn't save ticket. Please try again."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ticket konnte nicht gespeichert werden. Bitte versuche es erneut."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Couldn't save ticket. Veuillez réessayer."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Impossibile salvare il biglietto. Per favore riprova."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "No se pudo guardar el boleto. Por favor inténtalo de nuevo."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Não foi possível salvar o ingresso. Por favor, tente novamente."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Kan ticket niet opslaan. Probeer het opnieuw."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Nie udało się zapisać biletu. Spróbuj ponownie."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Не вдалося зберегти квиток. Спробуйте ще раз."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Biletul nu a putut fi salvat. Vă rugăm să încercați din nou."
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Lístek se nepodařilo uložit. Zkuste to prosím znovu."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Det gick inte att spara biljetten. Försök igen."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Δεν ήταν δυνατή η αποθήκευση του εισιτηρίου. Δοκιμάστε ξανά."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Nem sikerült menteni a jegyet. Kérjük, próbálja újra."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Bilet kaydedilemedi. Lütfen tekrar deneyin."
      }
     }
    }
@@ -7333,101 +7903,6 @@
     }
    }
   },
-  "Details of selected route": {
-   "extractionState": "manual",
-   "localizations": {
-    "en": {
-     "stringUnit": {
-      "state": "translated",
-      "value": "Details of selected route"
-     }
-    },
-    "de": {
-     "stringUnit": {
-      "state": "translated",
-      "value": "Details der ausgewählten Route"
-     }
-    },
-    "fr": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Détails de l'itinéraire sélectionné"
-     }
-    },
-    "it": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Dettagli del percorso selezionato"
-     }
-    },
-    "es": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Detalles de la ruta seleccionada"
-     }
-    },
-    "pt-PT": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Detalhes da rota selecionada"
-     }
-    },
-    "nl": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Details van geselecteerde route"
-     }
-    },
-    "pl": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Szczegóły wybranej trasy"
-     }
-    },
-    "uk": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Деталі обраного маршруту"
-     }
-    },
-    "ro": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Detalii despre traseul selectat"
-     }
-    },
-    "cs": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Podrobnosti o vybrané trase"
-     }
-    },
-    "sv": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Detaljer om vald rutt"
-     }
-    },
-    "el": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Λεπτομέρειες για την επιλεγμένη διαδρομή"
-     }
-    },
-    "hu": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "A kiválasztott útvonal részletei"
-     }
-    },
-    "tr": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Seçilen rotanın ayrıntıları"
-     }
-    }
-   }
-  },
   "Direct": {
    "extractionState": "manual",
    "localizations": {
@@ -7519,6 +7994,196 @@
      "stringUnit": {
       "state": "translated",
       "value": "Aktarmasız"
+     }
+    }
+   }
+  },
+  "Direction unavailable": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Direction unavailable"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Richtung nicht angegeben"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Direction indisponible"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Direzione non disponibile"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Dirección no disponible"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Direção indisponível"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Richting niet beschikbaar"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Kierunek niedostępny"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Напрямок недоступний"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Direcția indisponibilă"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Směr nedostupný"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Vägbeskrivning inte tillgänglig"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Η κατεύθυνση δεν είναι διαθέσιμη"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Az irány nem elérhető"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Yön mevcut değil"
+     }
+    }
+   }
+  },
+  "Diversion or stop change": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Diversion or stop change"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Umleitung oder geänderte Haltestelle"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Détournement ou arrêt du changement"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Deviazione o interruzione del cambiamento"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Desviar o detener el cambio"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Desvio ou interrupção da mudança"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Omleiding of stop verandering"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Przekierowanie lub zatrzymanie zmian"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Диверсія або зупинка зміни"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Deturnare sau oprire schimbare"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Přesměrování nebo zastavení změny"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Byte av omledning eller stopp"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Αλλαγή εκτροπής ή διακοπής"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Elterelés vagy leállítás"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Yönlendirme veya değişikliği durdurma"
      }
     }
    }
@@ -7713,6 +8378,101 @@
     }
    }
   },
+  "End trip": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "End trip"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fahrt beenden"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Fin du voyage"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Fine viaggio"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Fin del viaje"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Finalizar viagem"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Einde reis"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Zakończ podróż"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Завершити подорож"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Sfârșit călătoria"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Konec cesty"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Avsluta resan"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Τέλος ταξιδιού"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Vége az utazásnak"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Geziyi sonlandır"
+     }
+    }
+   }
+  },
   "Estimated vehicle position": {
    "extractionState": "manual",
    "localizations": {
@@ -7804,6 +8564,101 @@
      "stringUnit": {
       "state": "needs_review",
       "value": "Tahmini araç konumu"
+     }
+    }
+   }
+  },
+  "Experimental operator fare data, not a binding quote. Product options are not necessarily the total trip price. Check eligibility and the operator's price before buying.": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Experimental operator fare data, not a binding quote. Product options are not necessarily the total trip price. Check eligibility and the operator's price before buying."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Experimentelle Tarifdaten aus der Datenquelle, kein verbindliches Angebot. Ticketoptionen sind nicht unbedingt der Gesamtpreis der Fahrt. Prüfe Bedingungen und Preis beim Betreiber vor dem Kauf."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Données tarifaires expérimentales de l'opérateur, pas un devis contraignant. Les options de produits ne représentent pas nécessairement le prix total du voyage. Vérifiez l'éligibilité et le prix de l'opérateur avant d'acheter."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Dati tariffari dell'operatore sperimentale, non un preventivo vincolante. Le opzioni del prodotto non rappresentano necessariamente il prezzo totale del viaggio. Controlla l'idoneità e il prezzo dell'operatore prima di acquistare."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Datos de tarifas del operador experimental, no una cotización vinculante. Las opciones de productos no son necesariamente el precio total del viaje. Verifique la elegibilidad y el precio del operador antes de comprar."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Dados experimentais de tarifas da operadora, não uma cotação vinculativa. As opções de produtos não são necessariamente o preço total da viagem. Verifique a elegibilidade e o preço da operadora antes de comprar."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Experimentele tariefgegevens van operators, geen bindende offerte. Productopties zijn niet noodzakelijkerwijs de totale reisprijs. Controleer of u in aanmerking komt en de prijs van de exploitant voordat u koopt."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Eksperymentalne dane dotyczące taryf operatora, a nie wiążąca wycena. Opcje produktu niekoniecznie stanowią całkowitą cenę wycieczki. Przed zakupem sprawdź kwalifikowalność i cenę operatora."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Експериментальні дані про тариф оператора, не обов’язкова ціна. Варіанти продукту не обов’язково становлять загальну вартість поїздки. Перед покупкою уточнюйте придатність і ціну оператора."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Date experimentale privind tarifele operatorului, nu o ofertă obligatorie. Opțiunile de produse nu reprezintă neapărat prețul total al călătoriei. Verificați eligibilitatea și prețul operatorului înainte de a cumpăra."
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Experimentální údaje o jízdném operátora, nikoli závazná nabídka. Možnosti produktů nemusí nutně představovat celkovou cenu zájezdu. Před nákupem zkontrolujte způsobilost a cenu operátora."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Experimentell operatörsprisdata, inte en bindande offert. Produktalternativen är inte nödvändigtvis det totala resans pris. Kontrollera behörighet och operatörens pris innan du köper."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Πειραματικά δεδομένα ναύλου χειριστή, όχι δεσμευτική προσφορά. Οι επιλογές προϊόντων δεν είναι απαραίτητα η συνολική τιμή ταξιδιού. Ελέγξτε την καταλληλότητα και την τιμή του χειριστή πριν από την αγορά."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Kísérleti üzemeltetői viteldíjadatok, nem kötelező érvényű árajánlat. A terméklehetőségek nem feltétlenül jelentik az utazás teljes árát. Vásárlás előtt ellenőrizze a jogosultságot és az üzemeltetői árat."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Deneysel operatör ücreti verileri, bağlayıcı bir fiyat teklifi değil. Ürün seçeneklerinin mutlaka toplam yolculuk fiyatı olması gerekmez. Satın almadan önce uygunluğu ve operatörün fiyatını kontrol edin."
      }
     }
    }
@@ -7994,6 +8849,196 @@
      "stringUnit": {
       "state": "needs_review",
       "value": "Süresi doluyor"
+     }
+    }
+   }
+  },
+  "Fare estimate": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fare estimate"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Preisschätzung"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Estimation tarifaire"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Stima della tariffa"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "estimación de tarifa"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Estimativa de tarifa"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Tariefschatting"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Szacunkowa cena"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Оцінка вартості проїзду"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Estimarea tarifului"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Odhad jízdného"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Prisuppskattning"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Εκτίμηση ναύλου"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Viteldíjbecslés"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Ücret tahmini"
+     }
+    }
+   }
+  },
+  "Fare information": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fare information"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Tarifinformationen"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Informations tarifaires"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Informazioni sulle tariffe"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Información de tarifas"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Informações sobre tarifas"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Tariefinformatie"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Informacje o taryfach"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Інформація про вартість проїзду"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Informații despre tarife"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Informace o jízdném"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Prisinformation"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Πληροφορίες ναύλου"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Viteldíj információk"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Ücret bilgisi"
      }
     }
    }
@@ -8758,6 +9803,101 @@
     }
    }
   },
+  "Get off here": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Get off here"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Aussteigen"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Descendez ici"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Scendi qui"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Bájate aquí"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Saia daqui"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Ga hier weg"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Wyjdź stąd"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Злазь тут"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Coboara de aici"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Vypadni tady"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Gå av här"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Κατεβείτε εδώ"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Szállj le itt"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Buradan in"
+     }
+    }
+   }
+  },
   "Get off soon": {
    "extractionState": "manual",
    "localizations": {
@@ -9134,6 +10274,101 @@
      "stringUnit": {
       "state": "needs_review",
       "value": "Ev ve İş"
+     }
+    }
+   }
+  },
+  "In %lld min": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "In %lld min"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "In %lld Min."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Dans %lld min"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Tra %lld min"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "En %lld min"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Em %lld min"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Over %lld min"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Za %lld min"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Через %lld хв"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "În %lld min"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Za %lld min"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "I %lld min"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Σε %lld min"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "%lld perc múlva"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "%lld dakika olarak"
      }
     }
    }
@@ -10278,6 +11513,101 @@
     }
    }
   },
+  "Live": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Live"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Live"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "En direct"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Vivere"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Vivir"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Ao vivo"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Live"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Na żywo"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Жити"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Trăi"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Žít"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Bo"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Ζω"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Élő"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Canlı"
+     }
+    }
+   }
+  },
   "Live data": {
    "extractionState": "manual",
    "localizations": {
@@ -10559,6 +11889,101 @@
      "stringUnit": {
       "state": "needs_review",
       "value": "Canlı durum kullanılamıyor. Kaydedilen zamanlar gösteriliyor."
+     }
+    }
+   }
+  },
+  "Live tracking is active in the app. Lock screen updates may be unavailable.": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Live tracking is active in the app. Lock screen updates may be unavailable."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Live-Begleitung in der App aktiv. Sperrbildschirm-Updates sind möglicherweise nicht verfügbar."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Le suivi en direct est actif dans l'application. Les mises à jour de l'écran de verrouillage peuvent être indisponibles."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Nell'app è attivo il monitoraggio in tempo reale. Gli aggiornamenti della schermata di blocco potrebbero non essere disponibili."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "El seguimiento en vivo está activo en la aplicación. Es posible que las actualizaciones de la pantalla de bloqueo no estén disponibles."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "O rastreamento ao vivo está ativo no aplicativo. As atualizações da tela de bloqueio podem estar indisponíveis."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Live volgen is actief in de app. Updates voor het vergrendelscherm zijn mogelijk niet beschikbaar."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Śledzenie na żywo jest aktywne w aplikacji. Aktualizacje ekranu blokady mogą być niedostępne."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Живе відстеження активне в додатку. Оновлення екрана блокування можуть бути недоступні."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Urmărirea live este activă în aplicație. Este posibil ca actualizările ecranului de blocare să nu fie disponibile."
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "V aplikaci je aktivní živé sledování. Aktualizace zamykací obrazovky mohou být nedostupné."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Livespårning är aktiv i appen. Uppdateringar av låsskärmen kan vara otillgängliga."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Η ζωντανή παρακολούθηση είναι ενεργή στην εφαρμογή. Οι ενημερώσεις οθόνης κλειδώματος ενδέχεται να μην είναι διαθέσιμες."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Az élő követés aktív az alkalmazásban. Előfordulhat, hogy a lezárási képernyő frissítései nem érhetők el."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Uygulamada canlı takip aktif. Kilit ekranı güncellemeleri kullanılamayabilir."
      }
     }
    }
@@ -10943,6 +12368,101 @@
     }
    }
   },
+  "Major delays": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Major delays"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Erhebliche Verspätungen"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Retards importants"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Grandi ritardi"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Grandes retrasos"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Grandes atrasos"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Grote vertragingen"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Duże opóźnienia"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Великі затримки"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Întârzieri majore"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Velká zpoždění"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Stora förseningar"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Μεγάλες καθυστερήσεις"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Jelentős késések"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Büyük gecikmeler"
+     }
+    }
+   }
+  },
   "Map": {
    "extractionState": "manual",
    "localizations": {
@@ -11034,101 +12554,6 @@
      "stringUnit": {
       "state": "needs_review",
       "value": "Harita"
-     }
-    }
-   }
-  },
-  "Map data © OpenStreetMap contributors": {
-   "extractionState": "manual",
-   "localizations": {
-    "en": {
-     "stringUnit": {
-      "state": "translated",
-      "value": "Map data © OpenStreetMap contributors"
-     }
-    },
-    "de": {
-     "stringUnit": {
-      "state": "translated",
-      "value": "Kartendaten © OpenStreetMap-Mitwirkende"
-     }
-    },
-    "fr": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Données cartographiques © Contributeurs OpenStreetMap"
-     }
-    },
-    "it": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Dati della mappa © contributori di OpenStreetMap"
-     }
-    },
-    "es": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Datos del mapa © Colaboradores de OpenStreetMap"
-     }
-    },
-    "pt-PT": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Dados do mapa © contribuidores do OpenStreetMap"
-     }
-    },
-    "nl": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Kaartgegevens © OpenStreetMap-bijdragers"
-     }
-    },
-    "pl": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Dane mapy © współautorzy OpenStreetMap"
-     }
-    },
-    "uk": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Дані карти © учасники OpenStreetMap"
-     }
-    },
-    "ro": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Date despre hărți © colaboratori OpenStreetMap"
-     }
-    },
-    "cs": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Mapová data © Přispěvatelé OpenStreetMap"
-     }
-    },
-    "sv": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Kartdata © OpenStreetMap-bidragsgivare"
-     }
-    },
-    "el": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Δεδομένα χάρτη © Συνεισφέροντες OpenStreetMap"
-     }
-    },
-    "hu": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Térképadatok © OpenStreetMap közreműködők"
-     }
-    },
-    "tr": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Harita verileri © OpenStreetMap'e katkıda bulunanlar"
      }
     }
    }
@@ -12843,6 +14268,101 @@
     }
    }
   },
+  "No service": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "No service"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Betrieb unterbrochen"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Aucun service"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Nessun servizio"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Sin servicio"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Nenhum serviço"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Geen dienst"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Brak usługi"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Без обслуговування"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Niciun serviciu"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Žádná služba"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Ingen service"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Καμία υπηρεσία"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Nincs szolgáltatás"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Hizmet yok"
+     }
+    }
+   }
+  },
   "No stops": {
    "extractionState": "manual",
    "localizations": {
@@ -14173,6 +15693,196 @@
     }
    }
   },
+  "Operator details": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Operator details"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Details beim Betreiber"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Détails de l'opérateur"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Dettagli dell'operatore"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Detalles del operador"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Detalhes do operador"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Operatorgegevens"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Dane operatora"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Інформація про оператора"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Detalii operator"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Podrobnosti o operátorovi"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Operatörsuppgifter"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Στοιχεία χειριστή"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Üzemeltető adatai"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Operatör ayrıntıları"
+     }
+    }
+   }
+  },
+  "Pass": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Pass"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Zeitkarte"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Passer"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Passaggio"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Aprobar"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Passar"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Doorgang"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Przechodzić"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Пас"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Pasa"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Přihrávka"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Passera"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Πέρασμα"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Pass"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Geçmek"
+     }
+    }
+   }
+  },
   "Pass (valid for many trips)": {
    "extractionState": "manual",
    "localizations": {
@@ -14933,101 +16643,6 @@
     }
    }
   },
-  "Plans a route to %@": {
-   "extractionState": "manual",
-   "localizations": {
-    "en": {
-     "stringUnit": {
-      "state": "translated",
-      "value": "Plans a route to %@"
-     }
-    },
-    "de": {
-     "stringUnit": {
-      "state": "translated",
-      "value": "Plant eine Route nach %@"
-     }
-    },
-    "fr": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Planifie un itinéraire vers %@"
-     }
-    },
-    "it": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Pianifica un percorso verso %@"
-     }
-    },
-    "es": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Planea una ruta a %@"
-     }
-    },
-    "pt-PT": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Planeja uma rota para %@"
-     }
-    },
-    "nl": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Plan een route naar %@"
-     }
-    },
-    "pl": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Planuje trasę do %@"
-     }
-    },
-    "uk": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Планує маршрут до %@"
-     }
-    },
-    "ro": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Planifică o rută către %@"
-     }
-    },
-    "cs": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Plánuje trasu do %@"
-     }
-    },
-    "sv": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Planerar en rutt till %@"
-     }
-    },
-    "el": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Σχεδιάζει μια διαδρομή προς %@"
-     }
-    },
-    "hu": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Útvonalat tervez ide: %@"
-     }
-    },
-    "tr": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "%@'a rota planlar"
-     }
-    }
-   }
-  },
   "Platform %@": {
    "extractionState": "manual",
    "localizations": {
@@ -15499,6 +17114,196 @@
      "stringUnit": {
       "state": "needs_review",
       "value": "Hızlı"
+     }
+    }
+   }
+  },
+  "Rail replacement bus": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Rail replacement bus"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Schienenersatzverkehr"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Autobus de remplacement ferroviaire"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Autobus sostitutivo della ferrovia"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Autobús de sustitución ferroviaria"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Ônibus de substituição ferroviária"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Spoorvervangende bus"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Autobus zastępczy kolei"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Рейковий автобус на заміну"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Autobuz de schimb de șine"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Náhradní železniční autobus"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Rälsbytesbuss"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Λεωφορείο αντικατάστασης σιδηροδρόμου"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Sínpótló busz"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Ray değiştirme otobüsü"
+     }
+    }
+   }
+  },
+  "Recently searched": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Recently searched"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Zuletzt gesucht"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Recherche récente"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Cercato di recente"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Buscado recientemente"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Pesquisado recentemente"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Recent gezocht"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Ostatnio wyszukiwane"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Нещодавно шукав"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Căutat recent"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Nedávno hledané"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Sökte nyligen"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Πρόσφατη αναζήτηση"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Nemrég keresett"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Son arananlar"
      }
     }
    }
@@ -16073,6 +17878,101 @@
     }
    }
   },
+  "Replacement service information": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Replacement service information"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Hinweise zum Ersatzverkehr"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Informations sur le service de remplacement"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Informazioni sul servizio di sostituzione"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Información del servicio de reemplazo"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Informações sobre serviço de substituição"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Vervangingsservice-informatie"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Informacje o usłudze wymiany"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Інформація про службу заміни"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Informații despre serviciul de înlocuire"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Informace o náhradní službě"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Information om ersättningsservice"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Πληροφορίες υπηρεσίας αντικατάστασης"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Csereszolgáltatási információk"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Değiştirme hizmeti bilgileri"
+     }
+    }
+   }
+  },
   "Route": {
    "extractionState": "manual",
    "localizations": {
@@ -16639,101 +18539,6 @@
      "stringUnit": {
       "state": "needs_review",
       "value": "Bu operatöre sahip rotalar, operatörün web sitesi yerine \"Uygulamanızı açın\" ifadesini gösterir."
-     }
-    }
-   }
-  },
-  "Routing and timetables: Transitous and its data sources": {
-   "extractionState": "manual",
-   "localizations": {
-    "en": {
-     "stringUnit": {
-      "state": "translated",
-      "value": "Routing and timetables: Transitous and its data sources"
-     }
-    },
-    "de": {
-     "stringUnit": {
-      "state": "translated",
-      "value": "Routen und Fahrpläne: Transitous und seine Datenquellen"
-     }
-    },
-    "fr": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Itinéraires et horaires : Transitous et ses sources de données"
-     }
-    },
-    "it": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Rotte e orari: transitorio e le sue fonti di dati"
-     }
-    },
-    "es": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Rutas y horarios: Transitous y sus fuentes de datos"
-     }
-    },
-    "pt-PT": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Roteamento e horários: Transitous e suas fontes de dados"
-     }
-    },
-    "nl": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Routing en dienstregelingen: Transitous en zijn gegevensbronnen"
-     }
-    },
-    "pl": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Trasy i rozkłady jazdy: Transitous i jego źródła danych"
-     }
-    },
-    "uk": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Маршрути та розклади: Transitous та його джерела даних"
-     }
-    },
-    "ro": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Ruta și orare: Tranzit și sursele sale de date"
-     }
-    },
-    "cs": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Směrování a jízdní řády: Transitous a jeho datové zdroje"
-     }
-    },
-    "sv": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Rutning och tidtabeller: Transitous och dess datakällor"
-     }
-    },
-    "el": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Δρομολόγηση και χρονοδιαγράμματα: Μεταβατικό και οι πηγές δεδομένων του"
-     }
-    },
-    "hu": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Útvonalak és menetrendek: Transitous és adatforrásai"
-     }
-    },
-    "tr": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Rota ve tarifeler: Transitous ve veri kaynakları"
      }
     }
    }
@@ -17878,6 +19683,291 @@
     }
    }
   },
+  "Service alert": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Service alert"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Störungsmeldung"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Alerte service"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Avviso di servizio"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Alerta de servicio"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Alerta de serviço"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Servicewaarschuwing"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Alarm serwisowy"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Сервісна оповіщення"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Alerta de service"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Servisní upozornění"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Servicevarning"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Ειδοποίηση σέρβις"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Szerviz riasztás"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Servis uyarısı"
+     }
+    }
+   }
+  },
+  "Service changes": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Service changes"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Betriebsänderungen"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Modifications des services"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Modifiche al servizio"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Cambios de servicio"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Mudanças de serviço"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Dienstwijzigingen"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Zmiany w serwisie"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Сервісні зміни"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Schimbări de servicii"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Servisní změny"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Tjänsteförändringar"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Αλλαγές υπηρεσιών"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Szolgáltatási változások"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Hizmet değişiklikleri"
+     }
+    }
+   }
+  },
+  "Service changes on this route": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Service changes on this route"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Betriebsänderungen auf dieser Route"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Modifications du service sur cet itinéraire"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Modifiche al servizio su questa tratta"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Cambios de servicio en esta ruta"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Mudanças de serviço nesta rota"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Dienstwijzigingen op deze route"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Zmiany usług na tej trasie"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Зміни в обслуговуванні на цьому маршруті"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Schimbări de serviciu pe această rută"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Změny služby na této trase"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Serviceförändringar på denna rutt"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Η υπηρεσία αλλάζει σε αυτή τη διαδρομή"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Változások a szolgáltatásban ezen az útvonalon"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Bu rotadaki servis değişiklikleri"
+     }
+    }
+   }
+  },
   "Set %@": {
    "extractionState": "manual",
    "localizations": {
@@ -18254,6 +20344,101 @@
      "stringUnit": {
       "state": "needs_review",
       "value": "Biletlerimi göster (%lld)"
+     }
+    }
+   }
+  },
+  "Show original": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Show original"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Original anzeigen"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Afficher l'original"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Mostra originale"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Mostrar original"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Mostrar original"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Origineel tonen"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Pokaż oryginał"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Показати оригінал"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Afișați originalul"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Zobrazit originál"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Visa original"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Εμφάνιση πρωτότυπου"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Eredeti megjelenítése"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Orijinali göster"
      }
     }
    }
@@ -18828,97 +21013,97 @@
     }
    }
   },
-  "Source code and feedback": {
+  "Start trip": {
    "extractionState": "manual",
    "localizations": {
     "en": {
      "stringUnit": {
       "state": "translated",
-      "value": "Source code and feedback"
+      "value": "Start trip"
      }
     },
     "de": {
      "stringUnit": {
       "state": "translated",
-      "value": "Quellcode und Feedback"
+      "value": "Fahrt starten"
      }
     },
     "fr": {
      "stringUnit": {
       "state": "needs_review",
-      "value": "Code source et commentaires"
+      "value": "Commencer le voyage"
      }
     },
     "it": {
      "stringUnit": {
       "state": "needs_review",
-      "value": "Codice sorgente e feedback"
+      "value": "Inizio viaggio"
      }
     },
     "es": {
      "stringUnit": {
       "state": "needs_review",
-      "value": "Código fuente y comentarios"
+      "value": "Iniciar viaje"
      }
     },
     "pt-PT": {
      "stringUnit": {
       "state": "needs_review",
-      "value": "Código-fonte e feedback"
+      "value": "Iniciar viagem"
      }
     },
     "nl": {
      "stringUnit": {
       "state": "needs_review",
-      "value": "Broncode en feedback"
+      "value": "Begin reis"
      }
     },
     "pl": {
      "stringUnit": {
       "state": "needs_review",
-      "value": "Kod źródłowy i informacje zwrotne"
+      "value": "Rozpocznij podróż"
      }
     },
     "uk": {
      "stringUnit": {
       "state": "needs_review",
-      "value": "Вихідний код і відгуки"
+      "value": "Почати подорож"
      }
     },
     "ro": {
      "stringUnit": {
       "state": "needs_review",
-      "value": "Cod sursă și feedback"
+      "value": "Începeți călătoria"
      }
     },
     "cs": {
      "stringUnit": {
       "state": "needs_review",
-      "value": "Zdrojový kód a zpětná vazba"
+      "value": "Začít výlet"
      }
     },
     "sv": {
      "stringUnit": {
       "state": "needs_review",
-      "value": "Källkod och feedback"
+      "value": "Starta resan"
      }
     },
     "el": {
      "stringUnit": {
       "state": "needs_review",
-      "value": "Πηγαίος κώδικας και σχόλια"
+      "value": "Ξεκινήστε το ταξίδι"
      }
     },
     "hu": {
      "stringUnit": {
       "state": "needs_review",
-      "value": "Forráskód és visszajelzés"
+      "value": "Indítsa el az utazást"
      }
     },
     "tr": {
      "stringUnit": {
       "state": "needs_review",
-      "value": "Kaynak kodu ve geri bildirim"
+      "value": "Geziyi başlat"
      }
     }
    }
@@ -19394,6 +21579,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "Duraklar"
+     }
+    }
+   }
+  },
+  "Stored copy": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Stored copy"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Gespeicherte Kopie"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Copie stockée"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Copia archiviata"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Copia almacenada"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Cópia armazenada"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Opgeslagen kopie"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Przechowywana kopia"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Збережена копія"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Copie stocată"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Uložená kopie"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Lagrad kopia"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Αποθηκευμένο αντίγραφο"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Tárolt másolat"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Saklanan kopya"
      }
     }
    }
@@ -20348,6 +22628,101 @@
     }
    }
   },
+  "Ticket": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ticket"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ticket"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Billet"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Biglietto"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Boleto"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Bilhete"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Ticket"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Bilet"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Квиток"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Bilet"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Lístek"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Biljett"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Εισιτήριο"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Jegy"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Bilet"
+     }
+    }
+   }
+  },
   "Ticket %@": {
    "extractionState": "manual",
    "localizations": {
@@ -20629,6 +23004,196 @@
      "stringUnit": {
       "state": "needs_review",
       "value": "Operatör başına bilet uygulamaları"
+     }
+    }
+   }
+  },
+  "Ticket could not be saved": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ticket could not be saved"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ticket nicht gespeichert"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Le billet n'a pas pu être enregistré"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Impossibile salvare il biglietto"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "No se pudo guardar el billete"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Não foi possível salvar o ingresso"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Ticket kon niet worden opgeslagen"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Nie udało się zapisać biletu"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Не вдалося зберегти квиток"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Biletul nu a putut fi salvat"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Lístek se nepodařilo uložit"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Biljetten kunde inte sparas"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Δεν ήταν δυνατή η αποθήκευση του εισιτηρίου"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "A jegyet nem sikerült elmenteni"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Bilet kaydedilemedi"
+     }
+    }
+   }
+  },
+  "Ticket image unavailable": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ticket image unavailable"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ticketbild nicht verfügbar"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Image du billet indisponible"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Immagine del biglietto non disponibile"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Imagen de entrada no disponible"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Imagem do ingresso indisponível"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Ticketafbeelding niet beschikbaar"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Obraz biletu jest niedostępny"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Зображення квитка недоступне"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Imaginea biletului nu este disponibilă"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Obrázek vstupenky není k dispozici"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Biljettbilden är inte tillgänglig"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Η εικόνα του εισιτηρίου δεν είναι διαθέσιμη"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "A jegy képe nem elérhető"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Bilet resmi kullanılamıyor"
      }
     }
    }
@@ -20918,6 +23483,101 @@
     }
    }
   },
+  "Timetable": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Timetable"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fahrplan"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Calendrier"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Orario"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Calendario"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Horário"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Tijdschema"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Plan lekcji"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "розклад"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Orarul"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Jízdní řád"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Tidtabell"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Χρονοδιάγραμμα"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Menetrend"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Zaman çizelgesi"
+     }
+    }
+   }
+  },
   "To": {
    "extractionState": "manual",
    "localizations": {
@@ -21104,6 +23764,196 @@
      "stringUnit": {
       "state": "needs_review",
       "value": "Widget'a dokunup basılı tutun, ardından Widget'ı Düzenle'ye dokunun."
+     }
+    }
+   }
+  },
+  "Towards": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Towards"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Richtung"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Vers"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "In direzione"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Hacia"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Em direção a"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Richting"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "W kierunku"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "назустріч"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Către"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "K"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Mot"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Προς"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Felé"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Karşı"
+     }
+    }
+   }
+  },
+  "Towards %@": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Towards %@"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Richtung %@"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Vers %@"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "In direzione %@"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Hacia %@"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Em direção a %@"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Richting %@"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "W kierunku %@"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "До %@"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Spre %@"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Směrem k %@"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Mot %@"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Προς %@"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "%@ felé"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Karşı %@"
      }
     }
    }
@@ -21389,6 +24239,101 @@
      "stringUnit": {
       "state": "needs_review",
       "value": "Seyahat"
+     }
+    }
+   }
+  },
+  "Trip ended": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Trip ended"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fahrt beendet"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Voyage terminé"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Viaggio terminato"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "viaje finalizado"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "A viagem terminou"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Reis beëindigd"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Wycieczka dobiegła końca"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Подорож закінчилася"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Călătoria sa încheiat"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Výlet skončil"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Resan tog slut"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Το ταξίδι τελείωσε"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Az utazás véget ért"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Gezi sona erdi"
      }
     }
    }
@@ -22149,101 +25094,6 @@
      "stringUnit": {
       "state": "needs_review",
       "value": "%@ tarihine kadar geçerlidir"
-     }
-    }
-   }
-  },
-  "Version": {
-   "extractionState": "manual",
-   "localizations": {
-    "en": {
-     "stringUnit": {
-      "state": "translated",
-      "value": "Version"
-     }
-    },
-    "de": {
-     "stringUnit": {
-      "state": "translated",
-      "value": "Version"
-     }
-    },
-    "fr": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Version"
-     }
-    },
-    "it": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Versione"
-     }
-    },
-    "es": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Versión"
-     }
-    },
-    "pt-PT": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Versão"
-     }
-    },
-    "nl": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Versie"
-     }
-    },
-    "pl": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Wersja"
-     }
-    },
-    "uk": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Версія"
-     }
-    },
-    "ro": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Versiune"
-     }
-    },
-    "cs": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Verze"
-     }
-    },
-    "sv": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Version"
-     }
-    },
-    "el": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Εκδοχή"
-     }
-    },
-    "hu": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Változat"
-     }
-    },
-    "tr": {
-     "stringUnit": {
-      "state": "needs_review",
-      "value": "Sürüm"
      }
     }
    }

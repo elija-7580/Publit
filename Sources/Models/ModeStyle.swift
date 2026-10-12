@@ -10,16 +10,24 @@ protocol RouteStyled {
 }
 
 extension RouteStyled {
+    /// The compact, operator-defined line identifier. Never use a destination as a line name.
     var lineName: String {
-        let name = (displayName?.isEmpty == false ? displayName : routeShortName) ?? ""
-        return name.isEmpty ? ModeStyle.label(mode) : name
+        TransitLabels.clean(routeShortName) ?? TransitLabels.clean(displayName) ?? ModeStyle.label(mode)
     }
 
-    /// Background and text colour as hex, with the text colour corrected for legibility.
+    /// Additional service identity (e.g. ICE 615), retained separately from the line badge.
+    var serviceDetail: String? {
+        guard let display = TransitLabels.clean(displayName),
+              TransitLabels.identity(display) != TransitLabels.identity(lineName) else { return nil }
+        return display
+    }
+
+    /// A missing route colour must not masquerade as an official U-Bahn line colour.
     var lineColors: LineColors.Pair {
         LineColors.resolve(routeColor: routeColor, routeTextColor: routeTextColor,
-                           fallback: ModeStyle.defaultHex(mode))
+                           fallback: ModeStyle.isTransit(mode) ? "4D4D59" : ModeStyle.defaultHex(mode))
     }
+
 }
 
 enum ModeStyle {
@@ -76,5 +84,18 @@ enum ModeStyle {
         case "WALK", "BIKE", "RENTAL", "CAR": return "8E8E93"
         default: return "4D4D59"
         }
+    }
+}
+
+/// A headsign describes the vehicle's actual advertised direction, not the passenger's alighting stop.
+enum TransitLabels {
+    static func clean(_ value: String?) -> String? {
+        guard let value else { return nil }
+        let clean = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        return clean.isEmpty ? nil : clean
+    }
+
+    static func identity(_ value: String) -> String {
+        value.uppercased().filter { $0.isLetter || $0.isNumber }
     }
 }

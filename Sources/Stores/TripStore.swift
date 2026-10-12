@@ -28,10 +28,39 @@ struct SavedTrip: Codable, Identifiable, Hashable, Sendable {
 final class TripStore {
     private(set) var trips: [SavedTrip] = []
     @ObservationIgnored private let file: JSONFile<[SavedTrip]>
+    @ObservationIgnored private let activeFile: JSONFile<String>
+    private(set) var activeTripId: String?
 
     init(directory: URL? = nil) {
         file = JSONFile(name: "trips.json", directory: directory)
+        activeFile = JSONFile(name: "active-trip.json", directory: directory)
         trips = file.load() ?? []
+        let active = activeFile.load() ?? ""
+        activeTripId = trips.contains { $0.id == active } ? active : nil
+    }
+
+    var activeTrip: SavedTrip? {
+        guard let id = activeTripId, let trip = trip(id), trip.endTime.addingTimeInterval(15 * 60) >= .now else { return nil }
+        return trip
+    }
+
+    /// Only one manually started trip is active at a time. Returns the previous ID.
+    @discardableResult
+    func start(_ id: String) -> String? {
+        guard trips.contains(where: { $0.id == id }) else { return nil }
+        let previous = activeTripId
+        if let previous, previous != id { setFollowLive(previous, false) }
+        activeTripId = id
+        setFollowLive(id, true)
+        activeFile.saveInBackground(id)
+        return previous
+    }
+
+    func stop(_ id: String) {
+        guard activeTripId == id else { return }
+        activeTripId = nil
+        setFollowLive(id, false)
+        activeFile.saveInBackground("")
     }
 
     /// Not yet arrived, soonest first.
@@ -70,6 +99,7 @@ final class TripStore {
     }
 
     func remove(_ id: String) {
+        if activeTripId == id { stop(id) }
         trips.removeAll { $0.id == id }
         persist()
     }
@@ -88,5 +118,5 @@ final class TripStore {
         return legs.isEmpty ? "walk@\(Int(it.startTime.timeIntervalSince1970))@\(it.legs.last?.to.name ?? "")" : legs.joined(separator: ">")
     }
 
-    private func persist() { file.save(trips) }
+    private func persist() { file.saveInBackground(trips) }
 }

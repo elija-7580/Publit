@@ -11,12 +11,17 @@ struct DeparturesWidgetIntent: WidgetConfigurationIntent {
     var stop: StopEntity?
 }
 
-struct WidgetDeparture: Identifiable, Hashable {
+struct WidgetDeparture: Identifiable, Hashable, RouteStyled {
     let id: String
     let lineName: String
     let mode: String
     let background: String
     let foreground: String
+    let service: String?
+    var routeShortName: String? { lineName }
+    var displayName: String? { service }
+    var routeColor: String? { background }
+    var routeTextColor: String? { foreground }
     let headsign: String
     let time: Date
     let delayMinutes: Int
@@ -30,6 +35,7 @@ struct WidgetDeparture: Identifiable, Hashable {
         mode = st.mode
         background = st.lineColors.background
         foreground = st.lineColors.text
+        service = st.serviceDetail
         headsign = st.headsign
         time = st.departureTime
         delayMinutes = st.delayMinutes
@@ -108,9 +114,9 @@ struct DeparturesWidgetView: View {
 
     private var rows: Int {
         switch family {
-        case .systemSmall: return 3
-        case .systemMedium: return 4
-        case .systemLarge: return 9
+        case .systemSmall: return 2
+        case .systemMedium: return 2
+        case .systemLarge: return 5
         default: return 2
         }
     }
@@ -146,36 +152,31 @@ struct DeparturesWidgetView: View {
     }
 
     private func row(_ d: WidgetDeparture) -> some View {
-        HStack(spacing: 6) {
-            WidgetLineChip(d: d)
-            if family != .systemSmall {
-                Text(d.headsign).font(.subheadline).lineLimit(1)
+        VStack(alignment: .leading, spacing: 3) {
+            HStack(spacing: 6) {
+                LineBadge(d, compact: true)
+                Spacer(minLength: 2)
+                Text(Fmt.time(d.time, tz: d.tz))
+                    .font(.caption.weight(.semibold).monospacedDigit())
+                    .strikethrough(d.cancelled)
+                    .foregroundStyle(d.cancelled ? Color.danger : Color.primary)
+                    .lineLimit(1).fixedSize()
             }
-            Spacer(minLength: 4)
-            minutes(d)
-                .font(.subheadline.weight(.semibold).monospacedDigit())
-                .foregroundStyle(d.cancelled ? Color.secondary : d.realTime && entry.savedDataFrom == nil ? Color.live : Color.primary)
-                .strikethrough(d.cancelled)
-                .lineLimit(1)
+            DirectionLabel(direction: d.headsign, font: .caption)
+                .lineLimit(2)
         }
     }
 
-    @ViewBuilder
-    private func minutes(_ d: WidgetDeparture) -> some View {
-        let m = Int(floor(d.time.timeIntervalSince(entry.date) / 60))
-        if m <= 0 { Text("now") } else if m < 60 { Text("\(m) min") } else { Text(Fmt.time(d.time, tz: d.tz)) }
-    }
-
     private var compact: some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: 3) {
             Text(entry.stop?.name ?? "").font(.caption.weight(.semibold)).lineLimit(1)
-            ForEach(entry.upcoming.prefix(2)) { d in
+            if let d = entry.upcoming.first {
                 HStack(spacing: 4) {
-                    Text(d.lineName).font(.caption.weight(.bold)).lineLimit(1)
-                    Text(d.headsign).font(.caption).lineLimit(1)
-                    Spacer(minLength: 2)
-                    minutes(d).font(.caption.monospacedDigit())
+                    Text(verbatim: d.lineName).font(.caption.weight(.bold))
+                    Text(Fmt.time(d.time, tz: d.tz)).font(.caption.monospacedDigit())
+                        .strikethrough(d.cancelled)
                 }
+                DirectionLabel(direction: d.headsign, font: .caption2).lineLimit(1)
             }
         }
     }
@@ -187,19 +188,6 @@ struct DeparturesWidgetView: View {
             Text(detail).font(.caption).foregroundStyle(.secondary).lineLimit(3)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-    }
-}
-
-private struct WidgetLineChip: View {
-    let d: WidgetDeparture
-    var body: some View {
-        Text(d.lineName)
-            .font(.caption.weight(.bold))
-            .lineLimit(1)
-            .padding(.horizontal, 5).padding(.vertical, 2)
-            .frame(minWidth: 30)
-            .background(Color(hex: d.background) ?? .gray, in: RoundedRectangle(cornerRadius: 4, style: .continuous))
-            .foregroundStyle(Color(hex: d.foreground) ?? .white)
     }
 }
 
