@@ -224,3 +224,64 @@ final class PlanModelTests: XCTestCase {
         XCTAssertEqual(app.plan.from.title, "Marienplatz")
     }
 }
+
+final class TripProgressTests: XCTestCase {
+    private func stops() throws -> [Place] {
+        let it = try TransitousClient.makeDecoder().decode(Itinerary.self, from: Fixtures.data("trip_s3"))
+        let leg = try XCTUnwrap(it.legs.first)
+        XCTAssertEqual(leg.allStops.count, (leg.intermediateStops?.count ?? 0) + 2)
+        return leg.allStops
+    }
+
+    func testBeforeDuringAndAfter() throws {
+        let s = try stops()
+        let start = try XCTUnwrap(s.first?.departure)
+        let end = try XCTUnwrap(s.last?.arrival)
+        XCTAssertEqual(TripProgress.at(start.addingTimeInterval(-60), stops: s), .notStarted)
+        XCTAssertEqual(TripProgress.at(end.addingTimeInterval(60), stops: s), .finished)
+        let mid = TripProgress.at(start.addingTimeInterval(end.timeIntervalSince(start) / 2), stops: s)
+        switch mid {
+        case .between(let i, let f):
+            XCTAssertTrue((0..<(s.count - 1)).contains(i))
+            XCTAssertTrue((0...1).contains(f))
+        case .atStop(let i):
+            XCTAssertTrue((1..<(s.count - 1)).contains(i))
+        default: XCTFail("expected the vehicle on the way, got \(mid)")
+        }
+    }
+
+    func testPositionLiesBetweenNeighbouringStops() throws {
+        let s = try stops()
+        let d0 = try XCTUnwrap(s[0].departure), a1 = try XCTUnwrap(s[1].arrival ?? s[1].departure)
+        let p = TripProgress.at(d0.addingTimeInterval(a1.timeIntervalSince(d0) / 2), stops: s)
+        let pos = try XCTUnwrap(TripProgress.position(p, stops: s))
+        XCTAssertEqual(pos.lat, (s[0].lat + s[1].lat) / 2, accuracy: abs(s[0].lat - s[1].lat) / 2 + 1e-6)
+        XCTAssertEqual(TripProgress.nextStopIndex(p, count: s.count), 1)
+    }
+
+    func testEmptyTrip() {
+        XCTAssertEqual(TripProgress.at(Date(), stops: []), .notStarted)
+        XCTAssertNil(TripProgress.position(.finished, stops: []))
+    }
+}
+
+@MainActor
+final class SavedLineTests: XCTestCase {
+    func testSaveLineAtStopAndMatchDepartures() async throws {
+        let res = try TransitousClient.makeDecoder()
+            .decode(StopTimesResponse.self, from: Fixtures.data("stoptimes_marienplatz"))
+        let u3 = try XCTUnwrap(res.stopTimes.first { $0.lineName == "U3" })
+        let line = SavedLine(stopTime: u3, stopId: "de-DELFI_de:09162:2", stopName: "Marienplatz",
+                             at: LatLon(lat: 48.137, lon: 11.575))
+        let matching = res.stopTimes.filter(line.matches)
+        XCTAssertFalse(matching.isEmpty)
+        XCTAssertTrue(matching.allSatisfy { $0.lineName == "U3" })
+        XCTAssertEqual(line.lineColors.background, "EC6725")
+
+        let store = FavoritesStore(defaults: UserDefaults(suiteName: "publit-tests-\(UUID().uuidString)")!)
+        store.toggle(line)
+        XCTAssertTrue(store.containsLine(line.id))
+        store.toggle(line)
+        XCTAssertTrue(store.lines.isEmpty)
+    }
+}

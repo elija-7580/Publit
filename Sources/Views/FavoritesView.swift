@@ -33,10 +33,25 @@ struct FavoritesView: View {
                 }
             }
 
-            if favorites.stops.isEmpty && favorites.places.isEmpty {
+            if !favorites.lines.isEmpty {
+                Section("Lines") {
+                    ForEach(favorites.lines) { line in
+                        NavigationLink {
+                            LineDeparturesView(line: line)
+                        } label: {
+                            HStack(spacing: 10) {
+                                LineBadge(line)
+                                Text("at \(line.stopName)").lineLimit(1)
+                            }
+                        }
+                    }
+                    .onDelete { idx in favorites.removeLines(idx.map { favorites.lines[$0].id }) }
+                }
+            }
+            if favorites.stops.isEmpty && favorites.places.isEmpty && favorites.lines.isEmpty {
                 Section {
                     ContentUnavailableView("Nothing else saved yet", systemImage: "star",
-                                           description: Text("Save stops from their departure board, or add places with +."))
+                                           description: Text("Save stops from their departure board, lines from a trip, or add places with +."))
                 }
             }
             if !favorites.stops.isEmpty {

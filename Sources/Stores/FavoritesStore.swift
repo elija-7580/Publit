@@ -38,11 +38,50 @@ struct SavedPlace: Codable, Hashable, Identifiable {
     }
 }
 
+/// A saved line at one stop, e.g. "U6 at Marienplatz". Shows that line's next departures there.
+struct SavedLine: Codable, Hashable, Identifiable, RouteStyled {
+    var id: String { "\(routeKey)@\(stopId)" }
+    var routeKey: String
+    var mode: String
+    var routeShortName: String?
+    var displayName: String?
+    var routeColor: String?
+    var routeTextColor: String?
+    var stopId: String
+    var stopName: String
+    var lat: Double
+    var lon: Double
+
+    var coordinate: LatLon { LatLon(lat: lat, lon: lon) }
+
+    init(stopTime st: StopTime, stopId: String, stopName: String, at coordinate: LatLon) {
+        routeKey = SavedLine.key(st)
+        mode = st.mode
+        routeShortName = st.routeShortName
+        displayName = st.displayName
+        routeColor = st.routeColor
+        routeTextColor = st.routeTextColor
+        self.stopId = stopId
+        self.stopName = stopName
+        lat = coordinate.lat
+        lon = coordinate.lon
+    }
+
+    /// Route identity: the feed's route ID when present, else agency and line name.
+    static func key(_ st: StopTime) -> String {
+        st.routeId ?? "\(st.agencyName ?? "")|\(st.lineName)"
+    }
+
+    func matches(_ st: StopTime) -> Bool { SavedLine.key(st) == routeKey }
+}
+
 @MainActor
 @Observable
 final class FavoritesStore {
     private(set) var items: [SavedPlace] = []
+    private(set) var lines: [SavedLine] = []
     private let key = "publit.favorites.v1"
+    private let linesKey = "publit.lines.v1"
     private let defaults: UserDefaults
 
     init(defaults: UserDefaults = .standard) {
@@ -51,6 +90,22 @@ final class FavoritesStore {
            let decoded = try? JSONDecoder().decode([SavedPlace].self, from: data) {
             items = decoded
         }
+        if let data = defaults.data(forKey: linesKey),
+           let decoded = try? JSONDecoder().decode([SavedLine].self, from: data) {
+            lines = decoded
+        }
+    }
+
+    func containsLine(_ id: String) -> Bool { lines.contains { $0.id == id } }
+
+    func toggle(_ line: SavedLine) {
+        if containsLine(line.id) { lines.removeAll { $0.id == line.id } } else { lines.append(line) }
+        if let data = try? JSONEncoder().encode(lines) { defaults.set(data, forKey: linesKey) }
+    }
+
+    func removeLines(_ ids: [String]) {
+        lines.removeAll { ids.contains($0.id) }
+        if let data = try? JSONEncoder().encode(lines) { defaults.set(data, forKey: linesKey) }
     }
 
     var stops: [SavedPlace] { items.filter { $0.isStop && $0.role == nil } }

@@ -72,6 +72,7 @@ struct Leg: Decodable, Sendable, RouteStyled {
     let routeShortName: String?
     let displayName: String?
     let agencyName: String?
+    let routeId: String?
     let tripId: String?
     let cancelled: Bool?
     let intermediateStops: [Place]?
@@ -80,6 +81,8 @@ struct Leg: Decodable, Sendable, RouteStyled {
 
     var isTransit: Bool { ModeStyle.isTransit(mode) }
     var delayMinutes: Int { Int((startTime.timeIntervalSince(scheduledStartTime) / 60).rounded()) }
+    /// Boarding stop, every stop in between, and the alighting stop.
+    var allStops: [Place] { [from] + (intermediateStops ?? []) + [to] }
 }
 
 struct Itinerary: Decodable, Identifiable, Sendable {
@@ -109,6 +112,7 @@ struct StopTime: Decodable, Identifiable, Sendable, RouteStyled {
     let realTime: Bool
     let headsign: String
     let agencyName: String?
+    let routeId: String?
     let tripId: String
     let routeShortName: String?
     let displayName: String?

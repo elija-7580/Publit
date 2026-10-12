@@ -9,6 +9,7 @@ let core = [
     "Models/TransitModels.swift",
     "Models/ModeStyle.swift",
     "Models/TransferRisk.swift",
+    "Models/TripProgress.swift",
     "Util/Polyline.swift",
     "Util/LineColors.swift",
     "Util/Geo.swift",

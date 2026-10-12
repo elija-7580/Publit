@@ -85,6 +85,11 @@ final class TransitousClient: @unchecked Sendable {
         return try await get("/api/v6/stoptimes", q)
     }
 
+    /// The whole trip of one vehicle, with all stops and real-time times.
+    func trip(id: String) async throws -> Itinerary {
+        try await get("/api/v6/trip", [URLQueryItem(name: "tripId", value: id)])
+    }
+
     // MARK: Transport
 
     private func get<T: Decodable>(_ path: String, _ query: [URLQueryItem]) async throws -> T {

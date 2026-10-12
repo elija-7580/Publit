@@ -32,7 +32,12 @@ struct NearbyView: View {
 
             ForEach(groups) { group in
                 Section {
-                    ForEach(group.departures.prefix(5)) { DepartureRow(stopTime: $0) }
+                    ForEach(group.departures.prefix(5)) { st in
+                        NavigationLink {
+                            TripView(stopTime: st, stationId: group.id, stationName: group.name,
+                                     stationCoordinate: group.coordinate)
+                        } label: { DepartureRow(stopTime: st) }
+                    }
                     NavigationLink {
                         StopDeparturesView(stopId: group.id, name: group.name, coordinate: group.coordinate)
                     } label: {
@@ -121,7 +126,11 @@ struct StopDeparturesView: View {
                 } else if departures.isEmpty {
                     Text("No upcoming departures.").foregroundStyle(.secondary)
                 }
-                ForEach(departures) { DepartureRow(stopTime: $0) }
+                ForEach(departures) { st in
+                    NavigationLink {
+                        TripView(stopTime: st, stationId: stopId, stationName: name, stationCoordinate: coordinate)
+                    } label: { DepartureRow(stopTime: st) }
+                }
             }
             Section { AttributionFooter() }
         }

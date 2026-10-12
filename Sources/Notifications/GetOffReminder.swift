@@ -24,7 +24,7 @@ enum GetOffReminder {
         content.title = "Get off soon"
         content.body = "\(leg.lineName) reaches \(leg.to.name) at \(Fmt.time(leg.endTime, tz: leg.to.tz))."
         content.sound = .default
-        content.interruptionLevel = .timeSensitive
+        content.interruptionLevel = .active
 
         let comps = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: fireDate)
         let request = UNNotificationRequest(identifier: identifier(for: leg), content: content,
