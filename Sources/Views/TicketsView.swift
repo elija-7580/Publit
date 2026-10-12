@@ -57,6 +57,8 @@ struct AddTicketView: View {
     @State private var kind: Ticket.Kind
     @State private var photo: PhotosPickerItem?
     @State private var imageData: Data?
+    @State private var imagePreview: UIImage?
+    @State private var photoLoadTask: Task<Void, Never>?
     @State private var appLink = ""
     @State private var hasExpiry = false
     @State private var isSaving = false
@@ -84,8 +86,8 @@ struct AddTicketView: View {
                     PhotosPicker(selection: $photo, matching: .images) {
                         Label(imageData == nil ? L10n.t("Choose screenshot") : L10n.t("Replace screenshot"), systemImage: "photo.on.rectangle")
                     }
-                    if let imageData, let img = UIImage(data: imageData) {
-                        Image(uiImage: img).resizable().scaledToFit().frame(maxHeight: 220)
+                    if let imagePreview {
+                        Image(uiImage: imagePreview).resizable().scaledToFit().frame(maxHeight: 220)
                             .frame(maxWidth: .infinity)
                     }
                 } header: {
@@ -120,7 +122,7 @@ struct AddTicketView: View {
             .navigationTitle("Add ticket")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() }.disabled(isSaving) }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
                         isSaving = true
@@ -137,11 +139,18 @@ struct AddTicketView: View {
                 }
             }
             .interactiveDismissDisabled(isSaving)
+            .onDisappear { photoLoadTask?.cancel() }
             .onChange(of: photo) { _, item in
-                Task {
-                    guard let item, let data = try? await item.loadTransferable(type: Data.self) else { return }
-                    // Preserve the original file: JPEG recompression can damage QR/barcode detail.
-                    if UIImage(data: data) != nil { imageData = data }
+                photoLoadTask?.cancel()
+                imageData = nil
+                imagePreview = nil
+                photoLoadTask = Task {
+                    guard let item, let data = try? await item.loadTransferable(type: Data.self),
+                          !Task.isCancelled,
+                          let preview = await TicketImageLoader.preview(data), !Task.isCancelled else { return }
+                    // Preserve source bytes; the small display preview is decoded off the main actor.
+                    imageData = data
+                    imagePreview = preview
                 }
             }
         }

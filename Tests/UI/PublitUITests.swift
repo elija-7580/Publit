@@ -102,9 +102,9 @@ final class PublitUITests: XCTestCase {
         snap("workflow-start")
         start.tap()
         XCTAssertTrue(app.navigationBars["Aktive Fahrt"].waitForExistence(timeout: 10))
-        let end = app.buttons["endTrip"]
         snap("workflow-live-open")
         let activeList = app.collectionViews["activeTripList"]
+        let end = activeList.buttons["endTrip"]
         for _ in 0..<6 where !end.isHittable {
             if activeList.exists { activeList.swipeUp() } else { app.swipeUp() }
         }

@@ -6,6 +6,12 @@ struct DepartureRow: View {
     @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
+        TimelineView(.periodic(from: .now, by: 15)) { context in
+            row(now: context.date)
+        }
+    }
+
+    private func row(now: Date) -> some View {
         Group {
             if typeSize.isAccessibilitySize {
                 VStack(alignment: .leading, spacing: 10) {
@@ -13,7 +19,7 @@ struct DepartureRow: View {
                     DirectionLabel(direction: stopTime.directionName)
                     platform
                     serviceNote
-                    time
+                    time(now: now)
                 }
             } else {
                 HStack(alignment: .top, spacing: 12) {
@@ -24,7 +30,7 @@ struct DepartureRow: View {
                         serviceNote
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    time
+                    time(now: now)
                 }
             }
         }
@@ -62,10 +68,10 @@ struct DepartureRow: View {
         }
     }
 
-    private var time: some View {
+    private func time(now: Date) -> some View {
         DepartureTimeView(actual: stopTime.departureTime, delayMinutes: stopTime.delayMinutes,
                           realTime: stopTime.realTime && !Connectivity.shared.isOffline,
-                          cancelled: stopTime.isCancelled, tz: stopTime.place.tz)
+                          cancelled: stopTime.isCancelled, tz: stopTime.place.tz, now: now)
     }
 
     private var accessibilityText: String {

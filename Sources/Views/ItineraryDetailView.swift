@@ -129,8 +129,12 @@ struct LegRow: View {
                 if leg.isReplacementBus { Label("Rail replacement bus", systemImage: "bus.fill").font(.subheadline.weight(.semibold)).foregroundStyle(Color.delay) }
                 stopLine(label: "Board here", time: leg.startTime, delay: leg.delayMinutes,
                          name: leg.from.name, track: leg.from.track, tz: leg.from.tz)
-                Text("\(Fmt.stops(leg.intermediateStops?.count ?? 0)) · \(Fmt.duration(seconds: leg.duration))")
-                    .font(.caption).foregroundStyle(.secondary)
+                if let stops = leg.intermediateStops {
+                    Text("\(Fmt.stops(stops.count)) · \(Fmt.duration(seconds: leg.duration))")
+                        .font(.caption).foregroundStyle(.secondary)
+                } else {
+                    Text(Fmt.duration(seconds: leg.duration)).font(.caption).foregroundStyle(.secondary)
+                }
                 stopLine(label: "Get off here", time: leg.endTime,
                          delay: Int((leg.endTime.timeIntervalSince(leg.scheduledEndTime) / 60).rounded()),
                          name: leg.to.name, track: leg.to.track, tz: leg.to.tz)

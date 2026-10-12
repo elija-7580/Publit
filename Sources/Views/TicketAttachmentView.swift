@@ -7,13 +7,28 @@ private final class CachedTicketImage: NSObject, @unchecked Sendable {
     init(_ image: UIImage) { self.image = image }
 }
 
-private enum TicketImageLoader {
+enum TicketImageLoader {
     private static let cache: NSCache<NSString, CachedTicketImage> = {
         let cache = NSCache<NSString, CachedTicketImage>()
         cache.countLimit = 6
         cache.totalCostLimit = 48 * 1024 * 1024
         return cache
     }()
+
+    /// Decode only a bounded import preview off the UI thread; keep source bytes untouched.
+    static func preview(_ data: Data) async -> UIImage? {
+        let loaded = await Task.detached(priority: .userInitiated) { () -> CachedTicketImage? in
+            guard let source = CGImageSourceCreateWithData(data as CFData, nil),
+                  let cg = CGImageSourceCreateThumbnailAtIndex(source, 0, [
+                    kCGImageSourceCreateThumbnailFromImageAlways: true,
+                    kCGImageSourceCreateThumbnailWithTransform: true,
+                    kCGImageSourceThumbnailMaxPixelSize: 1024,
+                    kCGImageSourceShouldCacheImmediately: true,
+                  ] as CFDictionary) else { return nil }
+            return CachedTicketImage(UIImage(cgImage: cg))
+        }.value
+        return loaded?.image
+    }
 
     static func load(_ url: URL, original: Bool) async -> UIImage? {
         let loaded = await Task.detached(priority: .userInitiated) { () -> CachedTicketImage? in
