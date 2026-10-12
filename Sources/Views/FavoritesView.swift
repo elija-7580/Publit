@@ -41,7 +41,7 @@ struct FavoritesView: View {
                         } label: {
                             HStack(spacing: 10) {
                                 LineBadge(line)
-                                Text("at \(line.stopName)").lineLimit(1)
+                                Text(L10n.f("At %@", line.stopName)).lineLimit(1)
                             }
                         }
                     }

@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct PlaceSearchView: View {
-    let title: String
+    let title: LocalizedStringKey
     let allowCurrentLocation: Bool
     let onSelect: (Endpoint) -> Void
 

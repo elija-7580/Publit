@@ -25,6 +25,7 @@ struct TripView: View {
                     let stops = leg.allStops
                     let progress = TripProgress.at(ctx.date, stops: stops)
                     Section {
+                        OfflineNote()
                         tripMap(leg: leg, stops: stops, progress: progress)
                             .frame(height: 240)
                             .listRowInsets(EdgeInsets())
@@ -49,7 +50,7 @@ struct TripView: View {
             ToolbarItem(placement: .topBarTrailing) { ShowTicketButton() }
             ToolbarItem(placement: .topBarTrailing) {
                 Button { favorites.toggle(savedLine) } label: {
-                    Label(favorites.containsLine(savedLine.id) ? "Saved line" : "Save line",
+                    Label(favorites.containsLine(savedLine.id) ? L10n.t("Saved line") : L10n.t("Save line"),
                           systemImage: favorites.containsLine(savedLine.id) ? "star.fill" : "star")
                 }
             }
@@ -76,10 +77,10 @@ struct TripView: View {
     private func statusLine(progress: TripProgress, stops: [Place], leg: Leg) -> some View {
         let text: String = {
             switch progress {
-            case .notStarted: return "Not departed yet"
-            case .finished: return "Arrived at \(stops.last?.name ?? "")"
-            case .atStop(let i): return "At \(stops[i].name)"
-            case .between(let i, _): return "Between \(stops[i].name) and \(stops[i + 1].name)"
+            case .notStarted: return L10n.t("Not departed yet")
+            case .finished: return L10n.f("Arrived at %@", stops.last?.name ?? "")
+            case .atStop(let i): return L10n.f("At %@", stops[i].name)
+            case .between(let i, _): return L10n.f("Between %@ and %@", stops[i].name, stops[i + 1].name)
             }
         }()
         Label(text, systemImage: leg.realTime ? "dot.radiowaves.left.and.right" : "calendar")
@@ -142,7 +143,8 @@ private struct StopTimeRow: View {
         HStack(spacing: 10) {
             Text(time.map { Fmt.time($0, tz: stop.tz) } ?? "–")
                 .font(.subheadline.weight(isFocus ? .bold : .regular).monospacedDigit())
-                .frame(width: 52, alignment: .leading)
+                .lineLimit(1).fixedSize()
+                .frame(minWidth: 52, alignment: .leading)
             if realTime && delay > 0 {
                 Text("+\(delay)").font(.caption.monospacedDigit()).foregroundStyle(Color.delay)
             }
@@ -183,7 +185,7 @@ struct LineDeparturesView: View {
                     } label: { DepartureRow(stopTime: st) }
                 }
             } header: {
-                HStack { LineBadge(line); Text("at \(line.stopName)").textCase(nil) }
+                HStack { LineBadge(line); Text(L10n.f("At %@", line.stopName)).textCase(nil) }
             }
         }
         .navigationTitle(line.lineName)
@@ -201,7 +203,7 @@ struct LineDeparturesView: View {
         do {
             let res = try await TransitousClient.shared.departures(stopId: line.stopId, count: 100,
                                                                   radius: StopDeparturesView.stationRadius)
-            departures = res.stopTimes.filter(line.matches)
+            departures = StopTime.upcoming(res.stopTimes).filter(line.matches)
             errorMessage = nil
         } catch {
             if !(error is CancellationError) && (error as? URLError)?.code != .cancelled {

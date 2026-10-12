@@ -35,12 +35,14 @@ struct DepartureRow: View {
 
     private var accessibilityText: String {
         var parts = ["\(ModeStyle.label(stopTime.mode)) \(stopTime.lineName)"]
-        if !stopTime.headsign.isEmpty { parts.append("to \(stopTime.headsign)") }
-        parts.append("at \(Fmt.time(stopTime.departureTime, tz: stopTime.place.tz))")
-        if stopTime.isCancelled { parts.append("cancelled") }
-        else if stopTime.realTime { parts.append(stopTime.delayMinutes > 0 ? "live, \(stopTime.delayMinutes) minutes late" : "live, on time") }
-        else { parts.append("timetable time, no live data") }
-        if let track = stopTime.place.track, !track.isEmpty { parts.append("platform \(track)") }
+        if !stopTime.headsign.isEmpty { parts.append(L10n.f("to %@", stopTime.headsign)) }
+        parts.append(L10n.f("at %@", Fmt.time(stopTime.departureTime, tz: stopTime.place.tz)))
+        if stopTime.isCancelled { parts.append(L10n.t("cancelled")) }
+        else if stopTime.realTime {
+            parts.append(stopTime.delayMinutes > 0 ? L10n.f("live, %lld minutes late", stopTime.delayMinutes) : L10n.t("live, on time"))
+        }
+        else { parts.append(L10n.t("timetable time, no live data")) }
+        if let track = stopTime.place.track, !track.isEmpty { parts.append(L10n.f("platform %@", track)) }
         return parts.joined(separator: ", ")
     }
 }

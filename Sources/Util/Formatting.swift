@@ -3,21 +3,26 @@ import Foundation
 enum Fmt {
     static func duration(seconds: Int) -> String {
         let minutes = max(1, Int((Double(seconds) / 60).rounded()))
-        if minutes < 60 { return "\(minutes) min" }
+        if minutes < 60 { return L10n.f("%lld min", minutes) }
         let h = minutes / 60, m = minutes % 60
-        return m == 0 ? "\(h) h" : "\(h) h \(m) min"
+        return m == 0 ? L10n.f("%lld h", h) : L10n.f("%lld h %lld min", h, m)
     }
 
     static func distance(meters: Double) -> String {
-        meters < 1000 ? "\(Int(meters.rounded())) m" : String(format: "%.1f km", meters / 1000)
+        if meters < 1000 { return "\(Int(meters.rounded())) m" }
+        let f = NumberFormatter()
+        f.locale = Locale.current
+        f.minimumFractionDigits = 1
+        f.maximumFractionDigits = 1
+        return (f.string(from: NSNumber(value: meters / 1000)) ?? String(format: "%.1f", meters / 1000)) + " km"
     }
 
     static func changes(_ n: Int) -> String {
-        n == 0 ? "Direct" : n == 1 ? "1 change" : "\(n) changes"
+        n == 0 ? L10n.t("Direct") : n == 1 ? L10n.t("1 change") : L10n.f("%lld changes", n)
     }
 
     static func stops(_ n: Int) -> String {
-        n == 0 ? "No stops" : n == 1 ? "1 stop" : "\(n) stops"
+        n == 0 ? L10n.t("No stops") : n == 1 ? L10n.t("1 stop") : L10n.f("%lld stops", n)
     }
 
     private static let lock = NSLock()
@@ -53,6 +58,6 @@ enum Fmt {
         let h = abs(offset) / 60, m = abs(offset) % 60
         let gmt = m == 0 ? "GMT\(sign)\(h)" : String(format: "GMT\(sign)%d:%02d", h, m)
         let city = id.split(separator: "/").last.map { $0.replacingOccurrences(of: "_", with: " ") } ?? id
-        return "Local time \(city) (\(gmt))"
+        return L10n.f("Local time %@ (%@)", city, gmt)
     }
 }

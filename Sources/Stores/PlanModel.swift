@@ -7,7 +7,7 @@ enum Endpoint: Hashable {
 
     var title: String {
         switch self {
-        case .currentLocation: return "Current location"
+        case .currentLocation: return L10n.t("Current location")
         case .place(let p): return p.name
         }
     }
@@ -73,8 +73,8 @@ final class PlanModel {
         guard let f = from.coordinate(current: current), let t = to.coordinate(current: current) else {
             itineraries = []
             errorMessage = locationDenied
-                ? "Location is off. Choose a start point, or allow location access in Settings."
-                : "Waiting for your location…"
+                ? L10n.t("Location is off. Choose a start point, or allow location access in Settings.")
+                : L10n.t("Waiting for your location…")
             return
         }
         let myToken = UUID()
@@ -95,7 +95,7 @@ final class PlanModel {
             itineraries = Self.merge(transit: res.itineraries, direct: res.direct)
             nextCursor = arriveBy ? res.previousPageCursor : res.nextPageCursor
             lastRequest = (f, t, time, arriveBy, maxWalk)
-            if itineraries.isEmpty { errorMessage = "No connections found." }
+            if itineraries.isEmpty { errorMessage = L10n.t("No connections found.") }
         } catch {
             guard token == myToken, !Self.isCancellation(error) else { return }
             // A failed background refresh keeps the routes already on screen.
@@ -157,14 +157,26 @@ final class AppState {
     let goNow = PlanModel()
     /// Set by publit:// links (calendar events, Live Activity buttons).
     var deepLink: DeepLink?
+    /// Nearby shows "Where to now?" results (also opened by Siri: "Take me home").
+    var showGoNow = false
 
     func open(_ url: URL) {
         guard let link = DeepLink(url: url) else { return }
         switch link {
         case .trip: tab = .plan
-        case .ticket, .tripTickets: break
+        case .stop: tab = .nearby
+        case .ticket, .tripTickets, .go: break
         }
         deepLink = link
+    }
+
+    /// Routes from the current location to `place`, leaving now (Nearby → "Where to now?").
+    func goNow(to place: SavedPlace) {
+        goNow.from = .currentLocation
+        goNow.to = .place(place)
+        goNow.timeMode = .now
+        tab = .nearby
+        showGoNow = true
     }
 
     func route(to place: SavedPlace) {

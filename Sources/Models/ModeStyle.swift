@@ -46,22 +46,22 @@ enum ModeStyle {
 
     static func label(_ mode: String) -> String {
         switch mode {
-        case "WALK": return "Walk"
-        case "BIKE": return "Bike"
-        case "RENTAL": return "Rental"
-        case "CAR": return "Car"
-        case "BUS": return "Bus"
-        case "COACH": return "Coach"
-        case "TRAM": return "Tram"
-        case "SUBWAY", "METRO": return "Metro"
-        case "FERRY": return "Ferry"
-        case "AIRPLANE": return "Flight"
-        case "SUBURBAN": return "S-Bahn"
-        case "HIGHSPEED_RAIL": return "High-speed"
-        case "NIGHT_RAIL": return "Night train"
-        case "FUNICULAR": return "Funicular"
-        case "AERIAL_LIFT", "AREAL_LIFT", "CABLE_CAR": return "Cable car"
-        default: return "Train"
+        case "WALK": return L10n.t("Walk")
+        case "BIKE": return L10n.t("Bike")
+        case "RENTAL": return L10n.t("Rental")
+        case "CAR": return L10n.t("Car")
+        case "BUS": return L10n.t("Bus")
+        case "COACH": return L10n.t("Coach")
+        case "TRAM": return L10n.t("Tram")
+        case "SUBWAY", "METRO": return L10n.t("Metro")
+        case "FERRY": return L10n.t("Ferry")
+        case "AIRPLANE": return L10n.t("Flight")
+        case "SUBURBAN": return L10n.t("S-Bahn")
+        case "HIGHSPEED_RAIL": return L10n.t("High-speed")
+        case "NIGHT_RAIL": return L10n.t("Night train")
+        case "FUNICULAR": return L10n.t("Funicular")
+        case "AERIAL_LIFT", "AREAL_LIFT", "CABLE_CAR": return L10n.t("Cable car")
+        default: return L10n.t("Train")
         }
     }
 

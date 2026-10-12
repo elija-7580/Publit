@@ -1,3 +1,5 @@
+<p><img src="docs/brand/icon-light.svg" width="96" alt="Publit icon"></p>
+
 # Publit
 
 **Public transport, without the noise.** A free, open-source transit app for iPhone: live departures near you, trip planning across Europe, and every connection on one timeline.

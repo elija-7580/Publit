@@ -6,7 +6,6 @@ struct NearbyView: View {
     @Environment(FavoritesStore.self) private var favorites
     @Environment(TripStore.self) private var trips
     @State private var searching = false
-    @State private var goNow = false
     @State private var showMap = false
     @State private var groups: [StopGroup] = []
     @State private var isLoading = false
@@ -21,6 +20,7 @@ struct NearbyView: View {
     var body: some View {
         List {
             goSection
+            OfflineNote()
             if location.isDenied {
                 ContentUnavailableView("Location is off",
                                        systemImage: "location.slash",
@@ -36,7 +36,7 @@ struct NearbyView: View {
                                            description: Text("No public transport stops within 1.5 km."))
                 }
             }
-            if !groups.isEmpty, errorMessage != nil {
+            if !groups.isEmpty, errorMessage != nil, !Connectivity.shared.isOffline {
                 Label("Couldn't refresh. Times may be out of date.", systemImage: "exclamationmark.triangle")
                     .font(.footnote).foregroundStyle(.secondary)
             }
@@ -74,10 +74,11 @@ struct NearbyView: View {
         .sheet(isPresented: $searching) {
             PlaceSearchView(title: "Where to?", allowCurrentLocation: false) { endpoint in go(endpoint) }
         }
-        .navigationDestination(isPresented: $goNow) { GoNowView() }
+        .navigationDestination(isPresented: Bindable(app).showGoNow) { GoNowView() }
         .fullScreenCover(isPresented: $showMap) { StationMapView() }
         .refreshable { await load() }
         .task(id: locationKey) {
+            showLastBoard()
             while !Task.isCancelled {
                 await load()
                 try? await Task.sleep(for: .seconds(30))
@@ -90,7 +91,7 @@ struct NearbyView: View {
         app.goNow.from = .currentLocation
         app.goNow.to = destination
         app.goNow.timeMode = .now
-        goNow = true
+        app.showGoNow = true
     }
 
     @ViewBuilder
@@ -103,7 +104,7 @@ struct NearbyView: View {
             .accessibilityIdentifier("whereToNow")
             ForEach(favorites.pinned) { p in
                 Button { go(.place(p)) } label: {
-                    Label { Text(p.role?.title ?? p.name) + Text("  \(p.name)").foregroundStyle(.secondary) }
+                    Label { Text(p.role?.title ?? p.name) + Text(verbatim: "  \(p.name)").foregroundStyle(.secondary) }
                         icon: { Image(systemName: p.role?.symbol ?? "mappin") }
                 }
             }
@@ -118,6 +119,14 @@ struct NearbyView: View {
         }
     }
 
+    /// The last board (up to 10 min old) right away, so the screen is not empty while GPS and network start.
+    private func showLastBoard() {
+        guard groups.isEmpty, let last = TransitousClient.shared.lastNearby(maxAge: 600) else { return }
+        let here = location.coordinate ?? last.center
+        guard here.distance(to: last.center) < 400 else { return }
+        groups = StopGrouping.group(StopTime.upcoming(last.response.stopTimes), around: here)
+    }
+
     private func load() async {
         guard let here = location.coordinate else { return }
         isLoading = true
@@ -127,7 +136,7 @@ struct NearbyView: View {
             if res.stopTimes.isEmpty {
                 res = try await TransitousClient.shared.departures(near: here, radius: 1500, count: 80)
             }
-            groups = StopGrouping.group(res.stopTimes, around: here)
+            groups = StopGrouping.group(StopTime.upcoming(res.stopTimes), around: here)
             errorMessage = nil
         } catch {
             if !(error is CancellationError) && (error as? URLError)?.code != .cancelled {
@@ -172,6 +181,7 @@ struct StopDeparturesView: View {
                 }
             }
             Section {
+                OfflineNote()
                 if let errorMessage, departures.isEmpty {
                     Text(errorMessage).foregroundStyle(.secondary)
                 } else if errorMessage != nil, let lastUpdated {
@@ -217,7 +227,7 @@ struct StopDeparturesView: View {
     private func load() async {
         do {
             let res = try await TransitousClient.shared.departures(stopId: stopId, count: 40, radius: Self.stationRadius)
-            departures = res.stopTimes
+            departures = StopTime.upcoming(res.stopTimes)
             alerts = Array(Set(res.place?.alertsList ?? []))
             errorMessage = nil
             lastUpdated = Date()

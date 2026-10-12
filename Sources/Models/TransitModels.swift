@@ -7,6 +7,14 @@ struct LatLon: Hashable, Codable, Sendable {
 
     /// `lat,lon` as expected by the MOTIS API.
     var apiValue: String { "\(lat),\(lon)" }
+
+    init(lat: Double, lon: Double) { self.lat = lat; self.lon = lon }
+
+    init?(apiValue: String) {
+        let parts = apiValue.split(separator: ",").compactMap { Double($0) }
+        guard parts.count == 2 else { return nil }
+        self.init(lat: parts[0], lon: parts[1])
+    }
 }
 
 /// Google-encoded polyline as returned by MOTIS (`precision` 6 for /v2+).
@@ -150,6 +158,13 @@ struct StopTime: Decodable, Identifiable, Sendable, RouteStyled {
     var delayMinutes: Int {
         guard let s = scheduledDepartureTime else { return 0 }
         return Int((departureTime.timeIntervalSince(s) / 60).rounded())
+    }
+}
+
+extension StopTime {
+    /// Drops departures that have already left (saved boards shown offline can be minutes old).
+    static func upcoming(_ list: [StopTime], now: Date = Date()) -> [StopTime] {
+        list.filter { $0.departureTime > now.addingTimeInterval(-60) }
     }
 }
 

@@ -6,7 +6,7 @@ import Observation
 struct Ticket: Codable, Identifiable, Hashable, Sendable {
     enum Kind: String, Codable, CaseIterable, Sendable {
         case pass, single
-        var title: String { self == .pass ? "Pass (valid for many trips)" : "Single trip" }
+        var title: String { self == .pass ? L10n.t("Pass (valid for many trips)") : L10n.t("Single trip") }
     }
 
     let id: String

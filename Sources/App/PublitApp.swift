@@ -11,6 +11,8 @@ struct PublitApp: App {
 
     init() {
         UNUserNotificationCenter.current().delegate = NotificationRouter.shared
+        // Offline copies older than a week are no use for departures or routes.
+        DispatchQueue.global(qos: .utility).async { TransitousClient.shared.cache.prune(olderThan: 7 * 24 * 3600) }
     }
 
     var body: some Scene {
@@ -30,7 +32,10 @@ struct PublitApp: App {
                     }
                     location.start()
                     NotificationRouter.shared.open = { [app] url in app.open(url) }
+                    IntentBridge.connect { [app] url in app.open(url) }
+                    PublitShortcuts.updateAppShortcutParameters()
                 }
+                .onChange(of: favorites.stops.count) { PublitShortcuts.updateAppShortcutParameters() }
         }
     }
 }
@@ -39,6 +44,7 @@ struct RootView: View {
     @Environment(AppState.self) private var app
     @Environment(TripStore.self) private var trips
     @Environment(TicketStore.self) private var tickets
+    @Environment(FavoritesStore.self) private var favorites
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
@@ -65,6 +71,23 @@ struct RootView: View {
         .fullScreenCover(item: ticketLink) { link in
             TicketDisplayView(tickets: ticketsFor(link))
         }
+        .sheet(item: stopLink) { stop in
+            NavigationStack {
+                StopDeparturesView(stopId: stop.id, name: stop.name, coordinate: stop.coordinate)
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) { Button("Done") { app.deepLink = nil } }
+                    }
+            }
+        }
+        .onChange(of: app.deepLink) { _, link in
+            guard case .go(let role) = link else { return }
+            app.deepLink = nil
+            if let place = favorites.place(for: role) {
+                app.goNow(to: place)
+            } else {
+                app.tab = .favorites // Home/Work not set yet: that is where it is set.
+            }
+        }
         .task(id: scenePhase) {
             // Keep running Live Activities current while the app is open.
             guard scenePhase == .active else { return }
@@ -76,6 +99,19 @@ struct RootView: View {
     }
 
     private struct ID: Identifiable { let value: String; var id: String { value } }
+
+    private struct StopRef: Identifiable {
+        let id: String, name: String, coordinate: LatLon
+    }
+
+    private var stopLink: Binding<StopRef?> {
+        Binding(get: {
+            if case .stop(let id, let name, let lat, let lon) = app.deepLink {
+                return StopRef(id: id, name: name, coordinate: LatLon(lat: lat, lon: lon))
+            }
+            return nil
+        }, set: { if $0 == nil { app.deepLink = nil } })
+    }
 
     private var tripLink: Binding<ID?> {
         Binding(get: {
@@ -98,7 +134,7 @@ struct RootView: View {
         case .ticket(let id?): return tickets.ticket(id).map { [$0] } ?? tickets.tickets(forTrip: nil)
         case .ticket(nil): return tickets.tickets(forTrip: nil)
         case .tripTickets(let tripId): return tickets.tickets(forTrip: tripId)
-        case .trip: return []
+        case .trip, .stop, .go: return []
         }
     }
 

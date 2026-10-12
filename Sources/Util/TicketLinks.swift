@@ -13,10 +13,10 @@ struct TicketLink: Hashable, Identifiable, Sendable {
     var id: String { operatorName + "|" + url.absoluteString }
     var title: String {
         switch source {
-        case .userLinked: return "Open your \(operatorName) app"
-        case .booking: return "Buy ticket: \(operatorName)"
-        case .fares: return "Fares and tickets: \(operatorName)"
-        case .website: return "\(operatorName) website"
+        case .userLinked: return L10n.f("Open your %@ app", operatorName)
+        case .booking: return L10n.f("Buy ticket: %@", operatorName)
+        case .fares: return L10n.f("Fares and tickets: %@", operatorName)
+        case .website: return L10n.f("%@ website", operatorName)
         }
     }
 }

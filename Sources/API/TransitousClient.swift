@@ -20,11 +20,14 @@ final class TransitousClient: @unchecked Sendable {
     private let session: URLSession
     private let userAgent: String
     let decoder: JSONDecoder
+    let cache: ResponseCache
 
     init(base: URL = URL(string: "https://api.transitous.org")!,
-         userAgent: String = AppInfo.userAgent) {
+         userAgent: String = AppInfo.userAgent,
+         cache: ResponseCache = ResponseCache()) {
         self.base = base
         self.userAgent = userAgent
+        self.cache = cache
         let cfg = URLSessionConfiguration.default
         cfg.timeoutIntervalForRequest = 20
         cfg.requestCachePolicy = .reloadIgnoringLocalCacheData
@@ -52,7 +55,7 @@ final class TransitousClient: @unchecked Sendable {
             q.append(URLQueryItem(name: "placeBias", value: "5"))
         }
         if let language { q.append(URLQueryItem(name: "language", value: language)) }
-        return try await get("/api/v1/geocode", q)
+        return try await get("/api/v1/geocode", q, cache: .search)
     }
 
     /// Walking limits for the first and last leg and for walk-only routes (seconds).
@@ -64,8 +67,10 @@ final class TransitousClient: @unchecked Sendable {
 
     func plan(from: LatLon, to: LatLon, time: Date?, arriveBy: Bool, pageCursor: String? = nil,
               maxWalk: Int = TransitousClient.walkLimits.prePost) async throws -> PlanResponse {
+        // "Now" searches change by the minute; planned ones can be reused a little longer.
         try await get("/api/v6/plan", Self.planQuery(from: from, to: to, time: time, arriveBy: arriveBy,
-                                                     pageCursor: pageCursor, maxWalk: maxWalk))
+                                                     pageCursor: pageCursor, maxWalk: maxWalk),
+                      cache: CachePolicy(maxAge: time == nil ? 20 : 60, persist: true))
     }
 
     static func planQuery(from: LatLon, to: LatLon, time: Date?, arriveBy: Bool,
@@ -87,7 +92,7 @@ final class TransitousClient: @unchecked Sendable {
 
     /// Fresh real-time state of a saved route (same vehicles, current delays and cancellations).
     func refresh(itineraryId: String) async throws -> Itinerary {
-        try await get("/api/v6/refresh-itinerary", [URLQueryItem(name: "itineraryId", value: itineraryId)])
+        try await get("/api/v6/refresh-itinerary", [URLQueryItem(name: "itineraryId", value: itineraryId)], cache: .noStore)
     }
 
     /// Stops inside a map rectangle, for the interactive station map.
@@ -96,7 +101,7 @@ final class TransitousClient: @unchecked Sendable {
             URLQueryItem(name: "min", value: min.apiValue),
             URLQueryItem(name: "max", value: max.apiValue),
             URLQueryItem(name: "zoom", value: String(zoom)),
-        ])
+        ], cache: .search)
     }
 
     func departures(near center: LatLon, radius: Int, count: Int) async throws -> StopTimesResponse {
@@ -104,7 +109,7 @@ final class TransitousClient: @unchecked Sendable {
             URLQueryItem(name: "center", value: center.apiValue),
             URLQueryItem(name: "radius", value: String(radius)),
             URLQueryItem(name: "n", value: String(count)),
-        ])
+        ], cache: CachePolicy(maxAge: 20, persist: true, slot: "nearby"))
     }
 
     /// Departures at a stop. `radius` (metres) also includes nearby platforms of the same station.
@@ -115,35 +120,95 @@ final class TransitousClient: @unchecked Sendable {
             URLQueryItem(name: "withAlerts", value: "true"),
         ]
         if let radius { q.append(URLQueryItem(name: "radius", value: String(radius))) }
-        return try await get("/api/v6/stoptimes", q)
+        return try await get("/api/v6/stoptimes", q, cache: .live)
     }
 
     /// The whole trip of one vehicle, with all stops and real-time times.
     func trip(id: String) async throws -> Itinerary {
-        try await get("/api/v6/trip", [URLQueryItem(name: "tripId", value: id)])
+        try await get("/api/v6/trip", [URLQueryItem(name: "tripId", value: id)], cache: CachePolicy(maxAge: 15, persist: true))
     }
 
     // MARK: Transport
 
-    private func get<T: Decodable>(_ path: String, _ query: [URLQueryItem]) async throws -> T {
+    /// Last "departures near me" response and where it was asked, for an instant first screen.
+    func lastNearby(maxAge: TimeInterval) -> (response: StopTimesResponse, center: LatLon, date: Date)? {
+        guard let e = cache.stale("nearby"), Date().timeIntervalSince(e.date) < maxAge,
+              let res = try? decoder.decode(StopTimesResponse.self, from: e.data),
+              let center = URLComponents(string: e.url)?.queryItems?.first(where: { $0.name == "center" })?.value
+                .flatMap(LatLon.init(apiValue:)) else { return nil }
+        return (res, center, e.date)
+    }
+
+    private func get<T: Decodable>(_ path: String, _ query: [URLQueryItem], cache policy: CachePolicy) async throws -> T {
         var comps = URLComponents(url: base.appendingPathComponent(path), resolvingAgainstBaseURL: false)!
         comps.queryItems = query
-        var req = URLRequest(url: comps.url!)
+        let url = comps.url!
+        let key = policy.slot ?? url.absoluteString
+        if let hit = cache.fresh(key, maxAge: policy.maxAge), hit.url == url.absoluteString,
+           let value = try? decoder.decode(T.self, from: hit.data) {
+            return value
+        }
+        var req = URLRequest(url: url)
         req.setValue(userAgent, forHTTPHeaderField: "User-Agent")
         req.setValue("application/json", forHTTPHeaderField: "Accept")
 
-        let (data, response) = try await session.data(for: req)
-        let status = (response as? HTTPURLResponse)?.statusCode ?? 0
+        let data: Data
+        let status: Int
+        do {
+            let (d, response) = try await session.data(for: req)
+            data = d
+            status = (response as? HTTPURLResponse)?.statusCode ?? 0
+        } catch {
+            if Self.isOffline(error), let value: T = await offlineCopy(key, url: url, policy: policy) { return value }
+            throw error
+        }
         guard (200..<300).contains(status) else {
+            if status >= 500, let value: T = await offlineCopy(key, url: url, policy: policy) { return value }
             if let err = try? JSONDecoder().decode(ServerError.self, from: data) {
                 throw APIError(message: err.error)
             }
-            throw APIError(message: "Server error (HTTP \(status)).")
+            throw APIError(message: L10n.f("Server error (HTTP %lld).", status))
         }
+        let value: T
         do {
-            return try decoder.decode(T.self, from: data)
+            value = try decoder.decode(T.self, from: data)
         } catch {
-            throw APIError(message: "Unexpected response from the routing service.")
+            throw APIError(message: L10n.t("Unexpected response from the routing service."))
+        }
+        cache.store(key, data: data, url: url.absoluteString, persist: policy.persist)
+        await Connectivity.shared.reachedServer()
+        return value
+    }
+
+    /// Saved response for the same request (or the same slot, e.g. the last nearby board).
+    private func offlineCopy<T: Decodable>(_ key: String, url: URL, policy: CachePolicy) async -> T? {
+        guard policy.persist, let e = cache.stale(key),
+              Date().timeIntervalSince(e.date) <= (policy.maxAge >= 3600 ? 7 * 24 * 3600 : 24 * 3600),
+              Self.sameOfflineRequest(savedURL: e.url, requestedURL: url, slot: policy.slot),
+              let value = try? decoder.decode(T.self, from: e.data) else { return nil }
+        await Connectivity.shared.servedOffline(from: e.date)
+        return value
+    }
+
+    static func sameOfflineRequest(savedURL: String, requestedURL: URL, slot: String?) -> Bool {
+        if savedURL == requestedURL.absoluteString { return true }
+        guard slot == "nearby" else { return false }
+        func center(_ url: String) -> LatLon? {
+            URLComponents(string: url)?.queryItems?.first { $0.name == "center" }?.value.flatMap(LatLon.init(apiValue:))
+        }
+        guard let a = center(savedURL), let b = center(requestedURL.absoluteString) else { return false }
+        return a.distance(to: b) < 400
+    }
+
+    /// No connection (as opposed to a cancelled request or a server answer).
+    static func isOffline(_ error: Error) -> Bool {
+        guard let e = error as? URLError else { return false }
+        switch e.code {
+        case .notConnectedToInternet, .networkConnectionLost, .timedOut, .cannotFindHost, .cannotConnectToHost,
+             .dnsLookupFailed, .dataNotAllowed, .internationalRoamingOff:
+            return true
+        default:
+            return false
         }
     }
 }

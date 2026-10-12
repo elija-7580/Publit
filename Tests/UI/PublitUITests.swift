@@ -18,6 +18,7 @@ final class PublitUITests: XCTestCase {
     private func launch(_ env: [String: String] = [:]) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchEnvironment = env
+        app.launchArguments = ["-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
         app.launch()
         return app
     }
@@ -39,6 +40,30 @@ final class PublitUITests: XCTestCase {
             try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
             try? shot.pngRepresentation.write(to: dir.appendingPathComponent("\(name).png"))
         }
+    }
+
+    /// F08 German localization: navigation, route planning and long Settings footers.
+    func testF08GermanLayout() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-AppleLanguages", "(de)", "-AppleLocale", "de_AT"]
+        app.launchEnvironment = ["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "plan"]
+        app.launch()
+        XCTAssertTrue(app.navigationBars["Planen"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Von")).firstMatch.exists)
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Nach")).firstMatch.exists)
+        sleep(3)
+        snap("de-plan")
+        app.buttons["Einstellungen"].tap()
+        XCTAssertTrue(app.navigationBars["Einstellungen"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", "Öffentlicher Verkehr ohne Ablenkung.")).firstMatch.exists)
+        snap("de-settings")
+        app.buttons["Fertig"].tap()
+        app.tabBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(app.navigationBars["In der Nähe"].waitForExistence(timeout: 5))
+        snap("de-nearby")
+        app.tabBars.buttons.element(boundBy: 2).tap()
+        XCTAssertTrue(app.navigationBars["Gespeichert"].waitForExistence(timeout: 5))
+        snap("de-saved")
     }
 
     /// F01 Nearby: live departures around the (simulated) location.

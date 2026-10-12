@@ -18,6 +18,7 @@ struct GoNowView: View {
                     .listRowInsets(EdgeInsets())
             }
             Section {
+                OfflineNote()
                 if plan.isLoading && its.isEmpty {
                     HStack { Spacer(); ProgressView(); Spacer() }
                 } else if let msg = plan.errorMessage, its.isEmpty {
@@ -25,7 +26,7 @@ struct GoNowView: View {
                 }
                 ForEach(its) { it in
                     NavigationLink {
-                        ItineraryDetailView(itinerary: it, fromName: "Current location", toName: plan.to?.title ?? "")
+                        ItineraryDetailView(itinerary: it, fromName: L10n.t("Current location"), toName: plan.to?.title ?? "")
                     } label: {
                         VStack(alignment: .leading, spacing: 4) {
                             if let dep = it.firstDeparture {
@@ -51,7 +52,7 @@ struct GoNowView: View {
                 }
             }
         }
-        .navigationTitle(plan.to?.title ?? "Route")
+        .navigationTitle(plan.to?.title ?? L10n.t("Route"))
         .navigationBarTitleDisplayMode(.inline)
         .refreshable { await plan.search(current: location.coordinate, locationDenied: location.isDenied, silent: true) }
         .task(id: plan.queryKey) {
@@ -69,6 +70,6 @@ struct GoNowView: View {
 
     private func leaveText(_ it: Itinerary, firstDeparture: Date) -> String {
         let mins = Int(ceil(it.startTime.timeIntervalSinceNow / 60))
-        return mins <= 0 ? "Leave now" : "Leave in \(mins) min"
+        return mins <= 0 ? L10n.t("Leave now") : L10n.f("Leave in %lld min", mins)
     }
 }

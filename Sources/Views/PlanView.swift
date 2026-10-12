@@ -26,7 +26,7 @@ struct PlanView: View {
                     Text("Arrive").tag(TimeMode.arriveBy)
                 }
                 .pickerStyle(.segmented)
-                DatePicker(plan.timeMode == .arriveBy ? "Arrive by" : "Depart at", selection: $plan.date)
+                DatePicker(plan.timeMode == .arriveBy ? L10n.t("Arrive by") : L10n.t("Depart at"), selection: $plan.date)
             }
 
             if plan.to == nil {
@@ -78,18 +78,29 @@ struct PlanView: View {
 
     @ViewBuilder
     private var quickDestinations: some View {
-        Section("Quick") {
-            ForEach(PlaceRole.allCases, id: \.self) { role in
-                if let p = favorites.place(for: role) {
-                    Button { app.plan.to = .place(p) } label: {
-                        Label { Text(role.title) + Text("  \(p.name)").foregroundStyle(.secondary) }
-                            icon: { Image(systemName: role.symbol) }
+        if !favorites.pinned.isEmpty {
+            Section {
+                ForEach(PlaceRole.allCases, id: \.self) { role in
+                    if let p = favorites.place(for: role) {
+                        Button { app.plan.to = .place(p) } label: {
+                            Label { Text(role.title) + Text(verbatim: "  \(p.name)").foregroundStyle(.secondary) }
+                                icon: { Image(systemName: role.symbol) }
+                        }
                     }
                 }
+            } header: {
+                Text("Quick")
+            } footer: {
+                if favorites.pinned.count < PlaceRole.allCases.count {
+                    Text("Set Home and Work in Saved to plan there with one tap.")
+                }
             }
-            if favorites.pinned.count < PlaceRole.allCases.count {
+        } else {
+            Section {
+            } header: {
+                Text("Quick")
+            } footer: {
                 Text("Set Home and Work in Saved to plan there with one tap.")
-                    .font(.footnote).foregroundStyle(.secondary)
             }
         }
     }
@@ -99,10 +110,6 @@ struct PlanView: View {
         let upcoming = trips.upcoming()
         let past = trips.past()
         Section {
-            if upcoming.isEmpty {
-                Text("Save a route to see it here, add it to your calendar and get a reminder when to leave.")
-                    .font(.footnote).foregroundStyle(.secondary)
-            }
             ForEach(upcoming) { t in
                 NavigationLink { SavedTripView(tripId: t.id) } label: { SavedTripRow(trip: t) }
             }
@@ -111,6 +118,10 @@ struct PlanView: View {
             } }
         } header: {
             Text("Upcoming trips")
+        } footer: {
+            if upcoming.isEmpty {
+                Text("Save a route to see it here, add it to your calendar and get a reminder when to leave.")
+            }
         }
         if !past.isEmpty {
             Section("Past trips") {
@@ -141,10 +152,11 @@ struct PlanView: View {
         return d
     }
 
-    private func endpointButton(label: String, endpoint: Endpoint?, target: PickTarget) -> some View {
+    private func endpointButton(label: LocalizedStringKey, endpoint: Endpoint?, target: PickTarget) -> some View {
         Button { picking = target } label: {
             HStack {
-                Text(label).foregroundStyle(.secondary).frame(width: 48, alignment: .leading)
+                Text(label).foregroundStyle(.secondary).lineLimit(1).fixedSize()
+                    .frame(minWidth: 56, alignment: .leading)
                 if let endpoint {
                     if case .currentLocation = endpoint {
                         Image(systemName: "location.fill").foregroundStyle(.blue)
@@ -156,7 +168,8 @@ struct PlanView: View {
                 Spacer()
             }
         }
-        .accessibilityLabel("\(label): \(endpoint?.title ?? "not set")")
+        .accessibilityElement(children: .combine)
+        .accessibilityValue(endpoint?.title ?? L10n.t("not set"))
     }
 
     private func detail(_ it: Itinerary) -> some View {
@@ -171,6 +184,7 @@ struct PlanView: View {
         let zoneNote = its.first.flatMap { Fmt.foreignZoneNote(tz: $0.legs.first?.from.tz, at: $0.startTime) }
 
         Section {
+            OfflineNote()
             if plan.isLoading && its.isEmpty {
                 HStack { Spacer(); ProgressView(); Spacer() }
             } else if let msg = plan.errorMessage, its.isEmpty {
@@ -212,7 +226,7 @@ struct PlanView: View {
                     Task { await plan.loadMore() }
                 } label: {
                     HStack {
-                        Text(plan.timeMode == .arriveBy ? "Earlier connections" : "Later connections")
+                        Text(plan.timeMode == .arriveBy ? L10n.t("Earlier connections") : L10n.t("Later connections"))
                         if plan.isLoadingMore { Spacer(); ProgressView() }
                     }
                 }
@@ -222,7 +236,7 @@ struct PlanView: View {
                 Text("Routes")
                 Spacer()
                 if !its.isEmpty {
-                    Button(showMap ? "List" : "Map") { withAnimation { showMap.toggle() } }
+                    Button(showMap ? L10n.t("List") : L10n.t("Map")) { withAnimation { showMap.toggle() } }
                         .font(.caption.weight(.semibold))
                         .textCase(nil)
                 }

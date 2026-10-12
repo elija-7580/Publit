@@ -5,6 +5,7 @@ import ActivityKit
 @main
 struct PublitWidgets: WidgetBundle {
     var body: some Widget {
+        DeparturesWidget()
         TripLiveActivity()
     }
 }

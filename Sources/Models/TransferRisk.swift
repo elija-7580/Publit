@@ -10,9 +10,9 @@ struct TransferWarning: Hashable, Sendable {
 
     var message: String {
         switch level {
-        case .missed: return "Change at \(stopName) no longer works"
-        case .tight: return bufferMinutes <= 0 ? "Very tight change at \(stopName)"
-                                               : "Tight change at \(stopName) (\(bufferMinutes) min)"
+        case .missed: return L10n.f("Change at %@ no longer works", stopName)
+        case .tight: return bufferMinutes <= 0 ? L10n.f("Very tight change at %@", stopName)
+                                               : L10n.f("Tight change at %@ (%lld min)", stopName, bufferMinutes)
         }
     }
 }

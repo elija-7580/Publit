@@ -9,6 +9,19 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             List {
+                Section {
+                    HStack(spacing: 14) {
+                        PublitAppIcon(size: 56)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(verbatim: "Publit").font(.title2.bold())
+                            Text("Public transport, without the noise.")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .padding(.vertical, 4)
+                    .accessibilityElement(children: .combine)
+                }
                 Section("Tickets") {
                     NavigationLink {
                         TicketsView()

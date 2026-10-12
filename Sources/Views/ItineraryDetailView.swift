@@ -40,7 +40,7 @@ struct ItineraryDetailView: View {
 
     /// MOTIS names coordinate endpoints "START"/"END".
     static func placeName(_ p: Place?) -> String {
-        guard let p, p.name != "START", p.name != "END" else { return "Destination" }
+        guard let p, p.name != "START", p.name != "END" else { return L10n.t("Destination") }
         return p.name
     }
 
@@ -185,7 +185,7 @@ struct GetOffButton: View {
             Button {
                 Task { await toggle() }
             } label: {
-                Label(scheduled ? "Reminder set" : "Remind me to get off",
+                Label(scheduled ? L10n.t("Reminder set") : L10n.t("Remind me to get off"),
                       systemImage: scheduled ? "bell.fill" : "bell")
                     .font(.caption.weight(.semibold))
             }
@@ -207,11 +207,11 @@ struct GetOffButton: View {
         switch await GetOffReminder.schedule(for: leg) {
         case .scheduled(let date):
             scheduled = true
-            note = "We'll notify you at \(Fmt.time(date, tz: leg.to.tz))."
+            note = L10n.f("We'll notify you at %@.", Fmt.time(date, tz: leg.to.tz))
         case .tooLate:
-            note = "This stop is less than two minutes away."
+            note = L10n.t("This stop is less than two minutes away.")
         case .denied:
-            note = "Allow notifications for Publit in Settings."
+            note = L10n.t("Allow notifications for Publit in Settings.")
         }
     }
 }
@@ -234,7 +234,7 @@ struct StatusBanner: View {
                 Text(status.headline).font(.headline)
                 Spacer()
                 if status.phase != .arrived && status.phase != .cancelled {
-                    Text(status.delayMinutes > 0 ? "+\(status.delayMinutes) min" : "On time")
+                    Text(status.delayMinutes > 0 ? L10n.f("+%lld min", status.delayMinutes) : L10n.t("On time"))
                         .font(.subheadline.weight(.semibold)).foregroundStyle(color)
                 }
             }

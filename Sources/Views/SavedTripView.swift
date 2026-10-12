@@ -41,7 +41,7 @@ struct SavedTripView: View {
             if let updated = trips.trip(t.id) { await LiveTripActivity.update(updated) }
         } catch {
             if !(error is CancellationError) && (error as? URLError)?.code != .cancelled {
-                errorMessage = "Live status unavailable. Showing saved times."
+                errorMessage = L10n.t("Live status unavailable. Showing saved times.")
             }
         }
     }

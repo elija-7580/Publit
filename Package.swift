@@ -5,6 +5,7 @@ import PackageDescription
 
 let core = [
     "API/TransitousClient.swift",
+    "API/ResponseCache.swift",
     "App/AppInfo.swift",
     "Models/TransitModels.swift",
     "Models/ModeStyle.swift",
@@ -14,6 +15,7 @@ let core = [
     "Util/LineColors.swift",
     "Util/Geo.swift",
     "Util/Formatting.swift",
+    "Util/L10n.swift",
     "Util/Palette.swift",
     "Stores/StopGrouping.swift",
     "Stores/FavoritesStore.swift",
@@ -22,6 +24,7 @@ let core = [
     "Stores/TripStore.swift",
     "Stores/TicketStore.swift",
     "Models/DeepLink.swift",
+    "Models/PlaceRole.swift",
     "Models/TripStatus.swift",
     "Util/TicketLinks.swift",
     "Stores/MapStations.swift",

@@ -1,14 +1,6 @@
 import Foundation
 import Observation
 
-/// Home and Work get a fixed slot so they are one tap away in the planner.
-enum PlaceRole: String, Codable, CaseIterable, Identifiable, Sendable {
-    case home, work
-    var id: String { rawValue }
-    var title: String { self == .home ? "Home" : "Work" }
-    var symbol: String { self == .home ? "house.fill" : "briefcase.fill" }
-}
-
 /// A saved place or stop. Stored locally on the device only.
 struct SavedPlace: Codable, Hashable, Identifiable {
     var id: String

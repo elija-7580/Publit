@@ -18,7 +18,7 @@ enum LeaveReminder {
 
         let status = TripStatus.at(fire, trip.itinerary)
         let content = UNMutableNotificationContent()
-        content.title = "Leave at \(Fmt.time(trip.startTime, tz: trip.itinerary.legs.first?.from.tz)) for \(trip.toName)"
+        content.title = L10n.f("Leave at %@ for %@", Fmt.time(trip.startTime, tz: trip.itinerary.legs.first?.from.tz), trip.toName)
         content.body = status.detail
         content.sound = .default
         content.interruptionLevel = .active
@@ -30,8 +30,8 @@ enum LeaveReminder {
         // a second notification an hour before leaving opens the app, which then starts it.
         if trip.startTime.timeIntervalSinceNow > 8 * 3600 {
             let follow = UNMutableNotificationContent()
-            follow.title = "\(trip.title) in 1 hour"
-            follow.body = "Open to follow it live on the lock screen."
+            follow.title = L10n.f("%@ in 1 hour", trip.title)
+            follow.body = L10n.t("Open to follow it live on the lock screen.")
             follow.userInfo = ["url": trip.deepLink.absoluteString]
             try? await center.add(request(followIdentifier(trip.id), follow, at: trip.startTime.addingTimeInterval(-3600)))
         }

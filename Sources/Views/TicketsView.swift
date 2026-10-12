@@ -46,7 +46,7 @@ struct TicketsView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(t.name).foregroundStyle(.primary)
                     if let until = t.validUntil {
-                        Text(t.isValid() ? "Valid until \(until.formatted(date: .abbreviated, time: .omitted))" : "Expired")
+                        Text(t.isValid() ? L10n.f("Valid until %@", until.formatted(date: .abbreviated, time: .omitted)) : L10n.t("Expired"))
                             .font(.caption).foregroundStyle(t.isValid() ? Color.secondary : Color.danger)
                     }
                 }
@@ -89,7 +89,7 @@ struct AddTicketView: View {
                 }
                 Section {
                     PhotosPicker(selection: $photo, matching: .images) {
-                        Label(imageData == nil ? "Choose screenshot" : "Replace screenshot", systemImage: "photo.on.rectangle")
+                        Label(imageData == nil ? L10n.t("Choose screenshot") : L10n.t("Replace screenshot"), systemImage: "photo.on.rectangle")
                     }
                     if let imageData, let img = UIImage(data: imageData) {
                         Image(uiImage: img).resizable().scaledToFit().frame(maxHeight: 220)
@@ -170,7 +170,7 @@ struct TicketDisplayView: View {
                     .indexViewStyle(.page(backgroundDisplayMode: .always))
                 }
             }
-            .navigationTitle(tickets.count == 1 ? tickets[0].name : "Tickets")
+            .navigationTitle(tickets.count == 1 ? tickets[0].name : L10n.t("Tickets"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } }

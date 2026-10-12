@@ -24,7 +24,7 @@ struct TripActionsSection: View {
                 if let saved { trips.remove(saved.id); LeaveReminder.cancel(saved.id); reminderOn = false }
                 else { trips.save(itinerary, from: fromName, to: toName) }
             } label: {
-                Label(saved == nil ? "Save trip" : "Saved", systemImage: saved == nil ? "bookmark" : "bookmark.fill")
+                Label(saved == nil ? L10n.t("Save trip") : L10n.t("Saved"), systemImage: saved == nil ? "bookmark" : "bookmark.fill")
             }
             Button {
                 calendarTrip = ensureSaved()
@@ -35,7 +35,7 @@ struct TripActionsSection: View {
                 Button {
                     Task { await toggleReminder() }
                 } label: {
-                    Label(reminderOn ? "Leave reminder on" : "Remind me to leave in time",
+                    Label(reminderOn ? L10n.t("Leave reminder on") : L10n.t("Remind me to leave in time"),
                           systemImage: reminderOn ? "bell.fill" : "bell")
                 }
             }
@@ -77,19 +77,19 @@ struct TripActionsSection: View {
         }
         switch await LeaveReminder.schedule(trip) {
         case .denied:
-            note = "Allow notifications for Publit in Settings."
+            note = L10n.t("Allow notifications for Publit in Settings.")
             return
         case .tooLate:
-            note = "This trip starts now."
+            note = L10n.t("This trip starts now.")
         case .scheduled(let date):
-            note = "We'll remind you at \(Fmt.time(date, tz: trip.itinerary.legs.first?.from.tz))."
+            note = L10n.f("We'll remind you at %@.", Fmt.time(date, tz: trip.itinerary.legs.first?.from.tz))
         }
         trips.setFollowLive(trip.id, true)
         reminderOn = true
         switch LiveTripActivity.start(trip, hasTicket: !tickets.tickets(forTrip: trip.id).isEmpty) {
-        case .started: note = (note ?? "") + " Follow it on the lock screen."
-        case .tooEarly: note = (note ?? "") + " Live updates on the lock screen start 8 hours before."
-        case .unavailable: note = (note ?? "") + " Turn on Live Activities for Publit in Settings to follow it on the lock screen."
+        case .started: note = [note, L10n.t("Follow it on the lock screen.")].compactMap { $0 }.joined(separator: " ")
+        case .tooEarly: note = [note, L10n.t("Live updates on the lock screen start 8 hours before.")].compactMap { $0 }.joined(separator: " ")
+        case .unavailable: note = [note, L10n.t("Turn on Live Activities for Publit in Settings to follow it on the lock screen.")].compactMap { $0 }.joined(separator: " ")
         case .failed: break
         }
     }
@@ -111,7 +111,7 @@ struct TicketSection: View {
             Section {
                 if !mine.isEmpty {
                     Button { showing = true } label: {
-                        Label(mine.count == 1 ? "Show ticket: \(mine[0].name)" : "Show my tickets (\(mine.count))",
+                        Label(mine.count == 1 ? L10n.f("Show ticket: %@", mine[0].name) : L10n.f("Show my tickets (%lld)", mine.count),
                               systemImage: "ticket.fill")
                     }
                 }

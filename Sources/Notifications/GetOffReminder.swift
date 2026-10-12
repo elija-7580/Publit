@@ -21,8 +21,8 @@ enum GetOffReminder {
         guard granted else { return .denied }
 
         let content = UNMutableNotificationContent()
-        content.title = "Get off soon"
-        content.body = "\(leg.lineName) reaches \(leg.to.name) at \(Fmt.time(leg.endTime, tz: leg.to.tz))."
+        content.title = L10n.t("Get off soon")
+        content.body = L10n.f("%@ reaches %@ at %@.", leg.lineName, leg.to.name, Fmt.time(leg.endTime, tz: leg.to.tz))
         content.sound = .default
         content.interruptionLevel = .active
 

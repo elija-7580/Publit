@@ -9,3 +9,6 @@ build/
 Package.resolved
 node_modules/
 .wrangler/
+
+# Decoded at build time from Config/AppIcon/*.png.b64
+Sources/App/Assets.xcassets/AppIcon.appiconset/*.png
