@@ -148,6 +148,7 @@ struct TicketSection: View {
     var body: some View {
         let links = TicketLinks.links(for: itinerary, userLinked: tickets.linkedApps)
         let mine = tickets.tickets(forTrip: tripId)
+        Group {
         if !itinerary.isDirect {
             Section {
                 ForEach(mine.prefix(2)) { ticket in
@@ -169,8 +170,9 @@ struct TicketSection: View {
                     Text("The operator publishes no ticket link. Link your ticket app in Settings → Ticket apps.")
                 }
             }
-            .fullScreenCover(item: $showing) { ticket in TicketDisplayView(tickets: [ticket]) }
         }
+        }
+        .fullScreenCover(item: $showing) { ticket in TicketDisplayView(tickets: [ticket]) }
     }
 }
 

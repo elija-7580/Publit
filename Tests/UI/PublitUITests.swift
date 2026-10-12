@@ -118,10 +118,17 @@ final class PublitUITests: XCTestCase {
         for _ in 0..<4 where !ticket.isHittable { app.swipeUp() }
         XCTAssertTrue(ticket.isHittable)
         ticket.tap()
-        XCTAssertTrue(app.buttons["Original anzeigen"].waitForExistence(timeout: 10))
         sleep(1)
+        snap("ticket-open-result")
+        let original = app.buttons["showTicketOriginal"]
+        for _ in 0..<3 where !original.isHittable { app.swipeUp() }
+        if !original.exists {
+            print("TICKET NAVBARS: \(app.navigationBars.allElementsBoundByIndex.map(\.identifier))")
+            print("TICKET BUTTONS: \(app.buttons.allElementsBoundByIndex.map { $0.identifier + ":" + $0.label })")
+        }
+        XCTAssertTrue(original.waitForExistence(timeout: 5))
         snap("ticket-embedded")
-        app.buttons["Original anzeigen"].tap()
+        original.tap()
         sleep(1)
         snap("ticket-original")
         app.terminate()

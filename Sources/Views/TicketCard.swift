@@ -35,6 +35,7 @@ struct TicketSummaryCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.appAccent.opacity(0.05), in: RoundedRectangle(cornerRadius: 14))
         .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.appAccent.opacity(0.16), lineWidth: 1))
+        .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("ticketCard")
     }

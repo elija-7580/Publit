@@ -213,6 +213,7 @@ struct TicketDisplayView: View {
                                 .frame(maxWidth: .infinity)
                         }
                         .buttonStyle(.bordered)
+                        .accessibilityIdentifier("showTicketOriginal")
                     }
                     .padding(16)
                     .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14))
