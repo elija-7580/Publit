@@ -131,6 +131,50 @@ final class PublitUITests: XCTestCase {
         app.terminate()
     }
 
+    /// F12 Ticket passes (built, not in the app yet): list, pass with code, full-screen code,
+    /// check screen after recognition, import sources, dark mode and large type.
+    func testF12TicketPassScreens() {
+        var app = sample("passes")
+        let card = app.buttons["passCard"].firstMatch
+        XCTAssertTrue(card.waitForExistence(timeout: 10))
+        snap("pass-wallet")
+        card.tap()
+        XCTAssertTrue(app.buttons["passCode"].waitForExistence(timeout: 5))
+        app.terminate()
+
+        app = sample("pass")
+        let code = app.buttons["passCode"]
+        XCTAssertTrue(code.waitForExistence(timeout: 10))
+        snap("pass-detail")
+        code.tap()
+        XCTAssertTrue(app.buttons["closeCode"].waitForExistence(timeout: 5))
+        snap("pass-code")
+        app.buttons["closeCode"].tap()
+        app.terminate()
+
+        app = sample("pass-editor")
+        XCTAssertTrue(app.buttons["savePass"].waitForExistence(timeout: 10))
+        snap("pass-editor")
+        app.swipeUp()
+        snap("pass-editor-look")
+        app.terminate()
+
+        app = sample("pass-import")
+        XCTAssertTrue(app.buttons["importFile"].waitForExistence(timeout: 10))
+        snap("pass-import")
+        app.terminate()
+
+        app = sample("passes", dark: true)
+        XCTAssertTrue(app.buttons["passCard"].firstMatch.waitForExistence(timeout: 10))
+        snap("pass-wallet-dark")
+        app.terminate()
+
+        app = sample("pass", large: true)
+        XCTAssertTrue(app.buttons["passCode"].waitForExistence(timeout: 10))
+        snap("pass-detail-large")
+        app.terminate()
+    }
+
     /// F01 Nearby: live departures around the (simulated) location.
     func testF01NearbyShowsDepartures() {
         let app = launch()

@@ -1,0 +1,16 @@
+{
+  "name": "publit-pass-signer",
+  "private": true,
+  "type": "module",
+  "description": "Signs Publit's Apple Wallet pass manifests. Holds the Pass Type ID certificate so the app never ships a private key.",
+  "scripts": {
+    "test": "node --test",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "node-forge": "1.3.1"
+  },
+  "devDependencies": {
+    "wrangler": "^3.80.0"
+  }
+}

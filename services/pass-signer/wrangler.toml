@@ -1,0 +1,17 @@
+name = "publit-pass-signer"
+main = "src/index.js"
+compatibility_date = "2024-10-01"
+
+[vars]
+# Must match pass.json; set to your own Pass Type ID and Team ID.
+PASS_TYPE_ID = "pass.io.github.publit.ticket"
+TEAM_ID = "XXXXXXXXXX"
+
+# Secrets (wrangler secret put …): PASS_CERT_PEM, PASS_KEY_PEM, WWDR_CERT_PEM, optional PASS_KEY_PASSPHRASE.
+
+# Basic abuse protection: requests per minute per client IP (Cloudflare Rate Limiting binding).
+[[unsafe.bindings]]
+name = "RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "1001"
+simple = { limit = 20, period = 60 }

@@ -56,6 +56,16 @@ struct PresentationSampleView: View {
     }
 
     var body: some View {
+        if kind.hasPrefix("pass") {
+            PassSampleView(kind: kind)
+                .preferredColorScheme(dark ? .dark : .light)
+                .dynamicTypeSize(large ? .accessibility2 : .large)
+        } else {
+            standard
+        }
+    }
+
+    private var standard: some View {
         NavigationStack {
             List {
                 if kind == "board" {

@@ -58,7 +58,11 @@ struct SettingsView: View {
                 } header: {
                     Text("About")
                 } footer: {
-                    Text("Publit is open source (MIT). No account, no ads, no tracking. Saved places, trips and tickets stay on this device.")
+                    if Features.tickets {
+                        Text("Publit is open source (MIT). No account, no ads, no tracking. Saved places, trips and tickets stay on this device.")
+                    } else {
+                        Text("Publit is open source (MIT). No account, no ads, no tracking. Saved places and trips stay on this device.")
+                    }
                 }
             }
             .navigationTitle("Settings")

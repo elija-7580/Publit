@@ -57,6 +57,7 @@ Sources/
   Models/     API models, line styling
   Location/   CoreLocation wrapper
   Stores/     favourites, trips, tickets (off for now), search history
+  Tickets/    ticket passes: recognition, pass card, Wallet export (built, not wired in yet)
   Util/       polyline decoder, formatting
   Views/      Nearby, Plan, Route detail, Trips, Saved
   Intents/    App Shortcuts and Siri
@@ -64,6 +65,7 @@ Sources/
 Widgets/      home-screen widgets
 Tests/        unit, localization and UI tests with recorded fixtures
 feeds/        data converters contributed to Transitous
+services/     pass-signer: optional Apple Wallet signing service
 ```
 
 ## Data and attribution
@@ -74,7 +76,7 @@ Publit is an independent project and does not use code, assets or data from othe
 
 ## Roadmap
 
-- Tickets: a proper ticket screen (pass-style card, validity, trip, zoomable image). The current version is built but switched off (`Features.tickets`).
+- Tickets as passes: add a PDF, photo or screenshot, Publit reads it on the device, you check the details, the code is ready for the gate. Built in `Sources/Tickets` with tests and demo screens, not wired into the app yet. See [docs/tickets.md](docs/tickets.md). The first ticket version stays switched off (`Features.tickets`).
 - Live Activity updates via push while the app is closed
 - Performance profiling on physical devices (Instruments)
 - Native-speaker review of all translations

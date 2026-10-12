@@ -33,6 +33,13 @@ let core = [
     "Models/TripStatus.swift",
     "Util/TicketLinks.swift",
     "Stores/MapStations.swift",
+    "Tickets/TicketPass.swift",
+    "Tickets/PassStyle.swift",
+    "Tickets/TicketTextParser.swift",
+    "Tickets/PassStore.swift",
+    "Tickets/WalletPass.swift",
+    "Util/SHA1.swift",
+    "Util/ZipWriter.swift",
 ]
 
 let package = Package(

@@ -1,0 +1,239 @@
+import SwiftUI
+import UIKit
+
+/// A ticket as a pass: operator and title, the route, the details, a perforation and the code.
+/// `compact` is the list version without the code.
+struct PassCardView: View {
+    let pass: TicketPass
+    var compact = false
+    var now: Date = .now
+    var onCodeTap: (() -> Void)? = nil
+
+    @Environment(\.dynamicTypeSize) private var typeSize
+
+    private var background: Color { Color(hex: pass.style.background) ?? .black }
+    private var foreground: Color { Color(hex: pass.style.foreground) ?? .white }
+    private var label: Color { Color(hex: pass.style.label) ?? .gray }
+    private var expired: Bool { if case .expired = pass.validity(at: now) { return true }; return false }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: 14) {
+                header
+                route
+                if !compact { details }
+            }
+            .padding(18)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(background, in: TicketSectionShape(notchBottom: !compact))
+
+            if !compact {
+                codeArea
+                    .padding(18)
+                    .frame(maxWidth: .infinity)
+                    .background(background, in: TicketSectionShape(notchTop: true))
+                    .overlay(alignment: .top) {
+                        Perforation()
+                            .stroke(label.opacity(0.6), style: StrokeStyle(lineWidth: 1.5, dash: [5, 5]))
+                            .frame(height: 1.5)
+                            .padding(.horizontal, 20)
+                            .accessibilityHidden(true)
+                    }
+            }
+        }
+        .foregroundStyle(foreground)
+        .compositingGroup()
+        .shadow(color: .black.opacity(0.14), radius: 12, y: 5)
+        .saturation(compact && expired ? 0 : 1)
+        .opacity(compact && expired ? 0.7 : 1)
+    }
+
+    private var header: some View {
+        let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 10)) : AnyLayout(HStackLayout(alignment: .center, spacing: 12))
+        return layout {
+            HStack(spacing: 12) {
+                Image(systemName: pass.symbol.systemImage)
+                    .font(.headline)
+                    .frame(width: 38, height: 38)
+                    .background(foreground.opacity(0.14), in: Circle())
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 2) {
+                    if let op = pass.operatorName {
+                        Text(verbatim: op).font(.caption.weight(.semibold)).textCase(.uppercase).foregroundStyle(label)
+                    }
+                    Text(verbatim: pass.displayTitle).font(.headline).fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            if !typeSize.isAccessibilitySize { Spacer(minLength: 4) }
+            ValidityBadge(validity: pass.validity(at: now), foreground: foreground)
+        }
+    }
+
+    @ViewBuilder
+    private var route: some View {
+        if pass.hasRoute, let origin = pass.origin, let destination = pass.destination {
+            let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8)) : AnyLayout(HStackLayout(alignment: .top, spacing: 10))
+            layout {
+                field(L10n.t("From"), origin, big: true)
+                Image(systemName: typeSize.isAccessibilitySize ? "arrow.down" : "arrow.right")
+                    .font(.title3.weight(.semibold)).foregroundStyle(label)
+                    .padding(.top, typeSize.isAccessibilitySize ? 0 : 20)
+                    .accessibilityHidden(true)
+                field(L10n.t("To"), destination, big: true)
+            }
+        } else if !compact {
+            field(L10n.t("Type"), pass.category.title, big: true)
+        }
+    }
+
+    private var detailFields: [(String, String)] {
+        var out: [(String, String)] = []
+        if let from = pass.validFrom { out.append((L10n.t("Valid from"), PassFormat.date(from, end: false))) }
+        if let until = pass.validUntil { out.append((L10n.t("Valid until"), PassFormat.date(until, end: true))) }
+        if let passenger = pass.passenger { out.append((L10n.t("Passenger"), passenger)) }
+        if let c = pass.travelClassText { out.append((L10n.t("Class"), c)) }
+        if let price = pass.price { out.append((L10n.t("Price"), price)) }
+        return out
+    }
+
+    @ViewBuilder
+    private var details: some View {
+        let fields = detailFields
+        if !fields.isEmpty {
+            let columns = typeSize.isAccessibilitySize ? 1 : 2
+            Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 12) {
+                ForEach(Array(stride(from: 0, to: fields.count, by: columns)), id: \.self) { start in
+                    GridRow {
+                        ForEach(start..<min(start + columns, fields.count), id: \.self) { i in
+                            field(fields[i].0, fields[i].1, big: false)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func field(_ title: String, _ value: String, big: Bool) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(verbatim: title).font(.caption2.weight(.semibold)).textCase(.uppercase).foregroundStyle(label)
+            Text(verbatim: value)
+                .font(big ? .title3.weight(.bold) : .subheadline.weight(.semibold))
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
+    }
+
+    @ViewBuilder
+    private var codeArea: some View {
+        VStack(spacing: 10) {
+            if let code = pass.barcode {
+                Button { onCodeTap?() } label: {
+                    BarcodeView(code: code)
+                        .frame(maxWidth: code.format.isSquare ? 230 : .infinity)
+                        .frame(height: code.format.isSquare ? 230 : 120)
+                        .padding(14)
+                        .background(.white, in: RoundedRectangle(cornerRadius: 14))
+                }
+                .buttonStyle(.plain)
+                .disabled(onCodeTap == nil)
+                .accessibilityLabel(L10n.f("%@ code", code.format.title))
+                .accessibilityHint(onCodeTap == nil ? "" : L10n.t("Shows the code full screen."))
+                .accessibilityIdentifier("passCode")
+                if let text = pass.reference ?? code.altText {
+                    Text(verbatim: text).font(.footnote.monospaced()).foregroundStyle(label)
+                        .textSelection(.enabled)
+                }
+            } else {
+                Label(pass.document != nil ? L10n.t("No code found. Show the original instead.") : L10n.t("No code"),
+                      systemImage: "doc.text.magnifyingglass")
+                    .font(.subheadline).foregroundStyle(label)
+                    .frame(maxWidth: .infinity, minHeight: 60)
+            }
+        }
+    }
+}
+
+struct ValidityBadge: View {
+    let validity: TicketPass.Validity
+    let foreground: Color
+
+    var body: some View {
+        if let content {
+            Label(content.text, systemImage: content.icon)
+                .font(.caption.weight(.semibold))
+                .padding(.horizontal, 10).padding(.vertical, 5)
+                .background(foreground.opacity(0.14), in: Capsule())
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var content: (text: String, icon: String)? {
+        switch validity {
+        case .valid: return (L10n.t("Valid now"), "checkmark.circle.fill")
+        case .upcoming(let from): return (L10n.f("From %@", PassFormat.date(from, end: false)), "clock")
+        case .expired: return (L10n.t("Expired"), "xmark.circle")
+        case .unknown: return nil
+        }
+    }
+}
+
+/// Rounded rectangle with semicircle notches where the perforation is, like a paper ticket.
+struct TicketSectionShape: Shape {
+    var cornerRadius: CGFloat = 22
+    var notchRadius: CGFloat = 11
+    var notchTop = false
+    var notchBottom = false
+
+    func path(in rect: CGRect) -> Path {
+        var path = Path(roundedRect: rect, cornerRadii: RectangleCornerRadii(
+            topLeading: notchTop ? 0 : cornerRadius, bottomLeading: notchBottom ? 0 : cornerRadius,
+            bottomTrailing: notchBottom ? 0 : cornerRadius, topTrailing: notchTop ? 0 : cornerRadius))
+        let d = notchRadius * 2
+        if notchTop {
+            path = path.subtracting(Path(ellipseIn: CGRect(x: rect.minX - notchRadius, y: rect.minY - notchRadius, width: d, height: d)))
+                .subtracting(Path(ellipseIn: CGRect(x: rect.maxX - notchRadius, y: rect.minY - notchRadius, width: d, height: d)))
+        }
+        if notchBottom {
+            path = path.subtracting(Path(ellipseIn: CGRect(x: rect.minX - notchRadius, y: rect.maxY - notchRadius, width: d, height: d)))
+                .subtracting(Path(ellipseIn: CGRect(x: rect.maxX - notchRadius, y: rect.maxY - notchRadius, width: d, height: d)))
+        }
+        return path
+    }
+}
+
+private struct Perforation: Shape {
+    func path(in rect: CGRect) -> Path {
+        Path { p in
+            p.move(to: CGPoint(x: rect.minX, y: rect.midY))
+            p.addLine(to: CGPoint(x: rect.maxX, y: rect.midY))
+        }
+    }
+}
+
+/// Renders the code away from the main thread; it never blocks scrolling.
+struct BarcodeView: View {
+    let code: TicketPass.Barcode
+    @State private var image: UIImage?
+    @State private var failed = false
+
+    var body: some View {
+        Group {
+            if let image {
+                Image(uiImage: image).interpolation(.none).resizable().scaledToFit()
+            } else if failed {
+                Image(systemName: "exclamationmark.triangle").foregroundStyle(.secondary)
+            } else {
+                ProgressView()
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .task(id: code) {
+            let code = code
+            let rendered = await Task.detached(priority: .userInitiated) { BarcodeRenderer.image(code) }.value
+            guard !Task.isCancelled else { return }
+            image = rendered
+            failed = rendered == nil
+        }
+    }
+}

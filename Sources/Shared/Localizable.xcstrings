@@ -286,6 +286,101 @@
     }
    }
   },
+  "%@ code": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ code"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@-Code"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Code %@"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Codice %@"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Código %@"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Código %@"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@-code"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kod %@"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Код %@"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Cod %@"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kód %@"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@-kod"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Κωδικός %@"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ kód"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ kodu"
+     }
+    }
+   }
+  },
   "%@ departs %@": {
    "extractionState": "manual",
    "localizations": {
@@ -3058,6 +3153,196 @@
     }
    }
   },
+  "A copy of your ticket for quick access. Only the ticket the operator issued is valid. Inspectors may ask for it or for the operator's app.": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "A copy of your ticket for quick access. Only the ticket the operator issued is valid. Inspectors may ask for it or for the operator's app."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Eine Kopie deines Tickets für den schnellen Zugriff. Gültig ist nur das Ticket des Verkehrsunternehmens. Bei Kontrollen kann es oder die App des Unternehmens verlangt werden."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Une copie de ton billet pour y accéder vite. Seul le billet émis par l’opérateur est valable. Les contrôleurs peuvent le demander, ou l’app de l’opérateur."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Una copia del tuo biglietto per averlo subito a portata di mano. Vale solo il biglietto emesso dall’operatore. I controllori possono chiederlo, o l’app dell’operatore."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Una copia de tu billete para tenerlo a mano. Solo vale el billete emitido por el operador. En un control pueden pedírtelo, o la app del operador."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Uma cópia do teu bilhete para acesso rápido. Só é válido o bilhete emitido pelo operador. Na fiscalização podem pedi-lo, ou a app do operador."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Een kopie van je ticket voor snelle toegang. Alleen het ticket van de vervoerder is geldig. Bij controle kan daarom of om de app van de vervoerder worden gevraagd."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kopia biletu, by mieć go pod ręką. Ważny jest tylko bilet wydany przez przewoźnika. Kontroler może poprosić o niego lub o aplikację przewoźnika."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Копія твого квитка для швидкого доступу. Дійсний лише квиток, виданий перевізником. Контролер може попросити його або застосунок перевізника."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O copie a biletului tău, mereu la îndemână. Valabil este doar biletul emis de operator. La control ți se poate cere acesta sau aplicația operatorului."
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kopie tvé jízdenky pro rychlý přístup. Platí jen jízdenka vydaná dopravcem. Revizor si ji může vyžádat, nebo aplikaci dopravce."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "En kopia av din biljett för snabb åtkomst. Bara biljetten från trafikbolaget gäller. Vid kontroll kan du behöva visa den eller trafikbolagets app."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Αντίγραφο του εισιτηρίου σου για γρήγορη πρόσβαση. Ισχύει μόνο το εισιτήριο που εξέδωσε ο φορέας. Στον έλεγχο μπορεί να ζητηθεί αυτό ή η εφαρμογή του φορέα."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "A jegyed másolata a gyors eléréshez. Csak a szolgáltató által kiadott jegy érvényes. Ellenőrzéskor ezt vagy a szolgáltató appját kérhetik."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Hızlı erişim için biletinin bir kopyası. Yalnızca işletmecinin verdiği bilet geçerlidir. Kontrolde bu bilet ya da işletmecinin uygulaması istenebilir."
+     }
+    }
+   }
+  },
+  "A copy of your ticket, made with Publit. Only the ticket the operator issued is valid; keep it with you.": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "A copy of your ticket, made with Publit. Only the ticket the operator issued is valid; keep it with you."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Eine Kopie deines Tickets, erstellt mit Publit. Gültig ist nur das Ticket des Verkehrsunternehmens. Hab es dabei."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Une copie de ton billet, créée avec Publit. Seul le billet émis par l’opérateur est valable ; garde-le sur toi."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Una copia del tuo biglietto, creata con Publit. Vale solo il biglietto emesso dall’operatore: tienilo con te."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Una copia de tu billete, creada con Publit. Solo vale el billete emitido por el operador; llévalo contigo."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Uma cópia do teu bilhete, criada com o Publit. Só é válido o bilhete emitido pelo operador; leva-o contigo."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Een kopie van je ticket, gemaakt met Publit. Alleen het ticket van de vervoerder is geldig; neem het mee."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kopia biletu utworzona w Publit. Ważny jest tylko bilet wydany przez przewoźnika – miej go przy sobie."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Копія твого квитка, створена в Publit. Дійсний лише квиток, виданий перевізником, – май його з собою."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O copie a biletului tău, creată cu Publit. Valabil este doar biletul emis de operator; ține-l la tine."
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kopie tvé jízdenky vytvořená v Publitu. Platí jen jízdenka vydaná dopravcem – měj ji u sebe."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "En kopia av din biljett, gjord med Publit. Bara biljetten från trafikbolaget gäller – ha den med dig."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Αντίγραφο του εισιτηρίου σου, φτιαγμένο με το Publit. Ισχύει μόνο το εισιτήριο του φορέα· να το έχεις μαζί σου."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "A jegyed másolata, a Publittal készült. Csak a szolgáltató által kiadott jegy érvényes, legyen nálad."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Biletinin Publit ile oluşturulmuş kopyası. Yalnızca işletmecinin verdiği bilet geçerlidir; yanında bulundur."
+     }
+    }
+   }
+  },
   "A screenshot of the ticket or its QR code. Inspectors usually need the live ticket in the operator's app; use the link below for that.": {
    "extractionState": "manual",
    "localizations": {
@@ -3438,6 +3723,101 @@
     }
    }
   },
+  "About this pass": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "About this pass"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Über diesen Pass"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "À propos de ce pass"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Informazioni su questo pass"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sobre este pase"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sobre este passe"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Over deze pas"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O tej karcie"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Про цю картку"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Despre acest permis"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O této kartě"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Om det här kortet"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Σχετικά με την κάρτα"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "A kártyáról"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bu kart hakkında"
+     }
+    }
+   }
+  },
   "Active trip": {
    "extractionState": "manual",
    "localizations": {
@@ -3719,6 +4099,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "KlimaTicket veya Deutschlandticket gibi bir abonmanın, tek yön biletin ekran görüntüsünü ya da biletinizin bulunduğu uygulamanın bağlantısını ekleyin."
+     }
+    }
+   }
+  },
+  "Add a ticket from a PDF, a photo or a screenshot. Publit reads the details on your iPhone and keeps the code ready for the gate.": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Add a ticket from a PDF, a photo or a screenshot. Publit reads the details on your iPhone and keeps the code ready for the gate."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Füge ein Ticket aus einem PDF, einem Foto oder einem Screenshot hinzu. Publit liest die Angaben auf deinem iPhone und hält den Code für die Sperre bereit."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ajoute un billet depuis un PDF, une photo ou une capture d’écran. Publit lit les infos sur ton iPhone et garde le code prêt pour le portique."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Aggiungi un biglietto da un PDF, una foto o uno screenshot. Publit legge i dati sul tuo iPhone e tiene pronto il codice per il tornello."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Añade un billete desde un PDF, una foto o una captura de pantalla. Publit lee los datos en tu iPhone y deja el código listo para el torno."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Adiciona um bilhete a partir de um PDF, de uma foto ou de uma captura de ecrã. O Publit lê os dados no teu iPhone e tem o código pronto para a cancela."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Voeg een ticket toe uit een pdf, foto of screenshot. Publit leest de gegevens op je iPhone en houdt de code klaar voor het poortje."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Dodaj bilet z pliku PDF, zdjęcia lub zrzutu ekranu. Publit odczyta dane na iPhonie i przygotuje kod do bramki."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Додай квиток із PDF, фото чи знімка екрана. Publit прочитає дані на твоєму iPhone і тримає код напоготові для турнікета."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Adaugă un bilet dintr-un PDF, o fotografie sau o captură de ecran. Publit citește datele pe iPhone și ține codul pregătit pentru barieră."
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Přidej jízdenku z PDF, fotky nebo snímku obrazovky. Publit přečte údaje přímo v iPhonu a připraví kód pro turniket."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Lägg till en biljett från en pdf, ett foto eller en skärmbild. Publit läser uppgifterna på din iPhone och har koden redo vid spärren."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Πρόσθεσε εισιτήριο από PDF, φωτογραφία ή στιγμιότυπο οθόνης. Το Publit διαβάζει τα στοιχεία στο iPhone σου και κρατά τον κωδικό έτοιμο για την μπάρα."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Adj hozzá jegyet PDF-ből, fotóból vagy képernyőképből. A Publit az iPhone-odon olvassa ki az adatokat, és kéznél tartja a kódot a beléptetőhöz."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "PDF, fotoğraf ya da ekran görüntüsünden bilet ekle. Publit bilgileri iPhone’unda okur ve kodu turnike için hazır tutar."
      }
     }
    }
@@ -4578,6 +5053,196 @@
     }
    }
   },
+  "Annual pass or subscription": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Annual pass or subscription"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Jahreskarte oder Abo"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Abonnement annuel"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Abbonamento annuale"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Abono anual o suscripción"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Passe anual ou assinatura"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Jaarkaart of abonnement"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bilet roczny lub abonament"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Річний квиток або абонемент"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Abonament anual"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Roční jízdenka nebo předplatné"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Årskort eller abonnemang"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ετήσια κάρτα ή συνδρομή"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Éves bérlet vagy előfizetés"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Yıllık kart veya abonman"
+     }
+    }
+   }
+  },
+  "Apple Wallet is not available right now. Please try again later.": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Apple Wallet is not available right now. Please try again later."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Apple Wallet ist gerade nicht verfügbar. Bitte versuch es später noch einmal."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Apple Wallet n’est pas disponible pour le moment. Réessaie plus tard."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Apple Wallet non è disponibile al momento. Riprova più tardi."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Apple Wallet no está disponible ahora. Inténtalo más tarde."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O Apple Wallet não está disponível agora. Tenta mais tarde."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Apple Wallet is nu niet beschikbaar. Probeer het later opnieuw."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Apple Wallet jest teraz niedostępny. Spróbuj ponownie później."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Apple Wallet зараз недоступний. Спробуй пізніше."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Apple Wallet nu este disponibil acum. Încearcă mai târziu."
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Apple Wallet teď není dostupný. Zkus to později."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Apple Wallet är inte tillgängligt just nu. Försök igen senare."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Το Apple Wallet δεν είναι διαθέσιμο τώρα. Δοκίμασε ξανά αργότερα."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Az Apple Wallet most nem érhető el. Próbáld újra később."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Apple Wallet şu anda kullanılamıyor. Daha sonra yeniden dene."
+     }
+    }
+   }
+  },
   "Arrive": {
    "extractionState": "manual",
    "localizations": {
@@ -5429,6 +6094,196 @@
      "stringUnit": {
       "state": "translated",
       "value": "Bisiklet"
+     }
+    }
+   }
+  },
+  "Black": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Black"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Schwarz"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Noir"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nero"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Negro"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Preto"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Zwart"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Czarny"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Чорний"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Negru"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Černá"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Svart"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Μαύρο"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fekete"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Siyah"
+     }
+    }
+   }
+  },
+  "Blue": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Blue"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Blau"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bleu"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Blu"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Azul"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Azul"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Blauw"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Niebieski"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Синій"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Albastru"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Modrá"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Blå"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Μπλε"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kék"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Mavi"
      }
     }
    }
@@ -6288,6 +7143,101 @@
     }
    }
   },
+  "Check ticket": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Check ticket"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ticket prüfen"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Vérifier le billet"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Controlla biglietto"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Revisar billete"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Verificar bilhete"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ticket controleren"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sprawdź bilet"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Перевір квиток"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Verifică biletul"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Zkontrolovat jízdenku"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kontrollera biljett"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Έλεγχος εισιτηρίου"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Jegy ellenőrzése"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bileti kontrol et"
+     }
+    }
+   }
+  },
   "Choose a stop": {
    "extractionState": "manual",
    "localizations": {
@@ -6383,6 +7333,101 @@
     }
    }
   },
+  "Choose page": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Choose page"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Seite wählen"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Choisir la page"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Scegli pagina"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Elegir página"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Escolher página"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Pagina kiezen"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Wybierz stronę"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Вибери сторінку"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Alege pagina"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Vybrat stránku"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Välj sida"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Επιλογή σελίδας"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Oldal kiválasztása"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sayfa seç"
+     }
+    }
+   }
+  },
   "Choose screenshot": {
    "extractionState": "manual",
    "localizations": {
@@ -6474,6 +7519,196 @@
      "stringUnit": {
       "state": "translated",
       "value": "Ekran görüntüsü seç"
+     }
+    }
+   }
+  },
+  "Class": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Class"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Klasse"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Classe"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Classe"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Clase"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Classe"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Klasse"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Klasa"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Клас"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Clasa"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Třída"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Klass"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Θέση"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Osztály"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sınıf"
+     }
+    }
+   }
+  },
+  "Class %@": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Class %@"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@. Klasse"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Classe %@"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ª classe"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@.ª clase"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@.ª classe"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@e klas"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Klasa %@"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ клас"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Clasa %@"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@. třída"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Klass %@"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@η θέση"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@. osztály"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@. sınıf"
      }
     }
    }
@@ -6854,6 +8089,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "Şehirlerarası otobüs"
+     }
+    }
+   }
+  },
+  "Code": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Code"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Code"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Code"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Codice"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Código"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Código"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Code"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kod"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Код"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Cod"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kód"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kod"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Κωδικός"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kód"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kod"
      }
     }
    }
@@ -7428,6 +8758,386 @@
     }
    }
   },
+  "Day ticket": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Day ticket"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Tageskarte"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Billet journée"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Biglietto giornaliero"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Billete de un día"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bilhete diário"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Dagkaart"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bilet dobowy"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Денний квиток"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bilet de o zi"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Celodenní jízdenka"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Dagbiljett"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ημερήσιο εισιτήριο"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Napijegy"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Günlük bilet"
+     }
+    }
+   }
+  },
+  "Delete": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Delete"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Löschen"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Supprimer"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Elimina"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Eliminar"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Apagar"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Verwijderen"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Usuń"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Видалити"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Șterge"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Smazat"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Radera"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Διαγραφή"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Törlés"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sil"
+     }
+    }
+   }
+  },
+  "Delete this ticket?": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Delete this ticket?"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Dieses Ticket löschen?"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Supprimer ce billet ?"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Eliminare questo biglietto?"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "¿Eliminar este billete?"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Apagar este bilhete?"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Dit ticket verwijderen?"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Usunąć ten bilet?"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Видалити цей квиток?"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ștergi acest bilet?"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Smazat tuto jízdenku?"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Radera biljetten?"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Διαγραφή αυτού του εισιτηρίου;"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Törlöd ezt a jegyet?"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bu bilet silinsin mi?"
+     }
+    }
+   }
+  },
+  "Delete ticket": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Delete ticket"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ticket löschen"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Supprimer le billet"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Elimina biglietto"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Eliminar billete"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Apagar bilhete"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ticket verwijderen"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Usuń bilet"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Видалити квиток"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Șterge biletul"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Smazat jízdenku"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Radera biljett"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Διαγραφή εισιτηρίου"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Jegy törlése"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bileti sil"
+     }
+    }
+   }
+  },
   "Depart": {
    "extractionState": "manual",
    "localizations": {
@@ -7899,6 +9609,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "Varış yeri"
+     }
+    }
+   }
+  },
+  "Details": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Details"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Details"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Détails"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Dettagli"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Detalles"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Detalhes"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Details"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Szczegóły"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Деталі"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Detalii"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Podrobnosti"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Detaljer"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Λεπτομέρειες"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Részletek"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ayrıntılar"
      }
     }
    }
@@ -8473,6 +10278,196 @@
     }
    }
   },
+  "Edit": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Edit"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bearbeiten"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Modifier"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Modifica"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Editar"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Editar"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Wijzigen"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Edytuj"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Змінити"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Editează"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Upravit"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Redigera"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Επεξεργασία"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Szerkesztés"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Düzenle"
+     }
+    }
+   }
+  },
+  "Edit ticket": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Edit ticket"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ticket bearbeiten"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Modifier le billet"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Modifica biglietto"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Editar billete"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Editar bilhete"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ticket wijzigen"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Edytuj bilet"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Змінити квиток"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Editează biletul"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Upravit jízdenku"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Redigera biljett"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Επεξεργασία εισιτηρίου"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Jegy szerkesztése"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bileti düzenle"
+     }
+    }
+   }
+  },
   "End trip": {
    "extractionState": "manual",
    "localizations": {
@@ -8849,6 +10844,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "Süresi doldu"
+     }
+    }
+   }
+  },
+  "Expired on %@": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Expired on %@"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Abgelaufen am %@"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Expiré le %@"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Scaduto il %@"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Caducó el %@"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Expirou a %@"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Verlopen op %@"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Wygasł %@"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Термін дії минув %@"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "A expirat pe %@"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Platnost skončila %@"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Gick ut %@"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Έληξε στις %@"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Lejárt: %@"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ tarihinde süresi doldu"
      }
     }
    }
@@ -9613,6 +11703,196 @@
     }
    }
   },
+  "From %@": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "From %@"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ab %@"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Dès le %@"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Dal %@"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Desde el %@"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "A partir de %@"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Vanaf %@"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Od %@"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "З %@"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "De la %@"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Od %@"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Från %@"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Από %@"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ettől: %@"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ itibarıyla"
+     }
+    }
+   }
+  },
+  "From ticket": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "From ticket"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Vom Ticket"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Du billet"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Dal biglietto"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Del billete"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Do bilhete"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Van het ticket"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Z biletu"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "З квитка"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "De pe bilet"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Z jízdenky"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Från biljetten"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Από το εισιτήριο"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "A jegyről"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Biletten"
+     }
+    }
+   }
+  },
   "From your location": {
    "extractionState": "manual",
    "localizations": {
@@ -10084,6 +12364,291 @@
      "stringUnit": {
       "state": "translated",
       "value": "Yakında ineceksiniz"
+     }
+    }
+   }
+  },
+  "Graphite": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Graphite"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Graphit"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Graphite"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Grafite"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Grafito"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Grafite"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Grafiet"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Grafit"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Графіт"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Grafit"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Grafit"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Grafit"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Γραφίτης"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Grafit"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Grafit"
+     }
+    }
+   }
+  },
+  "Green": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Green"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Grün"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Vert"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Verde"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Verde"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Verde"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Groen"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Zielony"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Зелений"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Verde"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Zelená"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Grön"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Πράσινο"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Zöld"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Yeşil"
+     }
+    }
+   }
+  },
+  "Hidden": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Hidden"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ausgeblendet"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Masqués"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nascosti"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ocultos"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ocultos"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Verborgen"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ukryte"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Приховано"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ascunse"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Skryté"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Dolda"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Κρυφά"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Elrejtve"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Gizli"
      }
     }
    }
@@ -11129,6 +13694,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "Çıkış hatırlatıcısı açık"
+     }
+    }
+   }
+  },
+  "Light": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Light"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Hell"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Clair"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Chiaro"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Claro"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Claro"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Licht"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Jasny"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Світлий"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Deschis"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Světlá"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ljus"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ανοιχτό"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Világos"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Açık"
      }
     }
    }
@@ -12558,6 +15218,101 @@
     }
    }
   },
+  "Look": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Look"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Aussehen"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Apparence"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Aspetto"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Aspecto"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Aspeto"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Uiterlijk"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Wygląd"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Вигляд"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Aspect"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Vzhled"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Utseende"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Εμφάνιση"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Megjelenés"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Görünüm"
+     }
+    }
+   }
+  },
   "Major delays": {
    "extractionState": "manual",
    "localizations": {
@@ -12839,6 +15594,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "Metro"
+     }
+    }
+   }
+  },
+  "More": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "More"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Mehr"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Plus"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Altro"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Más"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Mais"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Meer"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Więcej"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Більше"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Mai mult"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Další"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Mer"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Περισσότερα"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Továbbiak"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Diğer"
      }
     }
    }
@@ -13698,6 +16548,291 @@
     }
    }
   },
+  "No code": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "No code"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kein Code"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Aucun code"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nessun codice"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sin código"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sem código"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Geen code"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Brak kodu"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Без коду"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fără cod"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bez kódu"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ingen kod"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Χωρίς κωδικό"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nincs kód"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kod yok"
+     }
+    }
+   }
+  },
+  "No code found on this page. Publit shows the original instead.": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "No code found on this page. Publit shows the original instead."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Auf dieser Seite wurde kein Code gefunden. Publit zeigt stattdessen das Original."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Aucun code trouvé sur cette page. Publit affiche l’original à la place."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nessun codice trovato in questa pagina. Publit mostra l’originale."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "No se encontró ningún código en esta página. Publit muestra el original."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Não foi encontrado nenhum código nesta página. O Publit mostra o original."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Geen code gevonden op deze pagina. Publit toont in plaats daarvan het origineel."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Na tej stronie nie znaleziono kodu. Publit pokaże oryginał."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "На цій сторінці коду не знайдено. Publit покаже оригінал."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nu s-a găsit niciun cod pe această pagină. Publit afișează originalul."
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Na této stránce nebyl nalezen žádný kód. Publit místo něj ukáže originál."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ingen kod hittades på sidan. Publit visar originalet i stället."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Δεν βρέθηκε κωδικός σε αυτή τη σελίδα. Το Publit δείχνει το πρωτότυπο."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ezen az oldalon nincs kód. A Publit helyette az eredetit mutatja."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bu sayfada kod bulunamadı. Publit bunun yerine aslını gösterir."
+     }
+    }
+   }
+  },
+  "No code found. Show the original instead.": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "No code found. Show the original instead."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kein Code gefunden. Zeig stattdessen das Original."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Aucun code trouvé. Montre l’original à la place."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nessun codice trovato. Mostra l’originale."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "No se encontró ningún código. Muestra el original."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nenhum código encontrado. Mostra o original."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Geen code gevonden. Toon het origineel."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nie znaleziono kodu. Pokaż oryginał."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Код не знайдено. Покажи оригінал."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nu s-a găsit niciun cod. Arată originalul."
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kód nebyl nalezen. Ukaž originál."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ingen kod hittades. Visa originalet."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Δεν βρέθηκε κωδικός. Δείξε το πρωτότυπο."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nincs kód. Mutasd az eredetit."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kod bulunamadı. Aslını göster."
+     }
+    }
+   }
+  },
   "No connections found.": {
    "extractionState": "manual",
    "localizations": {
@@ -13789,6 +16924,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "Bağlantı bulunamadı."
+     }
+    }
+   }
+  },
+  "No dates": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "No dates"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ohne Datum"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sans date"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Senza date"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sin fechas"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sem datas"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Zonder datum"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bez dat"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Без дат"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fără date"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bez data"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Utan datum"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Χωρίς ημερομηνίες"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Dátum nélkül"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Tarihsiz"
      }
     }
    }
@@ -14933,6 +18163,101 @@
     }
    }
   },
+  "None": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "None"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Keine"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Aucune"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nessuna"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ninguna"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nenhuma"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Geen"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Brak"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Немає"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Niciuna"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Žádná"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ingen"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Καμία"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nincs"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Yok"
+     }
+    }
+   }
+  },
   "Not departed yet": {
    "extractionState": "manual",
    "localizations": {
@@ -15028,6 +18353,101 @@
     }
    }
   },
+  "Notes": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Notes"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Notizen"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Notes"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Note"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Notas"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Notas"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Notities"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Notatki"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Нотатки"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Note"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Poznámky"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Anteckningar"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Σημειώσεις"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Jegyzetek"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Notlar"
+     }
+    }
+   }
+  },
   "Nothing else saved yet": {
    "extractionState": "manual",
    "localizations": {
@@ -15119,6 +18539,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "Başka kayıtlı öğe yok"
+     }
+    }
+   }
+  },
+  "OK": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "OK"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "OK"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "OK"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "OK"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "OK"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "OK"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "OK"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "OK"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "OK"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "OK"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "OK"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "OK"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "OK"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "OK"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Tamam"
      }
     }
    }
@@ -15309,6 +18824,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "Zamanında"
+     }
+    }
+   }
+  },
+  "Only codes that stay the same work here. Codes that change every few seconds only work in the operator's app.": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Only codes that stay the same work here. Codes that change every few seconds only work in the operator's app."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Hier funktionieren nur Codes, die gleich bleiben. Codes, die sich alle paar Sekunden ändern, funktionieren nur in der App des Verkehrsunternehmens."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Seuls les codes fixes fonctionnent ici. Les codes qui changent toutes les quelques secondes ne marchent que dans l’app de l’opérateur."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Qui funzionano solo i codici che non cambiano. I codici che cambiano ogni pochi secondi funzionano solo nell’app dell’operatore."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Aquí solo funcionan los códigos que no cambian. Los que cambian cada pocos segundos solo funcionan en la app del operador."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Aqui só funcionam códigos que não mudam. Os que mudam a cada poucos segundos só funcionam na app do operador."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Hier werken alleen codes die gelijk blijven. Codes die elke paar seconden veranderen werken alleen in de app van de vervoerder."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Działają tu tylko kody, które się nie zmieniają. Kody zmieniające się co kilka sekund działają tylko w aplikacji przewoźnika."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Тут працюють лише незмінні коди. Коди, що змінюються кожні кілька секунд, працюють тільки в застосунку перевізника."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Aici funcționează doar codurile care nu se schimbă. Codurile care se schimbă la câteva secunde merg doar în aplicația operatorului."
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fungují tu jen kódy, které se nemění. Kódy, které se mění každých pár sekund, fungují jen v aplikaci dopravce."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Här fungerar bara koder som inte ändras. Koder som byts ut med några sekunders mellanrum fungerar bara i trafikbolagets app."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Εδώ λειτουργούν μόνο κωδικοί που δεν αλλάζουν. Κωδικοί που αλλάζουν κάθε λίγα δευτερόλεπτα λειτουργούν μόνο στην εφαρμογή του φορέα."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Itt csak a változatlan kódok működnek. A néhány másodpercenként változó kódok csak a szolgáltató appjában működnek."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Burada yalnızca değişmeyen kodlar çalışır. Birkaç saniyede bir değişen kodlar yalnızca işletmecinin uygulamasında çalışır."
      }
     }
    }
@@ -15788,6 +19398,101 @@
     }
    }
   },
+  "Operator": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Operator"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Verkehrsunternehmen"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Opérateur"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Operatore"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Operador"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Operador"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Vervoerder"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Przewoźnik"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Перевізник"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Operator"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Dopravce"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Trafikbolag"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Φορέας"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Szolgáltató"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "İşletmeci"
+     }
+    }
+   }
+  },
   "Operator as shown in routes, e.g. Atac": {
    "extractionState": "manual",
    "localizations": {
@@ -15974,6 +19679,481 @@
      "stringUnit": {
       "state": "translated",
       "value": "İşletmeci bilgileri"
+     }
+    }
+   }
+  },
+  "Orange": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Orange"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Orange"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Orange"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Arancione"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Naranja"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Laranja"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Oranje"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Pomarańczowy"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Помаранчевий"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Portocaliu"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Oranžová"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Orange"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Πορτοκαλί"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Narancs"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Turuncu"
+     }
+    }
+   }
+  },
+  "Original ticket": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Original ticket"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Original-Ticket"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Billet original"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Biglietto originale"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Billete original"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bilhete original"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Origineel ticket"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Oryginalny bilet"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Оригінал квитка"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Biletul original"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Originál jízdenky"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Originalbiljett"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Πρωτότυπο εισιτήριο"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Eredeti jegy"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Orijinal bilet"
+     }
+    }
+   }
+  },
+  "Other ticket": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Other ticket"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Anderes Ticket"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Autre billet"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Altro biglietto"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Otro billete"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Outro bilhete"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ander ticket"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Inny bilet"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Інший квиток"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Alt bilet"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Jiná jízdenka"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Annan biljett"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Άλλο εισιτήριο"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Egyéb jegy"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Diğer bilet"
+     }
+    }
+   }
+  },
+  "PDF or image file": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "PDF or image file"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "PDF- oder Bilddatei"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fichier PDF ou image"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "File PDF o immagine"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Archivo PDF o imagen"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ficheiro PDF ou imagem"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Pdf- of afbeeldingsbestand"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Plik PDF lub obraz"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Файл PDF або зображення"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fișier PDF sau imagine"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Soubor PDF nebo obrázek"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Pdf- eller bildfil"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Αρχείο PDF ή εικόνας"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "PDF- vagy képfájl"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "PDF ya da görsel dosyası"
+     }
+    }
+   }
+  },
+  "Page %lld": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Page %lld"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Seite %lld"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Page %lld"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Pagina %lld"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Página %lld"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Página %lld"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Pagina %lld"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Strona %lld"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Сторінка %lld"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Pagina %lld"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Stránka %lld"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sida %lld"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Σελίδα %lld"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%lld. oldal"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sayfa %lld"
      }
     }
    }
@@ -16168,6 +20348,101 @@
     }
    }
   },
+  "Passenger": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Passenger"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fahrgast"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Voyageur"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Passeggero"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Pasajero"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Passageiro"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Reiziger"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Pasażer"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Пасажир"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Călător"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Cestující"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Resenär"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Επιβάτης"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Utas"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Yolcu"
+     }
+    }
+   }
+  },
   "Passes": {
    "extractionState": "manual",
    "localizations": {
@@ -16354,6 +20629,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "Geçmiş yolculuklar"
+     }
+    }
+   }
+  },
+  "Photo or screenshot": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Photo or screenshot"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Foto oder Screenshot"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Photo ou capture d’écran"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Foto o screenshot"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Foto o captura de pantalla"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Foto ou captura de ecrã"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Foto of screenshot"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Zdjęcie lub zrzut ekranu"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Фото або знімок екрана"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fotografie sau captură de ecran"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fotka nebo snímek obrazovky"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Foto eller skärmbild"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Φωτογραφία ή στιγμιότυπο"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fotó vagy képernyőkép"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fotoğraf ya da ekran görüntüsü"
      }
     }
    }
@@ -17118,6 +21488,196 @@
     }
    }
   },
+  "Preview: %@": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Preview: %@"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Vorschau: %@"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Aperçu : %@"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Anteprima: %@"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Vista previa: %@"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Pré-visualização: %@"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Voorbeeld: %@"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Podgląd: %@"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Попередній перегляд: %@"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Previzualizare: %@"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Náhled: %@"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Förhandsvisning: %@"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Προεπισκόπηση: %@"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Előnézet: %@"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Önizleme: %@"
+     }
+    }
+   }
+  },
+  "Price": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Price"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Preis"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Prix"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Prezzo"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Precio"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Preço"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Prijs"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Cena"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ціна"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Preț"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Cena"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Pris"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Τιμή"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ár"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fiyat"
+     }
+    }
+   }
+  },
   "Public transport, without the noise.": {
    "extractionState": "manual",
    "localizations": {
@@ -17213,6 +21773,101 @@
     }
    }
   },
+  "Publit is open source (MIT). No account, no ads, no tracking. Saved places and trips stay on this device.": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit is open source (MIT). No account, no ads, no tracking. Saved places and trips stay on this device."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit ist Open Source (MIT). Kein Konto, keine Werbung, kein Tracking. Gespeicherte Orte und Fahrten bleiben auf diesem Gerät."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit est open source (MIT). Sans compte, sans publicité, sans pistage. Vos lieux et trajets restent sur cet appareil."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit è open source (MIT). Nessun account, nessuna pubblicità, nessun tracciamento. Luoghi e viaggi salvati restano su questo dispositivo."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit es de código abierto (MIT). Sin cuenta, sin anuncios, sin rastreo. Tus lugares y viajes guardados se quedan en este dispositivo."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O Publit é open source (MIT). Sem conta, sem anúncios, sem rastreio. Locais e viagens guardados ficam neste dispositivo."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit is open source (MIT). Geen account, geen advertenties, geen tracking. Bewaarde plaatsen en reizen blijven op dit apparaat."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit jest open source (MIT). Bez konta, bez reklam, bez śledzenia. Zapisane miejsca i podróże zostają na tym urządzeniu."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit має відкритий код (MIT). Без облікового запису, без реклами, без стеження. Збережені місця й поїздки залишаються на цьому пристрої."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit este open source (MIT). Fără cont, fără reclame, fără urmărire. Locurile și călătoriile salvate rămân pe acest dispozitiv."
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit je open source (MIT). Žádný účet, žádné reklamy, žádné sledování. Uložená místa a cesty zůstávají v tomto zařízení."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit är öppen källkod (MIT). Inget konto, ingen reklam, ingen spårning. Sparade platser och resor stannar på enheten."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Το Publit είναι ανοιχτού κώδικα (MIT). Χωρίς λογαριασμό, χωρίς διαφημίσεις, χωρίς παρακολούθηση. Οι αποθηκευμένες τοποθεσίες και διαδρομές μένουν σε αυτή τη συσκευή."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "A Publit nyílt forráskódú (MIT). Nincs fiók, nincs reklám, nincs követés. A mentett helyek és utazások ezen az eszközön maradnak."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit açık kaynaklıdır (MIT). Hesap yok, reklam yok, takip yok. Kayıtlı yerler ve yolculuklar bu cihazda kalır."
+     }
+    }
+   }
+  },
   "Publit is open source (MIT). No account, no ads, no tracking. Saved places, trips and tickets stay on this device.": {
    "extractionState": "manual",
    "localizations": {
@@ -17304,6 +21959,196 @@
      "stringUnit": {
       "state": "translated",
       "value": "Publit açık kaynaklıdır (MIT). Hesap yok, reklam yok, takip yok. Kayıtlı yerler, yolculuklar ve biletler bu cihazda kalır."
+     }
+    }
+   }
+  },
+  "Publit reads the ticket on your iPhone. Nothing is uploaded. Codes that change every few seconds only work in the operator's app.": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit reads the ticket on your iPhone. Nothing is uploaded. Codes that change every few seconds only work in the operator's app."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit liest das Ticket auf deinem iPhone. Nichts wird hochgeladen. Codes, die sich alle paar Sekunden ändern, funktionieren nur in der App des Verkehrsunternehmens."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit lit le billet sur ton iPhone. Rien n’est envoyé. Les codes qui changent toutes les quelques secondes ne marchent que dans l’app de l’opérateur."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit legge il biglietto sul tuo iPhone. Non viene caricato nulla. I codici che cambiano ogni pochi secondi funzionano solo nell’app dell’operatore."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit lee el billete en tu iPhone. No se sube nada. Los códigos que cambian cada pocos segundos solo funcionan en la app del operador."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O Publit lê o bilhete no teu iPhone. Nada é enviado. Os códigos que mudam a cada poucos segundos só funcionam na app do operador."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit leest het ticket op je iPhone. Er wordt niets geüpload. Codes die elke paar seconden veranderen werken alleen in de app van de vervoerder."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit odczytuje bilet na iPhonie. Nic nie jest wysyłane. Kody zmieniające się co kilka sekund działają tylko w aplikacji przewoźnika."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit читає квиток на твоєму iPhone. Нічого не завантажується. Коди, що змінюються кожні кілька секунд, працюють тільки в застосунку перевізника."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit citește biletul pe iPhone. Nu se încarcă nimic. Codurile care se schimbă la câteva secunde merg doar în aplicația operatorului."
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit čte jízdenku přímo v iPhonu. Nic se nenahrává. Kódy, které se mění každých pár sekund, fungují jen v aplikaci dopravce."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit läser biljetten på din iPhone. Inget laddas upp. Koder som byts ut med några sekunders mellanrum fungerar bara i trafikbolagets app."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Το Publit διαβάζει το εισιτήριο στο iPhone σου. Δεν ανεβαίνει τίποτα. Κωδικοί που αλλάζουν κάθε λίγα δευτερόλεπτα λειτουργούν μόνο στην εφαρμογή του φορέα."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "A Publit az iPhone-odon olvassa ki a jegyet. Semmi sem kerül feltöltésre. A néhány másodpercenként változó kódok csak a szolgáltató appjában működnek."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit bileti iPhone’unda okur. Hiçbir şey yüklenmez. Birkaç saniyede bir değişen kodlar yalnızca işletmecinin uygulamasında çalışır."
+     }
+    }
+   }
+  },
+  "Purple": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Purple"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Lila"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Violet"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Viola"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Morado"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Roxo"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Paars"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fioletowy"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Фіолетовий"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Violet"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fialová"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Lila"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Μωβ"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Lila"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Mor"
      }
     }
    }
@@ -17498,6 +22343,196 @@
     }
    }
   },
+  "Read on your iPhone. Check every detail before you save.": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Read on your iPhone. Check every detail before you save."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Auf deinem iPhone gelesen. Prüf alle Angaben, bevor du speicherst."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Lu sur ton iPhone. Vérifie chaque détail avant d’enregistrer."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Letto sul tuo iPhone. Controlla ogni dato prima di salvare."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Leído en tu iPhone. Revisa cada dato antes de guardar."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Lido no teu iPhone. Verifica cada dado antes de guardar."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Gelezen op je iPhone. Controleer alle gegevens voordat je bewaart."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Odczytano na iPhonie. Sprawdź wszystkie dane przed zapisaniem."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Прочитано на твоєму iPhone. Перевір усі дані перед збереженням."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Citit pe iPhone. Verifică fiecare detaliu înainte să salvezi."
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Přečteno v iPhonu. Před uložením zkontroluj všechny údaje."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Läst på din iPhone. Kontrollera alla uppgifter innan du sparar."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Διαβάστηκε στο iPhone σου. Έλεγξε κάθε στοιχείο πριν την αποθήκευση."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Az iPhone-odon olvasva. Mentés előtt ellenőrizz minden adatot."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "iPhone’unda okundu. Kaydetmeden önce her bilgiyi kontrol et."
+     }
+    }
+   }
+  },
+  "Reading ticket…": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Reading ticket…"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ticket wird gelesen …"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Lecture du billet…"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Lettura del biglietto…"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Leyendo el billete…"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "A ler o bilhete…"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ticket wordt gelezen…"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Odczytywanie biletu…"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Читання квитка…"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Se citește biletul…"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Čtení jízdenky…"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Läser biljetten …"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ανάγνωση εισιτηρίου…"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Jegy beolvasása…"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bilet okunuyor…"
+     }
+    }
+   }
+  },
   "Recently searched": {
    "extractionState": "manual",
    "localizations": {
@@ -17589,6 +22624,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "Son aramalar"
+     }
+    }
+   }
+  },
+  "Red": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Red"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Rot"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Rouge"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Rosso"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Rojo"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Vermelho"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Rood"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Czerwony"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Червоний"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Roșu"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Červená"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Röd"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Κόκκινο"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Piros"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kırmızı"
      }
     }
    }
@@ -17973,6 +23103,101 @@
     }
    }
   },
+  "Remove code": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Remove code"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Code entfernen"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Retirer le code"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Rimuovi codice"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Quitar código"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Remover código"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Code verwijderen"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Usuń kod"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Прибрати код"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Elimină codul"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Odebrat kód"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ta bort kod"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Αφαίρεση κωδικού"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kód eltávolítása"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kodu kaldır"
+     }
+    }
+   }
+  },
   "Rental": {
    "extractionState": "manual",
    "localizations": {
@@ -18254,6 +23479,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "Yedek ulaşım bilgisi"
+     }
+    }
+   }
+  },
+  "Return ticket": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Return ticket"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Hin- und Rückfahrt"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Billet aller-retour"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Andata e ritorno"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Billete de ida y vuelta"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bilhete de ida e volta"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Retourticket"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bilet w obie strony"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Квиток туди й назад"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bilet dus-întors"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Zpáteční jízdenka"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Tur och retur"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Εισιτήριο μετ’ επιστροφής"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Retúrjegy"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Gidiş-dönüş bileti"
      }
     }
    }
@@ -19778,6 +25098,101 @@
     }
    }
   },
+  "Scan a paper ticket": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Scan a paper ticket"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Papierticket scannen"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Scanner un billet papier"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Scansiona un biglietto cartaceo"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Escanear un billete en papel"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Digitalizar um bilhete em papel"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Papieren ticket scannen"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Zeskanuj papierowy bilet"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Сканувати паперовий квиток"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Scanează un bilet pe hârtie"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Naskenovat papírovou jízdenku"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Skanna en pappersbiljett"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Σάρωση χάρτινου εισιτηρίου"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Papírjegy beolvasása"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kâğıt bileti tara"
+     }
+    }
+   }
+  },
   "Screenshot": {
    "extractionState": "manual",
    "localizations": {
@@ -19869,6 +25284,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "Ekran görüntüsü"
+     }
+    }
+   }
+  },
+  "Seat reservation": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Seat reservation"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sitzplatzreservierung"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Réservation de place"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Prenotazione del posto"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Reserva de asiento"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Reserva de lugar"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Zitplaatsreservering"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Rezerwacja miejsca"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Бронювання місця"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Rezervare de loc"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Místenka"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Platsbokning"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Κράτηση θέσης"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Helyjegy"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Koltuk rezervasyonu"
      }
     }
    }
@@ -20918,6 +26428,101 @@
     }
    }
   },
+  "Shown": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Shown"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Eingeblendet"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Affichés"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Mostrati"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Visibles"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Visíveis"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Zichtbaar"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Widoczne"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Показано"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Afișate"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Zobrazené"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Visas"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Εμφανή"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Megjelenítve"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Gösteriliyor"
+     }
+    }
+   }
+  },
   "Shows the best ways home from where you are, leaving now.": {
    "extractionState": "manual",
    "localizations": {
@@ -21104,6 +26709,196 @@
      "stringUnit": {
       "state": "translated",
       "value": "Bulunduğunuz yerden işe en iyi bağlantıları, hemen kalkışla gösterir."
+     }
+    }
+   }
+  },
+  "Shows the code full screen.": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Shows the code full screen."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Zeigt den Code im Vollbild."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Affiche le code en plein écran."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Mostra il codice a schermo intero."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Muestra el código a pantalla completa."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Mostra o código em ecrã inteiro."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Toont de code schermvullend."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Pokazuje kod na pełnym ekranie."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Показує код на весь екран."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Afișează codul pe tot ecranul."
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Zobrazí kód přes celou obrazovku."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Visar koden i helskärm."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Δείχνει τον κωδικό σε πλήρη οθόνη."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Teljes képernyőn mutatja a kódot."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kodu tam ekran gösterir."
+     }
+    }
+   }
+  },
+  "Single ticket": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Single ticket"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Einzelfahrt"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Billet simple"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Corsa semplice"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Billete sencillo"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bilhete simples"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Enkele reis"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bilet jednorazowy"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Разовий квиток"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bilet de o călătorie"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Jednotlivá jízdenka"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Enkelbiljett"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Απλό εισιτήριο"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Menetjegy"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Tek yön bileti"
      }
     }
    }
@@ -22248,6 +28043,196 @@
     }
    }
   },
+  "Symbol": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Symbol"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Symbol"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Symbole"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Simbolo"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Símbolo"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Símbolo"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Symbool"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Symbol"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Символ"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Simbol"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Symbol"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Symbol"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Σύμβολο"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Szimbólum"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Simge"
+     }
+    }
+   }
+  },
+  "Teal": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Teal"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Petrol"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bleu canard"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Verde acqua"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Verde azulado"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Verde-azulado"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Petrol"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Morski"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Бірюзовий"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Turcoaz"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Petrolejová"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Petrol"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Πετρόλ"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kékeszöld"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Petrol"
+     }
+    }
+   }
+  },
   "Tells you the next departures at a stop.": {
    "extractionState": "manual",
    "localizations": {
@@ -22339,6 +28324,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "Bir duraktan sonraki kalkışları söyler."
+     }
+    }
+   }
+  },
+  "The Wallet pass could not be created.": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "The Wallet pass could not be created."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Der Wallet-Pass konnte nicht erstellt werden."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Le pass Wallet n’a pas pu être créé."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Impossibile creare il pass per Wallet."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "No se pudo crear el pase de Wallet."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Não foi possível criar o passe do Wallet."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "De Wallet-pas kon niet worden gemaakt."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nie udało się utworzyć karty Wallet."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Не вдалося створити картку Wallet."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Permisul Wallet nu a putut fi creat."
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kartu pro Wallet se nepodařilo vytvořit."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Wallet-kortet kunde inte skapas."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Δεν ήταν δυνατή η δημιουργία της κάρτας Wallet."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nem sikerült létrehozni a Wallet-kártyát."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Wallet kartı oluşturulamadı."
      }
     }
    }
@@ -22438,6 +28518,101 @@
     }
    }
   },
+  "The copy and its original are removed from this iPhone.": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "The copy and its original are removed from this iPhone."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Die Kopie und ihr Original werden von diesem iPhone entfernt."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "La copie et son original sont supprimés de cet iPhone."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "La copia e il suo originale vengono rimossi da questo iPhone."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "La copia y su original se eliminan de este iPhone."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "A cópia e o original são removidos deste iPhone."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "De kopie en het origineel worden van deze iPhone verwijderd."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kopia i oryginał zostaną usunięte z tego iPhone’a."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Копію та оригінал буде видалено з цього iPhone."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Copia și originalul sunt șterse de pe acest iPhone."
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kopie i originál budou z tohoto iPhonu odstraněny."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kopian och originalet tas bort från den här iPhonen."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Το αντίγραφο και το πρωτότυπο αφαιρούνται από αυτό το iPhone."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "A másolat és az eredeti törlődik erről az iPhone-ról."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kopya ve aslı bu iPhone’dan silinir."
+     }
+    }
+   }
+  },
   "The operator publishes no ticket link. Link your ticket app in Settings → Ticket apps.": {
    "extractionState": "manual",
    "localizations": {
@@ -22529,6 +28704,386 @@
      "stringUnit": {
       "state": "translated",
       "value": "İşletmeci bilet bağlantısı sunmuyor. Bilet uygulamanızı Ayarlar → Bilet uygulamaları bölümünden bağlayın."
+     }
+    }
+   }
+  },
+  "The photo could not be loaded.": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "The photo could not be loaded."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Das Foto konnte nicht geladen werden."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "La photo n’a pas pu être chargée."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Impossibile caricare la foto."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "No se pudo cargar la foto."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Não foi possível carregar a foto."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "De foto kon niet worden geladen."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nie udało się wczytać zdjęcia."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Не вдалося завантажити фото."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fotografia nu a putut fi încărcată."
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fotku se nepodařilo načíst."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fotot kunde inte läsas in."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Δεν ήταν δυνατή η φόρτωση της φωτογραφίας."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nem sikerült betölteni a fotót."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fotoğraf yüklenemedi."
+     }
+    }
+   }
+  },
+  "This code cannot be added to Apple Wallet. Show it in Publit instead.": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "This code cannot be added to Apple Wallet. Show it in Publit instead."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Dieser Code kann nicht zu Apple Wallet hinzugefügt werden. Zeig ihn stattdessen in Publit."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ce code ne peut pas être ajouté à Apple Wallet. Montre-le plutôt dans Publit."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Questo codice non può essere aggiunto ad Apple Wallet. Mostralo in Publit."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Este código no se puede añadir a Apple Wallet. Muéstralo en Publit."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Este código não pode ser adicionado ao Apple Wallet. Mostra-o no Publit."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Deze code kan niet aan Apple Wallet worden toegevoegd. Toon hem in Publit."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Tego kodu nie można dodać do Apple Wallet. Pokaż go w Publit."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Цей код не можна додати до Apple Wallet. Покажи його в Publit."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Acest cod nu poate fi adăugat în Apple Wallet. Arată-l în Publit."
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Tento kód nejde přidat do Apple Wallet. Ukaž ho v Publitu."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Koden kan inte läggas till i Apple Wallet. Visa den i Publit i stället."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Αυτός ο κωδικός δεν μπορεί να προστεθεί στο Apple Wallet. Δείξ’ τον στο Publit."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ez a kód nem adható hozzá az Apple Wallethez. Mutasd a Publitban."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bu kod Apple Wallet’a eklenemez. Bunun yerine Publit’te göster."
+     }
+    }
+   }
+  },
+  "This file could not be read.": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "This file could not be read."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Diese Datei konnte nicht gelesen werden."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ce fichier n’a pas pu être lu."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Impossibile leggere questo file."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "No se pudo leer este archivo."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Não foi possível ler este ficheiro."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Dit bestand kon niet worden gelezen."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nie udało się odczytać pliku."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Не вдалося прочитати файл."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fișierul nu a putut fi citit."
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Soubor se nepodařilo přečíst."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Filen kunde inte läsas."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Δεν ήταν δυνατή η ανάγνωση του αρχείου."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nem sikerült beolvasni a fájlt."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bu dosya okunamadı."
+     }
+    }
+   }
+  },
+  "This file is too large for a ticket.": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "This file is too large for a ticket."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Diese Datei ist zu groß für ein Ticket."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ce fichier est trop volumineux pour un billet."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Questo file è troppo grande per un biglietto."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Este archivo es demasiado grande para un billete."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Este ficheiro é demasiado grande para um bilhete."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Dit bestand is te groot voor een ticket."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ten plik jest za duży jak na bilet."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Файл завеликий для квитка."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fișierul este prea mare pentru un bilet."
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Soubor je na jízdenku příliš velký."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Filen är för stor för en biljett."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Το αρχείο είναι πολύ μεγάλο για εισιτήριο."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "A fájl túl nagy egy jegyhez."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bu dosya bir bilet için çok büyük."
      }
     }
    }
@@ -23483,6 +30038,101 @@
     }
    }
   },
+  "Ticket deleted": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ticket deleted"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ticket gelöscht"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Billet supprimé"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Biglietto eliminato"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Billete eliminado"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bilhete apagado"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ticket verwijderd"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bilet usunięty"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Квиток видалено"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bilet șters"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Jízdenka smazána"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Biljetten raderad"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Το εισιτήριο διαγράφηκε"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Jegy törölve"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bilet silindi"
+     }
+    }
+   }
+  },
   "Ticket image unavailable": {
    "extractionState": "manual",
    "localizations": {
@@ -23574,6 +30224,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "Bilet görseli yok"
+     }
+    }
+   }
+  },
+  "Ticket number": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ticket number"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ticketnummer"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Numéro du billet"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Numero del biglietto"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Número de billete"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Número do bilhete"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ticketnummer"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Numer biletu"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Номер квитка"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Numărul biletului"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Číslo jízdenky"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Biljettnummer"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Αριθμός εισιτηρίου"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Jegyszám"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bilet numarası"
      }
     }
    }
@@ -23954,6 +30699,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "Tarife"
+     }
+    }
+   }
+  },
+  "Title": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Title"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Titel"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Titre"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Titolo"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Título"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Título"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Titel"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Tytuł"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Назва"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Titlu"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Název"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Titel"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Τίτλος"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Cím"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Başlık"
      }
     }
    }
@@ -24813,6 +31653,101 @@
     }
    }
   },
+  "Try another file": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Try another file"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Andere Datei wählen"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Essayer un autre fichier"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Prova un altro file"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Probar otro archivo"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Tentar outro ficheiro"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ander bestand proberen"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Wybierz inny plik"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Спробувати інший файл"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Încearcă alt fișier"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Zkusit jiný soubor"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Prova en annan fil"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Δοκίμασε άλλο αρχείο"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Másik fájl"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Başka dosya dene"
+     }
+    }
+   }
+  },
   "Turn on Live Activities for Publit in Settings to follow it on the lock screen.": {
    "extractionState": "manual",
    "localizations": {
@@ -25098,6 +32033,101 @@
     }
    }
   },
+  "Upcoming": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Upcoming"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Demnächst"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "À venir"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "In arrivo"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Próximos"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Próximos"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Binnenkort"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nadchodzące"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Найближчі"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Urmează"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nadcházející"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kommande"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Επερχόμενα"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Hamarosan"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Yaklaşan"
+     }
+    }
+   }
+  },
   "Upcoming trips": {
    "extractionState": "manual",
    "localizations": {
@@ -25288,6 +32318,386 @@
     }
    }
   },
+  "Use the %@ code": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Use the %@ code"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@-Code verwenden"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Utiliser le code %@"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Usa il codice %@"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Usar el código %@"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Usar o código %@"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@-code gebruiken"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Użyj kodu %@"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Використати код %@"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Folosește codul %@"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Použít kód %@"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Använd %@-koden"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Χρήση του κωδικού %@"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "A(z) %@ kód használata"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ kodunu kullan"
+     }
+    }
+   }
+  },
+  "Valid from": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Valid from"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Gültig ab"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Valable à partir du"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Valido dal"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Válido desde"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Válido a partir de"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Geldig vanaf"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ważny od"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Дійсний з"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Valabil de la"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Platí od"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Giltig från"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ισχύει από"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Érvényes ettől"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Geçerlilik başlangıcı"
+     }
+    }
+   }
+  },
+  "Valid from %@": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Valid from %@"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Gültig ab %@"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Valable à partir du %@"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Valido dal %@"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Válido desde el %@"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Válido a partir de %@"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Geldig vanaf %@"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ważny od %@"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Дійсний з %@"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Valabil de la %@"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Platí od %@"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Giltig från %@"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ισχύει από %@"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Érvényes ettől: %@"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ tarihinden itibaren geçerli"
+     }
+    }
+   }
+  },
+  "Valid now": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Valid now"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Jetzt gültig"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Valable maintenant"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Valido ora"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Válido ahora"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Válido agora"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nu geldig"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ważny teraz"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Дійсний зараз"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Valabil acum"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Platí teď"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Giltig nu"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ισχύει τώρα"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Most érvényes"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Şu an geçerli"
+     }
+    }
+   }
+  },
   "Valid until": {
    "extractionState": "manual",
    "localizations": {
@@ -25474,6 +32884,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "Geçerlilik sonu: %@"
+     }
+    }
+   }
+  },
+  "Validity": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Validity"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Gültigkeit"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Validité"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Validità"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Validez"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Validade"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Geldigheid"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ważność"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Термін дії"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Valabilitate"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Platnost"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Giltighet"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ισχύς"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Érvényesség"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Geçerlilik"
      }
     }
    }
@@ -26238,6 +33743,101 @@
     }
    }
   },
+  "Weekly or monthly pass": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Weekly or monthly pass"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Wochen- oder Monatskarte"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Abonnement hebdo ou mensuel"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Abbonamento settimanale o mensile"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Abono semanal o mensual"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Passe semanal ou mensal"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Week- of maandkaart"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bilet tygodniowy lub miesięczny"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Тижневий або місячний квиток"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Abonament săptămânal sau lunar"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Týdenní nebo měsíční jízdenka"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Vecko- eller månadskort"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Εβδομαδιαία ή μηνιαία κάρτα"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Heti vagy havi bérlet"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Haftalık veya aylık kart"
+     }
+    }
+   }
+  },
   "When": {
    "extractionState": "manual",
    "localizations": {
@@ -26618,6 +34218,101 @@
     }
    }
   },
+  "Which page is the ticket?": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Which page is the ticket?"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Auf welcher Seite ist das Ticket?"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sur quelle page est le billet ?"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "In quale pagina c’è il biglietto?"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "¿En qué página está el billete?"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Em que página está o bilhete?"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Op welke pagina staat het ticket?"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Na której stronie jest bilet?"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "На якій сторінці квиток?"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Pe ce pagină este biletul?"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Na které stránce je jízdenka?"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Vilken sida är biljetten?"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Σε ποια σελίδα είναι το εισιτήριο;"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Melyik oldalon van a jegy?"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bilet hangi sayfada?"
+     }
+    }
+   }
+  },
   "Work": {
    "extractionState": "manual",
    "localizations": {
@@ -26709,6 +34404,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "İş"
+     }
+    }
+   }
+  },
+  "Yellow": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Yellow"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Gelb"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Jaune"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Giallo"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Amarillo"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Amarelo"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Geel"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Żółty"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Жовтий"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Galben"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Žlutá"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Gul"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Κίτρινο"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sárga"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sarı"
      }
     }
    }
@@ -27184,6 +34974,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "varış yeri"
+     }
+    }
+   }
+  },
+  "from %1$@ to %2$@": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "from %1$@ to %2$@"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "von %1$@ nach %2$@"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "de %1$@ à %2$@"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "da %1$@ a %2$@"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "de %1$@ a %2$@"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "de %1$@ para %2$@"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "van %1$@ naar %2$@"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "z %1$@ do %2$@"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "з %1$@ до %2$@"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "de la %1$@ la %2$@"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "z %1$@ do %2$@"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "från %1$@ till %2$@"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "από %1$@ προς %2$@"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%1$@ – %2$@"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%1$@ – %2$@"
      }
     }
    }
