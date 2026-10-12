@@ -29,6 +29,7 @@ struct DepartureRow: View {
             }
         }
         .padding(.vertical, 6)
+        .alignmentGuide(.listRowSeparatorLeading) { _ in 0 }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityText)
         .accessibilityIdentifier("departureRow")

@@ -103,9 +103,14 @@ final class PublitUITests: XCTestCase {
         start.tap()
         XCTAssertTrue(app.navigationBars["Aktive Fahrt"].waitForExistence(timeout: 10))
         let end = app.buttons["endTrip"]
-        for _ in 0..<4 where !end.isHittable { app.swipeUp() }
-        XCTAssertTrue(end.isHittable)
+        snap("workflow-live-open")
+        let activeList = app.collectionViews["activeTripList"]
+        for _ in 0..<6 where !end.isHittable {
+            if activeList.exists { activeList.swipeUp() } else { app.swipeUp() }
+        }
         snap("workflow-live")
+        if !end.isHittable { print("ACTIVE TRIP HIERARCHY: \(app.debugDescription)") }
+        XCTAssertTrue(end.isHittable)
         end.tap()
         XCTAssertTrue(app.buttons["startTrip"].waitForExistence(timeout: 5))
         app.buttons["Fertig"].tap()

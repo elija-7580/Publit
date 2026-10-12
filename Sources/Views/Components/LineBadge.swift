@@ -68,11 +68,13 @@ struct DepartureTimeView: View {
                     Label(realTime ? L10n.t("Live") : L10n.t("Timetable"),
                           systemImage: realTime ? "dot.radiowaves.left.and.right" : "calendar")
                         .font(.caption2)
+                        .fixedSize(horizontal: true, vertical: true)
                         .foregroundStyle(realTime ? Color.live : Color.secondary)
                 }
             }
-            .fixedSize(horizontal: true, vertical: false)
+            .fixedSize(horizontal: true, vertical: true)
         }
+        .fixedSize(horizontal: true, vertical: true)
     }
 }
 

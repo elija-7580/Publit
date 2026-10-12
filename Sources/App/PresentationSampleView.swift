@@ -102,15 +102,17 @@ struct PresentationSampleView: View {
         }, set: { if !$0 { app.deepLink = nil } })) {
             NavigationStack {
                 List {
-                    if let trip = trips.saved(PresentationSamples.itinerary) {
+                    if case .trip(let id) = app.deepLink, let trip = trips.trip(id) {
                         Section("Active trip") { StatusBanner(status: TripStatus.at(.now, trip.itinerary), refreshedAt: trip.refreshedAt) }
                         ForEach(trip.itinerary.legs, id: \.startTime) { LegRow(leg: $0) }
                         TripActionsSection(itinerary: trip.itinerary, fromName: trip.fromName, toName: trip.toName)
                     }
                 }
+                .accessibilityIdentifier("activeTripList")
                 .navigationTitle("Active trip")
                 .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { app.deepLink = nil } } }
             }
+            .presentationDetents([.large])
         }
     }
 }
