@@ -28,6 +28,10 @@ final class ResponseCache: @unchecked Sendable {
     private var memory: [String: Entry] = [:]
     private let directory: URL?
     static let maxMemoryEntries = 200
+    /// Route and map responses are 100–600 KB each; keep memory bounded by size, not only by count.
+    static let maxMemoryBytes = 24 * 1024 * 1024
+    /// Disk copies are for offline use; the oldest go first above this size.
+    static let maxDiskBytes = 60 * 1024 * 1024
 
     init(directory: URL? = ResponseCache.defaultDirectory) {
         self.directory = directory
@@ -62,6 +66,13 @@ final class ResponseCache: @unchecked Sendable {
             memory = Dictionary(uniqueKeysWithValues: keep.map { ($0.key, $0.value) })
         }
         memory[key] = entry
+        var total = memory.values.reduce(0) { $0 + $1.data.count }
+        if total > Self.maxMemoryBytes {
+            for (k, e) in memory.sorted(by: { $0.value.date < $1.value.date }) where total > Self.maxMemoryBytes / 2 && k != key {
+                memory[k] = nil
+                total -= e.data.count
+            }
+        }
         lock.unlock()
         guard persist, let directory else { return }
         let header = "\(now.timeIntervalSince1970)\n\(url)\n"
@@ -95,9 +106,17 @@ final class ResponseCache: @unchecked Sendable {
         guard let directory,
               let files = try? FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: [.contentModificationDateKey])
         else { return }
+        var kept: [(url: URL, date: Date, size: Int)] = []
         for f in files {
-            let date = (try? f.resourceValues(forKeys: [.contentModificationDateKey]))?.contentModificationDate ?? .distantPast
+            let values = try? f.resourceValues(forKeys: [.contentModificationDateKey, .fileSizeKey])
+            let date = values?.contentModificationDate ?? .distantPast
             if now.timeIntervalSince(date) > age { try? FileManager.default.removeItem(at: f) }
+            else { kept.append((f, date, values?.fileSize ?? 0)) }
+        }
+        var total = kept.reduce(0) { $0 + $1.size }
+        for f in kept.sorted(by: { $0.date < $1.date }) where total > Self.maxDiskBytes {
+            try? FileManager.default.removeItem(at: f.url)
+            total -= f.size
         }
     }
 }

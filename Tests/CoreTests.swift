@@ -370,3 +370,17 @@ final class LinkSafetyTests: XCTestCase {
         XCTAssertNil(DeepLink(url: URL(string: "publit://stop/x?lat=48.1&lon=inf")!))
     }
 }
+
+final class ResponseCacheBoundsTests: XCTestCase {
+    func testMemoryStaysBelowByteLimitAndKeepsNewest() {
+        let cache = ResponseCache(directory: nil)
+        let blob = Data(repeating: 7, count: 2 * 1024 * 1024)
+        let start = Date(timeIntervalSince1970: 1_000_000)
+        for i in 0..<30 {
+            cache.store("k\(i)", data: blob, url: "u\(i)", persist: false, now: start.addingTimeInterval(Double(i)))
+        }
+        let kept = (0..<30).filter { cache.stale("k\($0)") != nil }
+        XCTAssertLessThanOrEqual(kept.count * blob.count, ResponseCache.maxMemoryBytes)
+        XCTAssertNotNil(cache.stale("k29"), "the newest response stays")
+    }
+}
