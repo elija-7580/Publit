@@ -13,85 +13,85 @@
     "de": {
      "stringUnit": {
       "state": "translated",
-      "value": "Publit nutzt deinen Standort, um Abfahrten in deiner Nähe anzuzeigen und Routen ab deinem Standort zu planen."
+      "value": "Publit nutzt deinen Standort, um Abfahrten in deiner Nähe zu zeigen und Routen ab deinem Standort zu planen."
      }
     },
     "fr": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Publit utilise votre localisation pour afficher les départs près de chez vous et pour planifier des voyages à partir de là où vous vous trouvez."
+      "state": "translated",
+      "value": "Publit utilise votre position pour afficher les départs à proximité et planifier des trajets depuis l’endroit où vous êtes."
      }
     },
     "it": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Publit utilizza la tua posizione per mostrare le partenze vicino a te e per pianificare i viaggi da dove ti trovi."
+      "state": "translated",
+      "value": "Publit usa la tua posizione per mostrare le partenze vicine e pianificare i viaggi da dove ti trovi."
      }
     },
     "es": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Publit utiliza su ubicación para mostrar salidas cerca de usted y planificar viajes desde donde se encuentra."
+      "state": "translated",
+      "value": "Publit usa tu ubicación para mostrar salidas cercanas y planificar viajes desde donde estás."
      }
     },
     "pt-PT": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Publit usa sua localização para mostrar partidas perto de você e planejar viagens de onde você está."
+      "state": "translated",
+      "value": "O Publit usa a sua localização para mostrar partidas perto de si e planear viagens a partir de onde está."
      }
     },
     "nl": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Publit gebruikt uw locatie om vertrektijden bij u in de buurt te tonen en om reizen te plannen vanaf uw locatie."
+      "state": "translated",
+      "value": "Publit gebruikt je locatie om vertrektijden in de buurt te tonen en reizen te plannen vanaf waar je bent."
      }
     },
     "pl": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Publit wykorzystuje Twoją lokalizację, aby pokazywać odjazdy w Twojej okolicy i planować wycieczki z miejsca, w którym się znajdujesz."
+      "state": "translated",
+      "value": "Publit używa Twojej lokalizacji, aby pokazywać odjazdy w pobliżu i planować podróże z miejsca, w którym jesteś."
      }
     },
     "uk": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Publit використовує ваше місцезнаходження, щоб показувати відправлення поблизу вас і планувати поїздки з вашого місця."
+      "state": "translated",
+      "value": "Publit використовує вашу геопозицію, щоб показувати відправлення поруч і планувати поїздки звідти, де ви є."
      }
     },
     "ro": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Publit folosește locația dvs. pentru a afișa plecările din apropiere și pentru a planifica călătorii de unde vă aflați."
+      "state": "translated",
+      "value": "Publit folosește locația dvs. pentru a afișa plecările din apropiere și a planifica rute de unde vă aflați."
      }
     },
     "cs": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Publit používá vaši polohu k zobrazení odjezdů ve vašem okolí a k plánování výletů z místa, kde se nacházíte."
+      "state": "translated",
+      "value": "Publit používá vaši polohu k zobrazení odjezdů v okolí a k plánování cest z místa, kde jste."
      }
     },
     "sv": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Publit använder din plats för att visa avgångar nära dig och för att planera resor där du är."
+      "state": "translated",
+      "value": "Publit använder din plats för att visa avgångar nära dig och planera resor från där du är."
      }
     },
     "el": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Το Publit χρησιμοποιεί την τοποθεσία σας για να εμφανίζει τις αναχωρήσεις κοντά σας και να προγραμματίζει ταξίδια από εκεί που βρίσκεστε."
+      "state": "translated",
+      "value": "Το Publit χρησιμοποιεί την τοποθεσία σας για να δείχνει αναχωρήσεις κοντά σας και να σχεδιάζει διαδρομές από εκεί που βρίσκεστε."
      }
     },
     "hu": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "A Publit az Ön tartózkodási helyét használja a közeli indulások megjelenítésére és az utazások megtervezésére onnan, ahol tartózkodik."
+      "state": "translated",
+      "value": "A Publit a helyzetedet használja, hogy megmutassa a közeli indulásokat, és onnan tervezzen útvonalat, ahol vagy."
      }
     },
     "tr": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Publit, yakınınızdaki kalkış saatlerini göstermek ve bulunduğunuz yerden seyahatleri planlamak için konumunuzu kullanır."
+      "state": "translated",
+      "value": "Publit, yakınınızdaki kalkışları göstermek ve bulunduğunuz yerden yolculuk planlamak için konumunuzu kullanır."
      }
     }
    }
@@ -108,85 +108,85 @@
     "de": {
      "stringUnit": {
       "state": "translated",
-      "value": "Publit trägt die von dir ausgewählten Fahrten in deinen Kalender ein."
+      "value": "Publit trägt die Fahrten, die du auswählst, in deinen Kalender ein."
      }
     },
     "fr": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Publit ajoute les voyages que vous choisissez à votre calendrier."
+      "state": "translated",
+      "value": "Publit ajoute à votre calendrier les trajets que vous choisissez."
      }
     },
     "it": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Publit aggiunge i viaggi scelti al tuo calendario."
+      "state": "translated",
+      "value": "Publit aggiunge al tuo calendario i viaggi che scegli."
      }
     },
     "es": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Publit agrega los viajes que elijas a tu calendario."
+      "state": "translated",
+      "value": "Publit añade a tu calendario los viajes que elijas."
      }
     },
     "pt-PT": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Publit adiciona as viagens que você escolher ao seu calendário."
+      "state": "translated",
+      "value": "O Publit adiciona ao seu calendário as viagens que escolher."
      }
     },
     "nl": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Publit voegt de door jou gekozen reizen toe aan je agenda."
+      "state": "translated",
+      "value": "Publit zet de reizen die je kiest in je agenda."
      }
     },
     "pl": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Publit dodaje wybrane przez Ciebie wycieczki do Twojego kalendarza."
+      "state": "translated",
+      "value": "Publit dodaje wybrane przez Ciebie podróże do kalendarza."
      }
     },
     "uk": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Publit додає вибрані вами поїздки до вашого календаря."
+      "state": "translated",
+      "value": "Publit додає вибрані вами поїздки в календар."
      }
     },
     "ro": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Publit adaugă călătoriile pe care le alegeți în calendarul dvs."
+      "state": "translated",
+      "value": "Publit adaugă în calendar călătoriile pe care le alegeți."
      }
     },
     "cs": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Publit přidá vybrané výlety do vašeho kalendáře."
+      "state": "translated",
+      "value": "Publit přidá vybrané cesty do vašeho kalendáře."
      }
     },
     "sv": {
      "stringUnit": {
-      "state": "needs_review",
+      "state": "translated",
       "value": "Publit lägger till resorna du väljer i din kalender."
      }
     },
     "el": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Το Publit προσθέτει τα ταξίδια που επιλέγετε στο ημερολόγιό σας."
+      "state": "translated",
+      "value": "Το Publit προσθέτει στο ημερολόγιό σας τις διαδρομές που επιλέγετε."
      }
     },
     "hu": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "A Publit hozzáadja a kiválasztott utazásokat a naptárához."
+      "state": "translated",
+      "value": "A Publit a naptáradba teszi a kiválasztott utazásokat."
      }
     },
     "tr": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Publit, seçtiğiniz gezileri takviminize ekler."
+      "state": "translated",
+      "value": "Publit seçtiğiniz yolculukları takviminize ekler."
      }
     }
    }

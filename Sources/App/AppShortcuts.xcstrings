@@ -12,86 +12,86 @@
     },
     "de": {
      "stringUnit": {
-      "state": "needs_review",
+      "state": "translated",
       "value": "Nächste Abfahrten in ${applicationName}"
      }
     },
     "fr": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Prochains départs à ${applicationName}"
+      "state": "translated",
+      "value": "Prochains départs dans ${applicationName}"
      }
     },
     "it": {
      "stringUnit": {
-      "state": "needs_review",
+      "state": "translated",
       "value": "Prossime partenze in ${applicationName}"
      }
     },
     "es": {
      "stringUnit": {
-      "state": "needs_review",
+      "state": "translated",
       "value": "Próximas salidas en ${applicationName}"
      }
     },
     "pt-PT": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Próximas partidas em ${applicationName}"
+      "state": "translated",
+      "value": "Próximas partidas no ${applicationName}"
      }
     },
     "nl": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Volgende vertrekken in ${applicationName}"
+      "state": "translated",
+      "value": "Volgende vertrektijden in ${applicationName}"
      }
     },
     "pl": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Następne odjazdy w ${applicationName}"
+      "state": "translated",
+      "value": "Najbliższe odjazdy w ${applicationName}"
      }
     },
     "uk": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Наступні відправлення в ${applicationName}"
+      "state": "translated",
+      "value": "Найближчі відправлення в ${applicationName}"
      }
     },
     "ro": {
      "stringUnit": {
-      "state": "needs_review",
+      "state": "translated",
       "value": "Următoarele plecări în ${applicationName}"
      }
     },
     "cs": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Další odjezdy v ${applicationName}"
+      "state": "translated",
+      "value": "Nejbližší odjezdy v ${applicationName}"
      }
     },
     "sv": {
      "stringUnit": {
-      "state": "needs_review",
+      "state": "translated",
       "value": "Nästa avgångar i ${applicationName}"
      }
     },
     "el": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Επόμενες αναχωρήσεις σε ${applicationName}"
+      "state": "translated",
+      "value": "Επόμενες αναχωρήσεις στο ${applicationName}"
      }
     },
     "hu": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Következő indulások: ${applicationName}"
+      "state": "translated",
+      "value": "Következő indulások a(z) ${applicationName} appban"
      }
     },
     "tr": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "${applicationName}'daki sonraki kalkışlar"
+      "state": "translated",
+      "value": "${applicationName} ile sonraki kalkışlar"
      }
     }
    }
@@ -113,80 +113,80 @@
     },
     "fr": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Prochains départs à ${stop} à ${applicationName}"
+      "state": "translated",
+      "value": "Prochains départs à ${stop} dans ${applicationName}"
      }
     },
     "it": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Prossime partenze a ${stop} in ${applicationName}"
+      "state": "translated",
+      "value": "Prossime partenze da ${stop} in ${applicationName}"
      }
     },
     "es": {
      "stringUnit": {
-      "state": "needs_review",
+      "state": "translated",
       "value": "Próximas salidas en ${stop} en ${applicationName}"
      }
     },
     "pt-PT": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Próximas partidas em ${stop} em ${applicationName}"
+      "state": "translated",
+      "value": "Próximas partidas em ${stop} no ${applicationName}"
      }
     },
     "nl": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Volgende vertrek op ${stop} in ${applicationName}"
+      "state": "translated",
+      "value": "Volgende vertrektijden bij ${stop} in ${applicationName}"
      }
     },
     "pl": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Następne odjazdy o ${stop} w ${applicationName}"
+      "state": "translated",
+      "value": "Najbliższe odjazdy z ${stop} w ${applicationName}"
      }
     },
     "uk": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Наступні відправлення о ${stop} в ${applicationName}"
+      "state": "translated",
+      "value": "Найближчі відправлення з ${stop} в ${applicationName}"
      }
     },
     "ro": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Următoarele plecări la ${stop} în ${applicationName}"
+      "state": "translated",
+      "value": "Următoarele plecări din ${stop} în ${applicationName}"
      }
     },
     "cs": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Další odjezdy v ${stop} v ${applicationName}"
+      "state": "translated",
+      "value": "Nejbližší odjezdy z ${stop} v ${applicationName}"
      }
     },
     "sv": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Nästa avgångar vid ${stop} i ${applicationName}"
+      "state": "translated",
+      "value": "Nästa avgångar från ${stop} i ${applicationName}"
      }
     },
     "el": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Επόμενες αναχωρήσεις στο ${stop} στο ${applicationName}"
+      "state": "translated",
+      "value": "Επόμενες αναχωρήσεις από ${stop} στο ${applicationName}"
      }
     },
     "hu": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Következő indulások: ${stop}, ${applicationName}"
+      "state": "translated",
+      "value": "Következő indulások innen: ${stop}, ${applicationName}"
      }
     },
     "tr": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Sonraki kalkışlar ${applicationName}'da ${stop}'da"
+      "state": "translated",
+      "value": "${applicationName} ile ${stop} durağından sonraki kalkışlar"
      }
     }
    }
@@ -208,80 +208,80 @@
     },
     "fr": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Départs à ${stop} à ${applicationName}"
+      "state": "translated",
+      "value": "Départs à ${stop} dans ${applicationName}"
      }
     },
     "it": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Partenze a ${stop} in ${applicationName}"
+      "state": "translated",
+      "value": "Partenze da ${stop} in ${applicationName}"
      }
     },
     "es": {
      "stringUnit": {
-      "state": "needs_review",
+      "state": "translated",
       "value": "Salidas en ${stop} en ${applicationName}"
      }
     },
     "pt-PT": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Partidas em ${stop} em ${applicationName}"
+      "state": "translated",
+      "value": "Partidas em ${stop} no ${applicationName}"
      }
     },
     "nl": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Vertrek om ${stop} in ${applicationName}"
+      "state": "translated",
+      "value": "Vertrektijden bij ${stop} in ${applicationName}"
      }
     },
     "pl": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Odloty o ${stop} w ${applicationName}"
+      "state": "translated",
+      "value": "Odjazdy z ${stop} w ${applicationName}"
      }
     },
     "uk": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Відправлення в ${stop} в ${applicationName}"
+      "state": "translated",
+      "value": "Відправлення з ${stop} в ${applicationName}"
      }
     },
     "ro": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Plecări la ${stop} în ${applicationName}"
+      "state": "translated",
+      "value": "Plecări din ${stop} în ${applicationName}"
      }
     },
     "cs": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Odlety v ${stop} v ${applicationName}"
+      "state": "translated",
+      "value": "Odjezdy z ${stop} v ${applicationName}"
      }
     },
     "sv": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Avgångar vid ${stop} i ${applicationName}"
+      "state": "translated",
+      "value": "Avgångar från ${stop} i ${applicationName}"
      }
     },
     "el": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Αναχωρήσεις στο ${stop} στο ${applicationName}"
+      "state": "translated",
+      "value": "Αναχωρήσεις από ${stop} στο ${applicationName}"
      }
     },
     "hu": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Indulás: ${stop} itt: ${applicationName}"
+      "state": "translated",
+      "value": "Indulások innen: ${stop}, ${applicationName}"
      }
     },
     "tr": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "${applicationName}'da ${stop}'dan Kalkışlar"
+      "state": "translated",
+      "value": "${applicationName} ile ${stop} kalkışları"
      }
     }
    }
@@ -297,86 +297,86 @@
     },
     "de": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Bring mich nach Hause mit ${applicationName}"
+      "state": "translated",
+      "value": "Bring mich mit ${applicationName} nach Hause"
      }
     },
     "fr": {
      "stringUnit": {
-      "state": "needs_review",
+      "state": "translated",
       "value": "Ramène-moi à la maison avec ${applicationName}"
      }
     },
     "it": {
      "stringUnit": {
-      "state": "needs_review",
+      "state": "translated",
       "value": "Portami a casa con ${applicationName}"
      }
     },
     "es": {
      "stringUnit": {
-      "state": "needs_review",
+      "state": "translated",
       "value": "Llévame a casa con ${applicationName}"
      }
     },
     "pt-PT": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Leve-me para casa com ${applicationName}"
+      "state": "translated",
+      "value": "Leva-me para casa com o ${applicationName}"
      }
     },
     "nl": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Breng mij naar huis met ${applicationName}"
+      "state": "translated",
+      "value": "Breng me naar huis met ${applicationName}"
      }
     },
     "pl": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Zabierz mnie do domu za pomocą ${applicationName}"
+      "state": "translated",
+      "value": "Zabierz mnie do domu z ${applicationName}"
      }
     },
     "uk": {
      "stringUnit": {
-      "state": "needs_review",
+      "state": "translated",
       "value": "Відвези мене додому з ${applicationName}"
      }
     },
     "ro": {
      "stringUnit": {
-      "state": "needs_review",
+      "state": "translated",
       "value": "Du-mă acasă cu ${applicationName}"
      }
     },
     "cs": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Vezmi mě domů pomocí ${applicationName}"
+      "state": "translated",
+      "value": "Doveď mě domů s ${applicationName}"
      }
     },
     "sv": {
      "stringUnit": {
-      "state": "needs_review",
+      "state": "translated",
       "value": "Ta mig hem med ${applicationName}"
      }
     },
     "el": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Πάρε με σπίτι με το ${applicationName}"
+      "state": "translated",
+      "value": "Πήγαινέ με σπίτι με το ${applicationName}"
      }
     },
     "hu": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Vigyen haza a ${applicationName}-val"
+      "state": "translated",
+      "value": "Vigyél haza a(z) ${applicationName} segítségével"
      }
     },
     "tr": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Beni ${applicationName} ile evime götür"
+      "state": "translated",
+      "value": "${applicationName} ile beni eve götür"
      }
     }
    }
@@ -392,86 +392,86 @@
     },
     "de": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Route nach Hause in ${applicationName}"
+      "state": "translated",
+      "value": "Heimweg in ${applicationName}"
      }
     },
     "fr": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Itinéraire de retour à ${applicationName}"
+      "state": "translated",
+      "value": "Itinéraire pour rentrer dans ${applicationName}"
      }
     },
     "it": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Itinerario verso casa in ${applicationName}"
+      "state": "translated",
+      "value": "Percorso verso casa in ${applicationName}"
      }
     },
     "es": {
      "stringUnit": {
-      "state": "needs_review",
+      "state": "translated",
       "value": "Ruta a casa en ${applicationName}"
      }
     },
     "pt-PT": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Rota para casa em ${applicationName}"
+      "state": "translated",
+      "value": "Rota para casa no ${applicationName}"
      }
     },
     "nl": {
      "stringUnit": {
-      "state": "needs_review",
+      "state": "translated",
       "value": "Route naar huis in ${applicationName}"
      }
     },
     "pl": {
      "stringUnit": {
-      "state": "needs_review",
+      "state": "translated",
       "value": "Trasa do domu w ${applicationName}"
      }
     },
     "uk": {
      "stringUnit": {
-      "state": "needs_review",
+      "state": "translated",
       "value": "Маршрут додому в ${applicationName}"
      }
     },
     "ro": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Traseu spre casă în ${applicationName}"
+      "state": "translated",
+      "value": "Rută spre casă în ${applicationName}"
      }
     },
     "cs": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Cesta domů v ${applicationName}"
+      "state": "translated",
+      "value": "Trasa domů v ${applicationName}"
      }
     },
     "sv": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Väg hem i ${applicationName}"
+      "state": "translated",
+      "value": "Resväg hem i ${applicationName}"
      }
     },
     "el": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Διαδρομή για το σπίτι σε ${applicationName}"
+      "state": "translated",
+      "value": "Διαδρομή για το σπίτι στο ${applicationName}"
      }
     },
     "hu": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Útvonal hazafelé: ${applicationName}"
+      "state": "translated",
+      "value": "Útvonal haza a(z) ${applicationName} appban"
      }
     },
     "tr": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "${applicationName}'da eve dönüş yolu"
+      "state": "translated",
+      "value": "${applicationName} ile eve rota"
      }
     }
    }
@@ -487,86 +487,86 @@
     },
     "de": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Route zur Arbeit in ${applicationName}"
+      "state": "translated",
+      "value": "Weg zur Arbeit in ${applicationName}"
      }
     },
     "fr": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Itinéraire pour se rendre au travail à ${applicationName}"
+      "state": "translated",
+      "value": "Itinéraire pour le travail dans ${applicationName}"
      }
     },
     "it": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Percorso per lavorare in ${applicationName}"
+      "state": "translated",
+      "value": "Percorso verso il lavoro in ${applicationName}"
      }
     },
     "es": {
      "stringUnit": {
-      "state": "needs_review",
+      "state": "translated",
       "value": "Ruta al trabajo en ${applicationName}"
      }
     },
     "pt-PT": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Rota para trabalho em ${applicationName}"
+      "state": "translated",
+      "value": "Rota para o trabalho no ${applicationName}"
      }
     },
     "nl": {
      "stringUnit": {
-      "state": "needs_review",
+      "state": "translated",
       "value": "Route naar werk in ${applicationName}"
      }
     },
     "pl": {
      "stringUnit": {
-      "state": "needs_review",
+      "state": "translated",
       "value": "Trasa do pracy w ${applicationName}"
      }
     },
     "uk": {
      "stringUnit": {
-      "state": "needs_review",
+      "state": "translated",
       "value": "Маршрут на роботу в ${applicationName}"
      }
     },
     "ro": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Traseu către serviciu în ${applicationName}"
+      "state": "translated",
+      "value": "Rută spre serviciu în ${applicationName}"
      }
     },
     "cs": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Cesta do práce v ${applicationName}"
+      "state": "translated",
+      "value": "Trasa do práce v ${applicationName}"
      }
     },
     "sv": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Väg till jobbet i ${applicationName}"
+      "state": "translated",
+      "value": "Resväg till jobbet i ${applicationName}"
      }
     },
     "el": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Διαδρομή προς εργασία στο ${applicationName}"
+      "state": "translated",
+      "value": "Διαδρομή για τη δουλειά στο ${applicationName}"
      }
     },
     "hu": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Útvonal a munkahelyre ${applicationName}"
+      "state": "translated",
+      "value": "Útvonal a munkahelyre a(z) ${applicationName} appban"
      }
     },
     "tr": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "${applicationName}'da çalışma rotası"
+      "state": "translated",
+      "value": "${applicationName} ile işe rota"
      }
     }
    }
@@ -582,86 +582,86 @@
     },
     "de": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Zeige mein Ticket in ${applicationName}"
+      "state": "translated",
+      "value": "Zeig mein Ticket in ${applicationName}"
      }
     },
     "fr": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Afficher mon billet dans ${applicationName}"
+      "state": "translated",
+      "value": "Affiche mon billet dans ${applicationName}"
      }
     },
     "it": {
      "stringUnit": {
-      "state": "needs_review",
+      "state": "translated",
       "value": "Mostra il mio biglietto in ${applicationName}"
      }
     },
     "es": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Mostrar mi ticket en ${applicationName}"
+      "state": "translated",
+      "value": "Muestra mi billete en ${applicationName}"
      }
     },
     "pt-PT": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Mostrar meu ingresso em ${applicationName}"
+      "state": "translated",
+      "value": "Mostra o meu bilhete no ${applicationName}"
      }
     },
     "nl": {
      "stringUnit": {
-      "state": "needs_review",
+      "state": "translated",
       "value": "Toon mijn ticket in ${applicationName}"
      }
     },
     "pl": {
      "stringUnit": {
-      "state": "needs_review",
+      "state": "translated",
       "value": "Pokaż mój bilet w ${applicationName}"
      }
     },
     "uk": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Покажи мій квиток у ${applicationName}"
+      "state": "translated",
+      "value": "Покажи мій квиток в ${applicationName}"
      }
     },
     "ro": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Afișați biletul meu în ${applicationName}"
+      "state": "translated",
+      "value": "Arată-mi biletul în ${applicationName}"
      }
     },
     "cs": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Ukaž můj tiket v ${applicationName}"
+      "state": "translated",
+      "value": "Ukaž mou jízdenku v ${applicationName}"
      }
     },
     "sv": {
      "stringUnit": {
-      "state": "needs_review",
+      "state": "translated",
       "value": "Visa min biljett i ${applicationName}"
      }
     },
     "el": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Εμφάνιση του εισιτηρίου μου σε ${applicationName}"
+      "state": "translated",
+      "value": "Δείξε το εισιτήριό μου στο ${applicationName}"
      }
     },
     "hu": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Mutasd meg a jegyemet a ${applicationName}-ban"
+      "state": "translated",
+      "value": "Mutasd a jegyemet a(z) ${applicationName} appban"
      }
     },
     "tr": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Biletimi ${applicationName}'da göster"
+      "state": "translated",
+      "value": "${applicationName} içinde biletimi göster"
      }
     }
    }
@@ -677,85 +677,85 @@
     },
     "de": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Zeige mein ${applicationName}-Ticket"
+      "state": "translated",
+      "value": "Zeig mein ${applicationName}-Ticket"
      }
     },
     "fr": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Afficher mon billet ${applicationName}"
+      "state": "translated",
+      "value": "Affiche mon billet ${applicationName}"
      }
     },
     "it": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Mostra il mio ticket ${applicationName}"
+      "state": "translated",
+      "value": "Mostra il mio biglietto ${applicationName}"
      }
     },
     "es": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Mostrar mi ticket ${applicationName}"
+      "state": "translated",
+      "value": "Muestra mi billete de ${applicationName}"
      }
     },
     "pt-PT": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Mostrar meu ticket ${applicationName}"
+      "state": "translated",
+      "value": "Mostra o meu bilhete do ${applicationName}"
      }
     },
     "nl": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Laat mijn ${applicationName}-ticket zien"
+      "state": "translated",
+      "value": "Toon mijn ${applicationName}-ticket"
      }
     },
     "pl": {
      "stringUnit": {
-      "state": "needs_review",
+      "state": "translated",
       "value": "Pokaż mój bilet ${applicationName}"
      }
     },
     "uk": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Показати мій квиток ${applicationName}"
+      "state": "translated",
+      "value": "Покажи мій квиток ${applicationName}"
      }
     },
     "ro": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Afișați biletul meu ${applicationName}"
+      "state": "translated",
+      "value": "Arată-mi biletul ${applicationName}"
      }
     },
     "cs": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Ukaž můj lístek ${applicationName}"
+      "state": "translated",
+      "value": "Ukaž mou jízdenku ${applicationName}"
      }
     },
     "sv": {
      "stringUnit": {
-      "state": "needs_review",
+      "state": "translated",
       "value": "Visa min ${applicationName}-biljett"
      }
     },
     "el": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Εμφάνιση του εισιτηρίου μου ${applicationName}"
+      "state": "translated",
+      "value": "Δείξε το εισιτήριο ${applicationName}"
      }
     },
     "hu": {
      "stringUnit": {
-      "state": "needs_review",
-      "value": "Mutasd meg a ${applicationName} jegyemet"
+      "state": "translated",
+      "value": "Mutasd a(z) ${applicationName} jegyemet"
      }
     },
     "tr": {
      "stringUnit": {
-      "state": "needs_review",
+      "state": "translated",
       "value": "${applicationName} biletimi göster"
      }
     }

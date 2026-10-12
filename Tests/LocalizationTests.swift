@@ -21,7 +21,8 @@ final class LocalizationTests: XCTestCase {
         let expression = try! NSRegularExpression(pattern: #"%(?:\d+\$)?(?:lld|ld|d|@)|\$\{[^}]+\}"#)
         let ns = text as NSString
         return expression.matches(in: text, range: NSRange(location: 0, length: ns.length))
-            .map { ns.substring(with: $0.range) }.sorted()
+            .map { ns.substring(with: $0.range).replacingOccurrences(of: #"^%\d+\$"#, with: "%", options: .regularExpression) }
+            .sorted()
     }
 
     func testEveryCatalogHasAllLanguagesAndPreservesPlaceholders() throws {
@@ -58,6 +59,27 @@ final class LocalizationTests: XCTestCase {
                 XCTAssertNotNil(plural["few"])
                 XCTAssertNotNil(plural["other"])
                 if language != "ro" { XCTAssertNotNil(plural["many"]) }
+            }
+        }
+    }
+
+    func testPositionalPlaceholdersAreCompleteAndInRange() throws {
+        let data = try catalog("Sources/Shared/Localizable.xcstrings")
+        let strings = try XCTUnwrap(data["strings"] as? [String: [String: Any]])
+        let any = try NSRegularExpression(pattern: #"%(?:\d+\$)?(?:lld|ld|d|@)"#)
+        let positional = try NSRegularExpression(pattern: #"%(\d+)\$"#)
+        for (key, item) in strings {
+            let loc = try XCTUnwrap(item["localizations"] as? [String: [String: Any]])
+            for (language, translation) in loc {
+                for text in leaves(translation) {
+                    let ns = text as NSString
+                    let total = any.numberOfMatches(in: text, range: NSRange(location: 0, length: ns.length))
+                    let indexes = positional.matches(in: text, range: NSRange(location: 0, length: ns.length))
+                        .compactMap { Int(ns.substring(with: $0.range(at: 1))) }
+                    guard !indexes.isEmpty else { continue }
+                    XCTAssertEqual(indexes.count, total, "Mixed positional placeholders: \(key)/\(language)")
+                    XCTAssertEqual(Set(indexes), Set(1...total), "Positional placeholders out of range: \(key)/\(language)")
+                }
             }
         }
     }

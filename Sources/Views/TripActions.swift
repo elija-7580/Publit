@@ -143,17 +143,14 @@ struct TicketSection: View {
     let onAddTicket: () -> Void
 
     @Environment(TicketStore.self) private var tickets
-    @State private var showing: Ticket?
 
     var body: some View {
         let links = TicketLinks.links(for: itinerary, userLinked: tickets.linkedApps)
         let mine = tickets.tickets(forTrip: tripId)
-        Group {
         if !itinerary.isDirect {
             Section {
                 ForEach(mine.prefix(2)) { ticket in
-                    Button { showing = ticket } label: { TicketSummaryCard(ticket: ticket) }
-                        .buttonStyle(.plain)
+                    TicketCardButton(ticket: ticket)
                 }
                 ForEach(links) { l in
                     Link(destination: l.url) {
@@ -171,8 +168,20 @@ struct TicketSection: View {
                 }
             }
         }
-        }
-        .fullScreenCover(item: $showing) { ticket in TicketDisplayView(tickets: [ticket]) }
+    }
+}
+
+/// One ticket row that owns its own full-screen presentation.
+/// A presentation modifier on a `Group`/`Section` inside a `List` is copied onto every row,
+/// so several covers competed for one binding and the ticket never opened reliably.
+struct TicketCardButton: View {
+    let ticket: Ticket
+    @State private var showing = false
+
+    var body: some View {
+        Button { showing = true } label: { TicketSummaryCard(ticket: ticket) }
+            .buttonStyle(.plain)
+            .fullScreenCover(isPresented: $showing) { TicketDisplayView(tickets: [ticket]) }
     }
 }
 
