@@ -177,11 +177,16 @@ struct TicketSection: View {
 struct TicketCardButton: View {
     let ticket: Ticket
     @State private var showing = false
+    /// fullScreenCover does not inherit the presenter's Dynamic Type; re-apply so UI samples (and a11y sizes) reach the ticket.
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         Button { showing = true } label: { TicketSummaryCard(ticket: ticket) }
             .buttonStyle(.plain)
-            .fullScreenCover(isPresented: $showing) { TicketDisplayView(tickets: [ticket]) }
+            .fullScreenCover(isPresented: $showing) {
+                TicketDisplayView(tickets: [ticket])
+                    .dynamicTypeSize(dynamicTypeSize)
+            }
     }
 }
 

@@ -58,6 +58,7 @@ struct RootView: View {
     @Environment(TicketStore.self) private var tickets
     @Environment(FavoritesStore.self) private var favorites
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         @Bindable var app = app
@@ -82,6 +83,7 @@ struct RootView: View {
         }
         .fullScreenCover(item: ticketLink) { link in
             TicketDisplayView(tickets: ticketsFor(link))
+                .dynamicTypeSize(dynamicTypeSize)
         }
         .sheet(item: stopLink) { stop in
             NavigationStack {

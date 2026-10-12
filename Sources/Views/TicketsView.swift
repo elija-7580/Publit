@@ -5,6 +5,7 @@ import UIKit
 /// All tickets the user keeps in Publit.
 struct TicketsView: View {
     @Environment(TicketStore.self) private var store
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var adding = false
     @State private var showing: Ticket?
 
@@ -35,7 +36,10 @@ struct TicketsView: View {
             }
         }
         .sheet(isPresented: $adding) { AddTicketView(tripId: nil) }
-        .fullScreenCover(item: $showing) { t in TicketDisplayView(tickets: [t]) }
+        .fullScreenCover(item: $showing) { t in
+            TicketDisplayView(tickets: [t])
+                .dynamicTypeSize(dynamicTypeSize)
+        }
     }
 
     private func row(_ t: Ticket) -> some View {
@@ -311,13 +315,17 @@ struct LinkedTicketAppsView: View {
 struct ShowTicketButton: View {
     var tripId: String? = nil
     @Environment(TicketStore.self) private var store
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var showing = false
 
     var body: some View {
         let list = store.tickets(forTrip: tripId)
         if !list.isEmpty {
             Button { showing = true } label: { Label("Show ticket", systemImage: "ticket") }
-                .fullScreenCover(isPresented: $showing) { TicketDisplayView(tickets: list) }
+                .fullScreenCover(isPresented: $showing) {
+                    TicketDisplayView(tickets: list)
+                        .dynamicTypeSize(dynamicTypeSize)
+                }
         }
     }
 }
