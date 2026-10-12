@@ -110,7 +110,9 @@ struct DeparturesWidget: Widget {
 
 struct DeparturesWidgetView: View {
     let entry: DeparturesEntry
-    @Environment(\.widgetFamily) private var family
+    @Environment(\.widgetFamily) private var systemFamily
+    var previewFamily: WidgetFamily? = nil
+    private var family: WidgetFamily { previewFamily ?? systemFamily }
 
     private var rows: Int {
         switch family {
@@ -154,7 +156,7 @@ struct DeparturesWidgetView: View {
     private func row(_ d: WidgetDeparture) -> some View {
         VStack(alignment: .leading, spacing: 3) {
             HStack(spacing: 6) {
-                LineBadge(d, compact: true)
+                LineBadge(d, compact: true, detailed: true)
                 Spacer(minLength: 2)
                 Text(Fmt.time(d.time, tz: d.tz))
                     .font(.caption.weight(.semibold).monospacedDigit())
@@ -172,7 +174,7 @@ struct DeparturesWidgetView: View {
             Text(entry.stop?.name ?? "").font(.caption.weight(.semibold)).lineLimit(1)
             if let d = entry.upcoming.first {
                 HStack(spacing: 4) {
-                    Text(verbatim: d.lineName).font(.caption.weight(.bold))
+                    Text(verbatim: d.serviceDetail ?? d.lineName).font(.caption.weight(.bold))
                     Text(Fmt.time(d.time, tz: d.tz)).font(.caption.monospacedDigit())
                         .strikethrough(d.cancelled)
                 }

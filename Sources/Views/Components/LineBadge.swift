@@ -7,9 +7,9 @@ struct LineBadge: View {
     let textColor: Color
     let compact: Bool
 
-    init(_ route: some RouteStyled, compact: Bool = false) {
+    init(_ route: some RouteStyled, compact: Bool = false, detailed: Bool = false) {
         self.compact = compact
-        name = route.lineName
+        name = detailed ? (route.serviceDetail ?? route.lineName) : route.lineName
         mode = route.mode
         color = route.lineColor
         textColor = route.lineTextColor

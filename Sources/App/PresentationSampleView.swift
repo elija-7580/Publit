@@ -62,11 +62,11 @@ struct PresentationSampleView: View {
                     Section("Departures") { ForEach(PresentationSamples.departures) { DepartureRow(stopTime: $0) } }
                 } else if kind == "widget" {
                     Section("Departures") {
-                        DeparturesWidgetView(entry: widgetEntry).environment(\.widgetFamily, .systemSmall)
-                            .frame(width: 160, height: 160).padding(12)
+                        DeparturesWidgetView(entry: widgetEntry, previewFamily: .systemSmall)
+                            .frame(width: 136, height: 136).padding(12)
                             .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 18))
-                        DeparturesWidgetView(entry: widgetEntry).environment(\.widgetFamily, .systemMedium)
-                            .frame(height: 160).padding(12)
+                        DeparturesWidgetView(entry: widgetEntry, previewFamily: .systemMedium)
+                            .frame(height: 136).padding(12)
                             .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 18))
                     }
                 } else if kind == "alerts" {
