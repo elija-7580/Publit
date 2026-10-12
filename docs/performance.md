@@ -38,7 +38,28 @@ dark and large accessibility text layouts.
 ## On-device profiling
 
 Use Instruments Time Profiler, Hangs, Allocations and Points of Interest on a
-physical iPhone. Compare cold launch, 80-row departure refresh, repeated trip
-open/close, a large ticket image and 10-minute active-trip tracking. Record main
-thread stalls, frame hitches, peak memory, request count and battery impact.
-No physical-device FPS or energy improvement has been claimed from CI results.
+physical iPhone. Compare cold launch, scrolling Nearby, route comparison, an
+80-row departure refresh, repeated trip open/close, a large ticket image and
+10-minute active-trip tracking. Record main thread stalls, frame hitches, peak
+memory, request count and battery impact.
+
+As of 2026-10-12 the Debug build (`ed5c4ae`, bundle `io.github.publit.app`)
+installs and launches on Elijá’s iPhone Pro via CoreDevice. An automated
+`xctrace` Time Profiler attach timed out while waiting for the device to boot
+for Instruments, so **no Time Profiler / Allocations / Energy Log numbers are
+recorded yet**. Do not treat CI Linux grouping benchmarks as device FPS or
+battery results. Re-run Instruments over USB when the phone stays online in
+Xcode’s device list, then add measured hotspots here with file and line.
+
+## Outdoor checklist (physical iPhone)
+
+- [ ] Location permission and Nearby departures around you
+- [ ] Plan a route (now and later)
+- [ ] Start a trip: Live Activity / Dynamic Island updates
+- [ ] Home-screen widget (small / medium)
+- [ ] Siri / App Shortcut for a saved stop
+- [ ] Ticket full screen at full brightness
+- [ ] Airplane / offline: last departures and saved trips still readable
+- [ ] Dark Mode
+- [ ] Larger Dynamic Type
+- [ ] VoiceOver on Nearby and ticket screens
