@@ -279,7 +279,10 @@ final class PublitUITests: XCTestCase {
         XCTAssertTrue(save.exists, "Save trip missing")
         save.tap()
         XCTAssertTrue(app.collectionViews.buttons["Saved"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.buttons["Add ticket for this trip"].exists)
+        // Saving adds rows above the ticket button; with live data it can end up below the fold.
+        let addTicket = app.buttons["Add ticket for this trip"]
+        for _ in 0..<4 where !addTicket.exists { app.swipeUp() }
+        XCTAssertTrue(addTicket.waitForExistence(timeout: 5), "Add ticket missing")
         snap("tripactions")
         app.navigationBars["Route"].buttons.firstMatch.tap()
         app.buttons["Clear destination"].tap()

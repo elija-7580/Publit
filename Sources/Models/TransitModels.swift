@@ -23,6 +23,8 @@ struct EncodedPolyline: Codable, Sendable {
     let precision: Int
     let length: Int
     let coordinates: [LatLon]
+    /// Simplified copy for maps, computed once while decoding (off the main thread).
+    let mapPoints: [LatLon]
 
     private enum CodingKeys: String, CodingKey { case points, precision, length }
 
@@ -32,6 +34,7 @@ struct EncodedPolyline: Codable, Sendable {
         precision = try c.decode(Int.self, forKey: .precision)
         length = try c.decodeIfPresent(Int.self, forKey: .length) ?? 0
         coordinates = Polyline.decode(points, precision: precision)
+        mapPoints = Polyline.simplify(coordinates)
     }
 
     func encode(to encoder: Encoder) throws {

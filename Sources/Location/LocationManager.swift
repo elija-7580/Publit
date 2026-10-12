@@ -17,6 +17,15 @@ final class LocationManager: NSObject, CLLocationManagerDelegate {
         m.delegate = self
         m.desiredAccuracy = kCLLocationAccuracyHundredMeters
         m.distanceFilter = 50
+        useRecentFix(m.location)
+    }
+
+    /// The system's last fix, when it is recent and good enough: routes and departures can start
+    /// right away instead of waiting a few seconds for GPS.
+    private func useRecentFix(_ fix: CLLocation?) {
+        guard location == nil, let fix, fix.horizontalAccuracy >= 0, fix.horizontalAccuracy <= 1000,
+              Date().timeIntervalSince(fix.timestamp) < 5 * 60 else { return }
+        location = fix
     }
 
     var coordinate: LatLon? {
@@ -29,6 +38,7 @@ final class LocationManager: NSObject, CLLocationManagerDelegate {
         if status == .notDetermined {
             manager.requestWhenInUseAuthorization()
         } else if !isDenied {
+            useRecentFix(manager.location)
             manager.startUpdatingLocation()
         }
     }
@@ -43,6 +53,7 @@ final class LocationManager: NSObject, CLLocationManagerDelegate {
         Task { @MainActor in
             self.status = s
             if s == .authorizedWhenInUse || s == .authorizedAlways {
+                self.useRecentFix(self.manager.location)
                 self.manager.startUpdatingLocation()
             }
         }
@@ -56,5 +67,5 @@ extension LatLon {
 }
 
 extension EncodedPolyline {
-    var clCoordinates: [CLLocationCoordinate2D] { coordinates.map(\.clCoordinate) }
+    var clCoordinates: [CLLocationCoordinate2D] { mapPoints.map(\.clCoordinate) }
 }

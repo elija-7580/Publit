@@ -73,8 +73,10 @@ struct StationMapView: View {
         let max = LatLon(lat: r.center.latitude + r.span.latitudeDelta / 2, lon: r.center.longitude + r.span.longitudeDelta / 2)
         let zoom = Int((log2(360 / r.span.longitudeDelta)).rounded())
         guard let stops = try? await TransitousClient.shared.mapStops(min: min, max: max, zoom: zoom) else { return }
+        // Grouping a few hundred stops by name takes noticeable time; keep it off the main thread.
+        let grouped = await Task.detached(priority: .userInitiated) { MapStation.group(stops) }.value
         guard !Task.isCancelled else { return }
-        stations = MapStation.group(stops)
+        stations = grouped
     }
 }
 

@@ -11,11 +11,13 @@ struct NearbyView: View {
     @State private var isLoading = false
     @State private var errorMessage: String?
 
-    /// Rounded position (~100 m) so small GPS jitter does not trigger reloads.
-    private var locationKey: String {
-        guard let c = location.coordinate else { return "none" }
-        return String(format: "%.3f,%.3f", c.lat, c.lon)
-    }
+    /// Where and when the board was last requested. A refined GPS fix does not restart a running request.
+    @State private var loadedCenter: LatLon?
+    @State private var loadedAt = Date.distantPast
+
+    /// Reload after moving this far (metres) or after `refreshInterval` seconds.
+    static let reloadDistance = 150.0
+    static let refreshInterval: TimeInterval = 30
 
     var body: some View {
         List {
@@ -78,12 +80,14 @@ struct NearbyView: View {
         }
         .navigationDestination(isPresented: Bindable(app).showGoNow) { GoNowView() }
         .fullScreenCover(isPresented: $showMap) { StationMapView() }
-        .refreshable { await load() }
-        .task(id: locationKey) {
+        .refreshable { await load(force: true) }
+        .task {
             await showLastBoard()
+            // One loop for the screen. Before, every ~100 m change of the first, still improving GPS
+            // fixes cancelled the running request and started over, so the board took many seconds.
             while !Task.isCancelled {
                 await load()
-                try? await Task.sleep(for: .seconds(30))
+                try? await Task.sleep(for: .milliseconds(500))
             }
         }
     }
@@ -137,16 +141,21 @@ struct NearbyView: View {
         }
     }
 
-    /// The last board (up to 10 min old) right away, so the screen is not empty while GPS and network start.
+    /// The last board (up to 30 min old, past departures removed) right away, so the screen is not
+    /// empty while GPS and network start. It is replaced as soon as fresh times arrive.
     private func showLastBoard() async {
-        guard groups.isEmpty, let last = await TransitousClient.shared.lastNearby(maxAge: 600) else { return }
+        guard groups.isEmpty, let last = await TransitousClient.shared.lastNearby(maxAge: 1800) else { return }
         let here = location.coordinate ?? last.center
         guard here.distance(to: last.center) < 400 else { return }
         groups = StopGrouping.group(StopTime.upcoming(last.response.stopTimes), around: here)
     }
 
-    private func load() async {
+    private func load(force: Bool = false) async {
         guard let here = location.coordinate else { return }
+        if !force, let c = loadedCenter, here.distance(to: c) < Self.reloadDistance,
+           Date().timeIntervalSince(loadedAt) < Self.refreshInterval { return }
+        loadedCenter = here
+        loadedAt = Date()
         isLoading = true
         defer { isLoading = false }
         do {
@@ -154,11 +163,18 @@ struct NearbyView: View {
             if res.stopTimes.isEmpty {
                 res = try await TransitousClient.shared.departures(near: here, radius: 1500, count: 80)
             }
-            groups = StopGrouping.group(StopTime.upcoming(res.stopTimes), around: here)
+            let stopTimes = res.stopTimes
+            groups = await Task.detached(priority: .userInitiated) {
+                StopGrouping.group(StopTime.upcoming(stopTimes), around: here)
+            }.value
             errorMessage = nil
         } catch {
             if !(error is CancellationError) && (error as? URLError)?.code != .cancelled {
                 errorMessage = error.localizedDescription
+                // Try again soon instead of waiting for the next regular refresh.
+                loadedAt = Date().addingTimeInterval(10 - Self.refreshInterval)
+            } else {
+                loadedCenter = nil
             }
         }
     }

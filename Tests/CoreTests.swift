@@ -1,3 +1,4 @@
+import Foundation
 import XCTest
 @testable import Publit
 
@@ -311,5 +312,43 @@ final class PaletteTests: XCTestCase {
                 XCTAssertGreaterThanOrEqual(LineColors.contrast(LineColors.RGB(hex: tone.dark)!, LineColors.RGB(hex: bg)!), 4.5, "\(tone.dark) on \(bg)")
             }
         }
+    }
+}
+
+final class PolylineSimplifyTests: XCTestCase {
+    func testDropsPointsOnAStraightLineAndKeepsEnds() {
+        let line = (0...100).map { LatLon(lat: 48.0 + Double($0) * 0.0001, lon: 11.0) }
+        let s = Polyline.simplify(line)
+        XCTAssertEqual(s.count, 2)
+        XCTAssertEqual(s.first, line.first)
+        XCTAssertEqual(s.last, line.last)
+    }
+
+    func testKeepsCorners() {
+        let a = (0...50).map { LatLon(lat: 48.0 + Double($0) * 0.0001, lon: 11.0) }
+        let b = (1...50).map { LatLon(lat: 48.005, lon: 11.0 + Double($0) * 0.0001) }
+        let s = Polyline.simplify(a + b)
+        XCTAssertEqual(s.count, 3)
+        XCTAssertEqual(s[1], LatLon(lat: 48.005, lon: 11.0))
+    }
+
+    func testEveryDroppedPointStaysCloseToTheSimplifiedLine() {
+        // A wiggly street: the simplified line must stay within a few metres of every original point.
+        let line = (0..<400).map { i in LatLon(lat: 48.0 + Double(i) * 0.00005, lon: 11.0 + sin(Double(i) / 9) * 0.0004) }
+        let s = Polyline.simplify(line, toleranceMeters: 4)
+        XCTAssertLessThan(s.count, line.count / 2)
+        for p in line {
+            let d = zip(s, s.dropFirst()).map { segmentDistance(p, $0, $1) }.min() ?? .infinity
+            XCTAssertLessThanOrEqual(d, 4.5)
+        }
+    }
+
+    private func segmentDistance(_ p: LatLon, _ a: LatLon, _ b: LatLon) -> Double {
+        let mx = 111_320 * cos(48.0 * .pi / 180), my = 110_540.0
+        let ax = a.lon * mx, ay = a.lat * my, bx = b.lon * mx, by = b.lat * my, px = p.lon * mx, py = p.lat * my
+        let dx = bx - ax, dy = by - ay, len2 = dx * dx + dy * dy
+        let t = len2 == 0 ? 0 : max(0, min(1, ((px - ax) * dx + (py - ay) * dy) / len2))
+        let ex = px - ax - t * dx, ey = py - ay - t * dy
+        return (ex * ex + ey * ey).squareRoot()
     }
 }
