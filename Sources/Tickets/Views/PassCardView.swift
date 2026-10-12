@@ -124,22 +124,30 @@ struct PassCardView: View {
         .accessibilityElement(children: .combine)
     }
 
+    /// A disabled button dims its label, so the preview shows the code without a button.
+    @ViewBuilder
+    private func codeButton(_ code: TicketPass.Barcode) -> some View {
+        let image = BarcodeView(code: code)
+            .frame(maxWidth: code.format.isSquare ? 230 : .infinity)
+            .frame(height: code.format.isSquare ? 230 : 120)
+            .padding(14)
+            .background(.white, in: RoundedRectangle(cornerRadius: 14))
+        if let onCodeTap {
+            Button { onCodeTap() } label: { image }
+                .buttonStyle(.plain)
+                .accessibilityHint(L10n.t("Shows the code full screen."))
+        } else {
+            image
+        }
+    }
+
     @ViewBuilder
     private var codeArea: some View {
         VStack(spacing: 10) {
             if let code = pass.barcode {
-                Button { onCodeTap?() } label: {
-                    BarcodeView(code: code)
-                        .frame(maxWidth: code.format.isSquare ? 230 : .infinity)
-                        .frame(height: code.format.isSquare ? 230 : 120)
-                        .padding(14)
-                        .background(.white, in: RoundedRectangle(cornerRadius: 14))
-                }
-                .buttonStyle(.plain)
-                .disabled(onCodeTap == nil)
-                .accessibilityLabel(L10n.f("%@ code", code.format.title))
-                .accessibilityHint(onCodeTap == nil ? "" : L10n.t("Shows the code full screen."))
-                .accessibilityIdentifier("passCode")
+                codeButton(code)
+                    .accessibilityLabel(L10n.f("%@ code", code.format.title))
+                    .accessibilityIdentifier("passCode")
                 if let text = pass.reference ?? code.altText {
                     Text(verbatim: text).font(.footnote.monospaced()).foregroundStyle(label)
                         .textSelection(.enabled)

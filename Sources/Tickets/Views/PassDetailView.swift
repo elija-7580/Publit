@@ -120,7 +120,7 @@ struct FullScreenCodeView: View {
             }
             if let passenger = pass.passenger { Text(verbatim: passenger).font(.headline) }
             Spacer()
-            Button { dismiss() } label: { Text("Done").frame(maxWidth: .infinity) }
+            Button { dismiss() } label: { Text("Done").foregroundStyle(.white).frame(maxWidth: .infinity) }
                 .buttonStyle(.borderedProminent).controlSize(.large).tint(.black)
                 .padding(.horizontal)
                 .accessibilityIdentifier("closeCode")
