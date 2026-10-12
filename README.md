@@ -6,25 +6,35 @@
 
 No ads, no account, no tracking.
 
-![Publit on iPhone](docs/images/hero.jpg)
+![Publit on iPhone](docs/images/hero.svg)
 
 | Nearby | Plan | Compare | Route |
 | --- | --- | --- | --- |
-| ![Nearby departures](docs/images/nearby.jpg) | ![Trip planning](docs/images/plan.jpg) | ![Route comparison on a map](docs/images/compare.jpg) | ![Route detail](docs/images/detail.jpg) |
+| ![Nearby departures](docs/images/nearby.svg) | ![Trip planning](docs/images/plan.svg) | ![Route comparison on a map](docs/images/compare.svg) | ![Route detail](docs/images/detail.svg) |
 
-<sub>Prototype renderings of the v0.1 interface, filled with live Transitous data (Munich, October 2026).</sub>
+| Departures | Active trip | Ticket | Widgets |
+| --- | --- | --- | --- |
+| ![Departure board with live and timetable times](docs/images/board-light.svg) | ![Active trip with start and end controls](docs/images/workflow-live.svg) | ![Stored ticket copy](docs/images/ticket-embedded.svg) | ![Small and medium widget](docs/images/widget-small-medium.svg) |
+
+<sub>Screenshots from the automated UI tests on the iPhone 16 Pro simulator (October 2026). The first row shows live Transitous data with a simulated location in Munich. The second row uses labelled demo data in German; the ticket is a test image, not a valid ticket.</sub>
 
 ## Status
 
-Early prototype (v0.1). Not on the App Store yet.
+Early prototype. Not on the App Store yet. Every commit runs core tests on Linux plus build, unit and UI tests on an iOS simulator.
 
 ## Features
 
-- **Nearby:** live departure boards for every stop within 500 m, grouped by station, refreshed every 30 s, with delays, platforms and cancellations.
-- **Plan:** search addresses, stops and places; depart at or arrive by.
-- **Compare:** all connections on a shared timeline, plus a map that overlays every option.
-- **Route detail:** legs, lines, platforms, stop counts, transfers and service alerts.
-- **Saved:** favourite stops and places, stored only on the device.
+- **Nearby:** live departure boards for stops within 500 m, grouped by station and refreshed every 30 s. Each time shows whether it is live or from the timetable, with delays, platforms, cancellations and the vehicle's direction.
+- **Go now:** search a destination and get routes from where you are, leaving now.
+- **Plan:** routes for later, by departure or arrival time. All connections share one timeline, and a map overlays every option.
+- **Route detail:** legs, lines, platforms, stops, transfer risk and service alerts, including replacement buses.
+- **Trips:** save a trip, add it to your calendar, get reminders to leave and to get off. Start a trip to follow it live in the app and on the lock screen (Live Activity).
+- **Tickets:** store a screenshot of a pass or single ticket, or link your ticket app per operator. Stored copies are not guaranteed to be accepted; the operator's live ticket may be required.
+- **Fares:** experimental fare data where operators publish it, clearly marked as an estimate.
+- **Widgets and Siri:** next departures on the home screen and through App Shortcuts.
+- **Offline:** last loaded departures and saved trips stay readable without a connection.
+- **15 languages:** English, German, French, Italian, Spanish, Portuguese (Portugal), Dutch, Polish, Ukrainian, Romanian, Czech, Swedish, Greek, Hungarian and Turkish.
+- **Saved:** stops, lines, places, trips and tickets stay on the device.
 
 ## Coverage
 
@@ -48,10 +58,13 @@ Sources/
   API/        Transitous client
   Models/     API models, line styling
   Location/   CoreLocation wrapper
-  Stores/     favourites, trip-planning state
+  Stores/     favourites, trips, tickets, search history
   Util/       polyline decoder, formatting
-  Views/      Nearby, Plan, Route detail, Search, Saved
-Tests/        decoding and polyline tests with recorded fixtures
+  Views/      Nearby, Plan, Route detail, Trips, Tickets, Saved
+  Intents/    App Shortcuts and Siri
+  Notifications/ reminders and Live Activities
+Widgets/      home-screen widgets
+Tests/        unit, localization and UI tests with recorded fixtures
 feeds/        data converters contributed to Transitous
 ```
 
@@ -63,7 +76,9 @@ Publit is an independent project and does not use code, assets or data from othe
 
 ## Roadmap
 
-- Live Activities and widgets for the next departure
+- Live Activity updates via push while the app is closed
+- Performance profiling on physical devices
+- Native-speaker review of all translations
 - watchOS companion
 - Line view with live vehicle positions
 - More cities with real-time data, starting with Bari
