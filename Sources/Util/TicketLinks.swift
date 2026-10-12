@@ -28,6 +28,19 @@ enum TicketLinks {
             .components(separatedBy: .whitespacesAndNewlines).filter { !$0.isEmpty }.joined(separator: " ")
     }
 
+    /// Ticket shops of large operators whose feeds publish no URL (keys are operatorKey word sets).
+    static let knownShops: [String: String] = [
+        "u-bahn munchen": "https://www.mvg.de/tickets-tarife.html",
+        "mvg": "https://www.mvg.de/tickets-tarife.html",
+        "s-bahn munchen": "https://www.mvv-muenchen.de/",
+        "db": "https://int.bahn.de",
+        "deutsche bahn": "https://int.bahn.de",
+        "obb": "https://tickets.oebb.at",
+        "wiener linien": "https://shop.wienerlinien.at",
+        "trenitalia": "https://www.trenitalia.com",
+        "sbb": "https://www.sbb.ch",
+    ]
+
     /// A link saved for "DB" also applies to "DB Regio AG Bayern"; the most specific entry wins.
     static func userLink(for operatorName: String, in linked: [String: String]) -> String? {
         let words = Set(operatorKey(operatorName).split(separator: " "))
@@ -54,6 +67,7 @@ enum TicketLinks {
         }
         if let u = url(leg.agencyFareUrl) { return TicketLink(operatorName: name, url: u, source: .fares) }
         if let u = url(leg.agencyUrl) { return TicketLink(operatorName: name, url: u, source: .website) }
+        if let u = url(userLink(for: name, in: knownShops)) { return TicketLink(operatorName: name, url: u, source: .fares) }
         return nil
     }
 

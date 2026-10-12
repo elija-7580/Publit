@@ -60,9 +60,9 @@ struct SavedTripRow: View {
                 Text(trip.startTime.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated)))
                     .font(.subheadline).foregroundStyle(.secondary)
             }
+            Text("\(Fmt.time(trip.startTime, tz: tz)) – \(Fmt.time(trip.endTime, tz: trip.itinerary.legs.last?.to.tz))")
+                .font(.subheadline.monospacedDigit()).lineLimit(1)
             HStack(spacing: 6) {
-                Text("\(Fmt.time(trip.startTime, tz: tz)) – \(Fmt.time(trip.endTime, tz: trip.itinerary.legs.last?.to.tz))")
-                    .font(.subheadline.monospacedDigit())
                 ForEach(Array(trip.itinerary.transitLegs.prefix(4).enumerated()), id: \.offset) { _, leg in
                     LineBadge(leg)
                 }

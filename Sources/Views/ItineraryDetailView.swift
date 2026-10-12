@@ -130,7 +130,7 @@ struct LegRow: View {
                 let stops = leg.intermediateStops?.count ?? 0
                 Text("\(Fmt.stops(stops)) · \(Fmt.duration(seconds: leg.duration))")
                     .font(.caption).foregroundStyle(.secondary)
-                    .padding(.leading, 52)
+                    .padding(.leading, 76)
                 stopLine(time: leg.endTime,
                          delay: Int((leg.endTime.timeIntervalSince(leg.scheduledEndTime) / 60).rounded()),
                          name: leg.to.name, track: leg.to.track, tz: leg.to.tz)
@@ -142,7 +142,7 @@ struct LegRow: View {
                         .font(.caption).foregroundStyle(Color.delay)
                 }
                 GetOffButton(leg: leg)
-                    .padding(.leading, 52)
+                    .padding(.leading, 76)
             }
             .padding(.vertical, 4)
         } else {
@@ -160,7 +160,8 @@ struct LegRow: View {
 
     private func stopLine(time: Date, delay: Int, name: String, track: String?, tz: String?) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
-            Text(Fmt.time(time, tz: tz)).font(.subheadline.weight(.semibold).monospacedDigit()).frame(width: 52, alignment: .leading)
+            Text(Fmt.time(time, tz: tz)).font(.subheadline.weight(.semibold).monospacedDigit()).lineLimit(1).fixedSize()
+                .frame(minWidth: 68, alignment: .leading)
             if delay > 0 {
                 Text("+\(delay)").font(.caption.monospacedDigit()).foregroundStyle(Color.delay)
             }

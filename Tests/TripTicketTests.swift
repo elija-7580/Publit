@@ -170,3 +170,16 @@ final class MapStationTests: XCTestCase {
         XCTAssertEqual(Set(stations.map(\.id)).count, stations.count, "unique IDs for map selection")
     }
 }
+
+final class KnownShopTests: XCTestCase {
+    func testMunichOperatorsGetAShopButNotTheNonMVVBus() throws {
+        let p = try TransitousClient.makeDecoder().decode(PlanResponse.self, from: Fixtures.data("plan_muc"))
+        let legs = p.itineraries.flatMap(\.transitLegs)
+        let ubahn = legs.first { $0.agencyName == "U-Bahn München" }.flatMap { TicketLinks.link(for: $0) }
+        XCTAssertEqual(ubahn?.url.host, "www.mvg.de")
+        let sbahn = legs.first { $0.agencyName == "DB Regio AG S-Bahn München" }.flatMap { TicketLinks.link(for: $0) }
+        XCTAssertEqual(sbahn?.url.host, "www.mvv-muenchen.de", "most specific entry beats plain DB")
+        let bus = legs.first { $0.agencyName == "Nicht in MVV integriert" }.flatMap { TicketLinks.link(for: $0) }
+        XCTAssertNil(bus)
+    }
+}

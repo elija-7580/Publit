@@ -100,6 +100,7 @@ struct NearbyView: View {
                 Label("Where to now?", systemImage: "magnifyingglass").foregroundStyle(.secondary)
             }
             .accessibilityLabel("Where to now? Route from your location")
+            .accessibilityIdentifier("whereToNow")
             ForEach(favorites.pinned) { p in
                 Button { go(.place(p)) } label: {
                     Label { Text(p.role?.title ?? p.name) + Text("  \(p.name)").foregroundStyle(.secondary) }

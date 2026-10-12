@@ -22,6 +22,12 @@ final class PublitUITests: XCTestCase {
         return app
     }
 
+    /// Touch the top edge (no controls there) so a pending permission alert is handled,
+    /// without tapping into the list like `app.tap()` (screen centre) does.
+    private func nudge(_ app: XCUIApplication) {
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.01)).tap()
+    }
+
     private func snap(_ name: String) {
         let shot = XCUIScreen.main.screenshot()
         let attachment = XCTAttachment(screenshot: shot)
@@ -38,7 +44,7 @@ final class PublitUITests: XCTestCase {
     /// F01 Nearby: live departures around the (simulated) location.
     func testF01NearbyShowsDepartures() {
         let app = launch()
-        app.tap() // lets the interruption monitor handle a permission alert
+        nudge(app) // lets the interruption monitor handle a permission alert
         XCTAssertTrue(app.navigationBars["Nearby"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.buttons["All departures"].firstMatch.waitForExistence(timeout: timeout),
                       "no departure board loaded")
@@ -114,8 +120,8 @@ final class PublitUITests: XCTestCase {
     /// F05 Nearby "Where to now?": routes from the current location, leaving now.
     func testF05GoNowFromNearby() {
         let app = launch()
-        app.tap()
-        let whereTo = app.buttons["Where to now? Route from your location"]
+        nudge(app)
+        let whereTo = app.buttons["whereToNow"]
         XCTAssertTrue(whereTo.waitForExistence(timeout: 10))
         whereTo.tap()
         let field = app.searchFields.firstMatch
@@ -134,7 +140,7 @@ final class PublitUITests: XCTestCase {
     /// F06 Station map opens and shows stations around the location.
     func testF06StationMap() {
         let app = launch()
-        app.tap()
+        nudge(app)
         let mapButton = app.buttons["Station map"]
         XCTAssertTrue(mapButton.waitForExistence(timeout: 10))
         mapButton.tap()
