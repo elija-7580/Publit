@@ -90,7 +90,7 @@ struct PresentationSampleView: View {
             guard kind == "workflow" else { return }
             let saved = trips.save(PresentationSamples.itinerary, from: "Marienplatz", to: "Nordfriedhof")
             trips.update(saved.id, with: PresentationSamples.itinerary)
-            if !tickets.tickets.contains(where: { $0.name == "Ticket-Beispiel" }) {
+            if Features.tickets, !tickets.tickets.contains(where: { $0.name == "Ticket-Beispiel" }) {
                 tickets.add(name: "Ticket-Beispiel", kind: .single, image: PresentationSamples.image,
                             appLink: nil, validUntil: nil, tripId: saved.id)
             }

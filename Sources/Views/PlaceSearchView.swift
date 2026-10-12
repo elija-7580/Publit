@@ -8,6 +8,8 @@ struct PlaceSearchView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(FavoritesStore.self) private var favorites
     @Environment(LocationManager.self) private var location
+    @Environment(SearchHistoryStore.self) private var history
+    @State private var confirmClear = false
     @State private var query = ""
     @State private var results: [GeocodeMatch] = []
     @State private var errorMessage: String?
@@ -25,6 +27,7 @@ struct PlaceSearchView: View {
                             Label("Current location", systemImage: "location.fill")
                         }
                     }
+                    recentSection
                     if !favorites.items.isEmpty {
                         Section("Saved") {
                             ForEach(favorites.items) { f in
@@ -63,6 +66,44 @@ struct PlaceSearchView: View {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
             }
             .task(id: query) { await search() }
+        }
+    }
+
+    /// Places searched before, newest first: the history lives where you search.
+    private var recentPlaces: [RecentSearch] {
+        var seen = Set<String>()
+        return history.entries.filter { entry in
+            if case .currentLocation = entry.to { return false }
+            return seen.insert(entry.to.key).inserted
+        }
+    }
+
+    @ViewBuilder
+    private var recentSection: some View {
+        let recent = Array(recentPlaces.prefix(6))
+        if !recent.isEmpty {
+            Section {
+                ForEach(recent) { search in
+                    Button { select(search.to) } label: {
+                        HStack(spacing: 12) {
+                            Image(systemName: "clock.arrow.circlepath")
+                                .font(.title3).foregroundStyle(.secondary)
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text(search.to.title).foregroundStyle(.primary).lineLimit(1)
+                                Text(L10n.f("from %@", search.from.title)).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                            }
+                        }
+                    }
+                    .accessibilityIdentifier("recentSearch")
+                    .swipeActions { Button("Remove", role: .destructive) { history.remove(search.id) } }
+                }
+                Button("Clear history", role: .destructive) { confirmClear = true }
+                    .font(.subheadline)
+            } header: { Text("Recently searched") }
+            .confirmationDialog("Clear search history?", isPresented: $confirmClear, titleVisibility: .visible) {
+                Button("Clear history", role: .destructive) { history.clear() }
+                Button("Cancel", role: .cancel) { }
+            }
         }
     }
 

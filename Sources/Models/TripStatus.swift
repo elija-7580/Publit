@@ -97,7 +97,8 @@ enum CalendarText {
             out.append(s)
         }
         out.append("")
-        out.append(L10n.f("Live status and tickets: %@", trip.deepLink.absoluteString))
+        out.append(Features.tickets ? L10n.f("Live status and tickets: %@", trip.deepLink.absoluteString)
+                                     : L10n.f("Live status: %@", trip.deepLink.absoluteString))
         return out.joined(separator: "\n")
     }
 

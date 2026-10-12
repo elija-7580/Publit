@@ -352,3 +352,21 @@ final class PolylineSimplifyTests: XCTestCase {
         return (ex * ex + ey * ey).squareRoot()
     }
 }
+
+final class LinkSafetyTests: XCTestCase {
+    func testFeedLinksOpenOnlyAsWebPages() {
+        XCTAssertEqual(TicketLinks.webURL("https://www.mvv-muenchen.de/x")?.host, "www.mvv-muenchen.de")
+        XCTAssertEqual(TicketLinks.webURL("www.oebb.at")?.scheme, "https")
+        XCTAssertNil(TicketLinks.webURL("tel://0800123"))
+        XCTAssertNil(TicketLinks.webURL("sms://123"))
+        XCTAssertNil(TicketLinks.webURL("publit://ticket"))
+        XCTAssertNil(TicketLinks.webURL("someapp://open"))
+    }
+
+    func testStopLinkRejectsImpossibleCoordinates() {
+        XCTAssertNotNil(DeepLink(url: URL(string: "publit://stop/x?lat=48.1&lon=11.5")!))
+        XCTAssertNil(DeepLink(url: URL(string: "publit://stop/x?lat=480&lon=11.5")!))
+        XCTAssertNil(DeepLink(url: URL(string: "publit://stop/x?lat=nan&lon=11.5")!))
+        XCTAssertNil(DeepLink(url: URL(string: "publit://stop/x?lat=48.1&lon=inf")!))
+    }
+}

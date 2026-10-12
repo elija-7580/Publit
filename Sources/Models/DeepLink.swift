@@ -33,7 +33,8 @@ enum DeepLink: Hashable, Identifiable {
             let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []
             func value(_ n: String) -> String? { items.first { $0.name == n }?.value }
             guard let arg, !arg.isEmpty, let lat = value("lat").flatMap(Double.init),
-                  let lon = value("lon").flatMap(Double.init) else { return nil }
+                  let lon = value("lon").flatMap(Double.init),
+                  lat.isFinite, lon.isFinite, abs(lat) <= 90, abs(lon) <= 180 else { return nil }
             self = .stop(id: arg, name: value("name") ?? arg, lat: lat, lon: lon)
         case "go":
             guard let role = arg.flatMap(PlaceRole.init(rawValue:)) else { return nil }

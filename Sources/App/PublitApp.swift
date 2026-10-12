@@ -137,7 +137,7 @@ struct RootView: View {
     private var ticketLink: Binding<DeepLink?> {
         Binding(get: {
             switch app.deepLink {
-            case .ticket, .tripTickets: return app.deepLink
+            case .ticket, .tripTickets: return Features.tickets ? app.deepLink : nil
             default: return nil
             }
         }, set: { if $0 == nil { app.deepLink = nil } })
@@ -163,7 +163,7 @@ struct RootView: View {
         // Trips with a leave reminder that start within 8 hours get their Live Activity now.
         for trip in trips.upcoming(now: now) where !LiveTripActivity.isRunning(trip.id) {
             if trips.wantsLiveActivity(trip.id), trip.startTime.timeIntervalSince(now) < LiveTripActivity.maxLead {
-                LiveTripActivity.start(trip, hasTicket: !tickets.tickets(forTrip: trip.id).isEmpty)
+                LiveTripActivity.start(trip, hasTicket: Features.tickets && !tickets.tickets(forTrip: trip.id).isEmpty)
             }
         }
     }

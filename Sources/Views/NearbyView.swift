@@ -23,7 +23,6 @@ struct NearbyView: View {
         List {
             goSection
             activeTripSection
-            RecentSearchesSection(goNow: true)
             OfflineNote()
             if location.isDenied {
                 ContentUnavailableView("Location is off",

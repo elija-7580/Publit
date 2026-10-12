@@ -11988,6 +11988,101 @@
     }
    }
   },
+  "Live status: %@": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Live status: %@"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Live-Status: %@"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Statut en direct : %@"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Stato in tempo reale: %@"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Estado en directo: %@"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Estado em tempo real: %@"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Live-status: %@"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Status na żywo: %@"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Статус наживо: %@"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Stare în timp real: %@"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Živý stav: %@"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Realtidsstatus: %@"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ζωντανή κατάσταση: %@"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Élő állapot: %@"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Canlı durum: %@"
+     }
+    }
+   }
+  },
   "Live tracking is active in the app. Lock screen updates may be unavailable.": {
    "extractionState": "manual",
    "localizations": {

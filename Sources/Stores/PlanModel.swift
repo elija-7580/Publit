@@ -50,6 +50,7 @@ final class PlanModel {
     private var nextCursor: String?
     @ObservationIgnored private var lastRequest: (from: LatLon, to: LatLon, time: Date?, arriveBy: Bool, maxWalk: Int)?
     @ObservationIgnored private var token = UUID()
+    @ObservationIgnored private var resultsKey: String?
     @ObservationIgnored var history: SearchHistoryStore = .shared
 
     var canLoadMore: Bool { nextCursor != nil && !itineraries.isEmpty }
@@ -78,6 +79,8 @@ final class PlanModel {
                 : L10n.t("Waiting for your location…")
             return
         }
+        // Results of another query (new destination or time) must not stay on screen without a spinner.
+        if !silent, resultsKey != queryKey { itineraries = []; nextCursor = nil }
         let searchedFrom = from
         let searchedMode = timeMode
         let searchedDate = date
@@ -98,6 +101,7 @@ final class PlanModel {
             }
             guard token == myToken else { return }
             itineraries = Self.merge(transit: res.itineraries, direct: res.direct)
+            resultsKey = queryKey
             nextCursor = arriveBy ? res.previousPageCursor : res.nextPageCursor
             lastRequest = (f, t, time, arriveBy, maxWalk)
             if !silent { history.record(from: searchedFrom, to: to, mode: searchedMode, date: searchedDate) }
@@ -167,6 +171,8 @@ final class AppState {
 
     func open(_ url: URL) {
         guard let link = DeepLink(url: url) else { return }
+        if !Features.tickets, case .ticket = link { return }
+        if !Features.tickets, case .tripTickets = link { return }
         switch link {
         case .trip: tab = .plan
         case .stop: tab = .nearby

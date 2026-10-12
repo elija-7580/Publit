@@ -58,11 +58,18 @@ enum TicketLinks {
         return u // custom app scheme, e.g. a ticket app the user linked
     }
 
+    /// Links that come from feeds (alerts, booking links) open only as web pages. A custom scheme
+    /// from third-party data could otherwise start a call, a message or another app.
+    static func webURL(_ s: String?) -> URL? {
+        guard let u = url(s), let scheme = u.scheme?.lowercased(), scheme == "http" || scheme == "https" else { return nil }
+        return u
+    }
+
     static func link(for leg: Leg, userLinked: [String: String] = [:]) -> TicketLink? {
         guard leg.isTransit else { return nil }
         let name = leg.agencyName?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty ?? leg.lineName
         if let u = url(userLink(for: name, in: userLinked)) { return TicketLink(operatorName: name, url: u, source: .userLinked) }
-        if let u = url(leg.ticketUrls?.ios) ?? url(leg.ticketUrls?.web) {
+        if let u = webURL(leg.ticketUrls?.ios) ?? webURL(leg.ticketUrls?.web) {
             return TicketLink(operatorName: name, url: u, source: .booking)
         }
         if let u = url(leg.agencyFareUrl) { return TicketLink(operatorName: name, url: u, source: .fares) }

@@ -113,36 +113,8 @@ final class PublitUITests: XCTestCase {
         XCTAssertTrue(end.isHittable)
         end.tap()
         XCTAssertTrue(app.buttons["startTrip"].waitForExistence(timeout: 5))
-        app.buttons["Fertig"].tap()
-        let ticket = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Ticket-Beispiel")).firstMatch
-        for _ in 0..<4 where !ticket.isHittable { app.swipeUp() }
-        XCTAssertTrue(ticket.isHittable)
-        ticket.tap()
-        sleep(1)
-        snap("ticket-open-result")
-        let original = app.buttons["showTicketOriginal"]
-        for _ in 0..<3 where !original.isHittable { app.swipeUp() }
-        if !original.exists {
-            print("TICKET NAVBARS: \(app.navigationBars.allElementsBoundByIndex.map(\.identifier))")
-            print("TICKET BUTTONS: \(app.buttons.allElementsBoundByIndex.map { $0.identifier + ":" + $0.label })")
-        }
-        XCTAssertTrue(original.waitForExistence(timeout: 5))
-        snap("ticket-embedded")
-        original.tap()
-        sleep(1)
-        snap("ticket-original")
-        app.terminate()
-        for (name, dark, large) in [("ticket-dark", true, false), ("ticket-large", false, true)] {
-            let extra = sample("workflow", dark: dark, large: large)
-            let card = extra.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Ticket-Beispiel")).firstMatch
-            for _ in 0..<6 where !card.isHittable { extra.swipeUp() }
-            XCTAssertTrue(card.isHittable)
-            card.tap()
-            XCTAssertTrue(extra.navigationBars["Ticket-Beispiel"].waitForExistence(timeout: 5))
-            sleep(1)
-            snap(name)
-            extra.terminate()
-        }
+        // The ticket part of this flow returns with Features.tickets.
+        XCTAssertFalse(app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Ticket-Beispiel")).firstMatch.exists)
     }
 
     func testF11DisruptionDetailsAndConditionalFareEstimate() {
@@ -279,10 +251,8 @@ final class PublitUITests: XCTestCase {
         XCTAssertTrue(save.exists, "Save trip missing")
         save.tap()
         XCTAssertTrue(app.collectionViews.buttons["Saved"].waitForExistence(timeout: 5))
-        // Saving adds rows above the ticket button; with live data it can end up below the fold.
-        let addTicket = app.buttons["Add ticket for this trip"]
-        for _ in 0..<4 where !addTicket.exists { app.swipeUp() }
-        XCTAssertTrue(addTicket.waitForExistence(timeout: 5), "Add ticket missing")
+        // Tickets are switched off for now (Features.tickets): no ticket section on the route.
+        XCTAssertFalse(app.buttons["Add ticket for this trip"].exists)
         snap("tripactions")
         app.navigationBars["Route"].buttons.firstMatch.tap()
         app.buttons["Clear destination"].tap()

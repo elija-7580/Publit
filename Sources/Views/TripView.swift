@@ -51,7 +51,7 @@ struct TripView: View {
         .navigationTitle(stopTime.lineName)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) { ShowTicketButton() }
+            if Features.tickets { ToolbarItem(placement: .topBarTrailing) { ShowTicketButton() } }
             ToolbarItem(placement: .topBarTrailing) {
                 Button { favorites.toggle(savedLine) } label: {
                     Label(favorites.containsLine(savedLine.id) ? L10n.t("Saved line") : L10n.t("Save line"),

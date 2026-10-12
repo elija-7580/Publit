@@ -22,23 +22,25 @@ struct SettingsView: View {
                     .padding(.vertical, 4)
                     .accessibilityElement(children: .combine)
                 }
-                Section("Tickets") {
-                    NavigationLink {
-                        TicketsView()
-                    } label: {
-                        LabeledContent {
-                            Text("\(tickets.tickets.count)")
+                if Features.tickets {
+                    Section("Tickets") {
+                        NavigationLink {
+                            TicketsView()
                         } label: {
-                            Label("My tickets", systemImage: "ticket")
+                            LabeledContent {
+                                Text("\(tickets.tickets.count)")
+                            } label: {
+                                Label("My tickets", systemImage: "ticket")
+                            }
                         }
-                    }
-                    NavigationLink {
-                        LinkedTicketAppsView()
-                    } label: {
-                        LabeledContent {
-                            Text("\(tickets.linkedApps.count)")
+                        NavigationLink {
+                            LinkedTicketAppsView()
                         } label: {
-                            Label("Ticket apps per operator", systemImage: "arrow.up.forward.app")
+                            LabeledContent {
+                                Text("\(tickets.linkedApps.count)")
+                            } label: {
+                                Label("Ticket apps per operator", systemImage: "arrow.up.forward.app")
+                            }
                         }
                     }
                 }

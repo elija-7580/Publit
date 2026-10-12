@@ -132,9 +132,6 @@ struct PublitShortcuts: AppShortcutsProvider {
         AppShortcut(intent: GoToWorkIntent(), phrases: [
             "Route to work in \(.applicationName)",
         ], shortTitle: "Route to work", systemImageName: "briefcase")
-        AppShortcut(intent: ShowTicketIntent(), phrases: [
-            "Show my ticket in \(.applicationName)",
-            "Show my \(.applicationName) ticket",
-        ], shortTitle: "Show ticket", systemImageName: "ticket")
+        // "Show ticket" returns with the ticket feature (Features.tickets).
     }
 }

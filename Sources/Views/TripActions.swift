@@ -19,6 +19,8 @@ struct TripActionsSection: View {
 
     private var saved: SavedTrip? { trips.saved(itinerary) }
 
+    @Environment(\.dynamicTypeSize) private var typeSize
+
     var body: some View {
         Section {
             if let saved, trips.activeTripId == saved.id {
@@ -29,6 +31,7 @@ struct TripActionsSection: View {
             } else {
                 Button { Task { await startTrip() } } label: {
                     Label("Start trip", systemImage: "location.north.circle.fill")
+                        .font(.headline)
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
@@ -36,30 +39,17 @@ struct TripActionsSection: View {
                 .disabled(itinerary.isCancelled || itinerary.endTime < .now)
                 .accessibilityIdentifier("startTrip")
             }
-            Button {
-                if let saved { trips.remove(saved.id); LeaveReminder.cancel(saved.id); Task { await LiveTripActivity.end(saved.id) }; reminderOn = false }
-                else { trips.save(itinerary, from: fromName, to: toName) }
-            } label: {
-                Label(saved == nil ? L10n.t("Save trip") : L10n.t("Saved"), systemImage: saved == nil ? "bookmark" : "bookmark.fill")
-            }
-            Button {
-                calendarTrip = ensureSaved()
-            } label: {
-                Label("Add to Calendar", systemImage: "calendar.badge.plus")
-            }
-            if itinerary.startTime > .now {
-                Button {
-                    Task { await toggleReminder() }
-                } label: {
-                    Label(reminderOn ? L10n.t("Leave reminder on") : L10n.t("Remind me to leave in time"),
-                          systemImage: reminderOn ? "bell.fill" : "bell")
-                }
+            // Secondary options side by side instead of a long list; stacked at accessibility text sizes.
+            if typeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: 12) { secondaryButtons }
+                    .labelStyle(.titleAndIcon)
+            } else {
+                HStack(spacing: 8) { secondaryButtons }
+                    .labelStyle(TileLabelStyle())
             }
             if let note {
                 Text(note).font(.caption).foregroundStyle(.secondary)
             }
-        } header: {
-            Text("Trip")
         } footer: {
             Text("The calendar entry links back to this trip with its live status.")
         }
@@ -70,12 +60,39 @@ struct TripActionsSection: View {
             CalendarEventSheet(trip: trip).ignoresSafeArea()
         }
 
-        FareSection(itinerary: itinerary)
-        TicketSection(itinerary: itinerary, tripId: saved?.id, onAddTicket: {
-            _ = ensureSaved()
-            addingTicket = true
-        })
-        .sheet(isPresented: $addingTicket) { AddTicketView(tripId: saved?.id) }
+        if Features.tickets {
+            TicketSection(itinerary: itinerary, tripId: saved?.id, onAddTicket: {
+                _ = ensureSaved()
+                addingTicket = true
+            })
+            .sheet(isPresented: $addingTicket) { AddTicketView(tripId: saved?.id) }
+        }
+    }
+
+    @ViewBuilder
+    private var secondaryButtons: some View {
+        Button {
+            if let saved { trips.remove(saved.id); LeaveReminder.cancel(saved.id); Task { await LiveTripActivity.end(saved.id) }; reminderOn = false }
+            else { trips.save(itinerary, from: fromName, to: toName) }
+        } label: {
+            Label(saved == nil ? L10n.t("Save trip") : L10n.t("Saved"), systemImage: saved == nil ? "bookmark" : "bookmark.fill")
+        }
+        .buttonStyle(.bordered)
+        Button {
+            calendarTrip = ensureSaved()
+        } label: {
+            Label("Add to Calendar", systemImage: "calendar.badge.plus")
+        }
+        .buttonStyle(.bordered)
+        if itinerary.startTime > .now {
+            Button {
+                Task { await toggleReminder() }
+            } label: {
+                Label(reminderOn ? L10n.t("Leave reminder on") : L10n.t("Remind me to leave in time"),
+                      systemImage: reminderOn ? "bell.fill" : "bell")
+            }
+            .buttonStyle(.bordered)
+        }
     }
 
     private func startTrip() async {
@@ -84,7 +101,7 @@ struct TripActionsSection: View {
             LeaveReminder.cancel(previous)
             await LiveTripActivity.end(previous)
         }
-        switch LiveTripActivity.start(trip, hasTicket: !tickets.tickets(forTrip: trip.id).isEmpty) {
+        switch LiveTripActivity.start(trip, hasTicket: Features.tickets && !tickets.tickets(forTrip: trip.id).isEmpty) {
         case .started: note = L10n.t("Follow it on the lock screen.")
         case .tooEarly: note = L10n.t("Live updates on the lock screen start 8 hours before.")
         case .unavailable, .failed: note = L10n.t("Live tracking is active in the app. Lock screen updates may be unavailable.")
@@ -127,7 +144,7 @@ struct TripActionsSection: View {
         }
         trips.setFollowLive(trip.id, true)
         reminderOn = true
-        switch LiveTripActivity.start(trip, hasTicket: !tickets.tickets(forTrip: trip.id).isEmpty) {
+        switch LiveTripActivity.start(trip, hasTicket: Features.tickets && !tickets.tickets(forTrip: trip.id).isEmpty) {
         case .started: note = [note, L10n.t("Follow it on the lock screen.")].compactMap { $0 }.joined(separator: " ")
         case .tooEarly: note = [note, L10n.t("Live updates on the lock screen start 8 hours before.")].compactMap { $0 }.joined(separator: " ")
         case .unavailable: note = [note, L10n.t("Turn on Live Activities for Publit in Settings to follow it on the lock screen.")].compactMap { $0 }.joined(separator: " ")
@@ -222,5 +239,19 @@ struct CalendarEventSheet: UIViewControllerRepresentable {
         func eventEditViewController(_ controller: EKEventEditViewController, didCompleteWith action: EKEventEditViewAction) {
             dismiss()
         }
+    }
+}
+
+/// Icon above a short title, filling an equal share of the row.
+struct TileLabelStyle: LabelStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        VStack(spacing: 6) {
+            configuration.icon.font(.title3)
+            configuration.title.font(.caption.weight(.semibold))
+                .multilineTextAlignment(.center)
+                .lineLimit(2).minimumScaleFactor(0.85)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, minHeight: 58)
     }
 }

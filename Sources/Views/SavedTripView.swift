@@ -8,10 +8,8 @@ struct SavedTripView: View {
 
     var body: some View {
         if let trip = trips.trip(tripId) {
-            TimelineView(.periodic(from: .now, by: 30)) { context in
-                ItineraryDetailView(itinerary: trip.itinerary, fromName: trip.fromName, toName: trip.toName,
-                                    status: TripStatus.at(context.date, trip.itinerary), refreshedAt: trip.refreshedAt)
-            }
+            ItineraryDetailView(itinerary: trip.itinerary, fromName: trip.fromName, toName: trip.toName,
+                                statusAt: { TripStatus.at($0, trip.itinerary) }, refreshedAt: trip.refreshedAt)
             .navigationTitle(trip.toName)
             .overlay(alignment: .bottom) {
                 if let errorMessage {

@@ -6,7 +6,7 @@ struct ServiceAlertRow: View {
         DisclosureGroup {
             VStack(alignment: .leading, spacing: 8) {
                 if !alert.descriptionText.isEmpty { Text(verbatim: alert.descriptionText).font(.subheadline) }
-                if let url = TicketLinks.url(alert.url) { Link("Operator details", destination: url) }
+                if let url = TicketLinks.webURL(alert.url) { Link("Operator details", destination: url) }
             }
             .padding(.vertical, 6)
         } label: {
