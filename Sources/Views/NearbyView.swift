@@ -77,10 +77,12 @@ struct NearbyView: View {
             ForEach(groups) { group in
                 Section {
                     ForEach(group.departures.prefix(5)) { st in
-                        NavigationLink {
-                            TripView(stopTime: st, stationId: group.id, stationName: group.name,
-                                     stationCoordinate: group.coordinate)
-                        } label: { DepartureRow(stopTime: st) }
+                        // By value: the trip stays open when the board refreshes and this row
+                        // changes or leaves (the departure has gone).
+                        NavigationLink(value: TripTarget(stopTime: st, stationId: group.id, stationName: group.name,
+                                                         coordinate: group.coordinate)) {
+                            DepartureRow(stopTime: st)
+                        }
                     }
                     NavigationLink {
                         StopDeparturesView(stopId: group.id, name: group.name, coordinate: group.coordinate, exact: group.isPole)
@@ -105,6 +107,9 @@ struct NearbyView: View {
             PlaceSearchView(title: "Where to?", allowCurrentLocation: false) { endpoint in go(endpoint) }
         }
         .navigationDestination(isPresented: Bindable(app).showGoNow) { GoNowView() }
+        .navigationDestination(for: TripTarget.self) { t in
+            TripView(stopTime: t.stopTime, stationId: t.stationId, stationName: t.stationName, stationCoordinate: t.coordinate)
+        }
         .fullScreenCover(isPresented: $showMap) { StationMapView() }
         .refreshable { await load(force: true) }
         .onChange(of: storedModes) {
@@ -232,6 +237,7 @@ struct NearbyView: View {
             }.value
             try Task.checkCancellation()
             guard loadGeneration == generation else { return }
+            HangLog.shared.note("nearby loaded: \(regrouped.count) stops, \(stopTimes.count) departures")
             groups = regrouped
             loadedCenter = here
             loadedModes = modes

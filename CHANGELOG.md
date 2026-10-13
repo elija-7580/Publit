@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.0 (build 9)
+
+### Freeze when opening a trip from Nearby (freeze log from build 8)
+- The log showed a 14.6 s freeze one second after opening a trip from the Nearby board, right after returning to the app. Likely cause: the board first shows the last saved departures, then the fresh ones arrive with new live times. A departure's list ID contained its live time, so a new delay made it a different row, and the trip opened from that row was closed while it was still open. Not yet confirmed on the device.
+- Departure IDs now use the timetable time; repeated departures in a response appear once.
+- Trips open from the Nearby board by value, so they stay open when the board refreshes or the departure leaves it.
+- Trip screen: stops, alerts and the map shape are worked out once per load. The map is redrawn only when the route or the vehicle moves, and has no title labels.
+- Alerts with the same priority and title keep a fixed order (before, the order could change on every redraw).
+- Freeze log also notes when Nearby and a trip have loaded (counts only).
+
 ## 0.6.0 (build 8)
 
 ### Freezes (reported as "scene-update" hangs on 0.1.0 and 0.6.0 build 7)

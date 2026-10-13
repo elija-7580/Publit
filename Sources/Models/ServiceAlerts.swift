@@ -31,7 +31,13 @@ extension Alert {
     }
     static func relevant(_ alerts: [Alert], now: Date = .now, from: Date? = nil, to: Date? = nil) -> [Alert] {
         Array(Set(alerts.filter { $0.visible(now: now, from: from, to: to) }))
-            .sorted { $0.priority == $1.priority ? $0.headerText < $1.headerText : $0.priority < $1.priority }
+            // A fixed order: a Set's order changes between calls, and a list whose rows reorder
+            // on every redraw keeps updating.
+            .sorted {
+                if $0.priority != $1.priority { return $0.priority < $1.priority }
+                if $0.headerText != $1.headerText { return $0.headerText < $1.headerText }
+                return $0.descriptionText < $1.descriptionText
+            }
     }
 }
 

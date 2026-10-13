@@ -187,7 +187,11 @@ struct StopTime: Decodable, Identifiable, Sendable, RouteStyled {
     /// Last stop of the trip.
     var tripTo: SegmentStop? = nil
 
-    var id: String { "\(tripId)|\(place.stopId ?? place.name)|\(departureTime.timeIntervalSince1970)" }
+    /// By the timetable time where known: a new delay must not turn a row into a different row
+    /// (in a list that would close a screen opened from it).
+    var id: String {
+        "\(tripId)|\(place.stopId ?? place.name)|\((scheduledDepartureTime ?? departureTime).timeIntervalSince1970)"
+    }
     var directionName: String? { TransitLabels.clean(headsign) }
     var departureTime: Date { place.departure ?? place.arrival ?? .distantPast }
     var scheduledDepartureTime: Date? { place.scheduledDeparture ?? place.scheduledArrival }
@@ -200,8 +204,10 @@ struct StopTime: Decodable, Identifiable, Sendable, RouteStyled {
 
 extension StopTime {
     /// Drops departures that have already left (saved boards shown offline can be minutes old).
+    /// Also drops repeated entries, so list IDs stay unique.
     static func upcoming(_ list: [StopTime], now: Date = Date()) -> [StopTime] {
-        list.filter { $0.departureTime > now.addingTimeInterval(-60) }
+        var seen = Set<String>()
+        return list.filter { $0.departureTime > now.addingTimeInterval(-60) && seen.insert($0.id).inserted }
     }
 }
 

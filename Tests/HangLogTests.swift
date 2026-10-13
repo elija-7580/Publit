@@ -56,3 +56,36 @@ final class HangLogTests: XCTestCase {
         XCTAssertTrue(text.contains("Screen15\n") && text.contains("Screen39\n"))
     }
 }
+
+/// A board refresh must not turn a departure into a different list row (that closed the trip opened from it).
+final class StableDepartureIdentityTests: XCTestCase {
+    private func stopTimes(delayingFirstBy minutes: Int = 0, duplicateFirst: Bool = false) throws -> [StopTime] {
+        var root = try XCTUnwrap(JSONSerialization.jsonObject(with: Fixtures.data("stoptimes")) as? [String: Any])
+        var list = try XCTUnwrap(root["stopTimes"] as? [[String: Any]])
+        if minutes != 0 {
+            var place = try XCTUnwrap(list[0]["place"] as? [String: Any])
+            let departure = try XCTUnwrap(DateParsing.parse(try XCTUnwrap(place["departure"] as? String)))
+            place["departure"] = ISO8601DateFormatter().string(from: departure.addingTimeInterval(Double(minutes) * 60))
+            list[0]["place"] = place
+        }
+        if duplicateFirst { list.insert(list[0], at: 1) }
+        root["stopTimes"] = list
+        let data = try JSONSerialization.data(withJSONObject: root)
+        return try TransitousClient.makeDecoder().decode(StopTimesResponse.self, from: data).stopTimes
+    }
+
+    func testANewDelayKeepsTheRowIdentity() throws {
+        let before = try stopTimes()[0]
+        let after = try stopTimes(delayingFirstBy: 4)[0]
+        XCTAssertNotEqual(before.departureTime, after.departureTime)
+        XCTAssertEqual(before.id, after.id)
+    }
+
+    func testRepeatedDeparturesAppearOnce() throws {
+        let list = try stopTimes(duplicateFirst: true)
+        let now = list.map(\.departureTime).min()!.addingTimeInterval(-120)
+        let shown = StopTime.upcoming(list, now: now)
+        XCTAssertEqual(Set(shown.map(\.id)).count, shown.count)
+        XCTAssertEqual(shown.count, list.count - 1)
+    }
+}

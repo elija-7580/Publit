@@ -1,6 +1,17 @@
 import SwiftUI
 import MapKit
 
+/// A departure to open as a trip, for value-based navigation.
+struct TripTarget: Hashable {
+    let stopTime: StopTime
+    let stationId: String
+    let stationName: String
+    let coordinate: LatLon
+
+    static func == (a: TripTarget, b: TripTarget) -> Bool { a.stopTime.id == b.stopTime.id && a.stationId == b.stationId }
+    func hash(into h: inout Hasher) { h.combine(stopTime.id); h.combine(stationId) }
+}
+
 /// One vehicle's whole trip: every stop with live times, an estimated position, and "save this line".
 struct TripView: View {
     let stopTime: StopTime
@@ -16,6 +27,11 @@ struct TripView: View {
     @State private var errorMessage: String?
     /// Stops at the station the user came from, worked out once per load instead of on every 15 s redraw.
     @State private var focusStops: Set<Int> = []
+    /// Worked out once per load, not on every redraw: stops, alerts and the map's shape.
+    @State private var stops: [Place] = []
+    @State private var alerts: [Alert] = []
+    @State private var shape: [LatLon] = []
+    @State private var generation = 0
 
     private var leg: Leg? { trip?.legs.first(where: \.isTransit) }
     private var savedLine: SavedLine {
@@ -27,14 +43,16 @@ struct TripView: View {
             List {
                 Section {
                     DepartureRow(stopTime: stopTime)
-                    ServiceAlertsView(alerts: Alert.relevant(stopTime.serviceAlerts + (leg?.serviceAlerts ?? [])))
+                    ServiceAlertsView(alerts: trip == nil ? stopTime.serviceAlerts : alerts)
                 }
                 if let leg {
-                    let stops = leg.allStops
                     let progress = TripProgress.at(ctx.date, stops: stops)
                     Section {
                         OfflineNote()
-                        tripMap(leg: leg, stops: stops, progress: progress)
+                        TripMap(generation: generation, shape: shape, stops: stops.map(\.coordinate),
+                                color: leg.lineColor, textColor: leg.lineTextColor, mode: leg.mode,
+                                vehicle: TripProgress.position(progress, stops: stops))
+                            .equatable()
                             .frame(height: 240)
                             .listRowInsets(EdgeInsets())
                         statusLine(progress: progress, stops: stops, leg: leg)
@@ -107,35 +125,22 @@ struct TripView: View {
         }
     }
 
-    private func tripMap(leg: Leg, stops: [Place], progress: TripProgress) -> some View {
-        Map(initialPosition: .automatic) {
-            MapPolyline(coordinates: leg.legGeometry.clCoordinates)
-                .stroke(leg.lineColor, style: StrokeStyle(lineWidth: 5, lineCap: .round, lineJoin: .round))
-            ForEach(Array(stops.enumerated()), id: \.offset) { _, s in
-                Annotation("", coordinate: s.coordinate.clCoordinate) {
-                    Circle().fill(.white).stroke(leg.lineColor, lineWidth: 2).frame(width: 8, height: 8)
-                }
-            }
-            if let pos = TripProgress.position(progress, stops: stops) {
-                Annotation(leg.lineName, coordinate: pos.clCoordinate) {
-                    Image(systemName: ModeStyle.symbol(leg.mode))
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(leg.lineTextColor)
-                        .padding(6)
-                        .background(leg.lineColor, in: Circle())
-                        .accessibilityLabel("Estimated vehicle position")
-                }
-            }
-        }
-        .mapStyle(.standard(pointsOfInterest: .excludingAll))
-    }
-
     private func load() async {
         do {
             let fresh = try await TransitousClient.shared.trip(id: stopTime.tripId)
             let station = StopGrouping.normalizedName(stationName)
-            let stops = fresh.legs.first(where: \.isTransit)?.allStops ?? []
-            focusStops = Set(stops.indices.filter { StopGrouping.normalizedName(stops[$0].name) == station })
+            let freshLeg = fresh.legs.first(where: \.isTransit)
+            let all = freshLeg?.allStops ?? []
+            focusStops = Set(all.indices.filter { StopGrouping.normalizedName(all[$0].name) == station })
+            alerts = Alert.relevant(stopTime.serviceAlerts + (freshLeg?.serviceAlerts ?? []))
+            let freshShape = freshLeg?.legGeometry.mapPoints ?? []
+            // The map is rebuilt only when the route or its stops moved, not for new times.
+            if freshShape != shape || all.map(\.coordinate) != stops.map(\.coordinate) {
+                shape = freshShape
+                generation += 1
+                HangLog.shared.note("trip loaded: \(all.count) stops, \(freshShape.count) map points, \(alerts.count) alerts")
+            }
+            stops = all
             trip = fresh
             errorMessage = nil
         } catch {
@@ -143,6 +148,47 @@ struct TripView: View {
                 errorMessage = error.localizedDescription
             }
         }
+    }
+}
+
+/// The trip on a map. Redrawn only for a new load or a moved vehicle, not on every list update.
+/// Stop dots and the vehicle have no titles, so MapKit lays out no labels for them.
+private struct TripMap: View, Equatable {
+    let generation: Int
+    let shape: [LatLon]
+    let stops: [LatLon]
+    let color: Color
+    let textColor: Color
+    let mode: String
+    let vehicle: LatLon?
+
+    static func == (a: TripMap, b: TripMap) -> Bool {
+        a.generation == b.generation && a.vehicle?.lat == b.vehicle?.lat && a.vehicle?.lon == b.vehicle?.lon
+    }
+
+    var body: some View {
+        Map(initialPosition: .automatic) {
+            MapPolyline(coordinates: shape.map(\.clCoordinate))
+                .stroke(color, style: StrokeStyle(lineWidth: 5, lineCap: .round, lineJoin: .round))
+            ForEach(Array(stops.enumerated()), id: \.offset) { _, s in
+                Annotation("", coordinate: s.clCoordinate, anchor: .center) {
+                    Circle().fill(.white).stroke(color, lineWidth: 2).frame(width: 8, height: 8)
+                }
+                .annotationTitles(.hidden)
+            }
+            if let vehicle {
+                Annotation("", coordinate: vehicle.clCoordinate, anchor: .center) {
+                    Image(systemName: ModeStyle.symbol(mode))
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(textColor)
+                        .padding(6)
+                        .background(color, in: Circle())
+                        .accessibilityLabel("Estimated vehicle position")
+                }
+                .annotationTitles(.hidden)
+            }
+        }
+        .mapStyle(.standard(pointsOfInterest: .excludingAll))
     }
 }
 
