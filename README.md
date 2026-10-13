@@ -50,6 +50,8 @@ open Publit.xcodeproj
 
 Set your Apple team in Xcode under Signing & Capabilities (or `DEVELOPMENT_TEAM` in `project.yml`). Run the tests with ⌘U.
 
+Installing a new version on your own iPhone: [docs/iphone-update.md](docs/iphone-update.md). Changes per version: [CHANGELOG.md](CHANGELOG.md).
+
 ```
 Sources/
   App/        entry point, tabs, app info

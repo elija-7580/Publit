@@ -5,8 +5,23 @@ struct LatLon: Hashable, Codable, Sendable {
     let lat: Double
     let lon: Double
 
-    /// `lat,lon` as expected by the MOTIS API.
-    var apiValue: String { "\(lat),\(lon)" }
+    /// `lat,lon` as expected by the MOTIS API, to about 1 m. Full GPS precision only makes
+    /// every request URL unique (no cache hits) and says more about where someone is than needed.
+    var apiValue: String { Self.format(lat, 5) + "," + Self.format(lon, 5) }
+
+    /// The same point to about 1 km, for search bias: nearby results stay first and repeated
+    /// searches from around the same place reuse the cached answer.
+    var coarseAPIValue: String { Self.format(lat, 2) + "," + Self.format(lon, 2) }
+
+    /// Locale-independent fixed decimals without trailing zeros ("48.13715", "11.5").
+    static func format(_ value: Double, _ decimals: Int) -> String {
+        var s = String(format: "%.\(decimals)f", value)
+        if s.contains(".") {
+            while s.hasSuffix("0") { s.removeLast() }
+            if s.hasSuffix(".") { s.removeLast() }
+        }
+        return s == "-0" ? "0" : s
+    }
 
     init(lat: Double, lon: Double) { self.lat = lat; self.lon = lon }
 

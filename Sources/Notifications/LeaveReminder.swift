@@ -38,6 +38,13 @@ enum LeaveReminder {
         return .scheduled(date)
     }
 
+    /// Moves a pending reminder when live times shifted the departure (delay, or an earlier train).
+    /// Nothing happens when no reminder is pending, e.g. it already fired or was switched off.
+    static func follow(_ old: SavedTrip, to new: SavedTrip) async {
+        guard TripStatus.reminderMoved(from: old.itinerary, to: new.itinerary), await isScheduled(new.id) else { return }
+        _ = await schedule(new)
+    }
+
     static func cancel(_ tripId: String) {
         UNUserNotificationCenter.current().removePendingNotificationRequests(
             withIdentifiers: [identifier(tripId), followIdentifier(tripId)])

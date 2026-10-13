@@ -24,6 +24,7 @@ import threading
 import time
 import urllib.request
 import zoneinfo
+from concurrent.futures import ThreadPoolExecutor
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 from google.protobuf import text_format
@@ -180,26 +181,50 @@ def convert_vehicle_positions(vp_json: dict) -> rt.FeedMessage:
 
 
 class Cache:
-    def __init__(self) -> None:
+    """Last good snapshot, refreshed at most every CACHE_SECONDS.
+
+    Serialized bytes are kept with it, so a request does not re-encode the feed. After a failed
+    refresh the next attempt waits RETRY_SECONDS: while AMTAB is down, requests are answered from
+    the last snapshot right away instead of each waiting for the upstream timeout.
+    """
+
+    RETRY_SECONDS = 10
+
+    def __init__(self, fetch=None) -> None:
         self._lock = threading.Lock()
+        self._fetch = fetch or fetch_json
         self._at = 0.0
+        self._retry_at = 0.0
         self.trip_updates: rt.FeedMessage | None = None
         self.vehicle_positions: rt.FeedMessage | None = None
+        self.trip_updates_bytes: bytes | None = None
+        self.vehicle_positions_bytes: bytes | None = None
         self.error: str | None = None
 
-    def get(self) -> "Cache":
+    def get(self, now: float | None = None) -> "Cache":
         with self._lock:
-            if time.time() - self._at < CACHE_SECONDS and self.trip_updates is not None:
+            now = time.time() if now is None else now
+            if now - self._at < CACHE_SECONDS and self.trip_updates is not None:
+                return self
+            if now < self._retry_at:
                 return self
             try:
-                vp_json = fetch_json("VechiclePosition")  # sic: AMTAB's endpoint spelling
-                tu_json = fetch_json("TripUpdates")
-                self.vehicle_positions = convert_vehicle_positions(vp_json)
-                self.trip_updates = convert_trip_updates(tu_json, vp_json)
+                # Both upstream calls at once: the slower one sets the refresh time, not their sum.
+                with ThreadPoolExecutor(max_workers=2) as pool:
+                    vp_future = pool.submit(self._fetch, "VechiclePosition")  # sic: AMTAB's endpoint spelling
+                    tu_future = pool.submit(self._fetch, "TripUpdates")
+                    vp_json, tu_json = vp_future.result(), tu_future.result()
+                vehicle_positions = convert_vehicle_positions(vp_json)
+                trip_updates = convert_trip_updates(tu_json, vp_json)
+                self.vehicle_positions, self.trip_updates = vehicle_positions, trip_updates
+                self.vehicle_positions_bytes = vehicle_positions.SerializeToString()
+                self.trip_updates_bytes = trip_updates.SerializeToString()
                 self.error = None
-                self._at = time.time()
+                self._at = now
+                self._retry_at = 0.0
             except Exception as exc:  # keep serving the last good snapshot
                 self.error = f"{type(exc).__name__}: {exc}"
+                self._retry_at = now + self.RETRY_SECONDS
                 log.warning("refresh failed: %s", self.error)
             return self
 
@@ -222,7 +247,8 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:  # noqa: N802
         path = self.path.split("?")[0].rstrip("/")
         c = CACHE.get()
-        feeds = {"/trip-updates": c.trip_updates, "/vehicle-positions": c.vehicle_positions}
+        feeds = {"/trip-updates": (c.trip_updates, c.trip_updates_bytes),
+                 "/vehicle-positions": (c.vehicle_positions, c.vehicle_positions_bytes)}
         if path == "/health":
             body = {
                 "ok": c.trip_updates is not None,
@@ -232,12 +258,12 @@ class Handler(BaseHTTPRequestHandler):
                 "feed_timestamp": c.trip_updates.header.timestamp if c.trip_updates else None,
             }
             return self._send(200 if body["ok"] else 503, json.dumps(body).encode(), "application/json")
-        for base, feed in feeds.items():
+        for base, (feed, encoded) in feeds.items():
             if path in (base + ".pb", base + ".txt"):
-                if feed is None:
+                if feed is None or encoded is None:
                     return self._send(503, b"upstream unavailable", "text/plain")
                 if path.endswith(".pb"):
-                    return self._send(200, feed.SerializeToString(), "application/x-protobuf")
+                    return self._send(200, encoded, "application/x-protobuf")
                 return self._send(200, text_format.MessageToString(feed).encode(), "text/plain; charset=utf-8")
         self._send(404, b"not found", "text/plain")
 

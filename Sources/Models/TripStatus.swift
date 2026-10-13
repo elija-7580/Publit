@@ -20,6 +20,12 @@ struct TripStatus: Equatable, Sendable {
     static func leaveTime(_ it: Itinerary) -> Date { it.startTime }
     static func reminderTime(_ it: Itinerary) -> Date { leaveTime(it).addingTimeInterval(-leaveLead) }
 
+    /// A live refresh moved the departure by a minute or more, while the trip still lies ahead:
+    /// a pending "time to leave" reminder has to move with it.
+    static func reminderMoved(from old: Itinerary, to new: Itinerary, now: Date = .now) -> Bool {
+        abs(reminderTime(new).timeIntervalSince(reminderTime(old))) >= 60 && new.startTime > now.addingTimeInterval(30)
+    }
+
     static func at(_ now: Date, _ it: Itinerary) -> TripStatus {
         let tz = it.legs.first?.from.tz
         let transit = it.transitLegs

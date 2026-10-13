@@ -63,8 +63,8 @@ struct GoNowView: View {
                 await plan.search(current: location.coordinate, locationDenied: location.isDenied, silent: true)
             }
         }
-        .onChange(of: location.coordinate == nil) { _, isNil in
-            if !isNil, plan.itineraries.isEmpty { Task { await plan.search(current: location.coordinate) } }
+        .onChange(of: location.hasFix) { _, hasFix in
+            if hasFix, plan.itineraries.isEmpty { Task { await plan.search(current: location.coordinate) } }
         }
     }
 

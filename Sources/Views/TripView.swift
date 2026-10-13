@@ -12,6 +12,8 @@ struct TripView: View {
     @Environment(FavoritesStore.self) private var favorites
     @State private var trip: Itinerary?
     @State private var errorMessage: String?
+    /// Stops at the station the user came from, worked out once per load instead of on every 15 s redraw.
+    @State private var focusStops: Set<Int> = []
 
     private var leg: Leg? { trip?.legs.first(where: \.isTransit) }
     private var savedLine: SavedLine {
@@ -37,7 +39,7 @@ struct TripView: View {
                     }
                     Section("Stops") {
                         ForEach(Array(stops.enumerated()), id: \.offset) { i, stop in
-                            StopTimeRow(stop: stop, isFocus: StopGrouping.normalizedName(stop.name) == StopGrouping.normalizedName(stationName),
+                            StopTimeRow(stop: stop, isFocus: focusStops.contains(i),
                                         isPast: isPast(i, progress: progress), realTime: leg.realTime)
                         }
                     }
@@ -124,7 +126,11 @@ struct TripView: View {
 
     private func load() async {
         do {
-            trip = try await TransitousClient.shared.trip(id: stopTime.tripId)
+            let fresh = try await TransitousClient.shared.trip(id: stopTime.tripId)
+            let station = StopGrouping.normalizedName(stationName)
+            let stops = fresh.legs.first(where: \.isTransit)?.allStops ?? []
+            focusStops = Set(stops.indices.filter { StopGrouping.normalizedName(stops[$0].name) == station })
+            trip = fresh
             errorMessage = nil
         } catch {
             if !(error is CancellationError) && (error as? URLError)?.code != .cancelled {

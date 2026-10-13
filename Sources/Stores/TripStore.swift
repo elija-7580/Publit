@@ -18,7 +18,8 @@ struct SavedTrip: Codable, Identifiable, Hashable, Sendable {
     var deepLink: URL { DeepLink.trip(id).url }
 
     static func == (a: SavedTrip, b: SavedTrip) -> Bool {
-        a.id == b.id && a.itinerary.id == b.itinerary.id && a.refreshedAt == b.refreshedAt
+        // followLive too: otherwise SwiftUI may skip redrawing a trip whose reminder was switched.
+        a.id == b.id && a.itinerary.id == b.itinerary.id && a.refreshedAt == b.refreshedAt && a.followLive == b.followLive
     }
     func hash(into h: inout Hasher) { h.combine(id) }
 }

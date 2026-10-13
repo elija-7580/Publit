@@ -38,13 +38,16 @@ enum Fmt {
     private static let lock = NSLock()
     private static var formatters: [String: DateFormatter] = [:]
 
-    private static func formatter(_ tz: TimeZone) -> DateFormatter {
+    /// Keyed by the zone's name as sent by the server: no TimeZone lookup per row and redraw.
+    private static func formatter(zoneID: String?) -> DateFormatter {
         lock.lock(); defer { lock.unlock() }
-        let key = Locale.current.identifier + "|" + tz.identifier
-        if let f = formatters[key] { return f }
+        let locale = Locale.current
+        let key = locale.identifier + "|" + (zoneID ?? "")
+        // The device zone can change while the app runs (travelling); stop zones cannot.
+        if let f = formatters[key], zoneID != nil || f.timeZone == TimeZone.current { return f }
         let f = DateFormatter()
-        f.locale = Locale.current
-        f.timeZone = tz
+        f.locale = locale
+        f.timeZone = timeZone(zoneID)
         f.setLocalizedDateFormatFromTemplate("jmm")
         if formatters.count >= 32 { formatters.removeAll() }
         formatters[key] = f
@@ -54,7 +57,7 @@ enum Fmt {
     /// Clock time in the stop's own time zone, so a trip in Istanbul shows Istanbul time
     /// even when the phone is still set to Vienna.
     static func time(_ date: Date, tz: String? = nil) -> String {
-        formatter(timeZone(tz)).string(from: date)
+        formatter(zoneID: tz).string(from: date)
     }
 
     static func timeZone(_ id: String?) -> TimeZone {

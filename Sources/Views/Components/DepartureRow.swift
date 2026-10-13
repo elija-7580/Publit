@@ -6,7 +6,9 @@ struct DepartureRow: View {
     @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
-        TimelineView(.periodic(from: .now, by: 15)) { context in
+        // Countdowns are in whole minutes: all rows redraw together on the minute instead of
+        // each on its own 15 s timer.
+        TimelineView(.everyMinute) { context in
             row(now: context.date)
         }
     }

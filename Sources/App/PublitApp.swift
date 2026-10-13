@@ -157,6 +157,7 @@ struct RootView: View {
         for trip in trips.upcoming(now: now.addingTimeInterval(-15 * 60)) where LiveTripActivity.isRunning(trip.id) || trips.activeTripId == trip.id {
             if let fresh = try? await TripRefreshCoordinator.shared.refresh(trip.itinerary.id) {
                 trips.update(trip.id, with: fresh)
+                if let updated = trips.trip(trip.id) { await LeaveReminder.follow(trip, to: updated) }
             }
             if let t = trips.trip(trip.id) { await LiveTripActivity.update(t) }
         }

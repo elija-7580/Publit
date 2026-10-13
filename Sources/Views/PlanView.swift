@@ -69,9 +69,9 @@ struct PlanView: View {
                 await app.plan.search(current: location.coordinate, locationDenied: location.isDenied, silent: true)
             }
         }
-        .onChange(of: location.coordinate == nil) { _, isNil in
+        .onChange(of: location.hasFix) { _, hasFix in
             // Retry once the first location fix arrives.
-            if !isNil, app.plan.itineraries.isEmpty, app.plan.to != nil {
+            if hasFix, app.plan.itineraries.isEmpty, app.plan.to != nil {
                 Task { await app.plan.search(current: location.coordinate) }
             }
         }

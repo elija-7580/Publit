@@ -30,6 +30,7 @@ struct MapStation: Identifiable, Hashable {
         for (_, group) in buckets {
             // Within one parent station, or same name within 300 m.
             var remaining = group
+            var firstInStation = true
             while let first = remaining.first {
                 let k = key(first.name)
                 var same: [MapStop] = [], rest: [MapStop] = []
@@ -43,7 +44,11 @@ struct MapStation: Identifiable, Hashable {
                 remaining = rest
                 let lat = same.map(\.lat).reduce(0, +) / Double(same.count)
                 let lon = same.map(\.lon).reduce(0, +) / Double(same.count)
-                out.append(MapStation(id: first.stationId, name: first.name, coordinate: LatLon(lat: lat, lon: lon),
+                // A parent station split by name gives several pins; each needs its own ID
+                // (duplicate IDs confuse the map selection and SwiftUI's diffing).
+                let id = firstInStation ? first.stationId : first.stopId
+                firstInStation = false
+                out.append(MapStation(id: id, name: first.name, coordinate: LatLon(lat: lat, lon: lon),
                                       modes: Array(Set(same.flatMap { $0.modes ?? [] })).sorted(),
                                       importance: same.compactMap(\.importance).max() ?? 0))
             }

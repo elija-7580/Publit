@@ -51,7 +51,7 @@ final class TransitousClient: @unchecked Sendable {
     func geocode(_ text: String, near: LatLon?, language: String? = Locale.current.language.languageCode?.identifier) async throws -> [GeocodeMatch] {
         var q = [URLQueryItem(name: "text", value: text), URLQueryItem(name: "numResults", value: "15")]
         if let near {
-            q.append(URLQueryItem(name: "place", value: near.apiValue))
+            q.append(URLQueryItem(name: "place", value: near.coarseAPIValue))
             q.append(URLQueryItem(name: "placeBias", value: "5"))
         }
         if let language { q.append(URLQueryItem(name: "language", value: language)) }
@@ -230,6 +230,50 @@ enum DateParsing {
         return f
     }()
 
-    static func parse(_ s: String) -> Date? { plain.date(from: s) ?? fractional.date(from: s) }
+    static func parse(_ s: String) -> Date? { fastUTC(s) ?? plain.date(from: s) ?? fractional.date(from: s) }
+
+    /// `2026-10-12T14:05:00Z` (optionally with fractional seconds), the form MOTIS sends for every time.
+    /// A route response has thousands of these; reading them directly is many times faster than
+    /// ISO8601DateFormatter. Anything else (offsets, odd lengths) falls back to the formatters.
+    static func fastUTC(_ s: String) -> Date? {
+        s.utf8.withContiguousStorageIfAvailable { b -> Date? in
+            let n = b.count
+            guard n >= 20, b[4] == 45, b[7] == 45, b[10] == 84, b[13] == 58, b[16] == 58, b[n - 1] == 90 else { return nil }
+            func num(_ from: Int, _ len: Int) -> Int? {
+                var v = 0
+                for i in from..<(from + len) {
+                    let d = Int(b[i]) - 48
+                    guard d >= 0, d <= 9 else { return nil }
+                    v = v * 10 + d
+                }
+                return v
+            }
+            guard let y = num(0, 4), let mo = num(5, 2), let d = num(8, 2),
+                  let h = num(11, 2), let mi = num(14, 2), let sec = num(17, 2),
+                  (1...12).contains(mo), (1...31).contains(d), h < 24, mi < 60, sec < 61 else { return nil }
+            var fraction = 0.0
+            if n > 20 {
+                // ".123Z"
+                guard b[19] == 46, n > 21 else { return nil }
+                var scale = 0.1
+                for i in 20..<(n - 1) {
+                    let digit = Int(b[i]) - 48
+                    guard digit >= 0, digit <= 9 else { return nil }
+                    fraction += Double(digit) * scale
+                    scale /= 10
+                }
+            }
+            // Days from civil (Howard Hinnant), proleptic Gregorian, UTC.
+            let yy = mo <= 2 ? y - 1 : y
+            let era = (yy >= 0 ? yy : yy - 399) / 400
+            let yoe = yy - era * 400
+            let mp = (mo + 9) % 12
+            let doy = (153 * mp + 2) / 5 + d - 1
+            let doe = yoe * 365 + yoe / 4 - yoe / 100 + doy
+            let days = era * 146097 + doe - 719468
+            let seconds = Double(days * 86400 + h * 3600 + mi * 60 + sec) + fraction
+            return Date(timeIntervalSince1970: seconds)
+        } ?? nil
+    }
     static func format(_ d: Date) -> String { plain.string(from: d) }
 }

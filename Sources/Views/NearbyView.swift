@@ -32,7 +32,7 @@ struct NearbyView: View {
                 if let errorMessage {
                     ContentUnavailableView("Departures unavailable", systemImage: "exclamationmark.triangle",
                                            description: Text(errorMessage))
-                } else if isLoading || location.coordinate == nil {
+                } else if isLoading || !location.hasFix {
                     HStack { Spacer(); ProgressView(); Spacer() }
                 } else {
                     ContentUnavailableView("No departures nearby", systemImage: "tram",

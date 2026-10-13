@@ -76,10 +76,20 @@ final class ResponseCache: @unchecked Sendable {
         lock.unlock()
         guard persist, let directory else { return }
         let header = "\(now.timeIntervalSince1970)\n\(url)\n"
-        var blob = Data(header.utf8)
-        blob.append(data)
-        try? blob.write(to: directory.appendingPathComponent(Self.fileName(key)), options: .atomic)
+        let file = directory.appendingPathComponent(Self.fileName(key))
+        // The answer is already in memory; the offline copy does not have to delay it.
+        Self.io.async {
+            var blob = Data(header.utf8)
+            blob.append(data)
+            try? blob.write(to: file, options: .atomic)
+        }
     }
+
+    /// Disk copies are written in order, off the request path.
+    private static let io = DispatchQueue(label: "io.github.publit.response-cache", qos: .utility)
+
+    /// Waits for pending disk copies (tests, and before reading a key that is not in memory).
+    static func flushWrites() { io.sync { } }
 
     /// Last known response, from memory or disk, however old.
     func stale(_ key: String) -> Entry? {
@@ -87,8 +97,9 @@ final class ResponseCache: @unchecked Sendable {
         let m = memory[key]
         lock.unlock()
         if let m { return m }
-        guard let directory,
-              let blob = try? Data(contentsOf: directory.appendingPathComponent(Self.fileName(key))) else { return nil }
+        guard let directory else { return nil }
+        Self.flushWrites()
+        guard let blob = try? Data(contentsOf: directory.appendingPathComponent(Self.fileName(key))) else { return nil }
         return Self.decode(blob)
     }
 

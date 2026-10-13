@@ -4,7 +4,11 @@ import Observation
 @MainActor
 @Observable
 final class LocationManager: NSObject, CLLocationManagerDelegate {
+    /// Every fix (about every 50 m). Read it in tasks and actions, not in a view body:
+    /// a body that reads it is redrawn on every fix.
     private(set) var location: CLLocation?
+    /// Changes once, when the first fix arrives. Safe to read in a view body.
+    private(set) var hasFix = false
     private(set) var status: CLAuthorizationStatus
 
     private let manager: CLLocationManager
@@ -26,6 +30,7 @@ final class LocationManager: NSObject, CLLocationManagerDelegate {
         guard location == nil, let fix, fix.horizontalAccuracy >= 0, fix.horizontalAccuracy <= 1000,
               Date().timeIntervalSince(fix.timestamp) < 5 * 60 else { return }
         location = fix
+        if !hasFix { hasFix = true }
     }
 
     var coordinate: LatLon? {
@@ -45,7 +50,10 @@ final class LocationManager: NSObject, CLLocationManagerDelegate {
 
     nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let last = locations.last else { return }
-        Task { @MainActor in self.location = last }
+        Task { @MainActor in
+            self.location = last
+            if !self.hasFix { self.hasFix = true }
+        }
     }
 
     nonisolated func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {

@@ -43,5 +43,39 @@ class ConvertTests(unittest.TestCase):
         self.assertFalse(stu.HasField("departure"))
 
 
+class CacheTests(unittest.TestCase):
+    def setUp(self):
+        self.tu = json.loads((FIX / "trip_updates.json").read_text())
+        self.vp = json.loads((FIX / "vehicle_positions.json").read_text())
+        self.calls = []
+
+    def fetch(self, path):
+        self.calls.append(path)
+        if getattr(self, "down", False):
+            raise OSError("upstream down")
+        return self.tu if path == "TripUpdates" else self.vp
+
+    def test_keeps_encoded_snapshot(self):
+        c = m.Cache(self.fetch).get(now=1000)
+        self.assertEqual(c.trip_updates_bytes, c.trip_updates.SerializeToString())
+        self.assertEqual(sorted(self.calls), ["TripUpdates", "VechiclePosition"])
+        c.get(now=1005)
+        self.assertEqual(len(self.calls), 2, "fresh snapshot is reused")
+
+    def test_waits_before_retrying_a_failed_upstream(self):
+        c = m.Cache(self.fetch).get(now=1000)
+        good = c.trip_updates_bytes
+        self.down = True
+        c.get(now=1000 + m.CACHE_SECONDS + 1)
+        calls = len(self.calls)
+        c.get(now=1000 + m.CACHE_SECONDS + 2)
+        self.assertEqual(len(self.calls), calls, "no retry inside the back-off window")
+        self.assertEqual(c.trip_updates_bytes, good, "last good feed is still served")
+        self.assertIsNotNone(c.error)
+        self.down = False
+        c.get(now=1000 + m.CACHE_SECONDS + 2 + m.Cache.RETRY_SECONDS)
+        self.assertIsNone(c.error)
+
+
 if __name__ == "__main__":
     unittest.main()

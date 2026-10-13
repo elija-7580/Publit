@@ -36,7 +36,10 @@ struct SavedTripView: View {
             let fresh = try await TripRefreshCoordinator.shared.refresh(t.itinerary.id)
             trips.update(t.id, with: fresh)
             errorMessage = nil
-            if let updated = trips.trip(t.id) { await LiveTripActivity.update(updated) }
+            if let updated = trips.trip(t.id) {
+                await LiveTripActivity.update(updated)
+                await LeaveReminder.follow(t, to: updated)
+            }
         } catch {
             if !(error is CancellationError) && (error as? URLError)?.code != .cancelled {
                 errorMessage = L10n.t("Live status unavailable. Showing saved times.")
