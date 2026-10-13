@@ -431,7 +431,7 @@ struct VehicleTripView: View {
     @State private var errorMessage: String?
 
     var body: some View {
-        TimelineView(.periodic(from: .now, by: 15)) { ctx in
+        TimelineView(.periodic(from: .timelineAnchor, by: 15)) { ctx in
             List {
                 Section {
                     HStack(spacing: 10) {

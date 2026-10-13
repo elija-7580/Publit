@@ -186,7 +186,7 @@ struct LineDetailView: View {
                 let stops = leg.allStops
                 let pattern = direction.flatMap { patterns[$0.id] }
                 Section {
-                    TimelineView(.periodic(from: .now, by: 5)) { ctx in
+                    TimelineView(.periodic(from: .timelineAnchor, by: 5)) { ctx in
                         LineMap(line: line, shape: leg.legGeometry.mapPoints, stops: stops,
                                 vehicles: pattern.map { p in
                                     LineVehicles.estimate(p, at: p.index(of: line.stopId, near: line.coordinate),

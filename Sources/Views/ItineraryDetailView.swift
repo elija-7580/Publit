@@ -59,7 +59,7 @@ struct ItineraryDetailView: View {
             // 1. What matters first: when, how long, which lines, live state and warnings.
             Section {
                 if let statusAt {
-                    TimelineView(.periodic(from: .now, by: 30)) { ctx in
+                    TimelineView(.periodic(from: .timelineAnchor, by: 30)) { ctx in
                         StatusBanner(status: statusAt(ctx.date), refreshedAt: refreshedAt)
                     }
                 }
@@ -103,9 +103,7 @@ struct ItineraryDetailView: View {
         .navigationTitle("Route")
         .screenTrail("Route")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            if Features.passes { ToolbarItem(placement: .topBarTrailing) { ShowPassButton(tripId: trips.saved(itinerary)?.id, at: itinerary.startTime) } }
-        }
+        .showPassToolbar(tripId: trips.saved(itinerary)?.id, at: itinerary.startTime, enabled: Features.passes)
         // A trip unsaved here is only deleted when the screen closes, not when a detail is pushed.
         .onDisappear { if !isPresented { trips.discardPendingRemovalsLater() } }
         .onChange(of: isPresented) { _, presented in if !presented { trips.discardPendingRemovalsLater() } }

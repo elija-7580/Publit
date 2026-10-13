@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0 (build 10)
+
+### Freeze on the trip screen (freeze log from build 9)
+- Still about 15 s without response after tapping a departure in Nearby, even for a short trip (13 stops, 102 map points), and already about 2 s while the trip screen opens, before the map is shown. So neither the map's size nor the list refresh explains it.
+- What the trip and route screens share is "Show ticket" in the navigation bar: an item that is empty when there is no ticket, with its ticket sheets inside the bar. It is now added only when there is a ticket, and the sheets hang on the screen. Likely cause, not confirmed on a device.
+- Periodic timelines (trip, route, line, map vehicle) use a fixed start instead of restarting their schedule on every redraw.
+
 ## 0.6.0 (build 9)
 
 ### Freeze when opening a trip from Nearby (freeze log from build 8)

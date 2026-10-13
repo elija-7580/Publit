@@ -39,7 +39,7 @@ struct TripView: View {
     }
 
     var body: some View {
-        TimelineView(.periodic(from: .now, by: 15)) { ctx in
+        TimelineView(.periodic(from: .timelineAnchor, by: 15)) { ctx in
             List {
                 Section {
                     DepartureRow(stopTime: stopTime)
@@ -73,8 +73,8 @@ struct TripView: View {
         .navigationTitle(stopTime.lineName)
         .screenTrail("Trip")
         .navigationBarTitleDisplayMode(.inline)
+        .showPassToolbar(at: stopTime.departureTime, enabled: Features.passes)
         .toolbar {
-            if Features.passes { ToolbarItem(placement: .topBarTrailing) { ShowPassButton(at: stopTime.departureTime) } }
             ToolbarItem(placement: .topBarTrailing) {
                 Button { favorites.toggle(savedLine) } label: {
                     Label(favorites.containsLine(savedLine.id) ? L10n.t("Saved line") : L10n.t("Save line"),

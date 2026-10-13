@@ -49,24 +49,33 @@ struct TripPassesView: View {
 }
 
 /// "Show ticket" for a trip: straight to the code when there is exactly one ticket with a code
-/// (fast at the gate), otherwise the trip's tickets. Hidden when there are none.
-struct ShowPassButton: View {
-    var tripId: String? = nil
-    var at: Date = .now
+/// (fast at the gate), otherwise the trip's tickets.
+/// The bar item exists only when there is a ticket, and its sheets hang on the screen, not inside
+/// the navigation bar: an empty item, or one that presents, can keep the bar laying itself out.
+struct ShowPassToolbar: ViewModifier {
+    var tripId: String?
+    var at: Date
+    var enabled = true
     @Environment(PassStore.self) private var store
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var code: TicketPass?
     @State private var listing = false
 
-    var body: some View {
-        let list = store.passes(forTrip: tripId, at: at)
-        if !list.isEmpty {
-            Button {
-                if list.count == 1, list[0].barcode != nil { code = list[0] } else { listing = true }
-            } label: {
-                Label(L10n.t("Show ticket"), systemImage: "ticket")
+    func body(content: Content) -> some View {
+        let list = enabled ? store.passes(forTrip: tripId, at: at) : []
+        content
+            .toolbar {
+                if !list.isEmpty {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            if list.count == 1, list[0].barcode != nil { code = list[0] } else { listing = true }
+                        } label: {
+                            Label(L10n.t("Show ticket"), systemImage: "ticket")
+                        }
+                        .accessibilityIdentifier("showTicket")
+                    }
+                }
             }
-            .accessibilityIdentifier("showTicket")
             .fullScreenCover(item: $code) { pass in
                 FullScreenCodeView(pass: pass, source: source(pass)).dynamicTypeSize(dynamicTypeSize)
             }
@@ -76,12 +85,17 @@ struct ShowPassButton: View {
                         .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { listing = false } } }
                 }
             }
-        }
     }
 
     private func source(_ pass: TicketPass) -> BarcodeSource? {
         guard let url = store.documentURL(pass), let d = pass.document else { return nil }
         return .file(url, d.kind, page: d.page)
+    }
+}
+
+extension View {
+    func showPassToolbar(tripId: String? = nil, at date: Date, enabled: Bool = true) -> some View {
+        modifier(ShowPassToolbar(tripId: tripId, at: date, enabled: enabled))
     }
 }
 

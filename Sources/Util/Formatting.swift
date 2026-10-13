@@ -76,3 +76,9 @@ enum Fmt {
         return L10n.f("Local time %@ (%@)", city, gmt)
     }
 }
+
+extension Date {
+    /// Fixed start for periodic timelines. `.periodic(from: .now, …)` starts a new schedule on
+    /// every redraw of the screen around it.
+    static let timelineAnchor = Date(timeIntervalSinceReferenceDate: 0)
+}
