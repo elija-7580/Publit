@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.0 (build 15)
+
+- Station map: the mode filter was sometimes not drawn (an empty strip under the bar) while its chips still took taps (screenshot from build 14). It was a horizontally scrolling row; on the map it is now one fixed row of symbols (All, Train, S-Bahn, Metro, Tram, Bus, Ferry) without scrolling, on a plain background. VoiceOver reads the mode names. Not yet confirmed on a device.
+- Plan: the symbol legend (walk, change, …) under the routes is gone; the start and end time of the time axis stay.
+
 ## 0.6.0 (build 14)
 
 ### Plan

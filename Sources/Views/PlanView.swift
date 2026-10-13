@@ -175,7 +175,7 @@ struct PlanView: View {
             }
 
             if !showMap && !its.isEmpty {
-                ConnectionLegendRow(start: windowStart, end: windowEnd, tz: its.first?.legs.first?.from.tz)
+                ConnectionLegendRow(start: windowStart, end: windowEnd, tz: its.first?.legs.first?.from.tz, showSymbols: false)
             }
             if showMap && !its.isEmpty {
                 CompareMapView(itineraries: its, selectedId: selectedId ?? its.first?.id)

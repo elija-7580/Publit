@@ -69,6 +69,8 @@ struct ConnectionSymbols: View {
 struct ConnectionLegendRow: View {
     let start, end: Date
     var tz: String? = nil
+    /// The walk/change/… symbols under the time axis (Plan leaves them out).
+    var showSymbols = true
     @State private var showing = false
     @AppStorage("routeTimelines") private var enabled = true
 
@@ -84,7 +86,7 @@ struct ConnectionLegendRow: View {
                     Text(verbatim: Fmt.time(end, tz: tz)).monospacedDigit()
                 }
                 .font(.caption.weight(.semibold)).foregroundStyle(.secondary)
-                ConnectionSymbols()
+                if showSymbols { ConnectionSymbols() }
             }
             .sheet(isPresented: $showing) {
                 NavigationStack {

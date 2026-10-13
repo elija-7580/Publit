@@ -359,9 +359,9 @@ struct StationMapView: View {
 
     private var header: some View {
         VStack(spacing: 6) {
-            ModeFilterBar(available: ModeGroup.allCases.filter { $0 != .other }, filter: filterBinding)
+            ModeFilterBar(available: ModeGroup.allCases.filter { $0 != .other }, filter: filterBinding, iconsOnly: true)
                 .frame(maxWidth: .infinity)
-                .background(.regularMaterial)
+                .background(Color(.systemBackground))
             if model.isLoadingLive && !model.hasLive {
                 ProgressView(L10n.t("Updating live layer…")).font(.footnote).padding(8).background(.regularMaterial, in: Capsule())
             } else if let message = model.stationsError ?? model.liveError {
