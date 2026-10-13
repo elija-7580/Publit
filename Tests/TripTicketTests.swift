@@ -26,7 +26,7 @@ final class PlanQueryTests: XCTestCase {
     func testWalkingListedWhenAboutAsFast() throws {
         let p = try plan("plan_muc")
         let transit = p.itineraries
-        let walk = transit[0] // reuse as a stand-in; only duration and legs matter for isDirect
+        let walk = try XCTUnwrap(plan("plan_direct_modes").direct.first { StreetComparison.streetMode($0) == "WALK" })
         XCTAssertEqual(PlanModel.merge(transit: transit, direct: []).count, transit.count)
         XCTAssertEqual(PlanModel.merge(transit: [], direct: [walk]).map(\.id), [walk.id])
     }

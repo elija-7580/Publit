@@ -33,6 +33,8 @@ let core = [
     "Models/TripStatus.swift",
     "Util/TicketLinks.swift",
     "Stores/MapStations.swift",
+    "Models/TransitFilter.swift",
+    "Stores/LineGrouping.swift",
     "Tickets/TicketPass.swift",
     "Tickets/PassStyle.swift",
     "Tickets/TicketTextParser.swift",

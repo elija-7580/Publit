@@ -22,9 +22,13 @@ Early prototype. Not on the App Store yet. Every commit runs core tests on Linux
 
 ## Features
 
-- **Nearby:** live departure boards for stops within 500 m, grouped by station and refreshed every 30 s. Each time shows whether it is live or from the timetable, with delays, platforms, cancellations and the vehicle's direction. The last board appears at once while GPS and network start.
+- **Nearby:** live departure boards for stops within 500 m, grouped by station and refreshed every 30 s. Filter chips limit the board to trains, S-Bahn, U-Bahn, trams, buses or ferries. Each time shows whether it is live or from the timetable, with delays, platforms, cancellations and the vehicle's direction. The last board appears at once while GPS and network start.
 - **Station map:** all stops around you on a map; tap one for its departures.
+- **Lines at a station:** switch a station between its next departures and the lines serving it, grouped by mode with directions and the next times; filter by mode and save a line with a swipe.
 - **Go now:** search a destination and get routes from where you are, leaving now. Recent searches are in the search sheet.
+- **Route options:** choose the modes of transport, the maximum number of transfers and walking time, and step-free routes.
+- **Other ways:** next to the transit routes, Publit shows how long the trip takes on foot, by bike and by car (without traffic or parking).
+- **Search:** destination search can be limited to stops, addresses or places.
 - **Plan:** routes for later, by departure or arrival time. All connections share one timeline, and a map overlays every option.
 - **Route detail:** time, duration and the chain of lines at the top, then start, save, calendar and reminder in one row, then every step with platforms, stops, transfer risk and service alerts (including replacement buses), and the map.
 - **Trips:** save a trip, add it to your calendar, get reminders to leave and to get off. Start a trip to follow it live in the app and on the lock screen (Live Activity).

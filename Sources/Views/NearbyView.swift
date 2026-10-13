@@ -10,6 +10,21 @@ struct NearbyView: View {
     @State private var groups: [StopGroup] = []
     @State private var isLoading = false
     @State private var errorMessage: String?
+    /// Mode filter, kept between launches ("I never take the bus").
+    @AppStorage("nearbyModes") private var storedModes = ""
+    /// Modes seen around here, so the chips offer only what runs nearby.
+    @State private var seenGroups: Set<ModeGroup> = []
+    /// Last answer, to re-filter at once when a chip is tapped.
+    @State private var lastStopTimes: [StopTime] = []
+    @State private var lastCenter: LatLon?
+
+    private var filter: ModeFilter { ModeFilter(storageValue: storedModes) }
+    private var filterBinding: Binding<ModeFilter> {
+        Binding(get: { ModeFilter(storageValue: storedModes) }, set: { storedModes = $0.storageValue })
+    }
+    private var availableGroups: [ModeGroup] {
+        ModeGroup.allCases.filter { seenGroups.contains($0) || filter.included.contains($0) }
+    }
 
     /// Where and when the board was last requested. A refined GPS fix does not restart a running request.
     @State private var loadedCenter: LatLon?
@@ -24,6 +39,9 @@ struct NearbyView: View {
             goSection
             activeTripSection
             OfflineNote()
+            if !location.isDenied, availableGroups.count > 1 || filter.isActive {
+                ModeFilterBar(available: availableGroups, filter: filterBinding).chipRow()
+            }
             if location.isDenied {
                 ContentUnavailableView("Location is off",
                                        systemImage: "location.slash",
@@ -34,6 +52,14 @@ struct NearbyView: View {
                                            description: Text(errorMessage))
                 } else if isLoading || !location.hasFix {
                     HStack { Spacer(); ProgressView(); Spacer() }
+                } else if filter.isActive {
+                    ContentUnavailableView {
+                        Label("No departures for these modes", systemImage: "line.3.horizontal.decrease.circle")
+                    } description: {
+                        Text(verbatim: filter.summary ?? "")
+                    } actions: {
+                        Button("Show all modes") { storedModes = "" }
+                    }
                 } else {
                     ContentUnavailableView("No departures nearby", systemImage: "tram",
                                            description: Text("No public transport stops within 1.5 km."))
@@ -80,6 +106,11 @@ struct NearbyView: View {
         .navigationDestination(isPresented: Bindable(app).showGoNow) { GoNowView() }
         .fullScreenCover(isPresented: $showMap) { StationMapView() }
         .refreshable { await load(force: true) }
+        .onChange(of: storedModes) {
+            // Show the matching part of the current board at once, then ask the server for more.
+            if let c = lastCenter { regroup(lastStopTimes, around: c) }
+            Task { await load(force: true) }
+        }
         .task {
             await showLastBoard()
             // One loop for the screen. Before, every ~100 m change of the first, still improving GPS
@@ -146,7 +177,14 @@ struct NearbyView: View {
         guard groups.isEmpty, let last = await TransitousClient.shared.lastNearby(maxAge: 1800) else { return }
         let here = location.coordinate ?? last.center
         guard here.distance(to: last.center) < 400 else { return }
-        groups = StopGrouping.group(StopTime.upcoming(last.response.stopTimes), around: here)
+        let filter = filter
+        seenGroups = Set(ModeGroup.present(in: last.response.stopTimes.map(\.mode)))
+        groups = StopGrouping.group(StopTime.upcoming(last.response.stopTimes).filter { filter.allows($0.mode) }, around: here)
+    }
+
+    private func regroup(_ stopTimes: [StopTime], around here: LatLon) {
+        let filter = filter
+        groups = StopGrouping.group(StopTime.upcoming(stopTimes).filter { filter.allows($0.mode) }, around: here)
     }
 
     private func load(force: Bool = false) async {
@@ -157,14 +195,22 @@ struct NearbyView: View {
         loadedAt = Date()
         isLoading = true
         defer { isLoading = false }
+        let filter = filter
         do {
-            var res = try await TransitousClient.shared.departures(near: here, radius: 500, count: 80)
+            var res = try await TransitousClient.shared.departures(near: here, radius: 500, count: 80, modes: filter.apiValue)
             if res.stopTimes.isEmpty {
-                res = try await TransitousClient.shared.departures(near: here, radius: 1500, count: 80)
+                res = try await TransitousClient.shared.departures(near: here, radius: 1500, count: 80, modes: filter.apiValue)
             }
             let stopTimes = res.stopTimes
+            let present = Set(ModeGroup.present(in: stopTimes.map(\.mode)))
+            // A full board says what runs here; a filtered one can only add to it.
+            if filter.isActive { seenGroups.formUnion(present) } else { seenGroups = present }
+            lastStopTimes = stopTimes
+            lastCenter = here
+            // The filter may have changed while the request ran: keep to the current one.
+            let current = self.filter
             groups = await Task.detached(priority: .userInitiated) {
-                StopGrouping.group(StopTime.upcoming(stopTimes), around: here)
+                StopGrouping.group(StopTime.upcoming(stopTimes).filter { current.allows($0.mode) }, around: here)
             }.value
             errorMessage = nil
         } catch {
@@ -187,6 +233,8 @@ struct StopDeparturesView: View {
     let name: String
     let coordinate: LatLon
 
+    enum Mode: String, CaseIterable, Identifiable { case departures, lines; var id: String { rawValue } }
+
     @Environment(FavoritesStore.self) private var favorites
     @Environment(AppState.self) private var app
     @State private var departures: [StopTime] = []
@@ -194,16 +242,35 @@ struct StopDeparturesView: View {
     @State private var errorMessage: String?
     @State private var loaded = false
     @State private var lastUpdated: Date?
+    @State private var mode: Mode = .departures
+    @State private var filter = ModeFilter()
+    /// Modes that run here, from the last unfiltered answer.
+    @State private var available: [ModeGroup] = []
 
     private var saved: SavedPlace {
         SavedPlace(id: stopId, name: name, subtitle: nil, lat: coordinate.lat, lon: coordinate.lon, stopId: stopId)
     }
+
+    /// Filtered right away on a chip tap; the reload then brings more of the chosen modes.
+    private var shown: [StopTime] { departures.filter { filter.allows($0.mode) } }
 
     var body: some View {
         List {
             if !alerts.isEmpty {
                 Section("Alerts") {
                     ServiceAlertsView(alerts: alerts)
+                }
+            }
+            Section {
+                Picker("View", selection: $mode) {
+                    Text("Departures").tag(Mode.departures)
+                    Text("Lines").tag(Mode.lines)
+                }
+                .pickerStyle(.segmented)
+                .accessibilityIdentifier("stopViewMode")
+                if available.count > 1 || filter.isActive {
+                    ModeFilterBar(available: available, filter: $filter)
+                        .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
                 }
             }
             Section {
@@ -215,13 +282,35 @@ struct StopDeparturesView: View {
                         .font(.footnote).foregroundStyle(.secondary)
                 } else if !loaded {
                     HStack { Spacer(); ProgressView(); Spacer() }
-                } else if departures.isEmpty {
-                    Text("No upcoming departures.").foregroundStyle(.secondary)
+                } else if shown.isEmpty {
+                    if filter.isActive {
+                        Text("No departures for these modes").foregroundStyle(.secondary)
+                        Button("Show all modes") { filter = .all }
+                    } else {
+                        Text("No upcoming departures.").foregroundStyle(.secondary)
+                    }
                 }
-                ForEach(departures) { st in
-                    NavigationLink {
-                        TripView(stopTime: st, stationId: stopId, stationName: name, stationCoordinate: coordinate)
-                    } label: { DepartureRow(stopTime: st) }
+                switch mode {
+                case .departures:
+                    ForEach(shown) { st in
+                        NavigationLink {
+                            TripView(stopTime: st, stationId: stopId, stationName: name, stationCoordinate: coordinate)
+                        } label: { DepartureRow(stopTime: st) }
+                    }
+                case .lines:
+                    ForEach(LineGrouping.lines(shown)) { line in
+                        let savedLine = SavedLine(stopTime: line.first, stopId: stopId, stopName: name, at: coordinate)
+                        NavigationLink {
+                            LineDeparturesView(line: savedLine)
+                        } label: { LineAtStopRow(line: line) }
+                        .swipeActions {
+                            Button { favorites.toggle(savedLine) } label: {
+                                Label(favorites.containsLine(savedLine.id) ? L10n.t("Saved line") : L10n.t("Save line"),
+                                      systemImage: favorites.containsLine(savedLine.id) ? "star.slash" : "star")
+                            }
+                            .tint(.yellow)
+                        }
+                    }
                 }
             }
         }
@@ -242,7 +331,7 @@ struct StopDeparturesView: View {
             }
         }
         .refreshable { await load() }
-        .task {
+        .task(id: filter) {
             while !Task.isCancelled {
                 await load()
                 try? await Task.sleep(for: .seconds(30))
@@ -251,9 +340,14 @@ struct StopDeparturesView: View {
     }
 
     private func load() async {
+        let filter = filter
         do {
-            let res = try await TransitousClient.shared.departures(stopId: stopId, count: 40, radius: Self.stationRadius)
+            // More departures for the lines view: every line of a big station should appear.
+            let res = try await TransitousClient.shared.departures(stopId: stopId, count: 60, radius: Self.stationRadius,
+                                                                  modes: filter.apiValue)
+            guard !Task.isCancelled else { return }
             departures = StopTime.upcoming(res.stopTimes)
+            if !filter.isActive { available = ModeGroup.present(in: res.stopTimes.map(\.mode)) }
             alerts = Alert.relevant((res.place?.alertsList ?? []) + res.stopTimes.flatMap { $0.place.alertsList })
             errorMessage = nil
             lastUpdated = Date()
@@ -263,5 +357,48 @@ struct StopDeparturesView: View {
             }
         }
         loaded = true
+    }
+}
+
+/// One line at a station: badge, and the next departures per direction.
+struct LineAtStopRow: View {
+    let line: LineAtStop
+
+    var body: some View {
+        TimelineView(.everyMinute) { ctx in
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: 8) {
+                    LineBadge(line.first)
+                    if let detail = line.first.serviceDetail {
+                        Text(verbatim: detail).font(.caption.weight(.semibold)).foregroundStyle(.secondary).lineLimit(1)
+                    }
+                }
+                ForEach(Array(line.byDirection(perDirection: 3).prefix(3).enumerated()), id: \.offset) { _, dir in
+                    HStack(alignment: .firstTextBaseline, spacing: 6) {
+                        Image(systemName: "arrow.right").font(.caption2).foregroundStyle(.secondary)
+                            .accessibilityHidden(true)
+                        Text(verbatim: dir.direction ?? L10n.t("Direction unavailable"))
+                            .font(.subheadline).lineLimit(1)
+                        Spacer(minLength: 8)
+                        Text(verbatim: Self.times(dir.departures, now: ctx.date))
+                            .font(.subheadline.monospacedDigit()).foregroundStyle(.secondary)
+                            .lineLimit(1).fixedSize()
+                    }
+                }
+            }
+            .padding(.vertical, 4)
+            .accessibilityElement(children: .combine)
+        }
+        .accessibilityIdentifier("lineAtStop")
+    }
+
+    /// "now · 8 min · 14:35": minutes for the next hour, then clock times. Cancelled ones are left out.
+    static func times(_ departures: [StopTime], now: Date) -> String {
+        departures.filter { !$0.isCancelled }.map { st in
+            let m = Int(ceil(st.departureTime.timeIntervalSince(now) / 60))
+            if m <= 0 { return L10n.t("now") }
+            if m < 60 { return L10n.f("%lld min", m) }
+            return Fmt.time(st.departureTime, tz: st.place.tz)
+        }.joined(separator: " · ")
     }
 }

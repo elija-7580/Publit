@@ -36,6 +36,11 @@ struct ItineraryDetailView: View {
     var statusAt: ((Date) -> TripStatus)? = nil
     var refreshedAt: Date? = nil
 
+    private var isBikeOrCar: Bool {
+        let m = StreetComparison.streetMode(itinerary)
+        return m == "BIKE" || m == "CAR"
+    }
+
     private var resolvedFrom: String { fromName.isEmpty ? Self.placeName(itinerary.legs.first?.from) : fromName }
     private var resolvedTo: String { toName.isEmpty ? Self.placeName(itinerary.legs.last?.to) : toName }
 
@@ -64,10 +69,17 @@ struct ItineraryDetailView: View {
                 if let note = Fmt.foreignZoneNote(tz: itinerary.legs.first?.from.tz, at: itinerary.startTime) {
                     Label(note, systemImage: "clock").font(.footnote).foregroundStyle(.secondary)
                 }
+                if StreetComparison.streetMode(itinerary) == "CAR" {
+                    Label("Driving times are without traffic and parking.", systemImage: "info.circle")
+                        .font(.footnote).foregroundStyle(.secondary)
+                }
             }
 
             // 2. What you can do with it, right below: start, save, calendar, reminder.
-            TripActionsSection(itinerary: itinerary, fromName: resolvedFrom, toName: resolvedTo)
+            // Cycling and driving are shown for comparison only: no trip, reminder or fares.
+            if !isBikeOrCar {
+                TripActionsSection(itinerary: itinerary, fromName: resolvedFrom, toName: resolvedTo)
+            }
 
             // 3. The way, step by step.
             Section("Steps") {
@@ -83,7 +95,7 @@ struct ItineraryDetailView: View {
                     .listRowInsets(EdgeInsets())
             }
 
-            FareSection(itinerary: itinerary)
+            if !isBikeOrCar { FareSection(itinerary: itinerary) }
         }
         .navigationTitle("Route")
         .navigationBarTitleDisplayMode(.inline)

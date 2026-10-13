@@ -42,13 +42,19 @@ final class PlanModel {
     var timeMode: TimeMode = .now
     var date = Date()
 
+    /// Filters and comparison, shared by Plan and Nearby → "Where to now?" (set through AppState).
+    var options = RouteOptions.load()
+
     private(set) var itineraries: [Itinerary] = []
+    /// Walking, cycling and driving the whole way, when asked for (`options.compareStreetModes`).
+    private(set) var comparisons: [StreetComparison] = []
     private(set) var isLoading = false
     private(set) var isLoadingMore = false
     private(set) var errorMessage: String?
 
     private var nextCursor: String?
     @ObservationIgnored private var lastRequest: (from: LatLon, to: LatLon, time: Date?, arriveBy: Bool, maxWalk: Int)?
+    @ObservationIgnored private var lastOptions = RouteOptions()
     @ObservationIgnored private var token = UUID()
     @ObservationIgnored private var resultsKey: String?
     @ObservationIgnored var history: SearchHistoryStore = .shared
@@ -58,7 +64,7 @@ final class PlanModel {
     /// Changes whenever a new search is needed.
     var queryKey: String {
         let t = timeMode == .now ? "now" : String(Int(date.timeIntervalSince1970 / 60))
-        return "\(from.key)|\(to?.key ?? "-")|\(timeMode.rawValue)|\(t)"
+        return "\(from.key)|\(to?.key ?? "-")|\(timeMode.rawValue)|\(t)|\(options.key)"
     }
 
     func swap() {
@@ -70,17 +76,17 @@ final class PlanModel {
     /// - Parameter silent: refresh in place without a spinner (periodic live update).
     func search(current: LatLon?, locationDenied: Bool = false, silent: Bool = false) async {
         guard let to else {
-            itineraries = []; errorMessage = nil; return
+            itineraries = []; comparisons = []; errorMessage = nil; return
         }
         guard let f = from.coordinate(current: current), let t = to.coordinate(current: current) else {
-            itineraries = []
+            itineraries = []; comparisons = []
             errorMessage = locationDenied
                 ? L10n.t("Location is off. Choose a start point, or allow location access in Settings.")
                 : L10n.t("Waiting for your location…")
             return
         }
         // Results of another query (new destination or time) must not stay on screen without a spinner.
-        if !silent, resultsKey != queryKey { itineraries = []; nextCursor = nil }
+        if !silent, resultsKey != queryKey { itineraries = []; comparisons = []; nextCursor = nil }
         let searchedFrom = from
         let searchedMode = timeMode
         let searchedDate = date
@@ -91,26 +97,36 @@ final class PlanModel {
         errorMessage = nil
         let time: Date? = timeMode == .now ? nil : date
         let arriveBy = timeMode == .arriveBy
+        let options = options
         do {
-            var maxWalk = TransitousClient.walkLimits.prePost
-            var res = try await TransitousClient.shared.plan(from: f, to: t, time: time, arriveBy: arriveBy, maxWalk: maxWalk)
-            if res.itineraries.isEmpty {
+            var maxWalk = options.maxWalkMinutes * 60
+            var res = try await TransitousClient.shared.plan(from: f, to: t, time: time, arriveBy: arriveBy,
+                                                             maxWalk: maxWalk, options: options)
+            if res.itineraries.isEmpty, options.maxWalkMinutes == RouteOptions.defaultWalkMinutes {
                 // Nothing within 30 min walk of a stop: try once more with a longer walk.
+                // Not when the user chose a shorter walk: that limit is theirs.
                 maxWalk = TransitousClient.widerWalkLimit
-                res = try await TransitousClient.shared.plan(from: f, to: t, time: time, arriveBy: arriveBy, maxWalk: maxWalk)
+                res = try await TransitousClient.shared.plan(from: f, to: t, time: time, arriveBy: arriveBy,
+                                                             maxWalk: maxWalk, options: options)
             }
             guard token == myToken else { return }
             itineraries = Self.merge(transit: res.itineraries, direct: res.direct)
+            comparisons = Self.comparisons(direct: res.direct, listed: itineraries, enabled: options.compareStreetModes)
             resultsKey = queryKey
             nextCursor = arriveBy ? res.previousPageCursor : res.nextPageCursor
             lastRequest = (f, t, time, arriveBy, maxWalk)
+            lastOptions = options
             if !silent { history.record(from: searchedFrom, to: to, mode: searchedMode, date: searchedDate) }
-            if itineraries.isEmpty { errorMessage = L10n.t("No connections found.") }
+            if itineraries.isEmpty {
+                errorMessage = options.isDefault ? L10n.t("No connections found.")
+                    : L10n.t("No connections found with these filters.")
+            }
         } catch {
             guard token == myToken, !Self.isCancellation(error) else { return }
             // A failed background refresh keeps the routes already on screen.
             if !silent || itineraries.isEmpty {
                 itineraries = []
+                comparisons = []
                 errorMessage = error.localizedDescription
             }
         }
@@ -123,7 +139,8 @@ final class PlanModel {
         defer { isLoadingMore = false }
         do {
             let res = try await TransitousClient.shared.plan(from: req.from, to: req.to, time: req.time,
-                                                             arriveBy: req.arriveBy, pageCursor: cursor, maxWalk: req.maxWalk)
+                                                             arriveBy: req.arriveBy, pageCursor: cursor, maxWalk: req.maxWalk,
+                                                             options: lastOptions)
             // A new search started meanwhile: these results belong to the old query.
             guard token == myToken else { return }
             let known = Set(itineraries.map(\.id))
@@ -137,10 +154,19 @@ final class PlanModel {
 
     /// Walking there is listed first when it is about as fast as the best ride, or the only way.
     nonisolated static func merge(transit: [Itinerary], direct: [Itinerary]) -> [Itinerary] {
-        guard let walk = direct.min(by: { $0.duration < $1.duration }) else { return transit }
+        // Only walking joins the list; cycling and driving are shown as a comparison.
+        let walking = direct.filter { let m = StreetComparison.streetMode($0); return m != "BIKE" && m != "CAR" }
+        guard let walk = walking.min(by: { $0.duration < $1.duration }) else { return transit }
         guard let best = transit.map(\.duration).min() else { return [walk] }
         let worthIt = Double(walk.duration) <= Double(best) * 1.25 || walk.duration <= 10 * 60
         return worthIt ? [walk] + transit : transit
+    }
+
+    /// Street modes to compare. Walking is left out when it is already in the list of routes.
+    nonisolated static func comparisons(direct: [Itinerary], listed: [Itinerary], enabled: Bool) -> [StreetComparison] {
+        guard enabled else { return [] }
+        let listedIds = Set(listed.map(\.id))
+        return StreetComparison.from(direct).filter { !($0.mode == "WALK" && listedIds.contains($0.itinerary.id)) }
     }
 
     private static func isCancellation(_ error: Error) -> Bool {
@@ -188,6 +214,15 @@ final class AppState {
         goNow.timeMode = .now
         tab = .nearby
         showGoNow = true
+    }
+
+    /// Route filters apply to Plan and to "Where to now?" alike, and are kept for the next launch.
+    var routeOptions: RouteOptions { plan.options }
+
+    func setRouteOptions(_ options: RouteOptions) {
+        plan.options = options
+        goNow.options = options
+        options.save()
     }
 
     func route(to place: SavedPlace) {

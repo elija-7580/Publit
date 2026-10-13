@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.0 (build 3)
+
+### New
+- Filter by mode: chips on Nearby (kept between launches) and at every station: All, Train, S-Bahn, Metro, Tram, Bus, Ferry, Other. Only modes that run there are offered.
+- Lines at a station: every line with its next departures per direction; tap for the line, swipe to save it.
+- Route options for Plan and "Where to now?": transport modes, number of changes, walk to and from stops (5–30 min), step-free (wheelchair). The active filters are shown under the button.
+- Walking, cycling and driving the whole way, next to the routes ("Other ways"), with the difference to the fastest public transport route. Driving times are without traffic and parking. Can be switched off in Route options.
+- Search scopes: All, Stops, Addresses, Places.
+
 ## 0.2.0 (build 2)
 
 First update after 0.1. Install it on top of 0.1: saved places, trips and history stay.

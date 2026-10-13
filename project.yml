@@ -9,8 +9,8 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "0.2.0"
-    CURRENT_PROJECT_VERSION: "2"
+    MARKETING_VERSION: "0.3.0"
+    CURRENT_PROJECT_VERSION: "3"
     # Personal Team — Automatic Signing for local device installs.
     DEVELOPMENT_TEAM: "3D6S8GFSGK"
 targets:
@@ -85,6 +85,7 @@ targets:
       - Sources/Models/RouteStyle.swift
       - Sources/Models/DeepLink.swift
       - Sources/Models/PlaceRole.swift
+      - Sources/Models/TransitFilter.swift
       - Sources/Views/Components/LineBadge.swift
       - Sources/Util/Geo.swift
       - Sources/Util/Polyline.swift

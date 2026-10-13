@@ -18,6 +18,9 @@ struct GoNowView: View {
                     .listRowInsets(EdgeInsets())
             }
             Section {
+                RouteOptionsButton()
+            }
+            Section {
                 OfflineNote()
                 if plan.isLoading && its.isEmpty {
                     HStack { Spacer(); ProgressView(); Spacer() }
@@ -51,6 +54,9 @@ struct GoNowView: View {
                     Label(note, systemImage: "clock")
                 }
             }
+            StreetComparisonSection(comparisons: plan.comparisons,
+                                    bestTransit: its.filter { !$0.isDirect }.map(\.duration).min(),
+                                    fromName: L10n.t("Current location"), toName: plan.to?.title ?? "")
         }
         .navigationTitle(plan.to?.title ?? L10n.t("Route"))
         .navigationBarTitleDisplayMode(.inline)

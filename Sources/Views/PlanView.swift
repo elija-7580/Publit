@@ -27,6 +27,7 @@ struct PlanView: View {
                 }
                 .pickerStyle(.segmented)
                 DatePicker(plan.timeMode == .arriveBy ? L10n.t("Arrive by") : L10n.t("Depart at"), selection: $plan.date)
+                RouteOptionsButton()
             }
 
             if plan.to == nil {
@@ -35,6 +36,9 @@ struct PlanView: View {
                 RecentSearchesSection()
             } else {
                 resultsSection(plan)
+                StreetComparisonSection(comparisons: plan.comparisons,
+                                        bestTransit: plan.itineraries.filter { !$0.isDirect }.map(\.duration).min(),
+                                        fromName: plan.from.title, toName: plan.to?.title ?? "")
             }
         }
         .navigationTitle("Plan")

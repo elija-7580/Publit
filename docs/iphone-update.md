@@ -11,7 +11,7 @@ existing app: saved places, trips, lines and history stay on the phone.
 4. Check *Signing & Capabilities* for both targets (`Publit`, `PublitWidgets`): your team, automatic signing.
 5. For real-world speed use the Release configuration: *Product → Scheme → Edit Scheme… → Run → Build Configuration → Release*.
    Debug builds are slower and include demo screens for the UI tests. Switch back to Debug for development.
-6. *Product → Run* (⌘R). The app's settings (gear button) show Version 0.2.0.
+6. *Product → Run* (⌘R). The app's settings (gear button) show the version from `project.yml` (now 0.3.0).
 
 ## Good to know
 

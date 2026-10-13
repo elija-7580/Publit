@@ -304,4 +304,51 @@ final class PublitUITests: XCTestCase {
         XCTAssertTrue(row.waitForExistence(timeout: 5), "saved trip not under Upcoming")
         snap("trips")
     }
+
+    /// F13 Filters: mode chips on Nearby, lines at a station, route options and the walk/bike/car comparison.
+    func testF13ModeFiltersLinesAndComparison() {
+        let app = launch()
+        nudge(app)
+        XCTAssertTrue(app.buttons["All departures"].firstMatch.waitForExistence(timeout: timeout), "no departure board loaded")
+        let chip = ["modeChip-subway", "modeChip-suburban", "modeChip-tram", "modeChip-bus"].map { app.buttons[$0] }.first { $0.exists }
+        XCTAssertNotNil(chip, "no mode chips on Nearby")
+        chip?.tap()
+        XCTAssertTrue(app.buttons["All departures"].firstMatch.waitForExistence(timeout: timeout), "filtered board empty")
+        sleep(2)
+        snap("nearby-filter")
+        app.buttons["modeChip-all"].tap()
+
+        app.buttons["All departures"].firstMatch.tap()
+        XCTAssertTrue(app.buttons["Save"].waitForExistence(timeout: 10))
+        app.buttons["Lines"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["lineAtStop"].firstMatch.waitForExistence(timeout: timeout), "no lines at the station")
+        sleep(1)
+        snap("stop-lines")
+        app.terminate()
+
+        let plan = launch(["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "plan"])
+        let routes = plan.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'from Marienplatz'"))
+        XCTAssertTrue(routes.firstMatch.waitForExistence(timeout: timeout), "no routes found")
+        let car = plan.buttons["compare-CAR"]
+        for _ in 0..<6 where !car.isHittable { plan.swipeUp() }
+        XCTAssertTrue(car.exists, "no driving comparison")
+        sleep(1)
+        snap("plan-compare")
+        for _ in 0..<6 where !plan.buttons["routeOptions"].isHittable { plan.swipeDown() }
+        plan.buttons["routeOptions"].tap()
+        XCTAssertTrue(plan.navigationBars["Route options"].waitForExistence(timeout: 5))
+        let bus = plan.switches["routeMode-bus"]
+        XCTAssertTrue(bus.waitForExistence(timeout: 5))
+        bus.coordinate(withNormalizedOffset: CGVector(dx: 0.93, dy: 0.5)).tap()
+        sleep(1)
+        snap("route-options")
+        plan.buttons["routeOptionsDone"].tap()
+        XCTAssertTrue(routes.firstMatch.waitForExistence(timeout: timeout), "no routes without buses")
+        XCTAssertTrue(plan.buttons["routeOptions"].label.contains("Without Bus"), "filter summary missing")
+        // Leave the defaults for the next run.
+        plan.buttons["routeOptions"].tap()
+        XCTAssertTrue(plan.navigationBars["Route options"].waitForExistence(timeout: 5))
+        plan.buttons["Reset"].tap()
+        plan.buttons["routeOptionsDone"].tap()
+    }
 }

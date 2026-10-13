@@ -17,6 +17,29 @@ struct PlaceSearchView: View {
     /// Query the current results belong to; "No matches." only after a real search.
     @State private var searchToken = UUID()
     @State private var searched: String?
+    @State private var scope: SearchScope = .all
+
+    /// Search everything, or only stops, addresses or places (shops, sights, airports…).
+    enum SearchScope: String, CaseIterable, Identifiable {
+        case all, stops, addresses, places
+        var id: String { rawValue }
+        var apiType: String? {
+            switch self {
+            case .all: return nil
+            case .stops: return "STOP"
+            case .addresses: return "ADDRESS"
+            case .places: return "PLACE"
+            }
+        }
+        var title: LocalizedStringKey {
+            switch self {
+            case .all: return "All"
+            case .stops: return "Stops"
+            case .addresses: return "Addresses"
+            case .places: return "Places"
+            }
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -40,7 +63,7 @@ struct PlaceSearchView: View {
                 } else {
                     if let errorMessage {
                         Text(errorMessage).foregroundStyle(.secondary)
-                    } else if results.isEmpty && !isSearching && searched == query.trimmingCharacters(in: .whitespaces) {
+                    } else if results.isEmpty && !isSearching && searched == query.trimmingCharacters(in: .whitespaces) + "|" + scope.rawValue {
                         Text("No matches.").foregroundStyle(.secondary)
                     }
                     ForEach(results) { m in
@@ -59,13 +82,16 @@ struct PlaceSearchView: View {
             }
             .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always),
                         prompt: "Address, stop or place")
+            .searchScopes($scope, activation: .onTextEntry) {
+                ForEach(SearchScope.allCases) { Text($0.title).tag($0) }
+            }
             .autocorrectionDisabled()
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
             }
-            .task(id: query) { await search() }
+            .task(id: "\(scope.rawValue)|\(query)") { await search() }
         }
     }
 
@@ -123,11 +149,11 @@ struct PlaceSearchView: View {
         isSearching = true
         defer { if searchToken == token { isSearching = false } }
         do {
-            let r = try await TransitousClient.shared.geocode(text, near: location.coordinate)
+            let r = try await TransitousClient.shared.geocode(text, near: location.coordinate, type: scope.apiType)
             guard !Task.isCancelled, searchToken == token else { return }
             results = r
             errorMessage = nil
-            searched = text
+            searched = text + "|" + scope.rawValue
         } catch {
             guard !Task.isCancelled, searchToken == token else { return }
             if !(error is CancellationError) && (error as? URLError)?.code != .cancelled {

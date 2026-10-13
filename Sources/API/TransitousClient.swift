@@ -48,8 +48,11 @@ final class TransitousClient: @unchecked Sendable {
 
     // MARK: Endpoints
 
-    func geocode(_ text: String, near: LatLon?, language: String? = Locale.current.language.languageCode?.identifier) async throws -> [GeocodeMatch] {
+    /// - Parameter type: `STOP`, `ADDRESS` or `PLACE` to search only those; nil for everything.
+    func geocode(_ text: String, near: LatLon?, type: String? = nil,
+                 language: String? = Locale.current.language.languageCode?.identifier) async throws -> [GeocodeMatch] {
         var q = [URLQueryItem(name: "text", value: text), URLQueryItem(name: "numResults", value: "15")]
+        if let type { q.append(URLQueryItem(name: "type", value: type)) }
         if let near {
             q.append(URLQueryItem(name: "place", value: near.coarseAPIValue))
             q.append(URLQueryItem(name: "placeBias", value: "5"))
@@ -66,15 +69,16 @@ final class TransitousClient: @unchecked Sendable {
     static let widerWalkLimit = 2700
 
     func plan(from: LatLon, to: LatLon, time: Date?, arriveBy: Bool, pageCursor: String? = nil,
-              maxWalk: Int = TransitousClient.walkLimits.prePost) async throws -> PlanResponse {
+              maxWalk: Int = TransitousClient.walkLimits.prePost, options: RouteOptions = RouteOptions()) async throws -> PlanResponse {
         // "Now" searches change by the minute; planned ones can be reused a little longer.
         try await get("/api/v6/plan", Self.planQuery(from: from, to: to, time: time, arriveBy: arriveBy,
-                                                     pageCursor: pageCursor, maxWalk: maxWalk),
+                                                     pageCursor: pageCursor, maxWalk: maxWalk, options: options),
                       cache: CachePolicy(maxAge: time == nil ? 20 : 60, persist: true))
     }
 
     static func planQuery(from: LatLon, to: LatLon, time: Date?, arriveBy: Bool,
-                          pageCursor: String? = nil, maxWalk: Int = walkLimits.prePost) -> [URLQueryItem] {
+                          pageCursor: String? = nil, maxWalk: Int = walkLimits.prePost,
+                          options: RouteOptions = RouteOptions()) -> [URLQueryItem] {
         var q = [
             URLQueryItem(name: "fromPlace", value: from.apiValue),
             URLQueryItem(name: "toPlace", value: to.apiValue),
@@ -86,6 +90,11 @@ final class TransitousClient: @unchecked Sendable {
             URLQueryItem(name: "maxPostTransitTime", value: String(maxWalk)),
             URLQueryItem(name: "maxDirectTime", value: String(walkLimits.direct)),
         ]
+        // Walking, cycling and driving the whole way come back in `direct`, for comparison.
+        q.append(URLQueryItem(name: "directModes", value: options.directModes.joined(separator: ",")))
+        if let modes = options.modes.apiValue { q.append(URLQueryItem(name: "transitModes", value: modes)) }
+        if let n = options.maxTransfers { q.append(URLQueryItem(name: "maxTransfers", value: String(n))) }
+        if options.wheelchair { q.append(URLQueryItem(name: "pedestrianProfile", value: "WHEELCHAIR")) }
         if let time { q.append(URLQueryItem(name: "time", value: DateParsing.format(time))) }
         if let pageCursor { q.append(URLQueryItem(name: "pageCursor", value: pageCursor)) }
         return q
@@ -106,23 +115,29 @@ final class TransitousClient: @unchecked Sendable {
         ], cache: .search)
     }
 
-    func departures(near center: LatLon, radius: Int, count: Int) async throws -> StopTimesResponse {
-        try await get("/api/v6/stoptimes", [
+    /// - Parameter modes: only these modes (`ModeFilter.apiValue`); nil for all.
+    func departures(near center: LatLon, radius: Int, count: Int, modes: String? = nil) async throws -> StopTimesResponse {
+        var q = [
             URLQueryItem(name: "center", value: center.apiValue),
             URLQueryItem(name: "withAlerts", value: "true"),
             URLQueryItem(name: "radius", value: String(radius)),
             URLQueryItem(name: "n", value: String(count)),
-        ], cache: CachePolicy(maxAge: 20, persist: true, slot: "nearby"))
+        ]
+        if let modes { q.append(URLQueryItem(name: "mode", value: modes)) }
+        // A filtered board has its own slot: "only trams" must not come back as the full board offline.
+        return try await get("/api/v6/stoptimes", q,
+                             cache: CachePolicy(maxAge: 20, persist: true, slot: modes.map { "nearby|\($0)" } ?? "nearby"))
     }
 
     /// Departures at a stop. `radius` (metres) also includes nearby platforms of the same station.
-    func departures(stopId: String, count: Int, radius: Int? = nil) async throws -> StopTimesResponse {
+    func departures(stopId: String, count: Int, radius: Int? = nil, modes: String? = nil) async throws -> StopTimesResponse {
         var q = [
             URLQueryItem(name: "stopId", value: stopId),
             URLQueryItem(name: "n", value: String(count)),
             URLQueryItem(name: "withAlerts", value: "true"),
         ]
         if let radius { q.append(URLQueryItem(name: "radius", value: String(radius))) }
+        if let modes { q.append(URLQueryItem(name: "mode", value: modes)) }
         return try await get("/api/v6/stoptimes", q, cache: .live)
     }
 
@@ -197,7 +212,7 @@ final class TransitousClient: @unchecked Sendable {
 
     static func sameOfflineRequest(savedURL: String, requestedURL: URL, slot: String?) -> Bool {
         if savedURL == requestedURL.absoluteString { return true }
-        guard slot == "nearby" else { return false }
+        guard slot?.hasPrefix("nearby") == true else { return false }
         func center(_ url: String) -> LatLon? {
             URLComponents(string: url)?.queryItems?.first { $0.name == "center" }?.value.flatMap(LatLon.init(apiValue:))
         }
