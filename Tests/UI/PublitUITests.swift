@@ -193,12 +193,14 @@ final class PublitUITests: XCTestCase {
         let app = launch()
         nudge(app) // lets the interruption monitor handle a permission alert
         XCTAssertTrue(app.navigationBars["Nearby"].waitForExistence(timeout: 10))
-        XCTAssertTrue(app.buttons["All departures"].firstMatch.waitForExistence(timeout: timeout),
-                      "no departure board loaded")
+        // The board shows first (the link under it sits below the fold since the mode chips came).
+        XCTAssertTrue(app.buttons["modeChip-all"].waitForExistence(timeout: timeout), "no departure board loaded")
         sleep(1)
         snap("nearby")
 
-        app.buttons["All departures"].firstMatch.tap()
+        let all = app.buttons["All departures"].firstMatch
+        XCTAssertTrue(reveal(all, in: app), "no link to all departures")
+        all.tap()
         XCTAssertTrue(app.buttons["Save"].waitForExistence(timeout: 10))
         snap("stop")
         app.buttons["Save"].tap()
@@ -330,7 +332,7 @@ final class PublitUITests: XCTestCase {
         XCTAssertNotNil(chip, "no mode chips on Nearby")
         chip?.tap()
         XCTAssertTrue(reveal(app.buttons["All departures"].firstMatch, in: app), "filtered board empty")
-        for _ in 0..<3 where !app.buttons["modeChip-all"].isHittable { app.swipeDown() }
+        for _ in 0..<2 { app.swipeDown() } // back to the top for the screenshot
         sleep(2)
         snap("nearby-filter")
         app.buttons["modeChip-all"].tap()
