@@ -32,6 +32,7 @@ struct TripView: View {
     @State private var alerts: [Alert] = []
     @State private var shape: [LatLon] = []
     @State private var generation = 0
+    @State private var now = Date()
 
     private var leg: Leg? { trip?.legs.first(where: \.isTransit) }
     private var savedLine: SavedLine {
@@ -39,37 +40,36 @@ struct TripView: View {
     }
 
     var body: some View {
-        TimelineView(.periodic(from: .timelineAnchor, by: 15)) { ctx in
-            List {
+        List {
+            Section {
+                DepartureRow(stopTime: stopTime)
+                ServiceAlertsView(alerts: trip == nil ? stopTime.serviceAlerts : alerts)
+            }
+            if let leg {
+                let progress = TripProgress.at(now, stops: stops)
                 Section {
-                    DepartureRow(stopTime: stopTime)
-                    ServiceAlertsView(alerts: trip == nil ? stopTime.serviceAlerts : alerts)
+                    OfflineNote()
+                    TripMap(generation: generation, shape: shape, stops: stops.map(\.coordinate),
+                            color: leg.lineColor, textColor: leg.lineTextColor, mode: leg.mode,
+                            vehicle: TripProgress.position(progress, stops: stops))
+                        .equatable()
+                        .frame(height: 240)
+                        .listRowInsets(EdgeInsets())
+                    statusLine(progress: progress, stops: stops, leg: leg)
                 }
-                if let leg {
-                    let progress = TripProgress.at(ctx.date, stops: stops)
-                    Section {
-                        OfflineNote()
-                        TripMap(generation: generation, shape: shape, stops: stops.map(\.coordinate),
-                                color: leg.lineColor, textColor: leg.lineTextColor, mode: leg.mode,
-                                vehicle: TripProgress.position(progress, stops: stops))
-                            .equatable()
-                            .frame(height: 240)
-                            .listRowInsets(EdgeInsets())
-                        statusLine(progress: progress, stops: stops, leg: leg)
+                Section("Stops") {
+                    ForEach(Array(stops.enumerated()), id: \.offset) { i, stop in
+                        StopTimeRow(stop: stop, isFocus: focusStops.contains(i),
+                                    isPast: isPast(i, progress: progress), realTime: leg.realTime)
                     }
-                    Section("Stops") {
-                        ForEach(Array(stops.enumerated()), id: \.offset) { i, stop in
-                            StopTimeRow(stop: stop, isFocus: focusStops.contains(i),
-                                        isPast: isPast(i, progress: progress), realTime: leg.realTime)
-                        }
-                    }
-                } else if let errorMessage {
-                    Text(errorMessage).foregroundStyle(.secondary)
-                } else {
-                    HStack { Spacer(); ProgressView(); Spacer() }
                 }
+            } else if let errorMessage {
+                Text(errorMessage).foregroundStyle(.secondary)
+            } else {
+                HStack { Spacer(); ProgressView(); Spacer() }
             }
         }
+        .ticking(every: 15, now: $now)
         .navigationTitle(stopTime.lineName)
         .screenTrail("Trip")
         .navigationBarTitleDisplayMode(.inline)

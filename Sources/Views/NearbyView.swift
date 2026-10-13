@@ -440,30 +440,29 @@ struct LineAtStopRow: View {
     let line: LineAtStop
 
     var body: some View {
-        TimelineView(.everyMinute) { ctx in
-            VStack(alignment: .leading, spacing: 6) {
-                HStack(spacing: 8) {
-                    LineBadge(line.first)
-                    if let detail = line.first.serviceDetail {
-                        Text(verbatim: detail).font(.caption.weight(.semibold)).foregroundStyle(.secondary).lineLimit(1)
-                    }
-                }
-                ForEach(Array(line.byDirection(perDirection: 3).prefix(3).enumerated()), id: \.offset) { _, dir in
-                    HStack(alignment: .firstTextBaseline, spacing: 6) {
-                        Image(systemName: "arrow.right").font(.caption2).foregroundStyle(.secondary)
-                            .accessibilityHidden(true)
-                        Text(verbatim: dir.direction ?? L10n.t("Direction unavailable"))
-                            .font(.subheadline).lineLimit(1)
-                        Spacer(minLength: 8)
-                        Text(verbatim: Self.times(dir.departures, now: ctx.date))
-                            .font(.subheadline.monospacedDigit()).foregroundStyle(.secondary)
-                            .lineLimit(1).fixedSize()
-                    }
+        let now = Ticker.minute.now
+        return VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 8) {
+                LineBadge(line.first)
+                if let detail = line.first.serviceDetail {
+                    Text(verbatim: detail).font(.caption.weight(.semibold)).foregroundStyle(.secondary).lineLimit(1)
                 }
             }
-            .padding(.vertical, 4)
-            .accessibilityElement(children: .combine)
+            ForEach(Array(line.byDirection(perDirection: 3).prefix(3).enumerated()), id: \.offset) { _, dir in
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    Image(systemName: "arrow.right").font(.caption2).foregroundStyle(.secondary)
+                        .accessibilityHidden(true)
+                    Text(verbatim: dir.direction ?? L10n.t("Direction unavailable"))
+                        .font(.subheadline).lineLimit(1)
+                    Spacer(minLength: 8)
+                    Text(verbatim: Self.times(dir.departures, now: now))
+                        .font(.subheadline.monospacedDigit()).foregroundStyle(.secondary)
+                        .lineLimit(1).fixedSize()
+                }
+            }
         }
+        .padding(.vertical, 4)
+        .accessibilityElement(children: .combine)
         .accessibilityIdentifier("lineAtStop")
     }
 

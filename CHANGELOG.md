@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0 (build 12)
+
+### Freeze on the trip screen (freeze log from build 11)
+- The call stacks show no app code: the main thread is inside SwiftUI's drawing, and while drawing SwiftUI asks itself for the next update (`requestUpdate(after:)`) again and again, until about 15 s have passed: the period of the trip screen's timeline. After the trip has loaded it repeats for another ~15 s.
+- All timelines (`TimelineView`) are replaced by plain clocks: departure countdowns read one shared minute clock, the trip and map-vehicle screens keep their own time and update it every 15 s, the route status every 30 s, the line map every 5 s. Nothing else changes on screen. Likely cause, not confirmed on a device.
+- The fixed timeline start from build 10 is removed.
+
 ## 0.6.0 (build 11)
 
 ### Better freeze log

@@ -6,11 +6,9 @@ struct DepartureRow: View {
     @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
-        // Countdowns are in whole minutes: all rows redraw together on the minute instead of
-        // each on its own 15 s timer.
-        TimelineView(.everyMinute) { context in
-            row(now: context.date)
-        }
+        // Countdowns are in whole minutes: all rows read one shared minute clock and redraw
+        // together on the minute (no timeline per row).
+        row(now: Ticker.minute.now)
     }
 
     private func row(now: Date) -> some View {

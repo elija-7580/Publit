@@ -59,8 +59,8 @@ struct ItineraryDetailView: View {
             // 1. What matters first: when, how long, which lines, live state and warnings.
             Section {
                 if let statusAt {
-                    TimelineView(.periodic(from: .timelineAnchor, by: 30)) { ctx in
-                        StatusBanner(status: statusAt(ctx.date), refreshedAt: refreshedAt)
+                    Clocked(every: 30) { now in
+                        StatusBanner(status: statusAt(now), refreshedAt: refreshedAt)
                     }
                 }
                 RouteSummary(itinerary: itinerary)

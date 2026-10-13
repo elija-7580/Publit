@@ -429,52 +429,52 @@ struct VehicleTripView: View {
     let vehicle: LiveVehicle
     @State private var leg: Leg?
     @State private var errorMessage: String?
+    @State private var now = Date()
 
     var body: some View {
-        TimelineView(.periodic(from: .timelineAnchor, by: 15)) { ctx in
-            List {
-                Section {
-                    HStack(spacing: 10) {
-                        LineBadge(vehicle)
-                        VStack(alignment: .leading, spacing: 2) {
-                            if let to = leg?.directionName { Text(L10n.f("Towards %@", to)).font(.subheadline.weight(.semibold)) }
-                            Text(vehicle.realTime ? L10n.t("Live position") : L10n.t("Position from the timetable"))
-                                .font(.caption).foregroundStyle(.secondary)
-                        }
-                    }
-                    if vehicle.delayMinutes >= 1 {
-                        Text(L10n.f("%lld min late", vehicle.delayMinutes)).font(.footnote.weight(.semibold)).foregroundStyle(.orange)
+        List {
+            Section {
+                HStack(spacing: 10) {
+                    LineBadge(vehicle)
+                    VStack(alignment: .leading, spacing: 2) {
+                        if let to = leg?.directionName { Text(L10n.f("Towards %@", to)).font(.subheadline.weight(.semibold)) }
+                        Text(vehicle.realTime ? L10n.t("Live position") : L10n.t("Position from the timetable"))
+                            .font(.caption).foregroundStyle(.secondary)
                     }
                 }
-                if let leg {
-                    let stops = leg.allStops
-                    let progress = TripProgress.at(ctx.date, stops: stops)
-                    let next = TripProgress.nextStopIndex(progress, count: stops.count) ?? stops.count
-                    Section("Next stops") {
-                        ForEach(Array(stops.enumerated()).filter { $0.offset >= next }, id: \.offset) { _, stop in
-                            HStack {
-                                Text(stop.name)
-                                Spacer()
-                                if let t = stop.arrival ?? stop.departure {
-                                    Text(Fmt.time(t, tz: stop.tz)).monospacedDigit().foregroundStyle(.secondary)
-                                }
-                            }
-                        }
-                    }
-                    if let line = lineRef(leg, next: next) {
-                        Section {
-                            NavigationLink { LineDetailView(line: line) } label: {
-                                Label(L10n.f("Line %@: route and timetable", leg.lineName), systemImage: "point.topleft.down.to.point.bottomright.curvepath")
-                            }
-                        }
-                    }
-                } else if let errorMessage {
-                    Text(errorMessage).foregroundStyle(.secondary)
-                } else {
-                    HStack { Spacer(); ProgressView(); Spacer() }
+                if vehicle.delayMinutes >= 1 {
+                    Text(L10n.f("%lld min late", vehicle.delayMinutes)).font(.footnote.weight(.semibold)).foregroundStyle(.orange)
                 }
             }
+            if let leg {
+                let stops = leg.allStops
+                let progress = TripProgress.at(now, stops: stops)
+                let next = TripProgress.nextStopIndex(progress, count: stops.count) ?? stops.count
+                Section("Next stops") {
+                    ForEach(Array(stops.enumerated()).filter { $0.offset >= next }, id: \.offset) { _, stop in
+                        HStack {
+                            Text(stop.name)
+                            Spacer()
+                            if let t = stop.arrival ?? stop.departure {
+                                Text(Fmt.time(t, tz: stop.tz)).monospacedDigit().foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                }
+                if let line = lineRef(leg, next: next) {
+                    Section {
+                        NavigationLink { LineDetailView(line: line) } label: {
+                            Label(L10n.f("Line %@: route and timetable", leg.lineName), systemImage: "point.topleft.down.to.point.bottomright.curvepath")
+                        }
+                    }
+                }
+            } else if let errorMessage {
+                Text(errorMessage).foregroundStyle(.secondary)
+            } else {
+                HStack { Spacer(); ProgressView(); Spacer() }
+            }
         }
+        .ticking(every: 15, now: $now)
         .navigationTitle(vehicle.lineName)
         .screenTrail("Map vehicle")
         .navigationBarTitleDisplayMode(.inline)

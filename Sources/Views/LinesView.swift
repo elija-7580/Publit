@@ -186,11 +186,11 @@ struct LineDetailView: View {
                 let stops = leg.allStops
                 let pattern = direction.flatMap { patterns[$0.id] }
                 Section {
-                    TimelineView(.periodic(from: .timelineAnchor, by: 5)) { ctx in
+                    Clocked(every: 5) { now in
                         LineMap(line: line, shape: leg.legGeometry.mapPoints, stops: stops,
                                 vehicles: pattern.map { p in
                                     LineVehicles.estimate(p, at: p.index(of: line.stopId, near: line.coordinate),
-                                                          departures: vehicleDepartures, now: ctx.date)
+                                                          departures: vehicleDepartures, now: now)
                                 } ?? [])
                     }
                     .frame(height: 280)
