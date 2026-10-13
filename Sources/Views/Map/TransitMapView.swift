@@ -476,7 +476,7 @@ final class RentalPinView: MKAnnotationView {
         let kind: RentalKind, station: Bool, text: String, spoken: String
         switch pin.item {
         case .station(let s, let provider):
-            let kinds = (s.formFactors ?? []).map(RentalKind.init)
+            let kinds = (s.formFactors ?? []).map { RentalKind($0) }
             kind = kinds.contains(.bicycle) ? .bicycle : kinds.first ?? .other
             station = true
             text = s.numVehiclesAvailable.map { "\(kind.title) · \($0)" } ?? MapStation.shortName(s.name)
