@@ -1,4 +1,5 @@
 import SwiftUI
+import MapKit
 
 /// Lines tab: the lines around you (and saved ones), searchable by line or destination,
 /// plus stations by name. Each line opens its route on a map, live vehicles and timetables.
