@@ -120,12 +120,26 @@ struct RouteOptionsView: View {
 
 /// "Route options" row with the active filters, e.g. "Train, S-Bahn · Direct only".
 struct RouteOptionsButton: View {
+    /// One small line (Plan): the options are there, but not in the way.
+    var compact = false
     @Environment(AppState.self) private var app
     @State private var showing = false
 
     var body: some View {
         let options = app.routeOptions
         Button { showing = true } label: {
+            if compact {
+                HStack(spacing: 8) {
+                    Image(systemName: options.isDefault ? "slider.horizontal.3" : "line.3.horizontal.decrease.circle.fill")
+                        .foregroundStyle(options.isDefault ? Color.secondary : Color.appAccent)
+                        .accessibilityHidden(true)
+                    Text("Route options").font(.subheadline).foregroundStyle(.primary)
+                    Spacer(minLength: 8)
+                    Text(verbatim: options.summary ?? L10n.t("All modes"))
+                        .font(.caption).foregroundStyle(options.isDefault ? Color.secondary : Color.appAccent)
+                        .lineLimit(1)
+                }
+            } else {
             HStack(spacing: 10) {
                 Image(systemName: options.isDefault ? "slider.horizontal.3" : "line.3.horizontal.decrease.circle.fill")
                     .foregroundStyle(options.isDefault ? Color.secondary : Color.appAccent)
@@ -144,6 +158,7 @@ struct RouteOptionsButton: View {
                         .background(Color.appAccent, in: Capsule())
                         .accessibilityHidden(true)
                 }
+            }
             }
         }
         .accessibilityElement(children: .combine)

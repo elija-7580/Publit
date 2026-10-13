@@ -12,6 +12,9 @@ final class TransitMapModel {
     var liveHidden = false
     var isLoadingLive = false
     var liveError: String?
+    var stationsError: String?
+    /// A failed station download is tried again by the 2 s tick (before, only moving the map did).
+    @ObservationIgnored private var stationsRetryAt: Date?
     /// The first live layer arrived; later refreshes update silently.
     var hasLive = false
     @ObservationIgnored private var liveRetryAt: Date?
@@ -82,6 +85,9 @@ final class TransitMapModel {
         active = false
         regionTask?.cancel(); stationsTask?.cancel(); liveTask?.cancel(); rentalsTask?.cancel()
         buildGeneration = UUID()
+        // A cancelled download or build leaves nothing new: load the live layer again on resume
+        // instead of waiting out the 30 s refresh.
+        liveBox = nil
     }
 
     func resume() {
@@ -100,6 +106,10 @@ final class TransitMapModel {
     }
 
     func refreshIfDue() async {
+        if let stationsRetryAt, Date() >= stationsRetryAt, !stationsBusy, let region {
+            self.stationsRetryAt = nil
+            stationsTask = Task { await loadStations(region) }
+        }
         if let liveRetryAt, Date() >= liveRetryAt, !isLoadingLive {
             self.liveRetryAt = nil
             liveTask = Task { await loadLive(force: true) }
@@ -140,15 +150,27 @@ final class TransitMapModel {
         }
         if let stationCoverage, stationCoverage.contains(min: viewLo, max: viewHi, zoom: zoom) { return }
         let (lo, hi) = Self.box(r, grow: 0.3)
-        guard let stops = try? await TransitousClient.shared.mapStops(min: lo, max: hi, zoom: zoom) else { return }
+        let stops: [MapStop]
+        do {
+            stops = try await TransitousClient.shared.mapStops(min: lo, max: hi, zoom: zoom)
+        } catch {
+            if !Task.isCancelled && !(error is CancellationError) && (error as? URLError)?.code != .cancelled {
+                stationsError = L10n.t("Stations could not be loaded.")
+                stationsRetryAt = Date().addingTimeInterval(5)
+            }
+            return
+        }
         guard !Task.isCancelled else { return }
+        stationsError = nil
         rawStops = stops
-        stationCoverage = MapStopCache.Coverage(min: lo, max: hi, zoom: zoom)
         let currentSeparate = (region?.span.latitudeDelta ?? r.span.latitudeDelta) <= MapStation.poleSpan
         let grouped = await Task.detached(priority: .userInitiated) { MapStation.group(stops, separatePoles: currentSeparate) }.value
         guard !Task.isCancelled else { return }
         separatePoles = currentSeparate
         allStations = grouped
+        // Marked as covered only once its pins are on the map: a download or grouping cut off
+        // halfway (map closed, app in the background) used to leave the area "covered" but empty.
+        stationCoverage = MapStopCache.Coverage(min: lo, max: hi, zoom: zoom)
         bumpStations()
     }
 
@@ -191,7 +213,7 @@ final class TransitMapModel {
                 if !Task.isCancelled { liveError = L10n.t("Live layer unavailable. Stations still work."); liveRetryAt = Date().addingTimeInterval(10) }
                 return
             }
-        guard !Task.isCancelled else { return }
+        guard !Task.isCancelled else { liveBox = nil; return }
         liveError = nil; liveRetryAt = nil
         hasLive = true
         segments = segs
@@ -342,7 +364,7 @@ struct StationMapView: View {
                 .background(.regularMaterial)
             if model.isLoadingLive && !model.hasLive {
                 ProgressView(L10n.t("Updating live layer…")).font(.footnote).padding(8).background(.regularMaterial, in: Capsule())
-            } else if let message = model.liveError {
+            } else if let message = model.stationsError ?? model.liveError {
                 Text(verbatim: message).font(.footnote).padding(8).background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
             }
             if let hint {

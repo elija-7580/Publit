@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.6.0 (build 14)
+
+### Plan
+- No "Quick" section. Choosing From or To lists Home and Work first, then the current location, other saved places and recent places.
+- The swap button sits between From and To on the right, not in the navigation bar.
+- "To the first stop" is no longer on the Plan screen (it is in Route options, also reachable from Settings); Route options is one small line.
+- Routes load after "Search routes" once both ends are set. After that, changing places, time or options searches again by itself; clearing the destination starts over. A recent search or "Plan again" searches at once.
+
+### Station map: stations and vehicles missing at times
+- An area counted as loaded as soon as its stations were downloaded, before their pins were made. If that was cut off (map closed, app in the background), the area stayed empty until the map was moved far enough. It now counts only once the pins are there.
+- A failed station download is tried again after 5 s (before: only when the map moved), with a short note.
+- After returning to the map, the live layer (lines and vehicles) loads again at once instead of after up to 30 s.
+- The first map position is used even if MapKit reports no region change for it.
+
 ## 0.6.0 (build 13)
 
 - Build 12 fixed the freeze on the trip screen (confirmed on the device).

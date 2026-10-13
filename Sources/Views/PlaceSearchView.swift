@@ -45,21 +45,38 @@ struct PlaceSearchView: View {
         NavigationStack {
             List {
                 if query.trimmingCharacters(in: .whitespaces).isEmpty {
-                    if allowCurrentLocation && !location.isDenied {
-                        Button { select(.currentLocation) } label: {
-                            Label("Current location", systemImage: "location.fill")
+                    // Home and Work first, then the current location, other saved places, recent ones.
+                    Section {
+                        ForEach(PlaceRole.allCases, id: \.self) { role in
+                            if let p = favorites.place(for: role) {
+                                Button { select(.place(p)) } label: {
+                                    Label {
+                                        VStack(alignment: .leading, spacing: 1) {
+                                            Text(role.title).foregroundStyle(.primary)
+                                            Text(verbatim: p.name).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                                        }
+                                    } icon: { Image(systemName: role.symbol) }
+                                }
+                                .accessibilityIdentifier("pick-\(role.rawValue)")
+                            }
+                        }
+                        if allowCurrentLocation && !location.isDenied {
+                            Button { select(.currentLocation) } label: {
+                                Label("Current location", systemImage: "location.fill")
+                            }
                         }
                     }
-                    recentSection
-                    if !favorites.items.isEmpty {
+                    let others = favorites.items.filter { $0.role == nil }
+                    if !others.isEmpty {
                         Section("Saved") {
-                            ForEach(favorites.items) { f in
+                            ForEach(others) { f in
                                 Button { select(.place(f)) } label: {
                                     PlaceLabel(name: f.name, subtitle: f.subtitle, isStop: f.isStop)
                                 }
                             }
                         }
                     }
+                    recentSection
                 } else {
                     if let errorMessage {
                         Text(errorMessage).foregroundStyle(.secondary)

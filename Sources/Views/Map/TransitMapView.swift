@@ -91,6 +91,7 @@ struct TransitMapView: UIViewRepresentable {
         private var vehiclePins: [String: VehiclePin] = [:]
         private var rentalPins: [String: RentalPin] = [:]
         private var overlays: [MKOverlay] = []
+        private var reportedRegion = false
 
         init(_ parent: TransitMapView) { self.parent = parent }
 
@@ -181,6 +182,15 @@ struct TransitMapView: UIViewRepresentable {
         // MARK: MKMapViewDelegate
 
         func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+            reportedRegion = true
+            parent.onRegion(mapView.region)
+        }
+
+        /// The first region also when MapKit sends no region change for the start position
+        /// (then nothing loaded until the map was moved).
+        func mapViewDidFinishRenderingMap(_ mapView: MKMapView, fullyRendered: Bool) {
+            guard !reportedRegion, mapView.bounds.width > 0 else { return }
+            reportedRegion = true
             parent.onRegion(mapView.region)
         }
 

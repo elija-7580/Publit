@@ -15,7 +15,10 @@ struct RecentSearchesSection: View {
                             search.apply(to: app.goNow)
                             app.goNow.timeMode = .now
                             app.showGoNow = true
-                        } else { search.apply(to: app.plan) }
+                        } else {
+                            search.apply(to: app.plan)
+                            app.plan.searchStarted = true // a past search: run it again
+                        }
                     } label: {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(search.to.title).font(.subheadline.weight(.semibold)).foregroundStyle(.primary)

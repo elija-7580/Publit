@@ -168,6 +168,7 @@ struct PastTripsView: View {
             lat: t.itinerary.legs.last?.to.lat ?? 0, lon: t.itinerary.legs.last?.to.lon ?? 0, stopId: nil))
         app.plan.timeMode = .departAt
         app.plan.date = PlanView.nextOccurrence(of: t.startTime)
+        app.plan.searchStarted = true
         app.tab = .plan
     }
 }

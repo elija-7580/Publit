@@ -5,7 +5,6 @@ struct PlanView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var isVisible = false
     @Environment(LocationManager.self) private var location
-    @Environment(FavoritesStore.self) private var favorites
     @State private var picking: PickTarget?
     @State private var showMap = false
     @State private var selectedId: String?
@@ -19,8 +18,24 @@ struct PlanView: View {
         @Bindable var plan = app.plan
         List {
             Section {
-                endpointButton(label: "From", endpoint: plan.from, target: .from)
-                endpointButton(label: "To", endpoint: plan.to, target: .to)
+                // From and To with the swap button between them on the right.
+                HStack(spacing: 8) {
+                    VStack(spacing: 0) {
+                        endpointButton(label: "From", endpoint: plan.from, target: .from)
+                        Divider()
+                        endpointButton(label: "To", endpoint: plan.to, target: .to)
+                    }
+                    Button { app.plan.swap() } label: {
+                        Image(systemName: "arrow.up.arrow.down")
+                            .font(.body.weight(.semibold))
+                            .frame(width: 40, height: 40)
+                            .background(Color(.tertiarySystemFill), in: Circle())
+                    }
+                    .disabled(plan.to == nil)
+                    .accessibilityLabel(Text("Swap"))
+                    .accessibilityIdentifier("swapEndpoints")
+                }
+                .buttonStyle(.borderless)
                 // Plan is for later (tonight, next week). "From here, now" lives in Nearby.
                 Picker("When", selection: $plan.timeMode) {
                     Text("Depart").tag(TimeMode.departAt)
@@ -28,12 +43,23 @@ struct PlanView: View {
                 }
                 .pickerStyle(.segmented)
                 DatePicker(plan.timeMode == .arriveBy ? L10n.t("Arrive by") : L10n.t("Depart at"), selection: $plan.date)
-                FirstMilePicker()
-                RouteOptionsButton()
+                RouteOptionsButton(compact: true)
             }
 
-            if plan.to == nil {
-                quickDestinations
+            if plan.to != nil && !plan.searchStarted {
+                Section {
+                    Button { app.plan.searchStarted = true } label: {
+                        Label("Search routes", systemImage: "magnifyingglass")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity, minHeight: 34)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .listRowInsets(EdgeInsets())
+                    .listRowBackground(Color.clear)
+                    .accessibilityIdentifier("searchRoutes")
+                }
+            }
+            if plan.to == nil || !plan.searchStarted {
                 RecentSearchesSection()
             } else {
                 resultsSection(plan)
@@ -51,10 +77,6 @@ struct PlanView: View {
             if plan.date < .now.addingTimeInterval(-60) { plan.date = .now }
         }
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button { app.plan.swap() } label: { Label("Swap", systemImage: "arrow.up.arrow.down") }
-                    .disabled(plan.to == nil)
-            }
             if plan.to != nil {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { app.plan.to = nil } label: { Label("Clear destination", systemImage: "xmark.circle") }
@@ -67,8 +89,8 @@ struct PlanView: View {
             }
         }
         .onDisappear { isVisible = false }
-        .task(id: "\(app.plan.queryKey)|\(scenePhase)|\(app.tab)|\(isVisible)") {
-            guard isVisible, scenePhase == .active, app.tab == .plan else { return }
+        .task(id: "\(app.plan.queryKey)|\(scenePhase)|\(app.tab)|\(isVisible)|\(app.plan.searchStarted)") {
+            guard isVisible, scenePhase == .active, app.tab == .plan, app.plan.searchStarted else { return }
             selectedId = nil
             await app.plan.search(current: location.coordinate, locationDenied: location.isDenied)
             // Keep "now" results live: delays, cancellations and departed trips change by the minute.
@@ -80,37 +102,8 @@ struct PlanView: View {
         }
         .onChange(of: location.hasFix) { _, hasFix in
             // Retry once the first location fix arrives.
-            if hasFix, app.plan.itineraries.isEmpty, app.plan.to != nil {
+            if hasFix, app.plan.searchStarted, app.plan.itineraries.isEmpty, app.plan.to != nil {
                 Task { await app.plan.search(current: location.coordinate) }
-            }
-        }
-    }
-
-    @ViewBuilder
-    private var quickDestinations: some View {
-        if !favorites.pinned.isEmpty {
-            Section {
-                ForEach(PlaceRole.allCases, id: \.self) { role in
-                    if let p = favorites.place(for: role) {
-                        Button { app.plan.to = .place(p) } label: {
-                            Label { Text(role.title) + Text(verbatim: "  \(p.name)").foregroundStyle(.secondary) }
-                                icon: { Image(systemName: role.symbol) }
-                        }
-                    }
-                }
-            } header: {
-                Text("Quick")
-            } footer: {
-                if favorites.pinned.count < PlaceRole.allCases.count {
-                    Text("Set Home and Work in Saved to plan there with one tap.")
-                }
-            }
-        } else {
-            Section {
-            } header: {
-                Text("Quick")
-            } footer: {
-                Text("Set Home and Work in Saved to plan there with one tap.")
             }
         }
     }
@@ -137,6 +130,8 @@ struct PlanView: View {
                 }
                 Spacer()
             }
+            .frame(minHeight: 44)
+            .contentShape(Rectangle())
         }
         .accessibilityElement(children: .combine)
         .accessibilityValue(endpoint?.title ?? L10n.t("not set"))

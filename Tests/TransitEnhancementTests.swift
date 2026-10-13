@@ -238,4 +238,15 @@ final class RouteFromStopTests: XCTestCase {
         XCTAssertEqual(app.plan.from, .currentLocation)
         XCTAssertEqual(app.plan.to, .place(stop))
     }
+
+    @MainActor func testClearingDestinationNeedsSearchAgain() async {
+        let app = AppState()
+        app.route(to: stop)
+        XCTAssertFalse(app.plan.searchStarted, "routes load only after Search routes")
+        app.plan.searchStarted = true
+        app.plan.to = .place(other)
+        XCTAssertTrue(app.plan.searchStarted, "a new destination after a search searches again")
+        app.plan.to = nil
+        XCTAssertFalse(app.plan.searchStarted)
+    }
 }

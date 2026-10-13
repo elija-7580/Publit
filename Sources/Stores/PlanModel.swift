@@ -38,7 +38,10 @@ enum TimeMode: String, Codable, CaseIterable, Identifiable, Sendable {
 @Observable
 final class PlanModel {
     var from: Endpoint = .currentLocation
-    var to: Endpoint?
+    var to: Endpoint? { didSet { if to == nil { searchStarted = false } } }
+    /// Plan tab: routes load after "Search routes"; from then on, changes search again by themselves.
+    /// Clearing the destination starts over.
+    var searchStarted = false
     var timeMode: TimeMode = .now
     var date = Date()
 
@@ -276,5 +279,6 @@ final class AppState {
                                       lat: 48.1372, lon: 11.5755, stopId: nil))
         plan.to = .place(SavedPlace(id: "demo-muc", name: "Flughafen München", subtitle: nil,
                                     lat: 48.3537, lon: 11.7861, stopId: nil))
+        plan.searchStarted = true
     }
 }
