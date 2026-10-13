@@ -18,10 +18,16 @@ struct PassDetailView: View {
         }
     }
 
+    private func codeSource(_ pass: TicketPass) -> BarcodeSource? {
+        guard let url = store.documentURL(pass), let d = pass.document else { return nil }
+        return .file(url, d.kind, page: d.page)
+    }
+
     private func content(_ pass: TicketPass) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                PassCardView(pass: pass, onCodeTap: pass.barcode == nil ? nil : { showingCode = true })
+                PassCardView(pass: pass, logo: PassLogoCache.image(pass, store: store), codeSource: codeSource(pass),
+                             onCodeTap: pass.barcode == nil ? nil : { showingCode = true })
                     .accessibilityElement(children: .contain)
 
                 if case .expired(let date) = pass.validity() {
@@ -37,8 +43,8 @@ struct PassDetailView: View {
                         .buttonStyle(.bordered).controlSize(.large)
                         .accessibilityIdentifier("showOriginal")
                     }
-                    if WalletPassConfig.current != nil, pass.barcode?.walletMessage != nil {
-                        AddToWalletButton(pass: pass)
+                    if WalletPassConfig.current != nil, pass.barcode?.walletReady == true {
+                        AddToWalletButton(pass: pass, logo: PassLogoCache.image(pass, store: store))
                     }
                 }
 
@@ -70,7 +76,7 @@ struct PassDetailView: View {
                 .accessibilityIdentifier("passMenu")
             }
         }
-        .fullScreenCover(isPresented: $showingCode) { FullScreenCodeView(pass: pass) }
+        .fullScreenCover(isPresented: $showingCode) { FullScreenCodeView(pass: pass, source: codeSource(pass)) }
         .sheet(isPresented: $showingOriginal) {
             NavigationStack {
                 Group {
@@ -103,6 +109,7 @@ struct PassDetailView: View {
 /// The code alone on white, as large as possible, at full brightness.
 struct FullScreenCodeView: View {
     let pass: TicketPass
+    var source: BarcodeSource? = nil
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -110,9 +117,10 @@ struct FullScreenCodeView: View {
             Spacer()
             Text(verbatim: pass.displayTitle).font(.title2.bold()).multilineTextAlignment(.center)
             if let code = pass.barcode {
-                BarcodeView(code: code)
+                BarcodeView(code: code, source: source)
                     .aspectRatio(code.format.isSquare ? 1 : 3, contentMode: .fit)
-                    .padding(.horizontal, 24)
+                    // White all around: the quiet zone scanners need.
+                    .padding(.horizontal, code.format.isLinear ? 32 : 24)
                     .accessibilityLabel(L10n.f("%@ code", code.format.title))
                 if let text = pass.reference ?? code.altText {
                     Text(verbatim: text).font(.body.monospaced())

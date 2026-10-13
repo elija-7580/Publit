@@ -28,8 +28,31 @@ final class PassStore {
 
     func pass(_ id: String) -> TicketPass? { passes.first { $0.id == id } }
 
+    /// A pass by its own ID or by the ID of the old ticket it came from (links in calendars and Live Activities).
+    func pass(linkedTo id: String) -> TicketPass? { pass(id) ?? passes.first { $0.legacyId == id } }
+
     func documentURL(_ pass: TicketPass) -> URL? {
         pass.document.map { documentDirectory.appendingPathComponent($0.file) }
+    }
+
+    func logoURL(_ pass: TicketPass) -> URL? {
+        pass.logo.map { documentDirectory.appendingPathComponent($0.file) }
+    }
+
+    /// Sets or removes (nil) the operator logo of a saved pass. PNG data, already scaled down.
+    func setLogo(_ png: Data?, source: String?, for id: String) {
+        guard var pass = pass(id) else { return }
+        if let old = logoURL(pass) { try? FileManager.default.removeItem(at: old) }
+        if let png {
+            // A new name each time, so views showing the old file reload.
+            let name = "\(id)-logo-\(Int(Date().timeIntervalSince1970)).png"
+            guard (try? png.write(to: documentDirectory.appendingPathComponent(name), options: [.atomic, .completeFileProtection])) != nil
+            else { return }
+            pass.logo = TicketPass.Logo(file: name, source: source)
+        } else {
+            pass.logo = nil
+        }
+        update(pass)
     }
 
     func grouped(at date: Date = .now) -> [(group: PassGroup, passes: [TicketPass])] { PassGroup.grouped(passes, at: date) }
@@ -78,7 +101,10 @@ final class PassStore {
     }
 
     func remove(_ id: String) {
-        if let p = pass(id), let url = documentURL(p) { try? FileManager.default.removeItem(at: url) }
+        if let p = pass(id) {
+            if let url = documentURL(p) { try? FileManager.default.removeItem(at: url) }
+            if let url = logoURL(p) { try? FileManager.default.removeItem(at: url) }
+        }
         passes.removeAll { $0.id == id }
         persist()
     }

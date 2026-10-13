@@ -6,6 +6,8 @@ import VisionKit
 /// Add a ticket: choose a PDF, photo or screenshot (or scan paper), pick the page,
 /// let Publit read it on the device, then check the result.
 struct PassImportView: View {
+    /// A single ticket added from a trip belongs to that trip.
+    var tripId: String? = nil
     @Environment(\.dismiss) private var dismiss
     @State private var stage: Stage = .choose
     @State private var photo: PhotosPickerItem?
@@ -129,6 +131,7 @@ struct PassImportView: View {
             let scan = pdf ? try await TicketRecognizer.scan(pdf: data, page: page) : try await TicketRecognizer.scan(imageData: data)
             let draft = TicketTextParser.parse(lines: scan.lines, barcodes: scan.barcodes)
             var pass = TicketPass(draft: draft, barcode: scan.barcodes.first)
+            if let tripId, !pass.category.isPass { pass.tripId = tripId }
             if PassStyle.suggested(forOperator: draft.operatorName) == nil, let color = scan.suggestedColor {
                 pass.style = PassStyle(background: color)
             }

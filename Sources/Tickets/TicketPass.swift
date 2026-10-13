@@ -52,14 +52,18 @@ struct TicketPass: Codable, Identifiable, Hashable, Sendable {
     /// A code that does not change. Codes that rotate every few seconds only work in the operator's app.
     struct Barcode: Codable, Hashable, Sendable {
         enum Format: String, Codable, CaseIterable, Sendable {
-            case qr, aztec, pdf417, code128
+            case qr, aztec, pdf417, code128, dataMatrix
+            /// Linear retail and logistics codes, found on some paper and bus tickets.
+            case ean13, ean8, upce, code39, code93, itf, codabar
 
-            var walletFormat: String {
+            /// Wallet shows only these four; other codes stay in Publit.
+            var walletFormat: String? {
                 switch self {
                 case .qr: return "PKBarcodeFormatQR"
                 case .aztec: return "PKBarcodeFormatAztec"
                 case .pdf417: return "PKBarcodeFormatPDF417"
                 case .code128: return "PKBarcodeFormatCode128"
+                default: return nil
                 }
             }
 
@@ -70,10 +74,36 @@ struct TicketPass: Codable, Identifiable, Hashable, Sendable {
                 case .aztec: return "Aztec"
                 case .pdf417: return "PDF417"
                 case .code128: return "Code 128"
+                case .dataMatrix: return "Data Matrix"
+                case .ean13: return "EAN-13"
+                case .ean8: return "EAN-8"
+                case .upce: return "UPC-E"
+                case .code39: return "Code 39"
+                case .code93: return "Code 93"
+                case .itf: return "ITF"
+                case .codabar: return "Codabar"
                 }
             }
 
-            var isSquare: Bool { self == .qr || self == .aztec }
+            var isSquare: Bool { self == .qr || self == .aztec || self == .dataMatrix }
+            /// Bars in one row (all but the 2D codes).
+            var isLinear: Bool { !isSquare && self != .pdf417 }
+            /// Publit can draw these again from their content; the others are shown as cut out of the original.
+            var canRedraw: Bool { self == .qr || self == .aztec || self == .pdf417 || self == .code128 }
+        }
+
+        /// Where the code sits on the original page, as fractions of its width and height (origin top left).
+        /// Codes Publit cannot draw again are shown cut out of the original, exactly as issued.
+        struct Region: Codable, Hashable, Sendable {
+            var x, y, width, height: Double
+
+            /// With a margin for the quiet zone scanners need around the code, kept inside the page.
+            func padded(_ fraction: Double = 0.12) -> Region {
+                let dx = max(width * fraction, 0.01), dy = max(height * fraction, 0.01)
+                let x0 = max(0, x - dx), y0 = max(0, y - dy)
+                let x1 = min(1, x + width + dx), y1 = min(1, y + height + dy)
+                return Region(x: x0, y: y0, width: x1 - x0, height: y1 - y0)
+            }
         }
 
         var format: Format
@@ -84,14 +114,20 @@ struct TicketPass: Codable, Identifiable, Hashable, Sendable {
         /// Archived `CIBarcodeDescriptor`: redraws exactly the scanned symbol, binary content included.
         var descriptor: Data?
         var altText: String?
+        var region: Region?
 
-        init(format: Format, message: String? = nil, payload: Data? = nil, descriptor: Data? = nil, altText: String? = nil) {
+        init(format: Format, message: String? = nil, payload: Data? = nil, descriptor: Data? = nil, altText: String? = nil,
+             region: Region? = nil) {
             self.format = format
             self.message = message
             self.payload = payload
             self.descriptor = descriptor
             self.altText = altText
+            self.region = region
         }
+
+        /// Can go into Apple Wallet: a format Wallet draws, with content it can carry.
+        var walletReady: Bool { format.walletFormat != nil && walletMessage != nil }
 
         /// The bytes to encode when the code is drawn again.
         var bytes: Data? { payload ?? message.map { Data($0.utf8) } }
@@ -126,6 +162,12 @@ struct TicketPass: Codable, Identifiable, Hashable, Sendable {
         var dedupeKey: String {
             "\(format.rawValue)|" + (message ?? payload?.base64EncodedString() ?? descriptor?.base64EncodedString() ?? "")
         }
+    }
+
+    struct Logo: Codable, Hashable, Sendable {
+        var file: String
+        /// Where it came from (Wikimedia Commons file page or website), shown as the credit.
+        var source: String?
     }
 
     struct Document: Codable, Hashable, Sendable {
@@ -168,6 +210,8 @@ struct TicketPass: Codable, Identifiable, Hashable, Sendable {
     var tripId: String?
     /// The old `Ticket` this pass was imported from.
     var legacyId: String?
+    /// Operator logo (PNG file next to the documents), chosen by the user or suggested from Wikidata.
+    var logo: Logo? = nil
     let createdAt: Date
     var updatedAt: Date
 

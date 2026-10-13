@@ -10,6 +10,7 @@ struct TripActionsSection: View {
 
     @Environment(TripStore.self) private var trips
     @Environment(TicketStore.self) private var tickets
+    @Environment(PassStore.self) private var passes
     @Environment(AppState.self) private var app
     @State private var calendarTrip: SavedTrip?
     @State private var reminderOn = false
@@ -67,6 +68,9 @@ struct TripActionsSection: View {
             })
             .sheet(isPresented: $addingTicket) { AddTicketView(tripId: saved?.id) }
         }
+        if Features.passes, !itinerary.isDirect {
+            TripPassSection(tripId: saved?.id, at: itinerary.startTime, ensureTrip: { ensureSaved().id })
+        }
     }
 
     @ViewBuilder
@@ -113,7 +117,7 @@ struct TripActionsSection: View {
             LeaveReminder.cancel(previous)
             await LiveTripActivity.end(previous)
         }
-        switch LiveTripActivity.start(trip, hasTicket: Features.tickets && !tickets.tickets(forTrip: trip.id).isEmpty) {
+        switch LiveTripActivity.start(trip, hasTicket: !passes.passes(forTrip: trip.id, at: trip.startTime).isEmpty) {
         case .started: note = L10n.t("Follow it on the lock screen.")
         case .tooEarly: note = L10n.t("Live updates on the lock screen start 8 hours before.")
         case .unavailable, .failed: note = L10n.t("Live tracking is active in the app. Lock screen updates may be unavailable.")
@@ -156,7 +160,7 @@ struct TripActionsSection: View {
         }
         trips.setFollowLive(trip.id, true)
         reminderOn = true
-        switch LiveTripActivity.start(trip, hasTicket: Features.tickets && !tickets.tickets(forTrip: trip.id).isEmpty) {
+        switch LiveTripActivity.start(trip, hasTicket: !passes.passes(forTrip: trip.id, at: trip.startTime).isEmpty) {
         case .started: note = [note, L10n.t("Follow it on the lock screen.")].compactMap { $0 }.joined(separator: " ")
         case .tooEarly: note = [note, L10n.t("Live updates on the lock screen start 8 hours before.")].compactMap { $0 }.joined(separator: " ")
         case .unavailable: note = [note, L10n.t("Turn on Live Activities for Publit in Settings to follow it on the lock screen.")].compactMap { $0 }.joined(separator: " ")

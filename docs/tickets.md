@@ -1,7 +1,8 @@
 # Tickets as passes
 
-Status: built and tested, **not wired into the app**. Nothing here is reachable from the app's UI.
-The first ticket version (`TicketStore`, `TicketsView`) stays switched off with `Features.tickets = false`.
+Status: **in the app since 0.5.0** (Tickets tab, trip screens, Live Activity, deep links; `Features.passes`).
+The first ticket version (`TicketStore`, `TicketsView`) stays switched off with `Features.tickets = false`;
+its tickets are imported as passes on launch.
 
 The idea follows apps like NeatPass: your ticket arrives as a PDF, photo or screenshot; Publit reads it on the
 iPhone, you check the result, and you get a clean pass with the code ready for the gate. Publit's own take: it stays
@@ -11,7 +12,8 @@ inside a transit app, so a pass can belong to a saved trip, and passes valid at 
 
 1. **Add** (`PassImportView`): photo or screenshot (PhotosPicker), PDF or image file (file importer, 25 MB limit),
    or scan a paper ticket (VisionKit document camera). Multi-page PDFs ask for the page.
-2. **Read on the device** (`TicketRecognizer`): Vision finds QR, Aztec, PDF417 and Code 128 codes and the text.
+2. **Read on the device** (`TicketRecognizer`): Vision finds QR, Aztec, PDF417, Data Matrix, Code 128, EAN-13/8,
+   UPC-E, Code 39/93, ITF and Codabar codes and the text.
    PDFs use their embedded text when there is enough of it. The page's main colour is offered as "From ticket".
    Nothing is uploaded.
 3. **Understand** (`TicketTextParser`, platform-independent): operator, product (Deutschlandticket, KlimaTicket,
@@ -45,8 +47,26 @@ screens, and every pass says that only the operator's ticket is valid.
 | Demo data for screenshots | `Sources/Tickets/PassSamples.swift` (DEBUG only) | iOS |
 | Signing service | `services/pass-signer` | Cloudflare Workers |
 
-Codes are stored with their text, raw bytes when the text does not carry them (binary rail codes), and the
-archived `CIBarcodeDescriptor`, so the exact scanned symbol can be drawn again.
+Codes are stored with their text, raw bytes when the text does not carry them (binary rail codes), the
+archived `CIBarcodeDescriptor`, and their position on the page:
+
+- QR, Aztec, PDF417 and Data Matrix are redrawn from the descriptor: the same symbol version, error correction
+  level, mask and data codewords as the scanned one, binary content (UIC 918.3 `#UT…`) included.
+- Code 128 is redrawn from its content.
+- EAN, UPC, ITF, Code 39/93 and Codabar cannot be generated on iOS; they are cut out of the original page
+  with a quiet zone, so the bars are exactly the issued ones.
+- Redrawn codes use a whole number of screen pixels per module and nearest-neighbour sampling (no smoothed
+  edges), on white with a quiet zone. Wallet gets binary content as ISO-8859-1 text, which keeps every byte.
+
+## Operator logos
+
+`OperatorLogos` (platform-independent, tested) looks up the operator's Wikidata item (known operators by ID,
+others by search), takes its logo statements (P154: preferred and current first, no white variants, no
+deprecated ones) and loads them as PNG from Wikimedia Commons (`Special:FilePath`, 320 px). The website's icon is
+the fallback. New tickets of known operators get the first logo as a suggestion; the editor's "Operator logo"
+row offers all suggestions, a search by name, an image from Photos, or none. Only the operator name or ID is
+sent, with Publit's User-Agent. Logos are stored as PNG (max. 480 × 160 px) next to the documents and used on
+the card and in Wallet (`logo.png`, `icon.png` on a white plate). Logos are trademarks of their owners.
 
 Tests: `Tests/TicketPassTests.swift` (parser, validity, styles, SHA-1, CRC-32, ZIP, pass.json, store) and
 `testF12TicketPassScreens` in the UI tests (screenshots `pass-*.png` in the `ci-results` branch).
@@ -69,10 +89,11 @@ Wallet passes are `sharingProhibited` and have no web service, so they are never
 
 ## Wiring it in (when the design is approved)
 
-- [ ] Inject a `PassStore` in `PublitApp` and run `importLegacy` once for existing tickets.
-- [ ] Replace `TicketsView` in Settings with `PassWalletView`; route ticket deep links to `PassDetailView`.
-- [ ] Trip screens: show `passes(forTrip:at:)` with a "Show ticket" button that opens the pass or the code directly.
-- [ ] Live Activity and Siri "Show ticket" with the new store.
+- [x] Inject a `PassStore` in `PublitApp` and run `importLegacy` for existing tickets.
+- [x] Tickets tab with `PassWalletView`; ticket deep links open `PassDetailView` or the trip's tickets.
+- [x] Trip screens: `passes(forTrip:at:)` with "Show ticket" (one ticket with a code opens the code directly).
+- [x] Live Activity "Show ticket" with the new store.
+- [ ] Siri "Show ticket".
 - [ ] Share extension: "Share to Publit" from Mail and the Files app.
 - [ ] Remove `TicketStore`, `TicketsView`, `TicketCard`, `Features.tickets` after the migration release.
 - [ ] Test on a device: recognition of real tickets (ÖBB, DB, Deutschlandticket, KlimaTicket, Wiener Linien),

@@ -47,10 +47,26 @@ final class GroupingTests: XCTestCase {
         XCTAssertGreaterThan(rawKeys.count, 1, "fixture should reproduce the duplicate-station bug")
 
         let groups = StopGrouping.group(res.stopTimes, around: LatLon(lat: 48.1372, lon: 11.5755))
-        XCTAssertEqual(groups.filter { $0.name == "Marienplatz" }.count, 1)
-        XCTAssertEqual(Set(groups.map(\.name)).count, groups.count, "every station name appears once")
+        let stations = groups.filter { !$0.isPole }
+        XCTAssertEqual(stations.filter { $0.name == "Marienplatz" }.count, 1)
+        XCTAssertEqual(Set(stations.map(\.name)).count, stations.count, "every station name appears once")
         XCTAssertEqual(groups.first?.name, "Marienplatz", "nearest station first")
         XCTAssertEqual(groups.reduce(0) { $0 + $1.departures.count }, res.stopTimes.count, "no departure lost")
+        XCTAssertEqual(Set(groups.map(\.id)).count, groups.count, "unique IDs")
+    }
+
+    func testBusStopsOnEitherSideOfTheRoadStaySeparate() throws {
+        let res = try TransitousClient.makeDecoder()
+            .decode(StopTimesResponse.self, from: Fixtures.data("stoptimes_marienplatz"))
+        let groups = StopGrouping.group(res.stopTimes, around: nil)
+        // The bus stop at Marienplatz is its own board, at its own position, with its directions.
+        let bus = try XCTUnwrap(groups.first { $0.name == "Marienplatz" && $0.isPole })
+        XCTAssertTrue(bus.departures.allSatisfy { $0.mode == "BUS" })
+        XCTAssertFalse(bus.directions.isEmpty)
+        XCTAssertEqual(bus.id, bus.departures[0].place.stopId)
+        XCTAssertFalse(groups.first { $0.name == "Marienplatz" && !$0.isPole }!.departures.contains { $0.mode == "BUS" })
+        // Without separating, everything with the name is one board (the previous behaviour).
+        XCTAssertEqual(StopGrouping.group(res.stopTimes, around: nil, separatePoles: false).filter { $0.name == "Marienplatz" }.count, 1)
     }
 
     func testDeparturesInsideGroupAreChronological() throws {

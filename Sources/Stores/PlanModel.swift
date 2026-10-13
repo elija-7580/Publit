@@ -179,7 +179,7 @@ final class PlanModel {
     }
 }
 
-enum AppTab: Hashable { case nearby, plan, lines, favorites }
+enum AppTab: Hashable { case nearby, plan, lines, tickets, favorites }
 
 @MainActor
 @Observable
@@ -197,11 +197,15 @@ final class AppState {
     var deepLink: DeepLink?
     /// Nearby shows "Where to now?" results (also opened by Siri: "Take me home").
     var showGoNow = false
+    /// The first departure board is on screen (or could not load): the launch animation may end.
+    var firstBoardReady = false
 
     func open(_ url: URL) {
         guard let link = DeepLink(url: url) else { return }
-        if !Features.tickets, case .ticket = link { return }
-        if !Features.tickets, case .tripTickets = link { return }
+        if !Features.passes, case .ticket = link { return }
+        if !Features.passes, case .tripTickets = link { return }
+        // The default ticket link opens the Tickets tab.
+        if case .ticket(nil) = link { tab = .tickets; deepLink = nil; return }
         switch link {
         case .trip: tab = .plan
         case .stop: tab = .nearby

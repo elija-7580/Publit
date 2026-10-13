@@ -31,6 +31,8 @@ final class TransitousClient: @unchecked Sendable {
         let cfg = URLSessionConfiguration.default
         cfg.timeoutIntervalForRequest = 20
         cfg.requestCachePolicy = .reloadIgnoringLocalCacheData
+        // Responses are kept by `ResponseCache`; a second copy in URLCache would only cost memory and disk.
+        cfg.urlCache = nil
         session = URLSession(configuration: cfg)
         decoder = TransitousClient.makeDecoder()
     }
@@ -106,9 +108,11 @@ final class TransitousClient: @unchecked Sendable {
     }
 
     /// Fresh real-time state of a saved route (same vehicles, current delays and cancellations).
+    /// Without fares: they do not change, `TripStore.update` keeps the ones saved with the trip,
+    /// and the answer is smaller (this runs every minute or two for a Live Activity).
     func refresh(itineraryId: String) async throws -> Itinerary {
         try await get("/api/v6/refresh-itinerary", [URLQueryItem(name: "itineraryId", value: itineraryId),
-                                                                  URLQueryItem(name: "withFares", value: "true")], cache: .noStore)
+                                                                  URLQueryItem(name: "withFares", value: "false")], cache: .noStore)
     }
 
     /// Stops inside a map rectangle, for the interactive station map.
@@ -225,9 +229,7 @@ final class TransitousClient: @unchecked Sendable {
         let data: Data
         let status: Int
         do {
-            let (d, response) = try await session.data(for: req)
-            data = d
-            status = (response as? HTTPURLResponse)?.statusCode ?? 0
+            (data, status) = try await fetch(req)
         } catch {
             if Self.isOffline(error), let value: T = await offlineCopy(key, url: url, policy: policy) { return value }
             throw error
@@ -248,6 +250,34 @@ final class TransitousClient: @unchecked Sendable {
         cache.store(key, data: data, url: url.absoluteString, persist: policy.persist)
         await Connectivity.shared.reachedServer()
         return value
+    }
+
+    private let running = RequestCoalescer()
+
+    /// One download for identical requests that overlap (two screens or a quick reload asking for
+    /// the same board), and one retry for a dropped connection or a busy server.
+    private func fetch(_ req: URLRequest) async throws -> (Data, Int) {
+        let session = session
+        return try await running.run(req.url?.absoluteString ?? "") {
+            try await Self.withRetry {
+                let (d, response) = try await session.data(for: req)
+                return (d, (response as? HTTPURLResponse)?.statusCode ?? 0)
+            }
+        }
+    }
+
+    /// Tries once more after `delay` when the connection dropped or the server answered 502–504.
+    /// Not for timeouts: the user has waited long enough by then.
+    static func withRetry(delay: Duration = .milliseconds(800),
+                          _ op: @Sendable () async throws -> (Data, Int)) async throws -> (Data, Int) {
+        do {
+            let r = try await op()
+            guard [502, 503, 504].contains(r.1) else { return r }
+        } catch let e as URLError where e.code == .networkConnectionLost || e.code == .cannotConnectToHost {
+            // Fall through to the second attempt.
+        }
+        try await Task.sleep(for: delay)
+        return try await op()
     }
 
     /// Saved response for the same request (or the same slot, e.g. the last nearby board).
@@ -341,4 +371,43 @@ enum DateParsing {
         } ?? nil
     }
     static func format(_ d: Date) -> String { plain.string(from: d) }
+}
+
+/// Shares one running download among callers asking for the same URL at the same time.
+/// The download is cancelled only when every caller has given up on it.
+actor RequestCoalescer {
+    typealias Result = (Data, Int)
+    private var running: [String: (task: Task<Result, Error>, waiters: Int)] = [:]
+
+    func run(_ key: String, _ load: @escaping @Sendable () async throws -> Result) async throws -> Result {
+        let task: Task<Result, Error>
+        if let r = running[key] {
+            running[key]!.waiters += 1
+            task = r.task
+        } else {
+            task = Task { try await load() }
+            running[key] = (task, 1)
+        }
+        return try await withTaskCancellationHandler {
+            defer { leave(key, task) }
+            let value = try await task.value
+            try Task.checkCancellation()
+            return value
+        } onCancel: {
+            Task { await self.cancelIfAbandoned(key, task) }
+        }
+    }
+
+    private func leave(_ key: String, _ task: Task<Result, Error>) {
+        guard let r = running[key], r.task == task else { return }
+        if r.waiters <= 1 { running[key] = nil } else { running[key]!.waiters -= 1 }
+    }
+
+    /// A cancelled caller: if nobody else waits, stop the download.
+    private func cancelIfAbandoned(_ key: String, _ task: Task<Result, Error>) {
+        guard let r = running[key], r.task == task, r.waiters <= 1 else { return }
+        task.cancel()
+    }
+
+    var count: Int { running.count }
 }

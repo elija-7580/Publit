@@ -26,7 +26,9 @@ struct TripStatus: Equatable, Sendable {
         abs(reminderTime(new).timeIntervalSince(reminderTime(old))) >= 60 && new.startTime > now.addingTimeInterval(30)
     }
 
-    static func at(_ now: Date, _ it: Itinerary) -> TripStatus {
+    /// - Parameter countdown: "Leave in 6 min". Without it "Leave at 14:05", which stays true between
+    ///   updates (the Live Activity shows a running countdown next to it and is updated rarely).
+    static func at(_ now: Date, _ it: Itinerary, countdown: Bool = true) -> TripStatus {
         let tz = it.legs.first?.from.tz
         let transit = it.transitLegs
         func describe(_ leg: Leg) -> String {
@@ -54,7 +56,7 @@ struct TripStatus: Equatable, Sendable {
         }
         if now < it.startTime {
             let mins = Int(ceil(it.startTime.timeIntervalSince(now) / 60))
-            let head = mins <= 0 ? L10n.t("Leave now") : mins < 60 ? L10n.f("Leave in %lld min", mins)
+            let head = mins <= 0 ? L10n.t("Leave now") : (mins < 60 && countdown) ? L10n.f("Leave in %lld min", mins)
                 : L10n.f("Leave at %@", Fmt.time(it.startTime, tz: tz))
             let det = transit.first.map(describe) ?? L10n.f("Walk %@", Fmt.duration(seconds: it.duration))
             return TripStatus(phase: .beforeLeaving, nextEvent: it.startTime, headline: head, detail: det, delayMinutes: delay)
@@ -110,5 +112,29 @@ enum CalendarText {
 
     static func location(_ trip: SavedTrip) -> String {
         trip.itinerary.firstTransitLeg?.from.name ?? trip.fromName
+    }
+}
+
+/// How often the open app refreshes a running Live Activity. Each refresh is a network request
+/// and a lock-screen redraw, so they are spread out when nothing is about to happen: the
+/// countdown runs on the lock screen by itself.
+enum LiveRefresh {
+    /// Nothing running: look again in five minutes (a trip may need its Live Activity started).
+    static let idle: TimeInterval = 300
+
+    static func interval(start: Date, end: Date, nextEvent: Date, now: Date = .now) -> TimeInterval {
+        let toStart = start.timeIntervalSince(now)
+        if now >= end { return idle }
+        if toStart > 3600 { return 600 }
+        if toStart > 20 * 60 { return 180 }
+        if toStart > 0 { return 60 }
+        // Underway: a long ride with nothing to do for a while needs fewer checks.
+        return nextEvent.timeIntervalSince(now) > 10 * 60 ? 120 : 60
+    }
+
+    /// The soonest refresh any of the trips needs.
+    static func interval(_ trips: [Itinerary], now: Date = .now) -> TimeInterval {
+        trips.map { interval(start: $0.startTime, end: $0.endTime, nextEvent: TripStatus.at(now, $0).nextEvent, now: now) }
+            .min() ?? idle
     }
 }

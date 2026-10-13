@@ -48,6 +48,11 @@ final class LocationManager: NSObject, CLLocationManagerDelegate {
         }
     }
 
+    /// In the background nothing shows the location: GPS off until the app is open again.
+    func pause() {
+        manager.stopUpdatingLocation()
+    }
+
     nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let last = locations.last else { return }
         Task { @MainActor in

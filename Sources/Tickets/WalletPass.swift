@@ -102,8 +102,8 @@ enum WalletPassBuilder {
 
         var barcodes: [Barcode]?
         if let code = pass.barcode {
-            guard let message = code.walletMessage else { throw WalletPassError.unsupportedCode }
-            barcodes = [Barcode(format: code.format.walletFormat, message: message, messageEncoding: code.walletEncoding,
+            guard let message = code.walletMessage, let format = code.format.walletFormat else { throw WalletPassError.unsupportedCode }
+            barcodes = [Barcode(format: format, message: message, messageEncoding: code.walletEncoding,
                                 altText: pass.reference ?? code.altText)]
         }
 

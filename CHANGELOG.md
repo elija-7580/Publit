@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.5.0 (build 5)
+
+### New
+- Tickets tab: add a ticket from a PDF, photo, screenshot or paper scan. Publit reads it on the iPhone (nothing is uploaded), you check the details, and the code is ready for the gate at full brightness. Day, weekly and annual passes show up on every trip while they are valid; single tickets can belong to a trip ("Add ticket for this trip", "Show ticket" on route and trip screens, Live Activity button).
+- Operator logos on tickets: suggested for known operators from Wikimedia Commons (via Wikidata), or chosen from several suggestions, from Photos, or none. Only the operator name is sent.
+- Apple Wallet (optional, needs a Pass Type ID and the signing service): passes carry the operator logo and icon.
+- Codes stay as issued: QR, Aztec, PDF417 and Data Matrix are redrawn from the scanned symbol (same version, error correction and binary content), Code 128 from its content; EAN, UPC, ITF, Code 39/93 and Codabar are shown cut out of the original with their quiet zone. Redrawn codes use whole screen pixels per module, without smoothing.
+- Bus and tram stops on either side of the road are separate when you zoom in and on Nearby, each with its directions ("→ Moosach · Pasing"); departures and walking directions go to exactly that stop.
+- Stop screen: "Walk there" with the walking time to that stop (opens Apple Maps on foot) and a labelled "Route here".
+- Short launch animation while location and the first departures load underneath (skipped with Reduce Motion).
+
+### Faster and more reliable
+- Station pins stay where they are while zooming and panning: each station sits on its main platform instead of the average of whatever is loaded, and the area loaded is slightly larger than the screen. Station names hide instead of overlapping, and drop the city ("Karolinenplatz", not "München, Karolinenplatz").
+- Identical requests that overlap share one download; a dropped connection or a busy server (502–504) is retried once.
+- Live Activity: refreshed every 10 min when the trip is more than an hour away, every 3 min within the hour, every minute shortly before leaving and near the end of a ride, every 2 min on long rides. Unchanged content is not sent to the lock screen, the headline no longer holds a minute count that goes stale, and live refreshes skip the fare data.
+- GPS stops while Publit is in the background. No second response cache in memory or on disk.
+
+### CI
+- `docs/ci-workflow.yml`: faster workflow (cancels outdated runs, skips doc-only commits, boots the simulator during the build, UI tests on demand with `[ui]` or `[ui F14 F15]` in the commit message and nightly). It replaces `.github/workflows/ci.yml` once copied there (see `docs/ci.md`).
+
 ## 0.4.0 (build 4)
 
 ### New

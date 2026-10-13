@@ -169,6 +169,30 @@ final class MapStationTests: XCTestCase {
         XCTAssertTrue(marienplatz[0].isMajor)
         XCTAssertEqual(Set(stations.map(\.id)).count, stations.count, "unique IDs for map selection")
     }
+
+    func testPinsDoNotJumpWhenMorePlatformsLoad() throws {
+        let stops = try JSONDecoder().decode([MapStop].self, from: Fixtures.data("mapstops_marienplatz"))
+        let full = MapStation.group(stops)
+        // Zoomed out, the server leaves out minor platforms; panning loads them in another order.
+        let partial = MapStation.group(stops.filter { ($0.importance ?? 0) > 0.2 }.reversed())
+        for p in partial {
+            let f = try XCTUnwrap(full.first { $0.id == p.id }, "\(p.name) keeps its ID")
+            XCTAssertEqual(f.coordinate, p.coordinate, "\(p.name) keeps its position")
+        }
+        XCTAssertEqual(MapStation.group(stops.shuffled()).map(\.id).sorted(), full.map(\.id).sorted())
+    }
+
+    func testStreetStopsBecomeSeparatePinsWhenZoomedIn() throws {
+        let stops = try JSONDecoder().decode([MapStop].self, from: Fixtures.data("mapstops_marienplatz"))
+        let near = MapStation.group(stops, separatePoles: true)
+        let maxi = near.filter { $0.name == "Maximiliansplatz" }
+        XCTAssertEqual(maxi.count, 2, "one pin per side of the road")
+        XCTAssertTrue(maxi.allSatisfy(\.isPole))
+        XCTAssertEqual(Set(maxi.map(\.coordinate)).count, 2)
+        XCTAssertEqual(MapStation.group(stops).filter { $0.name == "Maximiliansplatz" }.count, 1, "one pin when zoomed out")
+        XCTAssertEqual(near.filter { $0.name == "Marienplatz" && !$0.isPole }.count, 1, "rail platforms stay one station")
+        XCTAssertEqual(Set(near.map(\.id)).count, near.count)
+    }
 }
 
 final class KnownShopTests: XCTestCase {
@@ -181,5 +205,12 @@ final class KnownShopTests: XCTestCase {
         XCTAssertEqual(sbahn?.url.host, "www.mvv-muenchen.de", "most specific entry beats plain DB")
         let bus = legs.first { $0.agencyName == "Nicht in MVV integriert" }.flatMap { TicketLinks.link(for: $0) }
         XCTAssertNil(bus)
+    }
+
+    func testMapLabelsDropTheCity() {
+        XCTAssertEqual(MapStation.shortName("München, Karolinenplatz"), "Karolinenplatz")
+        XCTAssertEqual(MapStation.shortName("Wien Hauptbahnhof"), "Wien Hauptbahnhof")
+        XCTAssertEqual(MapStation.shortName("Graz, Jakominiplatz"), "Jakominiplatz")
+        XCTAssertEqual(MapStation.shortName("A, B"), "A, B")
     }
 }

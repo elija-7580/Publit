@@ -44,15 +44,20 @@ enum TicketRecognizer {
 
     static func scan(imageData data: Data) async throws -> TicketScan {
         let image = try await Task.detached(priority: .userInitiated) { () throws -> CGImage in
-            guard let source = CGImageSourceCreateWithData(data as CFData, nil),
-                  let cg = CGImageSourceCreateThumbnailAtIndex(source, 0, [
-                    kCGImageSourceCreateThumbnailFromImageAlways: true,
-                    kCGImageSourceCreateThumbnailWithTransform: true,
-                    kCGImageSourceThumbnailMaxPixelSize: 3200,
-                  ] as CFDictionary) else { throw Failure.unreadable }
+            guard let cg = TicketRecognizer.loadImage(data) else { throw Failure.unreadable }
             return cg
         }.value
         return try await scan(image: image)
+    }
+
+    /// The image upright, as read for recognition (code regions refer to this orientation).
+    static func loadImage(_ data: Data, maxPixels: Int = 3200) -> CGImage? {
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil) else { return nil }
+        return CGImageSourceCreateThumbnailAtIndex(source, 0, [
+            kCGImageSourceCreateThumbnailFromImageAlways: true,
+            kCGImageSourceCreateThumbnailWithTransform: true,
+            kCGImageSourceThumbnailMaxPixelSize: maxPixels,
+        ] as CFDictionary)
     }
 
     static func scan(image: CGImage) async throws -> TicketScan {
@@ -60,7 +65,9 @@ enum TicketRecognizer {
             let trace = PerformanceTrace.begin("Recognise ticket")
             defer { PerformanceTrace.end(trace, "Recognise ticket") }
             let codes = VNDetectBarcodesRequest()
-            codes.symbologies = [.qr, .aztec, .pdf417, .code128]
+            codes.symbologies = [.qr, .aztec, .pdf417, .code128, .dataMatrix, .ean13, .ean8, .upce,
+                                 .code39, .code39Checksum, .code39FullASCII, .code39FullASCIIChecksum,
+                                 .code93, .code93i, .itf14, .i2of5, .i2of5Checksum, .codabar]
             let text = VNRecognizeTextRequest()
             text.recognitionLevel = .accurate
             // Names, numbers and codes: language correction changes more than it fixes.
@@ -102,15 +109,28 @@ enum TicketRecognizer {
         case .aztec: format = .aztec
         case .pdf417: format = .pdf417
         case .code128: format = .code128
+        case .dataMatrix: format = .dataMatrix
+        case .ean13: format = .ean13
+        case .ean8: format = .ean8
+        case .upce: format = .upce
+        case .code39, .code39Checksum, .code39FullASCII, .code39FullASCIIChecksum: format = .code39
+        case .code93, .code93i: format = .code93
+        case .itf14, .i2of5, .i2of5Checksum: format = .itf
+        case .codabar: format = .codabar
         default: return nil
         }
+        // Vision's box has its origin bottom left; the stored region top left.
+        let box = o.boundingBox
+        let region = TicketPass.Barcode.Region(x: Double(box.minX), y: Double(1 - box.maxY),
+                                               width: Double(box.width), height: Double(box.height))
         let descriptor = o.barcodeDescriptor.flatMap { try? NSKeyedArchiver.archivedData(withRootObject: $0, requiringSecureCoding: true) }
         let message = o.payloadStringValue
         // Raw bytes only when the text does not carry them exactly (binary rail ticket codes).
         var payload = o.payloadData
         if let message, let bytes = payload, Data(message.utf8) == bytes { payload = nil }
         guard message != nil || payload != nil || descriptor != nil else { return nil }
-        return TicketPass.Barcode(format: format, message: payload == nil ? message : nil, payload: payload, descriptor: descriptor)
+        return TicketPass.Barcode(format: format, message: payload == nil ? message : nil, payload: payload, descriptor: descriptor,
+                                  region: region)
     }
 
     /// Average of the clearly coloured pixels; nil for black-and-white tickets.

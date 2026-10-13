@@ -144,7 +144,7 @@ struct Itinerary: Codable, Identifiable, Sendable {
     let startTime: Date
     let endTime: Date
     let transfers: Int
-    let legs: [Leg]
+    var legs: [Leg]
     var fareTransfers: [FareTransfer]? = nil
 
     var transitLegs: [Leg] { legs.filter(\.isTransit) }

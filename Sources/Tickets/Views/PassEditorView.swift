@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// Check and adjust what was read from the ticket, with a live preview of the pass.
 struct PassEditorView: View {
@@ -17,6 +18,12 @@ struct PassEditorView: View {
     @State private var codeIndex: Int
     @State private var saving = false
     @State private var error: String?
+    /// The logo as PNG; written next to the documents on save.
+    @State private var logoData: Data?
+    @State private var logoCredit: String?
+    @State private var logoChanged = false
+    @State private var logoSuggested = false
+    @State private var choosingLogo = false
 
     init(mode: Mode, onFinish: (() -> Void)? = nil) {
         self.mode = mode
@@ -48,7 +55,7 @@ struct PassEditorView: View {
     var body: some View {
         Form {
             Section {
-                PassCardView(pass: pass)
+                PassCardView(pass: pass, logo: logoData.flatMap { UIImage(data: $0) }, codeSource: codeSource)
                     .padding(.vertical, 6)
                     .listRowInsets(EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12))
                     .listRowBackground(Color.clear)
@@ -92,6 +99,8 @@ struct PassEditorView: View {
 
             codeSection
 
+            logoSection
+
             Section(L10n.t("Look")) {
                 swatches
                 Picker(L10n.t("Symbol"), selection: $pass.symbol) {
@@ -124,6 +133,88 @@ struct PassEditorView: View {
             Text(verbatim: error ?? "")
         }
         .interactiveDismissDisabled(isNew)
+        .sheet(isPresented: $choosingLogo) {
+            NavigationStack {
+                LogoPickerView(operatorName: pass.operatorName ?? pass.title) { png, credit in
+                    logoData = png
+                    logoCredit = credit
+                    logoChanged = true
+                    logoSuggested = false
+                }
+            }
+        }
+        .task(id: pass.operatorName ?? "") { await loadLogo() }
+    }
+
+    private var codeSource: BarcodeSource? {
+        switch mode {
+        case .new(_, let document, let kind, let page, _, _):
+            guard let document, let kind else { return nil }
+            return .data(document, kind, page: page)
+        case .edit(let p):
+            guard let url = store.documentURL(p), let d = p.document else { return nil }
+            return .file(url, d.kind, page: d.page)
+        }
+    }
+
+    /// The saved logo when editing; for a new ticket of a known operator, its logo as a suggestion.
+    private func loadLogo() async {
+        guard !logoChanged else { return }
+        switch mode {
+        case .edit(let p):
+            if logoData == nil, let url = store.logoURL(p) {
+                logoData = try? Data(contentsOf: url)
+                logoCredit = p.logo?.source
+            }
+        case .new:
+            guard logoData == nil || logoSuggested else { return }
+            // While the operator is typed: wait for a pause.
+            try? await Task.sleep(for: .milliseconds(600))
+            guard !Task.isCancelled,
+                  let found = await LogoImages.suggestion(for: pass.operatorName), !Task.isCancelled, !logoChanged else { return }
+            logoData = found.png
+            logoCredit = found.credit
+            logoSuggested = true
+        }
+    }
+
+    @ViewBuilder
+    private var logoSection: some View {
+        Section {
+            Button { choosingLogo = true } label: {
+                HStack {
+                    Text("Logo").foregroundStyle(Color.primary)
+                    Spacer()
+                    if let data = logoData, let image = UIImage(data: data) {
+                        Image(uiImage: image).resizable().interpolation(.high).scaledToFit()
+                            .frame(maxWidth: 90, maxHeight: 28)
+                            .padding(.horizontal, 6).padding(.vertical, 3)
+                            .background(.white, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                            .overlay(RoundedRectangle(cornerRadius: 6, style: .continuous).stroke(Color.primary.opacity(0.12)))
+                    } else {
+                        Text("None").foregroundStyle(.secondary)
+                    }
+                    Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(.tertiary)
+                }
+            }
+            .accessibilityIdentifier("passLogo")
+            if logoData != nil {
+                Button(L10n.t("Remove logo"), role: .destructive) {
+                    logoData = nil
+                    logoCredit = nil
+                    logoChanged = true
+                    logoSuggested = false
+                }
+            }
+        } header: {
+            Text("Operator logo")
+        } footer: {
+            if logoSuggested {
+                Text("Suggested from Wikimedia Commons. Choose another if it is not the right one.")
+            } else if let logoCredit, !logoCredit.isEmpty {
+                Text(verbatim: logoCredit)
+            }
+        }
     }
 
     @ViewBuilder
@@ -149,7 +240,15 @@ struct PassEditorView: View {
         } header: {
             Text("Code")
         } footer: {
-            Text("Only codes that stay the same work here. Codes that change every few seconds only work in the operator's app.")
+            VStack(alignment: .leading, spacing: 6) {
+                if let code = pass.barcode, !code.format.canRedraw {
+                    Text("This code is shown exactly as on the original ticket.")
+                }
+                if let code = pass.barcode, code.format.walletFormat == nil {
+                    Text(verbatim: L10n.f("Apple Wallet cannot show %@ codes. Publit can.", code.format.title))
+                }
+                Text("Only codes that stay the same work here. Codes that change every few seconds only work in the operator's app.")
+            }
         }
     }
 
@@ -207,13 +306,15 @@ struct PassEditorView: View {
         switch mode {
         case .new(_, let document, let kind, let page, _, _):
             do {
-                try await store.add(pass, document: document, kind: kind, page: page)
+                let saved = try await store.add(pass, document: document, kind: kind, page: page)
+                if let logoData { store.setLogo(logoData, source: logoCredit, for: saved.id) }
                 finish()
             } catch {
                 self.error = error.localizedDescription
             }
         case .edit:
             store.update(pass)
+            if logoChanged { store.setLogo(logoData, source: logoCredit, for: pass.id) }
             finish()
         }
     }

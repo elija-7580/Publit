@@ -2,8 +2,8 @@ import Foundation
 import ActivityKit
 
 /// Starts, updates and ends the Live Activity of a saved trip.
-/// Updates happen whenever the app refreshes the trip (on open and every minute while visible);
-/// the countdown itself runs on the lock screen without updates.
+/// Updates happen when the app refreshes the trip (see `LiveRefresh`), and only when something
+/// visible changed; the countdown itself runs on the lock screen without updates.
 @MainActor
 enum LiveTripActivity {
     /// iOS keeps a Live Activity for up to 8 hours.
@@ -18,7 +18,7 @@ enum LiveTripActivity {
     static func isRunning(_ tripId: String) -> Bool { current(tripId) != nil }
 
     static func state(for trip: SavedTrip, now: Date = .now) -> TripActivityAttributes.ContentState {
-        let s = TripStatus.at(now, trip.itinerary)
+        let s = TripStatus.at(now, trip.itinerary, countdown: false)
         let leg = trip.itinerary.legs.first { $0.isTransit && $0.endTime > now } ?? trip.itinerary.firstTransitLeg
         return .init(phase: s.phase.rawValue, headline: s.headline, detail: s.detail, nextEvent: s.nextEvent,
                      delayMinutes: s.delayMinutes, arrival: trip.endTime, lineName: leg?.lineName,
@@ -49,13 +49,22 @@ enum LiveTripActivity {
         if now > trip.endTime.addingTimeInterval(10 * 60) {
             await a.end(content(trip, now: now), dismissalPolicy: .default)
         } else {
-            await a.update(content(trip, now: now))
+            let new = content(trip, now: now)
+            // Same text, times and colours: no redraw (it costs battery on the lock screen).
+            guard !same(a.content.state, new.state) else { return }
+            await a.update(new)
         }
     }
 
     static func end(_ tripId: String) async {
         guard let a = current(tripId) else { return }
         await a.end(nil, dismissalPolicy: .immediate)
+    }
+
+    static func same(_ a: TripActivityAttributes.ContentState, _ b: TripActivityAttributes.ContentState) -> Bool {
+        var b = b
+        b.updatedAt = a.updatedAt
+        return a == b
     }
 
     private static func content(_ trip: SavedTrip, now: Date) -> ActivityContent<TripActivityAttributes.ContentState> {

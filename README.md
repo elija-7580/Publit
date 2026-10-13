@@ -18,7 +18,7 @@ No ads, no account, no tracking.
 
 ## Status
 
-Early prototype. Not on the App Store yet. Every commit runs core tests on Linux plus build, unit and UI tests on an iOS simulator.
+Early prototype. Not on the App Store yet. Every commit runs core tests on Linux plus build and unit tests on an iOS simulator; UI tests with screenshots run on demand and nightly (see [docs/ci.md](docs/ci.md)).
 
 ## Features
 
@@ -38,7 +38,8 @@ Early prototype. Not on the App Store yet. Every commit runs core tests on Linux
 - **Widgets and Siri:** next departures on the home screen and through App Shortcuts.
 - **Offline:** last loaded departures and saved trips stay readable without a connection.
 - **15 languages:** English, German, French, Italian, Spanish, Portuguese (Portugal), Dutch, Polish, Ukrainian, Romanian, Czech, Swedish, Greek, Hungarian and Turkish.
-- **Saved:** stops, lines, places and trips stay on the device.
+- **Tickets:** add a ticket from a PDF, photo or screenshot; Publit reads it on the device, keeps the code exactly as issued and shows it full screen at the gate. Operator logos from Wikimedia Commons or your own image; optional Apple Wallet export. Passes appear on every trip while valid. See [docs/tickets.md](docs/tickets.md).
+- **Saved:** stops, lines, places, trips and tickets stay on the device.
 
 ## Coverage
 
@@ -84,7 +85,7 @@ Publit is an independent project and does not use code, assets or data from othe
 
 ## Roadmap
 
-- Tickets as passes: add a PDF, photo or screenshot, Publit reads it on the device, you check the details, the code is ready for the gate. Built in `Sources/Tickets` with tests and demo screens, not wired into the app yet. See [docs/tickets.md](docs/tickets.md). The first ticket version stays switched off (`Features.tickets`).
+- Tickets: share extension ("Share to Publit" from Mail and Files), Siri "Show ticket", tests with real tickets at gates
 - Live Activity updates via push while the app is closed
 - Performance profiling on physical devices (Instruments)
 - Native-speaker review of all translations

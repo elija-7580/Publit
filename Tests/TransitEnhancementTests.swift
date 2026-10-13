@@ -182,12 +182,12 @@ final class TransitEnhancementTests: XCTestCase {
             }
             return groups
         }
-        let old = legacy(); let new = StopGrouping.group(input, around: nil)
+        let old = legacy(); let new = StopGrouping.group(input, around: nil, separatePoles: false)
         XCTAssertEqual(old.map(\.id), new.map(\.id)); XCTAssertEqual(old.map { $0.departures.count }, new.map { $0.departures.count })
         func timing(_ work: () -> Void) -> Double {
             let begin = Date(); for _ in 0..<5 { work() }; return Date().timeIntervalSince(begin) * 1000 / 5
         }
-        let oldMS = timing { _ = legacy() }; let newMS = timing { _ = StopGrouping.group(input, around: nil) }
+        let oldMS = timing { _ = legacy() }; let newMS = timing { _ = StopGrouping.group(input, around: nil, separatePoles: false) }
         print(String(format: "PERF grouping records=%d legacy_ms=%.3f indexed_ms=%.3f ratio=%.2f", input.count, oldMS, newMS, oldMS / max(newMS, 0.001)))
     }
 }

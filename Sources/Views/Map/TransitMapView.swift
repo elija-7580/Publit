@@ -290,10 +290,12 @@ extension UIColor {
     }
 }
 
-/// Round mode icon; major stations also show their name.
+/// Round mode icon; major stations also show their name. The label is part of the view's frame,
+/// so MapKit hides overlapping names instead of drawing them on top of each other.
 final class StationPinView: MKAnnotationView {
     static let reuseId = "station"
     private static var cache: [String: UIImage] = [:]
+    private let iconView = UIImageView()
     private let label = UILabel()
 
     override init(annotation: MKAnnotation?, reuseIdentifier: String?) {
@@ -301,24 +303,45 @@ final class StationPinView: MKAnnotationView {
         collisionMode = .circle
         label.font = .systemFont(ofSize: 11, weight: .semibold)
         label.textColor = .label
+        label.textAlignment = .center
+        label.lineBreakMode = .byTruncatingTail
         label.layer.shadowColor = UIColor.systemBackground.cgColor
         label.layer.shadowRadius = 2
         label.layer.shadowOpacity = 1
         label.layer.shadowOffset = .zero
+        addSubview(iconView)
         addSubview(label)
     }
 
     required init?(coder: NSCoder) { fatalError("not used") }
 
     func show(_ s: MapStation) {
-        let size: CGFloat = s.isMajor ? 24 : 18
-        image = Self.icon(mode: s.mainMode, size: size)
+        let size: CGFloat = s.isMajor ? 24 : (s.isPole ? 16 : 18)
+        image = nil
+        iconView.image = Self.icon(mode: s.mainMode, size: size)
         displayPriority = s.isMajor ? .defaultHigh : .defaultLow
         zPriority = s.isMajor ? .init(rawValue: 400) : .init(rawValue: 300)
         accessibilityLabel = s.name
-        label.text = s.isMajor ? s.name : nil
-        label.sizeToFit()
-        label.frame.origin = CGPoint(x: (size - label.frame.width) / 2, y: size + 1)
+        if s.isMajor {
+            label.isHidden = false
+            label.text = MapStation.shortName(s.name)
+            let text = label.sizeThatFits(CGSize(width: 130, height: 20))
+            let w = max(size, min(130, ceil(text.width)))
+            let h = size + 1 + ceil(text.height)
+            frame.size = CGSize(width: w, height: h)
+            iconView.frame = CGRect(x: (w - size) / 2, y: 0, width: size, height: size)
+            label.frame = CGRect(x: 0, y: size + 1, width: w, height: ceil(text.height))
+            // Keep the icon (not the whole block) on the coordinate.
+            centerOffset = CGPoint(x: 0, y: h / 2 - size / 2)
+            collisionMode = .rectangle
+        } else {
+            label.isHidden = true
+            label.text = nil
+            frame.size = CGSize(width: size, height: size)
+            iconView.frame = CGRect(x: 0, y: 0, width: size, height: size)
+            centerOffset = .zero
+            collisionMode = .circle
+        }
     }
 
     static func icon(mode: String, size: CGFloat) -> UIImage {

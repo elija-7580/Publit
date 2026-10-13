@@ -9,25 +9,28 @@ enum KnownOperators {
         let color: String
         let symbol: TicketPass.Symbol
         let uicCode: String?
+        /// Wikidata item, for the logo (Wikimedia Commons) and the website.
+        var wikidata: String? = nil
+        var domain: String? = nil
     }
 
     static let all: [Operator] = [
-        Operator(name: "ÖBB", patterns: ["ÖBB", "OEBB", "Österreichische Bundesbahnen", "oebb.at"], color: "D70015", symbol: .train, uicCode: "1181"),
-        Operator(name: "Deutsche Bahn", patterns: ["Deutsche Bahn", "DB Fernverkehr", "DB Regio", "DB Navigator", "bahn.de"], color: "EC0016", symbol: .train, uicCode: "1080"),
-        Operator(name: "SBB", patterns: ["SBB CFF FFS", "SBB", "sbb.ch"], color: "D70015", symbol: .train, uicCode: "1185"),
-        Operator(name: "WESTbahn", patterns: ["WESTbahn"], color: "00578A", symbol: .train, uicCode: nil),
-        Operator(name: "Wiener Linien", patterns: ["Wiener Linien", "wienerlinien"], color: "D70015", symbol: .metro, uicCode: nil),
-        Operator(name: "MVV", patterns: ["MVV", "Münchner Verkehrs"], color: "0065AE", symbol: .metro, uicCode: nil),
-        Operator(name: "BVG", patterns: ["BVG", "Berliner Verkehrsbetriebe"], color: "F0D722", symbol: .metro, uicCode: nil),
-        Operator(name: "Trenitalia", patterns: ["Trenitalia"], color: "C8102E", symbol: .train, uicCode: "1183"),
-        Operator(name: "SNCF", patterns: ["SNCF", "TGV INOUI", "OUIGO"], color: "8C1D5A", symbol: .train, uicCode: "1187"),
-        Operator(name: "NS", patterns: ["NS International", "Nederlandse Spoorwegen"], color: "FFC917", symbol: .train, uicCode: "1184"),
-        Operator(name: "SNCB", patterns: ["SNCB", "NMBS"], color: "0069B4", symbol: .train, uicCode: "1188"),
-        Operator(name: "CFL", patterns: ["CFL", "Chemins de fer luxembourgeois"], color: "B5121B", symbol: .train, uicCode: "1182"),
-        Operator(name: "ČD", patterns: ["České dráhy", "Ceske drahy", "ČD"], color: "0B4EA2", symbol: .train, uicCode: "1154"),
-        Operator(name: "Renfe", patterns: ["Renfe"], color: "6C2C91", symbol: .train, uicCode: "1071"),
-        Operator(name: "RegioJet", patterns: ["RegioJet"], color: "FECB00", symbol: .train, uicCode: nil),
-        Operator(name: "FlixBus", patterns: ["FlixBus", "FlixTrain"], color: "73D700", symbol: .bus, uicCode: nil),
+        Operator(name: "ÖBB", patterns: ["ÖBB", "OEBB", "Österreichische Bundesbahnen", "oebb.at"], color: "D70015", symbol: .train, uicCode: "1181", wikidata: "Q83822", domain: "oebb.at"),
+        Operator(name: "Deutsche Bahn", patterns: ["Deutsche Bahn", "DB Fernverkehr", "DB Regio", "DB Navigator", "bahn.de"], color: "EC0016", symbol: .train, uicCode: "1080", wikidata: "Q9322", domain: "bahn.de"),
+        Operator(name: "SBB", patterns: ["SBB CFF FFS", "SBB", "sbb.ch"], color: "D70015", symbol: .train, uicCode: "1185", wikidata: "Q83835", domain: "sbb.ch"),
+        Operator(name: "WESTbahn", patterns: ["WESTbahn"], color: "00578A", symbol: .train, uicCode: nil, wikidata: "Q266280", domain: "westbahn.at"),
+        Operator(name: "Wiener Linien", patterns: ["Wiener Linien", "wienerlinien"], color: "D70015", symbol: .metro, uicCode: nil, wikidata: "Q668849", domain: "wienerlinien.at"),
+        Operator(name: "MVV", patterns: ["MVV", "Münchner Verkehrs"], color: "0065AE", symbol: .metro, uicCode: nil, wikidata: "Q259000", domain: "mvv-muenchen.de"),
+        Operator(name: "BVG", patterns: ["BVG", "Berliner Verkehrsbetriebe"], color: "F0D722", symbol: .metro, uicCode: nil, wikidata: "Q99633", domain: "bvg.de"),
+        Operator(name: "Trenitalia", patterns: ["Trenitalia"], color: "C8102E", symbol: .train, uicCode: "1183", wikidata: "Q286650", domain: "trenitalia.com"),
+        Operator(name: "SNCF", patterns: ["SNCF", "TGV INOUI", "OUIGO"], color: "8C1D5A", symbol: .train, uicCode: "1187", wikidata: "Q13646", domain: "sncf-connect.com"),
+        Operator(name: "NS", patterns: ["NS International", "Nederlandse Spoorwegen"], color: "FFC917", symbol: .train, uicCode: "1184", wikidata: "Q23076", domain: "ns.nl"),
+        Operator(name: "SNCB", patterns: ["SNCB", "NMBS"], color: "0069B4", symbol: .train, uicCode: "1188", wikidata: "Q524255", domain: "belgiantrain.be"),
+        Operator(name: "CFL", patterns: ["CFL", "Chemins de fer luxembourgeois"], color: "B5121B", symbol: .train, uicCode: "1182", wikidata: "Q525359", domain: "cfl.lu"),
+        Operator(name: "ČD", patterns: ["České dráhy", "Ceske drahy", "ČD"], color: "0B4EA2", symbol: .train, uicCode: "1154", wikidata: "Q304944", domain: "cd.cz"),
+        Operator(name: "Renfe", patterns: ["Renfe"], color: "6C2C91", symbol: .train, uicCode: "1071", wikidata: "Q2476154", domain: "renfe.com"),
+        Operator(name: "RegioJet", patterns: ["RegioJet"], color: "FECB00", symbol: .train, uicCode: nil, wikidata: "Q221186", domain: "regiojet.com"),
+        Operator(name: "FlixBus", patterns: ["FlixBus", "FlixTrain"], color: "73D700", symbol: .bus, uicCode: nil, wikidata: "Q1881378", domain: "flixbus.com"),
     ]
 
     static func find(_ name: String) -> Operator? {

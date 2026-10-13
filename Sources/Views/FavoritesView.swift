@@ -58,7 +58,7 @@ struct FavoritesView: View {
                 Section("Stops") {
                     ForEach(favorites.stops) { s in
                         NavigationLink {
-                            StopDeparturesView(stopId: s.stopId ?? s.id, name: s.name, coordinate: s.coordinate)
+                            StopDeparturesView(stopId: s.stopId ?? s.id, name: s.name, coordinate: s.coordinate, exact: s.exact == true)
                         } label: {
                             PlaceLabel(name: s.name, subtitle: s.subtitle, isStop: true)
                         }

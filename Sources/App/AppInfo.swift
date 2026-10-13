@@ -4,11 +4,13 @@ import Foundation
 enum Features {
     /// Stored tickets, ticket apps and "Buy ticket" links. Off until the ticket screen is redesigned.
     static let tickets = false
+    /// Tickets as passes (Tickets tab, trip tickets, Wallet). Replaces `tickets`.
+    static let passes = true
 }
 
 enum AppInfo {
     static var version: String {
-        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.4.0"
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.5.0"
     }
 
     /// Contact required by the Transitous usage policy. Set `PublitContact` in project.yml.

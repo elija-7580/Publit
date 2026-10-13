@@ -108,9 +108,21 @@ final class TripStore {
     /// Replace the stored route with a fresh real-time version.
     func update(_ id: String, with itinerary: Itinerary, at date: Date = .now) {
         guard let i = trips.firstIndex(where: { $0.id == id }) else { return }
-        trips[i].itinerary = itinerary
+        trips[i].itinerary = Self.keepingFares(of: trips[i].itinerary, in: itinerary)
         trips[i].refreshedAt = date
         persist()
+    }
+
+    /// Live refreshes come without fares (smaller answers); the fares saved with the trip stay.
+    nonisolated static func keepingFares(of old: Itinerary, in new: Itinerary) -> Itinerary {
+        guard new.fareTransfers == nil, old.fareTransfers != nil, old.legs.count == new.legs.count else { return new }
+        var fresh = new
+        fresh.fareTransfers = old.fareTransfers
+        for j in fresh.legs.indices {
+            fresh.legs[j].fareTransferIndex = old.legs[j].fareTransferIndex
+            fresh.legs[j].effectiveFareLegIndex = old.legs[j].effectiveFareLegIndex
+        }
+        return fresh
     }
 
     /// Same vehicles from the same stops on the same scheduled times.

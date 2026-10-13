@@ -8,6 +8,7 @@ struct PublitApp: App {
     @State private var favorites = FavoritesStore()
     @State private var trips = TripStore()
     @State private var tickets = TicketStore()
+    @State private var passes = PassStore()
     @State private var history = SearchHistoryStore.shared
 
     init() {
@@ -34,15 +35,19 @@ struct PublitApp: App {
                 .environment(favorites)
                 .environment(trips)
                 .environment(tickets)
+                .environment(passes)
                 .environment(history)
                 .tint(Color.appAccent)
                 .onOpenURL { app.open($0) }
                 .onAppear {
                     app.applyDemo(ProcessInfo.processInfo.environment["PUBLIT_DEMO"])
                     if let tab = ProcessInfo.processInfo.environment["PUBLIT_TAB"] {
-                        app.tab = tab == "plan" ? .plan : tab == "saved" ? .favorites : tab == "lines" ? .lines : .nearby
+                        app.tab = tab == "plan" ? .plan : tab == "saved" ? .favorites : tab == "lines" ? .lines
+                            : tab == "tickets" ? .tickets : .nearby
                     }
                     location.start()
+                    // Tickets of the first ticket version become passes (once per ticket).
+                    passes.importLegacy(tickets.tickets, imageDirectory: tickets.imageDirectory)
                     NotificationRouter.shared.open = { [app] url in app.open(url) }
                     IntentBridge.connect { [app] url in app.open(url) }
                     PublitShortcuts.updateAppShortcutParameters()
@@ -60,12 +65,38 @@ struct PublitApp: App {
 struct RootView: View {
     @Environment(AppState.self) private var app
     @Environment(TripStore.self) private var trips
-    @Environment(TicketStore.self) private var tickets
+    @Environment(PassStore.self) private var passes
     @Environment(FavoritesStore.self) private var favorites
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(LocationManager.self) private var location
+    /// The launch animation, while the first departures load underneath.
+    @State private var splash = true
 
     var body: some View {
+        tabs
+            .overlay {
+                if splash {
+                    LaunchSplash()
+                        .allowsHitTesting(false)
+                        .transition(.opacity)
+                }
+            }
+            .task { await endSplash() }
+    }
+
+    /// At least 0.7 s (the animation), at most 2 s, ended earlier by the first board.
+    private func endSplash() async {
+        let start = Date()
+        try? await Task.sleep(for: .milliseconds(700))
+        while !app.firstBoardReady, app.tab == .nearby, Date().timeIntervalSince(start) < 2 {
+            try? await Task.sleep(for: .milliseconds(100))
+        }
+        withAnimation(.easeOut(duration: 0.3)) { splash = false }
+    }
+
+    @ViewBuilder
+    private var tabs: some View {
         @Bindable var app = app
         TabView(selection: $app.tab) {
             NavigationStack { NearbyView() }
@@ -77,6 +108,9 @@ struct RootView: View {
             NavigationStack { LinesView() }
                 .tabItem { Label("Lines", systemImage: "point.topleft.down.to.point.bottomright.curvepath") }
                 .tag(AppTab.lines)
+            NavigationStack { PassWalletView() }
+                .tabItem { Label("Tickets", systemImage: "ticket") }
+                .tag(AppTab.tickets)
             NavigationStack { FavoritesView() }
                 .tabItem { Label("Saved", systemImage: "star") }
                 .tag(AppTab.favorites)
@@ -89,9 +123,23 @@ struct RootView: View {
                     }
             }
         }
-        .fullScreenCover(item: ticketLink) { link in
-            TicketDisplayView(tickets: ticketsFor(link))
-                .dynamicTypeSize(dynamicTypeSize)
+        .sheet(item: ticketLink) { link in
+            NavigationStack {
+                Group {
+                    switch link {
+                    case .ticket(let id?):
+                        if let pass = passes.pass(linkedTo: id) { PassDetailView(passId: pass.id) } else { TripPassesView() }
+                    case .tripTickets(let tripId):
+                        TripPassesView(tripId: tripId, at: trips.trip(tripId)?.startTime ?? .now)
+                    default:
+                        TripPassesView()
+                    }
+                }
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) { Button("Done") { app.deepLink = nil } }
+                }
+            }
+            .dynamicTypeSize(dynamicTypeSize)
         }
         .sheet(item: stopLink) { stop in
             NavigationStack {
@@ -111,13 +159,17 @@ struct RootView: View {
             }
         }
         .task(id: scenePhase) {
-            if scenePhase == .background { LineAlertMonitor.scheduleBackgroundCheck() }
+            if scenePhase == .background {
+                LineAlertMonitor.scheduleBackgroundCheck()
+                location.pause()
+            }
             // Keep running Live Activities current while the app is open.
             guard scenePhase == .active else { return }
+            location.start()
             await LineAlertMonitor.check()
             while !Task.isCancelled {
-                await refreshLiveTrips()
-                try? await Task.sleep(for: .seconds(60))
+                let wait = await refreshLiveTrips()
+                try? await Task.sleep(for: .seconds(wait))
             }
         }
     }
@@ -147,22 +199,14 @@ struct RootView: View {
     private var ticketLink: Binding<DeepLink?> {
         Binding(get: {
             switch app.deepLink {
-            case .ticket, .tripTickets: return Features.tickets ? app.deepLink : nil
+            case .ticket, .tripTickets: return Features.passes ? app.deepLink : nil
             default: return nil
             }
         }, set: { if $0 == nil { app.deepLink = nil } })
     }
 
-    private func ticketsFor(_ link: DeepLink) -> [Ticket] {
-        switch link {
-        case .ticket(let id?): return tickets.ticket(id).map { [$0] } ?? tickets.tickets(forTrip: nil)
-        case .ticket(nil): return tickets.tickets(forTrip: nil)
-        case .tripTickets(let tripId): return tickets.tickets(forTrip: tripId)
-        case .trip, .stop, .go: return []
-        }
-    }
-
-    private func refreshLiveTrips() async {
+    /// Refreshes the trips with a running Live Activity; returns the seconds until the next refresh.
+    private func refreshLiveTrips() async -> TimeInterval {
         let now = Date()
         for trip in trips.upcoming(now: now.addingTimeInterval(-15 * 60)) where LiveTripActivity.isRunning(trip.id) || trips.activeTripId == trip.id {
             if let fresh = try? await TripRefreshCoordinator.shared.refresh(trip.itinerary.id) {
@@ -177,8 +221,10 @@ struct RootView: View {
         // Trips with a leave reminder that start within 8 hours get their Live Activity now.
         for trip in trips.upcoming(now: now) where !LiveTripActivity.isRunning(trip.id) {
             if trips.wantsLiveActivity(trip.id), trip.startTime.timeIntervalSince(now) < LiveTripActivity.maxLead {
-                LiveTripActivity.start(trip, hasTicket: Features.tickets && !tickets.tickets(forTrip: trip.id).isEmpty)
+                LiveTripActivity.start(trip, hasTicket: !passes.passes(forTrip: trip.id, at: trip.startTime).isEmpty)
             }
         }
+        let live = trips.upcoming(now: Date().addingTimeInterval(-15 * 60)).filter { LiveTripActivity.isRunning($0.id) || trips.activeTripId == $0.id }
+        return LiveRefresh.interval(live.map(\.itinerary))
     }
 }

@@ -53,7 +53,7 @@ struct TripView: View {
         .navigationTitle(stopTime.lineName)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            if Features.tickets { ToolbarItem(placement: .topBarTrailing) { ShowTicketButton() } }
+            if Features.passes { ToolbarItem(placement: .topBarTrailing) { ShowPassButton(at: stopTime.departureTime) } }
             ToolbarItem(placement: .topBarTrailing) {
                 Button { favorites.toggle(savedLine) } label: {
                     Label(favorites.containsLine(savedLine.id) ? L10n.t("Saved line") : L10n.t("Save line"),

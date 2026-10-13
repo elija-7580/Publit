@@ -28,6 +28,7 @@ struct CompareMapView: View {
 }
 
 struct ItineraryDetailView: View {
+    @Environment(TripStore.self) private var trips
     let itinerary: Itinerary
     var fromName: String = ""
     var toName: String = ""
@@ -100,7 +101,7 @@ struct ItineraryDetailView: View {
         .navigationTitle("Route")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            if Features.tickets { ToolbarItem(placement: .topBarTrailing) { ShowTicketButton() } }
+            if Features.passes { ToolbarItem(placement: .topBarTrailing) { ShowPassButton(tripId: trips.saved(itinerary)?.id, at: itinerary.startTime) } }
         }
     }
 }

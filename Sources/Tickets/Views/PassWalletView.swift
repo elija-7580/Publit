@@ -66,7 +66,7 @@ struct PassWalletView: View {
     private func cards(_ passes: [TicketPass]) -> some View {
         ForEach(passes) { pass in
             NavigationLink(value: PassRoute(id: pass.id)) {
-                PassCardView(pass: pass, compact: true, now: now)
+                PassCardView(pass: pass, compact: true, now: now, logo: PassLogoCache.image(pass, store: store))
             }
             .buttonStyle(.plain)
             .accessibilityElement(children: .ignore)

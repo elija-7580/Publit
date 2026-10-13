@@ -7,6 +7,10 @@ struct PassCardView: View {
     let pass: TicketPass
     var compact = false
     var now: Date = .now
+    /// Operator logo, shown on a white plate instead of the symbol.
+    var logo: UIImage? = nil
+    /// The original, for codes shown cut out of it.
+    var codeSource: BarcodeSource? = nil
     var onCodeTap: (() -> Void)? = nil
 
     @Environment(\.dynamicTypeSize) private var typeSize
@@ -52,11 +56,20 @@ struct PassCardView: View {
         let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 10)) : AnyLayout(HStackLayout(alignment: .center, spacing: 12))
         return layout {
             HStack(spacing: 12) {
-                Image(systemName: pass.symbol.systemImage)
-                    .font(.headline)
-                    .frame(width: 38, height: 38)
-                    .background(foreground.opacity(0.14), in: Circle())
-                    .accessibilityHidden(true)
+                if let logo {
+                    Image(uiImage: logo)
+                        .resizable().interpolation(.high).scaledToFit()
+                        .frame(maxWidth: 84, maxHeight: 30)
+                        .padding(.horizontal, 6).padding(.vertical, 4)
+                        .background(.white, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                        .accessibilityHidden(true)
+                } else {
+                    Image(systemName: pass.symbol.systemImage)
+                        .font(.headline)
+                        .frame(width: 38, height: 38)
+                        .background(foreground.opacity(0.14), in: Circle())
+                        .accessibilityHidden(true)
+                }
                 VStack(alignment: .leading, spacing: 2) {
                     if let op = pass.operatorName {
                         Text(verbatim: op).font(.caption.weight(.semibold)).textCase(.uppercase).foregroundStyle(label)
@@ -127,7 +140,7 @@ struct PassCardView: View {
     /// A disabled button dims its label, so the preview shows the code without a button.
     @ViewBuilder
     private func codeButton(_ code: TicketPass.Barcode) -> some View {
-        let image = BarcodeView(code: code)
+        let image = BarcodeView(code: code, source: codeSource)
             .frame(maxWidth: code.format.isSquare ? 230 : .infinity)
             .frame(height: code.format.isSquare ? 230 : 120)
             .padding(14)
@@ -219,29 +232,61 @@ private struct Perforation: Shape {
     }
 }
 
-/// Renders the code away from the main thread; it never blocks scrolling.
+/// Renders the code away from the main thread; it never blocks scrolling. Redrawn codes are
+/// shown at their own pixel size (whole pixels per module, no smoothing); codes cut out of the
+/// original are scaled to fit.
 struct BarcodeView: View {
     let code: TicketPass.Barcode
-    @State private var image: UIImage?
+    var source: BarcodeSource? = nil
+    @Environment(\.displayScale) private var displayScale
+    @State private var rendered: BarcodeRenderer.Rendered?
     @State private var failed = false
 
+    private struct Key: Hashable {
+        let code: TicketPass.Barcode
+        let width: Int, height: Int
+    }
+
     var body: some View {
-        Group {
-            if let image {
-                Image(uiImage: image).interpolation(.none).resizable().scaledToFit()
-            } else if failed {
-                Image(systemName: "exclamationmark.triangle").foregroundStyle(.secondary)
-            } else {
-                ProgressView()
+        GeometryReader { geo in
+            Group {
+                if let rendered {
+                    if rendered.exact {
+                        Image(uiImage: rendered.image).interpolation(.none)
+                    } else {
+                        Image(uiImage: rendered.image).resizable().interpolation(.high).scaledToFit()
+                    }
+                } else if failed {
+                    Image(systemName: "exclamationmark.triangle").foregroundStyle(.secondary)
+                } else {
+                    ProgressView()
+                }
+            }
+            .frame(width: geo.size.width, height: geo.size.height)
+            .task(id: Key(code: code, width: Int(geo.size.width), height: Int(geo.size.height))) {
+                guard geo.size.width > 1, geo.size.height > 1 else { return }
+                let (code, size, scale, source) = (code, geo.size, displayScale, source)
+                let result = await Task.detached(priority: .userInitiated) {
+                    BarcodeRenderer.render(code, fitting: size, scale: scale, source: source)
+                }.value
+                guard !Task.isCancelled else { return }
+                rendered = result
+                failed = result == nil
             }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .task(id: code) {
-            let code = code
-            let rendered = await Task.detached(priority: .userInitiated) { BarcodeRenderer.image(code) }.value
-            guard !Task.isCancelled else { return }
-            image = rendered
-            failed = rendered == nil
-        }
+    }
+}
+
+/// Operator logos of saved passes, read once per file.
+@MainActor
+enum PassLogoCache {
+    private static let cache = NSCache<NSString, UIImage>()
+
+    static func image(_ pass: TicketPass, store: PassStore) -> UIImage? {
+        guard let logo = pass.logo, let url = store.logoURL(pass) else { return nil }
+        if let hit = cache.object(forKey: logo.file as NSString) { return hit }
+        guard let image = UIImage(contentsOfFile: url.path) else { return nil }
+        cache.setObject(image, forKey: logo.file as NSString)
+        return image
     }
 }

@@ -10,6 +10,8 @@ struct SavedPlace: Codable, Hashable, Identifiable {
     var lon: Double
     var stopId: String?
     var role: PlaceRole?
+    /// One street stop only (one side of the road), not the whole station.
+    var exact: Bool? = nil
 
     var isStop: Bool { stopId != nil }
 
@@ -19,6 +21,8 @@ struct SavedPlace: Codable, Hashable, Identifiable {
         if id == other.id { return true }
         guard isStop, other.isStop else { return false }
         if stopId == other.stopId { return true }
+        // The stop across the road has the same name but other departures.
+        if exact == true || other.exact == true { return false }
         return StopGrouping.normalizedName(name) == StopGrouping.normalizedName(other.name)
             && coordinate.distance(to: other.coordinate) < StopGrouping.mergeRadius
     }

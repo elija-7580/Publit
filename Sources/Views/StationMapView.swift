@@ -75,10 +75,12 @@ final class TransitMapModel {
             return
         }
         stationsHidden = false
-        let (lo, hi) = Self.box(r, grow: 0)
+        // A margin around the screen: stations at the edge have all their platforms, so their pins stay put.
+        let (lo, hi) = Self.box(r, grow: 0.15)
         let zoom = Self.zoom(r)
+        let separate = r.span.latitudeDelta <= MapStation.poleSpan
         guard let stops = try? await TransitousClient.shared.mapStops(min: lo, max: hi, zoom: zoom) else { return }
-        let grouped = await Task.detached(priority: .userInitiated) { MapStation.group(stops) }.value
+        let grouped = await Task.detached(priority: .userInitiated) { MapStation.group(stops, separatePoles: separate) }.value
         guard !Task.isCancelled else { return }
         allStations = grouped
         bumpStations()
@@ -275,7 +277,7 @@ struct MapSelectionView: View {
     var body: some View {
         switch selection {
         case .station(let s):
-            StopDeparturesView(stopId: s.id, name: s.name, coordinate: s.coordinate)
+            StopDeparturesView(stopId: s.id, name: s.name, coordinate: s.coordinate, exact: s.isPole)
         case .vehicle(let v):
             VehicleTripView(vehicle: v)
         case .rentalStation(let s, let provider):

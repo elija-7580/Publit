@@ -312,9 +312,16 @@ final class PublitUITests: XCTestCase {
         XCTAssertTrue(save.exists, "Save trip missing")
         save.tap()
         XCTAssertTrue(app.collectionViews.buttons["Saved"].waitForExistence(timeout: 5))
-        // Tickets are switched off for now (Features.tickets): no ticket section on the route.
-        XCTAssertFalse(app.buttons["Add ticket for this trip"].exists)
         snap("tripactions")
+        // Tickets for the trip: the add flow opens with the trip attached.
+        let addTicket = app.buttons["addTripTicket"]
+        for _ in 0..<4 where !addTicket.isHittable { app.swipeUp() }
+        XCTAssertTrue(addTicket.exists, "no ticket section on the route")
+        addTicket.tap()
+        XCTAssertTrue(app.buttons["importFile"].waitForExistence(timeout: 5), "add ticket did not open")
+        snap("trip-add-ticket")
+        app.buttons["Cancel"].firstMatch.tap()
+        sleep(1)
         app.navigationBars["Route"].buttons.firstMatch.tap()
         app.buttons["Clear destination"].tap()
         let row = app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS 'Flughafen München'")).firstMatch
@@ -423,8 +430,34 @@ final class PublitUITests: XCTestCase {
         XCTAssertTrue(routes.firstMatch.waitForExistence(timeout: timeout))
         sleep(1)
         snap("plan-sorted")
-        // Back to the default order for the next run.
-        sort.tap()
-        if plan.buttons["Departure"].firstMatch.waitForExistence(timeout: 5) { plan.buttons["Departure"].firstMatch.tap() }
+        // Back to the default order for the next run (not part of the check: the menu may still be closing).
+        sleep(1)
+        if sort.isHittable {
+            sort.tap()
+            if plan.buttons["Departure"].firstMatch.waitForExistence(timeout: 5) { plan.buttons["Departure"].firstMatch.tap() }
+        }
+    }
+
+    /// F15 Tickets tab: empty state, the add sheet and the way back; the stop screen's labelled actions.
+    func testF15TicketsTabAndStopActions() {
+        let app = launch(["PUBLIT_TAB": "tickets"])
+        nudge(app)
+        XCTAssertTrue(app.navigationBars["Tickets"].waitForExistence(timeout: 10), "no Tickets tab")
+        let add = app.buttons["addPass"]
+        XCTAssertTrue(add.waitForExistence(timeout: 5))
+        snap("tickets-tab")
+        add.tap()
+        XCTAssertTrue(app.buttons["importFile"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["importPhoto"].exists)
+        app.buttons["Cancel"].firstMatch.tap()
+        XCTAssertTrue(add.waitForExistence(timeout: 5))
+
+        app.tabBars.buttons["Nearby"].tap()
+        let all = app.buttons["All departures"].firstMatch
+        XCTAssertTrue(reveal(all, in: app), "no link to all departures")
+        all.tap()
+        XCTAssertTrue(app.buttons["routeHere"].waitForExistence(timeout: 10), "no labelled Route here action")
+        sleep(2) // walking time
+        snap("stop-actions")
     }
 }

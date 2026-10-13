@@ -79,16 +79,12 @@ struct NearbyView: View {
                         } label: { DepartureRow(stopTime: st) }
                     }
                     NavigationLink {
-                        StopDeparturesView(stopId: group.id, name: group.name, coordinate: group.coordinate)
+                        StopDeparturesView(stopId: group.id, name: group.name, coordinate: group.coordinate, exact: group.isPole)
                     } label: {
                         Text("All departures").font(.subheadline)
                     }
                 } header: {
-                    HStack {
-                        Text(group.name)
-                        Spacer()
-                        if let d = group.distance { Text(Fmt.distance(meters: d)) }
-                    }
+                    StopGroupHeader(group: group)
                 }
             }
 
@@ -112,6 +108,7 @@ struct NearbyView: View {
             Task { await load(force: true) }
         }
         .task {
+            if location.isDenied { app.firstBoardReady = true }
             await showLastBoard()
             // One loop for the screen. Before, every ~100 m change of the first, still improving GPS
             // fixes cancelled the running request and started over, so the board took many seconds.
@@ -180,6 +177,7 @@ struct NearbyView: View {
         let filter = filter
         seenGroups = Set(ModeGroup.present(in: last.response.stopTimes.map(\.mode)))
         groups = StopGrouping.group(StopTime.upcoming(last.response.stopTimes).filter { filter.allows($0.mode) }, around: here)
+        if !groups.isEmpty { app.firstBoardReady = true }
     }
 
     private func regroup(_ stopTimes: [StopTime], around here: LatLon) {
@@ -194,7 +192,10 @@ struct NearbyView: View {
         loadedCenter = here
         loadedAt = Date()
         isLoading = true
-        defer { isLoading = false }
+        defer {
+            isLoading = false
+            if !app.firstBoardReady { app.firstBoardReady = true }
+        }
         let filter = filter
         do {
             var res = try await TransitousClient.shared.departures(near: here, radius: 500, count: 80, modes: filter.apiValue)
@@ -225,6 +226,35 @@ struct NearbyView: View {
     }
 }
 
+/// Station name and distance; a street stop also says where its buses go, to tell it from the one across the road.
+struct StopGroupHeader: View {
+    let group: StopGroup
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            HStack {
+                Text(group.name)
+                Spacer()
+                if let d = group.distance { Text(Fmt.distance(meters: d)) }
+            }
+            if group.isPole, !group.directions.isEmpty {
+                Label(group.directions.joined(separator: " · "), systemImage: "arrow.right")
+                    .font(.caption).lineLimit(1)
+                    .labelStyle(CompactLabelStyle())
+            }
+        }
+        .textCase(nil)
+        .accessibilityElement(children: .combine)
+    }
+}
+
+/// Icon and text closer together than the default label.
+struct CompactLabelStyle: LabelStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        HStack(spacing: 4) { configuration.icon.imageScale(.small); configuration.title }
+    }
+}
+
 struct StopDeparturesView: View {
     /// Includes the other platforms of the station (feeds often split them across IDs).
     static let stationRadius = 150
@@ -232,6 +262,8 @@ struct StopDeparturesView: View {
     let stopId: String
     let name: String
     let coordinate: LatLon
+    /// Only this street stop, not the platforms around it (the stop across the road goes the other way).
+    var exact = false
 
     enum Mode: String, CaseIterable, Identifiable { case departures, lines; var id: String { rawValue } }
 
@@ -248,7 +280,9 @@ struct StopDeparturesView: View {
     @State private var available: [ModeGroup] = []
 
     private var saved: SavedPlace {
-        SavedPlace(id: stopId, name: name, subtitle: nil, lat: coordinate.lat, lon: coordinate.lon, stopId: stopId)
+        var p = SavedPlace(id: stopId, name: name, subtitle: nil, lat: coordinate.lat, lon: coordinate.lon, stopId: stopId)
+        if exact { p.exact = true }
+        return p
     }
 
     /// Filtered right away on a chip tap; the reload then brings more of the chosen modes.
@@ -262,6 +296,16 @@ struct StopDeparturesView: View {
                 }
             }
             Section {
+                if exact, !departures.isEmpty {
+                    Label(StopGrouping.directions(departures, limit: 3).joined(separator: " · "), systemImage: "arrow.right")
+                        .font(.subheadline).foregroundStyle(.secondary)
+                        .accessibilityLabel(L10n.f("Towards %@", StopGrouping.directions(departures, limit: 3).joined(separator: ", ")))
+                }
+                WalkThereRow(name: name, coordinate: coordinate)
+                Button { app.route(to: saved) } label: {
+                    Label("Route here", systemImage: "arrow.triangle.turn.up.right.diamond")
+                }
+                .accessibilityIdentifier("routeHere")
                 Picker("View", selection: $mode) {
                     Text("Departures").tag(Mode.departures)
                     Text("Lines").tag(Mode.lines)
@@ -317,12 +361,7 @@ struct StopDeparturesView: View {
         .navigationTitle(name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItemGroup(placement: .topBarTrailing) {
-                Button {
-                    app.route(to: saved)
-                } label: {
-                    Label("Route here", systemImage: "arrow.triangle.turn.up.right.diamond")
-                }
+            ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     favorites.toggle(saved)
                 } label: {
@@ -343,7 +382,7 @@ struct StopDeparturesView: View {
         let filter = filter
         do {
             // More departures for the lines view: every line of a big station should appear.
-            let res = try await TransitousClient.shared.departures(stopId: stopId, count: 60, radius: Self.stationRadius,
+            let res = try await TransitousClient.shared.departures(stopId: stopId, count: 60, radius: exact ? nil : Self.stationRadius,
                                                                   modes: filter.apiValue)
             guard !Task.isCancelled else { return }
             departures = StopTime.upcoming(res.stopTimes)
