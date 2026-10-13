@@ -32620,6 +32620,101 @@
 }
 }
 },
+"Route from here": {
+"extractionState": "manual",
+"localizations": {
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Route from here"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Route von hier"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Itinéraire depuis ici"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Percorso da qui"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Ruta desde aquí"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Rota a partir daqui"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Route vanaf hier"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Trasa stąd"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Маршрут звідси"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Rută de aici"
+}
+},
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Trasa odsud"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Resväg härifrån"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Διαδρομή από εδώ"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Útvonal innen"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Buradan rota"
+}
+}
+}
+},
 "Route here": {
 "extractionState": "manual",
 "localizations": {
