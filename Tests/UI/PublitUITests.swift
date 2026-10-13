@@ -255,11 +255,13 @@ final class PublitUITests: XCTestCase {
         let mapToggle = app.descendants(matching: .any)["routeMapToggle"].firstMatch
         XCTAssertTrue(mapToggle.waitForExistence(timeout: 10), "no map toggle")
         tapCentre(mapToggle)
-        XCTAssertTrue(app.buttons["Details of selected route"].waitForExistence(timeout: 10))
+        // The link sits under the 320 pt map, below the fold since the first-stop picker was added.
+        let details = app.buttons["Details of selected route"].firstMatch
+        XCTAssertTrue(reveal(details, in: app), "no route details link under the map")
         sleep(3) // map tiles
         snap("compare")
 
-        app.buttons["Details of selected route"].tap()
+        details.tap()
         XCTAssertTrue(app.navigationBars["Route"].waitForExistence(timeout: 10))
         sleep(3)
         snap("detail")
