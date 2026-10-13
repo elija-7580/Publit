@@ -34900,6 +34900,101 @@
 }
 }
 },
+"Search routes": {
+"extractionState": "manual",
+"localizations": {
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Search routes"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Routen suchen"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Rechercher des itinéraires"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Cerca percorsi"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Buscar rutas"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Procurar rotas"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Routes zoeken"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Szukaj tras"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Шукати маршрути"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Caută rute"
+}
+},
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Hledat trasy"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Sök resvägar"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Αναζήτηση διαδρομών"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Útvonalak keresése"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Rota ara"
+}
+}
+}
+},
 "Seat reservation": {
 "extractionState": "manual",
 "localizations": {
@@ -37841,6 +37936,101 @@
 "stringUnit": {
 "state": "translated",
 "value": "Duraklar"
+}
+}
+}
+},
+"Stations could not be loaded.": {
+"extractionState": "manual",
+"localizations": {
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Stations could not be loaded."
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Haltestellen konnten nicht geladen werden."
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Impossible de charger les arrêts."
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Impossibile caricare le fermate."
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "No se pudieron cargar las paradas."
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Não foi possível carregar as paragens."
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Haltes konden niet worden geladen."
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Nie udało się wczytać przystanków."
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Не вдалося завантажити зупинки."
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Stațiile nu au putut fi încărcate."
+}
+},
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Zastávky se nepodařilo načíst."
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Hållplatserna kunde inte läsas in."
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Δεν ήταν δυνατή η φόρτωση των στάσεων."
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "A megállókat nem sikerült betölteni."
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Duraklar yüklenemedi."
 }
 }
 }
