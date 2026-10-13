@@ -3,8 +3,10 @@ import SwiftUI
 struct NearbyView: View {
     @Environment(LocationManager.self) private var location
     @Environment(AppState.self) private var app
+    @Environment(\.scenePhase) private var scenePhase
     @Environment(FavoritesStore.self) private var favorites
     @Environment(TripStore.self) private var trips
+    @State private var isVisible = false
     @State private var searching = false
     @State private var showMap = false
     @State private var groups: [StopGroup] = []
@@ -107,17 +109,24 @@ struct NearbyView: View {
             if let c = lastCenter { regroup(lastStopTimes, around: c) }
             Task { await load(force: true) }
         }
-        .task {
+        .onAppear { isVisible = true }
+        .onDisappear { isVisible = false }
+        .task(id: refreshEnabled) {
+            guard refreshEnabled else { return }
             if location.isDenied { app.firstBoardReady = true }
             await showLastBoard()
             // One loop for the screen. Before, every ~100 m change of the first, still improving GPS
             // fixes cancelled the running request and started over, so the board took many seconds.
             while !Task.isCancelled {
                 await load()
-                try? await Task.sleep(for: .milliseconds(500))
+                // Once GPS is available, one wake-up every five seconds is enough to notice
+                // movement; server requests remain capped at once per 30 seconds.
+                try? await Task.sleep(for: location.hasFix ? .seconds(5) : .milliseconds(500))
             }
         }
     }
+
+    private var refreshEnabled: Bool { isVisible && scenePhase == .active && app.tab == .nearby && !showMap && !app.showGoNow }
 
     @ViewBuilder
     private var activeTripSection: some View {
@@ -202,6 +211,7 @@ struct NearbyView: View {
             if res.stopTimes.isEmpty {
                 res = try await TransitousClient.shared.departures(near: here, radius: 1500, count: 80, modes: filter.apiValue)
             }
+            try Task.checkCancellation()
             let stopTimes = res.stopTimes
             let present = Set(ModeGroup.present(in: stopTimes.map(\.mode)))
             // A full board says what runs here; a filtered one can only add to it.
@@ -210,9 +220,11 @@ struct NearbyView: View {
             lastCenter = here
             // The filter may have changed while the request ran: keep to the current one.
             let current = self.filter
-            groups = await Task.detached(priority: .userInitiated) {
+            let regrouped = await Task.detached(priority: .userInitiated) {
                 StopGrouping.group(StopTime.upcoming(stopTimes).filter { current.allows($0.mode) }, around: here)
             }.value
+            try Task.checkCancellation()
+            groups = regrouped
             errorMessage = nil
         } catch {
             if !(error is CancellationError) && (error as? URLError)?.code != .cancelled {
@@ -269,6 +281,8 @@ struct StopDeparturesView: View {
 
     @Environment(FavoritesStore.self) private var favorites
     @Environment(AppState.self) private var app
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var isVisible = false
     @State private var departures: [StopTime] = []
     @State private var alerts: [Alert] = []
     @State private var errorMessage: String?
@@ -370,7 +384,10 @@ struct StopDeparturesView: View {
             }
         }
         .refreshable { await load() }
-        .task(id: filter) {
+        .onAppear { isVisible = true }
+        .onDisappear { isVisible = false }
+        .task(id: "\(filter)|\(scenePhase)|\(app.tab)|\(isVisible)") {
+            guard isVisible, scenePhase == .active, app.tab == .nearby || app.tab == .lines else { return }
             while !Task.isCancelled {
                 await load()
                 try? await Task.sleep(for: .seconds(30))

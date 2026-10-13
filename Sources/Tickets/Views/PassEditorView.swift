@@ -301,7 +301,8 @@ struct PassEditorView: View {
         saving = true
         defer { saving = false }
         if let from = pass.validFrom, let until = pass.validUntil, from > until {
-            (pass.validFrom, pass.validUntil) = (until, from)
+            error = L10n.t("The end date must not be before the start date.")
+            return
         }
         switch mode {
         case .new(_, let document, let kind, let page, _, _):

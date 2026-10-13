@@ -10,6 +10,8 @@ struct TripView: View {
     let stationCoordinate: LatLon
 
     @Environment(FavoritesStore.self) private var favorites
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var isVisible = false
     @State private var trip: Itinerary?
     @State private var errorMessage: String?
     /// Stops at the station the user came from, worked out once per load instead of on every 15 s redraw.
@@ -62,7 +64,10 @@ struct TripView: View {
             }
         }
         .refreshable { await load() }
-        .task {
+        .onAppear { isVisible = true }
+        .onDisappear { isVisible = false }
+        .task(id: isVisible && scenePhase == .active) {
+            guard isVisible, scenePhase == .active else { return }
             while !Task.isCancelled {
                 await load()
                 try? await Task.sleep(for: .seconds(30))
@@ -174,6 +179,8 @@ private struct StopTimeRow: View {
 /// Next departures of one saved line at its saved stop.
 struct LineDeparturesView: View {
     let line: SavedLine
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var isVisible = false
     @State private var departures: [StopTime] = []
     @State private var errorMessage: String?
     @State private var loaded = false
@@ -201,7 +208,10 @@ struct LineDeparturesView: View {
         .navigationTitle(line.lineName)
         .navigationBarTitleDisplayMode(.inline)
         .refreshable { await load() }
-        .task {
+        .onAppear { isVisible = true }
+        .onDisappear { isVisible = false }
+        .task(id: isVisible && scenePhase == .active) {
+            guard isVisible, scenePhase == .active else { return }
             while !Task.isCancelled {
                 await load()
                 try? await Task.sleep(for: .seconds(30))

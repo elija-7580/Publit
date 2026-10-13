@@ -36,8 +36,11 @@ enum TicketRecognizer {
             guard let cg = TicketRecognizer.renderPage(pdf: data, page: page)?.cgImage else { throw Failure.unreadable }
             return (cg, PDFDocument(data: data)?.page(at: page)?.string)
         }.value
-        var result = try await scan(image: image)
+        try Task.checkCancellation()
         let embedded = (text ?? "").components(separatedBy: .newlines).map(TicketTextParser.clean).filter { !$0.isEmpty }
+        // Embedded text is exact and usable: still detect codes, but avoid expensive redundant OCR.
+        var result = try await scan(image: image, recognizeText: embedded.count < 3)
+        try Task.checkCancellation()
         if embedded.count >= 3 { result.lines = embedded }
         return result
     }
@@ -47,7 +50,25 @@ enum TicketRecognizer {
             guard let cg = TicketRecognizer.loadImage(data) else { throw Failure.unreadable }
             return cg
         }.value
+        try Task.checkCancellation()
         return try await scan(image: image)
+    }
+
+    /// Auto-select only a unique recognizable ticket page. Scan sequentially, releasing each
+    /// raster before the next page; never allocate a full PDF worth of rendered images.
+    static func uniqueTicket(pdf data: Data, count: Int) async throws -> (page: Int, scan: TicketScan)? {
+        guard count > 1, count <= TicketImportPolicy.maxAutomaticPages else { return nil }
+        var candidate: (page: Int, scan: TicketScan)?
+        for page in 0..<count {
+            try Task.checkCancellation()
+            let scanned = try await scan(pdf: data, page: page)
+            let draft = TicketTextParser.parse(lines: scanned.lines, barcodes: scanned.barcodes, strictValidity: true)
+            if TicketImportPolicy.canAddAutomatically(draft, barcodes: scanned.barcodes) {
+                guard candidate == nil else { return nil }
+                candidate = (page, scanned)
+            }
+        }
+        return candidate
     }
 
     /// The image upright, as read for recognition (code regions refer to this orientation).
@@ -60,7 +81,7 @@ enum TicketRecognizer {
         ] as CFDictionary)
     }
 
-    static func scan(image: CGImage) async throws -> TicketScan {
+    static func scan(image: CGImage, recognizeText: Bool = true) async throws -> TicketScan {
         try await Task.detached(priority: .userInitiated) { () throws -> TicketScan in
             let trace = PerformanceTrace.begin("Recognise ticket")
             defer { PerformanceTrace.end(trace, "Recognise ticket") }
@@ -77,7 +98,9 @@ enum TicketRecognizer {
                 let wanted = ["de-DE", "en-US", "fr-FR", "it-IT", "es-ES", "pt-BR", "nl-NL"].filter(supported.contains)
                 if !wanted.isEmpty { text.recognitionLanguages = wanted }
             }
-            try VNImageRequestHandler(cgImage: image, orientation: .up).perform([codes, text])
+            try Task.checkCancellation()
+            try VNImageRequestHandler(cgImage: image, orientation: .up).perform(recognizeText ? [codes, text] : [codes])
+            try Task.checkCancellation()
             var seen = Set<String>()
             let barcodes = (codes.results ?? []).compactMap(TicketRecognizer.barcode).filter { seen.insert($0.dedupeKey).inserted }
             return TicketScan(lines: TicketRecognizer.lines(text.results ?? []), barcodes: barcodes,

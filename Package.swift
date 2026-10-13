@@ -43,6 +43,7 @@ let core = [
     "Tickets/PassStyle.swift",
     "Tickets/TicketTextParser.swift",
     "Tickets/PassStore.swift",
+    "Tickets/TicketImportPolicy.swift",
     "Tickets/WalletPass.swift",
     "Tickets/OperatorLogos.swift",
     "Util/SHA1.swift",

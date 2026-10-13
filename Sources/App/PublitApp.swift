@@ -45,6 +45,10 @@ struct PublitApp: App {
                         app.tab = tab == "plan" ? .plan : tab == "saved" ? .favorites : tab == "lines" ? .lines
                             : tab == "tickets" ? .tickets : .nearby
                     }
+                    #if DEBUG
+                    if let sample = ProcessInfo.processInfo.environment["PUBLIT_IMPORT_SAMPLE"],
+                       let url = try? SharedTicketSamples.file(sample) { app.open(url) }
+                    #endif
                     location.start()
                     // Tickets of the first ticket version become passes (once per ticket).
                     passes.importLegacy(tickets.tickets, imageDirectory: tickets.imageDirectory)
@@ -114,6 +118,9 @@ struct RootView: View {
             NavigationStack { FavoritesView() }
                 .tabItem { Label("Saved", systemImage: "star") }
                 .tag(AppTab.favorites)
+        }
+        .sheet(item: $app.sharedTicketFile) { file in
+            PassImportView(sharedURL: file.url)
         }
         .sheet(item: tripLink) { id in
             NavigationStack {

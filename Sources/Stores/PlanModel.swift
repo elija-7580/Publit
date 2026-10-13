@@ -105,6 +105,7 @@ final class PlanModel {
             var maxWalk = options.maxWalkMinutes * 60
             var res = try await TransitousClient.shared.plan(from: f, to: t, time: time, arriveBy: arriveBy,
                                                              maxWalk: maxWalk, options: options)
+            try Task.checkCancellation()
             if res.itineraries.isEmpty, options.maxWalkMinutes == RouteOptions.defaultWalkMinutes {
                 // Nothing within 30 min walk of a stop: try once more with a longer walk.
                 // Not when the user chose a shorter walk: that limit is theirs.
@@ -112,6 +113,7 @@ final class PlanModel {
                 res = try await TransitousClient.shared.plan(from: f, to: t, time: time, arriveBy: arriveBy,
                                                              maxWalk: maxWalk, options: options)
             }
+            try Task.checkCancellation()
             guard token == myToken else { return }
             itineraries = Self.merge(transit: res.itineraries, direct: res.direct)
             comparisons = Self.comparisons(direct: res.direct, listed: itineraries, enabled: options.compareStreetModes)
@@ -179,6 +181,11 @@ final class PlanModel {
     }
 }
 
+struct SharedTicketFile: Identifiable {
+    let id = UUID()
+    let url: URL
+}
+
 enum AppTab: Hashable { case nearby, plan, lines, tickets, favorites }
 
 @MainActor
@@ -195,12 +202,20 @@ final class AppState {
     let goNow = PlanModel()
     /// Set by publit:// links (calendar events, Live Activity buttons).
     var deepLink: DeepLink?
+    /// PDF/image handed to the app by iOS Open In / Copy to Publit.
+    var sharedTicketFile: SharedTicketFile?
     /// Nearby shows "Where to now?" results (also opened by Siri: "Take me home").
     var showGoNow = false
     /// The first departure board is on screen (or could not load): the launch animation may end.
     var firstBoardReady = false
 
     func open(_ url: URL) {
+        if url.isFileURL, Features.passes {
+            deepLink = nil
+            tab = .tickets
+            sharedTicketFile = SharedTicketFile(url: url)
+            return
+        }
         guard let link = DeepLink(url: url) else { return }
         if !Features.passes, case .ticket = link { return }
         if !Features.passes, case .tripTickets = link { return }

@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.5.1 (build 6)
+
+### Shared tickets
+- Register PDF/image Open In / Copy to Publit handlers. When iOS hands Publit a local document, recognize it locally and auto-save recognizable tickets with their unchanged source. Uncertain documents go to review; a unique ticket page is selected automatically from PDFs up to 12 pages, otherwise the user chooses. Exact repeated document/page imports do not create duplicates.
+- Automatic validity uses labelled date contexts only, not arbitrary dates. Unknown validity stays unknown; recognition does not verify authenticity. Reversed dates require correction rather than silently swapping them.
+- Simulator fixtures and F16 cover real PDF/image recognition and multi-page/review paths. Source-app share-sheet visibility still needs device testing; this is a document handler, not a Share Extension.
+
+### Performance review
+- Periodic departures, routes and vehicles pause in background/hidden screens; Nearby polls movement every five seconds after its first fix instead of every half-second.
+- Fix shared-request cancellation: each cancelled waiter leaves immediately; the last waiter cancels the download. A stale completion cannot remove a newer flight.
+- Skip redundant OCR when a PDF already has embedded text; analyze pages sequentially; bound file reads at 25 MiB and PDF auto-analysis at 12 pages. Page-choice thumbnails release when offscreen.
+- Do not retain responses larger than the entire 24 MiB memory cache. Updating an existing entry no longer evicts half the cache. Operator-image cache has explicit count/cost limits.
+- Fix UI checks affected by the fifth tab (German Saved) and ensure the route sort control is scrolled into view before tapping.
+
+
 ## 0.5.0 (build 5)
 
 ### New

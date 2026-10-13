@@ -76,7 +76,7 @@ final class PublitUITests: XCTestCase {
         snap("de-nearby")
         app.tabBars.buttons.element(boundBy: 2).tap()
         XCTAssertTrue(app.navigationBars["Linien"].waitForExistence(timeout: 5))
-        app.tabBars.buttons.element(boundBy: 3).tap()
+        app.tabBars.buttons["Gespeichert"].tap()
         XCTAssertTrue(app.navigationBars["Gespeichert"].waitForExistence(timeout: 5))
         snap("de-saved")
     }
@@ -422,7 +422,7 @@ final class PublitUITests: XCTestCase {
         let routes = plan.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'from Marienplatz'"))
         XCTAssertTrue(routes.firstMatch.waitForExistence(timeout: timeout), "no routes found")
         let sort = plan.buttons["routeSortMenu"].firstMatch
-        XCTAssertTrue(sort.waitForExistence(timeout: 5), "no sort menu")
+        XCTAssertTrue(reveal(sort, in: plan), "no reachable sort menu")
         sort.tap()
         let fastest = plan.buttons["Fastest"].firstMatch
         XCTAssertTrue(fastest.waitForExistence(timeout: 5))
@@ -460,4 +460,28 @@ final class PublitUITests: XCTestCase {
         sleep(2) // walking time
         snap("stop-actions")
     }
+    /// F16 Real file handoff, local PDF text/Vision, auto-save and conservative fallbacks.
+    func testF16SharedTicketImport() {
+        for kind in ["pdf", "image", "unique"] {
+            let app = launch(["PUBLIT_IMPORT_SAMPLE": kind])
+            XCTAssertTrue(app.staticTexts["sharedTicketAdded"].waitForExistence(timeout: 30), "not imported: \(kind)")
+            snap("shared-ticket-\(kind)")
+            app.buttons["checkSharedTicket"].tap()
+            XCTAssertTrue(app.buttons["showOriginal"].waitForExistence(timeout: 10), "original missing")
+            snap("shared-ticket-detail-\(kind)")
+            app.terminate()
+        }
+        let ambiguous = launch(["PUBLIT_IMPORT_SAMPLE": "ambiguous"])
+        XCTAssertTrue(ambiguous.buttons["ticketPage-0"].waitForExistence(timeout: 30), "multiple tickets need a page choice")
+        snap("shared-ticket-pages")
+        ambiguous.buttons["ticketPage-0"].tap()
+        XCTAssertTrue(ambiguous.staticTexts["sharedTicketAdded"].waitForExistence(timeout: 30))
+        ambiguous.terminate()
+        let unknown = launch(["PUBLIT_IMPORT_SAMPLE": "unknown"])
+        XCTAssertTrue(unknown.buttons["savePass"].waitForExistence(timeout: 30), "unknown file must go to review")
+        XCTAssertFalse(unknown.staticTexts["sharedTicketAdded"].exists)
+        snap("shared-ticket-review")
+        unknown.buttons["Cancel"].firstMatch.tap()
+    }
+
 }

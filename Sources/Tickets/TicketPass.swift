@@ -176,6 +176,8 @@ struct TicketPass: Codable, Identifiable, Hashable, Sendable {
         var kind: Kind
         /// PDF page with the ticket (0-based).
         var page: Int
+        /// Exact original + page, for repeated share imports. Optional for older saved tickets.
+        var fingerprint: String? = nil
     }
 
     enum Validity: Equatable, Sendable {

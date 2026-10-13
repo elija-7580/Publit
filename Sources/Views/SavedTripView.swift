@@ -4,6 +4,8 @@ import SwiftUI
 struct SavedTripView: View {
     let tripId: String
     @Environment(TripStore.self) private var trips
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var isVisible = false
     @State private var errorMessage: String?
 
     var body: some View {
@@ -17,7 +19,10 @@ struct SavedTripView: View {
                         .background(.regularMaterial, in: Capsule()).padding(.bottom, 8)
                 }
             }
-            .task(id: tripId) {
+            .onAppear { isVisible = true }
+            .onDisappear { isVisible = false }
+            .task(id: "\(tripId)|\(scenePhase)|\(isVisible)") {
+                guard isVisible, scenePhase == .active else { return }
                 // Live status: refresh now and every minute until the trip is over.
                 while !Task.isCancelled {
                     guard let t = trips.trip(tripId), t.endTime.addingTimeInterval(15 * 60) > .now else { break }
@@ -34,6 +39,7 @@ struct SavedTripView: View {
     private func refresh(_ t: SavedTrip) async {
         do {
             let fresh = try await TripRefreshCoordinator.shared.refresh(t.itinerary.id)
+            try Task.checkCancellation()
             trips.update(t.id, with: fresh)
             errorMessage = nil
             if let updated = trips.trip(t.id) {

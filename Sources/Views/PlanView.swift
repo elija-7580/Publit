@@ -2,6 +2,8 @@ import SwiftUI
 
 struct PlanView: View {
     @Environment(AppState.self) private var app
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var isVisible = false
     @Environment(LocationManager.self) private var location
     @Environment(FavoritesStore.self) private var favorites
     @Environment(TripStore.self) private var trips
@@ -44,6 +46,7 @@ struct PlanView: View {
         .navigationTitle("Plan")
         .withSettingsButton()
         .onAppear {
+            isVisible = true
             if plan.timeMode == .now { plan.timeMode = .departAt }
             if plan.date < .now.addingTimeInterval(-60) { plan.date = .now }
         }
@@ -63,7 +66,9 @@ struct PlanView: View {
                 if target == .from { app.plan.from = endpoint } else { app.plan.to = endpoint }
             }
         }
-        .task(id: app.plan.queryKey) {
+        .onDisappear { isVisible = false }
+        .task(id: "\(app.plan.queryKey)|\(scenePhase)|\(app.tab)|\(isVisible)") {
+            guard isVisible, scenePhase == .active, app.tab == .plan else { return }
             selectedId = nil
             await app.plan.search(current: location.coordinate, locationDenied: location.isDenied)
             // Keep "now" results live: delays, cancellations and departed trips change by the minute.

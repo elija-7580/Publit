@@ -63,3 +63,36 @@ Xcode’s device list, then add measured hotspots here with file and line.
 - [ ] Dark Mode
 - [ ] Larger Dynamic Type
 - [ ] VoiceOver on Nearby and ticket screens
+
+## 0.5.1 code review and regression checks
+
+This is a code/lifecycle review, not a measured device performance profile. Existing native SwiftUI,
+transit data, privacy rules, persistence and visual foundations remain in place.
+
+| Finding | Targeted change | Verification |
+| --- | --- | --- |
+| Shared downloads counted cancelled callers until completion, so all-cancelled flights could keep running | Per-waiter continuations, last-waiter cancellation, generation IDs | Cancellation/reuse tests + existing overlap/retry tests |
+| Periodic view tasks could survive background/hidden screens | Scene/visibility/tab task keys on Nearby, Plan, Go Now, trip/line/stop views | Source inspection; UI regression; device energy check still pending |
+| Nearby woke twice a second even after GPS settled | Five-second movement checks after first fix; keep 30-second server cadence | Source inspection; physical walking/re-entry check pending |
+| PDF text was recognized by OCR and then discarded for embedded text | Embedded text suppresses OCR, barcode detection remains | iOS synthetic PDF/image recognition tests |
+| Long PDFs could accumulate every visited thumbnail | Cell-local thumbnails cleared offscreen; sequential bounded auto-analysis | Code inspection; device Allocations check pending |
+| A single oversized response bypassed the memory budget | Skip its memory retention; replacing keys does not trigger count pruning | Cache regression tests |
+| Operator logos had no explicit retained-image budget | 80 entries / 8 MiB decoded-cost NSCache limits | Source inspection; device scrolling check pending |
+
+### Test handoff
+
+1. Cold launch, switch all five tabs, open/close route/line/stop screens, then background/return.
+2. Share a PDF from Files/Mail and an image from WhatsApp where Open In is offered. If Publit is
+   absent from that host's share sheet, use the in-app file picker; no Share Extension is shipped.
+3. Single ticket, ticket + terms PDF, two tickets in one PDF, an expired ticket, no labelled dates,
+   an ordinary non-ticket image, malformed data and a file above 25 MiB.
+4. Repeat the same shared file: only one pass. Delete and re-import: source/code still accessible.
+5. Check every extracted validity against the original, including timezone-sensitive tickets.
+6. Instruments on the physical iPhone: Time Profiler/Hangs, Allocations, Network and Energy Log
+   during 10 minutes foreground, 10 minutes background, map panning and repeated 25 MiB imports.
+   Record actual traces before making FPS, memory-peak or battery improvement claims.
+
+Residuals: a started Vision operation may finish after dismissal (saving is cancellation-guarded);
+small operator-logo cache misses still load synchronously; TripRefreshCoordinator deliberately
+finishes a short shared in-flight refresh. Device traces are needed to decide whether these matter.
+No new background privilege, third-party import service or UI/framework rewrite was introduced.

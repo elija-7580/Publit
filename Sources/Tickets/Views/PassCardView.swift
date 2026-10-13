@@ -280,13 +280,18 @@ struct BarcodeView: View {
 /// Operator logos of saved passes, read once per file.
 @MainActor
 enum PassLogoCache {
-    private static let cache = NSCache<NSString, UIImage>()
+    private static let cache: NSCache<NSString, UIImage> = {
+        let cache = NSCache<NSString, UIImage>()
+        cache.countLimit = 80
+        cache.totalCostLimit = 8 * 1024 * 1024
+        return cache
+    }()
 
     static func image(_ pass: TicketPass, store: PassStore) -> UIImage? {
         guard let logo = pass.logo, let url = store.logoURL(pass) else { return nil }
         if let hit = cache.object(forKey: logo.file as NSString) { return hit }
         guard let image = UIImage(contentsOfFile: url.path) else { return nil }
-        cache.setObject(image, forKey: logo.file as NSString)
+        cache.setObject(image, forKey: logo.file as NSString, cost: Int(image.size.width * image.scale * image.size.height * image.scale * 4))
         return image
     }
 }

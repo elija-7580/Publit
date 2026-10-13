@@ -9,8 +9,8 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "0.5.0"
-    CURRENT_PROJECT_VERSION: "5"
+    MARKETING_VERSION: "0.5.1"
+    CURRENT_PROJECT_VERSION: "6"
     # Personal Team — Automatic Signing for local device installs.
     DEVELOPMENT_TEAM: "3D6S8GFSGK"
 targets:
@@ -39,6 +39,17 @@ targets:
         CFBundleURLTypes:
           - CFBundleURLName: io.github.publit.app
             CFBundleURLSchemes: [publit]
+        # iOS Open In / Copy to Publit; no App Group or paid-team entitlement required.
+        LSSupportsOpeningDocumentsInPlace: false
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: Ticket PDF
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: Alternate
+            LSItemContentTypes: [com.adobe.pdf]
+          - CFBundleTypeName: Ticket image
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: Alternate
+            LSItemContentTypes: [public.image]
         ITSAppUsesNonExemptEncryption: false
         # Contact sent in the User-Agent, required by the Transitous usage policy.
         PublitContact: https://github.com/elija-7580/Publit-

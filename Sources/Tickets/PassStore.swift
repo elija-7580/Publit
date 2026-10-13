@@ -70,16 +70,32 @@ final class PassStore {
 
     /// Saves a checked pass. The document is written away from the main actor before the pass appears.
     @discardableResult
-    func add(_ pass: TicketPass, document: Data? = nil, kind: TicketPass.Document.Kind? = nil, page: Int = 0) async throws -> TicketPass {
+    func add(_ pass: TicketPass, document: Data? = nil, kind: TicketPass.Document.Kind? = nil, page: Int = 0, deduplicate: Bool = false) async throws -> TicketPass {
         var pass = pass
         if let document, let kind {
             guard document.count <= Self.maxDocumentBytes else { throw Failure.documentTooLarge }
+            let fingerprint = await Task.detached(priority: .userInitiated) {
+                TicketImportPolicy.fingerprint(document, page: page)
+            }.value
+            try Task.checkCancellation()
+            if deduplicate, let existing = passes.first(where: { $0.document?.fingerprint == fingerprint }) {
+                return existing
+            }
             let name = "\(pass.id).\(kind == .pdf ? "pdf" : "img")"
             let url = documentDirectory.appendingPathComponent(name)
             try await Task.detached(priority: .userInitiated) {
                 try document.write(to: url, options: [.atomic, .completeFileProtection])
             }.value
-            pass.document = TicketPass.Document(file: name, kind: kind, page: page)
+            if Task.isCancelled {
+                try? FileManager.default.removeItem(at: url)
+                throw CancellationError()
+            }
+            // The actor can reenter during file writing; a second import may have finished first.
+            if deduplicate, let existing = passes.first(where: { $0.document?.fingerprint == fingerprint }) {
+                try? FileManager.default.removeItem(at: url)
+                return existing
+            }
+            pass.document = TicketPass.Document(file: name, kind: kind, page: page, fingerprint: fingerprint)
         }
         insert(pass)
         await Task.detached(priority: .userInitiated) { JSONPersistence.flush() }.value

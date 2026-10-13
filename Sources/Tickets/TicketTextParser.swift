@@ -74,7 +74,7 @@ extension TicketPass {
 /// a field stays empty when no label or pattern supports it. Covers common German, English,
 /// French and Italian ticket wording.
 enum TicketTextParser {
-    static func parse(lines raw: [String], barcodes: [TicketPass.Barcode] = [], calendar: Calendar = .current) -> TicketDraft {
+    static func parse(lines raw: [String], barcodes: [TicketPass.Barcode] = [], calendar: Calendar = .current, strictValidity: Bool = false) -> TicketDraft {
         let lines = raw.map(clean).filter { !$0.isEmpty }
         let text = lines.joined(separator: "\n")
         var d = TicketDraft()
@@ -99,7 +99,7 @@ enum TicketTextParser {
                 || (v.count >= 6 && v.count <= 40 && v.allSatisfy { $0.isUppercase || $0.isNumber || $0 == "-" })
         })
 
-        let validity = validity(lines, calendar: calendar)
+        let validity = validity(lines, calendar: calendar, strict: strictValidity)
         d.validFrom = validity.from
         d.validUntil = validity.until
 
@@ -278,7 +278,7 @@ enum TicketTextParser {
         var wholeMonth = false
     }
 
-    private static func validity(_ lines: [String], calendar: Calendar) -> (from: Date?, until: Date?) {
+    private static func validity(_ lines: [String], calendar: Calendar, strict: Bool) -> (from: Date?, until: Date?) {
         var from: FoundDate?
         var until: FoundDate?
         var day: FoundDate?
@@ -297,6 +297,13 @@ enum TicketTextParser {
                 guard !next.isEmpty, !excludedDateWords.contains(where: { fold(lines[i + 1]).contains($0) }) else { continue }
                 dates = next.map { var d = $0; d.position += f.count + 1; return d }
                 context = f + " " + fold(lines[i + 1])
+            }
+            if strict {
+                let explicitWords = validityWords.filter { !["datum", "date", "data"].contains($0) }
+                let labelled = explicitWords.contains { context.contains($0) }
+                    || untilWords.contains { containsWord($0, in: context) }
+                    || fromWords.contains { containsWord($0, in: context) }
+                guard labelled else { continue }
             }
             if dates.count == 1, dates[0].wholeMonth {
                 if month == nil { month = dates[0] }
@@ -339,7 +346,7 @@ enum TicketTextParser {
         }
         var start = from.flatMap { date($0, end: false, calendar) }
         var end = until.flatMap { date($0, end: true, calendar) }
-        if let s = start, let e = end, s > e { (start, end) = (e, s) }
+        if !strict, let s = start, let e = end, s > e { (start, end) = (e, s) }
         return (start, end)
     }
 

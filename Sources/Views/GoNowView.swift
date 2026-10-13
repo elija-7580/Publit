@@ -4,6 +4,8 @@ import SwiftUI
 struct GoNowView: View {
     @Environment(AppState.self) private var app
     @Environment(LocationManager.self) private var location
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var isVisible = false
     @State private var selectedId: String?
 
     var body: some View {
@@ -65,7 +67,10 @@ struct GoNowView: View {
         .navigationTitle(plan.to?.title ?? L10n.t("Route"))
         .navigationBarTitleDisplayMode(.inline)
         .refreshable { await plan.search(current: location.coordinate, locationDenied: location.isDenied, silent: true) }
-        .task(id: plan.queryKey) {
+        .onAppear { isVisible = true }
+        .onDisappear { isVisible = false }
+        .task(id: "\(plan.queryKey)|\(scenePhase)|\(isVisible)") {
+            guard isVisible, scenePhase == .active else { return }
             await plan.search(current: location.coordinate, locationDenied: location.isDenied)
             while !Task.isCancelled {
                 try? await Task.sleep(for: PlanView.refreshInterval)

@@ -8,6 +8,33 @@ The idea follows apps like NeatPass: your ticket arrives as a PDF, photo or scre
 iPhone, you check the result, and you get a clean pass with the code ready for the gate. Publit's own take: it stays
 inside a transit app, so a pass can belong to a saved trip, and passes valid at the trip's time show up there.
 
+## Shared PDF / image import (0.5.1)
+
+If the source app offers **Open In / Copy to Publit**, choose it. iOS hands the local file to Publit;
+it switches to Tickets, reads it on the device and automatically stores a recognizable ticket plus
+its unmodified source. The result offers **Check ticket** → **Show original** and **More → Edit**.
+No operator-logo search or ticket upload runs during auto-import.
+
+- Images and single-page PDFs: automatic when the product/category plus operator, code or route support recognition.
+- PDFs up to 12 pages: scan one page at a time; auto-select only a unique recognizable ticket page.
+- Several ticket pages, no unique match, or longer PDF: choose the page; all pages remain available.
+- Unrecognized documents: normal editable review, never silently converted into a valid ticket.
+- Labelled validity dates are extracted; unlabelled dates are not invented as validity. Missing dates stay unknown.
+- A repeated identical document/page opens the existing pass; different pages remain different tickets.
+- Maximum source size is 25 MiB. Dismissing an unfinished import prevents a late auto-save.
+
+**Scope:** this registers document handlers, not an iOS Share Extension. Ordinary image share sheets,
+including some WhatsApp flows, may not list Publit. If not listed, save to Files and use the in-app
+**Tickets → Add ticket → PDF or image file** flow (review + Save). Direct source-app visibility and
+security-scoped file-provider access must be verified on a physical iPhone. A universal Share Extension
+with reliable app handoff would need a separate extension plus shared-container setup (App Groups),
+which the current Personal Team signing does not support. Do not use extension URL-opening hacks or
+put private ticket bytes in a deep-link URL.
+
+Recognition is not an authenticity check. Always compare date, route and code with the operator's
+original; rotating codes still belong in the operator's app. Auto-import keeps codes and source bytes,
+but scanner compatibility still needs real-ticket/device testing.
+
 ## Flow
 
 1. **Add** (`PassImportView`): photo or screenshot (PhotosPicker), PDF or image file (file importer, 25 MB limit),

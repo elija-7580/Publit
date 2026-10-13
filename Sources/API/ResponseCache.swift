@@ -60,12 +60,13 @@ final class ResponseCache: @unchecked Sendable {
     func store(_ key: String, data: Data, url: String, persist: Bool, now: Date = Date()) {
         let entry = Entry(data: data, date: now, url: url)
         lock.lock()
-        if memory.count >= Self.maxMemoryEntries {
+        if memory[key] == nil, memory.count >= Self.maxMemoryEntries {
             // Drop the oldest half; cheaper than tracking exact LRU order.
             let keep = memory.sorted { $0.value.date > $1.value.date }.prefix(Self.maxMemoryEntries / 2)
             memory = Dictionary(uniqueKeysWithValues: keep.map { ($0.key, $0.value) })
         }
-        memory[key] = entry
+        if data.count <= Self.maxMemoryBytes { memory[key] = entry }
+        else { memory[key] = nil }
         var total = memory.values.reduce(0) { $0 + $1.data.count }
         if total > Self.maxMemoryBytes {
             for (k, e) in memory.sorted(by: { $0.value.date < $1.value.date }) where total > Self.maxMemoryBytes / 2 && k != key {

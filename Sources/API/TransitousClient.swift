@@ -373,40 +373,53 @@ enum DateParsing {
     static func format(_ d: Date) -> String { plain.string(from: d) }
 }
 
-/// Shares one running download among callers asking for the same URL at the same time.
-/// The download is cancelled only when every caller has given up on it.
+/// Shares downloads by URL. Each caller can leave immediately on cancellation;
+/// only abandoning the last waiter cancels the underlying URLSession request.
 actor RequestCoalescer {
     typealias Result = (Data, Int)
-    private var running: [String: (task: Task<Result, Error>, waiters: Int)] = [:]
+    private struct Flight {
+        let id: UUID
+        let task: Task<Void, Never>
+        var waiters: [UUID: CheckedContinuation<Result, Error>]
+    }
+    private var running: [String: Flight] = [:]
 
     func run(_ key: String, _ load: @escaping @Sendable () async throws -> Result) async throws -> Result {
-        let task: Task<Result, Error>
-        if let r = running[key] {
-            running[key]!.waiters += 1
-            task = r.task
-        } else {
-            task = Task { try await load() }
-            running[key] = (task, 1)
-        }
+        try Task.checkCancellation()
+        let waiter = UUID()
         return try await withTaskCancellationHandler {
-            defer { leave(key, task) }
-            let value = try await task.value
-            try Task.checkCancellation()
-            return value
+            try await withCheckedThrowingContinuation { continuation in
+                guard !Task.isCancelled else { continuation.resume(throwing: CancellationError()); return }
+                if running[key] != nil {
+                    running[key]!.waiters[waiter] = continuation
+                } else {
+                    let id = UUID()
+                    let task = Task {
+                        let result: Swift.Result<Result, Error>
+                        do { result = .success(try await load()) } catch { result = .failure(error) }
+                        finish(key, id: id, result: result)
+                    }
+                    running[key] = Flight(id: id, task: task, waiters: [waiter: continuation])
+                }
+            }
         } onCancel: {
-            Task { await self.cancelIfAbandoned(key, task) }
+            Task { await self.cancel(key, waiter: waiter) }
         }
     }
 
-    private func leave(_ key: String, _ task: Task<Result, Error>) {
-        guard let r = running[key], r.task == task else { return }
-        if r.waiters <= 1 { running[key] = nil } else { running[key]!.waiters -= 1 }
+    private func finish(_ key: String, id: UUID, result: Swift.Result<Result, Error>) {
+        guard let flight = running[key], flight.id == id else { return }
+        running[key] = nil
+        for waiter in flight.waiters.values { waiter.resume(with: result) }
     }
 
-    /// A cancelled caller: if nobody else waits, stop the download.
-    private func cancelIfAbandoned(_ key: String, _ task: Task<Result, Error>) {
-        guard let r = running[key], r.task == task, r.waiters <= 1 else { return }
-        task.cancel()
+    private func cancel(_ key: String, waiter: UUID) {
+        guard let continuation = running[key]?.waiters.removeValue(forKey: waiter) else { return }
+        continuation.resume(throwing: CancellationError())
+        if let flight = running[key], flight.waiters.isEmpty {
+            running[key] = nil
+            flight.task.cancel()
+        }
     }
 
     var count: Int { running.count }

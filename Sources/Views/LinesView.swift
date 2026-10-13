@@ -142,6 +142,9 @@ struct LineRefRow: View {
 /// One line: its route on a map with the vehicles on it now, the stops in order, alerts,
 /// and a timetable for every stop.
 struct LineDetailView: View {
+    @State private var isVisible = false
+    @Environment(\.scenePhase) private var scenePhase
+    @Environment(AppState.self) private var app
     let line: LineRef
     @Environment(FavoritesStore.self) private var favorites
     @State private var directions: [LineDirection] = []
@@ -229,8 +232,10 @@ struct LineDetailView: View {
             }
         }
         .task { await loadDirections() }
-        .task(id: direction?.id) {
-            guard let d = direction else { return }
+        .onAppear { isVisible = true }
+        .onDisappear { isVisible = false }
+        .task(id: "\(direction?.id ?? "-")|\(scenePhase)|\(app.tab)|\(isVisible)") {
+            guard isVisible, scenePhase == .active, app.tab == .lines || app.tab == .nearby, let d = direction else { return }
             await loadRoute(d)
             while !Task.isCancelled {
                 await loadVehicles(d)
