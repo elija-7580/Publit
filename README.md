@@ -6,23 +6,26 @@ No ads, no account, no tracking.
 
 ![Publit on iPhone](docs/images/hero.jpg)
 
+![Publit features](docs/images/features.jpg)
+
 | Nearby | Plan | Compare | Route |
 | --- | --- | --- | --- |
 | ![Nearby departures](docs/images/nearby.jpg) | ![Trip planning](docs/images/plan.jpg) | ![Route comparison on a map](docs/images/compare.jpg) | ![Route detail](docs/images/detail.jpg) |
 
-<sub>Prototype renderings of the v0.1 interface, filled with live Transitous data (Munich, October 2026).</sub>
+<sub>Screens from the current iPhone UI, filled with live Transitous data (Munich, October 2026).</sub>
 
 ## Status
 
-Early prototype (v0.1). Not on the App Store yet.
+Early public build (v0.6). Not on the App Store yet.
 
 ## Features
 
 - **Nearby:** live departure boards for every stop within 500 m, grouped by station, refreshed every 30 s, with delays, platforms and cancellations.
-- **Plan:** search addresses, stops and places; depart at or arrive by.
-- **Compare:** all connections on a shared timeline, plus a map that overlays every option.
-- **Route detail:** legs, lines, platforms, stop counts, transfers and service alerts.
-- **Saved:** favourite stops and places, stored only on the device.
+- **Plan:** search addresses, stops and places; depart at or arrive by; compare routes on one map.
+- **Route detail:** legs, lines, platforms, transfers, service alerts; start, save, calendar and leave-in-time reminders.
+- **Active trip:** follow a started journey live, including the lock screen.
+- **Saved:** stops, lines, places and trips, stored only on the device.
+- **Widgets & Siri / 15 languages:** next departures on the home screen and by voice; German, French, Italian, Ukrainian, Turkish and more.
 
 ## Coverage
 
