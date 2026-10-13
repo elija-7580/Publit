@@ -1521,6 +1521,101 @@
     }
    }
   },
+  "%@ to %@, next stop %@": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ to %@, next stop %@"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ nach %@, nächster Halt %@"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ vers %@, prochain arrêt %@"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ per %@, prossima fermata %@"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ hacia %@, próxima parada %@"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ para %@, próxima paragem %@"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ naar %@, volgende halte %@"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ do %@, następny przystanek %@"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ до %@, наступна зупинка %@"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ spre %@, următoarea stație %@"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ do %@, další zastávka %@"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ mot %@, nästa hållplats %@"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ προς %@, επόμενη στάση %@"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ – %@ felé, következő megálló: %@"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ – %@ yönü, sonraki durak %@"
+     }
+    }
+   }
+  },
   "%@ website": {
    "extractionState": "manual",
    "localizations": {
@@ -1897,6 +1992,442 @@
      "stringUnit": {
       "state": "translated",
       "value": "%@, peron %@, saat %@"
+     }
+    }
+   }
+  },
+  "%@: %lld departures cancelled": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "variations": {
+      "plural": {
+       "one": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: %lld departure cancelled"
+        }
+       },
+       "other": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: %lld departures cancelled"
+        }
+       }
+      }
+     }
+    },
+    "de": {
+     "variations": {
+      "plural": {
+       "one": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: %lld Fahrt fällt aus"
+        }
+       },
+       "other": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: %lld Fahrten fallen aus"
+        }
+       }
+      }
+     }
+    },
+    "fr": {
+     "variations": {
+      "plural": {
+       "one": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@ : %lld départ supprimé"
+        }
+       },
+       "many": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@ : %lld départs supprimés"
+        }
+       },
+       "other": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@ : %lld départs supprimés"
+        }
+       }
+      }
+     }
+    },
+    "it": {
+     "variations": {
+      "plural": {
+       "one": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: %lld corsa soppressa"
+        }
+       },
+       "many": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: %lld corse soppresse"
+        }
+       },
+       "other": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: %lld corse soppresse"
+        }
+       }
+      }
+     }
+    },
+    "es": {
+     "variations": {
+      "plural": {
+       "one": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: %lld salida cancelada"
+        }
+       },
+       "many": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: %lld salidas canceladas"
+        }
+       },
+       "other": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: %lld salidas canceladas"
+        }
+       }
+      }
+     }
+    },
+    "pt-PT": {
+     "variations": {
+      "plural": {
+       "one": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: %lld partida cancelada"
+        }
+       },
+       "many": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: %lld partidas canceladas"
+        }
+       },
+       "other": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: %lld partidas canceladas"
+        }
+       }
+      }
+     }
+    },
+    "nl": {
+     "variations": {
+      "plural": {
+       "one": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: %lld rit vervalt"
+        }
+       },
+       "other": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: %lld ritten vervallen"
+        }
+       }
+      }
+     }
+    },
+    "pl": {
+     "variations": {
+      "plural": {
+       "one": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: %lld kurs odwołany"
+        }
+       },
+       "few": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: %lld kursy odwołane"
+        }
+       },
+       "many": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: %lld kursów odwołanych"
+        }
+       },
+       "other": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: %lld kursu odwołanego"
+        }
+       }
+      }
+     }
+    },
+    "uk": {
+     "variations": {
+      "plural": {
+       "one": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: скасовано %lld рейс"
+        }
+       },
+       "few": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: скасовано %lld рейси"
+        }
+       },
+       "many": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: скасовано %lld рейсів"
+        }
+       },
+       "other": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: скасовано %lld рейсу"
+        }
+       }
+      }
+     }
+    },
+    "ro": {
+     "variations": {
+      "plural": {
+       "one": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: %lld plecare anulată"
+        }
+       },
+       "few": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: %lld plecări anulate"
+        }
+       },
+       "other": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: %lld de plecări anulate"
+        }
+       }
+      }
+     }
+    },
+    "cs": {
+     "variations": {
+      "plural": {
+       "one": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: %lld spoj zrušen"
+        }
+       },
+       "few": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: %lld spoje zrušeny"
+        }
+       },
+       "many": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: %lld spoje zrušeno"
+        }
+       },
+       "other": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: %lld spojů zrušeno"
+        }
+       }
+      }
+     }
+    },
+    "sv": {
+     "variations": {
+      "plural": {
+       "one": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: %lld avgång inställd"
+        }
+       },
+       "other": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: %lld avgångar inställda"
+        }
+       }
+      }
+     }
+    },
+    "el": {
+     "variations": {
+      "plural": {
+       "one": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: ακυρώθηκε %lld αναχώρηση"
+        }
+       },
+       "other": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: ακυρώθηκαν %lld αναχωρήσεις"
+        }
+       }
+      }
+     }
+    },
+    "hu": {
+     "variations": {
+      "plural": {
+       "one": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: %lld járat elmarad"
+        }
+       },
+       "other": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: %lld járat elmarad"
+        }
+       }
+      }
+     }
+    },
+    "tr": {
+     "variations": {
+      "plural": {
+       "one": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: %lld sefer iptal"
+        }
+       },
+       "other": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%@: %lld sefer iptal"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "%@: departure cancelled": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@: departure cancelled"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@: Fahrt fällt aus"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ : départ supprimé"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@: corsa soppressa"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@: salida cancelada"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@: partida cancelada"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@: vertrek vervalt"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@: kurs odwołany"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@: рейс скасовано"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@: plecare anulată"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@: spoj zrušen"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@: avgång inställd"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@: η αναχώρηση ακυρώθηκε"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@: a járat elmarad"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@: sefer iptal"
      }
     }
    }
@@ -2337,6 +2868,347 @@
     }
    }
   },
+  "%lld departures": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "variations": {
+      "plural": {
+       "one": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld departure"
+        }
+       },
+       "other": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld departures"
+        }
+       }
+      }
+     }
+    },
+    "de": {
+     "variations": {
+      "plural": {
+       "one": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld Abfahrt"
+        }
+       },
+       "other": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld Abfahrten"
+        }
+       }
+      }
+     }
+    },
+    "fr": {
+     "variations": {
+      "plural": {
+       "one": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld départ"
+        }
+       },
+       "many": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld départs"
+        }
+       },
+       "other": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld départs"
+        }
+       }
+      }
+     }
+    },
+    "it": {
+     "variations": {
+      "plural": {
+       "one": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld partenza"
+        }
+       },
+       "many": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld partenze"
+        }
+       },
+       "other": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld partenze"
+        }
+       }
+      }
+     }
+    },
+    "es": {
+     "variations": {
+      "plural": {
+       "one": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld salida"
+        }
+       },
+       "many": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld salidas"
+        }
+       },
+       "other": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld salidas"
+        }
+       }
+      }
+     }
+    },
+    "pt-PT": {
+     "variations": {
+      "plural": {
+       "one": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld partida"
+        }
+       },
+       "many": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld partidas"
+        }
+       },
+       "other": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld partidas"
+        }
+       }
+      }
+     }
+    },
+    "nl": {
+     "variations": {
+      "plural": {
+       "one": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld vertrek"
+        }
+       },
+       "other": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld vertrekken"
+        }
+       }
+      }
+     }
+    },
+    "pl": {
+     "variations": {
+      "plural": {
+       "one": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld odjazd"
+        }
+       },
+       "few": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld odjazdy"
+        }
+       },
+       "many": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld odjazdów"
+        }
+       },
+       "other": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld odjazdu"
+        }
+       }
+      }
+     }
+    },
+    "uk": {
+     "variations": {
+      "plural": {
+       "one": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld відправлення"
+        }
+       },
+       "few": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld відправлення"
+        }
+       },
+       "many": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld відправлень"
+        }
+       },
+       "other": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld відправлення"
+        }
+       }
+      }
+     }
+    },
+    "ro": {
+     "variations": {
+      "plural": {
+       "one": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld plecare"
+        }
+       },
+       "few": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld plecări"
+        }
+       },
+       "other": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld de plecări"
+        }
+       }
+      }
+     }
+    },
+    "cs": {
+     "variations": {
+      "plural": {
+       "one": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld odjezd"
+        }
+       },
+       "few": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld odjezdy"
+        }
+       },
+       "many": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld odjezdu"
+        }
+       },
+       "other": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld odjezdů"
+        }
+       }
+      }
+     }
+    },
+    "sv": {
+     "variations": {
+      "plural": {
+       "one": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld avgång"
+        }
+       },
+       "other": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld avgångar"
+        }
+       }
+      }
+     }
+    },
+    "el": {
+     "variations": {
+      "plural": {
+       "one": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld αναχώρηση"
+        }
+       },
+       "other": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld αναχωρήσεις"
+        }
+       }
+      }
+     }
+    },
+    "hu": {
+     "variations": {
+      "plural": {
+       "one": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld indulás"
+        }
+       },
+       "other": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld indulás"
+        }
+       }
+      }
+     }
+    },
+    "tr": {
+     "variations": {
+      "plural": {
+       "one": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld kalkış"
+        }
+       },
+       "other": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld kalkış"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
   "%lld h": {
    "extractionState": "manual",
    "localizations": {
@@ -2618,6 +3490,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "%lld dk"
+     }
+    }
+   }
+  },
+  "%lld min late": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%lld min late"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%lld Min. verspätet"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%lld min de retard"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%lld min di ritardo"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%lld min de retraso"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%lld min de atraso"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%lld min vertraagd"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%lld min opóźnienia"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "запізнення %lld хв"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%lld min întârziere"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "zpoždění %lld min"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%lld min försenad"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "καθυστέρηση %lld λεπ."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%lld perc késés"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%lld dk gecikme"
      }
     }
    }
@@ -2959,6 +3926,101 @@
         }
        }
       }
+     }
+    }
+   }
+  },
+  "(%lld min late)": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "(%lld min late)"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "(%lld Min. Verspätung)"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "(%lld min de retard)"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "(%lld min di ritardo)"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "(%lld min de retraso)"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "(%lld min de atraso)"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "(%lld min vertraging)"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "(%lld min opóźnienia)"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "(запізнення %lld хв)"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "(%lld min întârziere)"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "(zpoždění %lld min)"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "(%lld min försenad)"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "(καθυστέρηση %lld λεπ.)"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "(%lld perc késés)"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "(%lld dk gecikme)"
      }
     }
    }
@@ -5528,6 +6590,101 @@
     }
    }
   },
+  "Allow location access to see the lines around you, or search for a station.": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Allow location access to see the lines around you, or search for a station."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Erlaube den Standortzugriff, um die Linien in deiner Nähe zu sehen, oder suche nach einer Haltestelle."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Autorisez la localisation pour voir les lignes autour de vous, ou cherchez un arrêt."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Consenti l'accesso alla posizione per vedere le linee vicine, oppure cerca una fermata."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Permite el acceso a la ubicación para ver las líneas cercanas o busca una parada."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Permita o acesso à localização para ver as linhas à sua volta ou procure uma paragem."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sta locatietoegang toe om de lijnen om je heen te zien, of zoek een halte."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Zezwól na dostęp do lokalizacji, aby zobaczyć linie w pobliżu, albo wyszukaj przystanek."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Дозвольте доступ до геопозиції, щоб бачити лінії поруч, або знайдіть зупинку."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Permite accesul la locație pentru a vedea liniile din jur sau caută o stație."
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Povol přístup k poloze, abys viděl linky v okolí, nebo vyhledej zastávku."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Tillåt platsåtkomst för att se linjerna omkring dig, eller sök efter en hållplats."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Επίτρεψε την πρόσβαση στην τοποθεσία για να δεις τις γραμμές γύρω σου ή αναζήτησε μια στάση."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Engedélyezd a helyhozzáférést a közeli vonalakhoz, vagy keress egy megállót."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Çevrendeki hatları görmek için konum erişimine izin ver veya bir durak ara."
+     }
+    }
+   }
+  },
   "Allow notifications for Publit in Settings.": {
    "extractionState": "manual",
    "localizations": {
@@ -6478,6 +7635,101 @@
     }
    }
   },
+  "At %@: %@": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "At %@: %@"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@: %@"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ : %@"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@: %@"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@: %@"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@: %@"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@: %@"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@: %@"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@: %@"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@: %@"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@: %@"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@: %@"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@: %@"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@: %@"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@: %@"
+     }
+    }
+   }
+  },
   "At %@: %@.": {
    "extractionState": "manual",
    "localizations": {
@@ -6569,6 +7821,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "%@: %@."
+     }
+    }
+   }
+  },
+  "Available now": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Available now"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Jetzt verfügbar"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Disponibles maintenant"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Disponibili ora"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Disponibles ahora"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Disponíveis agora"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nu beschikbaar"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Dostępne teraz"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Доступно зараз"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Disponibile acum"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Dostupné teď"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Tillgängliga nu"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Διαθέσιμα τώρα"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Most elérhető"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Şu an müsait"
      }
     }
    }
@@ -6759,6 +8106,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "Bisiklet"
+     }
+    }
+   }
+  },
+  "Bikes and scooters": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bikes and scooters"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Räder und Scooter"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Vélos et trottinettes"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bici e monopattini"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bicis y patinetes"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bicicletas e trotinetes"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fietsen en steps"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Rowery i hulajnogi"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Велосипеди й самокати"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Biciclete și trotinete"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kola a koloběžky"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Cyklar och sparkcyklar"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ποδήλατα και πατίνια"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Biciklik és rollerek"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bisiklet ve scooter"
      }
     }
    }
@@ -7614,6 +9056,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "Araba"
+     }
+    }
+   }
+  },
+  "Cargo bike": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Cargo bike"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Lastenrad"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Vélo cargo"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Cargo bike"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bici de carga"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bicicleta de carga"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bakfiets"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Rower cargo"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Вантажний велосипед"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bicicletă cargo"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nákladní kolo"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Lastcykel"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ποδήλατο φορτίου"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Teherbicikli"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kargo bisikleti"
      }
     }
    }
@@ -9708,6 +11245,101 @@
     }
    }
   },
+  "Day": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Day"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Tag"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Jour"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Giorno"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Día"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Dia"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Dag"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Dzień"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "День"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Zi"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Den"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Dag"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ημέρα"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nap"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Gün"
+     }
+    }
+   }
+  },
   "Day ticket": {
    "extractionState": "manual",
    "localizations": {
@@ -10274,6 +11906,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "Kalkış saati"
+     }
+    }
+   }
+  },
+  "Departure": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Departure"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Abfahrt"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Départ"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Partenza"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Salida"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Partida"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Vertrek"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Odjazd"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Відправлення"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Plecare"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Odjezd"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Avgång"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Αναχώρηση"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Indulás"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kalkış"
      }
     }
    }
@@ -10943,6 +12670,101 @@
     }
    }
   },
+  "Direction": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Direction"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Richtung"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Direction"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Direzione"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Dirección"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sentido"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Richting"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kierunek"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Напрямок"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Direcție"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Směr"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Riktning"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Κατεύθυνση"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Irány"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Yön"
+     }
+    }
+   }
+  },
   "Direction unavailable": {
    "extractionState": "manual",
    "localizations": {
@@ -11034,6 +12856,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "Yön belirtilmemiş"
+     }
+    }
+   }
+  },
+  "Disruptions on saved lines": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Disruptions on saved lines"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Störungen auf gemerkten Linien"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Perturbations sur les lignes enregistrées"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Disservizi sulle linee salvate"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Incidencias en las líneas guardadas"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Perturbações nas linhas guardadas"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Storingen op bewaarde lijnen"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Utrudnienia na zapisanych liniach"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Збої на збережених лініях"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Perturbări pe liniile salvate"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Výluky na uložených linkách"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Störningar på sparade linjer"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Διαταραχές στις αποθηκευμένες γραμμές"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Zavarok a mentett vonalakon"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kayıtlı hatlarda aksaklıklar"
      }
     }
    }
@@ -11319,6 +13236,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "Araba süreleri trafik ve park hariçtir."
+     }
+    }
+   }
+  },
+  "E-scooter": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "E-scooter"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "E-Scooter"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Trottinette électrique"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Monopattino elettrico"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Patinete eléctrico"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Trotinete elétrica"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "E-step"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Hulajnoga elektryczna"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Електросамокат"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Trotinetă electrică"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Elektrokoloběžka"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Elsparkcykel"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ηλεκτρικό πατίνι"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "E-roller"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "E-scooter"
      }
     }
    }
@@ -12463,6 +14475,101 @@
     }
    }
   },
+  "Fastest": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fastest"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Schnellste"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Plus rapide"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Più veloce"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Más rápida"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Mais rápida"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Snelste"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Najszybsza"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Найшвидший"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Cea mai rapidă"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nejrychlejší"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Snabbast"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ταχύτερη"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Leggyorsabb"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "En hızlı"
+     }
+    }
+   }
+  },
   "Ferry": {
    "extractionState": "manual",
    "localizations": {
@@ -12554,6 +14661,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "Feribot"
+     }
+    }
+   }
+  },
+  "Fewest changes": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fewest changes"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Wenigste Umstiege"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Moins de correspondances"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Meno cambi"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Menos transbordos"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Menos transbordos"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Minste overstappen"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Najmniej przesiadek"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Найменше пересадок"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Cele mai puține schimbări"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nejméně přestupů"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Minst byten"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Λιγότερες μετεπιβιβάσεις"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Legkevesebb átszállás"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "En az aktarma"
      }
     }
    }
@@ -14173,6 +16375,196 @@
     }
    }
   },
+  "I'm arriving at %@ at %@.": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "I'm arriving at %@ at %@."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ich komme in %@ um %@ an."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "J'arrive à %@ à %@."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Arrivo a %@ alle %@."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Llego a %@ a las %@."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Chego a %@ às %@."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ik kom aan in %@ om %@."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Będę w %@ o %@."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Я прибуваю до %@ о %@."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ajung la %@ la ora %@."
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Do %@ dorazím v %@."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Jag kommer fram till %@ kl. %@."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Φτάνω στο %@ στις %@."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ – érkezésem: %@."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ varışım: %@."
+     }
+    }
+   }
+  },
+  "I've arrived at %@.": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "I've arrived at %@."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ich bin in %@ angekommen."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Je suis arrivé·e à %@."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sono arrivato/a a %@."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "He llegado a %@."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Cheguei a %@."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ik ben aangekomen in %@."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Jestem już w %@."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Я прибув(-ла) до %@."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Am ajuns la %@."
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Jsem v %@."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Jag har kommit fram till %@."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Έφτασα στο %@."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Megérkeztem: %@."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ noktasına vardım."
+     }
+    }
+   }
+  },
   "In %lld min": {
    "extractionState": "manual",
    "localizations": {
@@ -14454,6 +16846,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "Daha geç seferler"
+     }
+    }
+   }
+  },
+  "Least walking": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Least walking"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Wenigster Fußweg"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Moins de marche"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Meno a piedi"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Menos a pie"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Menos a pé"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Minst lopen"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Najmniej pieszo"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Найменше пішки"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Cel mai puțin mers pe jos"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nejméně chůze"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Minst gång"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Λιγότερο περπάτημα"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Legkevesebb gyaloglás"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "En az yürüme"
      }
     }
    }
@@ -15028,6 +17515,196 @@
     }
    }
   },
+  "Line %@: route and timetable": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Line %@: route and timetable"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Linie %@: Verlauf und Fahrplan"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ligne %@ : parcours et horaires"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Linea %@: percorso e orari"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Línea %@: recorrido y horarios"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Linha %@: percurso e horário"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Lijn %@: route en dienstregeling"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Linia %@: trasa i rozkład"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Лінія %@: маршрут і розклад"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Linia %@: traseu și orar"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Linka %@: trasa a jízdní řád"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Linje %@: sträckning och tidtabell"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Γραμμή %@: διαδρομή και δρομολόγια"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ vonal: útvonal és menetrend"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ hattı: güzergâh ve tarife"
+     }
+    }
+   }
+  },
+  "Line, destination or station": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Line, destination or station"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Linie, Ziel oder Haltestelle"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ligne, destination ou arrêt"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Linea, destinazione o fermata"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Línea, destino o parada"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Linha, destino ou paragem"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Lijn, bestemming of halte"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Linia, cel lub przystanek"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Лінія, напрямок або зупинка"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Linie, destinație sau stație"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Linka, cíl nebo zastávka"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Linje, destination eller hållplats"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Γραμμή, προορισμός ή στάση"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Vonal, célállomás vagy megálló"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Hat, varış yeri veya durak"
+     }
+    }
+   }
+  },
   "Lines": {
    "extractionState": "manual",
    "localizations": {
@@ -15119,6 +17796,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "Hatlar"
+     }
+    }
+   }
+  },
+  "Lines near you": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Lines near you"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Linien in der Nähe"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Lignes à proximité"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Linee vicine"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Líneas cercanas"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Linhas por perto"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Lijnen in de buurt"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Linie w pobliżu"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Лінії поруч"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Linii din apropiere"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Linky v okolí"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Linjer i närheten"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Κοντινές γραμμές"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Közeli vonalak"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Yakındaki hatlar"
      }
     }
    }
@@ -15689,6 +18461,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "Canlı veriler"
+     }
+    }
+   }
+  },
+  "Live position": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Live position"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Live-Position"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Position en temps réel"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Posizione in tempo reale"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Posición en tiempo real"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Posição em tempo real"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Live positie"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Pozycja na żywo"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Позиція наживо"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Poziție în timp real"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Živá poloha"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Liveposition"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Θέση σε πραγματικό χρόνο"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Élő pozíció"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Canlı konum"
      }
     }
    }
@@ -16738,6 +19605,101 @@
     }
    }
   },
+  "Map layers": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Map layers"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kartenebenen"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Calques de la carte"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Livelli della mappa"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Capas del mapa"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Camadas do mapa"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kaartlagen"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Warstwy mapy"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Шари мапи"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Straturi hartă"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Vrstvy mapy"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kartlager"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Επίπεδα χάρτη"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Térképrétegek"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Harita katmanları"
+     }
+    }
+   }
+  },
   "Metro": {
    "extractionState": "manual",
    "localizations": {
@@ -16829,6 +19791,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "Metro"
+     }
+    }
+   }
+  },
+  "Moped": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Moped"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Moped"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Scooter"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Scooter"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ciclomotor"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ciclomotor"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Scooter"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Skuter"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Мопед"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Moped"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Skútr"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Moped"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Μοτοποδήλατο"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Robogó"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Moped"
      }
     }
    }
@@ -17213,6 +20270,101 @@
     }
    }
   },
+  "New arrival time: %@": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "New arrival time: %@"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Neue Ankunftszeit: %@"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nouvelle heure d'arrivée : %@"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nuovo orario di arrivo: %@"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nueva hora de llegada: %@"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nova hora de chegada: %@"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nieuwe aankomsttijd: %@"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nowa godzina przyjazdu: %@"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Новий час прибуття: %@"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Noua oră de sosire: %@"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nový čas příjezdu: %@"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ny ankomsttid: %@"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Νέα ώρα άφιξης: %@"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Új érkezési idő: %@"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Yeni varış saati: %@"
+     }
+    }
+   }
+  },
   "Next departures": {
    "extractionState": "manual",
    "localizations": {
@@ -17589,6 +20741,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "Bir duraktan sonraki kalkışlar."
+     }
+    }
+   }
+  },
+  "Next stops": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Next stops"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nächste Halte"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Prochains arrêts"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Prossime fermate"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Próximas paradas"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Próximas paragens"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Volgende haltes"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Następne przystanki"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Наступні зупинки"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Următoarele stații"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Další zastávky"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nästa hållplatser"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Επόμενες στάσεις"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Következő megállók"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sonraki duraklar"
      }
     }
    }
@@ -18733,6 +21980,101 @@
     }
    }
   },
+  "No departures on this day.": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "No departures on this day."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "An diesem Tag keine Abfahrten."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Aucun départ ce jour-là."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nessuna partenza in questo giorno."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "No hay salidas este día."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sem partidas neste dia."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Geen vertrekken op deze dag."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Brak odjazdów tego dnia."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Цього дня немає відправлень."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nicio plecare în această zi."
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "V tento den žádné odjezdy."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Inga avgångar den här dagen."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Δεν υπάρχουν αναχωρήσεις αυτή την ημέρα."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ezen a napon nincs indulás."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bu gün kalkış yok."
+     }
+    }
+   }
+  },
   "No departures soon": {
    "extractionState": "manual",
    "localizations": {
@@ -18824,6 +22166,291 @@
      "stringUnit": {
       "state": "translated",
       "value": "Yakın zamanda kalkış yok"
+     }
+    }
+   }
+  },
+  "No line nearby matches. Try a station below.": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "No line nearby matches. Try a station below."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Keine Linie in der Nähe passt. Versuch es unten mit einer Haltestelle."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Aucune ligne proche ne correspond. Essayez un arrêt ci-dessous."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nessuna linea vicina corrisponde. Prova una fermata qui sotto."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ninguna línea cercana coincide. Prueba con una parada abajo."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nenhuma linha próxima corresponde. Experimente uma paragem abaixo."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Geen lijn in de buurt komt overeen. Probeer hieronder een halte."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Żadna pobliska linia nie pasuje. Wybierz przystanek poniżej."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Жодна лінія поруч не підходить. Спробуйте зупинку нижче."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nicio linie din apropiere nu se potrivește. Încearcă o stație de mai jos."
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Žádná linka v okolí neodpovídá. Zkus zastávku níže."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ingen linje i närheten matchar. Prova en hållplats nedan."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Καμία κοντινή γραμμή δεν ταιριάζει. Δοκίμασε μια στάση παρακάτω."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nincs egyező közeli vonal. Próbálj egy megállót lent."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Yakında eşleşen hat yok. Aşağıdan bir durak dene."
+     }
+    }
+   }
+  },
+  "No lines for these modes.": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "No lines for these modes."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Keine Linien für diese Verkehrsmittel."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Aucune ligne pour ces modes."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nessuna linea per questi mezzi."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "No hay líneas para estos medios."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sem linhas para estes meios."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Geen lijnen voor deze vervoerswijzen."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Brak linii dla tych środków transportu."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Немає ліній для цих видів транспорту."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nicio linie pentru aceste mijloace."
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Žádné linky pro tyto druhy dopravy."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Inga linjer för dessa trafikslag."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Δεν υπάρχουν γραμμές για αυτά τα μέσα."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nincs vonal ezekhez a közlekedési módokhoz."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bu ulaşım türleri için hat yok."
+     }
+    }
+   }
+  },
+  "No lines found nearby.": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "No lines found nearby."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Keine Linien in der Nähe gefunden."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Aucune ligne trouvée à proximité."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nessuna linea trovata nelle vicinanze."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "No se encontraron líneas cercanas."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nenhuma linha encontrada por perto."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Geen lijnen in de buurt gevonden."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nie znaleziono linii w pobliżu."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Поруч не знайдено ліній."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nu s-au găsit linii în apropiere."
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "V okolí nebyly nalezeny žádné linky."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Inga linjer hittades i närheten."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Δεν βρέθηκαν κοντινές γραμμές."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nem található vonal a közelben."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Yakında hat bulunamadı."
      }
     }
    }
@@ -19968,6 +23595,101 @@
     }
    }
   },
+  "Notifications": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Notifications"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Mitteilungen"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Notifications"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Notifiche"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Notificaciones"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Notificações"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Meldingen"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Powiadomienia"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Сповіщення"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Notificări"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Oznámení"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Notiser"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ειδοποιήσεις"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Értesítések"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bildirimler"
+     }
+    }
+   }
+  },
   "OK": {
    "extractionState": "manual",
    "localizations": {
@@ -20439,6 +24161,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "Uygulamayı aç"
+     }
+    }
+   }
+  },
+  "Open in the provider's app": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Open in the provider's app"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "In der App des Anbieters öffnen"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ouvrir dans l'app du fournisseur"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Apri nell'app del gestore"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Abrir en la app del proveedor"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Abrir na app do fornecedor"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Openen in de app van de aanbieder"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Otwórz w aplikacji operatora"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Відкрити в застосунку оператора"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Deschide în aplicația furnizorului"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Otevřít v aplikaci poskytovatele"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Öppna i leverantörens app"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Άνοιγμα στην εφαρμογή του παρόχου"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Megnyitás a szolgáltató appjában"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sağlayıcının uygulamasında aç"
      }
     }
    }
@@ -22343,6 +26160,101 @@
     }
    }
   },
+  "Pick up at %@": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Pick up at %@"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Abholen: %@"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Prise à %@"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ritiro a %@"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Recogida en %@"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Levantar em %@"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ophalen bij %@"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Odbiór: %@"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Взяти: %@"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Preluare la %@"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Vyzvednutí: %@"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Hämta vid %@"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Παραλαβή: %@"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Felvétel: %@"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Alış: %@"
+     }
+    }
+   }
+  },
   "Pl. %@": {
    "extractionState": "manual",
    "localizations": {
@@ -23103,6 +27015,101 @@
     }
    }
   },
+  "Position from the timetable": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Position from the timetable"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Position laut Fahrplan"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Position selon l'horaire"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Posizione secondo l'orario"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Posición según el horario"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Posição segundo o horário"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Positie volgens dienstregeling"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Pozycja według rozkładu"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Позиція за розкладом"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Poziție conform orarului"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Poloha podle jízdního řádu"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Position enligt tidtabell"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Θέση σύμφωνα με τα δρομολόγια"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Menetrend szerinti pozíció"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Tarifeye göre konum"
+     }
+    }
+   }
+  },
   "Preview: %@": {
    "extractionState": "manual",
    "localizations": {
@@ -23293,6 +27300,101 @@
     }
    }
   },
+  "Provider": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Provider"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Anbieter"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fournisseur"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Gestore"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Proveedor"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fornecedor"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Aanbieder"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Operator"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Оператор"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Furnizor"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Poskytovatel"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Leverantör"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Πάροχος"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Szolgáltató"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sağlayıcı"
+     }
+    }
+   }
+  },
   "Public transport, without the noise.": {
    "extractionState": "manual",
    "localizations": {
@@ -23384,6 +27486,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "Toplu taşıma, gürültüsüz."
+     }
+    }
+   }
+  },
+  "Publit checks your saved lines when you open it and from time to time in the background (iOS decides when), and tells you about alerts and cancelled departures.": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit checks your saved lines when you open it and from time to time in the background (iOS decides when), and tells you about alerts and cancelled departures."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit prüft deine gemerkten Linien beim Öffnen und ab und zu im Hintergrund (wann, entscheidet iOS) und meldet Störungen und ausfallende Fahrten."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit vérifie vos lignes enregistrées à l'ouverture et de temps en temps en arrière-plan (iOS décide quand), et vous signale les perturbations et les départs supprimés."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit controlla le linee salvate all'apertura e di tanto in tanto in background (decide iOS quando) e ti avvisa di disservizi e corse soppresse."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit revisa tus líneas guardadas al abrirla y de vez en cuando en segundo plano (iOS decide cuándo) y te avisa de incidencias y salidas canceladas."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "A Publit verifica as linhas guardadas ao abrir e de vez em quando em segundo plano (o iOS decide quando) e avisa sobre perturbações e partidas canceladas."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit controleert je bewaarde lijnen bij het openen en af en toe op de achtergrond (iOS bepaalt wanneer) en meldt storingen en vervallen ritten."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit sprawdza zapisane linie przy otwarciu i od czasu do czasu w tle (iOS decyduje kiedy) oraz informuje o utrudnieniach i odwołanych kursach."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit перевіряє збережені лінії під час відкриття і час від часу у фоні (коли — вирішує iOS) та повідомляє про збої й скасовані рейси."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit verifică liniile salvate la deschidere și din când în când în fundal (iOS decide când) și te anunță despre perturbări și plecări anulate."
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit kontroluje uložené linky při otevření a občas na pozadí (kdy, rozhoduje iOS) a upozorní na výluky a zrušené spoje."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit kontrollerar dina sparade linjer när du öppnar appen och då och då i bakgrunden (iOS bestämmer när) och meddelar störningar och inställda avgångar."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Το Publit ελέγχει τις αποθηκευμένες γραμμές όταν το ανοίγεις και κατά διαστήματα στο παρασκήνιο (το iOS αποφασίζει πότε) και σε ενημερώνει για διαταραχές και ακυρωμένες αναχωρήσεις."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "A Publit megnyitáskor és időnként a háttérben (hogy mikor, azt az iOS dönti el) ellenőrzi a mentett vonalakat, és jelzi a zavarokat és az elmaradó járatokat."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit kayıtlı hatlarını açılışta ve zaman zaman arka planda (ne zaman olacağına iOS karar verir) kontrol eder; aksaklıkları ve iptal edilen seferleri bildirir."
      }
     }
    }
@@ -24813,6 +29010,101 @@
     }
    }
   },
+  "Rent in the provider's app": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Rent in the provider's app"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "In der App des Anbieters mieten"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Louer dans l'app du fournisseur"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Noleggia nell'app del gestore"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Alquilar en la app del proveedor"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Alugar na app do fornecedor"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Huren in de app van de aanbieder"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Wypożycz w aplikacji operatora"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Орендувати в застосунку оператора"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Închiriază în aplicația furnizorului"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Půjčit v aplikaci poskytovatele"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Hyr i leverantörens app"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ενοικίαση στην εφαρμογή του παρόχου"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bérlés a szolgáltató appjában"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sağlayıcının uygulamasında kirala"
+     }
+    }
+   }
+  },
   "Rental": {
    "extractionState": "manual",
    "localizations": {
@@ -24904,6 +29196,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "Kiralık araç"
+     }
+    }
+   }
+  },
+  "Renting needs the provider's app and an account there.": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Renting needs the provider's app and an account there."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Zum Mieten brauchst du die App des Anbieters und ein Konto dort."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "La location nécessite l'app du fournisseur et un compte chez lui."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Per noleggiare servono l'app del gestore e un account."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Para alquilar necesitas la app del proveedor y una cuenta."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Para alugar precisa da app do fornecedor e de uma conta."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Huren kan via de app van de aanbieder, met een account daar."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Wypożyczenie wymaga aplikacji operatora i konta u niego."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Для оренди потрібні застосунок оператора й обліковий запис у ньому."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Pentru închiriere ai nevoie de aplicația furnizorului și de un cont."
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "K půjčení potřebuješ aplikaci poskytovatele a účet u něj."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "För att hyra behövs leverantörens app och ett konto där."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Για ενοικίαση χρειάζεσαι την εφαρμογή του παρόχου και λογαριασμό εκεί."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "A bérléshez a szolgáltató appja és ott egy fiók kell."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kiralamak için sağlayıcının uygulaması ve orada bir hesap gerekir."
      }
     }
    }
@@ -25189,6 +29576,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "Sıfırla"
+     }
+    }
+   }
+  },
+  "Return at %@": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Return at %@"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Abgeben: %@"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Retour à %@"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Riconsegna a %@"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Devolución en %@"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Devolver em %@"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Inleveren bij %@"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Zwrot: %@"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Повернути: %@"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Returnare la %@"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Vrácení: %@"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Lämna vid %@"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Επιστροφή: %@"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Leadás: %@"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "İade: %@"
      }
     }
    }
@@ -26998,6 +31480,101 @@
     }
    }
   },
+  "Saved lines": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Saved lines"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Gemerkte Linien"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Lignes enregistrées"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Linee salvate"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Líneas guardadas"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Linhas guardadas"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bewaarde lijnen"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Zapisane linie"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Збережені лінії"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Linii salvate"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Uložené linky"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sparade linjer"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Αποθηκευμένες γραμμές"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Mentett vonalak"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Kayıtlı hatlar"
+     }
+    }
+   }
+  },
   "Scan a paper ticket": {
    "extractionState": "manual",
    "localizations": {
@@ -27089,6 +31666,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "Kâğıt bileti tara"
+     }
+    }
+   }
+  },
+  "Scheduled times. Live delays are on the departure board.": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Scheduled times. Live delays are on the departure board."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fahrplanzeiten. Aktuelle Verspätungen stehen in der Abfahrtstafel."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Horaires prévus. Les retards en temps réel sont sur le tableau des départs."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Orari programmati. I ritardi in tempo reale sono nel tabellone delle partenze."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Horarios programados. Los retrasos en tiempo real están en el panel de salidas."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Horários previstos. Os atrasos em tempo real estão no painel de partidas."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Geplande tijden. Actuele vertragingen staan op het vertrekbord."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Godziny rozkładowe. Bieżące opóźnienia są na tablicy odjazdów."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Час за розкладом. Поточні затримки — на табло відправлень."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ore din orar. Întârzierile în timp real sunt pe panoul de plecări."
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Časy podle jízdního řádu. Aktuální zpoždění jsou na odjezdové tabuli."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Tidtabellstider. Aktuella förseningar finns på avgångstavlan."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Προγραμματισμένες ώρες. Οι καθυστερήσεις σε πραγματικό χρόνο είναι στον πίνακα αναχωρήσεων."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Menetrend szerinti idők. Az élő késések az indulási táblán láthatók."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Tarife saatleri. Canlı gecikmeler kalkış tablosunda."
      }
     }
    }
@@ -27944,6 +32616,196 @@
      "stringUnit": {
       "state": "translated",
       "value": "Ayarlar"
+     }
+    }
+   }
+  },
+  "Share arrival": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Share arrival"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ankunft teilen"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Partager l'arrivée"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Condividi arrivo"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Compartir llegada"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Partilhar chegada"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Aankomst delen"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Udostępnij przyjazd"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Поділитися прибуттям"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Distribuie sosirea"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sdílet příjezd"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Dela ankomst"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Κοινοποίηση άφιξης"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Érkezés megosztása"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Varışı paylaş"
+     }
+    }
+   }
+  },
+  "Shared bikes and e-scooters": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Shared bikes and e-scooters"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Leihräder und E-Scooter"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Vélos et trottinettes en libre-service"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bici e monopattini in sharing"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bicis y patinetes compartidos"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bicicletas e trotinetes partilhadas"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Deelfietsen en -steps"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Rowery i hulajnogi na minuty"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Велосипеди й самокати в оренду"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Biciclete și trotinete partajate"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sdílená kola a koloběžky"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Delade cyklar och elsparkcyklar"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Κοινόχρηστα ποδήλατα και πατίνια"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Közösségi bicikli és roller"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Paylaşımlı bisiklet ve e-scooter"
      }
     }
    }
@@ -29088,6 +33950,101 @@
     }
    }
   },
+  "Sort routes by": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sort routes by"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Verbindungen sortieren nach"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Trier les trajets par"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ordina percorsi per"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ordenar rutas por"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ordenar percursos por"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Routes sorteren op"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sortuj trasy według"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Сортувати маршрути за"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sortează rutele după"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Řadit spojení podle"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sortera resor efter"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ταξινόμηση διαδρομών κατά"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Útvonalak rendezése"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Rotaları sırala"
+     }
+    }
+   }
+  },
   "Start": {
    "extractionState": "manual",
    "localizations": {
@@ -29753,6 +34710,101 @@
     }
    }
   },
+  "Step-free routes avoid stairs where the data allows it. With sharing, routes can start or end on a rented bike or e-scooter; the search takes a little longer.": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Step-free routes avoid stairs where the data allows it. With sharing, routes can start or end on a rented bike or e-scooter; the search takes a little longer."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Stufenlose Verbindungen meiden Treppen, soweit die Daten es erlauben. Mit Sharing können Verbindungen mit einem Leihrad oder E-Scooter beginnen oder enden; die Suche dauert dann etwas länger."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Les trajets sans marches évitent les escaliers quand les données le permettent. Avec le libre-service, un trajet peut commencer ou finir à vélo ou en trottinette de location ; la recherche prend un peu plus de temps."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "I percorsi senza gradini evitano le scale dove i dati lo consentono. Con lo sharing, un percorso può iniziare o finire con una bici o un monopattino a noleggio; la ricerca richiede un po' più di tempo."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Las rutas sin escalones evitan escaleras cuando los datos lo permiten. Con vehículos compartidos, una ruta puede empezar o terminar en bici o patinete de alquiler; la búsqueda tarda algo más."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Os percursos sem degraus evitam escadas quando os dados o permitem. Com partilha, um percurso pode começar ou terminar numa bicicleta ou trotinete alugada; a pesquisa demora um pouco mais."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Drempelvrije routes vermijden trappen waar de gegevens dat toelaten. Met deelvervoer kan een route beginnen of eindigen op een huurfiets of -step; zoeken duurt dan iets langer."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Trasy bez schodów omijają schody, jeśli pozwalają na to dane. Z wypożyczalniami trasa może zaczynać się lub kończyć na wypożyczonym rowerze lub hulajnodze; wyszukiwanie trwa nieco dłużej."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Маршрути без сходинок оминають сходи, якщо дозволяють дані. З орендою маршрут може починатися чи закінчуватися на орендованому велосипеді або самокаті; пошук триває трохи довше."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Rutele fără trepte evită scările unde datele permit. Cu vehicule partajate, o rută poate începe sau se poate termina cu o bicicletă sau trotinetă închiriată; căutarea durează puțin mai mult."
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bezbariérová spojení se vyhýbají schodům, pokud to data umožňují. Se sdílením může spojení začít nebo skončit na půjčeném kole či koloběžce; hledání trvá o něco déle."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Stegfria resor undviker trappor där datan tillåter det. Med delade fordon kan en resa börja eller sluta på en hyrd cykel eller elsparkcykel; sökningen tar lite längre tid."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Οι διαδρομές χωρίς σκαλοπάτια αποφεύγουν τις σκάλες όπου το επιτρέπουν τα δεδομένα. Με κοινόχρηστα οχήματα, μια διαδρομή μπορεί να αρχίζει ή να τελειώνει με νοικιασμένο ποδήλατο ή πατίνι· η αναζήτηση διαρκεί λίγο περισσότερο."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "A lépcsőmentes útvonalak kerülik a lépcsőket, ahol az adatok engedik. Közösségi járművekkel az útvonal bérelt biciklivel vagy rollerrel is kezdődhet vagy végződhet; a keresés kicsit tovább tart."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Basamaksız rotalar, veriler izin verdiğince merdivenlerden kaçınır. Paylaşımlı araçlarla rota kiralık bisiklet veya e-scooter ile başlayıp bitebilir; arama biraz daha uzun sürer."
+     }
+    }
+   }
+  },
   "Steps": {
    "extractionState": "manual",
    "localizations": {
@@ -30414,6 +35466,101 @@
      "stringUnit": {
       "state": "translated",
       "value": "Simge"
+     }
+    }
+   }
+  },
+  "Tap a stop for its timetable.": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Tap a stop for its timetable."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Tippe auf einen Halt für seinen Fahrplan."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Touchez un arrêt pour voir ses horaires."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Tocca una fermata per vederne gli orari."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Toca una parada para ver su horario."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Toque numa paragem para ver o horário."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Tik op een halte voor de dienstregeling."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Stuknij przystanek, aby zobaczyć rozkład."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Торкніться зупинки, щоб побачити розклад."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Atinge o stație pentru orarul ei."
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Klepni na zastávku pro její jízdní řád."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Tryck på en hållplats för dess tidtabell."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Πάτησε μια στάση για τα δρομολόγιά της."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Koppints egy megállóra a menetrendjéért."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Tarifesi için bir durağa dokun."
      }
     }
    }
@@ -35453,6 +40600,196 @@
     }
    }
   },
+  "Vehicle positions are estimated from live departure times.": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Vehicle positions are estimated from live departure times."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fahrzeugpositionen sind aus aktuellen Abfahrtszeiten geschätzt."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Les positions des véhicules sont estimées à partir des départs en temps réel."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Le posizioni dei mezzi sono stimate dagli orari di partenza in tempo reale."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Las posiciones de los vehículos se estiman con las salidas en tiempo real."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "As posições dos veículos são estimadas a partir das partidas em tempo real."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Voertuigposities zijn geschat op basis van actuele vertrektijden."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Pozycje pojazdów są szacowane na podstawie bieżących odjazdów."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Позиції транспорту оцінено за поточним часом відправлення."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Pozițiile vehiculelor sunt estimate din orele de plecare în timp real."
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Polohy vozidel jsou odhadnuté z aktuálních časů odjezdů."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fordonens positioner uppskattas från aktuella avgångstider."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Οι θέσεις των οχημάτων εκτιμώνται από τις ώρες αναχώρησης σε πραγματικό χρόνο."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "A járművek helyzete az élő indulási időkből becsült."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Araç konumları canlı kalkış saatlerinden tahmin edilir."
+     }
+    }
+   }
+  },
+  "Vehicles": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Vehicles"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fahrzeuge"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Véhicules"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Mezzi"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Vehículos"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Veículos"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Voertuigen"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Pojazdy"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Транспорт"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Vehicule"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Vozidla"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fordon"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Οχήματα"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Járművek"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Araçlar"
+     }
+    }
+   }
+  },
   "Very tight change at %@": {
    "extractionState": "manual",
    "localizations": {
@@ -37068,6 +42405,101 @@
     }
    }
   },
+  "With sharing": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "With sharing"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Mit Sharing"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Avec libre-service"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Con sharing"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Con vehículos compartidos"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Com partilha"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Met deelvervoer"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Z wypożyczalniami"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "З орендою"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Cu vehicule partajate"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Se sdílením"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Med delade fordon"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Με κοινόχρηστα"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Közösségi járművekkel"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Paylaşımlı araçlarla"
+     }
+    }
+   }
+  },
   "Without %@": {
    "extractionState": "manual",
    "localizations": {
@@ -37349,6 +42781,196 @@
      "stringUnit": {
       "state": "translated",
       "value": "Sarı"
+     }
+    }
+   }
+  },
+  "You shared your arrival at %@. Tap to send the new time.": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "You shared your arrival at %@. Tap to send the new time."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Du hast deine Ankunft in %@ geteilt. Tippe, um die neue Zeit zu senden."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Vous avez partagé votre arrivée à %@. Touchez pour envoyer la nouvelle heure."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Hai condiviso il tuo arrivo a %@. Tocca per inviare il nuovo orario."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Compartiste tu llegada a %@. Toca para enviar la nueva hora."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Partilhou a sua chegada a %@. Toque para enviar a nova hora."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Je hebt je aankomst in %@ gedeeld. Tik om de nieuwe tijd te sturen."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Udostępniono przyjazd do %@. Stuknij, aby wysłać nową godzinę."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ви поділилися прибуттям до %@. Торкніться, щоб надіслати новий час."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ai distribuit sosirea la %@. Atinge pentru a trimite noua oră."
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sdílel(a) jsi příjezd do %@. Klepni a pošli nový čas."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Du delade din ankomst till %@. Tryck för att skicka den nya tiden."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Κοινοποίησες την άφιξή σου στο %@. Πάτησε για να στείλεις τη νέα ώρα."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Megosztottad az érkezésed ide: %@. Koppints az új idő elküldéséhez."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ varışını paylaştın. Yeni saati göndermek için dokun."
+     }
+    }
+   }
+  },
+  "Zoom in to see lines and vehicles": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Zoom in to see lines and vehicles"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Heranzoomen für Linien und Fahrzeuge"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Zoomez pour voir lignes et véhicules"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ingrandisci per vedere linee e mezzi"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Acerca el mapa para ver líneas y vehículos"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Aproxime para ver linhas e veículos"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Zoom in voor lijnen en voertuigen"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Przybliż, aby zobaczyć linie i pojazdy"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Збільште, щоб побачити лінії й транспорт"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Mărește pentru linii și vehicule"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Přibliž pro linky a vozidla"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Zooma in för linjer och fordon"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Μεγέθυνε για γραμμές και οχήματα"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nagyíts a vonalakhoz és járművekhez"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Hatları ve araçları görmek için yakınlaştır"
      }
     }
    }
