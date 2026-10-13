@@ -84,6 +84,18 @@ struct TripActionsSection: View {
             Label("Add to Calendar", systemImage: "calendar.badge.plus")
         }
         .buttonStyle(.bordered)
+        if itinerary.endTime > .now {
+            // "I'm arriving at … at 18:42": live time; a notification follows if it moves later.
+            ShareLink(item: ArrivalShare.message(for: itinerary, to: toName)) {
+                Label("Share arrival", systemImage: "square.and.arrow.up")
+            }
+            .buttonStyle(.bordered)
+            .simultaneousGesture(TapGesture().onEnded {
+                let trip = ensureSaved()
+                ArrivalUpdates.recordShare(tripKey: trip.id, arrival: itinerary.endTime)
+            })
+            .accessibilityIdentifier("shareArrival")
+        }
         if itinerary.startTime > .now {
             Button {
                 Task { await toggleReminder() }

@@ -75,6 +75,8 @@ final class PublitUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["In der Nähe"].waitForExistence(timeout: 5))
         snap("de-nearby")
         app.tabBars.buttons.element(boundBy: 2).tap()
+        XCTAssertTrue(app.navigationBars["Linien"].waitForExistence(timeout: 5))
+        app.tabBars.buttons.element(boundBy: 3).tap()
         XCTAssertTrue(app.navigationBars["Gespeichert"].waitForExistence(timeout: 5))
         snap("de-saved")
     }
@@ -341,7 +343,7 @@ final class PublitUITests: XCTestCase {
         XCTAssertTrue(reveal(all, in: app), "no departure board loaded")
         all.tap()
         XCTAssertTrue(app.buttons["Save"].waitForExistence(timeout: 10))
-        app.buttons["Lines"].tap()
+        app.segmentedControls.buttons["Lines"].tap()
         XCTAssertTrue(app.descendants(matching: .any)["lineAtStop"].firstMatch.waitForExistence(timeout: timeout), "no lines at the station")
         sleep(1)
         snap("stop-lines")
@@ -371,5 +373,58 @@ final class PublitUITests: XCTestCase {
         XCTAssertTrue(plan.navigationBars["Route options"].waitForExistence(timeout: 5))
         plan.buttons["Reset"].tap()
         plan.buttons["routeOptionsDone"].tap()
+    }
+
+    /// F14 Lines tab: lines around you, a line's route with vehicles and a stop timetable;
+    /// the station map with line shapes and live vehicles; sorting routes.
+    func testF14LinesTabAndLiveMap() {
+        let app = launch()
+        nudge(app)
+        app.tabBars.buttons["Lines"].tap()
+        XCTAssertTrue(app.navigationBars["Lines"].waitForExistence(timeout: 10))
+        let row = app.buttons["lineRow"].firstMatch
+        if !row.waitForExistence(timeout: timeout) { snap("lines-fail") }
+        XCTAssertTrue(row.exists, "no lines nearby")
+        sleep(1)
+        snap("lines")
+        row.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["lineDirection"].firstMatch.waitForExistence(timeout: timeout)
+                      || app.descendants(matching: .any)["lineStop"].firstMatch.waitForExistence(timeout: 5), "line detail empty")
+        sleep(5) // route shape and vehicles
+        snap("line-detail")
+        let stop = app.buttons["lineStop"].firstMatch
+        if reveal(stop, in: app) {
+            stop.tap()
+            XCTAssertTrue(app.descendants(matching: .any)["lineTimetable"].firstMatch.waitForExistence(timeout: timeout), "no timetable")
+            sleep(1)
+            snap("line-timetable")
+        }
+        app.terminate()
+
+        let map = launch()
+        nudge(map)
+        let mapButton = map.buttons["Station map"]
+        XCTAssertTrue(mapButton.waitForExistence(timeout: 10))
+        mapButton.tap()
+        XCTAssertTrue(map.navigationBars["Stations"].waitForExistence(timeout: 10))
+        sleep(12) // tiles, line shapes and the first vehicle positions
+        snap("map-lines")
+        map.terminate()
+
+        let plan = launch(["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "plan"])
+        let routes = plan.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'from Marienplatz'"))
+        XCTAssertTrue(routes.firstMatch.waitForExistence(timeout: timeout), "no routes found")
+        let sort = plan.buttons["routeSortMenu"].firstMatch
+        XCTAssertTrue(sort.waitForExistence(timeout: 5), "no sort menu")
+        sort.tap()
+        let fastest = plan.buttons["Fastest"].firstMatch
+        XCTAssertTrue(fastest.waitForExistence(timeout: 5))
+        fastest.tap()
+        XCTAssertTrue(routes.firstMatch.waitForExistence(timeout: timeout))
+        sleep(1)
+        snap("plan-sorted")
+        // Back to the default order for the next run.
+        sort.tap()
+        if plan.buttons["Departure"].firstMatch.waitForExistence(timeout: 5) { plan.buttons["Departure"].firstMatch.tap() }
     }
 }

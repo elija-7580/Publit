@@ -129,25 +129,47 @@ struct RouteOptions: Codable, Hashable, Sendable {
     var wheelchair = false
     /// Also ask for walking, cycling and driving the whole way, to compare.
     var compareStreetModes = true
+    /// Shared bikes and e-scooters to and from the stations.
+    var sharing = false
+    /// Order of the listed routes (sorting only, the same routes).
+    var sort = RouteSort.departure
+
+    init() {}
+
+    private enum CodingKeys: String, CodingKey {
+        case modes, maxTransfers, maxWalkMinutes, wheelchair, compareStreetModes, sharing, sort
+    }
+
+    /// Options saved by older versions lack the newer keys; they keep their defaults.
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        modes = try c.decodeIfPresent(ModeFilter.self, forKey: .modes) ?? ModeFilter()
+        maxTransfers = try c.decodeIfPresent(Int.self, forKey: .maxTransfers)
+        maxWalkMinutes = try c.decodeIfPresent(Int.self, forKey: .maxWalkMinutes) ?? Self.defaultWalkMinutes
+        wheelchair = try c.decodeIfPresent(Bool.self, forKey: .wheelchair) ?? false
+        compareStreetModes = try c.decodeIfPresent(Bool.self, forKey: .compareStreetModes) ?? true
+        sharing = try c.decodeIfPresent(Bool.self, forKey: .sharing) ?? false
+        sort = (try? c.decodeIfPresent(RouteSort.self, forKey: .sort)) ?? .departure
+    }
 
     static let defaultWalkMinutes = 30
     static let walkChoices = [5, 10, 15, 20, 30]
     static let transferChoices: [Int?] = [nil, 0, 1, 2]
 
     var isDefault: Bool {
-        !modes.isActive && maxTransfers == nil && maxWalkMinutes == Self.defaultWalkMinutes && !wheelchair
+        !modes.isActive && maxTransfers == nil && maxWalkMinutes == Self.defaultWalkMinutes && !wheelchair && !sharing
     }
 
     /// How many options differ from the default (badge on the filter button).
     var activeCount: Int {
-        [modes.isActive, maxTransfers != nil, maxWalkMinutes != Self.defaultWalkMinutes, wheelchair].filter { $0 }.count
+        [modes.isActive, maxTransfers != nil, maxWalkMinutes != Self.defaultWalkMinutes, wheelchair, sharing].filter { $0 }.count
     }
 
     var directModes: [String] { compareStreetModes ? ["WALK", "BIKE", "CAR"] : ["WALK"] }
 
     /// Part of the query key: other options mean other routes.
     var key: String {
-        "\(modes.storageValue)|\(maxTransfers.map(String.init) ?? "-")|\(maxWalkMinutes)|\(wheelchair)|\(compareStreetModes)"
+        "\(modes.storageValue)|\(maxTransfers.map(String.init) ?? "-")|\(maxWalkMinutes)|\(wheelchair)|\(compareStreetModes)|\(sharing)"
     }
 
     static func transferTitle(_ n: Int?) -> String {
@@ -165,6 +187,7 @@ struct RouteOptions: Codable, Hashable, Sendable {
         if let t = maxTransfers { parts.append(t == 0 ? L10n.t("Direct only") : L10n.f("Changes: up to %lld", t)) }
         if maxWalkMinutes != Self.defaultWalkMinutes { parts.append(L10n.f("Walk up to %lld min", maxWalkMinutes)) }
         if wheelchair { parts.append(L10n.t("Step-free")) }
+        if sharing { parts.append(L10n.t("With sharing")) }
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
 
@@ -212,5 +235,52 @@ struct StreetComparison: Identifiable, Sendable {
         let modes = Set(it.legs.map(\.mode))
         guard modes.count == 1, let m = modes.first, order.contains(m) else { return nil }
         return m
+    }
+}
+
+/// How the planner orders its routes.
+enum RouteSort: String, Codable, CaseIterable, Identifiable, Sendable {
+    case departure, fastest, fewestChanges, leastWalking
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .departure: return L10n.t("Departure")
+        case .fastest: return L10n.t("Fastest")
+        case .fewestChanges: return L10n.t("Fewest changes")
+        case .leastWalking: return L10n.t("Least walking")
+        }
+    }
+
+    var symbol: String {
+        switch self {
+        case .departure: return "clock"
+        case .fastest: return "hare"
+        case .fewestChanges: return "arrow.triangle.swap"
+        case .leastWalking: return "figure.walk"
+        }
+    }
+
+    /// Seconds on foot (walks to, between and from the vehicles).
+    static func walkSeconds(_ it: Itinerary) -> Int {
+        it.legs.filter { $0.mode == "WALK" }.reduce(0) { $0 + $1.duration }
+    }
+
+    /// Stable: ties keep the planner's order (by departure). `.departure` leaves the list as it is.
+    func apply(_ list: [Itinerary]) -> [Itinerary] {
+        guard self != .departure else { return list }
+        func key(_ it: Itinerary) -> (Int, Int) {
+            switch self {
+            case .departure: return (0, 0)
+            case .fastest: return (it.duration, it.transfers)
+            case .fewestChanges: return (it.transfers, it.duration)
+            case .leastWalking: return (Self.walkSeconds(it), it.duration)
+            }
+        }
+        return list.enumerated().sorted { a, b in
+            let ka = key(a.element), kb = key(b.element)
+            return ka != kb ? ka < kb : a.offset < b.offset
+        }.map(\.element)
     }
 }

@@ -5,6 +5,7 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(TicketStore.self) private var tickets
+    @AppStorage(LineAlertMonitor.enabledKey) private var lineAlerts = false
 
     var body: some View {
         NavigationStack {
@@ -43,6 +44,19 @@ struct SettingsView: View {
                             }
                         }
                     }
+                }
+                Section {
+                    Toggle(isOn: Binding(get: { lineAlerts }, set: { on in
+                        lineAlerts = on
+                        if on { Task { if !(await LineAlertMonitor.requestPermission()) { lineAlerts = false } } }
+                    })) {
+                        Label("Disruptions on saved lines", systemImage: "exclamationmark.bubble")
+                    }
+                    .accessibilityIdentifier("lineAlertsToggle")
+                } header: {
+                    Text("Notifications")
+                } footer: {
+                    Text("Publit checks your saved lines when you open it and from time to time in the background (iOS decides when), and tells you about alerts and cancelled departures.")
                 }
                 Section {
                     Link("Routing and timetables: Transitous and its data sources", destination: AppInfo.sourcesURL)

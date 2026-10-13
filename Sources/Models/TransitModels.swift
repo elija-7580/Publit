@@ -126,6 +126,8 @@ struct Leg: Codable, Sendable, RouteStyled {
     let intermediateStops: [Place]?
     let alerts: [Alert]?
     let legGeometry: EncodedPolyline
+    /// Bike or scooter sharing for `RENTAL` legs.
+    var rental: LegRental? = nil
     var fareTransferIndex: Int? = nil
     var effectiveFareLegIndex: Int? = nil
 
@@ -176,6 +178,10 @@ struct StopTime: Decodable, Identifiable, Sendable, RouteStyled {
     let routeTextColor: String?
     let cancelled: Bool?
     let tripCancelled: Bool?
+    /// Feed direction ("0"/"1"), when given; groups the two directions of a line.
+    var directionId: String? = nil
+    /// Last stop of the trip.
+    var tripTo: SegmentStop? = nil
 
     var id: String { "\(tripId)|\(place.stopId ?? place.name)|\(departureTime.timeIntervalSince1970)" }
     var directionName: String? { TransitLabels.clean(headsign) }

@@ -9,8 +9,8 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "0.3.0"
-    CURRENT_PROJECT_VERSION: "3"
+    MARKETING_VERSION: "0.4.0"
+    CURRENT_PROJECT_VERSION: "4"
     # Personal Team — Automatic Signing for local device installs.
     DEVELOPMENT_TEAM: "3D6S8GFSGK"
 targets:
@@ -33,6 +33,9 @@ targets:
         NSLocationWhenInUseUsageDescription: Publit uses your location to show departures near you and to plan trips from where you are.
         NSCalendarsWriteOnlyAccessUsageDescription: Publit adds the trips you choose to your calendar.
         NSSupportsLiveActivities: true
+        # Background check of saved lines for disruptions (LineAlertMonitor).
+        BGTaskSchedulerPermittedIdentifiers: [io.github.publit.app.lines]
+        UIBackgroundModes: [fetch]
         CFBundleURLTypes:
           - CFBundleURLName: io.github.publit.app
             CFBundleURLSchemes: [publit]
@@ -86,6 +89,7 @@ targets:
       - Sources/Models/DeepLink.swift
       - Sources/Models/PlaceRole.swift
       - Sources/Models/TransitFilter.swift
+      - Sources/Models/TransitExtras.swift
       - Sources/Views/Components/LineBadge.swift
       - Sources/Util/Geo.swift
       - Sources/Util/Polyline.swift

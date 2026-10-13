@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.4.0 (build 4)
+
+### New
+- Lines tab: the lines around you and your saved lines, searchable by line number ("U6", "bus 52") or destination, and stations by name. Filter by mode.
+- Line screen: the route on a map with the vehicles on it now (estimated from live departure times), both directions, alerts, every stop with minutes from the start. Tap a stop for its timetable for any day, by hour.
+- Station map: line routes in their colours and live vehicles moving along them, tap a vehicle for its trip and next stops. Shared bikes, e-scooters and their stations as a layer. Layers can be switched on and off; modes filter lines and vehicles too.
+- Shared bikes and e-scooters in route planning (Route options, off by default): routes can start or end on a rented vehicle, with a link to the provider's app.
+- Notifications for disruptions on saved lines: alerts and cancelled departures, checked on opening and in the background (Settings → Notifications).
+- Sort routes by departure, fastest, fewest changes or least walking.
+- Share arrival: send your live arrival time from a route or trip; when a followed trip runs late, Publit offers to send the new time.
+
+### Faster
+- The station map uses MapKit directly: line routes are grouped by colour into few overlays, vehicles glide between positions instead of being redrawn, and pins cluster.
+- Map data loads only for the visible area and only while the map is on screen; lines and vehicles appear from street level, rentals when zoomed in further. Answers are decoded and simplified off the main thread and cached briefly.
+- Line search uses one request for all departures nearby (cached 30 min); timetables for a day are cached for hours.
+
+### Not included
+- Vehicle occupancy: Transitous publishes no occupancy data, so Publit cannot show how full a vehicle is.
+
 ## 0.3.0 (build 3)
 
 ### New

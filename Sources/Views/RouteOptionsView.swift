@@ -47,8 +47,23 @@ struct RouteOptionsView: View {
                     Toggle(isOn: $draft.wheelchair) {
                         Label("Step-free (wheelchair)", systemImage: "figure.roll")
                     }
+                    Toggle(isOn: $draft.sharing) {
+                        Label("Shared bikes and e-scooters", systemImage: "scooter")
+                    }
+                    .accessibilityIdentifier("routeSharing")
                 } footer: {
-                    Text("Step-free routes avoid stairs where the data allows it.")
+                    Text("Step-free routes avoid stairs where the data allows it. With sharing, routes can start or end on a rented bike or e-scooter; the search takes a little longer.")
+                }
+
+                Section("Sort routes by") {
+                    Picker("Sort routes by", selection: $draft.sort) {
+                        ForEach(RouteSort.allCases) { s in
+                            Label(s.title, systemImage: s.symbol).tag(s)
+                        }
+                    }
+                    .pickerStyle(.inline)
+                    .labelsHidden()
+                    .accessibilityIdentifier("routeSort")
                 }
 
                 Section {
@@ -65,9 +80,10 @@ struct RouteOptionsView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Reset") {
-                        let compare = draft.compareStreetModes
+                        let compare = draft.compareStreetModes, sort = draft.sort
                         draft = RouteOptions()
                         draft.compareStreetModes = compare
+                        draft.sort = sort
                     }
                     .disabled(draft.isDefault)
                 }

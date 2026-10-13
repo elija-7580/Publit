@@ -40,7 +40,7 @@ struct PublitApp: App {
                 .onAppear {
                     app.applyDemo(ProcessInfo.processInfo.environment["PUBLIT_DEMO"])
                     if let tab = ProcessInfo.processInfo.environment["PUBLIT_TAB"] {
-                        app.tab = tab == "plan" ? .plan : tab == "saved" ? .favorites : .nearby
+                        app.tab = tab == "plan" ? .plan : tab == "saved" ? .favorites : tab == "lines" ? .lines : .nearby
                     }
                     location.start()
                     NotificationRouter.shared.open = { [app] url in app.open(url) }
@@ -48,6 +48,11 @@ struct PublitApp: App {
                     PublitShortcuts.updateAppShortcutParameters()
                 }
                 .onChange(of: favorites.stops.count) { PublitShortcuts.updateAppShortcutParameters() }
+        }
+        // Saved lines checked for disruptions while the app is closed (iOS decides when).
+        .backgroundTask(.appRefresh(LineAlertMonitor.taskId)) {
+            LineAlertMonitor.scheduleBackgroundCheck()
+            await LineAlertMonitor.check(minInterval: 10 * 60)
         }
     }
 }
@@ -69,6 +74,9 @@ struct RootView: View {
             NavigationStack { PlanView() }
                 .tabItem { Label("Plan", systemImage: "calendar") }
                 .tag(AppTab.plan)
+            NavigationStack { LinesView() }
+                .tabItem { Label("Lines", systemImage: "point.topleft.down.to.point.bottomright.curvepath") }
+                .tag(AppTab.lines)
             NavigationStack { FavoritesView() }
                 .tabItem { Label("Saved", systemImage: "star") }
                 .tag(AppTab.favorites)
@@ -103,8 +111,10 @@ struct RootView: View {
             }
         }
         .task(id: scenePhase) {
+            if scenePhase == .background { LineAlertMonitor.scheduleBackgroundCheck() }
             // Keep running Live Activities current while the app is open.
             guard scenePhase == .active else { return }
+            await LineAlertMonitor.check()
             while !Task.isCancelled {
                 await refreshLiveTrips()
                 try? await Task.sleep(for: .seconds(60))
@@ -157,7 +167,10 @@ struct RootView: View {
         for trip in trips.upcoming(now: now.addingTimeInterval(-15 * 60)) where LiveTripActivity.isRunning(trip.id) || trips.activeTripId == trip.id {
             if let fresh = try? await TripRefreshCoordinator.shared.refresh(trip.itinerary.id) {
                 trips.update(trip.id, with: fresh)
-                if let updated = trips.trip(trip.id) { await LeaveReminder.follow(trip, to: updated) }
+                if let updated = trips.trip(trip.id) {
+                    await LeaveReminder.follow(trip, to: updated)
+                    await ArrivalUpdates.follow(updated)
+                }
             }
             if let t = trips.trip(trip.id) { await LiveTripActivity.update(t) }
         }

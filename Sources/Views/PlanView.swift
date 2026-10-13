@@ -183,7 +183,7 @@ struct PlanView: View {
 
     @ViewBuilder
     private func resultsSection(_ plan: PlanModel) -> some View {
-        let its = plan.itineraries
+        let its = plan.sortedItineraries
         let windowStart = its.map(\.startTime).min() ?? .now
         let windowEnd = its.map(\.endTime).max() ?? .now
         let zoneNote = its.first.flatMap { Fmt.foreignZoneNote(tz: $0.legs.first?.from.tz, at: $0.startTime) }
@@ -241,6 +241,7 @@ struct PlanView: View {
                 Text("Routes")
                 Spacer()
                 if !its.isEmpty {
+                    RouteSortMenu()
                     Button(showMap ? L10n.t("List") : L10n.t("Map")) { withAnimation { showMap.toggle() } }
                         .font(.caption.weight(.semibold))
                         .textCase(nil)
@@ -346,5 +347,29 @@ struct TimelineBar: View {
             .frame(width: width, height: height, alignment: .leading)
         }
         .accessibilityHidden(true)
+    }
+}
+
+/// Quick switch of the route order in the results header.
+struct RouteSortMenu: View {
+    @Environment(AppState.self) private var app
+
+    var body: some View {
+        let current = app.routeOptions.sort
+        Menu {
+            Picker("Sort routes by", selection: Binding(get: { current }, set: { s in
+                var o = app.routeOptions
+                o.sort = s
+                app.setRouteOptions(o)
+            })) {
+                ForEach(RouteSort.allCases) { s in Label(s.title, systemImage: s.symbol).tag(s) }
+            }
+        } label: {
+            Label(current.title, systemImage: "arrow.up.arrow.down")
+                .font(.caption.weight(.semibold))
+                .textCase(nil)
+        }
+        .accessibilityIdentifier("routeSortMenu")
+        .padding(.trailing, 8)
     }
 }

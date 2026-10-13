@@ -260,10 +260,27 @@ struct LegRow: View {
             .accessibilityIdentifier("transitLeg")
         } else {
             HStack(alignment: .top, spacing: 8) {
-                Image(systemName: ModeStyle.symbol(leg.mode)).foregroundStyle(.secondary).frame(width: 24)
+                Image(systemName: leg.rental.map { $0.kind.symbol } ?? ModeStyle.symbol(leg.mode))
+                    .foregroundStyle(leg.rental == nil ? Color.secondary : Color.teal).frame(width: 24)
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("\(ModeStyle.label(leg.mode)) \(Fmt.duration(seconds: leg.duration))")
-                    if let d = leg.distance, d > 0 { Text(Fmt.distance(meters: d)).foregroundStyle(.secondary) }
+                    if let r = leg.rental {
+                        // Shared bike or scooter: whose, from where, and a link to rent it.
+                        Text(verbatim: "\(r.kind.title) · \(r.systemName ?? ModeStyle.label(leg.mode)) · \(Fmt.duration(seconds: leg.duration))")
+                        if let from = r.fromStationName, !from.isEmpty {
+                            Text(L10n.f("Pick up at %@", from)).foregroundStyle(.secondary)
+                        }
+                        if let to = r.toStationName, !to.isEmpty {
+                            Text(L10n.f("Return at %@", to)).foregroundStyle(.secondary)
+                        }
+                        if let d = leg.distance, d > 0 { Text(Fmt.distance(meters: d)).foregroundStyle(.secondary) }
+                        if let url = r.bookingURL {
+                            Link(destination: url) { Label("Rent in the provider's app", systemImage: "arrow.up.forward.app") }
+                                .font(.subheadline.weight(.semibold))
+                        }
+                    } else {
+                        Text("\(ModeStyle.label(leg.mode)) \(Fmt.duration(seconds: leg.duration))")
+                        if let d = leg.distance, d > 0 { Text(Fmt.distance(meters: d)).foregroundStyle(.secondary) }
+                    }
                 }
                 Spacer(minLength: 0)
             }

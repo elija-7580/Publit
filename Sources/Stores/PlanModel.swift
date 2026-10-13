@@ -59,6 +59,9 @@ final class PlanModel {
     @ObservationIgnored private var resultsKey: String?
     @ObservationIgnored var history: SearchHistoryStore = .shared
 
+    /// The routes in the order chosen in the options (fastest, fewest changes, …).
+    var sortedItineraries: [Itinerary] { options.sort.apply(itineraries) }
+
     var canLoadMore: Bool { nextCursor != nil && !itineraries.isEmpty }
 
     /// Changes whenever a new search is needed.
@@ -176,7 +179,7 @@ final class PlanModel {
     }
 }
 
-enum AppTab: Hashable { case nearby, plan, favorites }
+enum AppTab: Hashable { case nearby, plan, lines, favorites }
 
 @MainActor
 @Observable

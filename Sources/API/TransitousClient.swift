@@ -92,6 +92,11 @@ final class TransitousClient: @unchecked Sendable {
         ]
         // Walking, cycling and driving the whole way come back in `direct`, for comparison.
         q.append(URLQueryItem(name: "directModes", value: options.directModes.joined(separator: ",")))
+        // Shared bikes and scooters to and from the stations (much slower to compute on the server).
+        if options.sharing {
+            q.append(URLQueryItem(name: "preTransitModes", value: "WALK,RENTAL"))
+            q.append(URLQueryItem(name: "postTransitModes", value: "WALK,RENTAL"))
+        }
         if let modes = options.modes.apiValue { q.append(URLQueryItem(name: "transitModes", value: modes)) }
         if let n = options.maxTransfers { q.append(URLQueryItem(name: "maxTransfers", value: String(n))) }
         if options.wheelchair { q.append(URLQueryItem(name: "pedestrianProfile", value: "WHEELCHAIR")) }
@@ -139,6 +144,51 @@ final class TransitousClient: @unchecked Sendable {
         if let radius { q.append(URLQueryItem(name: "radius", value: String(radius))) }
         if let modes { q.append(URLQueryItem(name: "mode", value: modes)) }
         return try await get("/api/v6/stoptimes", q, cache: .live)
+    }
+
+    /// Departures over a time span, e.g. a whole day for a line timetable or the lines around a place.
+    /// - Parameters:
+    ///   - window: seconds from `time`; the server returns every departure in it.
+    ///   - modes: only these modes; keeps busy stations' answers small.
+    func departures(stopId: String? = nil, center: LatLon? = nil, radius: Int? = nil, time: Date, window: Int,
+                    modes: String? = nil, count: Int = 20, maxAge: TimeInterval) async throws -> StopTimesResponse {
+        var q: [URLQueryItem] = []
+        if let stopId { q.append(URLQueryItem(name: "stopId", value: stopId)) }
+        if let center { q.append(URLQueryItem(name: "center", value: center.apiValue)) }
+        if let radius { q.append(URLQueryItem(name: "radius", value: String(radius))) }
+        q += [
+            URLQueryItem(name: "time", value: DateParsing.format(time)),
+            URLQueryItem(name: "window", value: String(window)),
+            URLQueryItem(name: "n", value: String(count)),
+            URLQueryItem(name: "withAlerts", value: "false"),
+        ]
+        if let modes { q.append(URLQueryItem(name: "mode", value: modes)) }
+        return try await get("/api/v6/stoptimes", q, cache: CachePolicy(maxAge: maxAge, persist: maxAge >= 600))
+    }
+
+    /// Vehicles running in a map rectangle between `start` and `end`, stop to stop with their shapes.
+    /// Answers are a few hundred KB: asked only for what is on screen, a few minutes ahead.
+    func mapTrips(min: LatLon, max: LatLon, zoom: Int, start: Date, end: Date) async throws -> [TripSegment] {
+        try await get("/api/v6/map/trips", [
+            URLQueryItem(name: "min", value: min.apiValue),
+            URLQueryItem(name: "max", value: max.apiValue),
+            URLQueryItem(name: "zoom", value: String(zoom)),
+            URLQueryItem(name: "startTime", value: DateParsing.format(start)),
+            URLQueryItem(name: "endTime", value: DateParsing.format(end)),
+            URLQueryItem(name: "precision", value: zoom >= 14 ? "5" : "4"),
+        ], cache: CachePolicy(maxAge: 15, persist: false))
+    }
+
+    /// Bike and scooter sharing stations and free vehicles in a map rectangle.
+    func rentals(min: LatLon, max: LatLon) async throws -> RentalsResponse {
+        try await get("/api/v1/rentals", [
+            URLQueryItem(name: "min", value: min.apiValue),
+            URLQueryItem(name: "max", value: max.apiValue),
+            URLQueryItem(name: "withProviders", value: "false"),
+            URLQueryItem(name: "withStations", value: "true"),
+            URLQueryItem(name: "withVehicles", value: "true"),
+            URLQueryItem(name: "withZones", value: "false"),
+        ], cache: CachePolicy(maxAge: 60, persist: false))
     }
 
     /// The whole trip of one vehicle, with all stops and real-time times.

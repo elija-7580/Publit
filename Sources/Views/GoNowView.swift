@@ -8,7 +8,7 @@ struct GoNowView: View {
 
     var body: some View {
         let plan = app.goNow
-        let its = plan.itineraries
+        let its = plan.sortedItineraries
         let windowStart = its.map(\.startTime).min() ?? .now
         let windowEnd = its.map(\.endTime).max() ?? .now
         List {
@@ -48,7 +48,11 @@ struct GoNowView: View {
                     Button("Later connections") { Task { await plan.loadMore() } }
                 }
             } header: {
-                Text("From your location")
+                HStack {
+                    Text("From your location")
+                    Spacer()
+                    if !its.isEmpty { RouteSortMenu() }
+                }
             } footer: {
                 if let note = its.first.flatMap({ Fmt.foreignZoneNote(tz: $0.legs.first?.from.tz, at: $0.startTime) }) {
                     Label(note, systemImage: "clock")

@@ -69,6 +69,19 @@ struct SavedLine: Codable, Hashable, Identifiable, RouteStyled {
         lon = coordinate.lon
     }
 
+    init(line: LineRef) {
+        routeKey = line.key
+        mode = line.mode
+        routeShortName = line.routeShortName
+        displayName = line.displayName
+        routeColor = line.routeColor
+        routeTextColor = line.routeTextColor
+        stopId = line.stopId
+        stopName = line.stopName
+        lat = line.lat
+        lon = line.lon
+    }
+
     /// Route identity: the feed's route ID when present, else agency and line name.
     static func key(_ st: StopTime) -> String {
         st.routeId ?? "\(st.agencyName ?? "")|\(st.lineName)"
