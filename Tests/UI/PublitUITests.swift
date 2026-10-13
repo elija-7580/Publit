@@ -336,7 +336,7 @@ final class PublitUITests: XCTestCase {
         snap("stationmap")
     }
 
-    /// F07 Save a planned route: it appears under Upcoming trips, with ticket links in the details.
+    /// F07 Save a planned route: it appears under Upcoming trips in Saved, with ticket links in the details.
     func testF07SaveTripAndTickets() {
         let app = launch(["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "plan"])
         let routes = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'from Marienplatz'"))
@@ -360,8 +360,10 @@ final class PublitUITests: XCTestCase {
         sleep(1)
         app.navigationBars["Route"].buttons.firstMatch.tap()
         app.buttons["Clear destination"].tap()
+        // Saved trips are listed in the Saved tab (Plan is for planning only).
+        app.tabBars.buttons["Saved"].tap()
         let row = app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS 'Flughafen München'")).firstMatch
-        XCTAssertTrue(row.waitForExistence(timeout: 5), "saved trip not under Upcoming")
+        XCTAssertTrue(row.waitForExistence(timeout: 5), "saved trip not under Upcoming in Saved")
         snap("trips")
     }
 
@@ -498,6 +500,7 @@ final class PublitUITests: XCTestCase {
         XCTAssertTrue(reveal(all, in: app), "no link to all departures")
         all.tap()
         XCTAssertTrue(app.buttons["routeHere"].waitForExistence(timeout: 10), "no labelled Route here action")
+        XCTAssertTrue(app.buttons["routeFromHere"].exists, "no labelled Route from here action")
         sleep(2) // walking time
         snap("stop-actions")
     }

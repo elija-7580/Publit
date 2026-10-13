@@ -111,6 +111,8 @@ struct NearbyView: View {
             TripView(stopTime: t.stopTime, stationId: t.stationId, stationName: t.stationName, stationCoordinate: t.coordinate)
         }
         .fullScreenCover(isPresented: $showMap) { StationMapView() }
+        // "Route here/from here" on a map stop switches to Plan: the map closes so Plan is visible.
+        .onChange(of: app.tab) { if app.tab != .nearby { showMap = false } }
         .refreshable { await load(force: true) }
         .onChange(of: storedModes) {
             // Show the matching part of the current board at once, then ask the server for more.
@@ -334,10 +336,19 @@ struct StopDeparturesView: View {
                         .accessibilityLabel(L10n.f("Towards %@", StopGrouping.directions(departures, limit: 3).joined(separator: ", ")))
                 }
                 WalkThereRow(name: name, coordinate: coordinate)
-                Button { app.route(to: saved) } label: {
-                    Label("Route here", systemImage: "arrow.triangle.turn.up.right.diamond")
+                // Both open the Plan tab: "here" as destination or as start.
+                HStack(spacing: 16) {
+                    Button { app.route(to: saved) } label: {
+                        Label("Route here", systemImage: "arrow.triangle.turn.up.right.diamond")
+                    }
+                    .accessibilityIdentifier("routeHere")
+                    Spacer(minLength: 0)
+                    Button { app.route(from: saved) } label: {
+                        Label("Route from here", systemImage: "arrow.up.forward.circle")
+                    }
+                    .accessibilityIdentifier("routeFromHere")
                 }
-                .accessibilityIdentifier("routeHere")
+                .buttonStyle(.borderless)
                 Picker("View", selection: $mode) {
                     Text("Departures").tag(Mode.departures)
                     Text("Lines").tag(Mode.lines)

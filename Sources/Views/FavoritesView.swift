@@ -3,6 +3,7 @@ import SwiftUI
 struct FavoritesView: View {
     @Environment(FavoritesStore.self) private var favorites
     @Environment(AppState.self) private var app
+    @Environment(TripStore.self) private var trips
     @State private var adding = false
     @State private var settingRole: PlaceRole?
 
@@ -32,6 +33,8 @@ struct FavoritesView: View {
                     }
                 }
             }
+
+            upcomingTrips
 
             if !favorites.lines.isEmpty {
                 Section("Lines") {
@@ -103,5 +106,68 @@ struct FavoritesView: View {
                 if case .place(let p) = endpoint { favorites.set(p, as: role) }
             }
         }
+    }
+
+    /// Saved trips still to come, right below Home and Work; past ones on their own screen.
+    @ViewBuilder
+    private var upcomingTrips: some View {
+        let upcoming = trips.upcoming()
+        Section {
+            ForEach(upcoming) { t in
+                NavigationLink { SavedTripView(tripId: t.id) } label: { SavedTripRow(trip: t) }
+            }
+            .onDelete { idx in idx.map { upcoming[$0].id }.forEach { id in
+                LeaveReminder.cancel(id); Task { await LiveTripActivity.end(id) }; trips.remove(id)
+            } }
+            if !trips.past().isEmpty {
+                NavigationLink { PastTripsView() } label: {
+                    Label("Past trips", systemImage: "clock.arrow.circlepath")
+                }
+                .accessibilityIdentifier("pastTrips")
+            }
+        } header: {
+            Text("Upcoming trips")
+        } footer: {
+            if upcoming.isEmpty {
+                Text("Save a route to see it here, add it to your calendar and get a reminder when to leave.")
+            }
+        }
+    }
+}
+
+/// Trips that are over, newest first. Swipe right to plan the same route again next week.
+struct PastTripsView: View {
+    @Environment(AppState.self) private var app
+    @Environment(TripStore.self) private var trips
+
+    var body: some View {
+        let past = Array(trips.past().prefix(50))
+        List {
+            ForEach(past) { t in
+                NavigationLink { SavedTripView(tripId: t.id) } label: { SavedTripRow(trip: t).opacity(0.7) }
+                    .swipeActions(edge: .leading) {
+                        Button { planAgain(t) } label: { Label("Plan again", systemImage: "arrow.clockwise") }
+                            .tint(.blue)
+                    }
+            }
+            .onDelete { idx in idx.map { past[$0].id }.forEach(trips.remove) }
+        }
+        .overlay {
+            if past.isEmpty { ContentUnavailableView("Past trips", systemImage: "clock.arrow.circlepath") }
+        }
+        .navigationTitle("Past trips")
+        .screenTrail("Past trips")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    /// Same route again: same places, next week at the same time, in the Plan tab.
+    private func planAgain(_ t: SavedTrip) {
+        app.plan.from = .place(SavedPlace(id: "trip-from-\(t.id)", name: t.fromName, subtitle: nil,
+            lat: t.itinerary.legs.first?.from.lat ?? 0, lon: t.itinerary.legs.first?.from.lon ?? 0, stopId: nil))
+        app.plan.to = .place(SavedPlace(id: "trip-to-\(t.id)", name: t.toName, subtitle: nil,
+            lat: t.itinerary.legs.last?.to.lat ?? 0, lon: t.itinerary.legs.last?.to.lon ?? 0, stopId: nil))
+        app.plan.timeMode = .departAt
+        app.plan.date = PlanView.nextOccurrence(of: t.startTime)
+        app.tab = .plan
     }
 }

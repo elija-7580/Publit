@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0 (build 13)
+
+- Build 12 fixed the freeze on the trip screen (confirmed on the device).
+- Station map: the mode chips (Train, Bus, …) have their own space below the navigation bar instead of floating over the map. They could end up hidden, and then an active filter hid stations and vehicles without showing why.
+- Stops have "Route here" and "Route from here": both open the Plan tab with the stop as destination or start (the other end stays). From the station map, the map closes so Plan is visible.
+- Plan is for planning only: From/To, time, options, Home/Work and recent searches. Saved trips moved to Saved: upcoming trips right below Home and Work, past trips on their own screen ("Plan again" switches to Plan).
+
 ## 0.6.0 (build 12)
 
 ### Freeze on the trip screen (freeze log from build 11)

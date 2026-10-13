@@ -257,7 +257,15 @@ final class AppState {
     }
 
     func route(to place: SavedPlace) {
+        if plan.from == .place(place) { plan.from = .currentLocation }
         plan.to = .place(place)
+        tab = .plan
+    }
+
+    /// Plan tab with `place` as the start; the destination stays unless it is the same place.
+    func route(from place: SavedPlace) {
+        if plan.to == .place(place) { plan.to = nil }
+        plan.from = .place(place)
         tab = .plan
     }
 

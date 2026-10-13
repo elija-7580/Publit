@@ -214,3 +214,28 @@ final class TransitEnhancementTests: XCTestCase {
         print(String(format: "PERF grouping records=%d legacy_ms=%.3f indexed_ms=%.3f ratio=%.2f", input.count, oldMS, newMS, oldMS / max(newMS, 0.001)))
     }
 }
+
+final class RouteFromStopTests: XCTestCase {
+    private let stop = SavedPlace(id: "s1", name: "Stop", subtitle: nil, lat: 48.1, lon: 11.5, stopId: "s1")
+    private let other = SavedPlace(id: "p2", name: "Other", subtitle: nil, lat: 48.2, lon: 11.6, stopId: nil)
+
+    @MainActor func testRouteFromStopKeepsOtherDestinationAndOpensPlan() async {
+        let app = AppState()
+        app.plan.to = .place(other)
+        app.route(from: stop)
+        XCTAssertEqual(app.plan.from, .place(stop))
+        XCTAssertEqual(app.plan.to, .place(other))
+        XCTAssertEqual(app.tab, .plan)
+    }
+
+    @MainActor func testRouteFromAndToSameStopNeverBothEnds() async {
+        let app = AppState()
+        app.route(to: stop)
+        app.route(from: stop)
+        XCTAssertEqual(app.plan.from, .place(stop))
+        XCTAssertNil(app.plan.to)
+        app.route(to: stop)
+        XCTAssertEqual(app.plan.from, .currentLocation)
+        XCTAssertEqual(app.plan.to, .place(stop))
+    }
+}

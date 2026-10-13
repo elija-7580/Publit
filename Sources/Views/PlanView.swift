@@ -6,7 +6,6 @@ struct PlanView: View {
     @State private var isVisible = false
     @Environment(LocationManager.self) private var location
     @Environment(FavoritesStore.self) private var favorites
-    @Environment(TripStore.self) private var trips
     @State private var picking: PickTarget?
     @State private var showMap = false
     @State private var selectedId: String?
@@ -33,16 +32,8 @@ struct PlanView: View {
                 RouteOptionsButton()
             }
 
-            if plan.to != nil, !trips.upcoming().isEmpty {
-                Section("Upcoming trips") {
-                    ForEach(trips.upcoming().prefix(3)) { trip in
-                        NavigationLink { SavedTripView(tripId: trip.id) } label: { SavedTripRow(trip: trip) }
-                    }
-                }
-            }
             if plan.to == nil {
                 quickDestinations
-                savedTrips
                 RecentSearchesSection()
             } else {
                 resultsSection(plan)
@@ -120,46 +111,6 @@ struct PlanView: View {
                 Text("Quick")
             } footer: {
                 Text("Set Home and Work in Saved to plan there with one tap.")
-            }
-        }
-    }
-
-    @ViewBuilder
-    private var savedTrips: some View {
-        let upcoming = trips.upcoming()
-        let past = trips.past()
-        Section {
-            ForEach(upcoming) { t in
-                NavigationLink { SavedTripView(tripId: t.id) } label: { SavedTripRow(trip: t) }
-            }
-            .onDelete { idx in idx.map { upcoming[$0].id }.forEach { id in
-                LeaveReminder.cancel(id); Task { await LiveTripActivity.end(id) }; trips.remove(id)
-            } }
-        } header: {
-            Text("Upcoming trips")
-        } footer: {
-            if upcoming.isEmpty {
-                Text("Save a route to see it here, add it to your calendar and get a reminder when to leave.")
-            }
-        }
-        if !past.isEmpty {
-            Section("Past trips") {
-                ForEach(past.prefix(20)) { t in
-                    NavigationLink { SavedTripView(tripId: t.id) } label: { SavedTripRow(trip: t).opacity(0.7) }
-                        .swipeActions(edge: .leading) {
-                            Button {
-                                // Same route again: same places, next week at the same time.
-                                app.plan.from = .place(SavedPlace(id: "trip-from-\(t.id)", name: t.fromName, subtitle: nil,
-                                    lat: t.itinerary.legs.first?.from.lat ?? 0, lon: t.itinerary.legs.first?.from.lon ?? 0, stopId: nil))
-                                app.plan.to = .place(SavedPlace(id: "trip-to-\(t.id)", name: t.toName, subtitle: nil,
-                                    lat: t.itinerary.legs.last?.to.lat ?? 0, lon: t.itinerary.legs.last?.to.lon ?? 0, stopId: nil))
-                                app.plan.timeMode = .departAt
-                                app.plan.date = Self.nextOccurrence(of: t.startTime)
-                            } label: { Label("Plan again", systemImage: "arrow.clockwise") }
-                            .tint(.blue)
-                        }
-                }
-                .onDelete { idx in idx.map { past[$0].id }.forEach(trips.remove) }
             }
         }
     }

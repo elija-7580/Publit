@@ -289,7 +289,9 @@ struct StationMapView: View {
                            onRegion: { model.regionChanged($0) },
                            onSelect: { selection = $0 })
                 .ignoresSafeArea(edges: .bottom)
-                .overlay(alignment: .top) { header }
+                // Own space below the bar (an overlay could end up under the navigation bar,
+                // and then an active filter hid stations without showing why).
+                .safeAreaInset(edge: .top, spacing: 0) { header }
                 .navigationTitle("Stations")
                 .screenTrail("Station map")
                 .navigationBarTitleDisplayMode(.inline)
@@ -336,6 +338,7 @@ struct StationMapView: View {
     private var header: some View {
         VStack(spacing: 6) {
             ModeFilterBar(available: ModeGroup.allCases.filter { $0 != .other }, filter: filterBinding)
+                .frame(maxWidth: .infinity)
                 .background(.regularMaterial)
             if model.isLoadingLive && !model.hasLive {
                 ProgressView(L10n.t("Updating live layer…")).font(.footnote).padding(8).background(.regularMaterial, in: Capsule())
