@@ -53,6 +53,7 @@ struct TripView: View {
             }
         }
         .navigationTitle(stopTime.lineName)
+        .screenTrail("Trip")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if Features.passes { ToolbarItem(placement: .topBarTrailing) { ShowPassButton(at: stopTime.departureTime) } }
@@ -206,6 +207,7 @@ struct LineDeparturesView: View {
             }
         }
         .navigationTitle(line.lineName)
+        .screenTrail("Line trip")
         .navigationBarTitleDisplayMode(.inline)
         .refreshable { await load() }
         .onAppear { isVisible = true }

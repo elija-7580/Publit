@@ -87,6 +87,7 @@ struct PlaceSearchView: View {
             }
             .autocorrectionDisabled()
             .navigationTitle(title)
+            .screenTrail("Place search")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }

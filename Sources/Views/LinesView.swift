@@ -87,6 +87,7 @@ struct LinesView: View {
             }
         }
         .navigationTitle("Lines")
+        .screenTrail("Lines")
         .withSettingsButton()
         .searchable(text: $query, prompt: Text("Line, destination or station"))
         .refreshable { await load(force: true) }
@@ -223,6 +224,7 @@ struct LineDetailView: View {
             }
         }
         .navigationTitle(line.lineName)
+        .screenTrail("Line")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -421,6 +423,7 @@ struct LineTimetableView: View {
             }
         }
         .navigationTitle(stopName)
+        .screenTrail("Line stop")
         .navigationBarTitleDisplayMode(.inline)
         .task(id: day) { await load() }
     }

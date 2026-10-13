@@ -82,6 +82,7 @@ struct FavoritesView: View {
             }
         }
         .navigationTitle("Saved")
+        .screenTrail("Saved")
         .withSettingsButton()
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {

@@ -63,6 +63,7 @@ struct PassDetailView: View {
         }
         .background(Color(uiColor: .systemGroupedBackground))
         .navigationTitle(pass.displayTitle)
+        .screenTrail("Pass")
         .navigationBarTitleDisplayMode(.inline)
         .brightnessBoost(pass.barcode != nil)
         .toolbar {

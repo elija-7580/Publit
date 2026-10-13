@@ -66,6 +66,7 @@ struct GoNowView: View {
                                     fromName: L10n.t("Current location"), toName: plan.to?.title ?? "")
         }
         .navigationTitle(plan.to?.title ?? L10n.t("Route"))
+        .screenTrail("Go now")
         .navigationBarTitleDisplayMode(.inline)
         .refreshable { await plan.search(current: location.coordinate, locationDenied: location.isDenied, silent: true) }
         .onAppear { isVisible = true }

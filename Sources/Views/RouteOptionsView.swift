@@ -91,6 +91,7 @@ struct RouteOptionsView: View {
                 }
             }
             .navigationTitle("Route options")
+            .screenTrail("Route options")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

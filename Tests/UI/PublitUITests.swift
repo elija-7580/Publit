@@ -70,6 +70,11 @@ final class PublitUITests: XCTestCase {
         return element.exists
     }
 
+    /// Taps the element's centre even when XCUITest reports a Menu in a list row as not hittable.
+    private func tapCentre(_ element: XCUIElement) {
+        if element.isHittable { element.tap() } else { element.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap() }
+    }
+
     private func snap(_ name: String) {
         let shot = XCUIScreen.main.screenshot()
         let attachment = XCTAttachment(screenshot: shot)
@@ -246,7 +251,10 @@ final class PublitUITests: XCTestCase {
         sleep(1)
         snap("plan")
 
-        app.buttons["Map"].tap()
+        // By identifier: the label alone no longer matches once the control has an identifier.
+        let mapToggle = app.descendants(matching: .any)["routeMapToggle"].firstMatch
+        XCTAssertTrue(mapToggle.waitForExistence(timeout: 10), "no map toggle")
+        tapCentre(mapToggle)
         XCTAssertTrue(app.buttons["Details of selected route"].waitForExistence(timeout: 10))
         sleep(3) // map tiles
         snap("compare")
@@ -450,9 +458,11 @@ final class PublitUITests: XCTestCase {
         let plan = launch(["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "plan"])
         let routes = plan.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'from Marienplatz'"))
         XCTAssertTrue(routes.firstMatch.waitForExistence(timeout: timeout), "no routes found")
-        let sort = plan.buttons["routeSortMenu"].firstMatch
-        XCTAssertTrue(reveal(sort, in: plan), "no reachable sort menu")
-        sort.tap()
+        // Any element type: a SwiftUI Menu in a list row is not always reported as a button.
+        let sort = plan.descendants(matching: .any)["routeSortMenu"].firstMatch
+        if !reveal(sort, in: plan) { print("SORT MENU: \(sort.exists ? sort.debugDescription : "missing")") }
+        XCTAssertTrue(sort.exists, "no sort menu")
+        tapCentre(sort)
         let fastest = plan.buttons["Fastest"].firstMatch
         XCTAssertTrue(fastest.waitForExistence(timeout: 5))
         fastest.tap()
@@ -461,8 +471,8 @@ final class PublitUITests: XCTestCase {
         snap("plan-sorted")
         // Back to the default order for the next run (not part of the check: the menu may still be closing).
         sleep(1)
-        if sort.isHittable {
-            sort.tap()
+        if sort.exists {
+            tapCentre(sort)
             if plan.buttons["Departure"].firstMatch.waitForExistence(timeout: 5) { plan.buttons["Departure"].firstMatch.tap() }
         }
     }

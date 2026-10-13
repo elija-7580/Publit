@@ -13,6 +13,7 @@ struct PublitApp: App {
 
     init() {
         UNUserNotificationCenter.current().delegate = NotificationRouter.shared
+        HangLog.shared.start()
         // Offline copies older than a week are no use for departures or routes.
         DispatchQueue.global(qos: .utility).async { TransitousClient.shared.cache.prune(olderThan: 7 * 24 * 3600) }
     }
@@ -162,7 +163,14 @@ struct RootView: View {
                 app.tab = .favorites // Home/Work not set yet: that is where it is set.
             }
         }
+        .onChange(of: app.tab) { _, tab in HangLog.shared.note("tab \(tab)") }
         .task(id: scenePhase) {
+            switch scenePhase {
+            case .active: HangLog.shared.note("app active")
+            case .inactive: HangLog.shared.note("app inactive")
+            case .background: HangLog.shared.note("app background")
+            @unknown default: break
+            }
             if scenePhase == .background {
                 LineAlertMonitor.scheduleBackgroundCheck()
                 location.pause()

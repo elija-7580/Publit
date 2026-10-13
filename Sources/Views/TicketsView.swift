@@ -30,6 +30,7 @@ struct TicketsView: View {
             }
         }
         .navigationTitle("My tickets")
+        .screenTrail("My tickets")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button { adding = true } label: { Label("Add ticket", systemImage: "plus") }
@@ -124,6 +125,7 @@ struct AddTicketView: View {
                 Button("Done") { saveError = nil }
             } message: { Text(saveError ?? "") }
             .navigationTitle("Add ticket")
+            .screenTrail("Add ticket")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() }.disabled(isSaving) }
@@ -185,6 +187,7 @@ struct TicketDisplayView: View {
                 }
             }
             .navigationTitle(tickets.count == 1 ? tickets[0].name : L10n.t("Tickets"))
+            .screenTrail("Ticket display")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } }
@@ -308,6 +311,7 @@ struct LinkedTicketAppsView: View {
             }
         }
         .navigationTitle("Ticket apps")
+        .screenTrail("Ticket apps")
     }
 }
 

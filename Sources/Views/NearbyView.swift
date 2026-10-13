@@ -94,6 +94,7 @@ struct NearbyView: View {
 
         }
         .navigationTitle("Nearby")
+        .screenTrail("Nearby")
         .withSettingsButton()
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -384,6 +385,7 @@ struct StopDeparturesView: View {
             }
         }
         .navigationTitle(name)
+        .screenTrail("Stop departures")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {

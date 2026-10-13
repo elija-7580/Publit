@@ -49,6 +49,7 @@ let core = [
     "Tickets/OperatorLogos.swift",
     "Util/SHA1.swift",
     "Util/ZipWriter.swift",
+    "Util/HangLog.swift",
 ]
 
 let package = Package(

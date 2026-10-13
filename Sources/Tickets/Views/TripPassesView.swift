@@ -42,6 +42,7 @@ struct TripPassesView: View {
             }
         }
         .navigationTitle(L10n.t("Tickets"))
+        .screenTrail("Trip tickets")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $adding) { PassImportView(tripId: tripId) }
     }

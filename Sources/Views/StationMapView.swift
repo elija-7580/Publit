@@ -291,6 +291,7 @@ struct StationMapView: View {
                 .ignoresSafeArea(edges: .bottom)
                 .overlay(alignment: .top) { header }
                 .navigationTitle("Stations")
+                .screenTrail("Station map")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) { layersMenu }
@@ -418,6 +419,7 @@ struct RentalDetailView: View {
             }
         }
         .navigationTitle(title)
+        .screenTrail("Map stop")
         .navigationBarTitleDisplayMode(.inline)
     }
 }
@@ -474,6 +476,7 @@ struct VehicleTripView: View {
             }
         }
         .navigationTitle(vehicle.lineName)
+        .screenTrail("Map vehicle")
         .navigationBarTitleDisplayMode(.inline)
         .task {
             do {

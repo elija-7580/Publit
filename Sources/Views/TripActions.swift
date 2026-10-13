@@ -44,7 +44,8 @@ struct TripActionsSection: View {
                 .accessibilityIdentifier("startTrip")
             }
             Divider().frame(maxWidth: .infinity)
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: typeSize.isAccessibilitySize ? 1 : 2), spacing: 12) {
+            // Not a LazyVGrid: a lazy grid inside a self-sizing list row is measured again on every pass.
+            EqualColumns(columns: typeSize.isAccessibilitySize ? 1 : 2, spacing: 12) {
                 secondaryButtons
             }
             .labelStyle(ActionLabelStyle())
@@ -56,6 +57,8 @@ struct TripActionsSection: View {
             .padding(.vertical, 4)
             .listRowSeparator(.hidden)
             .sheet(item: $calendarTrip) { trip in CalendarEventSheet(trip: trip).ignoresSafeArea() }
+            // Here and not on TicketSection: on a Section it is copied onto every ticket row.
+            .sheet(isPresented: $addingTicket) { AddTicketView(tripId: saved?.id) }
         } footer: {
             Text("The calendar entry links back to this trip with its live status.")
         }
@@ -68,7 +71,6 @@ struct TripActionsSection: View {
                 _ = ensureSaved()
                 addingTicket = true
             })
-            .sheet(isPresented: $addingTicket) { AddTicketView(tripId: saved?.id) }
         }
         if Features.passes, !itinerary.isDirect {
             TripPassSection(tripId: saved?.id, at: itinerary.startTime, ensureTrip: { ensureSaved().id })
@@ -270,6 +272,54 @@ struct CalendarEventSheet: UIViewControllerRepresentable {
     }
 }
 
+/// Equal-width columns; each row as tall as its tallest cell. Measures every cell once per pass.
+struct EqualColumns: Layout {
+    var columns: Int
+    var spacing: CGFloat
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let cols = max(1, columns)
+        let width: CGFloat
+        if let w = proposal.width, w.isFinite {
+            width = w
+        } else {
+            let widest = subviews.map { $0.sizeThatFits(.unspecified).width }.max() ?? 0
+            width = widest * CGFloat(cols) + spacing * CGFloat(cols - 1)
+        }
+        let heights = rowHeights(subviews, cellWidth: cellWidth(width, cols))
+        return CGSize(width: width, height: heights.reduce(0, +) + spacing * CGFloat(max(0, heights.count - 1)))
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let cols = max(1, columns)
+        let cell = cellWidth(bounds.width, cols)
+        let heights = rowHeights(subviews, cellWidth: cell)
+        var y = bounds.minY
+        for (row, height) in heights.enumerated() {
+            for col in 0..<cols {
+                let i = row * cols + col
+                guard i < subviews.count else { break }
+                let x = bounds.minX + CGFloat(col) * (cell + spacing)
+                subviews[i].place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(width: cell, height: height))
+            }
+            y += height + spacing
+        }
+    }
+
+    private func cellWidth(_ width: CGFloat, _ cols: Int) -> CGFloat {
+        max(0, (width - spacing * CGFloat(cols - 1)) / CGFloat(cols))
+    }
+
+    private func rowHeights(_ subviews: Subviews, cellWidth: CGFloat) -> [CGFloat] {
+        let cols = max(1, columns)
+        return stride(from: 0, to: subviews.count, by: cols).map { start in
+            subviews[start..<min(start + cols, subviews.count)]
+                .map { $0.sizeThatFits(ProposedViewSize(width: cellWidth, height: nil)).height }
+                .max() ?? 0
+        }
+    }
+}
+
 /// Icon above a short title, filling an equal share of the row.
 struct TileLabelStyle: LabelStyle {
     func makeBody(configuration: Configuration) -> some View {
@@ -311,6 +361,16 @@ extension TripStore {
         for id in removePending() {
             LeaveReminder.cancel(id)
             Task { await LiveTripActivity.end(id) }
+        }
+    }
+
+    /// The same once the back animation has finished: removing a trip mid-transition changes
+    /// the list being revealed (Saved, Plan) while UIKit is laying it out.
+    func discardPendingRemovalsLater() {
+        guard !pendingRemoval.isEmpty else { return }
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(600))
+            discardPendingRemovals()
         }
     }
 }

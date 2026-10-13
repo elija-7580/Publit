@@ -111,11 +111,15 @@ final class TripStore {
     }
 
     /// Saved again (or used for a reminder, calendar or ticket) before the screen closed.
-    func keep(_ id: String) { pendingRemoval.remove(id) }
+    func keep(_ id: String) {
+        if pendingRemoval.contains(id) { pendingRemoval.remove(id) }
+    }
 
     /// Trips unsaved on a screen that has now closed. Returns their IDs for clean-up.
     @discardableResult
     func removePending() -> [String] {
+        // Assigning, even an empty set, would redraw every screen that shows a Saved button.
+        guard !pendingRemoval.isEmpty else { return [] }
         let ids = pendingRemoval.filter { trip($0) != nil }.sorted()
         pendingRemoval.removeAll()
         for id in ids { remove(id) }
@@ -123,7 +127,7 @@ final class TripStore {
     }
 
     func remove(_ id: String) {
-        pendingRemoval.remove(id)
+        if pendingRemoval.contains(id) { pendingRemoval.remove(id) }
         if activeTripId == id { stop(id) }
         trips.removeAll { $0.id == id }
         persist()

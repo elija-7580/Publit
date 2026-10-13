@@ -13,6 +13,7 @@ struct SavedTripView: View {
             ItineraryDetailView(itinerary: trip.itinerary, fromName: trip.fromName, toName: trip.toName,
                                 statusAt: { TripStatus.at($0, trip.itinerary) }, refreshedAt: trip.refreshedAt)
             .navigationTitle(trip.toName)
+            .screenTrail("Saved trip")
             .overlay(alignment: .bottom) {
                 if let errorMessage {
                     Text(errorMessage).font(.caption).padding(8)

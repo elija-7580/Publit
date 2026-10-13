@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.0 (build 8)
+
+### Freezes (reported as "scene-update" hangs on 0.1.0 and 0.6.0 build 7)
+- Both device reports show the main thread busy laying out views for more than 10 s, the second while a back swipe started. The reports contain no app code, so the screen is not known yet; the changes below remove likely causes and are not confirmed on a device.
+- Route actions: the button grid is no longer a `LazyVGrid` inside a list row; a fixed two-column layout measures each button once.
+- Route summary and connection legend choose their layout by text size instead of `ViewThatFits`, so a row cannot switch height between layout passes. The line chain places badges exactly as it measured them.
+- "Add ticket" sheet on the route screen is attached once instead of to every ticket row.
+- A trip unsaved on the route screen is deleted shortly after the back animation, not during it. Closing a screen with nothing to delete no longer redraws other screens.
+- New: Settings → Diagnostics. If the app does not respond for 2 s or more, the time and the screens opened just before are written to a local file that can be shared. Only fixed screen names and times; nothing leaves the device unless shared.
+
 ## 0.6.0 (build 7)
 
 ### Fixes from device testing (need confirmation on the device)

@@ -116,6 +116,7 @@ struct PassEditorView: View {
             }
         }
         .navigationTitle(isNew ? L10n.t("Check ticket") : L10n.t("Edit ticket"))
+        .screenTrail("Pass editor")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {

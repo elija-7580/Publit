@@ -119,6 +119,7 @@ struct PassImportView: View {
             }
         }
         .navigationTitle(L10n.t("Add ticket"))
+        .screenTrail("Pass import")
         .navigationBarTitleDisplayMode(.inline)
     }
 

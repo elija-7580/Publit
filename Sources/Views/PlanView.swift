@@ -52,6 +52,7 @@ struct PlanView: View {
             }
         }
         .navigationTitle("Plan")
+        .screenTrail("Plan")
         .withSettingsButton()
         .onAppear {
             isVisible = true

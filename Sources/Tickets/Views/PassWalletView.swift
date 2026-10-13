@@ -22,6 +22,7 @@ struct PassWalletView: View {
         }
         .background(Color(uiColor: .systemGroupedBackground))
         .navigationTitle(L10n.t("Tickets"))
+        .screenTrail("Tickets")
         .navigationDestination(for: PassRoute.self) { PassDetailView(passId: $0.id) }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {

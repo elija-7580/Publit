@@ -10,6 +10,7 @@ struct SettingsView: View {
     @AppStorage("mapSharing") private var mapSharing = false
     @AppStorage("routeTimelines") private var routeTimelines = true
     @AppStorage(LineAlertMonitor.enabledKey) private var lineAlerts = false
+    @State private var hasFreezeLog = HangLog.shared.hasEntries
 
     var body: some View {
         NavigationStack {
@@ -81,6 +82,26 @@ struct SettingsView: View {
                     Text("Times marked live come from the operator's real-time feed; all others are timetable times.")
                 }
                 Section {
+                    if hasFreezeLog {
+                        ShareLink(item: HangLog.shared.fileURL) {
+                            Label("Share freeze log", systemImage: "square.and.arrow.up")
+                        }
+                        .accessibilityIdentifier("shareFreezeLog")
+                        Button(role: .destructive) {
+                            HangLog.shared.clear()
+                            hasFreezeLog = false
+                        } label: {
+                            Label("Delete freeze log", systemImage: "trash")
+                        }
+                    } else {
+                        Text("No freezes recorded").foregroundStyle(.secondary)
+                    }
+                } header: {
+                    Text("Diagnostics")
+                } footer: {
+                    Text("If Publit stops responding for 2 seconds or more, the time and the screens opened just before are noted here. Nothing else is recorded, and nothing leaves this device unless you share it.")
+                }
+                Section {
                     Link("Source code and feedback", destination: AppInfo.repositoryURL)
                     LabeledContent("Version", value: AppInfo.version)
                 } header: {
@@ -94,6 +115,7 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle("Settings")
+            .screenTrail("Settings")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } }

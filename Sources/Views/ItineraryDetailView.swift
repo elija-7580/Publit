@@ -101,36 +101,37 @@ struct ItineraryDetailView: View {
             if !isBikeOrCar { FareSection(itinerary: itinerary) }
         }
         .navigationTitle("Route")
+        .screenTrail("Route")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if Features.passes { ToolbarItem(placement: .topBarTrailing) { ShowPassButton(tripId: trips.saved(itinerary)?.id, at: itinerary.startTime) } }
         }
         // A trip unsaved here is only deleted when the screen closes, not when a detail is pushed.
-        .onDisappear { if !isPresented { trips.discardPendingRemovals() } }
-        .onChange(of: isPresented) { _, presented in if !presented { trips.discardPendingRemovals() } }
+        .onDisappear { if !isPresented { trips.discardPendingRemovalsLater() } }
+        .onChange(of: isPresented) { _, presented in if !presented { trips.discardPendingRemovalsLater() } }
     }
 }
 
 /// Time, duration and the chain of lines, e.g. 🚶 › S8 › U6 › 🚶.
 struct RouteSummary: View {
     let itinerary: Itinerary
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            ViewThatFits(in: .horizontal) {
-            HStack(alignment: .firstTextBaseline) {
-                Text("\(Fmt.time(itinerary.startTime, tz: itinerary.legs.first?.from.tz)) – \(Fmt.time(itinerary.endTime, tz: itinerary.legs.last?.to.tz))")
-                    .font(.title2.weight(.bold).monospacedDigit())
-                    .lineLimit(1).minimumScaleFactor(0.7)
-                Spacer(minLength: 8)
-                Text(Fmt.duration(seconds: itinerary.duration)).font(.title3.weight(.semibold))
-                    .lineLimit(1).fixedSize()
-            }
-            VStack(alignment: .leading, spacing: 4) {
-                Text("\(Fmt.time(itinerary.startTime, tz: itinerary.legs.first?.from.tz)) – \(Fmt.time(itinerary.endTime, tz: itinerary.legs.last?.to.tz))")
-                    .font(.title2.bold().monospacedDigit())
-                Text(Fmt.duration(seconds: itinerary.duration)).font(.subheadline.weight(.semibold)).foregroundStyle(.secondary)
-            }
+            // Chosen by text size, not ViewThatFits: measuring both layouts in a self-sizing row
+            // can make the row's height flip between passes.
+            if typeSize.isAccessibilitySize {
+                stackedTimes
+            } else {
+                HStack(alignment: .firstTextBaseline) {
+                    Text("\(Fmt.time(itinerary.startTime, tz: itinerary.legs.first?.from.tz)) – \(Fmt.time(itinerary.endTime, tz: itinerary.legs.last?.to.tz))")
+                        .font(.title2.weight(.bold).monospacedDigit())
+                        .lineLimit(1).minimumScaleFactor(0.7)
+                    Spacer(minLength: 8)
+                    Text(Fmt.duration(seconds: itinerary.duration)).font(.title3.weight(.semibold))
+                        .lineLimit(1).fixedSize()
+                }
             }
             legChain
             HStack(spacing: 6) {
@@ -149,6 +150,14 @@ struct RouteSummary: View {
         }
         .padding(.vertical, 4)
         .accessibilityElement(children: .combine)
+    }
+
+    private var stackedTimes: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("\(Fmt.time(itinerary.startTime, tz: itinerary.legs.first?.from.tz)) – \(Fmt.time(itinerary.endTime, tz: itinerary.legs.last?.to.tz))")
+                .font(.title2.bold().monospacedDigit())
+            Text(Fmt.duration(seconds: itinerary.duration)).font(.subheadline.weight(.semibold)).foregroundStyle(.secondary)
+        }
     }
 
     private var legChain: some View {
@@ -181,26 +190,31 @@ struct FlowRow: Layout {
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
         let maxWidth = proposal.width ?? .infinity
-        var x: CGFloat = 0, y: CGFloat = 0, rowHeight: CGFloat = 0, width: CGFloat = 0
-        for v in subviews {
-            let s = v.sizeThatFits(.unspecified)
-            if x > 0, x + s.width > maxWidth { x = 0; y += rowHeight + spacing; rowHeight = 0 }
-            x += s.width + spacing
-            rowHeight = max(rowHeight, s.height)
-            width = max(width, x - spacing)
-        }
-        return CGSize(width: min(width, maxWidth), height: y + rowHeight)
+        let frames = arrange(subviews, maxWidth: maxWidth)
+        let width = frames.map(\.maxX).max() ?? 0
+        let height = frames.map(\.maxY).max() ?? 0
+        return CGSize(width: min(width, maxWidth), height: height)
     }
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        var x = bounds.minX, y = bounds.minY, rowHeight: CGFloat = 0
+        // The same arrangement as when measuring, so rows never differ between the two.
+        let frames = arrange(subviews, maxWidth: proposal.width ?? bounds.width)
+        for (v, f) in zip(subviews, frames) {
+            v.place(at: CGPoint(x: bounds.minX + f.minX, y: bounds.minY + f.minY), proposal: ProposedViewSize(f.size))
+        }
+    }
+
+    private func arrange(_ subviews: Subviews, maxWidth: CGFloat) -> [CGRect] {
+        var frames: [CGRect] = []
+        var x: CGFloat = 0, y: CGFloat = 0, rowHeight: CGFloat = 0
         for v in subviews {
             let s = v.sizeThatFits(.unspecified)
-            if x > bounds.minX, x + s.width > bounds.maxX { x = bounds.minX; y += rowHeight + spacing; rowHeight = 0 }
-            v.place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(s))
+            if x > 0, x + s.width > maxWidth { x = 0; y += rowHeight + spacing; rowHeight = 0 }
+            frames.append(CGRect(origin: CGPoint(x: x, y: y), size: s))
             x += s.width + spacing
             rowHeight = max(rowHeight, s.height)
         }
+        return frames
     }
 }
 

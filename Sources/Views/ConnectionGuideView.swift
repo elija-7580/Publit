@@ -23,6 +23,7 @@ struct ConnectionGuideView: View {
         }
         .background(Color(uiColor: .systemGroupedBackground))
         .navigationTitle(L10n.t("How to read connections"))
+        .screenTrail("Connection guide")
         .navigationBarTitleDisplayMode(.inline)
     }
 
@@ -45,10 +46,16 @@ struct ConnectionGuideView: View {
 }
 
 struct ConnectionSymbols: View {
+    @Environment(\.dynamicTypeSize) private var typeSize
+
     var body: some View {
-        ViewThatFits(in: .horizontal) {
-            HStack(spacing: 16) { symbols }
-            VStack(alignment: .leading, spacing: 12) { symbols }
+        // By text size rather than ViewThatFits, so a list row keeps one height.
+        Group {
+            if typeSize >= .xxxLarge {
+                VStack(alignment: .leading, spacing: 12) { symbols }
+            } else {
+                HStack(spacing: 16) { symbols }
+            }
         }
         .font(.footnote).foregroundStyle(.secondary)
     }
