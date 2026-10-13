@@ -5,6 +5,8 @@ struct LatLon: Hashable, Codable, Sendable {
     let lat: Double
     let lon: Double
 
+    var isValidCoordinate: Bool { lat.isFinite && lon.isFinite && abs(lat) <= 90 && abs(lon) <= 180 }
+
     /// `lat,lon` as expected by the MOTIS API, to about 1 m. Full GPS precision only makes
     /// every request URL unique (no cache hits) and says more about where someone is than needed.
     var apiValue: String { Self.format(lat, 5) + "," + Self.format(lon, 5) }
@@ -28,7 +30,9 @@ struct LatLon: Hashable, Codable, Sendable {
     init?(apiValue: String) {
         let parts = apiValue.split(separator: ",").compactMap { Double($0) }
         guard parts.count == 2 else { return nil }
-        self.init(lat: parts[0], lon: parts[1])
+        let point = LatLon(lat: parts[0], lon: parts[1])
+        guard point.isValidCoordinate else { return nil }
+        self = point
     }
 }
 

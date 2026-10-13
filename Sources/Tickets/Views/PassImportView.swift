@@ -14,6 +14,7 @@ struct PassImportView: View {
     @State private var stage: Stage = .choose
     @State private var photo: PhotosPickerItem?
     @State private var choosingFile = false
+    @State private var choosingPhoto = false
     @State private var scanning = false
     @State private var readingTask: Task<Void, Never>?
 
@@ -53,11 +54,14 @@ struct PassImportView: View {
             .toolbar {
                 // The check screen has its own Cancel and Save.
                 ToolbarItem(placement: .cancellationAction) {
-                    if showsCancel { Button("Cancel") { dismiss() } }
+                    if showsCancel { Button("Cancel") { readingTask?.cancel(); dismiss() } }
                 }
             }
         }
-        .onDisappear { readingTask?.cancel() }
+        .onDisappear {
+            if !scanning && !choosingFile && !choosingPhoto { readingTask?.cancel() }
+        }
+        .photosPicker(isPresented: $choosingPhoto, selection: $photo, matching: .images)
         .task { if let sharedURL { await open(sharedURL) } }
         .fileImporter(isPresented: $choosingFile, allowedContentTypes: [.pdf, .image]) { result in
             guard case .success(let url) = result else { return }
@@ -97,7 +101,7 @@ struct PassImportView: View {
     private var chooser: some View {
         List {
             Section {
-                PhotosPicker(selection: $photo, matching: .images) {
+                Button { choosingPhoto = true } label: {
                     Label(L10n.t("Photo or screenshot"), systemImage: "photo.on.rectangle")
                 }
                 .accessibilityIdentifier("importPhoto")

@@ -3,33 +3,40 @@ import Foundation
 enum Polyline {
     /// Decodes a Google encoded polyline with the given decimal precision.
     static func decode(_ encoded: String, precision: Int) -> [LatLon] {
+        guard (0...7).contains(precision), encoded.utf8.count <= 1_000_000 else { return [] }
         let bytes = Array(encoded.utf8)
         let factor = pow(10.0, Double(precision))
         var coords: [LatLon] = []
         var index = 0
-        var lat = 0
-        var lon = 0
+        var lat: Int64 = 0, lon: Int64 = 0
 
-        func next() -> Int? {
-            var result = 0
+        func next() -> Int64? {
+            var bits: UInt64 = 0
             var shift = 0
-            while index < bytes.count {
-                let b = Int(bytes[index]) - 63
+            while index < bytes.count, shift < 40 {
+                let byte = bytes[index]
                 index += 1
-                result |= (b & 0x1F) << shift
-                shift += 5
-                if b < 0x20 {
-                    return (result & 1) != 0 ? ~(result >> 1) : (result >> 1)
+                guard byte >= 63, byte <= 126 else { return nil }
+                let value = UInt64(byte - 63)
+                bits |= (value & 31) << shift
+                if value < 32 {
+                    let magnitude = Int64(bits >> 1)
+                    return bits & 1 == 1 ? -magnitude - 1 : magnitude
                 }
+                shift += 5
             }
             return nil
         }
 
         while index < bytes.count {
-            guard let dLat = next(), let dLon = next() else { break }
-            lat += dLat
-            lon += dLon
-            coords.append(LatLon(lat: Double(lat) / factor, lon: Double(lon) / factor))
+            guard coords.count < 50_000, let dLat = next(), let dLon = next() else { return [] }
+            let (a, overLat) = lat.addingReportingOverflow(dLat)
+            let (b, overLon) = lon.addingReportingOverflow(dLon)
+            guard !overLat, !overLon else { return [] }
+            let point = LatLon(lat: Double(a) / factor, lon: Double(b) / factor)
+            guard point.isValidCoordinate else { return [] }
+            lat = a; lon = b
+            coords.append(point)
         }
         return coords
     }

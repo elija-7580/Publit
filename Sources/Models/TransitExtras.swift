@@ -139,3 +139,20 @@ struct LegRental: Codable, Hashable, Sendable {
         [rentalUriIOS, rentalUriWeb].compactMap { $0 }.first { !$0.isEmpty }.flatMap(URL.init(string:))
     }
 }
+
+extension RentalsResponse {
+    /// Limit MapKit work and put the nearest, available rentals first. Provider-scoped IDs remain
+    /// distinct even when two GBFS operators both call a vehicle "1".
+    func mapSnapshot(min lo: LatLon, max hi: LatLon, limit: Int = 250) -> RentalsResponse {
+        let center = LatLon(lat: (lo.lat + hi.lat) / 2, lon: (lo.lon + hi.lon) / 2)
+        func visible(_ point: LatLon) -> Bool {
+            point.isValidCoordinate && point.lat >= lo.lat && point.lat <= hi.lat && point.lon >= lo.lon && point.lon <= hi.lon
+        }
+        let stations = stations.filter { $0.isRenting != false && visible($0.coordinate) }
+            .sorted { $0.coordinate.distance(to: center) < $1.coordinate.distance(to: center) }
+        let vehicles = vehicles.filter { $0.isAvailable && visible($0.coordinate) }
+            .sorted { $0.coordinate.distance(to: center) < $1.coordinate.distance(to: center) }
+        return RentalsResponse(providerGroups: providerGroups, stations: Array(stations.prefix(max(0, limit))),
+                               vehicles: Array(vehicles.prefix(max(0, limit))))
+    }
+}

@@ -31,6 +31,8 @@ struct NearbyView: View {
     /// Where and when the board was last requested. A refined GPS fix does not restart a running request.
     @State private var loadedCenter: LatLon?
     @State private var loadedAt = Date.distantPast
+    @State private var loadedModes = ""
+    @State private var loadGeneration = UUID()
 
     /// Reload after moving this far (metres) or after `refreshInterval` seconds.
     static let reloadDistance = 150.0
@@ -107,11 +109,10 @@ struct NearbyView: View {
         .onChange(of: storedModes) {
             // Show the matching part of the current board at once, then ask the server for more.
             if let c = lastCenter { regroup(lastStopTimes, around: c) }
-            Task { await load(force: true) }
         }
         .onAppear { isVisible = true }
         .onDisappear { isVisible = false }
-        .task(id: refreshEnabled) {
+        .task(id: "\(refreshEnabled)|\(storedModes)") {
             guard refreshEnabled else { return }
             if location.isDenied { app.firstBoardReady = true }
             await showLastBoard()
@@ -180,7 +181,7 @@ struct NearbyView: View {
     /// The last board (up to 30 min old, past departures removed) right away, so the screen is not
     /// empty while GPS and network start. It is replaced as soon as fresh times arrive.
     private func showLastBoard() async {
-        guard groups.isEmpty, let last = await TransitousClient.shared.lastNearby(maxAge: 1800) else { return }
+        guard groups.isEmpty, let last = await TransitousClient.shared.lastNearby(maxAge: 1800, modes: filter.apiValue) else { return }
         let here = location.coordinate ?? last.center
         guard here.distance(to: last.center) < 400 else { return }
         let filter = filter
@@ -195,23 +196,28 @@ struct NearbyView: View {
     }
 
     private func load(force: Bool = false) async {
-        guard let here = location.coordinate else { return }
-        if !force, let c = loadedCenter, here.distance(to: c) < Self.reloadDistance,
+        guard refreshEnabled, let here = location.coordinate else { return }
+        if isLoading, !force { return }
+        if !force, loadedModes == storedModes, let c = loadedCenter, here.distance(to: c) < Self.reloadDistance,
            Date().timeIntervalSince(loadedAt) < Self.refreshInterval { return }
-        loadedCenter = here
-        loadedAt = Date()
+        let generation = UUID()
+        loadGeneration = generation
         isLoading = true
         defer {
-            isLoading = false
-            if !app.firstBoardReady { app.firstBoardReady = true }
+            if loadGeneration == generation {
+                isLoading = false
+                if !app.firstBoardReady { app.firstBoardReady = true }
+            }
         }
         let filter = filter
+        let modes = storedModes
         do {
-            var res = try await TransitousClient.shared.departures(near: here, radius: 500, count: 80, modes: filter.apiValue)
+            var res = try await TransitousClient.shared.departures(near: here, radius: 500, count: 40, modes: filter.apiValue)
             if res.stopTimes.isEmpty {
-                res = try await TransitousClient.shared.departures(near: here, radius: 1500, count: 80, modes: filter.apiValue)
+                res = try await TransitousClient.shared.departures(near: here, radius: 1500, count: 40, modes: filter.apiValue)
             }
             try Task.checkCancellation()
+            guard loadGeneration == generation else { return }
             let stopTimes = res.stopTimes
             let present = Set(ModeGroup.present(in: stopTimes.map(\.mode)))
             // A full board says what runs here; a filtered one can only add to it.
@@ -224,9 +230,14 @@ struct NearbyView: View {
                 StopGrouping.group(StopTime.upcoming(stopTimes).filter { current.allows($0.mode) }, around: here)
             }.value
             try Task.checkCancellation()
+            guard loadGeneration == generation else { return }
             groups = regrouped
+            loadedCenter = here
+            loadedModes = modes
+            loadedAt = Date()
             errorMessage = nil
         } catch {
+            guard loadGeneration == generation else { return }
             if !(error is CancellationError) && (error as? URLError)?.code != .cancelled {
                 errorMessage = error.localizedDescription
                 // Try again soon instead of waiting for the next regular refresh.
@@ -359,7 +370,7 @@ struct StopDeparturesView: View {
                     ForEach(LineGrouping.lines(shown)) { line in
                         let savedLine = SavedLine(stopTime: line.first, stopId: stopId, stopName: name, at: coordinate)
                         NavigationLink {
-                            LineDeparturesView(line: savedLine)
+                            LineDetailView(line: LineRef(saved: savedLine), initialDepartures: shown)
                         } label: { LineAtStopRow(line: line) }
                         .swipeActions {
                             Button { favorites.toggle(savedLine) } label: {

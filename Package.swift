@@ -6,6 +6,7 @@ import PackageDescription
 let core = [
     "API/TransitousClient.swift",
     "API/ResponseCache.swift",
+    "API/MapStopCache.swift",
     "API/TripRefreshCoordinator.swift",
     "App/AppInfo.swift",
     "Models/TransitModels.swift",

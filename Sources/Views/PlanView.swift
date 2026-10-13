@@ -29,9 +29,17 @@ struct PlanView: View {
                 }
                 .pickerStyle(.segmented)
                 DatePicker(plan.timeMode == .arriveBy ? L10n.t("Arrive by") : L10n.t("Depart at"), selection: $plan.date)
+                FirstMilePicker()
                 RouteOptionsButton()
             }
 
+            if plan.to != nil, !trips.upcoming().isEmpty {
+                Section("Upcoming trips") {
+                    ForEach(trips.upcoming().prefix(3)) { trip in
+                        NavigationLink { SavedTripView(tripId: trip.id) } label: { SavedTripRow(trip: trip) }
+                    }
+                }
+            }
             if plan.to == nil {
                 quickDestinations
                 savedTrips
@@ -213,6 +221,9 @@ struct PlanView: View {
                 .listRowBackground(Color.clear)
             }
 
+            if !showMap && !its.isEmpty {
+                ConnectionLegendRow(start: windowStart, end: windowEnd, tz: its.first?.legs.first?.from.tz)
+            }
             if showMap && !its.isEmpty {
                 CompareMapView(itineraries: its, selectedId: selectedId ?? its.first?.id)
                     .frame(height: 320)
@@ -268,6 +279,7 @@ struct PlanView: View {
 
 /// One route in the comparison list. All rows share one time axis so routes can be compared at a glance.
 struct ItineraryRow: View {
+    @AppStorage("routeTimelines") private var showTimeline = true
     let itinerary: Itinerary
     let windowStart: Date
     let windowEnd: Date
@@ -289,8 +301,9 @@ struct ItineraryRow: View {
                 Text(Fmt.duration(seconds: itinerary.duration))
                     .font(.subheadline.weight(.semibold).monospacedDigit())
             }
-            TimelineBar(itinerary: itinerary, windowStart: windowStart, windowEnd: windowEnd)
-                .frame(height: 20)
+            if showTimeline {
+                TimelineBar(itinerary: itinerary, windowStart: windowStart, windowEnd: windowEnd).frame(height: 22)
+            }
             HStack(spacing: 8) {
                 Text(Fmt.changes(itinerary.transfers))
                 if let first = itinerary.firstTransitLeg {
@@ -327,9 +340,17 @@ struct TimelineBar: View {
             let width = geo.size.width
             let height = geo.size.height
             ZStack(alignment: .leading) {
-                ForEach(Array(itinerary.legs.enumerated()), id: \.offset) { _, leg in
-                    let x = leg.startTime.timeIntervalSince(windowStart) / span * width
-                    let w = max(leg.endTime.timeIntervalSince(leg.startTime) / span * width, 2)
+                ForEach(Array(itinerary.legs.enumerated()), id: \.offset) { index, leg in
+                    if index > 0, itinerary.legs[index - 1].endTime < leg.startTime {
+                        let previous = itinerary.legs[index - 1].endTime
+                        let gapStart = max(0, min(width, previous.timeIntervalSince(windowStart) / span * width))
+                        let gapEnd = max(gapStart, min(width, leg.startTime.timeIntervalSince(windowStart) / span * width))
+                        Path { path in path.move(to: CGPoint(x: gapStart, y: height / 2)); path.addLine(to: CGPoint(x: gapEnd, y: height / 2)) }
+                            .stroke(Color.secondary, style: StrokeStyle(lineWidth: 2, lineCap: .butt, dash: [4, 4]))
+                    }
+                    let x = max(0, min(width, leg.startTime.timeIntervalSince(windowStart) / span * width))
+                    let end = max(x, min(width, leg.endTime.timeIntervalSince(windowStart) / span * width))
+                    let w = max(0, min(width - x, max(end - x, 2)))
                     if leg.isTransit {
                         RoundedRectangle(cornerRadius: 4, style: .continuous)
                             .fill(leg.lineColor)
@@ -352,7 +373,7 @@ struct TimelineBar: View {
                     }
                 }
             }
-            .frame(width: width, height: height, alignment: .leading)
+            .frame(width: width, height: height, alignment: .leading).clipped()
         }
         .accessibilityHidden(true)
     }

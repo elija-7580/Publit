@@ -119,7 +119,7 @@ struct PassEditorView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
-                Button("Cancel") { finish() }
+                Button("Cancel") { finish() }.disabled(saving)
             }
             ToolbarItem(placement: .confirmationAction) {
                 Button("Save") { Task { await save() } }
@@ -132,7 +132,7 @@ struct PassEditorView: View {
         } message: {
             Text(verbatim: error ?? "")
         }
-        .interactiveDismissDisabled(isNew)
+        .interactiveDismissDisabled(isNew || saving)
         .sheet(isPresented: $choosingLogo) {
             NavigationStack {
                 LogoPickerView(operatorName: pass.operatorName ?? pass.title) { png, credit in
@@ -143,7 +143,7 @@ struct PassEditorView: View {
                 }
             }
         }
-        .task(id: pass.operatorName ?? "") { await loadLogo() }
+
     }
 
     private var codeSource: BarcodeSource? {

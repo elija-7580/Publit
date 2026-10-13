@@ -28,8 +28,6 @@ struct LaunchSplash: View {
                 .frame(width: 112, height: 112)
                 .background(Color(red: 0.067, green: 0.067, blue: 0.067),
                             in: RoundedRectangle(cornerRadius: 112 * 0.225, style: .continuous))
-                ProgressView()
-                    .opacity(stop ? 1 : 0)
             }
         }
         .accessibilityHidden(true)

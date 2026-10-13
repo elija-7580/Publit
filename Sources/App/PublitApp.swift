@@ -42,7 +42,7 @@ struct PublitApp: App {
                 .onAppear {
                     app.applyDemo(ProcessInfo.processInfo.environment["PUBLIT_DEMO"])
                     if let tab = ProcessInfo.processInfo.environment["PUBLIT_TAB"] {
-                        app.tab = tab == "plan" ? .plan : tab == "saved" ? .favorites : tab == "lines" ? .lines
+                        app.tab = tab == "plan" ? .plan : tab == "saved" ? .favorites : tab == "lines" ? .favorites
                             : tab == "tickets" ? .tickets : .nearby
                     }
                     #if DEBUG
@@ -109,9 +109,6 @@ struct RootView: View {
             NavigationStack { PlanView() }
                 .tabItem { Label("Plan", systemImage: "calendar") }
                 .tag(AppTab.plan)
-            NavigationStack { LinesView() }
-                .tabItem { Label("Lines", systemImage: "point.topleft.down.to.point.bottomright.curvepath") }
-                .tag(AppTab.lines)
             NavigationStack { PassWalletView() }
                 .tabItem { Label("Tickets", systemImage: "ticket") }
                 .tag(AppTab.tickets)

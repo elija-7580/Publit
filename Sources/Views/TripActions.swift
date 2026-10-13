@@ -24,6 +24,7 @@ struct TripActionsSection: View {
 
     var body: some View {
         Section {
+            VStack(spacing: 16) {
             if let saved, trips.activeTripId == saved.id {
                 Button { Task { await stopTrip(saved) } } label: {
                     Label("End trip", systemImage: "stop.circle")
@@ -31,7 +32,7 @@ struct TripActionsSection: View {
                 .accessibilityIdentifier("endTrip")
             } else {
                 Button { Task { await startTrip() } } label: {
-                    Label("Start trip", systemImage: "location.north.circle.fill")
+                    Text("Start trip")
                         .font(.headline)
                         .frame(maxWidth: .infinity)
                 }
@@ -40,25 +41,24 @@ struct TripActionsSection: View {
                 .disabled(itinerary.isCancelled || itinerary.endTime < .now)
                 .accessibilityIdentifier("startTrip")
             }
-            // Secondary options side by side instead of a long list; stacked at accessibility text sizes.
-            if typeSize.isAccessibilitySize {
-                VStack(alignment: .leading, spacing: 12) { secondaryButtons }
-                    .labelStyle(.titleAndIcon)
-            } else {
-                HStack(spacing: 8) { secondaryButtons }
-                    .labelStyle(TileLabelStyle())
+            Divider().frame(maxWidth: .infinity)
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: typeSize.isAccessibilitySize ? 1 : 2), spacing: 12) {
+                secondaryButtons
             }
+            .labelStyle(ActionLabelStyle())
+            .buttonStyle(ActionButtonStyle())
             if let note {
-                Text(note).font(.caption).foregroundStyle(.secondary)
+                Text(note).font(.footnote).foregroundStyle(.secondary).frame(maxWidth: .infinity, alignment: .leading)
             }
+            }
+            .padding(.vertical, 4)
+            .listRowSeparator(.hidden)
+            .sheet(item: $calendarTrip) { trip in CalendarEventSheet(trip: trip).ignoresSafeArea() }
         } footer: {
             Text("The calendar entry links back to this trip with its live status.")
         }
         .task(id: saved?.id) {
             if let id = saved?.id { reminderOn = await LeaveReminder.isScheduled(id) }
-        }
-        .sheet(item: $calendarTrip) { trip in
-            CalendarEventSheet(trip: trip).ignoresSafeArea()
         }
 
         if Features.tickets {
@@ -76,24 +76,24 @@ struct TripActionsSection: View {
     @ViewBuilder
     private var secondaryButtons: some View {
         Button {
-            if let saved { trips.remove(saved.id); LeaveReminder.cancel(saved.id); Task { await LiveTripActivity.end(saved.id) }; reminderOn = false }
-            else { trips.save(itinerary, from: fromName, to: toName) }
+            if saved == nil { trips.save(itinerary, from: fromName, to: toName) }
         } label: {
             Label(saved == nil ? L10n.t("Save trip") : L10n.t("Saved"), systemImage: saved == nil ? "bookmark" : "bookmark.fill")
         }
-        .buttonStyle(.bordered)
+        .buttonStyle(ActionButtonStyle())
+        .disabled(saved != nil)
         Button {
             calendarTrip = ensureSaved()
         } label: {
             Label("Add to Calendar", systemImage: "calendar.badge.plus")
         }
-        .buttonStyle(.bordered)
+        .buttonStyle(ActionButtonStyle())
         if itinerary.endTime > .now {
             // "I'm arriving at … at 18:42": live time; a notification follows if it moves later.
             ShareLink(item: ArrivalShare.message(for: itinerary, to: toName)) {
                 Label("Share arrival", systemImage: "square.and.arrow.up")
             }
-            .buttonStyle(.bordered)
+            .buttonStyle(ActionButtonStyle())
             .simultaneousGesture(TapGesture().onEnded {
                 let trip = ensureSaved()
                 ArrivalUpdates.recordShare(tripKey: trip.id, arrival: itinerary.endTime)
@@ -104,16 +104,18 @@ struct TripActionsSection: View {
             Button {
                 Task { await toggleReminder() }
             } label: {
-                Label(reminderOn ? L10n.t("Leave reminder on") : L10n.t("Remind me to leave in time"),
+                Label(reminderOn ? L10n.t("Reminder on") : L10n.t("Leave reminder"),
                       systemImage: reminderOn ? "bell.fill" : "bell")
             }
-            .buttonStyle(.bordered)
+            .buttonStyle(ActionButtonStyle())
         }
     }
 
     private func startTrip() async {
         let trip = ensureSaved()
-        if let previous = trips.start(trip.id), previous != trip.id {
+        let previous = trips.start(trip.id)
+        app.open(trip.deepLink)
+        if let previous, previous != trip.id {
             LeaveReminder.cancel(previous)
             await LiveTripActivity.end(previous)
         }
@@ -122,7 +124,6 @@ struct TripActionsSection: View {
         case .tooEarly: note = L10n.t("Live updates on the lock screen start 8 hours before.")
         case .unavailable, .failed: note = L10n.t("Live tracking is active in the app. Lock screen updates may be unavailable.")
         }
-        app.open(trip.deepLink)
     }
 
     private func stopTrip(_ trip: SavedTrip) async {
@@ -269,5 +270,26 @@ struct TileLabelStyle: LabelStyle {
                 .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, minHeight: 58)
+    }
+}
+
+/// Fixed padding and unlimited wrapping, independent of iOS's automatic capsule button shapes.
+struct ActionLabelStyle: LabelStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        VStack(spacing: 8) {
+            configuration.icon.font(.title3.weight(.semibold))
+            configuration.title.font(.subheadline.weight(.semibold))
+                .multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, minHeight: 64, alignment: .center)
+    }
+}
+
+struct ActionButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label.padding(12).frame(maxWidth: .infinity)
+            .foregroundStyle(Color.appAccent)
+            .background(Color.appAccent.opacity(configuration.isPressed ? 0.2 : 0.1), in: RoundedRectangle(cornerRadius: 14))
+            .contentShape(RoundedRectangle(cornerRadius: 14))
     }
 }

@@ -7,6 +7,7 @@ extension LatLon {
         let p1 = lat * .pi / 180, p2 = other.lat * .pi / 180
         let dp = (other.lat - lat) * .pi / 180, dl = (other.lon - lon) * .pi / 180
         let a = sin(dp / 2) * sin(dp / 2) + cos(p1) * cos(p2) * sin(dl / 2) * sin(dl / 2)
-        return 2 * r * atan2(sqrt(a), sqrt(1 - a))
+        let bounded = max(0, min(1, a))
+        return 2 * r * atan2(sqrt(bounded), sqrt(1 - bounded))
     }
 }

@@ -118,6 +118,7 @@ struct TripPassSection: View {
             Button { adding = ensureTrip() } label: {
                 Label(L10n.t("Add ticket for this trip"), systemImage: "plus.rectangle.on.rectangle")
             }
+            .id("trip-ticket-import-row")
             .accessibilityIdentifier("addTripTicket")
             // On one row only: presentation modifiers on a Section are copied onto every row.
             .sheet(item: Binding(get: { adding.map(TripRef.init) }, set: { adding = $0?.id })) { ref in

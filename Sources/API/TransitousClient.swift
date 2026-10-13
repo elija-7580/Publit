@@ -18,9 +18,12 @@ final class TransitousClient: @unchecked Sendable {
 
     private let base: URL
     private let session: URLSession
+    /// Same settings with a 45 s idle timeout, for Park & Ride and sharing searches.
+    private let slowSession: URLSession
     private let userAgent: String
     let decoder: JSONDecoder
     let cache: ResponseCache
+    private let mapStopCache = MapStopCache()
 
     init(base: URL = URL(string: "https://api.transitous.org")!,
          userAgent: String = AppInfo.userAgent,
@@ -34,6 +37,9 @@ final class TransitousClient: @unchecked Sendable {
         // Responses are kept by `ResponseCache`; a second copy in URLCache would only cost memory and disk.
         cfg.urlCache = nil
         session = URLSession(configuration: cfg)
+        let slow = cfg.copy() as! URLSessionConfiguration
+        slow.timeoutIntervalForRequest = 45
+        slowSession = URLSession(configuration: slow)
         decoder = TransitousClient.makeDecoder()
     }
 
@@ -75,7 +81,8 @@ final class TransitousClient: @unchecked Sendable {
         // "Now" searches change by the minute; planned ones can be reused a little longer.
         try await get("/api/v6/plan", Self.planQuery(from: from, to: to, time: time, arriveBy: arriveBy,
                                                      pageCursor: pageCursor, maxWalk: maxWalk, options: options),
-                      cache: CachePolicy(maxAge: time == nil ? 20 : 60, persist: true))
+                      cache: CachePolicy(maxAge: time == nil ? 20 : 60, persist: true),
+                      timeout: options.isSlowSearch ? 45 : nil)
     }
 
     static func planQuery(from: LatLon, to: LatLon, time: Date?, arriveBy: Bool,
@@ -94,10 +101,13 @@ final class TransitousClient: @unchecked Sendable {
         ]
         // Walking, cycling and driving the whole way come back in `direct`, for comparison.
         q.append(URLQueryItem(name: "directModes", value: options.directModes.joined(separator: ",")))
-        // Shared bikes and scooters to and from the stations (much slower to compute on the server).
-        if options.sharing {
-            q.append(URLQueryItem(name: "preTransitModes", value: "WALK,RENTAL"))
-            q.append(URLQueryItem(name: "postTransitModes", value: "WALK,RENTAL"))
+        // Own bike / car to the first stop, shared bikes and scooters at either end
+        // (car and sharing are much slower to compute on the server).
+        if options.preTransitModes != ["WALK"] {
+            q.append(URLQueryItem(name: "preTransitModes", value: options.preTransitModes.joined(separator: ",")))
+        }
+        if options.postTransitModes != ["WALK"] {
+            q.append(URLQueryItem(name: "postTransitModes", value: options.postTransitModes.joined(separator: ",")))
         }
         if let modes = options.modes.apiValue { q.append(URLQueryItem(name: "transitModes", value: modes)) }
         if let n = options.maxTransfers { q.append(URLQueryItem(name: "maxTransfers", value: String(n))) }
@@ -117,11 +127,15 @@ final class TransitousClient: @unchecked Sendable {
 
     /// Stops inside a map rectangle, for the interactive station map.
     func mapStops(min: LatLon, max: LatLon, zoom: Int) async throws -> [MapStop] {
-        try await get("/api/v6/map/stops", [
+        if let cached = mapStopCache.covering(min: min, max: max, zoom: zoom) { return cached }
+        let stops: [MapStop] = try await get("/api/v6/map/stops", [
             URLQueryItem(name: "min", value: min.apiValue),
             URLQueryItem(name: "max", value: max.apiValue),
             URLQueryItem(name: "zoom", value: String(zoom)),
         ], cache: .search)
+        let valid = stops.filter { $0.coordinate.isValidCoordinate }
+        mapStopCache.store(valid, min: min, max: max, zoom: zoom)
+        return valid
     }
 
     /// - Parameter modes: only these modes (`ModeFilter.apiValue`); nil for all.
@@ -203,26 +217,37 @@ final class TransitousClient: @unchecked Sendable {
     // MARK: Transport
 
     /// Last "departures near me" response and where it was asked, for an instant first screen.
-    func lastNearby(maxAge: TimeInterval) async -> (response: StopTimesResponse, center: LatLon, date: Date)? {
-        guard let e = cache.stale("nearby"), Date().timeIntervalSince(e.date) < maxAge,
+    func lastNearby(maxAge: TimeInterval, modes: String? = nil) async -> (response: StopTimesResponse, center: LatLon, date: Date)? {
+        guard let e = cache.stale(modes.map { "nearby|\($0)" } ?? "nearby"), Date().timeIntervalSince(e.date) < maxAge,
               let res = try? decoder.decode(StopTimesResponse.self, from: e.data),
               let center = URLComponents(string: e.url)?.queryItems?.first(where: { $0.name == "center" })?.value
                 .flatMap(LatLon.init(apiValue:)) else { return nil }
         return (res, center, e.date)
     }
 
-    private func get<T: Decodable>(_ path: String, _ query: [URLQueryItem], cache policy: CachePolicy) async throws -> T {
+    private func get<T: Decodable>(_ path: String, _ query: [URLQueryItem], cache policy: CachePolicy,
+                                   timeout: TimeInterval? = nil) async throws -> T {
         let trace = PerformanceTrace.begin("Transit request")
         defer { PerformanceTrace.end(trace, "Transit request") }
         var comps = URLComponents(url: base.appendingPathComponent(path), resolvingAgainstBaseURL: false)!
         comps.queryItems = query
         let url = comps.url!
         let key = policy.slot ?? url.absoluteString
-        if let hit = cache.fresh(key, maxAge: policy.maxAge), hit.url == url.absoluteString,
-           let value = try? decoder.decode(T.self, from: hit.data) {
+        if let hit = cache.fresh(key, maxAge: policy.maxAge),
+           hit.url == url.absoluteString || (policy.slot?.hasPrefix("nearby") == true && Self.sameNearbyRequest(savedURL: hit.url, requestedURL: url)),
+           let value = try? Self.makeDecoder().decode(T.self, from: hit.data) {
+            return value
+        }
+        // Stations/search data are static enough to reuse a fresh disk copy after relaunch.
+        if policy.persist, policy.maxAge >= 600, let hit = cache.stale(key), hit.url == url.absoluteString,
+           Date().timeIntervalSince(hit.date) < policy.maxAge,
+           let value = try? Self.makeDecoder().decode(T.self, from: hit.data) {
+            cache.store(key, data: hit.data, url: hit.url, persist: false, now: hit.date)
             return value
         }
         var req = URLRequest(url: url)
+        // The server computes Park & Ride before sending a byte; the default 20 s would cut it off.
+        if let timeout { req.timeoutInterval = timeout }
         req.setValue(userAgent, forHTTPHeaderField: "User-Agent")
         req.setValue("application/json", forHTTPHeaderField: "Accept")
 
@@ -243,7 +268,9 @@ final class TransitousClient: @unchecked Sendable {
         }
         let value: T
         do {
-            value = try decoder.decode(T.self, from: data)
+            let decodeTrace = PerformanceTrace.begin("Decode transit response")
+            defer { PerformanceTrace.end(decodeTrace, "Decode transit response") }
+            value = try Self.makeDecoder().decode(T.self, from: data)
         } catch {
             throw APIError(message: L10n.t("Unexpected response from the routing service."))
         }
@@ -257,7 +284,7 @@ final class TransitousClient: @unchecked Sendable {
     /// One download for identical requests that overlap (two screens or a quick reload asking for
     /// the same board), and one retry for a dropped connection or a busy server.
     private func fetch(_ req: URLRequest) async throws -> (Data, Int) {
-        let session = session
+        let session = req.timeoutInterval > 20 && req.timeoutInterval < 60 ? slowSession : session
         return try await running.run(req.url?.absoluteString ?? "") {
             try await Self.withRetry {
                 let (d, response) = try await session.data(for: req)
@@ -273,7 +300,7 @@ final class TransitousClient: @unchecked Sendable {
         do {
             let r = try await op()
             guard [502, 503, 504].contains(r.1) else { return r }
-        } catch let e as URLError where e.code == .networkConnectionLost || e.code == .cannotConnectToHost {
+        } catch let e as URLError where [.networkConnectionLost, .cannotConnectToHost, .cannotFindHost, .dnsLookupFailed].contains(e.code) {
             // Fall through to the second attempt.
         }
         try await Task.sleep(for: delay)
@@ -288,6 +315,20 @@ final class TransitousClient: @unchecked Sendable {
               let value = try? decoder.decode(T.self, from: e.data) else { return nil }
         await Connectivity.shared.servedOffline(from: e.date)
         return value
+    }
+
+    /// Tiny GPS refinements do not invalidate a 20-second board. All other parameters must match.
+    static func sameNearbyRequest(savedURL: String, requestedURL: URL, maxDistance: Double = 150) -> Bool {
+        func parts(_ url: URL) -> (LatLon, [String: String])? {
+            guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+                  let center = components.queryItems?.first(where: { $0.name == "center" })?.value.flatMap(LatLon.init(apiValue:)) else { return nil }
+            var fields: [String: String] = [:]
+            for item in components.queryItems ?? [] where item.name != "center" { fields[item.name] = item.value ?? "" }
+            return (center, fields)
+        }
+        guard let saved = URL(string: savedURL), saved.host == requestedURL.host, saved.path == requestedURL.path,
+              let a = parts(saved), let b = parts(requestedURL), a.1 == b.1 else { return false }
+        return a.0.distance(to: b.0) < maxDistance
     }
 
     static func sameOfflineRequest(savedURL: String, requestedURL: URL, slot: String?) -> Bool {

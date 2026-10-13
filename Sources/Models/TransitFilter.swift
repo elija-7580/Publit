@@ -131,13 +131,15 @@ struct RouteOptions: Codable, Hashable, Sendable {
     var compareStreetModes = true
     /// Shared bikes and e-scooters to and from the stations.
     var sharing = false
+    /// How to get to the first stop: walking, own bike (Bike & Ride) or car (Park & Ride).
+    var firstMile = FirstMile.walk
     /// Order of the listed routes (sorting only, the same routes).
     var sort = RouteSort.departure
 
     init() {}
 
     private enum CodingKeys: String, CodingKey {
-        case modes, maxTransfers, maxWalkMinutes, wheelchair, compareStreetModes, sharing, sort
+        case modes, maxTransfers, maxWalkMinutes, wheelchair, compareStreetModes, sharing, firstMile, sort
     }
 
     /// Options saved by older versions lack the newer keys; they keep their defaults.
@@ -149,6 +151,7 @@ struct RouteOptions: Codable, Hashable, Sendable {
         wheelchair = try c.decodeIfPresent(Bool.self, forKey: .wheelchair) ?? false
         compareStreetModes = try c.decodeIfPresent(Bool.self, forKey: .compareStreetModes) ?? true
         sharing = try c.decodeIfPresent(Bool.self, forKey: .sharing) ?? false
+        firstMile = (try? c.decodeIfPresent(FirstMile.self, forKey: .firstMile)) ?? .walk
         sort = (try? c.decodeIfPresent(RouteSort.self, forKey: .sort)) ?? .departure
     }
 
@@ -158,18 +161,35 @@ struct RouteOptions: Codable, Hashable, Sendable {
 
     var isDefault: Bool {
         !modes.isActive && maxTransfers == nil && maxWalkMinutes == Self.defaultWalkMinutes && !wheelchair && !sharing
+            && firstMile == .walk
     }
 
     /// How many options differ from the default (badge on the filter button).
     var activeCount: Int {
-        [modes.isActive, maxTransfers != nil, maxWalkMinutes != Self.defaultWalkMinutes, wheelchair, sharing].filter { $0 }.count
+        [modes.isActive, maxTransfers != nil, maxWalkMinutes != Self.defaultWalkMinutes, wheelchair, sharing,
+         firstMile != .walk].filter { $0 }.count
     }
 
     var directModes: [String] { compareStreetModes ? ["WALK", "BIKE", "CAR"] : ["WALK"] }
 
+    /// Ways to the first stop. Walking always stays in, so the results mix variants
+    /// (walk to the tram, or cycle to the train station) for comparison.
+    var preTransitModes: [String] {
+        var m = ["WALK"]
+        if let extra = firstMile.apiMode { m.append(extra) }
+        if sharing { m.append("RENTAL") }
+        return m
+    }
+
+    /// Ways from the last stop: walking, or a shared bike or scooter.
+    var postTransitModes: [String] { sharing ? ["WALK", "RENTAL"] : ["WALK"] }
+
+    /// Park & Ride and sharing take the server much longer (up to about half a minute).
+    var isSlowSearch: Bool { firstMile == .car || sharing }
+
     /// Part of the query key: other options mean other routes.
     var key: String {
-        "\(modes.storageValue)|\(maxTransfers.map(String.init) ?? "-")|\(maxWalkMinutes)|\(wheelchair)|\(compareStreetModes)|\(sharing)"
+        "\(modes.storageValue)|\(maxTransfers.map(String.init) ?? "-")|\(maxWalkMinutes)|\(wheelchair)|\(compareStreetModes)|\(sharing)|\(firstMile.rawValue)"
     }
 
     static func transferTitle(_ n: Int?) -> String {
@@ -187,6 +207,7 @@ struct RouteOptions: Codable, Hashable, Sendable {
         if let t = maxTransfers { parts.append(t == 0 ? L10n.t("Direct only") : L10n.f("Changes: up to %lld", t)) }
         if maxWalkMinutes != Self.defaultWalkMinutes { parts.append(L10n.f("Walk up to %lld min", maxWalkMinutes)) }
         if wheelchair { parts.append(L10n.t("Step-free")) }
+        if firstMile != .walk { parts.append(firstMile.summary) }
         if sharing { parts.append(L10n.t("With sharing")) }
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
@@ -282,5 +303,47 @@ enum RouteSort: String, Codable, CaseIterable, Identifiable, Sendable {
             let ka = key(a.element), kb = key(b.element)
             return ka != kb ? ka < kb : a.offset < b.offset
         }.map(\.element)
+    }
+}
+
+/// How to get from the start to the first stop (MOTIS `preTransitModes`).
+/// Bus, tram and train are always part of the route itself; this is only the first mile.
+enum FirstMile: String, Codable, CaseIterable, Identifiable, Sendable {
+    case walk, bike, car
+
+    var id: String { rawValue }
+
+    /// Added to `WALK`; nil = walking only.
+    var apiMode: String? {
+        switch self {
+        case .walk: return nil
+        case .bike: return "BIKE"
+        // Drive to a car park near a station, then walk to the platform.
+        case .car: return "CAR_PARKING"
+        }
+    }
+
+    var title: String {
+        switch self {
+        case .walk: return L10n.t("Walk")
+        case .bike: return L10n.t("Bike")
+        case .car: return L10n.t("Car")
+        }
+    }
+
+    var summary: String {
+        switch self {
+        case .walk: return L10n.t("Walk")
+        case .bike: return L10n.t("Bike & Ride")
+        case .car: return L10n.t("Park & Ride")
+        }
+    }
+
+    var symbol: String {
+        switch self {
+        case .walk: return "figure.walk"
+        case .bike: return "bicycle"
+        case .car: return "car.fill"
+        }
     }
 }

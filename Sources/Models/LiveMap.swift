@@ -7,6 +7,7 @@ struct PolylineRuler: Sendable {
     let cumulative: [Double]
 
     init(_ points: [LatLon]) {
+        let points = points.filter(\.isValidCoordinate)
         self.points = points
         var acc = [Double](repeating: 0, count: points.count)
         if points.count > 1 {
@@ -19,7 +20,7 @@ struct PolylineRuler: Sendable {
 
     /// Point `meters` along the line, and the direction of travel there (degrees from north).
     func point(at meters: Double) -> (LatLon, Double?)? {
-        guard let first = points.first else { return nil }
+        guard meters.isFinite, let first = points.first else { return nil }
         guard points.count > 1 else { return (first, nil) }
         let d = min(max(meters, 0), length)
         // Binary search for the piece that contains d.
@@ -161,13 +162,17 @@ enum LiveMap {
         var pieces: [String: [VehicleTrack.Piece]] = [:]
         var info: [String: (name: String, mode: String, color: String, realTime: Bool)] = [:]
         for s in segments where !excludedModes.contains(s.mode) && s.distance <= maxSegmentMeters && filter.allows(s.mode) {
-            guard let trip = s.trips.first else { continue }
+            guard s.distance.isFinite, s.distance >= 0, s.from.coordinate.isValidCoordinate,
+                  s.to.coordinate.isValidCoordinate, s.arrival >= s.departure,
+                  let trip = s.trips.first else { continue }
             let color = colorHex(s.routeColor, mode: s.mode)
             let points = Polyline.simplify(Polyline.decode(s.polyline, precision: precision), toleranceMeters: tolerance)
             guard points.count > 1 else { continue }
             let shapeKey = "\(s.from.stopId ?? s.from.name)>\(s.to.stopId ?? s.to.name)|\(color)"
             if shapes[shapeKey] == nil { shapes[shapeKey] = LineShape(id: shapeKey, mode: s.mode, colorHex: color, points: points) }
-            let delay = Int((s.departure.timeIntervalSince(s.scheduledDeparture) / 60).rounded())
+            let delayValue = (s.departure.timeIntervalSince(s.scheduledDeparture) / 60).rounded()
+            guard delayValue.isFinite else { continue }
+            let delay = Int(max(-1440, min(1440, delayValue)))
             pieces[trip.tripId, default: []].append(VehicleTrack.Piece(
                 departure: s.departure, arrival: s.arrival, ruler: PolylineRuler(points), toName: s.to.name, delayMinutes: delay))
             if info[trip.tripId] == nil {

@@ -37,7 +37,7 @@ struct FavoritesView: View {
                 Section("Lines") {
                     ForEach(favorites.lines) { line in
                         NavigationLink {
-                            LineDeparturesView(line: line)
+                            LineDetailView(line: LineRef(saved: line))
                         } label: {
                             HStack(spacing: 10) {
                                 LineBadge(line)
@@ -84,6 +84,10 @@ struct FavoritesView: View {
         .navigationTitle("Saved")
         .withSettingsButton()
         .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                NavigationLink { LinesView() } label: { Label(L10n.t("Find a line"), systemImage: "point.topleft.down.to.point.bottomright.curvepath") }
+                    .accessibilityIdentifier("findLine")
+            }
             ToolbarItem(placement: .topBarTrailing) {
                 Button { adding = true } label: { Label("Add", systemImage: "plus") }
             }

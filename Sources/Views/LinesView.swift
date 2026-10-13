@@ -146,6 +146,7 @@ struct LineDetailView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Environment(AppState.self) private var app
     let line: LineRef
+    var initialDepartures: [StopTime] = []
     @Environment(FavoritesStore.self) private var favorites
     @State private var directions: [LineDirection] = []
     @State private var directionId: String?
@@ -231,7 +232,13 @@ struct LineDetailView: View {
                 }
             }
         }
-        .task { await loadDirections() }
+        .task {
+            if !initialDepartures.isEmpty {
+                directions = LineDirection.from(initialDepartures, matching: line.key)
+                loaded = true
+            }
+            await loadDirections()
+        }
         .onAppear { isVisible = true }
         .onDisappear { isVisible = false }
         .task(id: "\(direction?.id ?? "-")|\(scenePhase)|\(app.tab)|\(isVisible)") {
@@ -253,6 +260,7 @@ struct LineDetailView: View {
         do {
             let res = try await TransitousClient.shared.departures(stopId: line.stopId, count: 100,
                                                                   radius: StopDeparturesView.stationRadius)
+            try Task.checkCancellation()
             let mine = StopTime.upcoming(res.stopTimes).filter(line.matches)
             directions = LineDirection.from(mine, matching: line.key)
             // Prefer the direction the line was opened with (e.g. from a vehicle on the map).
@@ -275,6 +283,7 @@ struct LineDetailView: View {
             if let leg = try await TransitousClient.shared.trip(id: d.sampleTripId).legs.first(where: \.isTransit) {
                 let stops = leg.allStops, shape = leg.legGeometry.mapPoints
                 let pattern = await Task.detached(priority: .userInitiated) { LineVehicles.Pattern(stops: stops, shape: shape) }.value
+                try Task.checkCancellation()
                 legs[d.id] = leg
                 patterns[d.id] = pattern
             }

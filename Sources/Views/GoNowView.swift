@@ -29,6 +29,7 @@ struct GoNowView: View {
                 } else if let msg = plan.errorMessage, its.isEmpty {
                     Text(msg).foregroundStyle(.secondary)
                 }
+                if !its.isEmpty { ConnectionLegendRow(start: windowStart, end: windowEnd, tz: its.first?.legs.first?.from.tz) }
                 ForEach(its) { it in
                     NavigationLink {
                         ItineraryDetailView(itinerary: it, fromName: L10n.t("Current location"), toName: plan.to?.title ?? "")

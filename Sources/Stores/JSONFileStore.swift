@@ -33,15 +33,21 @@ struct JSONFile<Value: Codable>: Sendable {
     }
 
     /// Immutable snapshots are encoded and written in order, away from the UI thread.
-    func saveInBackground(_ value: Value) where Value: Sendable {
-        JSONPersistence.queue.async { save(value) }
+    func saveInBackground(_ value: Value, completion: (@Sendable (Result<Void, Error>) -> Void)? = nil) where Value: Sendable {
+        JSONPersistence.queue.async {
+            do { try saveChecked(value); completion?(.success(())) }
+            catch { completion?(.failure(error)) }
+        }
     }
 
-    func save(_ value: Value) {
+    func save(_ value: Value) { try? saveChecked(value) }
+
+    /// Critical imports use this throwing path; a failed write must never report success.
+    func saveChecked(_ value: Value) throws {
         let trace = PerformanceTrace.begin("Save local data")
         defer { PerformanceTrace.end(trace, "Save local data") }
-        guard let data = try? Self.encoder.encode(value) else { return }
-        try? data.write(to: url, options: .atomic)
+        let data = try Self.encoder.encode(value)
+        try data.write(to: url, options: .atomic)
     }
 }
 

@@ -27,6 +27,21 @@ struct RouteOptionsView: View {
                     Text("Routes only use the modes that are switched on.")
                 }
 
+                Section {
+                    Picker("To the first stop", selection: $draft.firstMile) {
+                        ForEach(FirstMile.allCases) { m in
+                            Label(m.summary, systemImage: m.symbol).tag(m)
+                        }
+                    }
+                    .pickerStyle(.inline)
+                    .labelsHidden()
+                    .accessibilityIdentifier("routeFirstMile")
+                } header: {
+                    Text("To the first stop")
+                } footer: {
+                    Text("Bike & Ride: cycle to a station and park there. Park & Ride: drive to a car park at a station; this search can take up to half a minute. Walking routes stay in the list for comparison; buses, trams and trains are always included.")
+                }
+
                 Section("Changes") {
                     Picker("Changes", selection: $draft.maxTransfers) {
                         ForEach(RouteOptions.transferChoices, id: \.self) { n in
@@ -192,5 +207,52 @@ struct StreetComparisonSection: View {
         let diff = seconds - best
         if abs(diff) < 180 { return L10n.t("About as fast") }
         return diff < 0 ? L10n.f("%@ faster", Fmt.duration(seconds: -diff)) : L10n.f("%@ slower", Fmt.duration(seconds: diff))
+    }
+}
+
+/// Quick choice in the planner: how to get to the first stop. The results then mix
+/// variants (walk to the tram, cycle or drive to the train), like other trip planners.
+struct FirstMilePicker: View {
+    @Environment(AppState.self) private var app
+
+    var body: some View {
+        let current = app.routeOptions.firstMile
+        VStack(alignment: .leading, spacing: 8) {
+            Text("To the first stop")
+                .font(.subheadline.weight(.semibold))
+            HStack(spacing: 8) {
+                ForEach(FirstMile.allCases) { mode in
+                    let selected = mode == current
+                    Button {
+                        guard !selected else { return }
+                        var o = app.routeOptions
+                        o.firstMile = mode
+                        app.setRouteOptions(o)
+                    } label: {
+                        VStack(spacing: 4) {
+                            Image(systemName: mode.symbol).font(.body.weight(.semibold))
+                            Text(verbatim: mode.title)
+                                .font(.caption.weight(.semibold))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.8)
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 52)
+                        .foregroundStyle(selected ? Color.white : Color.primary)
+                        .background(selected ? Color.appAccent : Color(.tertiarySystemFill),
+                                    in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(Text(verbatim: mode.summary))
+                    .accessibilityAddTraits(selected ? .isSelected : [])
+                    .accessibilityIdentifier("firstMile-\(mode.rawValue)")
+                }
+            }
+            if current == .car {
+                Text("Park & Ride searches take longer.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+        }
+        .padding(.vertical, 4)
     }
 }

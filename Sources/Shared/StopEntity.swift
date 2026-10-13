@@ -23,7 +23,7 @@ struct StopEntity: AppEntity {
     init?(id: String) {
         let parts = id.split(separator: "|", maxSplits: 2, omittingEmptySubsequences: false).map(String.init)
         let coords = parts.first?.split(separator: ",").compactMap { Double($0) } ?? []
-        guard parts.count == 3, coords.count == 2 else { return nil }
+        guard parts.count == 3, coords.count == 2, LatLon(lat: coords[0], lon: coords[1]).isValidCoordinate, !parts[1].isEmpty else { return nil }
         self.init(stopId: parts[1], name: parts[2], lat: coords[0], lon: coords[1])
     }
 
@@ -38,7 +38,7 @@ struct StopQuery: EntityStringQuery {
     func entities(matching string: String) async throws -> [StopEntity] {
         let text = string.trimmingCharacters(in: .whitespaces)
         guard text.count >= 2 else { return [] }
-        return try await TransitousClient.shared.geocode(text, near: nil)
+        return try await TransitousClient.shared.geocode(text, near: nil, type: "STOP")
             .filter(\.isStop)
             .map { StopEntity(stopId: $0.id, name: $0.name, lat: $0.lat, lon: $0.lon) }
     }

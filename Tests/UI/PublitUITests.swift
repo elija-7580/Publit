@@ -74,8 +74,6 @@ final class PublitUITests: XCTestCase {
         app.tabBars.buttons.element(boundBy: 0).tap()
         XCTAssertTrue(app.navigationBars["In der Nähe"].waitForExistence(timeout: 5))
         snap("de-nearby")
-        app.tabBars.buttons.element(boundBy: 2).tap()
-        XCTAssertTrue(app.navigationBars["Linien"].waitForExistence(timeout: 5))
         app.tabBars.buttons["Gespeichert"].tap()
         XCTAssertTrue(app.navigationBars["Gespeichert"].waitForExistence(timeout: 5))
         snap("de-saved")
@@ -388,7 +386,9 @@ final class PublitUITests: XCTestCase {
         // Demo location so Lines has nearby data even when the simulator GPS is cold.
         let app = launch(["PUBLIT_DEMO": "munich"])
         nudge(app)
-        app.tabBars.buttons["Lines"].tap()
+        app.tabBars.buttons["Saved"].tap()
+        XCTAssertTrue(app.buttons["findLine"].waitForExistence(timeout: 10))
+        app.buttons["findLine"].tap()
         XCTAssertTrue(app.navigationBars["Lines"].waitForExistence(timeout: 10))
         let row = app.buttons["lineRow"].firstMatch
         if !row.waitForExistence(timeout: timeout) { snap("lines-fail") }

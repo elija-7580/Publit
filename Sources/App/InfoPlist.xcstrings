@@ -190,6 +190,101 @@
      }
     }
    }
+  },
+  "NSCameraUsageDescription": {
+   "extractionState": "manual",
+   "localizations": {
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit používá fotoaparát jen tehdy, když chcete naskenovat papírovou jízdenku. Sken zůstane ve vašem iPhonu."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit nutzt die Kamera nur, wenn du ein Papierticket scannen möchtest. Der Scan bleibt auf deinem iPhone."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Το Publit χρησιμοποιεί την κάμερα μόνο όταν επιλέγετε να σαρώσετε ένα χάρτινο εισιτήριο. Η σάρωση μένει στο iPhone σας."
+     }
+    },
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit uses the camera only when you choose to scan a paper ticket. The scan stays on your iPhone."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit usa la cámara solo cuando decides escanear un billete en papel. El escaneo se queda en tu iPhone."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit utilise l’appareil photo uniquement lorsque vous choisissez de scanner un billet papier. Le scan reste sur votre iPhone."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "A Publit csak akkor használja a kamerát, ha papírjegyet szeretnél beolvasni. A beolvasás az iPhone-odon marad."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit usa la fotocamera solo quando scegli di scansionare un biglietto cartaceo. La scansione resta sul tuo iPhone."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit gebruikt de camera alleen als je een papieren kaartje wilt scannen. De scan blijft op je iPhone."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit używa aparatu tylko wtedy, gdy chcesz zeskanować papierowy bilet. Skan pozostaje na Twoim iPhonie."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O Publit usa a câmara apenas quando escolhe digitalizar um bilhete em papel. A digitalização fica no seu iPhone."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit folosește camera doar când alegi să scanezi un bilet pe hârtie. Scanarea rămâne pe iPhone-ul tău."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit använder kameran bara när du väljer att skanna en pappersbiljett. Skanningen stannar på din iPhone."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit kamerayı yalnızca kâğıt bilet taramayı seçtiğinizde kullanır. Tarama iPhone’unuzda kalır."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit використовує камеру лише тоді, коли ви хочете відсканувати паперовий квиток. Скан лишається на вашому iPhone."
+     }
+    }
+   }
   }
  },
  "version": "1.0"

@@ -57,6 +57,7 @@ final class PlanModel {
     @ObservationIgnored private var lastOptions = RouteOptions()
     @ObservationIgnored private var token = UUID()
     @ObservationIgnored private var resultsKey: String?
+    @ObservationIgnored private var completedAt: Date?
     @ObservationIgnored var history: SearchHistoryStore = .shared
 
     /// The routes in the order chosen in the options (fastest, fewest changes, …).
@@ -88,6 +89,9 @@ final class PlanModel {
                 : L10n.t("Waiting for your location…")
             return
         }
+        if !silent, resultsKey == queryKey, !itineraries.isEmpty,
+           let completedAt, Date().timeIntervalSince(completedAt) < 45,
+           let lastRequest, f.distance(to: lastRequest.from) < 150 { return }
         // Results of another query (new destination or time) must not stay on screen without a spinner.
         if !silent, resultsKey != queryKey { itineraries = []; comparisons = []; nextCursor = nil }
         let searchedFrom = from
@@ -118,6 +122,7 @@ final class PlanModel {
             itineraries = Self.merge(transit: res.itineraries, direct: res.direct)
             comparisons = Self.comparisons(direct: res.direct, listed: itineraries, enabled: options.compareStreetModes)
             resultsKey = queryKey
+            completedAt = Date()
             nextCursor = arriveBy ? res.previousPageCursor : res.nextPageCursor
             lastRequest = (f, t, time, arriveBy, maxWalk)
             lastOptions = options
@@ -132,7 +137,11 @@ final class PlanModel {
             if !silent || itineraries.isEmpty {
                 itineraries = []
                 comparisons = []
-                errorMessage = error.localizedDescription
+                if options.isSlowSearch, (error as? URLError)?.code == .timedOut {
+                    errorMessage = L10n.t("This search took too long. Try again, or choose walking to the first stop.")
+                } else {
+                    errorMessage = error.localizedDescription
+                }
             }
         }
     }
@@ -186,7 +195,7 @@ struct SharedTicketFile: Identifiable {
     let url: URL
 }
 
-enum AppTab: Hashable { case nearby, plan, lines, tickets, favorites }
+enum AppTab: Hashable { case nearby, plan, tickets, favorites }
 
 @MainActor
 @Observable

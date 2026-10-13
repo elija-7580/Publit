@@ -9,6 +9,8 @@ final class PassStore {
 
     @ObservationIgnored private let file: JSONFile<[TicketPass]>
     @ObservationIgnored let documentDirectory: URL
+    @ObservationIgnored private var commitTail: Task<Void, Never>?
+    @ObservationIgnored private var revision = 0
 
     /// Documents above this size are rejected; tickets are a few pages at most.
     static let maxDocumentBytes = 25 * 1024 * 1024
@@ -71,7 +73,9 @@ final class PassStore {
     /// Saves a checked pass. The document is written away from the main actor before the pass appears.
     @discardableResult
     func add(_ pass: TicketPass, document: Data? = nil, kind: TicketPass.Document.Kind? = nil, page: Int = 0, deduplicate: Bool = false) async throws -> TicketPass {
+        try Task.checkCancellation()
         var pass = pass
+        var writtenURL: URL?
         if let document, let kind {
             guard document.count <= Self.maxDocumentBytes else { throw Failure.documentTooLarge }
             let fingerprint = await Task.detached(priority: .userInitiated) {
@@ -96,10 +100,40 @@ final class PassStore {
                 return existing
             }
             pass.document = TicketPass.Document(file: name, kind: kind, page: page, fingerprint: fingerprint)
+            writtenURL = url
         }
-        insert(pass)
-        await Task.detached(priority: .userInitiated) { JSONPersistence.flush() }.value
-        return pass
+        let candidate = pass, documentURL = writtenURL, previous = commitTail
+        let commit = Task { @MainActor in
+            if let previous { await previous.value }
+            try Task.checkCancellation()
+            if deduplicate, let hash = candidate.document?.fingerprint,
+               let existing = passes.first(where: { $0.document?.fingerprint == hash }) {
+                if let documentURL { try? FileManager.default.removeItem(at: documentURL) }
+                return existing
+            }
+            // Other saved tickets can be edited during disk I/O. Repeat with their latest state
+            // rather than publishing an older snapshot over those edits.
+            while true {
+                let observed = revision
+                var snapshot = passes.filter { $0.id != candidate.id }
+                snapshot.append(candidate)
+                try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+                    file.saveInBackground(snapshot) { continuation.resume(with: $0) }
+                }
+                if observed == revision {
+                    passes = snapshot
+                    revision += 1
+                    return candidate
+                }
+            }
+        }
+        commitTail = Task { _ = try? await commit.value }
+        do {
+            return try await withTaskCancellationHandler { try await commit.value } onCancel: { commit.cancel() }
+        } catch {
+            if let writtenURL { try? FileManager.default.removeItem(at: writtenURL) }
+            throw error
+        }
     }
 
     /// Adds or replaces a pass that needs no file work (samples, tests, imports).
@@ -147,5 +181,5 @@ final class PassStore {
         return count
     }
 
-    private func persist() { file.saveInBackground(passes) }
+    private func persist() { revision += 1; file.saveInBackground(passes) }
 }

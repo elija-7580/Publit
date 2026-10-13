@@ -1,4 +1,7 @@
 import Foundation
+#if canImport(CryptoKit)
+import CryptoKit
+#endif
 
 /// SHA-1 for the Wallet pass manifest, which Apple specifies as SHA-1 file hashes.
 /// Not used for anything security-relevant; the signature over the manifest provides integrity.
@@ -6,6 +9,9 @@ enum SHA1 {
     static func hex(_ data: Data) -> String { digest(data).map { String(format: "%02x", $0) }.joined() }
 
     static func digest(_ data: Data) -> [UInt8] {
+        #if canImport(CryptoKit)
+        return Array(Insecure.SHA1.hash(data: data))
+        #else
         var h: [UInt32] = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0]
         var message = [UInt8](data)
         let bitLength = UInt64(message.count) * 8
@@ -35,6 +41,7 @@ enum SHA1 {
             h[0] = h[0] &+ a; h[1] = h[1] &+ b; h[2] = h[2] &+ c; h[3] = h[3] &+ d; h[4] = h[4] &+ e
         }
         return h.flatMap { v in (0..<4).reversed().map { UInt8((v >> (UInt32($0) * 8)) & 0xFF) } }
+        #endif
     }
 
     private static func rotl(_ x: UInt32, _ n: UInt32) -> UInt32 { (x << n) | (x >> (32 - n)) }

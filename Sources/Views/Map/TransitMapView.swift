@@ -97,7 +97,11 @@ struct TransitMapView: UIViewRepresentable {
         func apply(_ c: TransitMapContent, to map: MKMapView) {
             if versions.stations != c.stationsVersion {
                 versions.stations = c.stationsVersion
-                diff(c.stations.map { ($0.id, $0) }, into: &stationPins, map: map, make: StationPin.init, update: { _, _ in })
+                diff(c.stations.filter { $0.coordinate.isValidCoordinate }.map { ($0.id, $0) }, into: &stationPins, map: map, make: StationPin.init, update: { pin, station in
+                    pin.station = station
+                    pin.coordinate = station.coordinate.clCoordinate
+                    if let view = map.view(for: pin) as? StationPinView { view.show(station) }
+                })
             }
             if versions.shapes != c.shapesVersion {
                 versions.shapes = c.shapesVersion
@@ -106,7 +110,7 @@ struct TransitMapView: UIViewRepresentable {
             if versions.vehicles != c.vehiclesVersion {
                 versions.vehicles = c.vehiclesVersion
                 let glide = parent.glide
-                diff(c.vehicles.map { ($0.id, $0) }, into: &vehiclePins, map: map, make: VehiclePin.init) { pin, v in
+                diff(c.vehicles.filter { $0.coordinate.isValidCoordinate }.map { ($0.id, $0) }, into: &vehiclePins, map: map, make: VehiclePin.init) { pin, v in
                     let changedLook = pin.vehicle.name != v.name || pin.vehicle.colorHex != v.colorHex
                     pin.vehicle = v
                     let target = v.coordinate.clCoordinate
@@ -122,9 +126,12 @@ struct TransitMapView: UIViewRepresentable {
                 versions.rentals = c.rentalsVersion
                 let r = c.rentals
                 let items: [(String, RentalPin.Item)] =
-                    r.stations.map { ("s|\($0.id)", .station($0, provider: r.groupName($0.providerGroupId))) }
-                    + r.vehicles.filter(\.isAvailable).map { ("v|\($0.id)", .vehicle($0, provider: r.groupName($0.providerGroupId))) }
-                diff(items, into: &rentalPins, map: map, make: RentalPin.init, update: { _, _ in })
+                    r.stations.filter { $0.coordinate.isValidCoordinate && $0.isRenting != false }.map { ("s|\($0.providerGroupId)|\($0.id)", .station($0, provider: r.groupName($0.providerGroupId))) }
+                    + r.vehicles.filter { $0.isAvailable && $0.coordinate.isValidCoordinate }.map { ("v|\($0.providerGroupId)|\($0.id)", .vehicle($0, provider: r.groupName($0.providerGroupId))) }
+                diff(items, into: &rentalPins, map: map, make: RentalPin.init, update: { pin, item in
+                    pin.update(item)
+                    if let view = map.view(for: pin) as? RentalPinView { view.show(pin) }
+                })
             }
         }
 
@@ -153,10 +160,11 @@ struct TransitMapView: UIViewRepresentable {
             var order: [String] = []
             for s in shapes {
                 let key = "\(LiveMap.rank(s.mode))|\(s.colorHex)"
-                let coords = s.points.map(\.clCoordinate)
+                let coords = s.points.filter(\.isValidCoordinate).map(\.clCoordinate)
+                guard coords.count >= 2 else { continue }
                 let line = MKPolyline(coordinates: coords, count: coords.count)
                 if groups[key] == nil { order.append(key); groups[key] = (s.mode, s.colorHex, []) }
-                groups[key]!.lines.append(line)
+                groups[key]?.lines.append(line)
             }
             let fresh: [MKOverlay] = order.compactMap { key in
                 guard let g = groups[key] else { return nil }
@@ -248,8 +256,8 @@ final class LineOverlay: MKMultiPolyline {
 }
 
 final class StationPin: NSObject, MKAnnotation {
-    let station: MapStation
-    let coordinate: CLLocationCoordinate2D
+    var station: MapStation
+    @objc dynamic var coordinate: CLLocationCoordinate2D
     var title: String? { station.name }
     init(_ s: MapStation) { station = s; coordinate = s.coordinate.clCoordinate }
 }
@@ -266,14 +274,22 @@ final class RentalPin: NSObject, MKAnnotation {
         case station(RentalsResponse.Station, provider: String)
         case vehicle(RentalsResponse.Vehicle, provider: String)
     }
-    let item: Item
-    let coordinate: CLLocationCoordinate2D
+    var item: Item
+    @objc dynamic var coordinate: CLLocationCoordinate2D
     var title: String? {
         switch item {
         case .station(let s, _): return s.name
         case .vehicle(_, let p): return p
         }
     }
+    func update(_ item: Item) {
+        self.item = item
+        switch item {
+        case .station(let s, _): coordinate = s.coordinate.clCoordinate
+        case .vehicle(let v, _): coordinate = v.coordinate.clCoordinate
+        }
+    }
+
     init(_ item: Item) {
         self.item = item
         switch item {
@@ -301,7 +317,9 @@ final class StationPinView: MKAnnotationView {
     override init(annotation: MKAnnotation?, reuseIdentifier: String?) {
         super.init(annotation: annotation, reuseIdentifier: reuseIdentifier)
         collisionMode = .circle
-        label.font = .systemFont(ofSize: 11, weight: .semibold)
+        label.font = .systemFont(ofSize: 13, weight: .semibold)
+        isAccessibilityElement = true
+        accessibilityTraits = .button
         label.textColor = .label
         label.textAlignment = .center
         label.lineBreakMode = .byTruncatingTail
@@ -322,23 +340,23 @@ final class StationPinView: MKAnnotationView {
         displayPriority = s.isMajor ? .defaultHigh : .defaultLow
         zPriority = s.isMajor ? .init(rawValue: 400) : .init(rawValue: 300)
         accessibilityLabel = s.name
-        if s.isMajor {
+        if s.isMajor || s.isPole {
             label.isHidden = false
             label.text = MapStation.shortName(s.name)
             let text = label.sizeThatFits(CGSize(width: 130, height: 20))
             let w = max(size, min(130, ceil(text.width)))
-            let h = size + 1 + ceil(text.height)
+            let h = max(44, size + 4 + ceil(text.height))
             frame.size = CGSize(width: w, height: h)
             iconView.frame = CGRect(x: (w - size) / 2, y: 0, width: size, height: size)
-            label.frame = CGRect(x: 0, y: size + 1, width: w, height: ceil(text.height))
+            label.frame = CGRect(x: 0, y: size + 4, width: w, height: ceil(text.height))
             // Keep the icon (not the whole block) on the coordinate.
             centerOffset = CGPoint(x: 0, y: h / 2 - size / 2)
             collisionMode = .rectangle
         } else {
             label.isHidden = true
             label.text = nil
-            frame.size = CGSize(width: size, height: size)
-            iconView.frame = CGRect(x: 0, y: 0, width: size, height: size)
+            frame.size = CGSize(width: 44, height: 44)
+            iconView.frame = CGRect(x: (44 - size) / 2, y: (44 - size) / 2, width: size, height: size)
             centerOffset = .zero
             collisionMode = .circle
         }
@@ -375,7 +393,11 @@ final class VehiclePinView: MKAnnotationView {
         displayPriority = .required
         zPriority = .max
         collisionMode = .none
-        badge.font = .systemFont(ofSize: 11, weight: .heavy)
+        badge.font = .systemFont(ofSize: 13, weight: .bold)
+        badge.adjustsFontSizeToFitWidth = true
+        badge.minimumScaleFactor = 0.85
+        isAccessibilityElement = true
+        accessibilityTraits = .button
         badge.textAlignment = .center
         badge.layer.cornerRadius = 5
         badge.layer.masksToBounds = true
@@ -397,16 +419,16 @@ final class VehiclePinView: MKAnnotationView {
             badge.text = v.lineName
             badge.backgroundColor = UIColor(hex: colors.background)
             badge.textColor = UIColor(hex: colors.text)
-            let w = max(24, badge.intrinsicContentSize.width + 8)
-            badge.frame = CGRect(x: 0, y: 0, width: w, height: 18)
-            frame.size = badge.frame.size
+            let w = min(140, max(32, badge.intrinsicContentSize.width + 12))
+            frame.size = CGSize(width: max(44, w), height: 44)
+            badge.frame = CGRect(x: (bounds.width - w) / 2, y: 10, width: w, height: 24)
             centerOffset = .zero
             accessibilityLabel = "\(ModeStyle.label(v.mode)) \(v.lineName)"
         }
         // The arrow sits on the badge's edge in the direction of travel.
         CATransaction.begin()
         CATransaction.setDisableActions(true)
-        if let h = v.heading {
+        if let h = v.heading, h.isFinite {
             arrow.isHidden = false
             let rad = h * .pi / 180
             let r = max(bounds.width, bounds.height) / 2 + 4
@@ -419,48 +441,61 @@ final class VehiclePinView: MKAnnotationView {
     }
 }
 
-/// Small sharing icon; many together become one numbered cluster.
+/// Sharing station/vehicle with readable context and a 44pt-or-larger hit target.
 final class RentalPinView: MKAnnotationView {
     static let reuseId = "rental"
-    static let tint = UIColor(red: 0.0, green: 0.6, blue: 0.55, alpha: 1)
-    private static var cache: [String: UIImage] = [:]
+    static let tint = UIColor(red: 0, green: 0.48, blue: 0.44, alpha: 1)
+    private let iconView = UIImageView()
+    private let label = UILabel()
 
     override init(annotation: MKAnnotation?, reuseIdentifier: String?) {
         super.init(annotation: annotation, reuseIdentifier: reuseIdentifier)
         clusteringIdentifier = "rental"
-        displayPriority = .defaultLow
-        collisionMode = .circle
+        displayPriority = .defaultHigh
+        collisionMode = .rectangle
+        isAccessibilityElement = true
+        accessibilityTraits = .button
+        iconView.contentMode = .scaleAspectFit
+        iconView.tintColor = .white
+        iconView.backgroundColor = Self.tint
+        iconView.layer.borderColor = UIColor.white.cgColor
+        iconView.layer.borderWidth = 1.5
+        label.font = .systemFont(ofSize: 12, weight: .semibold)
+        label.textColor = .label
+        label.textAlignment = .center
+        label.lineBreakMode = .byTruncatingTail
+        label.backgroundColor = UIColor.systemBackground.withAlphaComponent(0.9)
+        label.layer.cornerRadius = 4
+        label.layer.masksToBounds = true
+        addSubview(iconView); addSubview(label)
     }
-
     required init?(coder: NSCoder) { fatalError("not used") }
 
     func show(_ pin: RentalPin) {
-        clusteringIdentifier = "rental"
-        let kind: RentalKind, station: Bool
+        image = nil
+        let kind: RentalKind, station: Bool, text: String, spoken: String
         switch pin.item {
-        case .station(let s, _): kind = RentalKind(s.formFactors?.first); station = true
-        case .vehicle(let v, _): kind = RentalKind(v.formFactor); station = false
+        case .station(let s, let provider):
+            let kinds = (s.formFactors ?? []).map(RentalKind.init)
+            kind = kinds.contains(.bicycle) ? .bicycle : kinds.first ?? .other
+            station = true
+            text = s.numVehiclesAvailable.map { "\(kind.title) · \($0)" } ?? MapStation.shortName(s.name)
+            spoken = [s.name, provider, kind.title, s.numVehiclesAvailable.map { L10n.f("Available now: %lld", $0) }].compactMap { $0 }.joined(separator: ", ")
+        case .vehicle(let v, let provider):
+            kind = RentalKind(v.formFactor); station = false
+            text = provider.isEmpty ? kind.title : provider
+            spoken = [provider, kind.title, L10n.t("Available now")].filter { !$0.isEmpty }.joined(separator: ", ")
         }
-        image = Self.icon(kind, station: station)
-        accessibilityLabel = pin.title
-    }
-
-    static func icon(_ kind: RentalKind, station: Bool) -> UIImage {
-        let key = "\(kind.rawValue)|\(station)"
-        if let hit = cache[key] { return hit }
-        let size: CGFloat = station ? 20 : 16
-        let img = UIGraphicsImageRenderer(size: CGSize(width: size, height: size)).image { ctx in
-            let rect = CGRect(x: 0, y: 0, width: size, height: size).insetBy(dx: 1, dy: 1)
-            tint.setFill()
-            let shape = station ? UIBezierPath(roundedRect: rect, cornerRadius: 4) : UIBezierPath(ovalIn: rect)
-            shape.fill()
-            UIColor.white.setStroke(); shape.lineWidth = 1.2; shape.stroke()
-            let cfg = UIImage.SymbolConfiguration(pointSize: size * 0.5, weight: .bold)
-            if let sym = UIImage(systemName: kind.symbol, withConfiguration: cfg)?.withTintColor(.white, renderingMode: .alwaysOriginal) {
-                sym.draw(in: CGRect(x: (size - sym.size.width) / 2, y: (size - sym.size.height) / 2, width: sym.size.width, height: sym.size.height))
-            }
-        }
-        cache[key] = img
-        return img
+        clusteringIdentifier = station ? "rental-station" : "rental-\(kind.rawValue)"
+        iconView.image = UIImage(systemName: kind.symbol, withConfiguration: UIImage.SymbolConfiguration(pointSize: 17, weight: .semibold))
+        iconView.layer.cornerRadius = station ? 8 : 16
+        label.text = text
+        let w = max(64, min(140, label.intrinsicContentSize.width + 10))
+        frame.size = CGSize(width: w, height: 54)
+        iconView.frame = CGRect(x: (w - 32) / 2, y: 0, width: 32, height: 32)
+        label.frame = CGRect(x: 0, y: 35, width: w, height: 19)
+        centerOffset = CGPoint(x: 0, y: 11)
+        accessibilityLabel = spoken
+        accessibilityHint = L10n.t("Show rental details")
     }
 }

@@ -11,6 +11,10 @@ final class TransitMapModel {
     var stationsHidden = false
     var liveHidden = false
     var isLoadingLive = false
+    var liveError: String?
+    /// The first live layer arrived; later refreshes update silently.
+    var hasLive = false
+    @ObservationIgnored private var liveRetryAt: Date?
 
     var filter = ModeFilter() { didSet { if filter != oldValue { rebuildLive(); bumpStations() } } }
     var showLines = true { didSet { if showLines != oldValue { publishShapes() } } }
@@ -26,13 +30,26 @@ final class TransitMapModel {
     @ObservationIgnored private var liveBox: (min: LatLon, max: LatLon, at: Date)?
     @ObservationIgnored private var rentalBox: (min: LatLon, max: LatLon, at: Date)?
     @ObservationIgnored private var regionTask: Task<Void, Never>?
+    @ObservationIgnored private var stationsTask: Task<Void, Never>?
+    @ObservationIgnored private var liveTask: Task<Void, Never>?
+    @ObservationIgnored private var rentalsTask: Task<Void, Never>?
+    @ObservationIgnored private var stationsBusy = false
+    @ObservationIgnored private var rentalsBusy = false
+    @ObservationIgnored private var stationsQueued = false
+    @ObservationIgnored private var liveQueued = false
+    @ObservationIgnored private var rentalsQueued = false
+    @ObservationIgnored private var active = true
+    @ObservationIgnored private var stationCoverage: MapStopCache.Coverage?
+    @ObservationIgnored private var rawStops: [MapStop] = []
+    @ObservationIgnored private var separatePoles = false
+    @ObservationIgnored private var buildGeneration = UUID()
 
     /// Spans (degrees latitude) above which a layer is not loaded: too much to show or download.
     static let maxStationSpan = 0.08
     static let maxLiveSpan = 0.06
     static let maxRentalSpan = 0.03
     /// Vehicles are asked for this far ahead; the first request also draws the lines.
-    static let firstWindow: TimeInterval = 15 * 60
+    static let firstWindow: TimeInterval = 5 * 60
     static let refreshWindow: TimeInterval = 4 * 60
     static let refreshEvery: TimeInterval = 30
     static let tickSeconds: TimeInterval = 2
@@ -43,17 +60,38 @@ final class TransitMapModel {
         regionTask = Task { [weak self] in
             try? await Task.sleep(for: .milliseconds(300))
             guard !Task.isCancelled, let self else { return }
-            async let a: Void = self.loadStations(r)
-            async let b: Void = self.loadLive(force: false)
-            async let c: Void = self.loadRentals(force: false)
-            _ = await (a, b, c)
+            guard self.active else { return }
+            self.queueLoads()
             self.tick()
         }
     }
 
+    /// A new camera rectangle only replaces the debounce, not the already running downloads.
+    /// One flight per layer finishes; if the camera moved, fetch just the latest interest next.
+    private func queueLoads() {
+        guard active, let region else { return }
+        if stationsBusy { stationsQueued = true }
+        else { stationsTask = Task { await loadStations(region) } }
+        if isLoadingLive { liveQueued = true }
+        else { liveTask = Task { await loadLive(force: false) } }
+        if rentalsBusy { rentalsQueued = true }
+        else { rentalsTask = Task { await loadRentals(force: false) } }
+    }
+
+    func pause() {
+        active = false
+        regionTask?.cancel(); stationsTask?.cancel(); liveTask?.cancel(); rentalsTask?.cancel()
+        buildGeneration = UUID()
+    }
+
+    func resume() {
+        active = true
+        if let region { regionChanged(region) }
+    }
+
     /// Called every `tickSeconds` while the map is open.
     func tick(now: Date = .now) {
-        guard let r = region else { return }
+        guard active, let r = region else { return }
         let (lo, hi) = Self.box(r, grow: 0.1)
         let list = showVehicles && !liveHidden ? LiveMap.vehicles(tracks, at: now, min: lo, max: hi) : []
         if list.isEmpty && content.vehicles.isEmpty { return }
@@ -62,13 +100,28 @@ final class TransitMapModel {
     }
 
     func refreshIfDue() async {
-        if let box = liveBox, Date().timeIntervalSince(box.at) >= Self.refreshEvery { await loadLive(force: true) }
+        if let liveRetryAt, Date() >= liveRetryAt, !isLoadingLive {
+            self.liveRetryAt = nil
+            liveTask = Task { await loadLive(force: true) }
+        }
+        if let box = liveBox, !isLoadingLive, Date().timeIntervalSince(box.at) >= Self.refreshEvery {
+            liveTask = Task { await loadLive(force: true) }
+        }
         if showSharing, let box = rentalBox, Date().timeIntervalSince(box.at) >= 60 { await loadRentals(force: true) }
     }
 
     // MARK: Loading
 
     private func loadStations(_ r: MKCoordinateRegion) async {
+        guard active, !Task.isCancelled, !stationsBusy else { return }
+        stationsBusy = true
+        defer {
+            stationsBusy = false
+            if stationsQueued, active {
+                stationsQueued = false
+                if let region { stationsTask = Task { await loadStations(region) } }
+            }
+        }
         guard r.span.latitudeDelta <= Self.maxStationSpan else {
             stationsHidden = true
             if !content.stations.isEmpty { allStations = []; bumpStations() }
@@ -76,12 +129,25 @@ final class TransitMapModel {
         }
         stationsHidden = false
         // A margin around the screen: stations at the edge have all their platforms, so their pins stay put.
-        let (lo, hi) = Self.box(r, grow: 0.15)
-        let zoom = Self.zoom(r)
+        let (viewLo, viewHi) = Self.box(r, grow: 0)
+        let zoom = max(14, min(16, Self.zoom(r)))
         let separate = r.span.latitudeDelta <= MapStation.poleSpan
+        if (separate != separatePoles || allStations.isEmpty), !rawStops.isEmpty {
+            let cached = rawStops
+            let grouped = await Task.detached(priority: .userInitiated) { MapStation.group(cached, separatePoles: separate) }.value
+            guard !Task.isCancelled else { return }
+            separatePoles = separate; allStations = grouped; bumpStations()
+        }
+        if let stationCoverage, stationCoverage.contains(min: viewLo, max: viewHi, zoom: zoom) { return }
+        let (lo, hi) = Self.box(r, grow: 0.3)
         guard let stops = try? await TransitousClient.shared.mapStops(min: lo, max: hi, zoom: zoom) else { return }
-        let grouped = await Task.detached(priority: .userInitiated) { MapStation.group(stops, separatePoles: separate) }.value
         guard !Task.isCancelled else { return }
+        rawStops = stops
+        stationCoverage = MapStopCache.Coverage(min: lo, max: hi, zoom: zoom)
+        let currentSeparate = (region?.span.latitudeDelta ?? r.span.latitudeDelta) <= MapStation.poleSpan
+        let grouped = await Task.detached(priority: .userInitiated) { MapStation.group(stops, separatePoles: currentSeparate) }.value
+        guard !Task.isCancelled else { return }
+        separatePoles = currentSeparate
         allStations = grouped
         bumpStations()
     }
@@ -93,14 +159,16 @@ final class TransitMapModel {
     }
 
     private func loadLive(force: Bool) async {
-        guard let r = region else { return }
+        guard active, !Task.isCancelled, !isLoadingLive, let r = region else { return }
         guard r.span.latitudeDelta <= Self.maxLiveSpan else {
             liveHidden = true
             tracks = []
             if !content.shapes.isEmpty { content.shapes = []; content.shapesVersion += 1 }
             return
         }
+        let wasHidden = liveHidden
         liveHidden = false
+        if wasHidden, !segments.isEmpty { rebuildLive() }
         guard showLines || showVehicles else { return }
         let (vlo, vhi) = Self.box(r, grow: 0)
         // Small pans stay inside the last (larger) box: no new request.
@@ -112,11 +180,20 @@ final class TransitMapModel {
         let now = Date()
         liveBox = (lo, hi, now)
         isLoadingLive = true
-        defer { isLoadingLive = false }
+        defer {
+            isLoadingLive = false
+            if liveQueued, active { liveQueued = false; liveTask = Task { await loadLive(force: false) } }
+        }
         guard let segs = try? await TransitousClient.shared.mapTrips(
             min: lo, max: hi, zoom: zoom, start: now.addingTimeInterval(-60),
-            end: now.addingTimeInterval(first ? Self.firstWindow : Self.refreshWindow)) else { liveBox = nil; return }
+            end: now.addingTimeInterval(first ? Self.firstWindow : Self.refreshWindow)) else {
+                liveBox = nil
+                if !Task.isCancelled { liveError = L10n.t("Live layer unavailable. Stations still work."); liveRetryAt = Date().addingTimeInterval(10) }
+                return
+            }
         guard !Task.isCancelled else { return }
+        liveError = nil; liveRetryAt = nil
+        hasLive = true
         segments = segs
         segmentPrecision = zoom >= 14 ? 5 : 4
         rebuildLive()
@@ -124,12 +201,15 @@ final class TransitMapModel {
 
     /// Shapes and tracks from the last answer (also when the filter changes).
     private func rebuildLive() {
+        let generation = UUID()
+        buildGeneration = generation
         let segs = segments, f = filter, precision = segmentPrecision
         let tolerance = LiveMap.tolerance(spanMeters: (region?.span.latitudeDelta ?? 0.02) * 111_000)
         Task {
             let snap = await Task.detached(priority: .userInitiated) {
                 LiveMap.build(segs, filter: f, precision: precision, tolerance: tolerance)
             }.value
+            guard active, buildGeneration == generation, !Task.isCancelled else { return }
             tracks = snap.tracks
             // Lines stay drawn after their vehicles have passed; a new filter starts over.
             if f != lastShapeFilter { shapes = [:]; lastShapeFilter = f }
@@ -151,6 +231,12 @@ final class TransitMapModel {
     }
 
     private func loadRentals(force: Bool) async {
+        guard active, !Task.isCancelled, !rentalsBusy else { return }
+        rentalsBusy = true
+        defer {
+            rentalsBusy = false
+            if rentalsQueued, active { rentalsQueued = false; rentalsTask = Task { await loadRentals(force: false) } }
+        }
         guard showSharing, let r = region, r.span.latitudeDelta <= Self.maxRentalSpan else {
             if !content.rentals.stations.isEmpty || !content.rentals.vehicles.isEmpty {
                 content.rentals = RentalsResponse(); content.rentalsVersion += 1
@@ -163,7 +249,9 @@ final class TransitMapModel {
         let (lo, hi) = Self.box(r, grow: 0.25)
         rentalBox = (lo, hi, Date())
         guard let res = try? await TransitousClient.shared.rentals(min: lo, max: hi) else { rentalBox = nil; return }
-        content.rentals = res
+        guard !Task.isCancelled, showSharing else { return }
+        // The whole loaded box: panning inside it does not reload, so nothing may be cut off.
+        content.rentals = res.mapSnapshot(min: lo, max: hi)
         content.rentalsVersion += 1
     }
 
@@ -215,6 +303,7 @@ struct StationMapView: View {
                 }
         }
         .onAppear {
+            model.resume()
             if center == nil { center = location.coordinate }
             model.filter = ModeFilter(storageValue: storedModes)
             model.showLines = showLines
@@ -225,7 +314,10 @@ struct StationMapView: View {
         .onChange(of: showLines) { model.showLines = showLines }
         .onChange(of: showVehicles) { model.showVehicles = showVehicles }
         .onChange(of: showSharing) { model.showSharing = showSharing }
+        .onDisappear { model.pause() }
         .task(id: scenePhase) {
+            guard scenePhase == .active else { model.pause(); return }
+            model.resume()
             // Vehicles glide every 2 s and are fetched again every 30 s, only while the map is on screen.
             guard scenePhase == .active else { return }
             while !Task.isCancelled {
@@ -244,6 +336,11 @@ struct StationMapView: View {
         VStack(spacing: 6) {
             ModeFilterBar(available: ModeGroup.allCases.filter { $0 != .other }, filter: filterBinding)
                 .background(.regularMaterial)
+            if model.isLoadingLive && !model.hasLive {
+                ProgressView(L10n.t("Updating live layer…")).font(.footnote).padding(8).background(.regularMaterial, in: Capsule())
+            } else if let message = model.liveError {
+                Text(verbatim: message).font(.footnote).padding(8).background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
+            }
             if let hint {
                 Text(hint).font(.footnote.weight(.semibold))
                     .padding(.horizontal, 12).padding(.vertical, 6)

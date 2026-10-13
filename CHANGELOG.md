@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.6.0 (build 7)
+
+### Fixes from device testing (need confirmation on the device)
+- Paper-ticket scan: add the missing camera usage description (`NSCameraUsageDescription`, 15 languages); without it iOS stops an app that opens the camera.
+- Ticket import: a ticket appears only after its document and metadata are written; write errors are reported, and a failed save leaves no ticket or orphan document behind. Photo/file pickers no longer cancel the running import. No automatic logo lookup while saving.
+- Live data: malformed route shapes, invalid coordinates, non-finite distances and extreme delays are rejected; MapKit only gets valid coordinates. The reported live-data crash had no crash log, so its cause is not confirmed.
+- Widget: stop search asks for stops only and skips entries without a valid ID or coordinate.
+
+### Loading
+- Nearby: one load per location/mode change instead of competing loads, smaller first request, last board shown first, small GPS movements reuse the board.
+- Map: panning and zooming no longer cancel loading; stations, vehicles and rentals load separately and stay visible. Loaded areas are reused; stop grouping runs off the main thread. A failed live layer shows a note and retries after 10 s.
+- Lines open with the departures already shown; Plan does not repeat the same search within 45 s.
+- No timings measured on a device for this build; server response time is outside the app.
+
+### Navigation and layout
+- Lines tab removed: saved lines and stops are in Saved, with "Find a line". Plan shows the next saved trips.
+- Route actions: full-width divider under Start trip, even two-column grid with wrapping labels (one column with large text).
+- Connections: legend and "How to read connections" explain the timeline bars (later departures start farther right; coloured = ride, grey = walk, dotted = wait). Timelines can be turned off in Settings.
+- Settings: travel preferences (route options, timelines, map layers).
+- Map: larger labels; bike and scooter pins show type, availability and provider and open details. Walking lines use crisp dashes.
+- Launch animation: only the moving icon, no spinner underneath.
+
+### Getting to the first stop
+- Plan: choose Walk, Bike (Bike & Ride) or Car (Park & Ride) to the first stop. Walking variants stay in the list for comparison. Shared bikes/scooters stay in Route options. Park & Ride is slow on the Transitous server (about 20–25 s in tests) and uses a 45 s timeout.
+
 ## 0.5.1 (build 6)
 
 ### Shared tickets

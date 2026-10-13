@@ -5,6 +5,10 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(TicketStore.self) private var tickets
+    @AppStorage("mapLines") private var mapLines = true
+    @AppStorage("mapVehicles") private var mapVehicles = true
+    @AppStorage("mapSharing") private var mapSharing = false
+    @AppStorage("routeTimelines") private var routeTimelines = true
     @AppStorage(LineAlertMonitor.enabledKey) private var lineAlerts = false
 
     var body: some View {
@@ -22,6 +26,16 @@ struct SettingsView: View {
                     }
                     .padding(.vertical, 4)
                     .accessibilityElement(children: .combine)
+                }
+                Section(L10n.t("Travel preferences")) {
+                    RouteOptionsButton()
+                    Toggle(L10n.t("Show connection timelines"), isOn: $routeTimelines)
+                    NavigationLink { ConnectionGuideView() } label: { Label(L10n.t("How to read connections"), systemImage: "questionmark.circle") }
+                }
+                Section(L10n.t("Map layers")) {
+                    Toggle(L10n.t("Lines"), isOn: $mapLines)
+                    Toggle(L10n.t("Vehicles"), isOn: $mapVehicles)
+                    Toggle(L10n.t("Bikes and scooters"), isOn: $mapSharing)
                 }
                 if Features.tickets {
                     Section("Tickets") {

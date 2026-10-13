@@ -18,8 +18,8 @@ struct CompareMapView: View {
                 ForEach(Array(it.legs.enumerated()), id: \.offset) { _, leg in
                     MapPolyline(coordinates: leg.legGeometry.clCoordinates)
                         .stroke(isSelected ? leg.lineColor : Color.gray.opacity(0.45),
-                                style: StrokeStyle(lineWidth: isSelected ? 5 : 3, lineCap: .round, lineJoin: .round,
-                                                   dash: leg.isTransit ? [] : [2, 6]))
+                                style: StrokeStyle(lineWidth: isSelected ? 5 : 3, lineCap: leg.isTransit ? .round : .butt, lineJoin: .round,
+                                                   dash: leg.isTransit ? [] : [6, 4]))
                 }
             }
         }
@@ -112,6 +112,7 @@ struct RouteSummary: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
+            ViewThatFits(in: .horizontal) {
             HStack(alignment: .firstTextBaseline) {
                 Text("\(Fmt.time(itinerary.startTime, tz: itinerary.legs.first?.from.tz)) – \(Fmt.time(itinerary.endTime, tz: itinerary.legs.last?.to.tz))")
                     .font(.title2.weight(.bold).monospacedDigit())
@@ -119,6 +120,12 @@ struct RouteSummary: View {
                 Spacer(minLength: 8)
                 Text(Fmt.duration(seconds: itinerary.duration)).font(.title3.weight(.semibold))
                     .lineLimit(1).fixedSize()
+            }
+            VStack(alignment: .leading, spacing: 4) {
+                Text("\(Fmt.time(itinerary.startTime, tz: itinerary.legs.first?.from.tz)) – \(Fmt.time(itinerary.endTime, tz: itinerary.legs.last?.to.tz))")
+                    .font(.title2.bold().monospacedDigit())
+                Text(Fmt.duration(seconds: itinerary.duration)).font(.subheadline.weight(.semibold)).foregroundStyle(.secondary)
+            }
             }
             legChain
             HStack(spacing: 6) {
@@ -202,8 +209,8 @@ struct RouteMap: View {
             ForEach(Array(itinerary.legs.enumerated()), id: \.offset) { _, leg in
                 MapPolyline(coordinates: leg.legGeometry.clCoordinates)
                     .stroke(leg.isTransit ? leg.lineColor : Color.gray,
-                            style: StrokeStyle(lineWidth: leg.isTransit ? 5 : 3, lineCap: .round, lineJoin: .round,
-                                               dash: leg.isTransit ? [] : [2, 6]))
+                            style: StrokeStyle(lineWidth: leg.isTransit ? 5 : 4, lineCap: leg.isTransit ? .round : .butt, lineJoin: .round,
+                                               dash: leg.isTransit ? [] : [6, 4]))
             }
             if let first = itinerary.legs.first {
                 Marker("Start", systemImage: "circle.fill", coordinate: first.from.coordinate.clCoordinate)
