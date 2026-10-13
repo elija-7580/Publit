@@ -43,18 +43,20 @@ physical iPhone. Compare cold launch, scrolling Nearby, route comparison, an
 10-minute active-trip tracking. Record main thread stalls, frame hitches, peak
 memory, request count and battery impact.
 
-As of 2026-10-13 (0.5.1 / build 6, `4ceed8a` + follow-up fixes):
+As of 2026-10-13 (0.5.1 / build 6, `c38c2a5`):
 
 - Debug build installs and launches on Elijá’s iPhone Pro (`io.github.publit.app`)
   via CoreDevice.
-- Simulator **App Launch** Instruments template completed on iPhone 17 Pro
-  (iOS 26.5): recording duration 20.5 s, process exit 0. Automated export of
-  lifecycle / hang tables did not yield per-phase TTID numbers in this
-  environment — open the `.trace` in Instruments for a human reading.
+- Simulator iPhone 17 Pro (iOS 26.5) Instruments:
+  - **Time Profiler** (10.6 s attach): completed; `potential-hangs` export returned
+    schema only (no hang rows above 250 ms microhang threshold in that idle window).
+  - **Allocations** (10.6 s attach): completed; open the `.trace` in Instruments for
+    peak heap — CLI export does not print a single peak-RSS number here.
+  - **App Launch** / `--launch` often fails with ambiguous Publit vs
+    PublitWidgets process when multiple installs exist; uninstall duplicates first.
 - Physical-device `xctrace` attach remains unreliable (device boot timeout /
-  ambiguous Publit vs widget process). Use Xcode → Product → Profile over USB
-  for Time Profiler, Allocations, Network and Energy Log while scrolling Nearby
-  and comparing routes.
+  ambiguous Publit vs widget). Use Xcode → Product → Profile over USB for Network
+  and Energy Log while scrolling Nearby and comparing routes.
 - Do not treat CI Linux grouping benchmarks as device FPS or battery results.
 
 ## Outdoor checklist (physical iPhone)
