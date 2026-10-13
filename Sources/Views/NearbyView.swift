@@ -387,7 +387,7 @@ struct StopDeparturesView: View {
         .onAppear { isVisible = true }
         .onDisappear { isVisible = false }
         .task(id: "\(filter)|\(scenePhase)|\(app.tab)|\(isVisible)") {
-            guard isVisible, scenePhase == .active, app.tab == .nearby || app.tab == .lines else { return }
+            guard isVisible, scenePhase == .active else { return }
             while !Task.isCancelled {
                 await load()
                 try? await Task.sleep(for: .seconds(30))

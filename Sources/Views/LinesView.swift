@@ -235,7 +235,7 @@ struct LineDetailView: View {
         .onAppear { isVisible = true }
         .onDisappear { isVisible = false }
         .task(id: "\(direction?.id ?? "-")|\(scenePhase)|\(app.tab)|\(isVisible)") {
-            guard isVisible, scenePhase == .active, app.tab == .lines || app.tab == .nearby, let d = direction else { return }
+            guard isVisible, scenePhase == .active, let d = direction else { return }
             await loadRoute(d)
             while !Task.isCancelled {
                 await loadVehicles(d)
