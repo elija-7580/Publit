@@ -1,45 +1,28 @@
-<p><img src="docs/brand/icon-light.svg" width="96" alt="Publit icon"></p>
-
 # Publit
 
 **Public transport, without the noise.** A free, open-source transit app for iPhone: live departures near you, trip planning across Europe, and every connection on one timeline.
 
 No ads, no account, no tracking.
 
-![Publit on iPhone: Nearby, Plan and an active trip](docs/images/hero.svg)
+![Publit on iPhone](docs/images/hero.jpg)
 
-![Nearby, Go now, Station map, live or timetable times](docs/images/features-1.svg)
+| Nearby | Plan | Compare | Route |
+| --- | --- | --- | --- |
+| ![Nearby departures](docs/images/nearby.jpg) | ![Trip planning](docs/images/plan.jpg) | ![Route comparison on a map](docs/images/compare.jpg) | ![Route detail](docs/images/detail.jpg) |
 
-![Route comparison, route detail, disruptions, experimental fares](docs/images/features-2.svg)
-
-![Active trip, saved trips, widgets and Siri, 15 languages](docs/images/features-3.svg)
-
-<sub>Screenshots from the automated UI tests on the iPhone 16 Pro simulator (October 2026). Nearby, Go now, the station map and the route screens show live Transitous data with a simulated location in Munich. Departures, disruptions, fares, saved trips and the active trip use labelled demo data, partly in German.</sub>
+<sub>Prototype renderings of the v0.1 interface, filled with live Transitous data (Munich, October 2026).</sub>
 
 ## Status
 
-Early prototype. Not on the App Store yet. Every commit runs core tests on Linux plus build and unit tests on an iOS simulator; UI tests with screenshots run on demand and nightly (see [docs/ci.md](docs/ci.md)).
+Early prototype (v0.1). Not on the App Store yet.
 
 ## Features
 
-- **Nearby:** live departure boards for stops within 500 m, grouped by station and refreshed every 30 s. Filter chips limit the board to trains, S-Bahn, U-Bahn, trams, buses or ferries. Each time shows whether it is live or from the timetable, with delays, platforms, cancellations and the vehicle's direction. The last board appears at once while GPS and network start.
-- **Live map:** stops, line routes in their colours and live vehicles moving along them; shared bikes and e-scooters as a layer. Tap a stop for its departures, a vehicle for its trip.
-- **Lines:** find lines around you by number or destination; each line shows its route with the vehicles on it, alerts, and a timetable for every stop and day.
-- **Disruption alerts:** notifications for alerts and cancelled departures on saved lines.
-- **Lines at a station:** switch a station between its next departures and the lines serving it, grouped by mode with directions and the next times; filter by mode and save a line with a swipe.
-- **Go now:** search a destination and get routes from where you are, leaving now. Recent searches are in the search sheet.
-- **Route options:** choose the modes of transport, the maximum number of transfers and walking time, step-free routes and shared bikes or e-scooters; sort by departure, speed, changes or walking.
-- **Other ways:** next to the transit routes, Publit shows how long the trip takes on foot, by bike and by car (without traffic or parking).
-- **Search:** destination search can be limited to stops, addresses or places.
-- **Plan:** routes for later, by departure or arrival time. All connections share one timeline, and a map overlays every option.
-- **Route detail:** time, duration and the chain of lines at the top, then start, save, calendar and reminder in one row, then every step with platforms, stops, transfer risk and service alerts (including replacement buses), and the map.
-- **Trips:** save a trip, add it to your calendar, get reminders to leave and to get off, share your live arrival time. Start a trip to follow it live in the app and on the lock screen (Live Activity).
-- **Fares:** experimental fare data where operators publish it, clearly marked as an estimate.
-- **Widgets and Siri:** next departures on the home screen and through App Shortcuts.
-- **Offline:** last loaded departures and saved trips stay readable without a connection.
-- **15 languages:** English, German, French, Italian, Spanish, Portuguese (Portugal), Dutch, Polish, Ukrainian, Romanian, Czech, Swedish, Greek, Hungarian and Turkish.
-- **Tickets:** add a ticket from a PDF, photo or screenshot; Publit reads it on the device, keeps the code exactly as issued and shows it full screen at the gate. Operator logos from Wikimedia Commons or your own image; optional Apple Wallet export. Passes appear on every trip while valid. See [docs/tickets.md](docs/tickets.md).
-- **Saved:** stops, lines, places, trips and tickets stay on the device.
+- **Nearby:** live departure boards for every stop within 500 m, grouped by station, refreshed every 30 s, with delays, platforms and cancellations.
+- **Plan:** search addresses, stops and places; depart at or arrive by.
+- **Compare:** all connections on a shared timeline, plus a map that overlays every option.
+- **Route detail:** legs, lines, platforms, stop counts, transfers and service alerts.
+- **Saved:** favourite stops and places, stored only on the device.
 
 ## Coverage
 
@@ -57,24 +40,17 @@ open Publit.xcodeproj
 
 Set your Apple team in Xcode under Signing & Capabilities (or `DEVELOPMENT_TEAM` in `project.yml`). Run the tests with ⌘U.
 
-Installing a new version on your own iPhone: [docs/iphone-update.md](docs/iphone-update.md). Changes per version: [CHANGELOG.md](CHANGELOG.md).
-
 ```
 Sources/
   App/        entry point, tabs, app info
   API/        Transitous client
   Models/     API models, line styling
   Location/   CoreLocation wrapper
-  Stores/     favourites, trips, tickets (off for now), search history
-  Tickets/    ticket passes: recognition, pass card, Wallet export (built, not wired in yet)
+  Stores/     favourites, trip-planning state
   Util/       polyline decoder, formatting
-  Views/      Nearby, Plan, Route detail, Trips, Saved
-  Intents/    App Shortcuts and Siri
-  Notifications/ reminders and Live Activities
-Widgets/      home-screen widgets
-Tests/        unit, localization and UI tests with recorded fixtures
+  Views/      Nearby, Plan, Route detail, Search, Saved
+Tests/        decoding and polyline tests with recorded fixtures
 feeds/        data converters contributed to Transitous
-services/     pass-signer: optional Apple Wallet signing service
 ```
 
 ## Data and attribution
@@ -85,11 +61,9 @@ Publit is an independent project and does not use code, assets or data from othe
 
 ## Roadmap
 
-- Tickets: share extension ("Share to Publit" from Mail and Files), Siri "Show ticket", tests with real tickets at gates
-- Live Activity updates via push while the app is closed
-- Performance profiling on physical devices (Instruments)
-- Native-speaker review of all translations
+- Live Activities and widgets for the next departure
 - watchOS companion
+- Line view with live vehicle positions
 - More cities with real-time data, starting with Bari
 
 ## Contributing
