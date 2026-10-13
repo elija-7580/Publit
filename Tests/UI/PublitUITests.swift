@@ -29,6 +29,19 @@ final class PublitUITests: XCTestCase {
         app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.01)).tap()
     }
 
+    /// Waits for an element in a lazy list, scrolling down when it is not there yet.
+    private func reveal(_ element: XCUIElement, in app: XCUIApplication) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            if element.waitForExistence(timeout: 4) {
+                for _ in 0..<4 where !element.isHittable { app.swipeUp() }
+                return element.isHittable
+            }
+            app.swipeUp()
+        }
+        return element.exists
+    }
+
     private func snap(_ name: String) {
         let shot = XCUIScreen.main.screenshot()
         let attachment = XCTAttachment(screenshot: shot)
@@ -309,16 +322,22 @@ final class PublitUITests: XCTestCase {
     func testF13ModeFiltersLinesAndComparison() {
         let app = launch()
         nudge(app)
-        XCTAssertTrue(app.buttons["All departures"].firstMatch.waitForExistence(timeout: timeout), "no departure board loaded")
+        // Earlier tests pin places and save a trip, so the first board can sit below the fold;
+        // the chips at the top appear as soon as a board with several modes has loaded.
+        if !app.buttons["modeChip-all"].waitForExistence(timeout: timeout) { snap("nearby-filter-fail") }
+        XCTAssertTrue(app.buttons["modeChip-all"].exists, "no mode chips on Nearby")
         let chip = ["modeChip-subway", "modeChip-suburban", "modeChip-tram", "modeChip-bus"].map { app.buttons[$0] }.first { $0.exists }
         XCTAssertNotNil(chip, "no mode chips on Nearby")
         chip?.tap()
-        XCTAssertTrue(app.buttons["All departures"].firstMatch.waitForExistence(timeout: timeout), "filtered board empty")
+        XCTAssertTrue(reveal(app.buttons["All departures"].firstMatch, in: app), "filtered board empty")
+        for _ in 0..<3 where !app.buttons["modeChip-all"].isHittable { app.swipeDown() }
         sleep(2)
         snap("nearby-filter")
         app.buttons["modeChip-all"].tap()
 
-        app.buttons["All departures"].firstMatch.tap()
+        let all = app.buttons["All departures"].firstMatch
+        XCTAssertTrue(reveal(all, in: app), "no departure board loaded")
+        all.tap()
         XCTAssertTrue(app.buttons["Save"].waitForExistence(timeout: 10))
         app.buttons["Lines"].tap()
         XCTAssertTrue(app.descendants(matching: .any)["lineAtStop"].firstMatch.waitForExistence(timeout: timeout), "no lines at the station")
