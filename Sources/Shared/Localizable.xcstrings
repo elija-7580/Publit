@@ -27965,6 +27965,101 @@
 }
 }
 },
+"Please check the dates and code against the original. Recognition does not verify whether a ticket is valid.": {
+"extractionState": "manual",
+"localizations": {
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Please check the dates and code against the original. Recognition does not verify whether a ticket is valid."
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Bitte gleiche die Daten und den Code mit dem Original ab. Die Erkennung prüft nicht, ob ein Ticket gültig ist."
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Veuillez vérifier les dates et le code sur l’original. La reconnaissance ne vérifie pas la validité du billet."
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Controlla le date e il codice sull’originale. Il riconoscimento non verifica la validità del biglietto."
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Comprueba las fechas y el código con el original. El reconocimiento no verifica si el billete es válido."
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Confira as datas e o código com o original. O reconhecimento não verifica se o bilhete é válido."
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Controleer de datums en de code aan de hand van het origineel. De herkenning controleert niet of het ticket geldig is."
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Porównaj daty i kod z oryginałem. Rozpoznawanie nie sprawdza ważności biletu."
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Звірте дати й код з оригіналом. Розпізнавання не перевіряє дійсність квитка."
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Verifică datele și codul în original. Recunoașterea nu verifică valabilitatea biletului."
+}
+},
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Porovnejte data a kód s originálem. Rozpoznání neověřuje platnost jízdenky."
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Kontrollera datum och kod mot originalet. Igenkänningen kontrollerar inte om biljetten är giltig."
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Ελέγξτε τις ημερομηνίες και τον κωδικό στο πρωτότυπο. Η αναγνώριση δεν επιβεβαιώνει την εγκυρότητα του εισιτηρίου."
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Ellenőrizd a dátumokat és a kódot az eredetivel. A felismerés nem ellenőrzi a jegy érvényességét."
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Tarihleri ve kodu orijinal belgeyle karşılaştırın. Tanıma işlemi biletin geçerliliğini doğrulamaz."
+}
+}
+}
+},
 "Position estimated from live stop times.": {
 "extractionState": "manual",
 "localizations": {
@@ -37560,6 +37655,101 @@
 }
 }
 },
+"The end date must not be before the start date.": {
+"extractionState": "manual",
+"localizations": {
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "The end date must not be before the start date."
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Das Enddatum darf nicht vor dem Startdatum liegen."
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "La date de fin ne doit pas précéder la date de début."
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "La data di fine non può precedere quella di inizio."
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "La fecha de fin no puede ser anterior a la de inicio."
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "A data de fim não pode ser anterior à data de início."
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "De einddatum mag niet vóór de begindatum liggen."
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Data końcowa nie może być wcześniejsza niż początkowa."
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Дата закінчення не може бути раніше дати початку."
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Data de sfârșit nu poate fi înaintea datei de început."
+}
+},
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Datum konce nesmí předcházet datu začátku."
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Slutdatumet får inte vara före startdatumet."
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Η ημερομηνία λήξης δεν μπορεί να προηγείται της έναρξης."
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "A záródátum nem lehet korábbi a kezdődátumnál."
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Bitiş tarihi başlangıç tarihinden önce olamaz."
+}
+}
+}
+},
 "The operator publishes no ticket link. Link your ticket app in Settings → Ticket apps.": {
 "extractionState": "manual",
 "localizations": {
@@ -38791,6 +38981,196 @@
 "stringUnit": {
 "state": "translated",
 "value": "Bilet: %@"
+}
+}
+}
+},
+"Ticket added": {
+"extractionState": "manual",
+"localizations": {
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Ticket added"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Ticket hinzugefügt"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Billet ajouté"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Biglietto aggiunto"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Billete añadido"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Bilhete adicionado"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Ticket toegevoegd"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Bilet dodany"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Квиток додано"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Bilet adăugat"
+}
+},
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Jízdenka přidána"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Biljett tillagd"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Το εισιτήριο προστέθηκε"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Jegy hozzáadva"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Bilet eklendi"
+}
+}
+}
+},
+"Ticket already saved": {
+"extractionState": "manual",
+"localizations": {
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Ticket already saved"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Ticket bereits gespeichert"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Billet déjà enregistré"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Biglietto già salvato"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Billete ya guardado"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Bilhete já guardado"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Ticket al opgeslagen"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Bilet już zapisany"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Квиток уже збережено"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Bilet deja salvat"
+}
+},
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Jízdenka již uložena"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Biljetten är redan sparad"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Το εισιτήριο έχει ήδη αποθηκευτεί"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "A jegy már mentve van"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Bilet zaten kaydedildi"
 }
 }
 }
