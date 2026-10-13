@@ -11,7 +11,7 @@ final class HangLog: @unchecked Sendable {
     /// iOS ends an app that has been blocked for about 10 s, so the last note comes before that.
     static let marks: [TimeInterval] = [2, 5, 8]
     static let maxTrail = 25
-    static let maxBytes = 48_000
+    static let maxBytes = 400_000
 
     let fileURL: URL
     private let lock = NSLock()
@@ -44,6 +44,9 @@ final class HangLog: @unchecked Sendable {
 
     /// Starts the watchdog: every half second it asks the main thread for a reply.
     func start() {
+        #if canImport(Darwin)
+        MainThreadSampler.install()
+        #endif
         lock.lock(); defer { lock.unlock() }
         guard timer == nil else { return }
         let t = DispatchSource.makeTimerSource(queue: queue)
@@ -77,7 +80,7 @@ final class HangLog: @unchecked Sendable {
             let mark = Int(Self.marks[notedMarks])
             if notedMarks == 0 {
                 let os = ProcessInfo.processInfo.operatingSystemVersionString
-                entry = "\n— \(Self.dateTime(since)) · Publit \(AppInfo.version) · \(os)\n"
+                entry = "\n— \(Self.dateTime(since)) · Publit \(AppInfo.version) (\(AppInfo.build)) · \(Self.device) · \(os)\n"
                     + "No response for \(mark) s. Last steps:\n"
                     + (trail.isEmpty ? "  (none)\n" : trail.map { "  \($0)\n" }.joined())
             } else {
@@ -86,8 +89,36 @@ final class HangLog: @unchecked Sendable {
             notedMarks += 1
         }
         lock.unlock()
-        if let entry { append(entry) }
+        if let entry { append(entry + stack()) }
         return false
+    }
+
+    /// What the main thread is doing right now; repeated frames are folded.
+    private func stack() -> String {
+        #if canImport(Darwin)
+        guard let lines = MainThreadSampler.sample(), !lines.isEmpty else { return "  (no call stack)\n" }
+        var out = "Main thread:\n"
+        var previous: String?, repeats = 0
+        func flush() { if repeats > 0 { out += "      … same ×\(repeats)\n" }; repeats = 0 }
+        for line in lines {
+            if line == previous { repeats += 1; continue }
+            flush()
+            out += "    \(line)\n"
+            previous = line
+        }
+        flush()
+        return out
+        #else
+        return ""
+        #endif
+    }
+
+    private static var device: String {
+        var info = utsname()
+        uname(&info)
+        return withUnsafeBytes(of: &info.machine) { raw in
+            String(decoding: raw.prefix { $0 != 0 }, as: UTF8.self)
+        }
     }
 
     /// The main thread replied.

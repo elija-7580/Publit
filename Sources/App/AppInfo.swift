@@ -12,6 +12,7 @@ enum AppInfo {
     static var version: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.6.0"
     }
+    static var build: String { Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?" }
 
     /// Contact required by the Transitous usage policy. Set `PublitContact` in project.yml.
     static var contact: String {

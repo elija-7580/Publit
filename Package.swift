@@ -50,6 +50,7 @@ let core = [
     "Util/SHA1.swift",
     "Util/ZipWriter.swift",
     "Util/HangLog.swift",
+    "Util/MainThreadSampler.swift",
 ]
 
 let package = Package(

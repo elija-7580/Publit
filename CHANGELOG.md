@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.0 (build 11)
+
+### Better freeze log
+- The log from build 9/10 shows the freeze starting as soon as a trip opens, before its data has loaded (7.5 s), then about 15 s more after loading. It had no build number, so it is unclear which build was running.
+- Each freeze entry now has the build number and device model, and the main thread's call stack (function names from the app and iOS) at 2, 5 and 8 s. That shows where the app is stuck. No stack is taken while Xcode's debugger is attached (it would stop on the signal used).
+
 ## 0.6.0 (build 10)
 
 ### Freeze on the trip screen (freeze log from build 9)
