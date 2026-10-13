@@ -6685,6 +6685,101 @@
 }
 }
 },
+"All rows use the same clock. Later departures start farther right.": {
+"extractionState": "manual",
+"localizations": {
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Všechny řádky používají stejnou časovou osu. Pozdější odjezdy začínají víc vpravo."
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Alle Zeilen nutzen dieselbe Zeitachse. Spätere Abfahrten beginnen weiter rechts."
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Όλες οι γραμμές έχουν τον ίδιο άξονα χρόνου. Οι πιο αργές αναχωρήσεις ξεκινούν πιο δεξιά."
+}
+},
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "All rows use the same clock. Later departures start farther right."
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Todas las filas usan el mismo reloj. Las salidas más tardías empiezan más a la derecha."
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Toutes les lignes utilisent la même échelle de temps. Les départs plus tardifs commencent plus à droite."
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Minden sor ugyanazt az időtengelyt használja. A későbbi indulások jobbrább kezdődnek."
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Tutte le righe usano la stessa scala oraria. Le partenze più tardi iniziano più a destra."
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Alle rijen gebruiken dezelfde tijdas. Latere vertrekken beginnen verder naar rechts."
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Wszystkie wiersze mają tę samą oś czasu. Późniejsze odjazdy zaczynają się bardziej na prawo."
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Todas as linhas usam o mesmo relógio. As partidas mais tardias começam mais à direita."
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Toate rândurile folosesc aceeași axă a timpului. Plecările mai târzii încep mai la dreapta."
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Alla rader använder samma tidsaxel. Senare avgångar börjar längre till höger."
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Tüm satırlar aynı zaman eksenini kullanır. Daha geç kalkışlar daha sağdan başlar."
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Усі рядки мають спільну шкалу часу. Пізніші відправлення починаються правіше."
+}
+}
+}
+},
 "Allow location access in Settings to see departures near you. Trip planning works without it.": {
 "extractionState": "manual",
 "localizations": {
@@ -8205,6 +8300,101 @@
 }
 }
 },
+"Available now: %lld": {
+"extractionState": "manual",
+"localizations": {
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Dostupné teď: %lld"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Jetzt verfügbar: %lld"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Διαθέσιμα τώρα: %lld"
+}
+},
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Available now: %lld"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Disponibles ahora: %lld"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Disponibles : %lld"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Most elérhető: %lld"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Disponibili ora: %lld"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Nu beschikbaar: %lld"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Dostępne teraz: %lld"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Disponíveis agora: %lld"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Disponibile acum: %lld"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Tillgängliga nu: %lld"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Şu an müsait: %lld"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Доступно зараз: %lld"
+}
+}
+}
+},
 "Between %@ and %@": {
 "extractionState": "manual",
 "localizations": {
@@ -8391,6 +8581,196 @@
 "stringUnit": {
 "state": "translated",
 "value": "Bisiklet"
+}
+}
+}
+},
+"Bike & Ride": {
+"extractionState": "manual",
+"localizations": {
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Kolo + MHD"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Bike & Ride"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Ποδήλατο + συγκοινωνία"
+}
+},
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Bike & Ride"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Bici + transporte"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Vélo + train"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Bike & Ride"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Bici + treno"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Fiets + OV"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Rower + przesiadka"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Bicicleta + transporte"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Bicicletă + transport"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Cykel + kollektivtrafik"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Bisiklet + toplu taşıma"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Велосипед + транспорт"
+}
+}
+}
+},
+"Bike & Ride: cycle to a station and park there. Park & Ride: drive to a car park at a station; this search can take up to half a minute. Walking routes stay in the list for comparison; buses, trams and trains are always included.": {
+"extractionState": "manual",
+"localizations": {
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Kolo + MHD: dojeďte na kole na stanici a nechte ho tam. P+R: dojeďte autem na parkoviště u stanice; toto hledání může trvat až půl minuty. Pěší trasy zůstanou v seznamu pro srovnání; autobusy, tramvaje a vlaky jsou vždy zahrnuty."
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Bike & Ride: mit dem Rad zu einem Bahnhof fahren und dort abstellen. Park & Ride: mit dem Auto zu einem Parkplatz an einem Bahnhof fahren; diese Suche kann bis zu einer halben Minute dauern. Fußwege bleiben zum Vergleich in der Liste; Bus, Tram und Bahn sind immer dabei."
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Ποδήλατο + συγκοινωνία: πηγαίνετε με ποδήλατο σε έναν σταθμό και αφήστε το εκεί. Park & Ride: οδηγήστε σε χώρο στάθμευσης σταθμού· αυτή η αναζήτηση μπορεί να διαρκέσει έως μισό λεπτό. Οι διαδρομές με τα πόδια μένουν στη λίστα για σύγκριση· λεωφορεία, τραμ και τρένα περιλαμβάνονται πάντα."
+}
+},
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Bike & Ride: cycle to a station and park there. Park & Ride: drive to a car park at a station; this search can take up to half a minute. Walking routes stay in the list for comparison; buses, trams and trains are always included."
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Bici + transporte: ve en bici a una estación y apárcala allí. Park & Ride: conduce hasta un aparcamiento de una estación; esta búsqueda puede tardar hasta medio minuto. Las rutas a pie siguen en la lista para comparar; autobuses, tranvías y trenes siempre se incluyen."
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Vélo + train : rejoignez une gare à vélo et garez-le. Parking relais : rejoignez un parking de gare en voiture ; cette recherche peut prendre jusqu’à 30 secondes. Les trajets à pied restent dans la liste pour comparer ; bus, trams et trains sont toujours inclus."
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Bike & Ride: kerékpárral menj egy állomásig, és ott hagyd. P+R: autóval menj egy állomás melletti parkolóba; ez a keresés akár fél percig is tarthat. A gyalogos útvonalak összehasonlításként a listában maradnak; a busz, villamos és vonat mindig benne van."
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Bici + treno: vai in bici fino a una stazione e parcheggiala. Park & Ride: vai in auto a un parcheggio di una stazione; la ricerca può richiedere fino a mezzo minuto. I percorsi a piedi restano nell’elenco per confronto; bus, tram e treni sono sempre inclusi."
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Fiets + OV: fiets naar een station en zet je fiets daar neer. P+R: rij naar een parkeerplaats bij een station; deze zoekopdracht kan tot een halve minuut duren. Looproutes blijven ter vergelijking in de lijst; bus, tram en trein zijn altijd inbegrepen."
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Rower + przesiadka: dojedź rowerem do stacji i zostaw go tam. Parkuj i jedź: dojedź autem na parking przy stacji; to wyszukiwanie może trwać do pół minuty. Trasy piesze zostają na liście do porównania; autobusy, tramwaje i pociągi są zawsze uwzględnione."
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Bicicleta + transporte: vá de bicicleta até uma estação e estacione-a lá. Park & Ride: conduza até um parque de estacionamento numa estação; esta pesquisa pode demorar até meio minuto. Os percursos a pé continuam na lista para comparação; autocarros, elétricos e comboios estão sempre incluídos."
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Bicicletă + transport: mergi cu bicicleta până la o gară și las-o acolo. Park & Ride: mergi cu mașina până la o parcare de lângă o gară; căutarea poate dura până la jumătate de minut. Rutele pe jos rămân în listă pentru comparație; autobuzele, tramvaiele și trenurile sunt mereu incluse."
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Cykel + kollektivtrafik: cykla till en station och parkera där. Infartsparkering: kör till en parkering vid en station; sökningen kan ta upp till en halv minut. Gångvägar finns kvar i listan för jämförelse; bussar, spårvagnar och tåg ingår alltid."
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Bisiklet + toplu taşıma: bir istasyona bisikletle gidip orada bırakın. Park & Ride: bir istasyondaki otoparka arabayla gidin; bu arama yarım dakikaya kadar sürebilir. Yürüyüş rotaları karşılaştırma için listede kalır; otobüs, tramvay ve tren her zaman dahildir."
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Велосипед + транспорт: доїдьте велосипедом до станції й залиште його там. Park & Ride: доїдьте автомобілем до парковки біля станції; цей пошук може тривати до пів хвилини. Піші маршрути лишаються в списку для порівняння; автобуси, трамваї й потяги завжди враховано."
 }
 }
 }
@@ -15235,6 +15615,101 @@
 }
 }
 },
+"Find a line": {
+"extractionState": "manual",
+"localizations": {
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Najít linku"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Linie suchen"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Εύρεση γραμμής"
+}
+},
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Find a line"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Buscar una línea"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Trouver une ligne"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Vonal keresése"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Trova una linea"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Lijn zoeken"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Znajdź linię"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Procurar uma linha"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Caută o linie"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Hitta en linje"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Hat bul"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Знайти лінію"
+}
+}
+}
+},
 "Flight": {
 "extractionState": "manual",
 "localizations": {
@@ -16850,6 +17325,101 @@
 }
 }
 },
+"How to read connections": {
+"extractionState": "manual",
+"localizations": {
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Jak číst spojení"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "So liest du Verbindungen"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Πώς διαβάζονται οι διαδρομές"
+}
+},
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "How to read connections"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Cómo leer las conexiones"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Comment lire les trajets"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Így olvasd a kapcsolatokat"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Come leggere i collegamenti"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Zo lees je verbindingen"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Jak czytać połączenia"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Como ler as ligações"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Cum citești conexiunile"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Så läser du resorna"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Bağlantılar nasıl okunur"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Як читати маршрути"
+}
+}
+}
+},
 "I'm arriving at %@ at %@.": {
 "extractionState": "manual",
 "localizations": {
@@ -17796,6 +18366,101 @@
 "stringUnit": {
 "state": "translated",
 "value": "Şimdi çıkın"
+}
+}
+}
+},
+"Leave reminder": {
+"extractionState": "manual",
+"localizations": {
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Připomenout odchod"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Losgeh-Erinnerung"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Υπενθύμιση αναχώρησης"
+}
+},
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Leave reminder"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Aviso de salida"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Rappel de départ"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Indulási emlékeztető"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Promemoria partenza"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Vertrekherinnering"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Przypomnienie o wyjściu"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Lembrete de saída"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Memento de plecare"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Avgångspåminnelse"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Çıkış hatırlatıcısı"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Нагадати вийти"
 }
 }
 }
@@ -18936,6 +19601,101 @@
 "stringUnit": {
 "state": "translated",
 "value": "Canlı veriler"
+}
+}
+}
+},
+"Live layer unavailable. Stations still work.": {
+"extractionState": "manual",
+"localizations": {
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Živá vrstva není dostupná. Zastávky fungují dál."
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Live-Ebene nicht verfügbar. Haltestellen funktionieren weiterhin."
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Το ζωντανό επίπεδο δεν είναι διαθέσιμο. Οι στάσεις λειτουργούν κανονικά."
+}
+},
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Live layer unavailable. Stations still work."
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Capa en directo no disponible. Las paradas siguen funcionando."
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Couche en direct indisponible. Les arrêts restent disponibles."
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Az élő réteg nem érhető el. A megállók továbbra is működnek."
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Livello in tempo reale non disponibile. Le fermate funzionano comunque."
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Livelaag niet beschikbaar. Haltes werken nog wel."
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Warstwa na żywo niedostępna. Przystanki nadal działają."
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Camada em tempo real indisponível. As paragens continuam a funcionar."
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Stratul live nu este disponibil. Stațiile funcționează în continuare."
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Livelagret är inte tillgängligt. Hållplatserna fungerar ändå."
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Canlı katman kullanılamıyor. Duraklar çalışmaya devam ediyor."
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Шар у реальному часі недоступний. Зупинки працюють."
 }
 }
 }
@@ -26635,6 +27395,196 @@
 }
 }
 },
+"Park & Ride": {
+"extractionState": "manual",
+"localizations": {
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "P+R"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Park & Ride"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Park & Ride"
+}
+},
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Park & Ride"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Park & Ride"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Parking relais"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "P+R"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Park & Ride"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "P+R"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Parkuj i jedź"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Park & Ride"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Park & Ride"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Infartsparkering"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Park & Ride"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Park & Ride"
+}
+}
+}
+},
+"Park & Ride searches take longer.": {
+"extractionState": "manual",
+"localizations": {
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Hledání P+R trvá déle."
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Park-&-Ride-Suchen dauern länger."
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Οι αναζητήσεις Park & Ride διαρκούν περισσότερο."
+}
+},
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Park & Ride searches take longer."
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Las búsquedas Park & Ride tardan más."
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Les recherches avec parking relais sont plus longues."
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "A P+R keresés tovább tart."
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Le ricerche Park & Ride richiedono più tempo."
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "P+R-zoekopdrachten duren langer."
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Wyszukiwanie „Parkuj i jedź” trwa dłużej."
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "As pesquisas Park & Ride demoram mais."
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Căutările Park & Ride durează mai mult."
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Sökningar med infartsparkering tar längre tid."
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Park & Ride aramaları daha uzun sürer."
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Пошук Park & Ride триває довше."
+}
+}
+}
+},
 "Pass": {
 "extractionState": "manual",
 "localizations": {
@@ -29865,6 +30815,101 @@
 }
 }
 },
+"Reminder on": {
+"extractionState": "manual",
+"localizations": {
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Připomínka zapnuta"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Erinnerung an"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Υπενθύμιση ενεργή"
+}
+},
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Reminder on"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Recordatorio activado"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Rappel activé"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Emlékeztető be"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Promemoria attivo"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Herinnering aan"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Przypomnienie włączone"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Lembrete ativo"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Memento activ"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Påminnelse på"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Hatırlatıcı açık"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Нагадування ввімкнено"
+}
+}
+}
+},
 "Reminder set": {
 "extractionState": "manual",
 "localizations": {
@@ -31001,6 +32046,101 @@
 "stringUnit": {
 "state": "translated",
 "value": "Gidiş-dönüş bileti"
+}
+}
+}
+},
+"Ride": {
+"extractionState": "manual",
+"localizations": {
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Jízda"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Fahrt"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Διαδρομή"
+}
+},
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Ride"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Trayecto"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Trajet"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Utazás"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Viaggio"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Rit"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Przejazd"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Viagem"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Călătorie"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Resa"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Yolculuk"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Поїздка"
 }
 }
 }
@@ -34330,6 +35470,101 @@
 }
 }
 },
+"Show connection timelines": {
+"extractionState": "manual",
+"localizations": {
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Zobrazit časové osy spojení"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Zeitleisten bei Verbindungen zeigen"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Εμφάνιση χρονογραμμών διαδρομών"
+}
+},
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Show connection timelines"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Mostrar líneas de tiempo de las conexiones"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Afficher les frises des trajets"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Idővonalak megjelenítése"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Mostra linee temporali dei collegamenti"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Tijdlijnen bij verbindingen tonen"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Pokaż osie czasu połączeń"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Mostrar linhas temporais das ligações"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Afișează cronologia conexiunilor"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Visa tidslinjer för resor"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Bağlantı zaman çizelgelerini göster"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Показувати часові шкали маршрутів"
+}
+}
+}
+},
 "Show my tickets (%lld)": {
 "extractionState": "manual",
 "localizations": {
@@ -34516,6 +35751,101 @@
 "stringUnit": {
 "state": "translated",
 "value": "Orijinali göster"
+}
+}
+}
+},
+"Show rental details": {
+"extractionState": "manual",
+"localizations": {
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Zobrazit podrobnosti půjčovny"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Details zum Verleih anzeigen"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Εμφάνιση στοιχείων ενοικίασης"
+}
+},
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Show rental details"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Mostrar detalles del alquiler"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Afficher les détails de location"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Kölcsönzés részletei"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Mostra dettagli noleggio"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Huurdetails tonen"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Pokaż szczegóły wypożyczenia"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Mostrar detalhes do aluguer"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Afișează detaliile închirierii"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Visa hyrinformation"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Kiralama ayrıntılarını göster"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Показати деталі прокату"
 }
 }
 }
@@ -37560,6 +38890,101 @@
 }
 }
 },
+"The coloured blocks are rides. Thin grey sections are walking; dotted gaps are waiting between legs.": {
+"extractionState": "manual",
+"localizations": {
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Barevné bloky jsou jízdy. Tenké šedé úseky jsou chůze, tečkované mezery čekání mezi úseky."
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Farbige Blöcke sind Fahrten. Dünne graue Abschnitte sind Fußwege, gepunktete Lücken sind Wartezeiten zwischen den Abschnitten."
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Τα χρωματιστά τμήματα είναι διαδρομές με όχημα. Τα λεπτά γκρι είναι περπάτημα· τα διάστικτα κενά είναι αναμονή μεταξύ σκελών."
+}
+},
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "The coloured blocks are rides. Thin grey sections are walking; dotted gaps are waiting between legs."
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Los bloques de color son los trayectos. Las secciones grises finas son a pie; los huecos punteados son esperas entre tramos."
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Les blocs colorés sont les trajets. Les fines sections grises sont la marche ; les espaces pointillés sont l’attente entre deux étapes."
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "A színes blokkok a járműves szakaszok. A vékony szürke részek gyaloglást, a pontozott rések várakozást jelentenek a szakaszok között."
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "I blocchi colorati sono i tratti in mezzo. Le sezioni grigie sottili sono a piedi; gli spazi tratteggiati sono attese tra i tratti."
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Gekleurde blokken zijn ritten. Dunne grijze delen zijn lopen; gestippelde tussenruimtes zijn wachttijd tussen de delen."
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Kolorowe bloki to przejazdy. Cienkie szare odcinki to dojścia pieszo; kropkowane przerwy to oczekiwanie między odcinkami."
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Os blocos coloridos são as viagens. As secções cinzentas finas são a pé; os espaços pontilhados são esperas entre troços."
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Blocurile colorate sunt călătoriile. Secțiunile gri subțiri sunt mers pe jos; golurile punctate sunt așteptări între segmente."
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "De färgade blocken är resor. Tunna grå delar är promenader; prickade luckor är väntan mellan delresor."
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Renkli bloklar yolculuklardır. İnce gri bölümler yürüyüş, noktalı boşluklar aktarmalar arasındaki beklemedir."
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Кольорові блоки — це поїздки. Тонкі сірі відрізки — пішки; пунктирні проміжки — очікування між відрізками."
+}
+}
+}
+},
 "The copy and its original are removed from this iPhone.": {
 "extractionState": "manual",
 "localizations": {
@@ -38320,6 +39745,101 @@
 }
 }
 },
+"This is a comparison, not live progress. Check the departure times, line names and change warnings.": {
+"extractionState": "manual",
+"localizations": {
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Jde o srovnání, ne o průběh v reálném čase. Zkontrolujte časy odjezdů, linky a upozornění na přestupy."
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Das ist ein Vergleich, kein Live-Fortschritt. Achte auf Abfahrtszeiten, Linien und Umstiegshinweise."
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Είναι σύγκριση, όχι ζωντανή πρόοδος. Ελέγξτε ώρες αναχώρησης, γραμμές και προειδοποιήσεις μετεπιβίβασης."
+}
+},
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "This is a comparison, not live progress. Check the departure times, line names and change warnings."
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Es una comparación, no el progreso en directo. Revisa las horas de salida, las líneas y los avisos de transbordo."
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Il s’agit d’une comparaison, pas d’une progression en direct. Vérifiez les horaires, les lignes et les alertes de correspondance."
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Ez összehasonlítás, nem élő haladás. Ellenőrizd az indulási időket, a vonalakat és az átszállási figyelmeztetéseket."
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "È un confronto, non l’avanzamento in tempo reale. Controlla orari di partenza, linee e avvisi sui cambi."
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Dit is een vergelijking, geen live voortgang. Let op vertrektijden, lijnen en overstapwaarschuwingen."
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "To porównanie, a nie postęp na żywo. Sprawdź godziny odjazdu, linie i ostrzeżenia o przesiadkach."
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "É uma comparação, não o progresso em tempo real. Verifique as horas de partida, as linhas e os avisos de transbordo."
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Este o comparație, nu progresul în timp real. Verifică orele de plecare, liniile și avertizările de transfer."
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Det här är en jämförelse, inte liveförlopp. Kontrollera avgångstider, linjer och bytesvarningar."
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Bu bir karşılaştırmadır, canlı ilerleme değildir. Kalkış saatlerini, hatları ve aktarma uyarılarını kontrol edin."
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Це порівняння, а не поступ у реальному часі. Перевіряйте час відправлення, лінії та попередження про пересадки."
+}
+}
+}
+},
 "This is not a valid link.": {
 "extractionState": "manual",
 "localizations": {
@@ -38411,6 +39931,101 @@
 "stringUnit": {
 "state": "translated",
 "value": "Bu geçerli bir bağlantı değil."
+}
+}
+}
+},
+"This search took too long. Try again, or choose walking to the first stop.": {
+"extractionState": "manual",
+"localizations": {
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Hledání trvalo příliš dlouho. Zkuste to znovu nebo zvolte chůzi k první zastávce."
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Diese Suche hat zu lange gedauert. Versuch es noch einmal oder wähle „zu Fuß“ zur ersten Haltestelle."
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Η αναζήτηση καθυστέρησε πολύ. Δοκιμάστε ξανά ή επιλέξτε περπάτημα έως την πρώτη στάση."
+}
+},
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "This search took too long. Try again, or choose walking to the first stop."
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "La búsqueda ha tardado demasiado. Inténtalo de nuevo o elige ir a pie hasta la primera parada."
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Cette recherche a pris trop de temps. Réessayez ou choisissez la marche jusqu’au premier arrêt."
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "A keresés túl sokáig tartott. Próbáld újra, vagy válaszd a gyaloglást az első megállóig."
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "La ricerca ha richiesto troppo tempo. Riprova o scegli a piedi fino alla prima fermata."
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Deze zoekopdracht duurde te lang. Probeer het opnieuw of kies lopen naar de eerste halte."
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Wyszukiwanie trwało zbyt długo. Spróbuj ponownie lub wybierz dojście pieszo do pierwszego przystanku."
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "A pesquisa demorou demasiado. Tente novamente ou escolha ir a pé até à primeira paragem."
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Căutarea a durat prea mult. Încearcă din nou sau alege mersul pe jos până la prima stație."
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Sökningen tog för lång tid. Försök igen eller välj att gå till första hållplatsen."
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Arama çok uzun sürdü. Tekrar deneyin veya ilk durağa yürümeyi seçin."
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Пошук тривав надто довго. Спробуйте ще раз або виберіть пішки до першої зупинки."
 }
 }
 }
@@ -39935,6 +41550,101 @@
 }
 }
 },
+"Time axis": {
+"extractionState": "manual",
+"localizations": {
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Časová osa"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Zeitachse"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Άξονας χρόνου"
+}
+},
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Time axis"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Eje de tiempo"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Axe du temps"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Időtengely"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Asse temporale"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Tijdas"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Oś czasu"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Eixo temporal"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Axa timpului"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Tidsaxel"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Zaman ekseni"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Шкала часу"
+}
+}
+}
+},
 "Times marked live come from the operator's real-time feed; all others are timetable times.": {
 "extractionState": "manual",
 "localizations": {
@@ -40311,6 +42021,101 @@
 "stringUnit": {
 "state": "translated",
 "value": "Nereye"
+}
+}
+}
+},
+"To the first stop": {
+"extractionState": "manual",
+"localizations": {
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "K první zastávce"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Zur ersten Haltestelle"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Έως την πρώτη στάση"
+}
+},
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "To the first stop"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Hasta la primera parada"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Jusqu’au premier arrêt"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Az első megállóig"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Fino alla prima fermata"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Naar de eerste halte"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Do pierwszego przystanku"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Até à primeira paragem"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Până la prima stație"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Till första hållplatsen"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "İlk durağa"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "До першої зупинки"
 }
 }
 }
@@ -40881,6 +42686,101 @@
 "stringUnit": {
 "state": "translated",
 "value": "Ulaşım türleri"
+}
+}
+}
+},
+"Travel preferences": {
+"extractionState": "manual",
+"localizations": {
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Předvolby cestování"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Reiseeinstellungen"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Προτιμήσεις μετακίνησης"
+}
+},
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Travel preferences"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Preferencias de viaje"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Préférences de trajet"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Utazási beállítások"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Preferenze di viaggio"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Reisvoorkeuren"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Preferencje podróży"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Preferências de viagem"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Preferințe de călătorie"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Resinställningar"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Seyahat tercihleri"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Налаштування поїздок"
 }
 }
 }
@@ -41926,6 +43826,101 @@
 "stringUnit": {
 "state": "translated",
 "value": "Güncellendi: %@"
+}
+}
+}
+},
+"Updating live layer…": {
+"extractionState": "manual",
+"localizations": {
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Aktualizace živé vrstvy…"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Live-Ebene wird aktualisiert …"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Ενημέρωση ζωντανού επιπέδου…"
+}
+},
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Updating live layer…"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Actualizando capa en directo…"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Mise à jour de la couche en direct…"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Élő réteg frissítése…"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Aggiornamento livello in tempo reale…"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Livelaag bijwerken…"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Aktualizowanie warstwy na żywo…"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "A atualizar camada em tempo real…"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Se actualizează stratul live…"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Uppdaterar livelagret…"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Canlı katman güncelleniyor…"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Оновлення шару в реальному часі…"
 }
 }
 }
@@ -43066,6 +45061,101 @@
 "stringUnit": {
 "state": "translated",
 "value": "Görünüm"
+}
+}
+}
+},
+"Wait": {
+"extractionState": "manual",
+"localizations": {
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Čekání"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Warten"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Αναμονή"
+}
+},
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Wait"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Espera"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Attente"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Várakozás"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Attesa"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Wachten"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Czekanie"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Espera"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Așteptare"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Väntan"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Bekleme"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Очікування"
 }
 }
 }
