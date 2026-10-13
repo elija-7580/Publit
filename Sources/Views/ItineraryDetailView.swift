@@ -29,6 +29,8 @@ struct CompareMapView: View {
 
 struct ItineraryDetailView: View {
     @Environment(TripStore.self) private var trips
+    /// False once this screen is popped or dismissed (still true while a child screen is pushed).
+    @Environment(\.isPresented) private var isPresented
     let itinerary: Itinerary
     var fromName: String = ""
     var toName: String = ""
@@ -103,6 +105,9 @@ struct ItineraryDetailView: View {
         .toolbar {
             if Features.passes { ToolbarItem(placement: .topBarTrailing) { ShowPassButton(tripId: trips.saved(itinerary)?.id, at: itinerary.startTime) } }
         }
+        // A trip unsaved here is only deleted when the screen closes, not when a detail is pushed.
+        .onDisappear { if !isPresented { trips.discardPendingRemovals() } }
+        .onChange(of: isPresented) { _, presented in if !presented { trips.discardPendingRemovals() } }
     }
 }
 

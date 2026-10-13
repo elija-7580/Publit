@@ -5,14 +5,35 @@ import XCTest
 final class PublitUITests: XCTestCase {
     private let timeout: TimeInterval = 45
 
+    /// Started per test. CI has one 45-minute job for build and all UI tests; a single hanging
+    /// test must not use it up, or no log at all is published. After this many seconds the runner
+    /// stops, xcodebuild reports the test as crashed and continues with the next one.
+    private static let watchdogSeconds: TimeInterval = 150
+    private var watchdog: DispatchWorkItem?
+    private var startedAt = Date()
+
     override func setUp() {
         continueAfterFailure = false
+        startedAt = Date()
+        let name = self.name
+        let item = DispatchWorkItem {
+            print("WATCHDOG: \(name) still running after \(Int(Self.watchdogSeconds)) s - stopping the runner")
+            fflush(stdout)
+            abort()
+        }
+        watchdog = item
+        DispatchQueue.global().asyncAfter(deadline: .now() + Self.watchdogSeconds, execute: item)
         addUIInterruptionMonitor(withDescription: "Location") { alert in
             for label in ["Allow While Using App", "Allow Once", "Allow"] where alert.buttons[label].exists {
                 alert.buttons[label].tap(); return true
             }
             return false
         }
+    }
+
+    override func tearDown() {
+        watchdog?.cancel()
+        print("TIMING: \(name) \(Int(Date().timeIntervalSince(startedAt))) s")
     }
 
     private func launch(_ env: [String: String] = [:]) -> XCUIApplication {
@@ -34,7 +55,14 @@ final class PublitUITests: XCTestCase {
         let deadline = Date().addingTimeInterval(timeout)
         while Date() < deadline {
             if element.waitForExistence(timeout: 4) {
-                for _ in 0..<4 where !element.isHittable { app.swipeUp() }
+                // Short drags: a full swipe can scroll a row past the top in one go.
+                let window = app.windows.firstMatch
+                for _ in 0..<10 where !element.isHittable {
+                    let up = element.frame.minY > window.frame.midY
+                    let from = window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: up ? 0.7 : 0.35))
+                    let to = window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: up ? 0.45 : 0.6))
+                    from.press(forDuration: 0.05, thenDragTo: to)
+                }
                 return element.isHittable
             }
             app.swipeUp()

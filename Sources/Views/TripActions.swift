@@ -19,6 +19,8 @@ struct TripActionsSection: View {
     @State private var showingTickets = false
 
     private var saved: SavedTrip? { trips.saved(itinerary) }
+    /// Unsaved here, but kept until this screen closes.
+    private var pending: Bool { saved.map { trips.isPendingRemoval($0.id) } ?? false }
 
     @Environment(\.dynamicTypeSize) private var typeSize
 
@@ -76,12 +78,17 @@ struct TripActionsSection: View {
     @ViewBuilder
     private var secondaryButtons: some View {
         Button {
-            if saved == nil { trips.save(itinerary, from: fromName, to: toName) }
+            if let saved {
+                if pending { trips.keep(saved.id) } else { trips.markForRemoval(saved.id) }
+            } else {
+                trips.save(itinerary, from: fromName, to: toName)
+            }
         } label: {
-            Label(saved == nil ? L10n.t("Save trip") : L10n.t("Saved"), systemImage: saved == nil ? "bookmark" : "bookmark.fill")
+            let isSaved = saved != nil && !pending
+            Label(isSaved ? L10n.t("Saved") : L10n.t("Save trip"), systemImage: isSaved ? "bookmark.fill" : "bookmark")
         }
         .buttonStyle(ActionButtonStyle())
-        .disabled(saved != nil)
+        .accessibilityIdentifier("saveTrip")
         Button {
             calendarTrip = ensureSaved()
         } label: {
@@ -135,7 +142,11 @@ struct TripActionsSection: View {
     }
 
     private func ensureSaved() -> SavedTrip {
-        saved ?? trips.save(itinerary, from: fromName, to: toName)
+        if let saved {
+            trips.keep(saved.id)
+            return saved
+        }
+        return trips.save(itinerary, from: fromName, to: toName)
     }
 
     private func toggleReminder() async {
@@ -291,5 +302,15 @@ struct ActionButtonStyle: ButtonStyle {
             .foregroundStyle(Color.appAccent)
             .background(Color.appAccent.opacity(configuration.isPressed ? 0.2 : 0.1), in: RoundedRectangle(cornerRadius: 14))
             .contentShape(RoundedRectangle(cornerRadius: 14))
+    }
+}
+
+extension TripStore {
+    /// Deletes trips unsaved on a screen that has closed, with their reminder and Live Activity.
+    func discardPendingRemovals() {
+        for id in removePending() {
+            LeaveReminder.cancel(id)
+            Task { await LiveTripActivity.end(id) }
+        }
     }
 }

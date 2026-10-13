@@ -212,11 +212,17 @@ struct PlanView: View {
             // Sort/map controls as a real list row: Menu buttons in Section headers are often
             // non-hittable for UI tests and awkward for VoiceOver.
             if !its.isEmpty {
+                // Borderless: two controls in one row, each with its own tap area
+                // (otherwise a tap anywhere in the row triggers both).
                 HStack {
                     RouteSortMenu()
+                        .buttonStyle(.borderless)
                     Spacer()
                     Button(showMap ? L10n.t("List") : L10n.t("Map")) { withAnimation { showMap.toggle() } }
                         .font(.caption.weight(.semibold))
+                        .buttonStyle(.borderless)
+                        .frame(minHeight: 44)
+                        .accessibilityIdentifier("routeMapToggle")
                 }
                 .listRowBackground(Color.clear)
             }

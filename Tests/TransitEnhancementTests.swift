@@ -112,6 +112,29 @@ final class TransitEnhancementTests: XCTestCase {
         XCTAssertEqual(plan.to, recent.to)
     }
     @MainActor
+    func testUnsavedTripStaysUntilTheScreenCloses() async throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { JSONPersistence.flush(); try? FileManager.default.removeItem(at: dir) }
+        let store = TripStore(directory: dir)
+        let it = try itinerary()
+        let trip = store.save(it, from: "A", to: "B")
+        store.markForRemoval(trip.id)
+        XCTAssertNotNil(store.trip(trip.id), "an accidental unsave must not delete at once")
+        XCTAssertTrue(store.isPendingRemoval(trip.id))
+        store.keep(trip.id)
+        XCTAssertEqual(store.removePending(), [], "saved again: nothing is deleted on close")
+        XCTAssertNotNil(store.trip(trip.id))
+        store.markForRemoval(trip.id)
+        JSONPersistence.flush()
+        XCTAssertNotNil(TripStore(directory: dir).trip(trip.id), "pending is not persisted: a relaunch keeps the trip")
+        XCTAssertEqual(store.removePending(), [trip.id])
+        XCTAssertNil(store.trip(trip.id))
+        XCTAssertFalse(store.isPendingRemoval(trip.id))
+        JSONPersistence.flush()
+        XCTAssertNil(TripStore(directory: dir).trip(trip.id))
+    }
+
+    @MainActor
     func testStartedTripIsPersistentAndOnlyOneTripIsActive() async throws {
         let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { JSONPersistence.flush(); try? FileManager.default.removeItem(at: dir) }

@@ -31,6 +31,9 @@ final class TripStore {
     @ObservationIgnored private let file: JSONFile<[SavedTrip]>
     @ObservationIgnored private let activeFile: JSONFile<String>
     private(set) var activeTripId: String?
+    /// Unsaved on the open trip screen: still on the device until that screen closes,
+    /// so an accidental tap can be undone. Not persisted: after a relaunch the trip is simply still saved.
+    private(set) var pendingRemoval: Set<String> = []
 
     init(directory: URL? = nil) {
         file = JSONFile(name: "trips.json", directory: directory)
@@ -99,7 +102,28 @@ final class TripStore {
         persist()
     }
 
+    func isPendingRemoval(_ id: String) -> Bool { pendingRemoval.contains(id) }
+
+    /// "Saved" tapped again: mark only; `discardPending` deletes when the screen closes.
+    func markForRemoval(_ id: String) {
+        guard trip(id) != nil else { return }
+        pendingRemoval.insert(id)
+    }
+
+    /// Saved again (or used for a reminder, calendar or ticket) before the screen closed.
+    func keep(_ id: String) { pendingRemoval.remove(id) }
+
+    /// Trips unsaved on a screen that has now closed. Returns their IDs for clean-up.
+    @discardableResult
+    func removePending() -> [String] {
+        let ids = pendingRemoval.filter { trip($0) != nil }.sorted()
+        pendingRemoval.removeAll()
+        for id in ids { remove(id) }
+        return ids
+    }
+
     func remove(_ id: String) {
+        pendingRemoval.remove(id)
         if activeTripId == id { stop(id) }
         trips.removeAll { $0.id == id }
         persist()

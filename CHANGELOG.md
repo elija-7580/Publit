@@ -18,6 +18,7 @@
 - Lines tab removed: saved lines and stops are in Saved, with "Find a line". Plan shows the next saved trips.
 - Route actions: full-width divider under Start trip, even two-column grid with wrapping labels (one column with large text).
 - Connections: legend and "How to read connections" explain the timeline bars (later departures start farther right; coloured = ride, grey = walk, dotted = wait). Timelines can be turned off in Settings.
+- Saved trips: tapping "Saved" on an open trip unsaves it, but the trip stays on the device until that screen closes, so it can be saved again. Opening a stop or ticket from the trip does not count as closing; after a relaunch the trip is still saved.
 - Settings: travel preferences (route options, timelines, map layers).
 - Map: larger labels; bike and scooter pins show type, availability and provider and open details. Walking lines use crisp dashes.
 - Launch animation: only the moving icon, no spinner underneath.
