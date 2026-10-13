@@ -12290,6 +12290,101 @@
 }
 }
 },
+"Delete freeze log": {
+"extractionState": "manual",
+"localizations": {
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Delete freeze log"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Hänger-Protokoll löschen"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Supprimer le journal des blocages"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Elimina registro dei blocchi"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Eliminar registro de bloqueos"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Apagar registo de bloqueios"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Vastloperlogboek verwijderen"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Usuń dziennik zawieszeń"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Видалити журнал зависань"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Ștergeți jurnalul blocajelor"
+}
+},
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Smazat záznam zamrznutí"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Radera logg över frysningar"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Διαγραφή αρχείου παγωμάτων"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Lefagyásnapló törlése"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Donma kaydını sil"
+}
+}
+}
+},
 "Delete this ticket?": {
 "extractionState": "manual",
 "localizations": {
@@ -13236,6 +13331,101 @@
 "stringUnit": {
 "state": "translated",
 "value": "Seçilen rotanın ayrıntıları"
+}
+}
+}
+},
+"Diagnostics": {
+"extractionState": "manual",
+"localizations": {
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Diagnostics"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Diagnose"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Diagnostic"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Diagnostica"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Diagnóstico"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Diagnóstico"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Diagnose"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Diagnostyka"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Діагностика"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Diagnosticare"
+}
+},
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Diagnostika"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Diagnostik"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Διαγνωστικά"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Diagnosztika"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Tanılama"
 }
 }
 }
@@ -17606,6 +17796,101 @@
 "stringUnit": {
 "state": "translated",
 "value": "%@ noktasına vardım."
+}
+}
+}
+},
+"If Publit stops responding for 2 seconds or more, the time and the screens opened just before are noted here. Nothing else is recorded, and nothing leaves this device unless you share it.": {
+"extractionState": "manual",
+"localizations": {
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "If Publit stops responding for 2 seconds or more, the time and the screens opened just before are noted here. Nothing else is recorded, and nothing leaves this device unless you share it."
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Reagiert Publit 2 Sekunden oder länger nicht, werden hier die Uhrzeit und die zuvor geöffneten Bildschirme notiert. Sonst wird nichts aufgezeichnet, und nichts verlässt dieses Gerät, außer du teilst es."
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Si Publit ne répond plus pendant 2 secondes ou plus, l’heure et les écrans ouverts juste avant sont notés ici. Rien d’autre n’est enregistré, et rien ne quitte cet appareil sauf si vous le partagez."
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Se Publit non risponde per 2 secondi o più, qui vengono annotati l’ora e le schermate aperte poco prima. Non viene registrato altro e nulla lascia questo dispositivo, a meno che tu non lo condivida."
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Si Publit deja de responder durante 2 segundos o más, aquí se anotan la hora y las pantallas abiertas justo antes. No se registra nada más y nada sale de este dispositivo a menos que lo compartas."
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Se a Publit deixar de responder durante 2 segundos ou mais, a hora e os ecrãs abertos imediatamente antes ficam registados aqui. Nada mais é registado e nada sai deste dispositivo, a menos que o partilhe."
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Reageert Publit 2 seconden of langer niet, dan worden hier de tijd en de schermen die net daarvoor open waren genoteerd. Verder wordt niets vastgelegd, en niets verlaat dit apparaat tenzij je het deelt."
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Jeśli Publit przestanie odpowiadać na 2 sekundy lub dłużej, zapisywana jest tu godzina i ekrany otwarte tuż wcześniej. Nic więcej nie jest rejestrowane i nic nie opuszcza tego urządzenia, chyba że to udostępnisz."
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Якщо Publit не відповідає 2 секунди або довше, тут записуються час і екрани, відкриті безпосередньо перед цим. Більше нічого не записується, і ніщо не залишає цей пристрій, якщо ви цим не поділитеся."
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Dacă Publit nu mai răspunde timp de 2 secunde sau mai mult, aici se notează ora și ecranele deschise chiar înainte. Nu se înregistrează nimic altceva și nimic nu părăsește acest dispozitiv decât dacă îl partajați."
+}
+},
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Pokud Publit nereaguje 2 sekundy nebo déle, zaznamená se sem čas a obrazovky otevřené těsně předtím. Nic jiného se nezaznamenává a nic neopustí toto zařízení, pokud to nesdílíte."
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Om Publit slutar svara i 2 sekunder eller mer antecknas tiden och skärmarna som var öppna precis innan här. Inget annat registreras, och inget lämnar den här enheten om du inte delar det."
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Αν η Publit σταματήσει να αποκρίνεται για 2 δευτερόλεπτα ή περισσότερο, εδώ καταγράφονται η ώρα και οι οθόνες που άνοιξαν λίγο πριν. Τίποτε άλλο δεν καταγράφεται και τίποτα δεν φεύγει από αυτή τη συσκευή, εκτός αν το κοινοποιήσετε."
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Ha a Publit 2 másodpercig vagy tovább nem válaszol, itt rögzítjük az időpontot és a közvetlenül előtte megnyitott képernyőket. Mást nem rögzítünk, és semmi sem hagyja el ezt az eszközt, hacsak meg nem osztod."
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Publit 2 saniye veya daha uzun süre yanıt vermezse, saat ve hemen öncesinde açılan ekranlar buraya not edilir. Başka hiçbir şey kaydedilmez ve siz paylaşmadıkça hiçbir şey bu cihazdan çıkmaz."
 }
 }
 }
@@ -23591,6 +23876,101 @@
 "stringUnit": {
 "state": "translated",
 "value": "Yakın zamanda kalkış yok"
+}
+}
+}
+},
+"No freezes recorded": {
+"extractionState": "manual",
+"localizations": {
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "No freezes recorded"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Keine Hänger aufgezeichnet"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Aucun blocage enregistré"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Nessun blocco registrato"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "No se han registrado bloqueos"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Nenhum bloqueio registado"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Geen vastlopers vastgelegd"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Nie zarejestrowano zawieszeń"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Зависань не зафіксовано"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Niciun blocaj înregistrat"
+}
+},
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Žádná zamrznutí nezaznamenána"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Inga frysningar registrerade"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Δεν καταγράφηκαν παγώματα"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Nincs rögzített lefagyás"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Kaydedilmiş donma yok"
 }
 }
 }
@@ -35276,6 +35656,101 @@
 "stringUnit": {
 "state": "translated",
 "value": "Varışı paylaş"
+}
+}
+}
+},
+"Share freeze log": {
+"extractionState": "manual",
+"localizations": {
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Share freeze log"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Hänger-Protokoll teilen"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Partager le journal des blocages"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Condividi registro dei blocchi"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Compartir registro de bloqueos"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Partilhar registo de bloqueios"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Vastloperlogboek delen"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Udostępnij dziennik zawieszeń"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Поділитися журналом зависань"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Partajați jurnalul blocajelor"
+}
+},
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Sdílet záznam zamrznutí"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Dela logg över frysningar"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Κοινοποίηση αρχείου παγωμάτων"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Lefagyásnapló megosztása"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Donma kaydını paylaş"
 }
 }
 }
