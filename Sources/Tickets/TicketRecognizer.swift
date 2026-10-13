@@ -39,7 +39,15 @@ enum TicketRecognizer {
         try Task.checkCancellation()
         let embedded = (text ?? "").components(separatedBy: .newlines).map(TicketTextParser.clean).filter { !$0.isEmpty }
         // Embedded text is exact and usable: still detect codes, but avoid expensive redundant OCR.
-        var result = try await scan(image: image, recognizeText: embedded.count < 3)
+        // If Vision cannot run (simulator without inference context, transient Neural Engine errors),
+        // keep a text-only result so PDF imports do not hard-fail when the page already has enough text.
+        var result: TicketScan
+        do {
+            result = try await scan(image: image, recognizeText: embedded.count < 3)
+        } catch {
+            guard embedded.count >= 3 else { throw error }
+            result = TicketScan(lines: embedded, barcodes: [], suggestedColor: nil)
+        }
         try Task.checkCancellation()
         if embedded.count >= 3 { result.lines = embedded }
         return result

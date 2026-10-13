@@ -201,6 +201,18 @@ struct PlanView: View {
                 Text(msg).foregroundStyle(.secondary)
             }
 
+            // Sort/map controls as a real list row: Menu buttons in Section headers are often
+            // non-hittable for UI tests and awkward for VoiceOver.
+            if !its.isEmpty {
+                HStack {
+                    RouteSortMenu()
+                    Spacer()
+                    Button(showMap ? L10n.t("List") : L10n.t("Map")) { withAnimation { showMap.toggle() } }
+                        .font(.caption.weight(.semibold))
+                }
+                .listRowBackground(Color.clear)
+            }
+
             if showMap && !its.isEmpty {
                 CompareMapView(itineraries: its, selectedId: selectedId ?? its.first?.id)
                     .frame(height: 320)
@@ -242,16 +254,7 @@ struct PlanView: View {
                 }
             }
         } header: {
-            HStack {
-                Text("Routes")
-                Spacer()
-                if !its.isEmpty {
-                    RouteSortMenu()
-                    Button(showMap ? L10n.t("List") : L10n.t("Map")) { withAnimation { showMap.toggle() } }
-                        .font(.caption.weight(.semibold))
-                        .textCase(nil)
-                }
-            }
+            Text("Routes")
         } footer: {
             if !its.isEmpty {
                 VStack(alignment: .leading, spacing: 6) {
