@@ -10,7 +10,7 @@ struct PlanView: View {
     @State private var selectedId: String?
 
     /// Live refresh interval while planning for "now".
-    static let refreshInterval: Duration = .seconds(60)
+    static var refreshInterval: Duration { Energy.duration(60) }
 
     enum PickTarget: String, Identifiable { case from, to; var id: String { rawValue } }
 

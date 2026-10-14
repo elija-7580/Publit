@@ -177,11 +177,17 @@ struct RootView: View {
             }
         }
         .onChange(of: app.tab) { _, tab in HangLog.shared.note("tab \(tab)") }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didReceiveMemoryWarningNotification)) { _ in
+            TransitousClient.shared.releaseMemory(background: false)
+        }
         .task(id: scenePhase) {
             switch scenePhase {
             case .active: HangLog.shared.note("app active"); HangLog.shared.scene(active: true)
             case .inactive: HangLog.shared.note("app inactive")
-            case .background: HangLog.shared.note("app background"); HangLog.shared.scene(active: false)
+            case .background:
+                HangLog.shared.note("app background"); HangLog.shared.scene(active: false)
+                trips.flushPendingSave()
+                TransitousClient.shared.releaseMemory(background: true)
             @unknown default: break
             }
             if scenePhase == .background {

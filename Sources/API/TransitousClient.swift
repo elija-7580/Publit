@@ -216,6 +216,12 @@ final class TransitousClient: @unchecked Sendable {
 
     // MARK: Transport
 
+    /// Memory warning: drop all kept answers. Background: keep only the newest few MB.
+    func releaseMemory(background: Bool) {
+        cache.releaseMemory(keepingBytes: background ? 4 * 1024 * 1024 : 0)
+        mapStopCache.clear()
+    }
+
     /// Last "departures near me" response and where it was asked, for an instant first screen.
     func lastNearby(maxAge: TimeInterval, modes: String? = nil) async -> (response: StopTimesResponse, center: LatLon, date: Date)? {
         guard let e = cache.stale(modes.map { "nearby|\($0)" } ?? "nearby"), Date().timeIntervalSince(e.date) < maxAge,
@@ -234,15 +240,19 @@ final class TransitousClient: @unchecked Sendable {
         let url = comps.url!
         let key = policy.slot ?? url.absoluteString
         if let hit = cache.fresh(key, maxAge: policy.maxAge),
-           hit.url == url.absoluteString || (policy.slot?.hasPrefix("nearby") == true && Self.sameNearbyRequest(savedURL: hit.url, requestedURL: url)),
-           let value = try? Self.makeDecoder().decode(T.self, from: hit.data) {
-            return value
+           hit.url == url.absoluteString || (policy.slot?.hasPrefix("nearby") == true && Self.sameNearbyRequest(savedURL: hit.url, requestedURL: url)) {
+            // Decoded once per answer: back navigation and a second screen reuse the models.
+            if let value = hit.decoded as? T { return value }
+            if let value = try? decoder.decode(T.self, from: hit.data) {
+                cache.remember(key, decoded: value, for: hit)
+                return value
+            }
         }
         // Stations/search data are static enough to reuse a fresh disk copy after relaunch.
         if policy.persist, policy.maxAge >= 600, let hit = cache.stale(key), hit.url == url.absoluteString,
            Date().timeIntervalSince(hit.date) < policy.maxAge,
-           let value = try? Self.makeDecoder().decode(T.self, from: hit.data) {
-            cache.store(key, data: hit.data, url: hit.url, persist: false, now: hit.date)
+           let value = try? decoder.decode(T.self, from: hit.data) {
+            cache.store(key, data: hit.data, url: hit.url, persist: false, now: hit.date, decoded: value)
             return value
         }
         var req = URLRequest(url: url)
@@ -276,12 +286,15 @@ final class TransitousClient: @unchecked Sendable {
         do {
             let decodeTrace = PerformanceTrace.begin("Decode transit response")
             defer { PerformanceTrace.end(decodeTrace, "Decode transit response") }
-            value = try Self.makeDecoder().decode(T.self, from: data)
+            value = try decoder.decode(T.self, from: data)
         } catch {
             HangLog.shared.error("answer \(kind)", error)
             throw APIError(message: L10n.t("Unexpected response from the routing service."))
         }
-        cache.store(key, data: data, url: url.absoluteString, persist: policy.persist)
+        // Live answers (fresh for seconds) go to disk at most every two minutes; the offline copy
+        // does not need to be newer, and the flash is spared a write on every refresh.
+        cache.store(key, data: data, url: url.absoluteString, persist: policy.persist, decoded: value,
+                    diskInterval: policy.maxAge < 600 ? ResponseCache.minDiskInterval : 0)
         await Connectivity.shared.reachedServer()
         return value
     }

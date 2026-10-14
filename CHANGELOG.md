@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.0 (build 23)
+
+### Resource use
+- Answers in memory keep their decoded form: going back to a screen, or a second screen showing the same departures, no longer decodes the same JSON again. The memory limit (24 MB) counts decoded answers at about three times their size.
+- Live answers (departures, vehicles, trips; fresh for seconds) are copied to disk for offline use at most every two minutes per board instead of on every refresh. Large disk use within a session is pruned right away instead of at the next launch.
+- In the background, kept answers shrink to the newest 4 MB (and map stops are dropped); on a memory warning all of them go. A smaller suspended app is less likely to be ended by iOS.
+- The freeze watchdog sleeps while Publit is in the background, and the diagnostic step trail is written at most every two seconds instead of on every step.
+- Live refreshes of saved trips are written once after they settle (2 s) instead of the whole trip file on every refresh; edits are still written right away, and pending refreshes when the app goes to the background.
+- In Low Power Mode, or when the phone is hot, open screens (Nearby, map vehicles, Plan, trips, lines, shared routes, live bar) refresh half as often. Live Activities and reminders keep their timing.
+
 ## 0.6.0 (build 22)
 
 ### Tickets: archive

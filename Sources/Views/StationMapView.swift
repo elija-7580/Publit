@@ -54,8 +54,8 @@ final class TransitMapModel {
     /// Vehicles are asked for this far ahead; the first request also draws the lines.
     static let firstWindow: TimeInterval = 5 * 60
     static let refreshWindow: TimeInterval = 4 * 60
-    static let refreshEvery: TimeInterval = 30
-    static let tickSeconds: TimeInterval = 2
+    static var refreshEvery: TimeInterval { Energy.interval(30) }
+    static var tickSeconds: TimeInterval { Energy.interval(2) }
 
     func regionChanged(_ r: MKCoordinateRegion) {
         region = r

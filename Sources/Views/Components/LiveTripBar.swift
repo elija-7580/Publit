@@ -72,7 +72,7 @@ struct LiveTripBar: View {
         while !Task.isCancelled {
             guard let t = trips.trip(id), t.endTime > .now else { return }
             await SavedTripView.refresh(t, in: trips)
-            try? await Task.sleep(for: .seconds(90))
+            try? await Task.sleep(for: Energy.duration(90))
         }
     }
 }

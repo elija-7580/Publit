@@ -51,6 +51,7 @@ let core = [
     "Util/ZipWriter.swift",
     "Util/HangLog.swift",
     "Util/MainThreadSampler.swift",
+    "Util/Energy.swift",
 ]
 
 let package = Package(

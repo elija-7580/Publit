@@ -46,7 +46,7 @@ struct SharedRouteView: View {
                     if itinerary == nil { failed = true; return }
                 }
                 guard let it = itinerary, it.endTime > .now, savedTrip == nil else { return }
-                try? await Task.sleep(for: .seconds(90))
+                try? await Task.sleep(for: Energy.duration(90))
             }
         }
     }

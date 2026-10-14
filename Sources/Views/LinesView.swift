@@ -186,7 +186,7 @@ struct LineDetailView: View {
                 let stops = leg.allStops
                 let pattern = direction.flatMap { patterns[$0.id] }
                 Section {
-                    Clocked(every: 5) { now in
+                    Clocked(every: Energy.interval(5)) { now in
                         LineMap(line: line, shape: leg.legGeometry.mapPoints, stops: stops,
                                 vehicles: pattern.map { p in
                                     LineVehicles.estimate(p, at: p.index(of: line.stopId, near: line.coordinate),
@@ -248,7 +248,7 @@ struct LineDetailView: View {
             await loadRoute(d)
             while !Task.isCancelled {
                 await loadVehicles(d)
-                try? await Task.sleep(for: .seconds(30))
+                try? await Task.sleep(for: Energy.duration(30))
             }
         }
     }

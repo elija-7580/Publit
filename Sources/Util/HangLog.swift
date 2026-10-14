@@ -45,6 +45,10 @@ final class HangLog: @unchecked Sendable {
     static let errorRepeatWindow: TimeInterval = 300
     private var recentErrors: [String: Date] = [:]
     private var sessionActive = false
+    private var pendingSession: String?
+    private var sessionWriteScheduled = false
+    private var timerSuspended = false
+    private static let sessionWriteDelay: TimeInterval = 2
     private var sessionURL: URL { fileURL.deletingLastPathComponent().appendingPathComponent("session.txt") }
 
     /// A failed request, an unreadable answer or another error worth a look. `context` is a fixed name
@@ -76,8 +80,13 @@ final class HangLog: @unchecked Sendable {
     func scene(active: Bool, at now: Date = Date()) {
         lock.lock()
         sessionActive = active
+        // The watchdog sleeps while Publit is in the background: nothing to watch, and no wake-ups.
+        if let timer, timerSuspended == active {
+            if active { timer.resume() } else { timer.suspend() }
+            timerSuspended = !active
+        }
         lock.unlock()
-        saveSession(at: now)
+        saveSession(at: now, immediately: true)
     }
 
     /// Called at launch: notes when the previous session ended while Publit was open.
@@ -94,20 +103,39 @@ final class HangLog: @unchecked Sendable {
                + "a crash, or iOS stopped the app (frozen too long, or out of memory).", at: now, steps: steps)
     }
 
-    private func saveSession(at now: Date) {
+    /// Steps are written at most every two seconds; scene changes are written right away.
+    private func saveSession(at now: Date, immediately: Bool = false) {
         lock.lock()
         let active = sessionActive, steps = trail
+        pendingSession = ([active ? "active" : "background", AppInfo.build, Self.dateTime(now)] + steps)
+            .joined(separator: "\n")
+        let schedule = !immediately && !sessionWriteScheduled
+        if schedule { sessionWriteScheduled = true }
         lock.unlock()
-        let text = ([active ? "active" : "background", AppInfo.build, Self.dateTime(now)] + steps).joined(separator: "\n")
-        let url = sessionURL
-        queue.async {
-            try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
-            try? text.write(to: url, atomically: true, encoding: .utf8)
+        if immediately {
+            queue.async { self.writePendingSession() }
+        } else if schedule {
+            queue.asyncAfter(deadline: .now() + Self.sessionWriteDelay) {
+                self.lock.lock(); self.sessionWriteScheduled = false; self.lock.unlock()
+                self.writePendingSession()
+            }
         }
     }
 
-    /// Waits until pending session writes are on disk (tests).
-    func flush() { queue.sync {} }
+    /// Runs on `queue`.
+    private func writePendingSession() {
+        lock.lock()
+        let text = pendingSession
+        pendingSession = nil
+        lock.unlock()
+        guard let text else { return }
+        let url = sessionURL
+        try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try? text.write(to: url, atomically: true, encoding: .utf8)
+    }
+
+    /// Writes pending session steps now and waits until they are on disk (tests).
+    func flush() { queue.sync { writePendingSession() } }
 
     static func isCancellation(_ error: Error) -> Bool {
         if error is CancellationError { return true }

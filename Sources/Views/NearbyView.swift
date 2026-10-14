@@ -36,7 +36,7 @@ struct NearbyView: View {
 
     /// Reload after moving this far (metres) or after `refreshInterval` seconds.
     static let reloadDistance = 150.0
-    static let refreshInterval: TimeInterval = 30
+    static var refreshInterval: TimeInterval { Energy.interval(30) }
 
     var body: some View {
         List {
@@ -441,7 +441,7 @@ struct StopDeparturesView: View {
             guard isVisible, scenePhase == .active else { return }
             while !Task.isCancelled {
                 await load()
-                try? await Task.sleep(for: .seconds(30))
+                try? await Task.sleep(for: Energy.duration(30))
             }
         }
     }

@@ -21,6 +21,8 @@ final class MapStopCache: @unchecked Sendable {
         return entry.stops.filter { $0.lat >= min.lat && $0.lat <= max.lat && $0.lon >= min.lon && $0.lon <= max.lon }
     }
 
+    func clear() { lock.lock(); entries.removeAll(); lock.unlock() }
+
     func store(_ stops: [MapStop], min: LatLon, max: LatLon, zoom: Int, now: Date = .now) {
         guard stops.count <= Self.maxRecords else { return }
         lock.lock(); defer { lock.unlock() }

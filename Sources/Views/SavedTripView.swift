@@ -28,7 +28,7 @@ struct SavedTripView: View {
                 while !Task.isCancelled {
                     guard let t = trips.trip(tripId), t.endTime.addingTimeInterval(15 * 60) > .now else { break }
                     await refresh(t)
-                    try? await Task.sleep(for: .seconds(60))
+                    try? await Task.sleep(for: Energy.duration(60))
                 }
             }
         } else {

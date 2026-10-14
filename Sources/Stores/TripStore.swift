@@ -155,7 +155,7 @@ final class TripStore {
         guard let i = trips.firstIndex(where: { $0.id == id }) else { return }
         trips[i].itinerary = Self.keepingFares(of: trips[i].itinerary, in: itinerary)
         trips[i].refreshedAt = date
-        persist()
+        persistSoon()
     }
 
     /// Live refreshes come without fares (smaller answers); the fares saved with the trip stay.
@@ -176,5 +176,27 @@ final class TripStore {
         return legs.isEmpty ? "walk@\(Int(it.startTime.timeIntervalSince1970))@\(it.legs.last?.to.name ?? "")" : legs.joined(separator: ">")
     }
 
-    private func persist() { file.saveInBackground(trips) }
+    private func persist() {
+        pendingSave?.cancel(); pendingSave = nil
+        file.saveInBackground(trips)
+    }
+
+    /// Live refreshes arrive for every open trip and the Live Activity: written once after they settle.
+    @ObservationIgnored private var pendingSave: Task<Void, Never>?
+
+    private func persistSoon() {
+        guard pendingSave == nil else { return }
+        pendingSave = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(2))
+            guard !Task.isCancelled, let self else { return }
+            self.pendingSave = nil
+            self.file.saveInBackground(self.trips)
+        }
+    }
+
+    /// Writes a pending live refresh now (app going to the background).
+    func flushPendingSave() {
+        guard pendingSave != nil else { return }
+        persist()
+    }
 }

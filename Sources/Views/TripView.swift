@@ -89,7 +89,7 @@ struct TripView: View {
             guard isVisible, scenePhase == .active else { return }
             while !Task.isCancelled {
                 await load()
-                try? await Task.sleep(for: .seconds(30))
+                try? await Task.sleep(for: Energy.duration(30))
             }
         }
     }
@@ -262,7 +262,7 @@ struct LineDeparturesView: View {
             guard isVisible, scenePhase == .active else { return }
             while !Task.isCancelled {
                 await load()
-                try? await Task.sleep(for: .seconds(30))
+                try? await Task.sleep(for: Energy.duration(30))
             }
         }
     }

@@ -18,20 +18,32 @@ struct CachePolicy: Sendable {
 /// Responses kept in memory (instant back-navigation) and on disk in Caches (offline).
 /// The system may delete Caches at any time; nothing here is the only copy of user data.
 final class ResponseCache: @unchecked Sendable {
-    struct Entry: Sendable {
+    struct Entry: @unchecked Sendable {
         let data: Data
         let date: Date
         let url: String
+        /// The decoded answer, so going back to a screen does not decode the same JSON again.
+        /// Immutable value types only (the response models).
+        var decoded: Any? = nil
+
+        /// Decoded models take about three times the JSON size in memory.
+        var cost: Int { decoded == nil ? data.count : data.count * 3 }
     }
 
     private let lock = NSLock()
     private var memory: [String: Entry] = [:]
+    private var memoryCost = 0
+    /// When each key last went to disk, to space out offline copies of answers that change every few seconds.
+    private var diskWrites: [String: Date] = [:]
+    private var bytesSincePrune = 0
     private let directory: URL?
     static let maxMemoryEntries = 200
     /// Route and map responses are 100–600 KB each; keep memory bounded by size, not only by count.
     static let maxMemoryBytes = 24 * 1024 * 1024
     /// Disk copies are for offline use; the oldest go first above this size.
     static let maxDiskBytes = 60 * 1024 * 1024
+    /// An offline copy of a live board (20 s fresh) does not need to be newer than this.
+    static let minDiskInterval: TimeInterval = 120
 
     init(directory: URL? = ResponseCache.defaultDirectory) {
         self.directory = directory
@@ -57,25 +69,45 @@ final class ResponseCache: @unchecked Sendable {
         return e
     }
 
-    func store(_ key: String, data: Data, url: String, persist: Bool, now: Date = Date()) {
-        let entry = Entry(data: data, date: now, url: url)
+    /// - Parameters:
+    ///   - decoded: the answer already decoded from `data`, kept with it in memory.
+    ///   - diskInterval: a disk copy written less than this ago is not replaced (0 = always write).
+    func store(_ key: String, data: Data, url: String, persist: Bool, now: Date = Date(), decoded: Any? = nil,
+               diskInterval: TimeInterval = 0) {
+        var entry = Entry(data: data, date: now, url: url, decoded: decoded)
         lock.lock()
         if memory[key] == nil, memory.count >= Self.maxMemoryEntries {
             // Drop the oldest half; cheaper than tracking exact LRU order.
             let keep = memory.sorted { $0.value.date > $1.value.date }.prefix(Self.maxMemoryEntries / 2)
             memory = Dictionary(uniqueKeysWithValues: keep.map { ($0.key, $0.value) })
+            memoryCost = memory.values.reduce(0) { $0 + $1.cost }
         }
-        if data.count <= Self.maxMemoryBytes { memory[key] = entry }
-        else { memory[key] = nil }
-        var total = memory.values.reduce(0) { $0 + $1.data.count }
-        if total > Self.maxMemoryBytes {
-            for (k, e) in memory.sorted(by: { $0.value.date < $1.value.date }) where total > Self.maxMemoryBytes / 2 && k != key {
+        if entry.cost > Self.maxMemoryBytes / 2 { entry.decoded = nil }
+        if let old = memory[key] { memoryCost -= old.cost }
+        if entry.cost <= Self.maxMemoryBytes {
+            memory[key] = entry
+            memoryCost += entry.cost
+        } else {
+            memory[key] = nil
+        }
+        if memoryCost > Self.maxMemoryBytes {
+            for (k, e) in memory.sorted(by: { $0.value.date < $1.value.date }) where memoryCost > Self.maxMemoryBytes / 2 && k != key {
                 memory[k] = nil
-                total -= e.data.count
+                memoryCost -= e.cost
             }
         }
+        // Offline copies of answers that change every few seconds are spaced out.
+        var write = persist && directory != nil
+        if write, let last = diskWrites[key], now.timeIntervalSince(last) < diskInterval { write = false }
+        if write {
+            diskWrites[key] = now
+            if diskWrites.count > 400 { diskWrites = diskWrites.filter { now.timeIntervalSince($0.value) < Self.minDiskInterval } }
+            bytesSincePrune += data.count
+        }
+        let prune = bytesSincePrune > Self.maxDiskBytes / 3
+        if prune { bytesSincePrune = 0 }
         lock.unlock()
-        guard persist, let directory else { return }
+        guard write, let directory else { return }
         let header = "\(now.timeIntervalSince1970)\n\(url)\n"
         let file = directory.appendingPathComponent(Self.fileName(key))
         // The answer is already in memory; the offline copy does not have to delay it.
@@ -83,8 +115,41 @@ final class ResponseCache: @unchecked Sendable {
             var blob = Data(header.utf8)
             blob.append(data)
             try? blob.write(to: file, options: .atomic)
+            // A long session can write a lot; keep the folder within its size without waiting for the next launch.
+            if prune { self.prune(olderThan: 7 * 24 * 3600) }
         }
     }
+
+    /// Keeps a decoded answer next to the memory copy it came from.
+    func remember(_ key: String, decoded: Any, for entry: Entry) {
+        lock.lock(); defer { lock.unlock() }
+        guard let current = memory[key], current.date == entry.date, current.url == entry.url, current.decoded == nil else { return }
+        var updated = current
+        updated.decoded = decoded
+        guard updated.cost <= Self.maxMemoryBytes / 2 else { return }
+        memoryCost += updated.cost - current.cost
+        memory[key] = updated
+    }
+
+    /// Frees memory: everything on a memory warning; in the background all but the newest few MB,
+    /// without decoded copies (a small app is less likely to be ended by iOS while suspended).
+    func releaseMemory(keepingBytes: Int = 0) {
+        lock.lock(); defer { lock.unlock() }
+        guard keepingBytes > 0 else { memory.removeAll(); memoryCost = 0; return }
+        var kept: [String: Entry] = [:]
+        var total = 0
+        for (k, e) in memory.sorted(by: { $0.value.date > $1.value.date }) {
+            guard total + e.data.count <= keepingBytes else { break }
+            var light = e
+            light.decoded = nil
+            kept[k] = light
+            total += e.data.count
+        }
+        memory = kept
+        memoryCost = total
+    }
+
+    var memoryBytes: Int { lock.lock(); defer { lock.unlock() }; return memoryCost }
 
     /// Disk copies are written in order, off the request path.
     private static let io = DispatchQueue(label: "io.github.publit.response-cache", qos: .utility)
