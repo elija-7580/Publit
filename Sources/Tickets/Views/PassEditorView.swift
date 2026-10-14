@@ -76,6 +76,7 @@ struct PassEditorView: View {
             Section(L10n.t("Route")) {
                 TextField(L10n.t("From"), text: text(\.origin))
                 TextField(L10n.t("To"), text: text(\.destination))
+                TextField(L10n.t("Via"), text: text(\.via))
             }
 
             Section(L10n.t("Validity")) {

@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.6.0 (build 22)
+
+### Tickets: archive
+- Expired tickets stay in the list for one more day (delayed trip, late check), then move to the new archive at the end of the ticket list ("Archive", with count). The archive is sorted by month, newest first, and searchable (title, operator, stations, passenger, ticket number, notes) – e.g. for refunds or expense reports. Nothing is deleted automatically; "Delete archived tickets" removes them with their originals after a confirmation.
+- Any ticket can be moved to the archive by hand (long press on the card, or the ⋯ menu of the ticket), e.g. a used-up undated ticket; "Move back to tickets" brings it back (an expired one then stays in the list). Archived tickets are no longer offered for trips.
+
+### Tickets: better recognition
+- Operators: the issuer in a UIC rail barcode wins, otherwise the operator named nearest the top (partners and sales agents further down no longer win). 30 more operators and transport associations (Italo, Trenord, Eurostar, iryo, PKP Intercity, MÁV, ZSSK, SŽ, DSB, SJ, Leo Express, BLS, ZVV, PostAuto, RATP, VOR, OÖVV, VVT, Salzburg Verkehr, Verbund Linie, Graz Linien, Linz AG, Wiener Lokalbahnen, HVV, VBB, MVG, RMV, VRR, VVS, KVB, VGN, DPP).
+- Products: Standard-Ticket, Einfach-Raus-Ticket, Quer-durchs-Land, Bayern-Ticket, Niedersachsenticket, Semesterticket, Jobticket, Kurzstrecke, Streifenkarte, (Super)Sparbillett, GA, Navigo, Travelcard, Frecciarossa; BahnCard/Vorteilscard/Halbtax only when nothing else matches. Ticket types in more languages (Dutch, Spanish, Portuguese, Polish, Czech, Swedish, Hungarian, Turkish).
+- Route: timetable rows as on DB/ÖBB tickets ("Berlin Hbf 14.10. ab 08:30 … München Hbf an 12:31": first departure to last arrival), "A → B → C" (B as via), "von … nach … über …", French/Italian/Dutch/Swedish "de … à …", "da … a …", "van … naar …", "från … till …", more labels (Abfahrtsbahnhof, Zielbahnhof, Einstieg, Origen/Destino, Vertrek/Aankomst …). New "Via" field in the editor and on the card.
+- Validity: shared-month ranges ("14.–20.10.2025", "28.12.–03.01.2026"), dd/mm/yy, dd-mm-yyyy, "Oct 14, 2025", "14th October 2025", "14 de octubre de 2025", month names in 12 languages, French times ("08h12"); a length printed with the start ("Gültig 90 Minuten", "24-Stunden-Karte", "7 Tage gültig ab …") sets the end; return tickets cover outbound to return day; validated/activated times count as start; more purchase-date words are ignored.
+- Passenger: more labels (Passager, Nome, Naam, Pasażer, Cestující …), traveller counts ("2 Erwachsene", "1 Adulto"; not "bis zu 5 Personen") and reductions (BahnCard 25/50/100, BC 50, Vorteilscard, Halbtax, Carte Avantage, Railcards) are added, e.g. "2 Erwachsene · BC 50"; advertising lines are skipped.
+- Class: "Klasse: 2", "KL. 1", "2e klas", "1. třída", "Klasa 2", "Second/Standard Class", "première classe" ….
+- Price: totals before other prices ("Gesamtbetrag" before "Fahrpreis"), tax lines ("MwSt 19 %") ignored, "2 x 19,90 € = 39,80 €" gives the result, thousands separators ("CHF 1'250.00"), "Fr. 12.80", "19,– €", more currencies.
+- Ticket numbers: many more labels (Bestellnummer, Vorgangsnummer, Référence du dossier, Codice prenotazione, Localizador, Boekingsnummer, Numer biletu, Číslo dokladu, Bokningsnummer …).
+- Patterns are compiled once, so reading a page is much faster.
+
 ## 0.6.0 (build 21)
 
 ### Diagnostics

@@ -59,12 +59,46 @@ final class PassStore {
 
     func grouped(at date: Date = .now) -> [(group: PassGroup, passes: [TicketPass])] { PassGroup.grouped(passes, at: date) }
 
+    /// Expired a day ago or longer, or moved there by hand. Newest first.
+    func archived(at date: Date = .now) -> [TicketPass] {
+        passes.filter { $0.isArchived(at: date) }.sorted { ($0.archiveDate, $0.createdAt) > ($1.archiveDate, $1.createdAt) }
+    }
+
+    func archive(_ id: String, now: Date = .now) {
+        guard var pass = pass(id) else { return }
+        pass.archivedAt = now
+        pass.keptOut = nil
+        update(pass, now: now)
+    }
+
+    /// Back into the list; an expired ticket then stays there until archived again.
+    func unarchive(_ id: String, now: Date = .now) {
+        guard var pass = pass(id) else { return }
+        pass.archivedAt = nil
+        if case .expired = pass.validity(at: now) { pass.keptOut = true } else { pass.keptOut = nil }
+        update(pass, now: now)
+    }
+
+    /// Deletes every archived ticket with its original and logo. Returns how many.
+    @discardableResult
+    func removeArchived(at date: Date = .now) -> Int {
+        let gone = archived(at: date)
+        for p in gone {
+            if let url = documentURL(p) { try? FileManager.default.removeItem(at: url) }
+            if let url = logoURL(p) { try? FileManager.default.removeItem(at: url) }
+        }
+        let ids = Set(gone.map(\.id))
+        passes.removeAll { ids.contains($0.id) }
+        if !gone.isEmpty { persist() }
+        return gone.count
+    }
+
     /// What a trip offers: every ticket added for it (oldest first), then tickets valid at the trip's time:
     /// passes, and dated tickets that belong to no trip (e.g. a single ticket added in the wallet).
     func passes(forTrip tripId: String?, at date: Date = .now) -> [TicketPass] {
         let own = tripId.map { id in passes.filter { $0.tripId == id }.sorted { $0.createdAt < $1.createdAt } } ?? []
         let valid = passes.filter { p in
-            guard !own.contains(p), p.category.isPass || p.tripId == nil else { return false }
+            guard !own.contains(p), p.archivedAt == nil, p.category.isPass || p.tripId == nil else { return false }
             if case .valid = p.validity(at: date) { return true }
             return false
         }

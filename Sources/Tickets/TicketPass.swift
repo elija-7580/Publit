@@ -214,6 +214,10 @@ struct TicketPass: Codable, Identifiable, Hashable, Sendable {
     var legacyId: String?
     /// Operator logo (PNG file next to the documents), chosen by the user or suggested from Wikidata.
     var logo: Logo? = nil
+    /// Set when the user moved the ticket to the archive by hand.
+    var archivedAt: Date? = nil
+    /// The user took an expired ticket back out of the archive: it stays in the list.
+    var keptOut: Bool? = nil
     let createdAt: Date
     var updatedAt: Date
 
@@ -254,6 +258,19 @@ struct TicketPass: Codable, Identifiable, Hashable, Sendable {
         return .valid(until: validUntil)
     }
 
+    /// Expired tickets stay in the list for a day (a delayed trip, a late check), then move to the archive.
+    static let archiveDelay: TimeInterval = 24 * 3600
+
+    func isArchived(at date: Date = .now) -> Bool {
+        if archivedAt != nil { return true }
+        if keptOut == true { return false }
+        if case .expired(let end) = validity(at: date) { return date.timeIntervalSince(end) >= Self.archiveDelay }
+        return false
+    }
+
+    /// For ordering and grouping the archive: when the ticket ended, else when it was archived or added.
+    var archiveDate: Date { validUntil ?? validFrom ?? archivedAt ?? createdAt }
+
     var hasRoute: Bool { origin?.isEmpty == false && destination?.isEmpty == false }
 
     var displayTitle: String {
@@ -280,6 +297,7 @@ struct TicketPass: Codable, Identifiable, Hashable, Sendable {
 }
 
 /// The list order: valid now (ending soonest first), upcoming, without dates, expired (latest first).
+/// Archived tickets are not in these groups.
 enum PassGroup: String, CaseIterable, Identifiable, Sendable {
     case valid, upcoming, undated, expired
     var id: String { rawValue }
@@ -305,7 +323,7 @@ enum PassGroup: String, CaseIterable, Identifiable, Sendable {
     static func grouped(_ passes: [TicketPass], at date: Date) -> [(group: PassGroup, passes: [TicketPass])] {
         let far = Date.distantFuture
         return allCases.compactMap { group in
-            let members = passes.filter { of($0, at: date) == group }.sorted { a, b in
+            let members = passes.filter { !$0.isArchived(at: date) && of($0, at: date) == group }.sorted { a, b in
                 switch group {
                 case .valid: return (a.validUntil ?? far, a.createdAt) < (b.validUntil ?? far, b.createdAt)
                 case .upcoming: return (a.validFrom ?? far) < (b.validFrom ?? far)
@@ -315,6 +333,28 @@ enum PassGroup: String, CaseIterable, Identifiable, Sendable {
             }
             return members.isEmpty ? nil : (group, members)
         }
+    }
+}
+
+enum PassArchive {
+    /// Newest first, in months ("October 2025").
+    static func months(_ passes: [TicketPass], calendar: Calendar = .current) -> [(month: Date, passes: [TicketPass])] {
+        let sorted = passes.sorted { ($0.archiveDate, $0.createdAt) > ($1.archiveDate, $1.createdAt) }
+        var out: [(month: Date, passes: [TicketPass])] = []
+        for pass in sorted {
+            let start = calendar.dateInterval(of: .month, for: pass.archiveDate)?.start ?? pass.archiveDate
+            if out.last?.month == start { out[out.count - 1].passes.append(pass) } else { out.append((start, [pass])) }
+        }
+        return out
+    }
+
+    /// Search across what a ticket shows: title, operator, route, passenger, number, notes.
+    static func matches(_ pass: TicketPass, _ query: String) -> Bool {
+        let words = query.split(whereSeparator: \.isWhitespace).map(String.init)
+        guard !words.isEmpty else { return true }
+        let haystack = [pass.displayTitle, pass.operatorName, pass.origin, pass.destination, pass.via, pass.passenger,
+                        pass.reference, pass.notes, pass.category.title].compactMap { $0 }.joined(separator: " ")
+        return words.allSatisfy { haystack.range(of: $0, options: [.caseInsensitive, .diacriticInsensitive]) != nil }
     }
 }
 

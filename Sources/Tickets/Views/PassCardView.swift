@@ -101,6 +101,7 @@ struct PassCardView: View {
 
     private var detailFields: [(String, String)] {
         var out: [(String, String)] = []
+        if pass.hasRoute, let via = pass.via, !via.isEmpty { out.append((L10n.t("Via"), via)) }
         if let from = pass.validFrom { out.append((L10n.t("Valid from"), PassFormat.date(from, end: false))) }
         if let until = pass.validUntil { out.append((L10n.t("Valid until"), PassFormat.date(until, end: true))) }
         if let passenger = pass.passenger { out.append((L10n.t("Passenger"), passenger)) }

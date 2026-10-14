@@ -70,6 +70,7 @@ struct PassDetailView: View {
             ToolbarItem(placement: .primaryAction) {
                 Menu {
                     Button { editing = true } label: { Label("Edit", systemImage: "pencil") }
+                    PassArchiveButton(pass: pass)
                     Button(role: .destructive) { confirmingDelete = true } label: { Label("Delete", systemImage: "trash") }
                 } label: {
                     Label("More", systemImage: "ellipsis.circle")

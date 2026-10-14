@@ -107,6 +107,140 @@ final class TicketTextParserTests: XCTestCase {
         let d = TicketTextParser.parse(lines: ["Fahrkarte", "Gültig vom 01.10.2025 bis 07.10.2025"], calendar: calendar)
         XCTAssertEqual(d.category, .period)
     }
+
+    func testDBTicketWithTimetableRowsTravellersAndDiscount() {
+        let d = TicketTextParser.parse(lines: [
+            "DB Fernverkehr AG", "Flexpreis", "Hinfahrt am 14.10.2025", "Halt Datum Zeit Gleis Produkte",
+            "Berlin Hbf 14.10. ab 08:30 7 ICE 1001", "Erfurt Hbf 14.10. an 10:12 3", "Erfurt Hbf 14.10. ab 10:20 4 ICE 503",
+            "München Hbf 14.10. an 12:31 18", "Reisende: 2 Erwachsene, BC 50", "Klasse: 2", "Auftragsnummer: 482910375813",
+            "enthaltene MwSt 7%: 7,84 €", "Summe 119,80 €", "Jetzt BahnCard 100 bestellen: www.bahn.de",
+        ], calendar: calendar)
+        XCTAssertEqual(d.operatorName, "Deutsche Bahn")
+        XCTAssertEqual(d.title, "Flexpreis")
+        XCTAssertEqual(d.origin, "Berlin Hbf")
+        XCTAssertEqual(d.destination, "München Hbf")
+        XCTAssertEqual(d.passenger, "2 Erwachsene · BC 50")
+        XCTAssertEqual(d.travelClass, "2")
+        XCTAssertEqual(d.reference, "482910375813")
+        XCTAssertEqual(d.price, "119,80 €")
+        XCTAssertEqual(d.validFrom, date(2025, 10, 14))
+        XCTAssertEqual(d.validUntil, date(2025, 10, 14, 23, 59, 59))
+    }
+
+    func testFrenchTicket() {
+        let d = TicketTextParser.parse(lines: [
+            "SNCF Connect", "Aller simple", "De Paris Gare de Lyon à Marseille Saint-Charles", "Voyage du 14/10/25 à 08h12",
+            "Voiture 12 Place 45 1ère classe", "Passager : Marie Dupont", "Référence du dossier : QWERTY", "Prix total : 89,00 €",
+        ], calendar: calendar)
+        XCTAssertEqual(d.operatorName, "SNCF")
+        XCTAssertEqual(d.category, .single)
+        XCTAssertEqual(d.origin, "Paris Gare de Lyon")
+        XCTAssertEqual(d.destination, "Marseille Saint-Charles")
+        XCTAssertEqual(d.validFrom, date(2025, 10, 14, 8, 12))
+        XCTAssertEqual(d.validUntil, date(2025, 10, 14, 23, 59, 59))
+        XCTAssertEqual(d.travelClass, "1")
+        XCTAssertEqual(d.passenger, "Marie Dupont")
+        XCTAssertEqual(d.reference, "QWERTY")
+        XCTAssertEqual(d.price, "89,00 €")
+    }
+
+    func testItalianTicket() {
+        let d = TicketTextParser.parse(lines: [
+            "Trenitalia", "Frecciarossa", "Da Milano Centrale a Roma Termini", "Data viaggio: 3 novembre 2025", "Partenza ore 07:00",
+            "Passeggero: Mario Rossi", "1 Adulto", "PNR: AB12CD", "Importo: € 39,90",
+        ], calendar: calendar)
+        XCTAssertEqual(d.operatorName, "Trenitalia")
+        XCTAssertEqual(d.title, "Frecciarossa")
+        XCTAssertEqual(d.origin, "Milano Centrale")
+        XCTAssertEqual(d.destination, "Roma Termini")
+        XCTAssertEqual(d.validFrom, date(2025, 11, 3))
+        XCTAssertEqual(d.passenger, "Mario Rossi · 1 Adulto")
+        XCTAssertEqual(d.reference, "AB12CD")
+        XCTAssertEqual(d.price, "€ 39,90")
+    }
+
+    func testMoreDateFormatsAndRanges() {
+        func range(_ lines: [String]) -> (Date?, Date?) {
+            let d = TicketTextParser.parse(lines: lines, calendar: calendar)
+            return (d.validFrom, d.validUntil)
+        }
+        XCTAssertTrue(range(["Wochenkarte", "Gültig 14.–20.10.2025"]) == (date(2025, 10, 14), date(2025, 10, 20, 23, 59, 59)))
+        XCTAssertTrue(range(["Gültigkeit: 28.12.–03.01.2026"]) == (date(2025, 12, 28), date(2026, 1, 3, 23, 59, 59)))
+        XCTAssertTrue(range(["Valid Oct 14, 2025 – Oct 20, 2025"]) == (date(2025, 10, 14), date(2025, 10, 20, 23, 59, 59)))
+        XCTAssertTrue(range(["Geldig van 14-10-2025 tot 20-10-2025"]) == (date(2025, 10, 14), date(2025, 10, 20, 23, 59, 59)))
+        XCTAssertTrue(range(["Fecha: 14 de octubre de 2025"]) == (date(2025, 10, 14), date(2025, 10, 14, 23, 59, 59)))
+        XCTAssertTrue(range(["Ważny do 31 października 2025"]) == (nil, date(2025, 10, 31, 23, 59, 59)))
+        XCTAssertTrue(range(["Valid on 14th October 2025"]) == (date(2025, 10, 14), date(2025, 10, 14, 23, 59, 59)))
+        XCTAssertTrue(range(["Abfahrt 08:15-10.10.2025"]).0 != date(2025, 10, 15))
+        XCTAssertTrue(range(["Valable le 14/10/2025 à 14h30"]) == (date(2025, 10, 14, 14, 30), date(2025, 10, 14, 23, 59, 59)))
+    }
+
+    func testValidityFromDuration() {
+        let single = TicketTextParser.parse(lines: ["Einzelfahrt", "Gültig 90 Minuten ab Entwertung", "Entwertet am 14.10.2025 10:15"], calendar: calendar)
+        XCTAssertEqual(single.category, .single)
+        XCTAssertEqual(single.validFrom, date(2025, 10, 14, 10, 15))
+        XCTAssertEqual(single.validUntil, date(2025, 10, 14, 11, 45))
+        let day = TicketTextParser.parse(lines: ["24-Stunden-Karte", "Gültig ab 14.10.2025 10:00"], calendar: calendar)
+        XCTAssertEqual(day.category, .dayPass)
+        XCTAssertEqual(day.validUntil, date(2025, 10, 15, 10, 0))
+        let week = TicketTextParser.parse(lines: ["Wochenkarte", "7 Tage gültig ab 13.10.2025"], calendar: calendar)
+        XCTAssertEqual(week.validFrom, date(2025, 10, 13))
+        XCTAssertEqual(week.validUntil, date(2025, 10, 19, 23, 59, 59))
+    }
+
+    func testReturnTicketCoversBothDays() {
+        let d = TicketTextParser.parse(lines: ["Hinfahrt 12.10.2025", "Rückfahrt 14.10.2025"], calendar: calendar)
+        XCTAssertEqual(d.validFrom, date(2025, 10, 12))
+        XCTAssertEqual(d.validUntil, date(2025, 10, 14, 23, 59, 59))
+    }
+
+    func testPrices() {
+        func price(_ lines: [String]) -> String? { TicketTextParser.parse(lines: lines, calendar: calendar).price }
+        XCTAssertEqual(price(["Preis: 2 x 19,90 € = 39,80 €"]), "39,80 €")
+        XCTAssertEqual(price(["MwSt 19 %: 3,18 €", "Gesamtbetrag: 19,90 €"]), "19,90 €")
+        XCTAssertEqual(price(["Fahrpreis 4,80 €", "Total CHF 1'250.00"]), "CHF 1'250.00")
+        XCTAssertEqual(price(["Preis Fr. 12.80"]), "Fr. 12.80")
+        XCTAssertEqual(price(["Betrag EUR 1234,50"]), "EUR 1234,50")
+        XCTAssertEqual(price(["Cena: 59,00 zł"]), "59,00 zł")
+    }
+
+    func testClassesInMoreLanguages() {
+        func cls(_ line: String) -> String? { TicketTextParser.parse(lines: [line], calendar: calendar).travelClass }
+        XCTAssertEqual(cls("Second Class"), "2")
+        XCTAssertEqual(cls("Standard Class"), "2")
+        XCTAssertEqual(cls("1. třída"), "1")
+        XCTAssertEqual(cls("Klasa 2"), "2")
+        XCTAssertEqual(cls("2e klas"), "2")
+        XCTAssertEqual(cls("KL. 1"), "1")
+        XCTAssertNil(cls("Klassenfahrt"))
+    }
+
+    func testViaAndArrowChains() {
+        let chain = TicketTextParser.parse(lines: ["Wien Hbf → Linz Hbf → Salzburg Hbf"], calendar: calendar)
+        XCTAssertEqual(chain.origin, "Wien Hbf")
+        XCTAssertEqual(chain.destination, "Salzburg Hbf")
+        XCTAssertEqual(chain.via, "Linz Hbf")
+        let over = TicketTextParser.parse(lines: ["Von Wien Hbf nach Innsbruck Hbf über Salzburg"], calendar: calendar)
+        XCTAssertEqual(over.destination, "Innsbruck Hbf")
+        XCTAssertEqual(over.via, "Salzburg")
+        let street = TicketTextParser.parse(lines: ["Trenitalia S.p.A.", "Via Roma 12, Milano"], calendar: calendar)
+        XCTAssertNil(street.via)
+        XCTAssertEqual(TicketPass(draft: chain, barcode: nil).via, "Linz Hbf")
+    }
+
+    func testOperatorNearestTheTopAndIssuerFirst() {
+        XCTAssertEqual(TicketTextParser.parse(lines: ["Wiener Linien", "Partner: ÖBB"], calendar: calendar).operatorName, "Wiener Linien")
+        let code = TicketPass.Barcode(format: .aztec, payload: Data("#UT01108000001".utf8))
+        XCTAssertEqual(TicketTextParser.parse(lines: ["ÖBB"], barcodes: [code], calendar: calendar).operatorName, "Deutsche Bahn")
+        XCTAssertEqual(TicketTextParser.parse(lines: ["PKP Intercity", "Bilet jednorazowy"], calendar: calendar).operatorName, "PKP Intercity")
+        XCTAssertNil(TicketTextParser.parse(lines: ["VOR FAHRTANTRITT ENTWERTEN"], calendar: calendar).operatorName)
+    }
+
+    func testGroupConditionsAreNotTravellers() {
+        XCTAssertNil(TicketTextParser.parse(lines: ["Tageskarte", "Gültig für bis zu 5 Personen"], calendar: calendar).passenger)
+        XCTAssertNil(TicketTextParser.parse(lines: ["1 Kind unter 6 Jahren frei"], calendar: calendar).passenger)
+        XCTAssertEqual(TicketTextParser.parse(lines: ["Flexpreis", "Name: Max Muster", "Ermäßigung: BahnCard 50"], calendar: calendar).passenger, "Max Muster · BahnCard 50")
+    }
 }
 
 final class TicketPassModelTests: XCTestCase {
@@ -261,6 +395,64 @@ final class PassStoreTests: XCTestCase {
             XCTFail("too large")
         } catch { XCTAssertEqual(error as? PassStore.Failure, .documentTooLarge) }
         XCTAssertTrue(store.passes.isEmpty)
+    }
+
+    func testExpiredTicketsMoveToTheArchiveAfterADay() async {
+        let store = PassStore(directory: directory())
+        let now = Date(timeIntervalSince1970: 1_760_000_000)
+        store.insert(TicketPass(title: "Just expired", validUntil: now - 3600))
+        store.insert(TicketPass(title: "Old", validUntil: now - 3 * 86400))
+        store.insert(TicketPass(title: "Older", validUntil: now - 40 * 86400))
+        store.insert(TicketPass(title: "Valid", validFrom: now - 3600, validUntil: now + 3600))
+        store.insert(TicketPass(title: "Undated"))
+        XCTAssertEqual(store.grouped(at: now).flatMap { $0.passes.map(\.title) }, ["Valid", "Undated", "Just expired"])
+        XCTAssertEqual(store.archived(at: now).map(\.title), ["Old", "Older"])
+        XCTAssertEqual(PassArchive.months(store.archived(at: now)).count, 2)
+    }
+
+    func testArchiveByHandAndBack() async throws {
+        let store = PassStore(directory: directory())
+        let now = Date(timeIntervalSince1970: 1_760_000_000)
+        let used = TicketPass(title: "Used up", category: .period, validFrom: now - 3600, validUntil: now + 86400)
+        let old = TicketPass(title: "Old", validUntil: now - 3 * 86400)
+        store.insert(used)
+        store.insert(old)
+        store.archive(used.id, now: now)
+        XCTAssertTrue(try XCTUnwrap(store.pass(used.id)).isArchived(at: now))
+        XCTAssertTrue(store.passes(forTrip: nil, at: now).isEmpty, "an archived pass is not offered for trips")
+        store.unarchive(used.id, now: now)
+        XCTAssertFalse(try XCTUnwrap(store.pass(used.id)).isArchived(at: now))
+        // An expired ticket taken out of the archive stays out.
+        store.unarchive(old.id, now: now)
+        XCTAssertFalse(try XCTUnwrap(store.pass(old.id)).isArchived(at: now + 86400))
+        XCTAssertEqual(store.archived(at: now).count, 0)
+        store.archive(old.id, now: now)
+        XCTAssertEqual(store.removeArchived(at: now), 1)
+        XCTAssertNil(store.pass(old.id))
+        XCTAssertNotNil(store.pass(used.id))
+        // Saved and loaded again.
+        try await Task.sleep(nanoseconds: 300_000_000)
+        store.archive(used.id, now: now)
+        try await Task.sleep(nanoseconds: 300_000_000)
+        XCTAssertNotNil(PassStore(directory: store.documentDirectory.deletingLastPathComponent()).pass(used.id)?.archivedAt)
+    }
+
+    func testArchiveSearch() async {
+        let p = TicketPass(title: "Sparschiene", operatorName: "ÖBB", origin: "Wien Hbf", destination: "Salzburg Hbf", reference: "ABC123")
+        XCTAssertTrue(PassArchive.matches(p, "salzburg obb"))
+        XCTAssertTrue(PassArchive.matches(p, "abc1"))
+        XCTAssertFalse(PassArchive.matches(p, "Graz"))
+        XCTAssertTrue(PassArchive.matches(p, "  "))
+    }
+
+    func testOlderSavedPassesDecodeWithoutArchiveFields() async throws {
+        let pass = TicketPass(title: "Old format")
+        var json = try XCTUnwrap(JSONSerialization.jsonObject(with: JSONEncoder().encode(pass)) as? [String: Any])
+        json["archivedAt"] = nil
+        json["keptOut"] = nil
+        let decoded = try JSONDecoder().decode(TicketPass.self, from: JSONSerialization.data(withJSONObject: json))
+        XCTAssertNil(decoded.archivedAt)
+        XCTAssertNil(decoded.keptOut)
     }
 
     func testPassesForTrip() async {
