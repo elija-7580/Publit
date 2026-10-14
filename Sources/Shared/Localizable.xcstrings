@@ -11815,6 +11815,101 @@
 }
 }
 },
+"Crashes and unexpected exits": {
+"extractionState": "manual",
+"localizations": {
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Crashes and unexpected exits"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Abstürze und unerwartete Beendigungen"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Plantages et fermetures inattendues"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Arresti anomali e chiusure impreviste"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Cierres inesperados y fallos"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Falhas e encerramentos inesperados"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Crashes en onverwachte afsluitingen"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Awarie i nieoczekiwane zamknięcia"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Збої та неочікувані завершення"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Blocări fatale și închideri neașteptate"
+}
+},
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Pády a neočekávaná ukončení"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Krascher och oväntade avslut"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Σφάλματα και απροσδόκητοι τερματισμοί"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Összeomlások és váratlan kilépések"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Çökmeler ve beklenmedik kapanmalar"
+}
+}
+}
+},
 "Current location": {
 "extractionState": "manual",
 "localizations": {
@@ -12290,97 +12385,97 @@
 }
 }
 },
-"Delete freeze log": {
+"Delete diagnostics": {
 "extractionState": "manual",
 "localizations": {
 "en": {
 "stringUnit": {
 "state": "translated",
-"value": "Delete freeze log"
+"value": "Delete diagnostics"
 }
 },
 "de": {
 "stringUnit": {
 "state": "translated",
-"value": "Hänger-Protokoll löschen"
+"value": "Diagnose löschen"
 }
 },
 "fr": {
 "stringUnit": {
 "state": "translated",
-"value": "Supprimer le journal des blocages"
+"value": "Supprimer le diagnostic"
 }
 },
 "it": {
 "stringUnit": {
 "state": "translated",
-"value": "Elimina registro dei blocchi"
+"value": "Elimina diagnostica"
 }
 },
 "es": {
 "stringUnit": {
 "state": "translated",
-"value": "Eliminar registro de bloqueos"
+"value": "Eliminar diagnóstico"
 }
 },
 "pt-PT": {
 "stringUnit": {
 "state": "translated",
-"value": "Apagar registo de bloqueios"
+"value": "Apagar diagnóstico"
 }
 },
 "nl": {
 "stringUnit": {
 "state": "translated",
-"value": "Vastloperlogboek verwijderen"
+"value": "Diagnose verwijderen"
 }
 },
 "pl": {
 "stringUnit": {
 "state": "translated",
-"value": "Usuń dziennik zawieszeń"
+"value": "Usuń diagnostykę"
 }
 },
 "uk": {
 "stringUnit": {
 "state": "translated",
-"value": "Видалити журнал зависань"
+"value": "Видалити діагностику"
 }
 },
 "ro": {
 "stringUnit": {
 "state": "translated",
-"value": "Ștergeți jurnalul blocajelor"
+"value": "Șterge diagnosticul"
 }
 },
 "cs": {
 "stringUnit": {
 "state": "translated",
-"value": "Smazat záznam zamrznutí"
+"value": "Smazat diagnostiku"
 }
 },
 "sv": {
 "stringUnit": {
 "state": "translated",
-"value": "Radera logg över frysningar"
+"value": "Radera diagnostik"
 }
 },
 "el": {
 "stringUnit": {
 "state": "translated",
-"value": "Διαγραφή αρχείου παγωμάτων"
+"value": "Διαγραφή διαγνωστικών"
 }
 },
 "hu": {
 "stringUnit": {
 "state": "translated",
-"value": "Lefagyásnapló törlése"
+"value": "Diagnosztika törlése"
 }
 },
 "tr": {
 "stringUnit": {
 "state": "translated",
-"value": "Donma kaydını sil"
+"value": "Tanılamayı sil"
 }
 }
 }
@@ -15140,6 +15235,101 @@
 }
 }
 },
+"Failed requests": {
+"extractionState": "manual",
+"localizations": {
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Failed requests"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Fehlgeschlagene Anfragen"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Requêtes échouées"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Richieste non riuscite"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Solicitudes fallidas"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Pedidos falhados"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Mislukte verzoeken"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Nieudane zapytania"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Невдалі запити"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Cereri eșuate"
+}
+},
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Neúspěšné požadavky"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Misslyckade förfrågningar"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Αποτυχημένα αιτήματα"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Sikertelen kérések"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Başarısız istekler"
+}
+}
+}
+},
 "Fare estimate": {
 "extractionState": "manual",
 "localizations": {
@@ -16086,6 +16276,101 @@
 "stringUnit": {
 "state": "translated",
 "value": "Kilit ekranından takip edin."
+}
+}
+}
+},
+"Freezes": {
+"extractionState": "manual",
+"localizations": {
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Freezes"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Hänger"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Blocages"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Blocchi"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Bloqueos"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Bloqueios"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Vastlopers"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Zawieszenia"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Зависання"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Blocări"
+}
+},
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Zamrznutí"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Frysningar"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Παγώματα"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Lefagyások"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Donmalar"
 }
 }
 }
@@ -17891,101 +18176,6 @@
 "stringUnit": {
 "state": "translated",
 "value": "%@ noktasına vardım."
-}
-}
-}
-},
-"If Publit stops responding for 2 seconds or more, the time and the screens opened just before are noted here. Nothing else is recorded, and nothing leaves this device unless you share it.": {
-"extractionState": "manual",
-"localizations": {
-"en": {
-"stringUnit": {
-"state": "translated",
-"value": "If Publit stops responding for 2 seconds or more, the time and the screens opened just before are noted here. Nothing else is recorded, and nothing leaves this device unless you share it."
-}
-},
-"de": {
-"stringUnit": {
-"state": "translated",
-"value": "Reagiert Publit 2 Sekunden oder länger nicht, werden hier die Uhrzeit und die zuvor geöffneten Bildschirme notiert. Sonst wird nichts aufgezeichnet, und nichts verlässt dieses Gerät, außer du teilst es."
-}
-},
-"fr": {
-"stringUnit": {
-"state": "translated",
-"value": "Si Publit ne répond plus pendant 2 secondes ou plus, l’heure et les écrans ouverts juste avant sont notés ici. Rien d’autre n’est enregistré, et rien ne quitte cet appareil sauf si vous le partagez."
-}
-},
-"it": {
-"stringUnit": {
-"state": "translated",
-"value": "Se Publit non risponde per 2 secondi o più, qui vengono annotati l’ora e le schermate aperte poco prima. Non viene registrato altro e nulla lascia questo dispositivo, a meno che tu non lo condivida."
-}
-},
-"es": {
-"stringUnit": {
-"state": "translated",
-"value": "Si Publit deja de responder durante 2 segundos o más, aquí se anotan la hora y las pantallas abiertas justo antes. No se registra nada más y nada sale de este dispositivo a menos que lo compartas."
-}
-},
-"pt-PT": {
-"stringUnit": {
-"state": "translated",
-"value": "Se a Publit deixar de responder durante 2 segundos ou mais, a hora e os ecrãs abertos imediatamente antes ficam registados aqui. Nada mais é registado e nada sai deste dispositivo, a menos que o partilhe."
-}
-},
-"nl": {
-"stringUnit": {
-"state": "translated",
-"value": "Reageert Publit 2 seconden of langer niet, dan worden hier de tijd en de schermen die net daarvoor open waren genoteerd. Verder wordt niets vastgelegd, en niets verlaat dit apparaat tenzij je het deelt."
-}
-},
-"pl": {
-"stringUnit": {
-"state": "translated",
-"value": "Jeśli Publit przestanie odpowiadać na 2 sekundy lub dłużej, zapisywana jest tu godzina i ekrany otwarte tuż wcześniej. Nic więcej nie jest rejestrowane i nic nie opuszcza tego urządzenia, chyba że to udostępnisz."
-}
-},
-"uk": {
-"stringUnit": {
-"state": "translated",
-"value": "Якщо Publit не відповідає 2 секунди або довше, тут записуються час і екрани, відкриті безпосередньо перед цим. Більше нічого не записується, і ніщо не залишає цей пристрій, якщо ви цим не поділитеся."
-}
-},
-"ro": {
-"stringUnit": {
-"state": "translated",
-"value": "Dacă Publit nu mai răspunde timp de 2 secunde sau mai mult, aici se notează ora și ecranele deschise chiar înainte. Nu se înregistrează nimic altceva și nimic nu părăsește acest dispozitiv decât dacă îl partajați."
-}
-},
-"cs": {
-"stringUnit": {
-"state": "translated",
-"value": "Pokud Publit nereaguje 2 sekundy nebo déle, zaznamená se sem čas a obrazovky otevřené těsně předtím. Nic jiného se nezaznamenává a nic neopustí toto zařízení, pokud to nesdílíte."
-}
-},
-"sv": {
-"stringUnit": {
-"state": "translated",
-"value": "Om Publit slutar svara i 2 sekunder eller mer antecknas tiden och skärmarna som var öppna precis innan här. Inget annat registreras, och inget lämnar den här enheten om du inte delar det."
-}
-},
-"el": {
-"stringUnit": {
-"state": "translated",
-"value": "Αν η Publit σταματήσει να αποκρίνεται για 2 δευτερόλεπτα ή περισσότερο, εδώ καταγράφονται η ώρα και οι οθόνες που άνοιξαν λίγο πριν. Τίποτε άλλο δεν καταγράφεται και τίποτα δεν φεύγει από αυτή τη συσκευή, εκτός αν το κοινοποιήσετε."
-}
-},
-"hu": {
-"stringUnit": {
-"state": "translated",
-"value": "Ha a Publit 2 másodpercig vagy tovább nem válaszol, itt rögzítjük az időpontot és a közvetlenül előtte megnyitott képernyőket. Mást nem rögzítünk, és semmi sem hagyja el ezt az eszközt, hacsak meg nem osztod."
-}
-},
-"tr": {
-"stringUnit": {
-"state": "translated",
-"value": "Publit 2 saniye veya daha uzun süre yanıt vermezse, saat ve hemen öncesinde açılan ekranlar buraya not edilir. Başka hiçbir şey kaydedilmez ve siz paylaşmadıkça hiçbir şey bu cihazdan çıkmaz."
 }
 }
 }
@@ -24070,101 +24260,6 @@
 }
 }
 },
-"No freezes recorded": {
-"extractionState": "manual",
-"localizations": {
-"en": {
-"stringUnit": {
-"state": "translated",
-"value": "No freezes recorded"
-}
-},
-"de": {
-"stringUnit": {
-"state": "translated",
-"value": "Keine Hänger aufgezeichnet"
-}
-},
-"fr": {
-"stringUnit": {
-"state": "translated",
-"value": "Aucun blocage enregistré"
-}
-},
-"it": {
-"stringUnit": {
-"state": "translated",
-"value": "Nessun blocco registrato"
-}
-},
-"es": {
-"stringUnit": {
-"state": "translated",
-"value": "No se han registrado bloqueos"
-}
-},
-"pt-PT": {
-"stringUnit": {
-"state": "translated",
-"value": "Nenhum bloqueio registado"
-}
-},
-"nl": {
-"stringUnit": {
-"state": "translated",
-"value": "Geen vastlopers vastgelegd"
-}
-},
-"pl": {
-"stringUnit": {
-"state": "translated",
-"value": "Nie zarejestrowano zawieszeń"
-}
-},
-"uk": {
-"stringUnit": {
-"state": "translated",
-"value": "Зависань не зафіксовано"
-}
-},
-"ro": {
-"stringUnit": {
-"state": "translated",
-"value": "Niciun blocaj înregistrat"
-}
-},
-"cs": {
-"stringUnit": {
-"state": "translated",
-"value": "Žádná zamrznutí nezaznamenána"
-}
-},
-"sv": {
-"stringUnit": {
-"state": "translated",
-"value": "Inga frysningar registrerade"
-}
-},
-"el": {
-"stringUnit": {
-"state": "translated",
-"value": "Δεν καταγράφηκαν παγώματα"
-}
-},
-"hu": {
-"stringUnit": {
-"state": "translated",
-"value": "Nincs rögzített lefagyás"
-}
-},
-"tr": {
-"stringUnit": {
-"state": "translated",
-"value": "Kaydedilmiş donma yok"
-}
-}
-}
-},
 "No line nearby matches. Try a station below.": {
 "extractionState": "manual",
 "localizations": {
@@ -24826,6 +24921,101 @@
 "stringUnit": {
 "state": "translated",
 "value": "Sonuç yok."
+}
+}
+}
+},
+"No problems recorded": {
+"extractionState": "manual",
+"localizations": {
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "No problems recorded"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Keine Probleme aufgezeichnet"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Aucun problème enregistré"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Nessun problema registrato"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "No se han registrado problemas"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Nenhum problema registado"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Geen problemen vastgelegd"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Nie zarejestrowano problemów"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Проблем не зафіксовано"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Nicio problemă înregistrată"
+}
+},
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Žádné zaznamenané problémy"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Inga problem registrerade"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Δεν καταγράφηκαν προβλήματα"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Nincs rögzített probléma"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Kaydedilmiş sorun yok"
 }
 }
 }
@@ -30435,6 +30625,101 @@
 }
 }
 },
+"Publit notes freezes of 2 seconds or more, crashes, unexpected exits and failed requests (only their kind), each with the screens opened just before. Places, stops and tickets are not recorded, and nothing leaves this device unless you share it.": {
+"extractionState": "manual",
+"localizations": {
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Publit notes freezes of 2 seconds or more, crashes, unexpected exits and failed requests (only their kind), each with the screens opened just before. Places, stops and tickets are not recorded, and nothing leaves this device unless you share it."
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Publit notiert Hänger ab 2 Sekunden, Abstürze, unerwartete Beendigungen und fehlgeschlagene Anfragen (nur deren Art), jeweils mit den kurz davor geöffneten Ansichten. Orte, Haltestellen und Tickets werden nicht aufgezeichnet, und nichts verlässt dieses Gerät, außer du teilst es."
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Publit note les blocages de 2 secondes ou plus, les plantages, les fermetures inattendues et les requêtes échouées (seulement leur type), avec les écrans ouverts juste avant. Les lieux, arrêts et billets ne sont pas enregistrés, et rien ne quitte cet appareil sauf si vous le partagez."
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Publit annota blocchi di 2 secondi o più, arresti anomali, chiusure impreviste e richieste non riuscite (solo il tipo), con le schermate aperte poco prima. Luoghi, fermate e biglietti non vengono registrati e nulla lascia questo dispositivo se non lo condividi."
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Publit anota bloqueos de 2 segundos o más, fallos, cierres inesperados y solicitudes fallidas (solo su tipo), con las pantallas abiertas justo antes. No se registran lugares, paradas ni billetes, y nada sale de este dispositivo salvo que lo compartas."
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "O Publit regista bloqueios de 2 segundos ou mais, falhas, encerramentos inesperados e pedidos falhados (apenas o tipo), com os ecrãs abertos imediatamente antes. Locais, paragens e bilhetes não são registados e nada sai deste dispositivo, a menos que o partilhe."
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Publit noteert vastlopers van 2 seconden of langer, crashes, onverwachte afsluitingen en mislukte verzoeken (alleen het soort), met de schermen die vlak daarvoor open waren. Plaatsen, haltes en tickets worden niet vastgelegd, en niets verlaat dit apparaat tenzij je het deelt."
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Publit zapisuje zawieszenia trwające 2 sekundy lub dłużej, awarie, nieoczekiwane zamknięcia i nieudane zapytania (tylko ich rodzaj) wraz z ekranami otwartymi tuż przedtem. Miejsca, przystanki i bilety nie są zapisywane i nic nie opuszcza tego urządzenia, chyba że to udostępnisz."
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Publit фіксує зависання від 2 секунд, збої, неочікувані завершення та невдалі запити (лише їхній тип) разом з екранами, відкритими безпосередньо перед цим. Місця, зупинки й квитки не записуються, і ніщо не залишає цей пристрій, якщо ви цим не поділитеся."
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Publit notează blocările de 2 secunde sau mai mult, blocările fatale, închiderile neașteptate și cererile eșuate (doar tipul lor), împreună cu ecranele deschise chiar înainte. Locurile, stațiile și biletele nu sunt înregistrate și nimic nu părăsește acest dispozitiv decât dacă îl partajezi."
+}
+},
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Publit zaznamenává zamrznutí od 2 sekund, pády, neočekávaná ukončení a neúspěšné požadavky (jen jejich druh) spolu s obrazovkami otevřenými těsně předtím. Místa, zastávky a jízdenky se nezaznamenávají a nic neopustí toto zařízení, pokud to nesdílíte."
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Publit noterar frysningar på 2 sekunder eller mer, krascher, oväntade avslut och misslyckade förfrågningar (bara typen), med skärmarna som öppnades strax innan. Platser, hållplatser och biljetter registreras inte, och inget lämnar enheten om du inte delar det."
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Το Publit καταγράφει παγώματα 2 δευτερολέπτων ή περισσότερο, σφάλματα, απροσδόκητους τερματισμούς και αποτυχημένα αιτήματα (μόνο το είδος τους), μαζί με τις οθόνες που άνοιξαν λίγο πριν. Τοποθεσίες, στάσεις και εισιτήρια δεν καταγράφονται και τίποτα δεν φεύγει από αυτή τη συσκευή αν δεν το κοινοποιήσεις."
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "A Publit rögzíti a legalább 2 másodperces lefagyásokat, összeomlásokat, váratlan kilépéseket és sikertelen kéréseket (csak a fajtájukat), a közvetlenül előtte megnyitott képernyőkkel együtt. Helyeket, megállókat és jegyeket nem rögzít, és semmi sem hagyja el az eszközt, hacsak meg nem osztod."
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Publit 2 saniye veya daha uzun donmaları, çökmeleri, beklenmedik kapanmaları ve başarısız istekleri (yalnızca türlerini), hemen öncesinde açılan ekranlarla birlikte kaydeder. Yerler, duraklar ve biletler kaydedilmez ve sen paylaşmadıkça hiçbir şey bu cihazdan çıkmaz."
+}
+}
+}
+},
 "Publit reads the ticket on your iPhone. Nothing is uploaded. Codes that change every few seconds only work in the operator's app.": {
 "extractionState": "manual",
 "localizations": {
@@ -32331,6 +32616,101 @@
 "stringUnit": {
 "state": "translated",
 "value": "Yedek ulaşım bilgisi"
+}
+}
+}
+},
+"Report a problem": {
+"extractionState": "manual",
+"localizations": {
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Report a problem"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Problem melden"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Signaler un problème"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Segnala un problema"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Informar de un problema"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Comunicar um problema"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Probleem melden"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Zgłoś problem"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Повідомити про проблему"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Raportează o problemă"
+}
+},
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Nahlásit problém"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Rapportera ett problem"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Αναφορά προβλήματος"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Probléma jelentése"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Sorun bildir"
 }
 }
 }
@@ -36230,97 +36610,97 @@
 }
 }
 },
-"Share freeze log": {
+"Share diagnostics": {
 "extractionState": "manual",
 "localizations": {
 "en": {
 "stringUnit": {
 "state": "translated",
-"value": "Share freeze log"
+"value": "Share diagnostics"
 }
 },
 "de": {
 "stringUnit": {
 "state": "translated",
-"value": "Hänger-Protokoll teilen"
+"value": "Diagnose teilen"
 }
 },
 "fr": {
 "stringUnit": {
 "state": "translated",
-"value": "Partager le journal des blocages"
+"value": "Partager le diagnostic"
 }
 },
 "it": {
 "stringUnit": {
 "state": "translated",
-"value": "Condividi registro dei blocchi"
+"value": "Condividi diagnostica"
 }
 },
 "es": {
 "stringUnit": {
 "state": "translated",
-"value": "Compartir registro de bloqueos"
+"value": "Compartir diagnóstico"
 }
 },
 "pt-PT": {
 "stringUnit": {
 "state": "translated",
-"value": "Partilhar registo de bloqueios"
+"value": "Partilhar diagnóstico"
 }
 },
 "nl": {
 "stringUnit": {
 "state": "translated",
-"value": "Vastloperlogboek delen"
+"value": "Diagnose delen"
 }
 },
 "pl": {
 "stringUnit": {
 "state": "translated",
-"value": "Udostępnij dziennik zawieszeń"
+"value": "Udostępnij diagnostykę"
 }
 },
 "uk": {
 "stringUnit": {
 "state": "translated",
-"value": "Поділитися журналом зависань"
+"value": "Поділитися діагностикою"
 }
 },
 "ro": {
 "stringUnit": {
 "state": "translated",
-"value": "Partajați jurnalul blocajelor"
+"value": "Partajează diagnosticul"
 }
 },
 "cs": {
 "stringUnit": {
 "state": "translated",
-"value": "Sdílet záznam zamrznutí"
+"value": "Sdílet diagnostiku"
 }
 },
 "sv": {
 "stringUnit": {
 "state": "translated",
-"value": "Dela logg över frysningar"
+"value": "Dela diagnostik"
 }
 },
 "el": {
 "stringUnit": {
 "state": "translated",
-"value": "Κοινοποίηση αρχείου παγωμάτων"
+"value": "Κοινοποίηση διαγνωστικών"
 }
 },
 "hu": {
 "stringUnit": {
 "state": "translated",
-"value": "Lefagyásnapló megosztása"
+"value": "Diagnosztika megosztása"
 }
 },
 "tr": {
 "stringUnit": {
 "state": "translated",
-"value": "Donma kaydını paylaş"
+"value": "Tanılamayı paylaş"
 }
 }
 }
