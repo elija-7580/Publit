@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.0 (build 16)
+
+- Freeze log from build 15: no more freezes on the trip screen. Two short ones remain: 3.2 s when opening "Where to now?" (the same SwiftUI loop asking itself for the next update), and text layout while the app went to the background.
+- "Recently searched" showed its time with `Text(date, style: .relative)`, which redraws itself every second. It now shows the time to the minute from the shared minute clock ("5 minutes ago", "now"). Likely cause of the 3.2 s, not confirmed on a device.
+
 ## 0.6.0 (build 15)
 
 - Station map: the mode filter was sometimes not drawn (an empty strip under the bar) while its chips still took taps (screenshot from build 14). It was a horizontally scrolling row; on the map it is now one fixed row of symbols (All, Train, S-Bahn, Metro, Tram, Bus, Ferry) without scrolling, on a plain background. VoiceOver reads the mode names. Not yet confirmed on a device.

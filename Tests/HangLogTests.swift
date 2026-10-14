@@ -89,3 +89,14 @@ final class StableDepartureIdentityTests: XCTestCase {
         XCTAssertEqual(shown.count, list.count - 1)
     }
 }
+
+#if canImport(Darwin)
+final class RelativeAgoTests: XCTestCase {
+    func testAgoIsToTheMinute() {
+        let now = Date(timeIntervalSinceReferenceDate: 800_000_000)
+        let en = Locale(identifier: "en_US")
+        XCTAssertEqual(Fmt.ago(now.addingTimeInterval(-20), now: now, locale: en), "now")
+        XCTAssertEqual(Fmt.ago(now.addingTimeInterval(-5 * 60 - 40), now: now, locale: en), "5 minutes ago")
+    }
+}
+#endif

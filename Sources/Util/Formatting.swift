@@ -76,3 +76,20 @@ enum Fmt {
         return L10n.f("Local time %@ (%@)", city, gmt)
     }
 }
+
+#if canImport(Darwin)
+extension Fmt {
+    /// "5 minutes ago" to the minute; under a minute "now". A plain string instead of
+    /// `Text(date, style: .relative)`, which redraws itself every second.
+    static func ago(_ date: Date, now: Date = .now, locale: Locale = .current) -> String {
+        let f = RelativeDateTimeFormatter()
+        f.locale = locale
+        f.dateTimeStyle = .named
+        f.unitsStyle = .full
+        let seconds = now.timeIntervalSince(date)
+        guard seconds >= 60 else { return f.localizedString(fromTimeInterval: 0) }
+        let rounded = now.addingTimeInterval(-(seconds / 60).rounded(.down) * 60)
+        return f.localizedString(for: rounded, relativeTo: now)
+    }
+}
+#endif
