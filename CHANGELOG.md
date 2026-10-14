@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.0 (build 29)
+
+### Backup server when Transitous is down
+- If Transitous cannot be reached or answers with a server error, Publit asks the MOTIS project's Europe server instead (same engine, same data and IDs, run separately at TU Darmstadt; live times included). Routes, departures, search, maps, sharing vehicles and saved trips keep working.
+- After a failure the backup is asked first for three minutes, so not every request waits for a dead server; then Transitous is tried again. When neither server answers (usually the iPhone's own connection), nothing changes: the saved offline copies are shown as before. Settings → Data mentions the backup.
+
 ## 0.6.0 (build 28)
 
 ### Clear message where there are no timetables

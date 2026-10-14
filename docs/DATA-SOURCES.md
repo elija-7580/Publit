@@ -85,6 +85,9 @@ Not usable without an agreement or key: StadtRAD Hamburg (DB API Marketplace "Sh
 | ViaggiaTreno | Italy (Trenitalia) | no | 403 from the test server | unofficial |
 | Transitland, Mobility Database API | worldwide feed catalogues | free key | – | for finding feeds, not routing |
 
+### In the app (build 29)
+`TransitousClient` fails over to `https://europe.motis-project.de` (MOTIS project, TU Darmstadt, separate hosting from Transitous). Checked 14 Oct 2026: plan, stoptimes, trip, geocode, map/stops, map/trips and rentals all answer with the same IDs and with live times. Used only on connection failures, HTTP 429 and 5xx; backup first for 3 minutes after a failure. **Before a public release, ask the MOTIS team whether an app may use this server as fallback** (it is their demo instance); the list of backup servers is one constant (`TransitousClient.backupServer`), so an own MOTIS instance can replace it.
+
 ### Recommendation
 - Keep Transitous as the only source for routing. Add a small **fallback layer** used only when Transitous fails or returns nothing: per country one adapter (Entur, opendata.ch, TfL, Wiener Linien, SL, VBB/BVG, iRail) for departures first, journeys later. Services that need a key must not ship the key in the app (proxy or user-supplied).
 - Longer term the most robust backup is a second MOTIS instance with the Transitous configuration.

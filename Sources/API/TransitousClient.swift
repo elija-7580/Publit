@@ -17,6 +17,9 @@ final class TransitousClient: @unchecked Sendable {
     static let shared = TransitousClient()
 
     private let base: URL
+    /// Asked only while `base` cannot be reached or fails (see `ServerFailover`).
+    private let backups: [URL]
+    let failover = ServerFailover()
     private let session: URLSession
     /// Same settings with a 45 s idle timeout, for Park & Ride and sharing searches.
     private let slowSession: URLSession
@@ -25,10 +28,16 @@ final class TransitousClient: @unchecked Sendable {
     let cache: ResponseCache
     private let mapStopCache = MapStopCache()
 
+    /// The MOTIS project's Europe server: the same engine (and so the same API), the same data
+    /// sets and IDs as Transitous, run separately at TU Darmstadt. Saved stops and trips stay valid.
+    static let backupServer = URL(string: "https://europe.motis-project.de")!
+
     init(base: URL = URL(string: "https://api.transitous.org")!,
+         backups: [URL] = [TransitousClient.backupServer],
          userAgent: String = AppInfo.userAgent,
          cache: ResponseCache = ResponseCache()) {
         self.base = base
+        self.backups = backups
         self.userAgent = userAgent
         self.cache = cache
         let cfg = URLSessionConfiguration.default
@@ -289,7 +298,7 @@ final class TransitousClient: @unchecked Sendable {
         let kind = Self.requestKind(path)
         let started = Date()
         do {
-            (data, status) = try await fetch(req)
+            (data, status) = try await fetchFailingOver(req, kind: kind)
         } catch {
             HangLog.shared.error("request \(kind)", error)
             if Self.isOffline(error), let value: T = await offlineCopy(key, url: url, policy: policy) { return value }
@@ -337,6 +346,69 @@ final class TransitousClient: @unchecked Sendable {
                 let (d, response) = try await session.data(for: req)
                 return (d, (response as? HTTPURLResponse)?.statusCode ?? 0)
             }
+        }
+    }
+
+    /// Transitous first; while it is down the backup first (for `ServerFailover.holdOff`), so not
+    /// every request waits for a dead server. Cache keys and offline copies keep Transitous' URL.
+    private func fetchFailingOver(_ req: URLRequest, kind: String) async throws -> (Data, Int) {
+        guard let url = req.url, !backups.isEmpty else { return try await fetch(req) }
+        let servers = failover.primaryFirst() ? [base] + backups : backups + [base]
+        var lastAnswer: (Data, Int)?
+        var lastError: Error?
+        for (index, server) in servers.enumerated() {
+            var attempt = req
+            attempt.url = Self.moved(url, to: server)
+            // A second server is a fallback, not a reason to keep someone waiting twice as long.
+            if index > 0 { attempt.timeoutInterval = min(req.timeoutInterval, Self.backupTimeout) }
+            let isPrimary = server == base
+            do {
+                let answer = try await fetch(attempt)
+                if Self.serverFailed(status: answer.1) {
+                    if isPrimary { failover.primaryFailed() }
+                    lastAnswer = answer
+                    continue
+                }
+                if isPrimary { failover.primaryAnswered() } else { HangLog.shared.note("backup server \(kind)") }
+                return answer
+            } catch {
+                guard Self.shouldFailOver(error) else { throw error }
+                if isPrimary { failover.primaryFailed() }
+                lastError = error
+            }
+        }
+        if let lastAnswer { return lastAnswer }
+        // No server could be reached: most likely the iPhone's connection, not Transitous.
+        // Asking the backup first next time would only add its wait to every request.
+        failover.reset()
+        throw lastError ?? URLError(.cannotConnectToHost)
+    }
+
+    static let backupTimeout: TimeInterval = 15
+
+    /// Same path and query on another server.
+    static func moved(_ url: URL, to server: URL) -> URL {
+        guard var c = URLComponents(url: url, resolvingAgainstBaseURL: false) else { return url }
+        c.scheme = server.scheme
+        c.host = server.host
+        c.port = server.port
+        return c.url ?? url
+    }
+
+    /// The server is overloaded or broken; another one may answer. 4xx is the request's fault.
+    static func serverFailed(status: Int) -> Bool { status == 429 || status >= 500 }
+
+    /// The server could not be reached. Not when the iPhone itself is offline or the request was
+    /// cancelled: another server would fail the same way.
+    static func shouldFailOver(_ error: Error) -> Bool {
+        guard let e = error as? URLError else { return false }
+        switch e.code {
+        case .cannotConnectToHost, .cannotFindHost, .dnsLookupFailed, .timedOut, .networkConnectionLost,
+             .secureConnectionFailed, .badServerResponse, .cannotParseResponse, .serverCertificateUntrusted,
+             .serverCertificateHasBadDate, .serverCertificateNotYetValid, .serverCertificateHasUnknownRoot:
+            return true
+        default:
+            return false
         }
     }
 
@@ -511,4 +583,31 @@ actor RequestCoalescer {
     }
 
     var count: Int { running.count }
+}
+
+/// Remembers that Transitous failed, so the next requests go to the backup server first.
+/// After `holdOff` Transitous is asked first again; an answer from it ends the failover.
+final class ServerFailover: @unchecked Sendable {
+    static let holdOff: TimeInterval = 180
+    private let lock = NSLock()
+    private var primaryDownSince: Date?
+
+    func primaryFirst(now: Date = Date()) -> Bool {
+        lock.lock(); defer { lock.unlock() }
+        guard let since = primaryDownSince else { return true }
+        return now.timeIntervalSince(since) >= Self.holdOff
+    }
+
+    func primaryFailed(now: Date = Date()) {
+        lock.lock(); primaryDownSince = now; lock.unlock()
+    }
+
+    func primaryAnswered() {
+        lock.lock(); primaryDownSince = nil; lock.unlock()
+    }
+
+    func reset() { primaryAnswered() }
+
+    /// Requests go to the backup server right now.
+    var onBackup: Bool { !primaryFirst() }
 }

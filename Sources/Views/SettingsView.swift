@@ -100,7 +100,7 @@ struct SettingsView: View {
                 } header: {
                     Text("Data")
                 } footer: {
-                    Text("Times marked live come from the operator's real-time feed; all others are timetable times.")
+                    Text("Times marked live come from the operator's real-time feed; all others are timetable times. If Transitous cannot be reached, Publit asks the MOTIS project's Europe server, which uses the same data.")
                 }
                 Section {
                     if let summary, summary.total > 0 {

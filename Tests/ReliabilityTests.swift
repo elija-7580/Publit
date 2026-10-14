@@ -111,3 +111,36 @@ final class ReliabilityTests: XCTestCase {
         XCTAssertEqual(TripStore.keepingFares(of: it, in: old).fareTransfers?.count, 1)
     }
 }
+
+final class ServerFailoverTests: XCTestCase {
+    func testBackupKeepsPathAndQuery() {
+        let url = URL(string: "https://api.transitous.org/api/v6/stoptimes?stopId=de-DELFI_de:09162:6&n=5")!
+        let moved = TransitousClient.moved(url, to: TransitousClient.backupServer)
+        XCTAssertEqual(moved.absoluteString, "https://europe.motis-project.de/api/v6/stoptimes?stopId=de-DELFI_de:09162:6&n=5")
+    }
+
+    func testOnlyServerProblemsFailOver() {
+        XCTAssertTrue(TransitousClient.serverFailed(status: 503))
+        XCTAssertTrue(TransitousClient.serverFailed(status: 429))
+        XCTAssertFalse(TransitousClient.serverFailed(status: 400))
+        XCTAssertFalse(TransitousClient.serverFailed(status: 200))
+        XCTAssertTrue(TransitousClient.shouldFailOver(URLError(.cannotConnectToHost)))
+        XCTAssertTrue(TransitousClient.shouldFailOver(URLError(.timedOut)))
+        // Offline or cancelled: another server would not help.
+        XCTAssertFalse(TransitousClient.shouldFailOver(URLError(.notConnectedToInternet)))
+        XCTAssertFalse(TransitousClient.shouldFailOver(URLError(.cancelled)))
+        XCTAssertFalse(TransitousClient.shouldFailOver(CancellationError()))
+    }
+
+    func testBackupFirstForAWhileAfterAFailure() {
+        let f = ServerFailover()
+        let t0 = Date()
+        XCTAssertTrue(f.primaryFirst(now: t0))
+        f.primaryFailed(now: t0)
+        XCTAssertFalse(f.primaryFirst(now: t0.addingTimeInterval(60)))
+        XCTAssertTrue(f.primaryFirst(now: t0.addingTimeInterval(ServerFailover.holdOff + 1)))
+        f.primaryFailed(now: t0)
+        f.primaryAnswered()
+        XCTAssertTrue(f.primaryFirst(now: t0))
+    }
+}
