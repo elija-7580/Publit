@@ -30,7 +30,7 @@ struct SharedRouteView: View {
                         .accessibilityIdentifier("searchSharedRoute")
                 }
             } else {
-                ProgressView().controlSize(.large).frame(maxWidth: .infinity, maxHeight: .infinity)
+                LogoLoader().frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
         .screenTrail("Shared route")

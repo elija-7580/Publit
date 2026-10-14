@@ -98,6 +98,7 @@ struct PlaceSearchView: View {
                 }
             }
             .inkList()
+            .environment(\.liveBarInset, 0)
             .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always),
                         prompt: "Address, stop or place")
             .searchScopes($scope, activation: .onTextEntry) {

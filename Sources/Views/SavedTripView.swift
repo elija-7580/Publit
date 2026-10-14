@@ -7,6 +7,7 @@ struct SavedTripView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var isVisible = false
     @State private var errorMessage: String?
+    @Environment(\.liveBarInset) private var liveInset
 
     var body: some View {
         if let trip = trips.trip(tripId) {
@@ -21,10 +22,12 @@ struct SavedTripView: View {
                     .screenTrail("Saved trip")
                 }
             }
-            .overlay(alignment: .bottom) {
+            .environment(\.liveBarInset, errorMessage == nil ? liveInset : 0)
+            .safeAreaInset(edge: .bottom, spacing: 0) {
                 if let errorMessage {
                     Text(errorMessage).font(.caption).padding(8)
-                        .background(.regularMaterial, in: Capsule()).padding(.bottom, 8)
+                        .matteSurface(in: RoundedRectangle(cornerRadius: 12))
+                        .padding(.horizontal, 12).padding(.bottom, 8 + liveInset)
                 }
             }
             .onAppear { isVisible = true }

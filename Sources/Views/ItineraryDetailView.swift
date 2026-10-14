@@ -128,7 +128,7 @@ struct RouteSummary: View {
                         .font(.title2.weight(.bold).monospacedDigit())
                         .lineLimit(1).minimumScaleFactor(0.7)
                     Spacer(minLength: 8)
-                    Text(Fmt.duration(seconds: itinerary.duration)).font(.title3.weight(.semibold))
+                    DurationFigure(seconds: itinerary.duration)
                         .lineLimit(1).fixedSize()
                 }
             }
@@ -155,7 +155,7 @@ struct RouteSummary: View {
         VStack(alignment: .leading, spacing: 4) {
             Text("\(Fmt.time(itinerary.startTime, tz: itinerary.legs.first?.from.tz)) – \(Fmt.time(itinerary.endTime, tz: itinerary.legs.last?.to.tz))")
                 .font(.title2.bold().monospacedDigit())
-            Text(Fmt.duration(seconds: itinerary.duration)).font(.subheadline.weight(.semibold)).foregroundStyle(.secondary)
+            DurationFigure(seconds: itinerary.duration)
         }
     }
 
@@ -255,19 +255,17 @@ struct LegRow: View {
                         Text(verbatim: detail).font(.caption.weight(.semibold))
                     }
                     Spacer(minLength: 4)
-                    Text(leg.realTime && !Connectivity.shared.isOffline ? L10n.t("Live") : L10n.t("Timetable"))
-                        .font(.caption).foregroundStyle(.secondary)
+                    DurationFigure(seconds: leg.duration, size: 22)
                 }
                 DirectionLabel(direction: leg.directionName)
                 if leg.isReplacementBus { Label("Rail replacement bus", systemImage: "bus.fill").font(.subheadline.weight(.semibold)).foregroundStyle(Color.delay) }
                 stopLine(label: "Board here", time: leg.startTime, delay: leg.delayMinutes,
                          name: leg.from.name, track: leg.from.track, tz: leg.from.tz)
-                if let stops = leg.intermediateStops {
-                    Text("\(Fmt.stops(stops.count)) · \(Fmt.duration(seconds: leg.duration))")
-                        .font(.caption).foregroundStyle(.secondary)
-                } else {
-                    Text(Fmt.duration(seconds: leg.duration)).font(.caption).foregroundStyle(.secondary)
+                HStack(spacing: 6) {
+                    if let stops = leg.intermediateStops { Text(Fmt.stops(stops.count)); Text(verbatim: "·") }
+                    Text(leg.realTime && !Connectivity.shared.isOffline ? L10n.t("Live") : L10n.t("Timetable"))
                 }
+                .font(.caption).foregroundStyle(.secondary)
                 stopLine(label: "Get off here", time: leg.endTime,
                          delay: Int((leg.endTime.timeIntervalSince(leg.scheduledEndTime) / 60).rounded()),
                          name: leg.to.name, track: leg.to.track, tz: leg.to.tz)
@@ -291,7 +289,7 @@ struct LegRow: View {
                 VStack(alignment: .leading, spacing: 4) {
                     if let r = leg.rental {
                         // Shared bike or scooter: whose, from where, and a link to rent it.
-                        Text(verbatim: "\(r.kind.title) · \(r.systemName ?? ModeStyle.label(leg.mode)) · \(Fmt.duration(seconds: leg.duration))")
+                        Text(verbatim: "\(r.kind.title) · \(r.systemName ?? ModeStyle.label(leg.mode))")
                         if let from = r.fromStationName, !from.isEmpty {
                             Text(L10n.f("Pick up at %@", from)).foregroundStyle(.secondary)
                         }
@@ -304,11 +302,12 @@ struct LegRow: View {
                                 .font(.subheadline.weight(.semibold))
                         }
                     } else {
-                        Text("\(ModeStyle.label(leg.mode)) \(Fmt.duration(seconds: leg.duration))")
+                        Text(verbatim: ModeStyle.label(leg.mode))
                         if let d = leg.distance, d > 0 { Text(Fmt.distance(meters: d)).foregroundStyle(.secondary) }
                     }
                 }
-                Spacer(minLength: 0)
+                Spacer(minLength: 4)
+                DurationFigure(seconds: leg.duration, size: 22)
             }
             .font(.subheadline)
         }

@@ -40,6 +40,7 @@ struct PublitApp: App {
                 .environment(passes)
                 .environment(history)
                 .tint(Color.ink)
+                .toggleStyle(InkSwitchStyle())
                 .onOpenURL { app.open($0) }
                 .onAppear {
                     app.applyDemo(ProcessInfo.processInfo.environment["PUBLIT_DEMO"])

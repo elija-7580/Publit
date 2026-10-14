@@ -245,8 +245,7 @@ struct CalendarEventSheet: UIViewControllerRepresentable {
         event.endDate = trip.endTime
         event.location = CalendarText.location(trip)
         event.notes = CalendarText.notes(trip)
-        // The route itself, not this phone's saved-trip ID: also opens on another device of the calendar.
-        event.url = DeepLink.route(trip.shared).url
+        event.url = CalendarText.url(trip)
         event.addAlarm(EKAlarm(absoluteDate: TripStatus.reminderTime(trip.itinerary)))
         let vc = EKEventEditViewController()
         vc.eventStore = store

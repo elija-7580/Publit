@@ -10,7 +10,7 @@ final class TicketRecognitionTests: XCTestCase {
         XCTAssertEqual(draft.title, "Sparschiene")
         XCTAssertEqual(draft.origin, "Wien Hbf")
         XCTAssertNotNil(draft.validUntil)
-        XCTAssertTrue(TicketImportPolicy.canAddAutomatically(draft, barcodes: scan.barcodes))
+        XCTAssertTrue(TicketImportPolicy.isRecognizable(draft, barcodes: scan.barcodes))
     }
 
     @MainActor func testImageIsRecognizedLocally() async throws {
@@ -23,7 +23,27 @@ final class TicketRecognitionTests: XCTestCase {
         }
         let draft = TicketTextParser.parse(lines: scan.lines, barcodes: scan.barcodes, strictValidity: true)
         XCTAssertEqual(draft.title, "Sparschiene")
-        XCTAssertTrue(TicketImportPolicy.canAddAutomatically(draft, barcodes: scan.barcodes))
+        XCTAssertTrue(TicketImportPolicy.isRecognizable(draft, barcodes: scan.barcodes))
+    }
+
+    @MainActor func testSelectableTextBoxesMatchTheUprightPage() async throws {
+        let image = try XCTUnwrap(TicketRecognizer.loadImage(SharedTicketSamples.image()))
+        let pieces: [TicketTextPiece]
+        do { pieces = try await TicketRecognizer.pieces(image: image) }
+        catch { throw XCTSkip("Vision unavailable on this host: \(error.localizedDescription)") }
+        XCTAssertFalse(pieces.isEmpty)
+        XCTAssertEqual(Set(pieces.map(\.id)).count, pieces.count)
+        for piece in pieces {
+            XCTAssertFalse(piece.text.isEmpty)
+            XCTAssertGreaterThanOrEqual(piece.rect.minX, 0)
+            XCTAssertGreaterThanOrEqual(piece.rect.minY, 0)
+            XCTAssertLessThanOrEqual(piece.rect.maxX, 1.001)
+            XCTAssertLessThanOrEqual(piece.rect.maxY, 1.001)
+            XCTAssertGreaterThan(piece.rect.width, 0)
+            XCTAssertGreaterThan(piece.rect.height, 0)
+        }
+        let product = try XCTUnwrap(pieces.first { $0.text.contains("Sparschiene") })
+        XCTAssertLessThan(product.rect.midY, 0.25, "the product is near the top, not vertically flipped")
     }
 
     @MainActor func testUniquePageAndMultipleTicketAmbiguity() async throws {

@@ -66,7 +66,7 @@ struct TripView: View {
             } else if let errorMessage {
                 Text(errorMessage).foregroundStyle(.secondary)
             } else {
-                HStack { Spacer(); ProgressView(); Spacer() }
+                LogoLoader()
             }
         }
         .inkList()
@@ -239,7 +239,7 @@ struct LineDeparturesView: View {
                 if let errorMessage, departures.isEmpty {
                     Text(errorMessage).foregroundStyle(.secondary)
                 } else if !loaded {
-                    HStack { Spacer(); ProgressView(); Spacer() }
+                    LogoLoader()
                 } else if departures.isEmpty {
                     Text("No departures of \(line.lineName) in the next hours.").foregroundStyle(.secondary)
                 }

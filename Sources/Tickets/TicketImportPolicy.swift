@@ -1,11 +1,11 @@
 import Foundation
 
-/// Conservative auto-import rules. Recognition does not verify authenticity or transport rights.
+/// Conservative page-recognition rules. Recognition does not verify authenticity or transport rights.
 enum TicketImportPolicy {
     /// Bound work for shared PDFs; longer or ambiguous documents go through the page picker.
     static let maxAutomaticPages = 12
 
-    static func canAddAutomatically(_ draft: TicketDraft, barcodes: [TicketPass.Barcode]) -> Bool {
+    static func isRecognizable(_ draft: TicketDraft, barcodes: [TicketPass.Barcode]) -> Bool {
         if let from = draft.validFrom, let until = draft.validUntil, until < from { return false }
         // A barcode alone may be a website link; an operator alone may be an advertisement.
         guard draft.category != nil else { return false }

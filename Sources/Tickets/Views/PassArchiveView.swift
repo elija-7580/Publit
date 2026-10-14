@@ -34,6 +34,7 @@ struct PassArchiveView: View {
                 }
             }
         }
+        .liveBarPadding()
         .background(Color.ground)
         .navigationTitle(L10n.t("Archive"))
         .screenTrail("Ticket archive")

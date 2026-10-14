@@ -13,6 +13,13 @@ struct TicketScan: @unchecked Sendable {
     var suggestedColor: String?
 }
 
+struct TicketTextPiece: Identifiable, Sendable {
+    let id: Int
+    let text: String
+    /// Normalized to the upright page, origin top left (same convention as barcode regions).
+    let rect: CGRect
+}
+
 enum TicketRecognizer {
     enum Failure: LocalizedError {
         case unreadable
@@ -71,7 +78,7 @@ enum TicketRecognizer {
             try Task.checkCancellation()
             let scanned = try await scan(pdf: data, page: page)
             let draft = TicketTextParser.parse(lines: scanned.lines, barcodes: scanned.barcodes, strictValidity: true)
-            if TicketImportPolicy.canAddAutomatically(draft, barcodes: scanned.barcodes) {
+            if TicketImportPolicy.isRecognizable(draft, barcodes: scanned.barcodes) {
                 guard candidate == nil else { return nil }
                 candidate = (page, scanned)
             }
@@ -98,14 +105,7 @@ enum TicketRecognizer {
                                  .code39, .code39Checksum, .code39FullASCII, .code39FullASCIIChecksum,
                                  .code93, .code93i, .itf14, .i2of5, .i2of5Checksum, .codabar]
             let text = VNRecognizeTextRequest()
-            text.recognitionLevel = .accurate
-            // Names, numbers and codes: language correction changes more than it fixes.
-            text.usesLanguageCorrection = false
-            text.automaticallyDetectsLanguage = true
-            if let supported = try? text.supportedRecognitionLanguages() {
-                let wanted = ["de-DE", "en-US", "fr-FR", "it-IT", "es-ES", "pt-BR", "nl-NL"].filter(supported.contains)
-                if !wanted.isEmpty { text.recognitionLanguages = wanted }
-            }
+            configure(text)
             try Task.checkCancellation()
             try VNImageRequestHandler(cgImage: image, orientation: .up).perform(recognizeText ? [codes, text] : [codes])
             try Task.checkCancellation()
@@ -114,6 +114,34 @@ enum TicketRecognizer {
             return TicketScan(lines: TicketRecognizer.lines(text.results ?? []), barcodes: barcodes,
                               suggestedColor: TicketRecognizer.dominantColor(image))
         }.value
+    }
+
+    /// Individually selectable OCR regions for the review screen; nothing leaves the device.
+    static func pieces(image: CGImage) async throws -> [TicketTextPiece] {
+        try await Task.detached(priority: .userInitiated) { () throws -> [TicketTextPiece] in
+            let request = VNRecognizeTextRequest()
+            configure(request)
+            try Task.checkCancellation()
+            try VNImageRequestHandler(cgImage: image, orientation: .up).perform([request])
+            try Task.checkCancellation()
+            return (request.results ?? []).enumerated().compactMap { index, observation in
+                guard let text = observation.topCandidates(1).first?.string, !text.isEmpty else { return nil }
+                let box = observation.boundingBox
+                return TicketTextPiece(id: index, text: text,
+                                       rect: CGRect(x: box.minX, y: 1 - box.maxY, width: box.width, height: box.height))
+            }
+        }.value
+    }
+
+    private static func configure(_ text: VNRecognizeTextRequest) {
+        text.recognitionLevel = .accurate
+        // Names, numbers and codes: language correction changes more than it fixes.
+        text.usesLanguageCorrection = false
+        text.automaticallyDetectsLanguage = true
+        if let supported = try? text.supportedRecognitionLanguages() {
+            let wanted = ["de-DE", "en-US", "fr-FR", "it-IT", "es-ES", "pt-BR", "nl-NL"].filter(supported.contains)
+            if !wanted.isEmpty { text.recognitionLanguages = wanted }
+        }
     }
 
     /// Vision returns text pieces; pieces on the same row become one line ("Von:" + "Wien Hbf").

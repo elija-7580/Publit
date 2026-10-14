@@ -358,6 +358,7 @@ struct StationMapView: View {
                         .presentationDetents([.medium, .large])
                 }
         }
+        .environment(\.liveBarInset, 0)
         .onAppear {
             model.resume()
             if center == nil { center = location.coordinate }
@@ -396,14 +397,14 @@ struct StationMapView: View {
                 .frame(maxWidth: .infinity)
                 .background(Color.ground)
             if model.isLoadingLive && !model.hasLive {
-                ProgressView(L10n.t("Updating live layer…")).font(.footnote).padding(8).background(.regularMaterial, in: Capsule())
+                LogoLoader(label: L10n.t("Updating live layer…"), size: 28).matteSurface(in: RoundedRectangle(cornerRadius: 14))
             } else if let message = model.stationsError ?? model.liveError {
-                Text(verbatim: message).font(.footnote).padding(8).background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
+                Text(verbatim: message).font(.footnote).padding(8).matteSurface(in: RoundedRectangle(cornerRadius: 8))
             }
             if let hint {
                 Text(hint).font(.footnote.weight(.semibold))
                     .padding(.horizontal, 12).padding(.vertical, 6)
-                    .background(.regularMaterial, in: Capsule())
+                    .matteSurface(in: Capsule())
             }
         }
     }
@@ -692,7 +693,7 @@ struct VehicleTripView: View {
             } else if let errorMessage {
                 Text(errorMessage).foregroundStyle(.secondary)
             } else {
-                HStack { Spacer(); ProgressView(); Spacer() }
+                LogoLoader()
             }
         }
         .inkList()

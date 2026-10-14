@@ -41,6 +41,7 @@ struct TripPassesView: View {
                 .background(Color.ground)
             }
         }
+        .liveBarPadding()
         .navigationTitle(L10n.t("Tickets"))
         .screenTrail("Trip tickets")
         .navigationBarTitleDisplayMode(.inline)
@@ -65,8 +66,8 @@ struct ShowPassToolbar: ViewModifier {
         let list = enabled ? store.passes(forTrip: tripId, at: at) : []
         content
             .toolbar {
-                if !list.isEmpty {
-                    ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .topBarTrailing) {
+                    if !list.isEmpty {
                         Button {
                             if list.count == 1, list[0].barcode != nil { code = list[0] } else { listing = true }
                         } label: {
@@ -84,6 +85,7 @@ struct ShowPassToolbar: ViewModifier {
                     TripPassesView(tripId: tripId, at: at)
                         .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { listing = false } } }
                 }
+                .environment(\.liveBarInset, 0)
             }
     }
 
@@ -144,6 +146,7 @@ struct TripPassSection: View {
                     TripPassesView(tripId: tripId, at: at)
                         .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { listing = false } } }
                 }
+                .environment(\.liveBarInset, 0)
             }
         } header: {
             Text("Tickets")

@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.6.0 (build 31)
+
+### Reliability and clearer trips
+- Refresh requests percent-encode `+` in itinerary/trip IDs; base64 IDs no longer become spaces and cause HTTP 400. Backup requests preserve the encoding.
+- Calendar events carry one short `publit://trip/<id>` link to the saved trip on this device, rather than a long encoded route plus an unavailable web link.
+- Walking distance uses GPS progress only for the current walk and only near its path; previewed and distant walks keep their planned length.
+- The live trip bar can be pulled up, settles with a spring, and animates countdown changes. Lists and vertical scrollers reserve its measured height, including large text; a failed-refresh banner reserves space instead of covering content.
+- Total and leg durations use larger tabular numbers with small localized units. Route comparison timelines show leg minutes where there is room.
+
+### Ticket review before saving
+- Shared files now go through the same review as in-app imports. Nothing is saved until Save; repeated document/page imports remain deduplicated.
+- The review offers tappable text boxes on the selected PDF page or image. Zoom, tap text, correct it and assign it to a ticket field, including validity dates. Recognition stays on-device; source bytes and codes stay unchanged.
+
+### Matte Ink & Dot
+- All content loading indicators use the logo stroke and landing dot, with a static mark for Reduce Motion.
+- Floating app controls use opaque matte surfaces and hairlines, not material blur. Native system bars remain platform-managed.
+- Switches use a contrasting green on-state. Settings diagnostics load once per opening without animated row changes.
+- Added translations in all 15 app languages and regression tests for query encoding, field mapping, date handling and walking previews. Shared-import UI tests now require review.
+
 ## 0.6.0 (build 30)
 
 ### Ink & Dot everywhere

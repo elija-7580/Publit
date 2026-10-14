@@ -9,16 +9,23 @@ struct LiveTripBar: View {
     @Environment(AppState.self) private var app
     @Environment(PassStore.self) private var passes
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @GestureState(resetTransaction: Transaction(animation: .spring(response: 0.35, dampingFraction: 0.8))) private var pull: CGFloat = 0
     /// Hidden by hand for this trip only; the next trip shows again.
     @AppStorage("liveBarHiddenTrip") private var hiddenId = ""
 
     var body: some View {
         // Minute clock: countdowns are in whole minutes, so one redraw a minute is enough.
         let now = Ticker.minute.now
-        if let trip = trips.current(now: now), trip.id != hiddenId {
-            bar(trip, now: now)
-                .task(id: "\(trip.id)|\(scenePhase)") { await follow(trip.id) }
+        let current = trips.current(now: now).flatMap { $0.id == hiddenId ? nil : $0 }
+        Group {
+            if let trip = current {
+                bar(trip, now: now)
+                    .transition(reduceMotion ? .opacity : .move(edge: .bottom).combined(with: .opacity))
+                    .task(id: "\(trip.id)|\(scenePhase)") { await follow(trip.id) }
+            }
         }
+        .animation(reduceMotion ? nil : .spring(response: 0.42, dampingFraction: 0.86), value: current?.id)
     }
 
     private func bar(_ trip: SavedTrip, now: Date) -> some View {
@@ -85,13 +92,32 @@ struct LiveTripBar: View {
         .background {
             if started {
                 RoundedRectangle(cornerRadius: 24, style: .continuous).fill(Color.ink)
-                    .shadow(color: .black.opacity(0.18), radius: 10, y: 3)
+                    .shadow(color: .black.opacity(0.08), radius: 4, y: 2)
             } else {
-                RoundedRectangle(cornerRadius: 22, style: .continuous).fill(.regularMaterial)
+                RoundedRectangle(cornerRadius: 22, style: .continuous).fill(Color.surface)
             }
         }
         .overlay(RoundedRectangle(cornerRadius: started ? 24 : 22, style: .continuous)
             .strokeBorder(started ? Color.clear : alert ? color.opacity(0.35) : Color.primary.opacity(0.08)))
+        .overlay(alignment: .top) {
+            Capsule().fill(started ? Color.onInk.opacity(0.35) : Color.ink.opacity(0.2))
+                .frame(width: 24, height: 3).padding(.top, 3).accessibilityHidden(true)
+        }
+        .offset(y: reduceMotion ? 0 : pull)
+        .simultaneousGesture(DragGesture(minimumDistance: 12)
+            .updating($pull) { value, state, transaction in
+                transaction.animation = nil
+                if abs(value.translation.height) > abs(value.translation.width) {
+                    state = max(-36, min(0, value.translation.height * 0.25))
+                }
+            }
+            .onEnded { value in
+                if abs(value.translation.height) > abs(value.translation.width),
+                   value.translation.height < -40 || (value.translation.height < -15 && value.predictedEndTranslation.height < -100) {
+                    app.deepLink = .trip(trip.id)
+                }
+            })
+        .accessibilityAction(named: Text("Open trip")) { app.deepLink = .trip(trip.id) }
         .padding(.horizontal, 10).padding(.bottom, 6)
     }
 
@@ -143,6 +169,8 @@ struct LiveTripBar: View {
                 VStack(spacing: 0) {
                     if mins < 60 {
                         Text(verbatim: "\(mins)").font(.title2.weight(.bold).monospacedDigit())
+                            .contentTransition(.numericText(value: Double(mins)))
+                            .animation(reduceMotion ? nil : .easeInOut(duration: 0.25), value: mins)
                         Text("min").font(.caption2.weight(.semibold)).foregroundStyle(Color.onInk.opacity(0.7))
                     } else {
                         Text(Fmt.time(status.nextEvent, tz: trip.itinerary.legs.first?.from.tz))
@@ -174,9 +202,56 @@ struct LiveTripBar: View {
     }
 }
 
-extension View {
-    /// The live trip bar above the tab bar, on every screen of a tab.
-    func liveTripBar() -> some View {
-        safeAreaInset(edge: .bottom, spacing: 0) { LiveTripBar() }
+/// NavigationStack's destinations do not reliably honour an inset applied outside the stack.
+/// Measure the actual bar (Dynamic Type included), then reserve it on each content scroller.
+private struct LiveBarHeightKey: PreferenceKey {
+    static var defaultValue: CGFloat { 0 }
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = max(value, nextValue()) }
+}
+
+private struct LiveBarInsetKey: EnvironmentKey {
+    static let defaultValue: CGFloat = 0
+}
+
+extension EnvironmentValues {
+    var liveBarInset: CGFloat {
+        get { self[LiveBarInsetKey.self] }
+        set { self[LiveBarInsetKey.self] = newValue }
     }
+}
+
+private struct LiveTripBarHost: ViewModifier {
+    @State private var height: CGFloat = 0
+
+    func body(content: Content) -> some View {
+        content
+            .environment(\.liveBarInset, height)
+            .overlay(alignment: .bottom) {
+                VStack(spacing: 0) { LiveTripBar() }
+                    .fixedSize(horizontal: false, vertical: true)
+                    .background {
+                        GeometryReader { proxy in
+                            Color.clear.preference(key: LiveBarHeightKey.self, value: proxy.size.height)
+                        }
+                    }
+            }
+            .onPreferenceChange(LiveBarHeightKey.self) { value in
+                // Geometry must not inherit row/appearance animations and bounce the list.
+                guard abs(value - height) > 0.5 else { return }
+                var transaction = Transaction()
+                transaction.disablesAnimations = true
+                withTransaction(transaction) { height = value }
+            }
+    }
+}
+
+private struct LiveBarPadding: ViewModifier {
+    @Environment(\.liveBarInset) private var height
+    func body(content: Content) -> some View { content.safeAreaPadding(.bottom, height) }
+}
+
+extension View {
+    /// Install once, on the tab's NavigationStack. Sheets with no bar reset liveBarInset to zero.
+    func liveTripBar() -> some View { modifier(LiveTripBarHost()) }
+    func liveBarPadding() -> some View { modifier(LiveBarPadding()) }
 }

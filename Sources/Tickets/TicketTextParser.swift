@@ -597,6 +597,14 @@ enum TicketTextParser {
         return nil
     }
 
+    /// Explicit field assignment: the user chose this text, so no label inference is needed.
+    /// A printed range supplies its first date for "from" and its last for "until".
+    static func date(in text: String, end: Bool, calendar: Calendar = .current) -> Date? {
+        let found = findDates(clean(text)).sorted { $0.position < $1.position }
+        guard let value = end ? found.last : found.first else { return nil }
+        return date(value, end: end, calendar)
+    }
+
     /// Dates without a time start at midnight and end at 23:59:59; whole months cover the month.
     private static func date(_ found: FoundDate, end: Bool, _ calendar: Calendar) -> Date? {
         var c = found.components

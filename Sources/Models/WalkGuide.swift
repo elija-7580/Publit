@@ -249,6 +249,13 @@ struct WalkRoute: Sendable {
                         toNext: next.map { max(0, $0.along - along) * scale })
     }
 
+    /// Previewed future/past walks retain their planned length. GPS only shortens the current
+    /// walk when the fix is close enough to its path, not a projection from another city.
+    func livePosition(of coordinate: LatLon?, isActive: Bool) -> Position? {
+        guard isActive, let coordinate, let position = position(of: coordinate), position.offset <= 250 else { return nil }
+        return position
+    }
+
     /// Clearly away from the path, allowing for the fix's accuracy.
     static func isOffRoute(_ position: Position, accuracy: Double) -> Bool {
         position.offset > max(50, accuracy * 1.5)

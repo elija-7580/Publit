@@ -542,25 +542,28 @@ final class PublitUITests: XCTestCase {
         sleep(2) // walking time
         snap("stop-actions")
     }
-    /// F16 Real file handoff, local PDF text/Vision, auto-save and conservative fallbacks.
+    /// F16 Real file handoff always requires explicit review before the source is stored.
     func testF16SharedTicketImport() {
-        // PDF samples use embedded text (works without Vision). Pure images need Vision OCR;
-        // some simulator hosts cannot create an inference context — then expect the review sheet.
         for kind in ["pdf", "image", "unique"] {
             let app = launch(["PUBLIT_IMPORT_SAMPLE": kind])
-            let added = app.staticTexts["sharedTicketAdded"].waitForExistence(timeout: 30)
-            if kind == "image", !added {
-                // Vision OCR unavailable: import shows failure or editable review — never a silent crash.
-                let review = app.buttons["savePass"].waitForExistence(timeout: 8)
-                let failed = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] %@", "Try another")).firstMatch.waitForExistence(timeout: 3)
-                XCTAssertTrue(review || failed, "image without Vision should fail gracefully or open review")
+            let save = app.buttons["savePass"]
+            let review = save.waitForExistence(timeout: 30)
+            if kind == "image", !review {
+                // Some simulator hosts cannot create a Vision inference context.
+                let failed = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] %@", "Try another")).firstMatch
+                XCTAssertTrue(failed.waitForExistence(timeout: 3), "image OCR must fail gracefully")
                 snap("shared-ticket-image-fallback")
                 app.terminate()
                 continue
             }
-            XCTAssertTrue(added, "not imported: \(kind)")
-            snap("shared-ticket-\(kind)")
-            app.buttons["checkSharedTicket"].tap()
+            XCTAssertTrue(review, "shared file must be reviewed: \(kind)")
+            XCTAssertFalse(app.staticTexts["sharedTicketAdded"].exists, "must not auto-save")
+            XCTAssertTrue(bringUp(app.buttons["mapTicketFields"], in: app), "document field mapping missing")
+            snap("shared-ticket-review-\(kind)")
+            save.tap()
+            let card = app.buttons["passCard"].firstMatch
+            XCTAssertTrue(card.waitForExistence(timeout: 10), "reviewed ticket not saved")
+            card.tap()
             XCTAssertTrue(app.buttons["showOriginal"].waitForExistence(timeout: 10), "original missing")
             snap("shared-ticket-detail-\(kind)")
             app.terminate()
@@ -569,13 +572,37 @@ final class PublitUITests: XCTestCase {
         XCTAssertTrue(ambiguous.buttons["ticketPage-0"].waitForExistence(timeout: 30), "multiple tickets need a page choice")
         snap("shared-ticket-pages")
         ambiguous.buttons["ticketPage-0"].tap()
-        XCTAssertTrue(ambiguous.staticTexts["sharedTicketAdded"].waitForExistence(timeout: 30))
+        XCTAssertTrue(ambiguous.buttons["savePass"].waitForExistence(timeout: 30), "chosen page must be reviewed")
         ambiguous.terminate()
         let unknown = launch(["PUBLIT_IMPORT_SAMPLE": "unknown"])
         XCTAssertTrue(unknown.buttons["savePass"].waitForExistence(timeout: 30), "unknown file must go to review")
         XCTAssertFalse(unknown.staticTexts["sharedTicketAdded"].exists)
         snap("shared-ticket-review")
         unknown.buttons["Cancel"].firstMatch.tap()
+    }
+
+    /// F17 The field mapper is reachable from review and returns without persisting a draft.
+    func testF17TicketFieldReview() {
+        let app = launch(["PUBLIT_IMPORT_SAMPLE": "pdf"])
+        XCTAssertTrue(app.buttons["savePass"].waitForExistence(timeout: 30))
+        let mapping = app.buttons["mapTicketFields"]
+        XCTAssertTrue(bringUp(mapping, in: app))
+        mapping.tap()
+        let text = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "ticketText-")).firstMatch
+        if text.waitForExistence(timeout: 20) {
+            XCTAssertTrue(reveal(text, in: app))
+            text.tap()
+            XCTAssertTrue(app.textFields["ticketMappingText"].exists || app.textViews["ticketMappingText"].exists)
+            app.buttons["ticketField-title"].tap()
+        } else {
+            // PDF text import still works when the simulator's Vision engine is unavailable.
+            XCTAssertTrue(app.buttons["Done"].exists)
+        }
+        snap("ticket-field-mapper")
+        app.buttons["Done"].firstMatch.tap()
+        XCTAssertTrue(app.buttons["savePass"].exists)
+        app.buttons["Cancel"].firstMatch.tap()
+        XCTAssertFalse(app.buttons["savePass"].exists)
     }
 
 }

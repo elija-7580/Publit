@@ -50,6 +50,17 @@ final class TripGuideTests: XCTestCase {
         XCTAssertEqual(kind(40), "arrive4")
     }
 
+    func testOnlyCurrentNearbyWalkUsesGPSProgress() throws {
+        let route = WalkRoute(leg: try trip().legs[0])
+        let halfway = LatLon(lat: 48, lon: 11.002)
+        let active = try XCTUnwrap(route.livePosition(of: halfway, isActive: true))
+        XCTAssertGreaterThan(active.remaining, 0)
+        XCTAssertLessThan(active.remaining, route.length * route.scale)
+        XCTAssertNil(route.livePosition(of: halfway, isActive: false), "preview retains its full distance")
+        XCTAssertNil(route.livePosition(of: LatLon(lat: 48.1, lon: 11.002), isActive: true), "far-away GPS must not shorten a route")
+        XCTAssertNil(route.livePosition(of: nil, isActive: true))
+    }
+
     func testPositionMovesTheStage() throws {
         let it = try trip(), steps = TripGuide.steps(it)
         // Already at the stop while the clock still says walking.

@@ -24,7 +24,6 @@ struct PassImportView: View {
         case pages(Data, count: Int)
         case review(PassEditorView.Mode)
         case failed(String)
-        case added(TicketPass, duplicate: Bool)
     }
 
     var body: some View {
@@ -33,14 +32,13 @@ struct PassImportView: View {
                 switch stage {
                 case .choose: chooser
                 case .reading:
-                    ProgressView(L10n.t("Reading ticket…")).controlSize(.large)
+                    LogoLoader(label: L10n.t("Reading ticket…"))
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 case .pages(let data, let count): PagePicker(data: data, count: count) { page in
                     readingTask?.cancel()
                     readingTask = Task { await read(data, pdf: true, page: page) }
                 }
                 case .review(let mode): PassEditorView(mode: mode) { dismiss() }
-                case .added(let pass, let duplicate): added(pass, duplicate: duplicate)
                 case .failed(let message):
                     ContentUnavailableView {
                         Label(L10n.t("This file could not be read."), systemImage: "exclamationmark.triangle")
@@ -58,6 +56,7 @@ struct PassImportView: View {
                 }
             }
         }
+        .environment(\.liveBarInset, 0)
         .onDisappear {
             if !scanning && !choosingFile && !choosingPhoto { readingTask?.cancel() }
         }
@@ -94,7 +93,6 @@ struct PassImportView: View {
 
     private var showsCancel: Bool {
         if case .review = stage { return false }
-        if case .added = stage { return false }
         return true
     }
 
@@ -153,7 +151,7 @@ struct PassImportView: View {
                 } else { stage = .pages(data, count: count) }
             } else { await read(data, pdf: true, page: 0) }
         } catch is CancellationError {
-            // Dismissing the import must never turn into a late auto-save.
+            // Dismissing the import must never turn into a late save.
         } catch { stage = .failed(error.localizedDescription) }
     }
 
@@ -171,6 +169,16 @@ struct PassImportView: View {
     private func accept(_ scan: TicketScan, data: Data, pdf: Bool, page: Int) async {
         do {
             try Task.checkCancellation()
+            let fingerprint = await Task.detached(priority: .userInitiated) {
+                TicketImportPolicy.fingerprint(data, page: page)
+            }.value
+            try Task.checkCancellation()
+            // A reimport reviews the existing pass, not a second draft whose changes would be
+            // silently discarded by deduplication on Save. Cancel never changes the stored pass.
+            if let existing = store.passes.first(where: { $0.document?.fingerprint == fingerprint }) {
+                stage = .review(.edit(existing))
+                return
+            }
             let draft = TicketTextParser.parse(lines: scan.lines, barcodes: scan.barcodes, strictValidity: sharedURL != nil)
             var pass = TicketPass(draft: draft, barcode: scan.barcodes.first)
             // Added from a trip: it belongs to that trip whatever type was recognised,
@@ -179,34 +187,10 @@ struct PassImportView: View {
             if PassStyle.suggested(forOperator: draft.operatorName) == nil, let color = scan.suggestedColor {
                 pass.style = PassStyle(background: color)
             }
-            if sharedURL != nil, TicketImportPolicy.canAddAutomatically(draft, barcodes: scan.barcodes) {
-                let saved = try await store.add(pass, document: data, kind: pdf ? .pdf : .image, page: page, deduplicate: true)
-                stage = .added(saved, duplicate: saved.id != pass.id)
-            } else {
-                stage = .review(.new(pass, document: data, kind: pdf ? .pdf : .image, page: page,
-                                     codes: scan.barcodes, colorFromTicket: scan.suggestedColor))
-            }
+            stage = .review(.new(pass, document: data, kind: pdf ? .pdf : .image, page: page,
+                                 codes: scan.barcodes, colorFromTicket: scan.suggestedColor))
         } catch is CancellationError {
         } catch { stage = .failed(error.localizedDescription) }
-    }
-
-    private func added(_ pass: TicketPass, duplicate: Bool) -> some View {
-        VStack(spacing: 20) {
-            Image(systemName: duplicate ? "ticket" : "checkmark.circle.fill")
-                .font(.system(size: 48)).foregroundStyle(Color.ink)
-            Text(verbatim: duplicate ? L10n.t("Ticket already saved") : L10n.t("Ticket added"))
-                .font(.title2.bold()).accessibilityIdentifier("sharedTicketAdded")
-            Text(verbatim: pass.displayTitle).font(.headline)
-            Text("Please check the dates and code against the original. Recognition does not verify whether a ticket is valid.")
-                .font(.subheadline).foregroundStyle(.secondary).multilineTextAlignment(.center)
-            NavigationLink { PassDetailView(passId: pass.id) } label: {
-                Label(L10n.t("Check ticket"), systemImage: "ticket").frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.ink).controlSize(.large).accessibilityIdentifier("checkSharedTicket")
-            Button("Done") { dismiss() }.buttonStyle(.bordered)
-        }
-        .padding().navigationTitle(L10n.t("Add ticket")).navigationBarTitleDisplayMode(.inline)
-        .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
     }
 }
 
@@ -242,7 +226,7 @@ private struct PDFPageChoice: View {
             VStack {
                 Group {
                     if let thumbnail { Image(uiImage: thumbnail).resizable().scaledToFit() }
-                    else { ProgressView().frame(height: 180) }
+                    else { LogoLoader(size: 40).frame(height: 180) }
                 }
                 .frame(maxWidth: .infinity)
                 .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 10))

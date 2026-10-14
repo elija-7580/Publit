@@ -61,6 +61,7 @@ struct PassDetailView: View {
             }
             .padding()
         }
+        .liveBarPadding()
         .background(Color.ground)
         .navigationTitle(pass.displayTitle)
         .screenTrail("Pass")

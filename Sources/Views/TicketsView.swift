@@ -122,7 +122,7 @@ struct AddTicketView: View {
                 }
             }
             .inkList()
-            .overlay { if isSaving { ProgressView().padding(20).background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12)) } }
+            .overlay { if isSaving { LogoLoader(size: 40).frame(width: 100).matteSurface(in: RoundedRectangle(cornerRadius: 12)) } }
             .alert("Ticket could not be saved", isPresented: Binding(get: { saveError != nil }, set: { if !$0 { saveError = nil } })) {
                 Button("Done") { saveError = nil }
             } message: { Text(saveError ?? "") }
@@ -313,6 +313,7 @@ struct LinkedTicketAppsView: View {
             }
         }
         .inkList()
+        .liveBarPadding()
         .navigationTitle("Ticket apps")
         .screenTrail("Ticket apps")
     }

@@ -22,7 +22,7 @@ struct AddToWalletButton: View {
             .frame(maxWidth: .infinity)
             .opacity(working ? 0.5 : 1)
             .disabled(working || !PKAddPassesViewController.canAddPasses())
-            .overlay { if working { ProgressView() } }
+            .overlay { if working { LogoLoader(size: 24).frame(width: 48) } }
             .accessibilityIdentifier("addToWallet")
             .sheet(item: $walletPass) { item in AddPassesSheet(pass: item.pass).ignoresSafeArea() }
             .alert(L10n.t("The Wallet pass could not be created."), isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })) {

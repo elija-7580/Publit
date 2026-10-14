@@ -55,7 +55,7 @@ struct NearbyView: View {
                     ContentUnavailableView("Departures unavailable", systemImage: "exclamationmark.triangle",
                                            description: Text(errorMessage))
                 } else if isLoading || !location.hasFix {
-                    HStack { Spacer(); ProgressView(); Spacer() }
+                    LogoLoader()
                 } else if filter.isActive {
                     ContentUnavailableView {
                         Label("No departures for these modes", systemImage: "line.3.horizontal.decrease.circle")
@@ -389,7 +389,7 @@ struct StopDeparturesView: View {
                     Label("Couldn't refresh. Showing times from \(Fmt.time(lastUpdated)).", systemImage: "exclamationmark.triangle")
                         .font(.footnote).foregroundStyle(.secondary)
                 } else if !loaded {
-                    HStack { Spacer(); ProgressView(); Spacer() }
+                    LogoLoader()
                 } else if shown.isEmpty {
                     if filter.isActive {
                         Text("No departures for these modes").foregroundStyle(.secondary)

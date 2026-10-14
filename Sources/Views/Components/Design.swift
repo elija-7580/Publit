@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// "Ink & Dot" (docs/design/README.md): flat opaque cards, one glass layer for floating controls,
+/// "Ink & Dot" (docs/design/README.md): flat opaque cards and matte floating controls,
 /// ink instead of a brand colour, the logo's yellow dot only for "you" and "live".
 extension Color {
     static let ground = Color(Palette.ground)
@@ -26,6 +26,14 @@ struct InkButtonStyle: ButtonStyle {
             .background(Color.ink, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
             .opacity(isEnabled ? (configuration.isPressed ? 0.75 : 1) : 0.35)
+    }
+}
+
+/// Switches turn the live green when on: an ink switch was black on light and nearly white on dark,
+/// and its thumb disappeared against it.
+struct InkSwitchStyle: ToggleStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        Toggle(configuration).toggleStyle(.switch).tint(Color.live)
     }
 }
 
@@ -73,6 +81,13 @@ extension View {
         scrollContentBackground(.hidden)
             .background(Color.ground)
             .listSectionSpacing(12)
+            .liveBarPadding()
+    }
+
+    /// Opaque floating controls with a quiet edge, shared across platforms (no blur).
+    func matteSurface<S: InsettableShape>(in shape: S) -> some View {
+        background(Color.surface, in: shape)
+            .overlay(shape.strokeBorder(Color.ink.opacity(0.09), lineWidth: 1))
     }
 
     /// Rows of a list section as one flat card.

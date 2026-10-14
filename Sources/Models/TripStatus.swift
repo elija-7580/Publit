@@ -107,12 +107,12 @@ enum CalendarText {
             s += " – \(leg.to.name) \(Fmt.time(leg.endTime, tz: leg.to.tz))"
             out.append(s)
         }
-        out.append("")
-        // The web link works for anyone invited and on every device, also where the trip is not saved.
-        let link = ShareLinks.web(.route(trip.shared)).absoluteString
-        out.append(Features.tickets ? L10n.f("Live status and tickets: %@", link) : L10n.f("Live status: %@", link))
         return out.joined(separator: "\n")
     }
+
+    /// One short link in the event's URL field: opens the saved trip with live status and tickets.
+    /// (The whole route as a link was 1–2 KB, and the web page behind share links needs GitHub Pages.)
+    static func url(_ trip: SavedTrip) -> URL { DeepLink.trip(trip.id).url }
 
     static func location(_ trip: SavedTrip) -> String {
         trip.itinerary.firstTransitLeg?.from.name ?? trip.fromName

@@ -21,6 +21,7 @@ struct ConnectionGuideView: View {
                     .font(.subheadline).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             }.padding()
         }
+        .liveBarPadding()
         .background(Color.ground)
         .navigationTitle(L10n.t("How to read connections"))
         .screenTrail("Connection guide")
@@ -92,6 +93,7 @@ struct ConnectionLegendRow: View {
                 NavigationStack {
                     ConnectionGuideView().toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { showing = false } } }
                 }
+                .environment(\.liveBarInset, 0)
             }
         }
     }

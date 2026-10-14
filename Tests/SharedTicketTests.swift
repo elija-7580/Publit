@@ -3,17 +3,17 @@ import XCTest
 @testable import Publit
 
 final class SharedTicketPolicyTests: XCTestCase {
-    func testRecognizableTicketCanBeAddedWithoutInventingDates() {
+    func testRecognizablePageDoesNotInventDates() {
         let draft = TicketTextParser.parse(lines: ["ÖBB", "Sparschiene", "Von: Wien Hbf", "Nach: Graz Hbf"], strictValidity: true)
-        XCTAssertTrue(TicketImportPolicy.canAddAutomatically(draft, barcodes: []))
+        XCTAssertTrue(TicketImportPolicy.isRecognizable(draft, barcodes: []))
         XCTAssertEqual(TicketPass(draft: draft, barcode: nil).validity(), .unknown)
     }
 
     func testAdvertisementAndWebsiteQRNeedReview() {
         let advertisement = TicketTextParser.parse(lines: ["ÖBB", "Travel with us", "oebb.at"])
         let website = TicketPass.Barcode(format: .qr, message: "https://oebb.at")
-        XCTAssertFalse(TicketImportPolicy.canAddAutomatically(advertisement, barcodes: [website]))
-        XCTAssertFalse(TicketImportPolicy.canAddAutomatically(TicketDraft(), barcodes: [website]))
+        XCTAssertFalse(TicketImportPolicy.isRecognizable(advertisement, barcodes: [website]))
+        XCTAssertFalse(TicketImportPolicy.isRecognizable(TicketDraft(), barcodes: [website]))
     }
 
     func testUnlabelledDatesAreNotAutomaticValidity() {
@@ -29,7 +29,7 @@ final class SharedTicketPolicyTests: XCTestCase {
         var cal = Calendar(identifier: .gregorian)
         cal.timeZone = TimeZone(identifier: "Europe/Vienna")!
         let d = TicketTextParser.parse(lines: ["ÖBB", "Sparschiene", "Gültig von: 12.10.2020 14:00", "Gültig bis: 12.10.2020 18:00"], calendar: cal, strictValidity: true)
-        XCTAssertTrue(TicketImportPolicy.canAddAutomatically(d, barcodes: []))
+        XCTAssertTrue(TicketImportPolicy.isRecognizable(d, barcodes: []))
         XCTAssertNotNil(d.validFrom)
         guard case .expired = TicketPass(draft: d, barcode: nil).validity(at: Date(timeIntervalSince1970: 1_800_000_000)) else {
             return XCTFail("must not make an expired document valid")
@@ -38,7 +38,7 @@ final class SharedTicketPolicyTests: XCTestCase {
 
     func testReversedLabelledValidityNeedsReview() {
         let d = TicketTextParser.parse(lines: ["ÖBB", "Sparschiene", "Gültig von: 13.10.2030", "Gültig bis: 12.10.2030"], strictValidity: true)
-        XCTAssertFalse(TicketImportPolicy.canAddAutomatically(d, barcodes: []))
+        XCTAssertFalse(TicketImportPolicy.isRecognizable(d, barcodes: []))
     }
 
     func testFingerprintIncludesDocumentAndPage() {

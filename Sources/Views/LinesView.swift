@@ -54,7 +54,7 @@ struct LinesView: View {
                     if let errorMessage {
                         Text(errorMessage).foregroundStyle(.secondary)
                     } else if isLoading || !location.hasFix {
-                        HStack { Spacer(); ProgressView(); Spacer() }
+                        LogoLoader()
                     } else {
                         Text("No lines found nearby.").foregroundStyle(.secondary)
                     }
@@ -221,7 +221,7 @@ struct LineDetailView: View {
             } else if loaded && directions.isEmpty {
                 Text("No departures of \(line.lineName) in the next hours.").foregroundStyle(.secondary)
             } else {
-                HStack { Spacer(); ProgressView(); Spacer() }
+                LogoLoader()
             }
         }
         .inkList()
@@ -421,7 +421,7 @@ struct LineTimetableView: View {
             } else if let errorMessage {
                 Text(errorMessage).foregroundStyle(.secondary)
             } else {
-                HStack { Spacer(); ProgressView(); Spacer() }
+                LogoLoader()
             }
         }
         .inkList()

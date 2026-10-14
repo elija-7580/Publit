@@ -134,13 +134,6 @@ struct SettingsView: View {
                 } footer: {
                     Text("Publit notes freezes of 2 seconds or more, crashes, unexpected exits and failed requests (only their kind), each with the screens opened just before. Places, stops and tickets are not recorded, and nothing leaves this device unless you share it.")
                 }
-                .task {
-                    let loaded = await Task.detached(priority: .utility) {
-                        (HangLog.shared.summary, HangLog.shared.writeReport())
-                    }.value
-                    summary = loaded.0
-                    reportURL = loaded.1
-                }
                 Section {
                     Link("Source code and feedback", destination: AppInfo.repositoryURL)
                     LabeledContent("Version", value: AppInfo.version)
@@ -155,6 +148,20 @@ struct SettingsView: View {
                 }
             }
             .inkList()
+            // Once per opening, on the list: on the section it ran again each time the section scrolled
+            // back in, and rows appearing and disappearing made the screen jump back and forth.
+            .task {
+                guard summary == nil else { return }
+                let loaded = await Task.detached(priority: .utility) {
+                    (HangLog.shared.summary, HangLog.shared.writeReport())
+                }.value
+                var t = Transaction()
+                t.disablesAnimations = true
+                withTransaction(t) {
+                    summary = loaded.0
+                    reportURL = loaded.1
+                }
+            }
             .navigationTitle("Settings")
             .screenTrail("Settings")
             .navigationBarTitleDisplayMode(.inline)
@@ -171,7 +178,7 @@ struct SettingsButton: View {
 
     var body: some View {
         Button { showing = true } label: { Label("Settings", systemImage: "gearshape") }
-            .sheet(isPresented: $showing) { SettingsView() }
+            .sheet(isPresented: $showing) { SettingsView().environment(\.liveBarInset, 0) }
     }
 }
 

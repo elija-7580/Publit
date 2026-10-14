@@ -66,7 +66,7 @@ struct LogoPickerView: View {
             }
             Section {
                 if loading {
-                    HStack { Spacer(); ProgressView(); Spacer() }
+                    LogoLoader()
                 } else if searched && shown.isEmpty {
                     Text("No logo found. Try another name or choose an image.").foregroundStyle(.secondary)
                 }

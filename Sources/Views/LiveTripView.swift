@@ -38,7 +38,10 @@ struct LiveTripView: View {
         let step = steps[index]
         let leg = it.legs[step.legIndex]
         let walk = step.kind == .walk ? WalkRoute(leg: leg) : nil
-        let walkPos = here.flatMap { walk?.position(of: $0) }
+        // Your position counts only on the walk you are on and near its path. A walk picked in the
+        // strip (a later change, the last metres) or one starting somewhere else shows its own length,
+        // not the way from where you stand.
+        let walkPos = walk?.livePosition(of: here, isActive: index == live)
         let ride = step.kind == .ride || step.kind == .wait ? TripGuide.ridePosition(leg, at: now, location: here) : nil
         let check = index == live ? TripGuide.check(step, it, at: now, location: here, accuracy: location.accuracy, walk: walk) : .fine
         let cue = index == live ? GuideCues.current(step, it, at: now, walk: walk, position: walkPos, progress: ride?.progress) : nil
@@ -108,6 +111,7 @@ struct LiveTripView: View {
                 TripPassesView(tripId: trip.id, at: now)
                     .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { showTickets = false } } }
             }
+            .environment(\.liveBarInset, 0)
         }
         .sensoryFeedback(trigger: feedback) { _, _ in
             feedbackKind == .platform ? SensoryFeedback.warning : SensoryFeedback.impact(weight: .heavy, intensity: 1)
@@ -599,7 +603,7 @@ private struct GuideMap: View {
                 Image(systemName: followHeading ? "location.north.line.fill" : "location.north.line")
                     .font(.body.weight(.semibold))
                     .frame(width: 44, height: 44)
-                    .background(.regularMaterial, in: Circle())
+                    .matteSurface(in: Circle())
             }
             .buttonStyle(.plain)
             .padding(8)
@@ -735,7 +739,7 @@ private struct AlternativeRow: View {
                 .disabled(switching)
                 .accessibilityIdentifier("guideSwitchConnection")
             } else if searching {
-                ProgressView(L10n.t("Looking for the next connection…")).font(.footnote)
+                LogoLoader(label: L10n.t("Looking for the next connection…"), size: 40)
             }
             Button { onMore() } label: {
                 Label("New route from here", systemImage: "arrow.triangle.turn.up.right.diamond")

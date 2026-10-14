@@ -24,6 +24,7 @@ struct PassEditorView: View {
     @State private var logoChanged = false
     @State private var logoSuggested = false
     @State private var choosingLogo = false
+    @State private var mappingFields = false
 
     init(mode: Mode, onFinish: (() -> Void)? = nil) {
         self.mode = mode
@@ -63,6 +64,18 @@ struct PassEditorView: View {
                     .accessibilityLabel(L10n.f("Preview: %@", pass.accessibilitySummary))
             } footer: {
                 if isNew { Text("Read on your iPhone. Check every detail before you save.") }
+            }
+
+            if let source = codeSource {
+                Section {
+                    Button { mappingFields = true } label: {
+                        Label(L10n.t("Assign fields on the ticket"), systemImage: "text.viewfinder")
+                    }
+                    .accessibilityIdentifier("mapTicketFields")
+                    .sheet(isPresented: $mappingFields) {
+                        NavigationStack { TicketFieldMapper(source: source, pass: $pass) }
+                    }
+                }
             }
 
             Section(L10n.t("Ticket")) {
@@ -117,6 +130,7 @@ struct PassEditorView: View {
             }
         }
         .inkList()
+        .environment(\.liveBarInset, 0)
         .navigationTitle(isNew ? L10n.t("Check ticket") : L10n.t("Edit ticket"))
         .screenTrail("Pass editor")
         .navigationBarTitleDisplayMode(.inline)
@@ -310,7 +324,13 @@ struct PassEditorView: View {
         switch mode {
         case .new(_, let document, let kind, let page, _, _):
             do {
-                let saved = try await store.add(pass, document: document, kind: kind, page: page)
+                let saved = try await store.add(pass, document: document, kind: kind, page: page, deduplicate: true)
+                guard saved.id == pass.id else {
+                    // Another import may have completed during disk I/O; do not silently lose
+                    // this review or overwrite the other pass.
+                    error = L10n.t("Ticket already saved")
+                    return
+                }
                 if let logoData { store.setLogo(logoData, source: logoCredit, for: saved.id) }
                 finish()
             } catch {

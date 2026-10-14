@@ -72,7 +72,7 @@ struct TicketAttachmentView: View {
         Group {
             if let image {
                 Image(uiImage: image).resizable().scaledToFit().accessibilityLabel(label)
-            } else if loading { ProgressView().frame(minHeight: 140) }
+            } else if loading { LogoLoader().frame(minHeight: 140) }
             else { Text("Ticket image unavailable").foregroundStyle(.secondary) }
         }
         .task(id: url) {

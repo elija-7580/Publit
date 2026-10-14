@@ -25,7 +25,7 @@ struct GoNowView: View {
             Section {
                 OfflineNote()
                 if plan.isLoading && its.isEmpty {
-                    HStack { Spacer(); ProgressView(); Spacer() }
+                    LogoLoader()
                 } else if let msg = plan.errorMessage, its.isEmpty {
                     Text(msg).foregroundStyle(.secondary)
                 }

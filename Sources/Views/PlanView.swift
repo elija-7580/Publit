@@ -80,8 +80,8 @@ struct PlanView: View {
             if plan.date < .now.addingTimeInterval(-60) { plan.date = .now }
         }
         .toolbar {
-            if plan.to != nil {
-                ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem(placement: .topBarTrailing) {
+                if plan.to != nil {
                     Button { app.plan.to = nil } label: { Label("Clear destination", systemImage: "xmark.circle") }
                 }
             }
@@ -154,7 +154,7 @@ struct PlanView: View {
         Section {
             OfflineNote()
             if plan.isLoading && its.isEmpty {
-                HStack { Spacer(); ProgressView(); Spacer() }
+                LogoLoader()
             } else if let msg = plan.errorMessage, its.isEmpty {
                 Text(msg).foregroundStyle(.secondary)
             }
@@ -216,7 +216,7 @@ struct PlanView: View {
                 } label: {
                     HStack {
                         Text(plan.timeMode == .arriveBy ? L10n.t("Earlier connections") : L10n.t("Later connections"))
-                        if plan.isLoadingMore { Spacer(); ProgressView() }
+                        if plan.isLoadingMore { Spacer(); LogoLoader(size: 24).frame(width: 48) }
                     }
                 }
             }
@@ -254,11 +254,10 @@ struct ItineraryRow: View {
                         .accessibilityLabel("Live data")
                 }
                 Spacer()
-                Text(Fmt.duration(seconds: itinerary.duration))
-                    .font(.subheadline.weight(.semibold).monospacedDigit())
+                DurationFigure(seconds: itinerary.duration, size: 22)
             }
             if showTimeline {
-                TimelineBar(itinerary: itinerary, windowStart: windowStart, windowEnd: windowEnd).frame(height: 22)
+                TimelineBar(itinerary: itinerary, windowStart: windowStart, windowEnd: windowEnd).frame(height: 42)
             }
             HStack(spacing: 8) {
                 Text(Fmt.changes(itinerary.transfers))
@@ -294,8 +293,8 @@ struct TimelineBar: View {
         GeometryReader { geo in
             let span = max(windowEnd.timeIntervalSince(windowStart), 60)
             let width = geo.size.width
-            let height = geo.size.height
-            ZStack(alignment: .leading) {
+            let height: CGFloat = 22
+            ZStack(alignment: .topLeading) {
                 ForEach(Array(itinerary.legs.enumerated()), id: \.offset) { index, leg in
                     if index > 0, itinerary.legs[index - 1].endTime < leg.startTime {
                         let previous = itinerary.legs[index - 1].endTime
@@ -325,11 +324,17 @@ struct TimelineBar: View {
                         Capsule()
                             .fill(Color.secondary.opacity(0.35))
                             .frame(width: w, height: 4)
-                            .offset(x: x)
+                            .offset(x: x, y: (height - 4) / 2)
+                    }
+                    if w >= 28 {
+                        Text(verbatim: "\(max(1, Int((Double(leg.duration) / 60).rounded())))′")
+                            .font(.caption2.weight(.semibold).monospacedDigit())
+                            .foregroundStyle(.secondary).lineLimit(1)
+                            .frame(width: w, height: 16).offset(x: x, y: height + 3)
                     }
                 }
             }
-            .frame(width: width, height: height, alignment: .leading).clipped()
+            .frame(width: width, height: geo.size.height, alignment: .topLeading).clipped()
         }
         .accessibilityHidden(true)
     }

@@ -20,6 +20,7 @@ struct PassWalletView: View {
                 list
             }
         }
+        .liveBarPadding()
         .background(Color.ground)
         .navigationTitle(L10n.t("Tickets"))
         .screenTrail("Tickets")

@@ -8,20 +8,20 @@ The idea follows apps like NeatPass: your ticket arrives as a PDF, photo or scre
 iPhone, you check the result, and you get a clean pass with the code ready for the gate. Publit's own take: it stays
 inside a transit app, so a pass can belong to a saved trip, and passes valid at the trip's time show up there.
 
-## Shared PDF / image import (0.5.1)
+## Shared PDF / image import (0.6.0, build 31)
 
 If the source app offers **Open In / Copy to Publit**, choose it. iOS hands the local file to Publit;
-it switches to Tickets, reads it on the device and automatically stores a recognizable ticket plus
-its unmodified source. The result offers **Check ticket** → **Show original** and **More → Edit**.
-No operator-logo search or ticket upload runs during auto-import.
+it switches to Tickets and reads it on the device. **Every import opens the review screen before anything
+is stored**, including recognizable shared tickets. Save keeps the checked fields and the unmodified source;
+Cancel leaves no new ticket. No ticket upload or automatic operator-logo lookup runs while reading the file.
 
-- Images and single-page PDFs: automatic when the product/category plus operator, code or route support recognition.
+- Images and single-page PDFs: read on-device, then review and Save.
 - PDFs up to 12 pages: scan one page at a time; auto-select only a unique recognizable ticket page.
 - Several ticket pages, no unique match, or longer PDF: choose the page; all pages remain available.
 - Unrecognized documents: normal editable review, never silently converted into a valid ticket.
 - Labelled validity dates are extracted; unlabelled dates are not invented as validity. Missing dates stay unknown.
-- A repeated identical document/page opens the existing pass; different pages remain different tickets.
-- Maximum source size is 25 MiB. Dismissing an unfinished import prevents a late auto-save.
+- A repeated identical document/page reviews the existing pass, including its saved corrections; different pages remain different tickets.
+- Maximum source size is 25 MiB. Dismissing an unfinished import prevents a late save.
 
 **Scope:** this registers document handlers, not an iOS Share Extension. Ordinary image share sheets,
 including some WhatsApp flows, may not list Publit. If not listed, save to Files and use the in-app
@@ -32,7 +32,7 @@ which the current Personal Team signing does not support. Do not use extension U
 put private ticket bytes in a deep-link URL.
 
 Recognition is not an authenticity check. Always compare date, route and code with the operator's
-original; rotating codes still belong in the operator's app. Auto-import keeps codes and source bytes,
+original; rotating codes still belong in the operator's app. Import keeps codes and source bytes,
 but scanner compatibility still needs real-ticket/device testing.
 
 ## Flow
@@ -48,7 +48,12 @@ but scanner compatibility still needs real-ticket/device testing.
    are ignored), passenger, class, price, ticket number. The issuer of a UIC 918.3 rail code (`#UT…`) is read
    from the code header. Fields stay empty when nothing supports them.
 4. **Check** (`PassEditorView`): live preview of the pass; every field editable; choose among several codes or
-   none; colour (presets, operator colour, colour from the ticket) and symbol.
+   none; colour (presets, operator colour, colour from the ticket) and symbol. **Assign fields on the ticket**
+   opens the original selected page with tappable OCR regions (also available when editing a saved ticket). Pinch/double-tap to zoom; tap text, correct it
+   if needed and choose title, operator, origin, destination, via, passenger, price, ticket number, validity
+   start/end or notes. Assignments only change the draft. Invalid date text leaves the existing value intact;
+   the final editor also rejects an end date before the start. If OCR is unavailable, the normal manual fields
+   remain usable. The document and barcode are never rewritten.
 5. **Use** (`PassWalletView`, `PassDetailView`): passes grouped as valid now, upcoming, no dates, expired
    (folded). The pass card shows operator, title, validity badge, route, details, a perforation and the code.
    Tapping the code opens it full screen on white; brightness goes to 100 % while a code is shown and comes
@@ -65,6 +70,7 @@ screens, and every pass says that only the operator's ticket is valid.
 | --- | --- | --- |
 | Model, validity, grouping | `Sources/Tickets/TicketPass.swift` | iOS, Linux |
 | Colours with WCAG AA text and labels | `Sources/Tickets/PassStyle.swift` | iOS, Linux |
+| Explicit field assignment | `Sources/Tickets/TicketFieldMapping.swift` | iOS, Linux |
 | Text rules, known operators | `Sources/Tickets/TicketTextParser.swift` | iOS, Linux |
 | Store, documents, legacy import | `Sources/Tickets/PassStore.swift` | iOS, Linux |
 | pass.json, manifest, package, signer client | `Sources/Tickets/WalletPass.swift`, `Sources/Util/SHA1.swift`, `Sources/Util/ZipWriter.swift` | iOS, Linux |

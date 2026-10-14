@@ -260,7 +260,7 @@ struct BarcodeView: View {
                 } else if failed {
                     Image(systemName: "exclamationmark.triangle").foregroundStyle(.secondary)
                 } else {
-                    ProgressView()
+                    LogoLoader(size: 28)
                 }
             }
             .frame(width: geo.size.width, height: geo.size.height)

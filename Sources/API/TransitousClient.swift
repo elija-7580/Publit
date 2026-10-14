@@ -268,6 +268,9 @@ final class TransitousClient: @unchecked Sendable {
         defer { PerformanceTrace.end(trace, "Transit request") }
         var comps = URLComponents(url: base.appendingPathComponent(path), resolvingAgainstBaseURL: false)!
         comps.queryItems = query
+        // URLComponents leaves "+" as it is, and the server reads it as a space: itinerary and trip
+        // IDs (base64) then come back as HTTP 400. Encoded, "+" stays a plus.
+        comps.percentEncodedQuery = Self.encodePlus(comps.percentEncodedQuery)
         let url = comps.url!
         let key = policy.slot ?? url.absoluteString
         if let hit = cache.fresh(key, maxAge: policy.maxAge),
@@ -328,6 +331,10 @@ final class TransitousClient: @unchecked Sendable {
                     diskInterval: policy.maxAge < 600 ? ResponseCache.minDiskInterval : 0)
         await Connectivity.shared.reachedServer()
         return value
+    }
+
+    static func encodePlus(_ query: String?) -> String? {
+        query?.replacingOccurrences(of: "+", with: "%2B")
     }
 
     /// "/api/v5/plan" → "plan": what kind of request, for the diagnostics steps.

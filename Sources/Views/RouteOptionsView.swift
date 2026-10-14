@@ -164,7 +164,7 @@ struct RouteOptionsButton: View {
         }
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("routeOptions")
-        .sheet(isPresented: $showing) { RouteOptionsView() }
+        .sheet(isPresented: $showing) { RouteOptionsView().environment(\.liveBarInset, 0) }
     }
 }
 
