@@ -150,6 +150,14 @@ struct RootView: View {
             }
             .dynamicTypeSize(dynamicTypeSize)
         }
+        .sheet(item: routeLink) { ref in
+            NavigationStack {
+                SharedRouteView(route: ref.route)
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) { Button("Done") { app.deepLink = nil } }
+                    }
+            }
+        }
         .sheet(item: stopLink) { stop in
             NavigationStack {
                 StopDeparturesView(stopId: stop.id, name: stop.name, coordinate: stop.coordinate)
@@ -201,6 +209,15 @@ struct RootView: View {
             if case .stop(let id, let name, let lat, let lon) = app.deepLink {
                 return StopRef(id: id, name: name, coordinate: LatLon(lat: lat, lon: lon))
             }
+            return nil
+        }, set: { if $0 == nil { app.deepLink = nil } })
+    }
+
+    private struct RouteRef: Identifiable { let route: SharedRoute; var id: String { route.query } }
+
+    private var routeLink: Binding<RouteRef?> {
+        Binding(get: {
+            if case .route(let r) = app.deepLink { return RouteRef(route: r) }
             return nil
         }, set: { if $0 == nil { app.deepLink = nil } })
     }

@@ -234,7 +234,7 @@ final class AppState {
         // The default ticket link opens the Tickets tab.
         if case .ticket(nil) = link { tab = .tickets; deepLink = nil; return }
         switch link {
-        case .trip: tab = .plan
+        case .trip, .route: tab = .plan
         case .stop: tab = .nearby
         case .ticket, .tripTickets, .go: break
         }
@@ -269,6 +269,19 @@ final class AppState {
     func route(from place: SavedPlace) {
         if plan.to == .place(place) { plan.to = nil }
         plan.from = .place(place)
+        tab = .plan
+    }
+
+    /// A shared route that can no longer be fetched: the same places in the Plan tab, at the shared time
+    /// if it is still ahead, otherwise now.
+    func searchAgain(_ r: SharedRoute, now: Date = .now) {
+        let key = "\(Int(r.departure.timeIntervalSince1970))"
+        plan.from = .place(SavedPlace(id: "shared-from-\(key)", name: r.fromName, subtitle: nil, lat: r.from.lat, lon: r.from.lon, stopId: nil))
+        plan.to = .place(SavedPlace(id: "shared-to-\(key)", name: r.toName, subtitle: nil, lat: r.to.lat, lon: r.to.lon, stopId: nil))
+        plan.timeMode = .departAt
+        plan.date = max(r.departure, now)
+        plan.searchStarted = true
+        deepLink = nil
         tab = .plan
     }
 

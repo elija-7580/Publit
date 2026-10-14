@@ -349,6 +349,13 @@ struct StopDeparturesView: View {
                     .accessibilityIdentifier("routeFromHere")
                 }
                 .buttonStyle(.borderless)
+                // The departure board as a link anyone can open (live on their phone, or on the map).
+                ShareLink(item: ShareLinks.web(.stop(id: stopId, name: name, lat: coordinate.lat, lon: coordinate.lon)),
+                          subject: Text(verbatim: name), message: Text(verbatim: name)) {
+                    Label("Share departures", systemImage: "square.and.arrow.up")
+                }
+                .buttonStyle(.borderless)
+                .accessibilityIdentifier("shareDepartures")
                 Picker("View", selection: $mode) {
                     Text("Departures").tag(Mode.departures)
                     Text("Lines").tag(Mode.lines)

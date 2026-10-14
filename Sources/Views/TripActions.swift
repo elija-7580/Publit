@@ -97,18 +97,21 @@ struct TripActionsSection: View {
             Label("Add to Calendar", systemImage: "calendar.badge.plus")
         }
         .buttonStyle(ActionButtonStyle())
-        if itinerary.endTime > .now {
-            // "I'm arriving at … at 18:42": live time; a notification follows if it moves later.
-            ShareLink(item: ArrivalShare.message(for: itinerary, to: toName)) {
-                Label("Share arrival", systemImage: "square.and.arrow.up")
-            }
-            .buttonStyle(ActionButtonStyle())
-            .simultaneousGesture(TapGesture().onEnded {
-                let trip = ensureSaved()
-                ArrivalUpdates.recordShare(tripKey: trip.id, arrival: itinerary.endTime)
-            })
-            .accessibilityIdentifier("shareArrival")
+        // A link anyone can open (web page → Publit, or maps), with the route fetched live on their phone.
+        // Before arrival with "I'm arriving at … at 18:42"; a notification follows if that moves later.
+        let upcoming = itinerary.endTime > .now
+        ShareLink(item: ShareLinks.web(.route(SharedRoute(itinerary, fromName: fromName, toName: toName))),
+                  subject: Text(verbatim: "\(fromName) → \(toName)"),
+                  message: Text(verbatim: upcoming ? ArrivalShare.message(for: itinerary, to: toName) : "\(fromName) → \(toName)")) {
+            Label(upcoming ? L10n.t("Share arrival") : L10n.t("Share trip"), systemImage: "square.and.arrow.up")
         }
+        .buttonStyle(ActionButtonStyle())
+        .simultaneousGesture(TapGesture().onEnded {
+            guard upcoming else { return }
+            let trip = ensureSaved()
+            ArrivalUpdates.recordShare(tripKey: trip.id, arrival: itinerary.endTime)
+        })
+        .accessibilityIdentifier("shareArrival")
         if itinerary.startTime > .now {
             Button {
                 Task { await toggleReminder() }
@@ -252,7 +255,8 @@ struct CalendarEventSheet: UIViewControllerRepresentable {
         event.endDate = trip.endTime
         event.location = CalendarText.location(trip)
         event.notes = CalendarText.notes(trip)
-        event.url = trip.deepLink
+        // The route itself, not this phone's saved-trip ID: also opens on another device of the calendar.
+        event.url = DeepLink.route(trip.shared).url
         event.addAlarm(EKAlarm(absoluteDate: TripStatus.reminderTime(trip.itinerary)))
         let vc = EKEventEditViewController()
         vc.eventStore = store

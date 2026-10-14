@@ -105,8 +105,9 @@ enum CalendarText {
             out.append(s)
         }
         out.append("")
-        out.append(Features.tickets ? L10n.f("Live status and tickets: %@", trip.deepLink.absoluteString)
-                                     : L10n.f("Live status: %@", trip.deepLink.absoluteString))
+        // The web link works for anyone invited and on every device, also where the trip is not saved.
+        let link = ShareLinks.web(.route(trip.shared)).absoluteString
+        out.append(Features.tickets ? L10n.f("Live status and tickets: %@", link) : L10n.f("Live status: %@", link))
         return out.joined(separator: "\n")
     }
 

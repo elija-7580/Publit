@@ -154,7 +154,7 @@ final class TripStatusTests: XCTestCase {
     func testCalendarNotesLinkBackToTheApp() throws {
         let it = try plan("plan_roma").itineraries[0]
         let trip = SavedTrip(id: "abc", itinerary: it, fromName: "Termini", toName: "Trastevere", savedAt: .now)
-        XCTAssertTrue(CalendarText.notes(trip).contains("publit://trip/abc"))
+        XCTAssertTrue(CalendarText.notes(trip).contains("https://elija-7580.github.io/Publit-/open/#route?"))
         XCTAssertTrue(CalendarText.title(trip).hasPrefix("Trastevere ("))
     }
 }

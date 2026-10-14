@@ -15,7 +15,10 @@ struct SavedTrip: Codable, Identifiable, Hashable, Sendable {
     var startTime: Date { itinerary.startTime }
     var endTime: Date { itinerary.endTime }
     var title: String { "\(fromName) → \(toName)" }
+    /// This phone only: opens the saved trip (Live Activity, reminders).
     var deepLink: URL { DeepLink.trip(id).url }
+    /// The route itself, for other people and other devices.
+    var shared: SharedRoute { SharedRoute(itinerary, fromName: fromName, toName: toName) }
 
     static func == (a: SavedTrip, b: SavedTrip) -> Bool {
         // followLive too: otherwise SwiftUI may skip redrawing a trip whose reminder was switched.

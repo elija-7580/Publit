@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.0 (build 19)
+
+### Sharing
+- Shared links now carry the route itself instead of this phone's saved-trip ID, so they work for anyone with Publit and on any device. The route (Transitous itinerary ID, compressed), start, destination and departure are in the link; the receiving iPhone fetches it again from Transitous with live times.
+- "Share arrival" (before arrival) sends the arrival text plus that link; after the trip the button is "Share trip". Departure boards have "Share departures".
+- Links are https (`https://elija-7580.github.io/Publit-/open/#…`), so messengers make them tappable. The small page (`docs/open/index.html`) shows the route or stop, opens Publit, or offers Apple Maps / Google Maps for people without Publit. The part after `#` stays in the browser. Needs GitHub Pages: Settings → Pages → Deploy from a branch → `main` / `/docs`.
+- Opening a route link: if it is one of your saved trips, that trip opens; otherwise the route with live status (refreshed every 90 s) and "Save trip". If Transitous no longer knows the route, "Search this route" fills Plan with the same places and time.
+- Calendar entries link to the route too (URL field `publit://route?…`, notes with the web link), so they also open on another device or after the trip was deleted.
+- Not yet confirmed on a device. The link includes the exact start point (e.g. home), as any shared route does.
+
 ## 0.6.0 (build 18)
 
 - Trip tickets: several tickets for one trip are all shown, oldest first. A ticket added from a trip now always belongs to that trip; before, only tickets recognised as a single ticket were linked, so one recognised (or changed on the check screen) as a day pass, return ticket or other could drop out of the trip. The ticket section on the trip lists all tickets instead of the first three.

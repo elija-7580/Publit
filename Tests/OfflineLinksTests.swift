@@ -44,6 +44,37 @@ final class OfflineLinksTests: XCTestCase {
         XCTAssertNil(DeepLink(url: URL(string: "publit://stop/x")!), "coordinates required")
     }
 
+    func testSharedRouteLinkCarriesTheWholeRoute() throws {
+        let data = try Data(contentsOf: URL(fileURLWithPath: #filePath).deletingLastPathComponent().appendingPathComponent("Fixtures/plan.json"))
+        let it = try TransitousClient.makeDecoder().decode(PlanResponse.self, from: data).itineraries[0]
+        let route = SharedRoute(it, fromName: "Café & Bar = ü/1", toName: "Home?#")
+        let web = ShareLinks.web(.route(route))
+        XCTAssertTrue(web.absoluteString.hasPrefix("https://elija-7580.github.io/Publit-/open/#route?i="))
+        XCTAssertFalse(web.absoluteString.contains("+"), "a + would turn into a space on the web page")
+        for url in [DeepLink.route(route).url, web] {
+            guard case .route(let back)? = DeepLink(url: url) else { return XCTFail("\(url)") }
+            XCTAssertEqual(back.itineraryId, it.id, "the ID survives packing")
+            XCTAssertEqual(back.fromName, "Café & Bar = ü/1")
+            XCTAssertEqual(back.toName, "Home?#")
+            XCTAssertEqual(back.departure, it.legs[0].scheduledStartTime)
+            XCTAssertEqual(back.from.lat, it.legs[0].from.lat, accuracy: 0.00001)
+            XCTAssertEqual(back.to.lon, it.legs.last!.to.lon, accuracy: 0.00001)
+        }
+        XCTAssertLessThan(ShareLinks.pack(it.id).count, it.id.count + 2)
+        XCTAssertNil(DeepLink(url: URL(string: "publit://route?f=A&t=B")!), "places and time are required")
+        XCTAssertNil(DeepLink(url: URL(string: "https://example.org/Publit-/open/#route?fl=1,2&tl=3,4&d=0")!))
+        guard case .route(let bare)? = DeepLink(url: URL(string: "publit://route?fl=48.1,11.5&tl=48.2,11.6&d=1800000000")!) else {
+            return XCTFail("no ID: still a route to search again")
+        }
+        XCTAssertNil(bare.itineraryId)
+        XCTAssertEqual(ShareLinks.unpack(ShareLinks.pack("not base64 ✓")), "not base64 ✓")
+    }
+
+    func testStopShareLinkOpensTheBoard() {
+        let stop = DeepLink.stop(id: "de:09162:2", name: "Marienplatz", lat: 48.137, lon: 11.575)
+        XCTAssertEqual(DeepLink(url: ShareLinks.web(stop)), stop)
+    }
+
     func testLatLonApiValueRoundTrip() {
         let p = LatLon(lat: 48.13715, lon: 11.5754)
         XCTAssertEqual(LatLon(apiValue: p.apiValue), p)
