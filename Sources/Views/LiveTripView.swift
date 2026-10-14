@@ -307,7 +307,7 @@ struct LiveTripView: View {
                 if let line = Self.whereNow(progress, stops: stops) {
                     Text(line).font(.subheadline).foregroundStyle(.secondary)
                 }
-                InkProgress(value: value, tint: leg.lineColor).padding(.top, 2)
+                InkProgress(value: value, tint: leg.lineStroke).padding(.top, 2)
                 Text(fromGPS ? L10n.t("Position from your location.") : leg.realTime
                      ? L10n.t("Position estimated from live stop times.") : L10n.t("Position estimated from the timetable."))
                     .font(.caption).foregroundStyle(.secondary)
@@ -320,7 +320,7 @@ struct LiveTripView: View {
         Section("Stops") {
             ForEach(Array(stops.enumerated()), id: \.offset) { i, stop in
                 GuideStopRow(stop: stop, state: Self.stopState(i, progress: progress, count: stops.count),
-                             isLast: i == stops.count - 1, color: leg.lineColor)
+                             isLast: i == stops.count - 1, color: leg.lineStroke)
             }
         }
     }
@@ -563,13 +563,13 @@ private struct GuideMap: View {
             ForEach(Array(itinerary.legs.enumerated()), id: \.offset) { i, leg in
                 let active = i == step.legIndex
                 MapPolyline(coordinates: leg.legGeometry.clCoordinates)
-                    .stroke((leg.isTransit ? leg.lineColor : Color.gray).opacity(active ? 1 : 0.35),
+                    .stroke((leg.isTransit ? leg.lineStroke : Color.gray).opacity(active ? 1 : 0.35),
                             style: StrokeStyle(lineWidth: active ? 6 : 4, lineCap: .round, lineJoin: .round,
                                                dash: leg.isTransit ? [] : [6, 5]))
             }
             if let vehicle {
                 Annotation("", coordinate: vehicle.clCoordinate) {
-                    Circle().fill(current.lineColor).frame(width: 18, height: 18)
+                    Circle().fill(current.lineStroke).frame(width: 18, height: 18)
                         .overlay(Circle().strokeBorder(.white, lineWidth: 3))
                         .shadow(radius: 2)
                 }

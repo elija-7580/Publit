@@ -33,6 +33,11 @@ final class PublitUITests: XCTestCase {
 
     override func tearDown() {
         watchdog?.cancel()
+        // The screen at the moment of failure, published with the CI screenshots.
+        if testRun?.hasSucceeded == false {
+            let test = name.split(separator: " ").last.map { String($0.dropLast()) } ?? "test"
+            snap("failed-\(test)")
+        }
         print("TIMING: \(name) \(Int(Date().timeIntervalSince(startedAt))) s")
     }
 
@@ -68,6 +73,29 @@ final class PublitUITests: XCTestCase {
             app.swipeUp()
         }
         return element.exists
+    }
+
+    /// Scrolls until the element sits in the upper part of the list, clear of the tab bar and the
+    /// live trip bar above it (a tap there would open the trip). Drags start high on the screen:
+    /// maps sit lower in the list and would pan instead of scrolling it.
+    private func bringUp(_ element: XCUIElement, in app: XCUIApplication) -> Bool {
+        let window = app.windows.firstMatch
+        let deadline = Date().addingTimeInterval(timeout)
+        var drags = 0
+        while Date() < deadline, drags < 16 {
+            let height = window.frame.height
+            var down = false
+            if element.waitForExistence(timeout: 2) {
+                let frame = element.frame
+                if frame.minY > height * 0.12, frame.maxY < height * 0.7 { return element.isHittable }
+                down = frame.maxY < height * 0.7
+            }
+            let from = window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: down ? 0.2 : 0.32))
+            let to = window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: down ? 0.42 : 0.1))
+            from.press(forDuration: 0.05, thenDragTo: to)
+            drags += 1
+        }
+        return element.exists && element.isHittable
     }
 
     /// Taps the element's centre even when XCUITest reports a Menu in a list row as not hittable.
@@ -257,7 +285,7 @@ final class PublitUITests: XCTestCase {
         tapCentre(mapToggle)
         // The link sits under the 320 pt map, below the fold since the first-stop picker was added.
         let details = app.buttons["Details of selected route"].firstMatch
-        XCTAssertTrue(reveal(details, in: app), "no route details link under the map")
+        XCTAssertTrue(bringUp(details, in: app), "no route details link under the map")
         sleep(3) // map tiles
         snap("compare")
 
@@ -265,7 +293,8 @@ final class PublitUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Route"].waitForExistence(timeout: 10))
         sleep(3)
         snap("detail")
-        XCTAssertTrue(app.buttons["Remind me to get off"].firstMatch.exists)
+        // In the steps, below the trip actions.
+        XCTAssertTrue(bringUp(app.buttons["Remind me to get off"].firstMatch, in: app), "no get-off reminder in the steps")
     }
 
     /// F03 Search and Home: find a stop, set it as Home, plan there with one tap.
@@ -284,9 +313,16 @@ final class PublitUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Home"].waitForExistence(timeout: 5))
         snap("saved")
 
+        // Plan has no quick destinations since build 14: Home comes first when picking a place.
         app.tabBars.buttons["Plan"].tap()
-        let quick = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Home'")).firstMatch
-        XCTAssertTrue(quick.waitForExistence(timeout: 5), "Home quick destination missing")
+        let to = app.buttons["endpoint-to"]
+        XCTAssertTrue(to.waitForExistence(timeout: 10), "no To field in Plan")
+        to.tap()
+        let home = app.buttons["pick-home"]
+        XCTAssertTrue(home.waitForExistence(timeout: 5), "Home missing when picking a destination")
+        home.tap()
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "value == 'Sendlinger Tor'")).firstMatch.waitForExistence(timeout: 5),
+                      "Home not taken as the destination")
     }
 
     /// F04 Edge: empty and nonsense search input must not crash and must say so.
@@ -350,9 +386,9 @@ final class PublitUITests: XCTestCase {
         XCTAssertTrue(app.collectionViews.buttons["Saved"].waitForExistence(timeout: 5))
         snap("tripactions")
         // Tickets for the trip: the add flow opens with the trip attached.
+        // Saving shows the live trip bar over the lower screen: bring the row above it.
         let addTicket = app.buttons["addTripTicket"]
-        for _ in 0..<4 where !addTicket.isHittable { app.swipeUp() }
-        XCTAssertTrue(addTicket.exists, "no ticket section on the route")
+        XCTAssertTrue(bringUp(addTicket, in: app), "no ticket section on the route")
         addTicket.tap()
         XCTAssertTrue(app.buttons["importFile"].waitForExistence(timeout: 5), "add ticket did not open")
         snap("trip-add-ticket")
@@ -397,8 +433,10 @@ final class PublitUITests: XCTestCase {
         let plan = launch(["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "plan"])
         let routes = plan.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'from Marienplatz'"))
         XCTAssertTrue(routes.firstMatch.waitForExistence(timeout: timeout), "no routes found")
+        // Driving comes a little after the routes (its own, slower request).
         let car = plan.buttons["compare-CAR"]
-        for _ in 0..<6 where !car.isHittable { plan.swipeUp() }
+        let until = Date().addingTimeInterval(timeout)
+        while Date() < until, !(car.waitForExistence(timeout: 2) && car.isHittable) { plan.swipeUp() }
         XCTAssertTrue(car.exists, "no driving comparison")
         sleep(1)
         snap("plan-compare")

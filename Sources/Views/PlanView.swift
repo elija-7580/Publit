@@ -22,8 +22,10 @@ struct PlanView: View {
                 HStack(spacing: 8) {
                     VStack(spacing: 0) {
                         endpointButton(label: "From", endpoint: plan.from, target: .from)
+                            .accessibilityIdentifier("endpoint-from")
                         Divider()
                         endpointButton(label: "To", endpoint: plan.to, target: .to)
+                            .accessibilityIdentifier("endpoint-to")
                     }
                     Button { app.plan.swap() } label: {
                         Image(systemName: "arrow.up.arrow.down")
@@ -306,7 +308,7 @@ struct TimelineBar: View {
                     let w = max(0, min(width - x, max(end - x, 2)))
                     if leg.isTransit {
                         RoundedRectangle(cornerRadius: 4, style: .continuous)
-                            .fill(leg.lineColor)
+                            .fill(leg.lineStroke)
                             .overlay {
                                 if w > 36 {
                                     Text(leg.lineName)

@@ -34,5 +34,21 @@ extension Color {
     static let delay = Color(Palette.delay)
     static let danger = Color(Palette.danger)
     static let appAccent = Color(Palette.accent)
+
+    /// A line colour for strokes, bars and dots: near-black lines are lifted in dark mode,
+    /// white and pale ones darkened in light mode (`LineColors.strokeHex`).
+    init(lineStroke hex: String) {
+        let l = LineColors.RGB(hex: LineColors.strokeHex(hex, dark: false)) ?? LineColors.black
+        let d = LineColors.RGB(hex: LineColors.strokeHex(hex, dark: true)) ?? LineColors.white
+        self.init(uiColor: UIColor { trait in
+            let c = trait.userInterfaceStyle == .dark ? d : l
+            return UIColor(red: c.r, green: c.g, blue: c.b, alpha: 1)
+        })
+    }
+}
+
+extension RouteStyled {
+    /// For route lines on maps, timeline bars, progress and stop lines (not for badge fills).
+    var lineStroke: Color { Color(lineStroke: lineColors.background) }
 }
 #endif

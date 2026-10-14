@@ -78,7 +78,9 @@ final class RouteOptionsTests: XCTestCase {
 
     func testDefaultsAskForTheComparisonOnly() {
         let d = query(RouteOptions())
-        XCTAssertEqual(d["directModes"], "WALK,BIKE,CAR")
+        // Walking comes with the routes; cycling and driving are asked apart (driving is slow).
+        XCTAssertEqual(d["directModes"], "WALK")
+        XCTAssertEqual(RouteOptions().comparisonModes, ["BIKE", "CAR"])
         XCTAssertNil(d["transitModes"])
         XCTAssertNil(d["maxTransfers"])
         XCTAssertNil(d["pedestrianProfile"])
@@ -100,8 +102,19 @@ final class RouteOptionsTests: XCTestCase {
         XCTAssertEqual(d["maxPostTransitTime"], "600")
         XCTAssertEqual(d["pedestrianProfile"], "WHEELCHAIR")
         XCTAssertEqual(d["directModes"], "WALK")
+        XCTAssertEqual(o.comparisonModes, [])
         XCTAssertEqual(o.activeCount, 4)
         XCTAssertEqual(o.summary, "Train, S-Bahn · Changes: up to 1 · Walk up to 10 min · Step-free")
+    }
+
+    func testStreetComparisonAsksForStreetsOnly() {
+        let q = TransitousClient.streetQuery(from: LatLon(lat: 48.8443, lon: 2.3744), to: LatLon(lat: 48.8809, lon: 2.3553),
+                                             time: nil, arriveBy: false, mode: "CAR")
+        let d = Dictionary(uniqueKeysWithValues: q.map { ($0.name, $0.value ?? "") })
+        XCTAssertEqual(d["directModes"], "CAR")
+        XCTAssertEqual(d["transitModes"], "", "an empty transitModes keeps the server from searching transit")
+        XCTAssertNil(d["withFares"])
+        XCTAssertNil(d["time"])
     }
 
     func testOptionsChangeTheQueryKey() async {

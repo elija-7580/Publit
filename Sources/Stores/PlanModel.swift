@@ -61,6 +61,9 @@ final class PlanModel {
     @ObservationIgnored private var token = UUID()
     @ObservationIgnored private var resultsKey: String?
     @ObservationIgnored private var completedAt: Date?
+    /// Cycling and driving the whole way for `streetKey`, fetched after the routes.
+    @ObservationIgnored private var streetRoutes: [Itinerary] = []
+    @ObservationIgnored private var streetKey: String?
     @ObservationIgnored var history: SearchHistoryStore = .shared
 
     /// The routes in the order chosen in the options (fastest, fewest changes, …).
@@ -123,7 +126,9 @@ final class PlanModel {
             try Task.checkCancellation()
             guard token == myToken else { return }
             itineraries = Self.merge(transit: res.itineraries, direct: res.direct)
-            comparisons = Self.comparisons(direct: res.direct, listed: itineraries, enabled: options.compareStreetModes)
+            let key = queryKey
+            if streetKey != key { streetRoutes = [] }
+            comparisons = Self.comparisons(direct: res.direct + streetRoutes, listed: itineraries, enabled: options.compareStreetModes)
             resultsKey = queryKey
             completedAt = Date()
             nextCursor = arriveBy ? res.previousPageCursor : res.nextPageCursor
@@ -133,6 +138,12 @@ final class PlanModel {
             if itineraries.isEmpty {
                 errorMessage = options.isDefault ? L10n.t("No connections found.")
                     : L10n.t("No connections found with these filters.")
+            }
+            // The routes are on screen; cycling and driving follow when the server has them.
+            isLoading = false
+            if !options.comparisonModes.isEmpty, streetKey != key {
+                await loadStreetRoutes(from: f, to: t, time: time, arriveBy: arriveBy, walking: res.direct,
+                                       modes: options.comparisonModes, key: key, token: myToken)
             }
         } catch {
             guard token == myToken, !Self.isCancellation(error) else { return }
@@ -147,6 +158,28 @@ final class PlanModel {
                 }
             }
         }
+    }
+
+    /// One request per mode, side by side: cycling comes back in about a second, driving
+    /// through a big city can take ten. Each shows as soon as it arrives; a failed one is asked
+    /// again on the next refresh, the others then come from the cache.
+    private func loadStreetRoutes(from f: LatLon, to t: LatLon, time: Date?, arriveBy: Bool, walking: [Itinerary],
+                                  modes: [String], key: String, token myToken: UUID) async {
+        var complete = true
+        await withTaskGroup(of: [Itinerary]?.self) { group in
+            for mode in modes {
+                group.addTask {
+                    try? await TransitousClient.shared.streetRoutes(from: f, to: t, time: time, arriveBy: arriveBy, mode: mode)
+                }
+            }
+            for await found in group {
+                guard token == myToken, !Task.isCancelled else { complete = false; continue }
+                guard let found else { complete = false; continue }
+                streetRoutes += found
+                comparisons = Self.comparisons(direct: walking + streetRoutes, listed: itineraries, enabled: true)
+            }
+        }
+        if complete, token == myToken { streetKey = key }
     }
 
     func loadMore() async {

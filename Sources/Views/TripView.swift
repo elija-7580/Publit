@@ -50,7 +50,7 @@ struct TripView: View {
                 Section {
                     OfflineNote()
                     TripMap(generation: generation, shape: shape, stops: stops.map(\.coordinate),
-                            color: leg.lineColor, textColor: leg.lineTextColor, mode: leg.mode,
+                            color: leg.lineStroke, textColor: leg.lineTextColor, mode: leg.mode,
                             vehicle: TripProgress.position(progress, stops: stops))
                         .equatable()
                         .frame(height: 240)

@@ -204,7 +204,7 @@ struct LineDetailView: View {
                             LineTimetableView(line: line, stopId: stop.stopId ?? stop.stationId, stopName: stop.name,
                                               direction: direction, tz: stop.tz)
                         } label: {
-                            LineStopRow(stop: stop, index: i, count: stops.count, color: line.lineColor,
+                            LineStopRow(stop: stop, index: i, count: stops.count, color: line.lineStroke,
                                         minutes: minutesFromStart(stop, first: stops[0]),
                                         isHere: stop.stopId == line.stopId || stop.parentId == line.stopId || stop.name == line.stopName)
                         }
@@ -318,11 +318,11 @@ private struct LineMap: View {
         Map(initialPosition: .automatic) {
             UserAnnotation()
             MapPolyline(coordinates: shape.map(\.clCoordinate))
-                .stroke(line.lineColor, style: StrokeStyle(lineWidth: 5, lineCap: .round, lineJoin: .round))
+                .stroke(line.lineStroke, style: StrokeStyle(lineWidth: 5, lineCap: .round, lineJoin: .round))
             ForEach(Array(stops.enumerated()), id: \.offset) { _, s in
                 Annotation("", coordinate: s.coordinate.clCoordinate, anchor: .center) {
                     Circle().fill(.white).frame(width: 8, height: 8)
-                        .overlay(Circle().stroke(line.lineColor, lineWidth: 2))
+                        .overlay(Circle().stroke(line.lineStroke, lineWidth: 2))
                 }
             }
             ForEach(vehicles) { v in

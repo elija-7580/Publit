@@ -17,7 +17,7 @@ struct CompareMapView: View {
                 let isSelected = it.id == selectedId
                 ForEach(Array(it.legs.enumerated()), id: \.offset) { _, leg in
                     MapPolyline(coordinates: leg.legGeometry.clCoordinates)
-                        .stroke(isSelected ? leg.lineColor : Color.gray.opacity(0.45),
+                        .stroke(isSelected ? leg.lineStroke : Color.gray.opacity(0.45),
                                 style: StrokeStyle(lineWidth: isSelected ? 5 : 3, lineCap: leg.isTransit ? .round : .butt, lineJoin: .round,
                                                    dash: leg.isTransit ? [] : [6, 4]))
                 }
@@ -225,7 +225,7 @@ struct RouteMap: View {
             UserAnnotation()
             ForEach(Array(itinerary.legs.enumerated()), id: \.offset) { _, leg in
                 MapPolyline(coordinates: leg.legGeometry.clCoordinates)
-                    .stroke(leg.isTransit ? leg.lineColor : Color.gray,
+                    .stroke(leg.isTransit ? leg.lineStroke : Color.gray,
                             style: StrokeStyle(lineWidth: leg.isTransit ? 5 : 4, lineCap: leg.isTransit ? .round : .butt, lineJoin: .round,
                                                dash: leg.isTransit ? [] : [6, 4]))
             }
@@ -279,7 +279,7 @@ struct LegRow: View {
             .padding(.vertical, 6)
             .padding(.leading, 12)
             .overlay(alignment: .leading) {
-                RoundedRectangle(cornerRadius: 2).fill(leg.lineColor).frame(width: 4).padding(.vertical, 6)
+                RoundedRectangle(cornerRadius: 2).fill(leg.lineStroke).frame(width: 4).padding(.vertical, 6)
                     .accessibilityHidden(true)
             }
             .accessibilityIdentifier("transitLeg")

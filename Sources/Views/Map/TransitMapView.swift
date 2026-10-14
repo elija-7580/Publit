@@ -271,7 +271,9 @@ struct TransitMapView: UIViewRepresentable {
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
             guard let line = overlay as? LineOverlay else { return MKOverlayRenderer(overlay: overlay) }
             let r = MKMultiPolylineRenderer(multiPolyline: line)
-            r.strokeColor = UIColor(hex: line.colorHex).withAlphaComponent(0.85)
+            // Near-black lines are lifted on dark maps (satellite maps are dark too), pale ones darkened on light maps.
+            let dark = mapView.traitCollection.userInterfaceStyle == .dark
+            r.strokeColor = UIColor(hex: LineColors.strokeHex(line.colorHex, dark: dark)).withAlphaComponent(0.85)
             r.lineWidth = LineOverlay.width(line.mode)
             r.lineCap = .round
             r.lineJoin = .round

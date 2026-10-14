@@ -6,6 +6,9 @@ struct LineBadge: View {
     let color: Color
     let textColor: Color
     let compact: Bool
+    /// Raw background, for the edge check in dark and light mode.
+    let hex: String
+    @Environment(\.colorScheme) private var scheme
 
     init(_ route: some RouteStyled, compact: Bool = false, detailed: Bool = false) {
         self.compact = compact
@@ -13,6 +16,7 @@ struct LineBadge: View {
         mode = route.mode
         color = route.lineColor
         textColor = route.lineTextColor
+        hex = route.lineColors.background
     }
 
     var body: some View {
@@ -30,7 +34,15 @@ struct LineBadge: View {
         .frame(minWidth: 44)
         .foregroundStyle(textColor)
         .background(color, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.primary.opacity(0.12), lineWidth: 0.5))
+        // Near-black badges on dark backgrounds (and white ones on light) get a visible edge;
+        // the others the usual hairline.
+        .overlay {
+            if LineColors.blendsIn(hex, dark: scheme == .dark) {
+                RoundedRectangle(cornerRadius: 6).strokeBorder(Color.primary.opacity(0.45), lineWidth: 1)
+            } else {
+                RoundedRectangle(cornerRadius: 6).stroke(Color.primary.opacity(0.12), lineWidth: 0.5)
+            }
+        }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(ModeStyle.label(mode)) \(name)")
     }

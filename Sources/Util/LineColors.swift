@@ -53,4 +53,48 @@ enum LineColors {
         }
         return Pair(background: bgHex, text: contrast(white, bg) >= contrast(black, bg) ? "FFFFFF" : "000000")
     }
+
+    // MARK: Lines on dark and light backgrounds
+
+    /// Card and list background in dark mode (secondarySystemGroupedBackground) and in light mode.
+    static let darkSurface = RGB(hex: "1C1C1E")!
+    static let lightSurface = RGB(hex: "FFFFFF")!
+
+    /// Below this a line colour melts into the background: near-black lines (Munich S8 #2D2B29,
+    /// 1.2:1) in dark mode, white or pale yellow ones in light mode. Ordinary dark blues and greens
+    /// (U-Bahn blue #0065AE: 2.8:1) stay above and keep their colour exactly.
+    static let minimumSurfaceContrast = 1.8
+
+    static func blendsIn(_ hex: String?, dark: Bool) -> Bool {
+        guard let c = RGB(hex: hex) else { return false }
+        return contrast(c, dark ? darkSurface : lightSurface) < minimumSurfaceContrast
+    }
+
+    /// For lines, bars and dots drawn without a badge: the operator's colour, lifted towards
+    /// white (dark mode) or black (light mode) only as far as needed to stand out. Badges keep the
+    /// exact colour and get an edge instead (`blendsIn`).
+    static func strokeHex(_ hex: String, dark: Bool) -> String {
+        guard let c = RGB(hex: hex) else { return normalized(hex) }
+        let surface = dark ? darkSurface : lightSurface
+        guard contrast(c, surface) < minimumSurfaceContrast else { return normalized(hex) }
+        let target = dark ? white : black
+        for step in 1...20 {
+            let amount = Double(step) / 20
+            let m = RGB(r: c.r + (target.r - c.r) * amount, g: c.g + (target.g - c.g) * amount, b: c.b + (target.b - c.b) * amount)
+            if contrast(m, surface) >= minimumSurfaceContrast { return m.hex }
+        }
+        return target.hex
+    }
+}
+
+extension LineColors.RGB {
+    init(r: Double, g: Double, b: Double) {
+        self.r = r; self.g = g; self.b = b
+    }
+
+    /// `2D2B29`
+    var hex: String {
+        func byte(_ v: Double) -> Int { max(0, min(255, Int((v * 255).rounded()))) }
+        return String(format: "%02X%02X%02X", byte(r), byte(g), byte(b))
+    }
 }

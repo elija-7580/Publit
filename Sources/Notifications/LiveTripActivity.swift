@@ -11,8 +11,22 @@ enum LiveTripActivity {
 
     static var isAvailable: Bool { ActivityAuthorizationInfo().areActivitiesEnabled }
 
+    /// How long "Arrived" stays on the lock screen after the arrival.
+    static let afterArrival: TimeInterval = 3 * 60
+    /// When the app goes to the background, the activity is ended with this much room after the
+    /// expected arrival: without the app nothing updates it any more, and iOS would otherwise
+    /// keep a finished trip on the lock screen for hours.
+    static let backgroundGrace: TimeInterval = 5 * 60
+
+    /// The running (not ended) activity of a trip.
     static func current(_ tripId: String) -> Activity<TripActivityAttributes>? {
-        Activity<TripActivityAttributes>.activities.first { $0.attributes.tripId == tripId }
+        Activity<TripActivityAttributes>.activities.first {
+            $0.attributes.tripId == tripId && ($0.activityState == .active || $0.activityState == .stale)
+        }
+    }
+
+    static func isOver(_ trip: SavedTrip, now: Date = .now) -> Bool {
+        now >= trip.endTime.addingTimeInterval(afterArrival)
     }
 
     static func isRunning(_ tripId: String) -> Bool { current(tripId) != nil }
@@ -60,8 +74,10 @@ enum LiveTripActivity {
 
     static func update(_ trip: SavedTrip, now: Date = .now) async {
         guard let a = current(trip.id) else { return }
-        if now > trip.endTime.addingTimeInterval(10 * 60) {
-            await a.end(content(trip, now: now), dismissalPolicy: .default)
+        if now >= trip.endTime {
+            // Arrived: shown briefly, then gone.
+            let gone = trip.endTime.addingTimeInterval(afterArrival)
+            await a.end(content(trip, now: now), dismissalPolicy: gone > now ? .after(gone) : .immediate)
         } else {
             let new = content(trip, now: now)
             // Same text, times and colours: no redraw (it costs battery on the lock screen).
@@ -71,8 +87,43 @@ enum LiveTripActivity {
     }
 
     static func end(_ tripId: String) async {
-        guard let a = current(tripId) else { return }
-        await a.end(nil, dismissalPolicy: .immediate)
+        for a in Activity<TripActivityAttributes>.activities where a.attributes.tripId == tripId {
+            await a.end(nil, dismissalPolicy: .immediate)
+        }
+    }
+
+    /// App goes to the background: each running activity ends now, with its last state, and
+    /// disappears by itself shortly after the arrival. Its countdown keeps running on the lock screen.
+    /// Activities of removed trips and of trips already over go at once.
+    static func handOver(_ lookup: (String) -> SavedTrip?, now: Date = .now) async {
+        for a in Activity<TripActivityAttributes>.activities where a.activityState == .active || a.activityState == .stale {
+            guard let trip = lookup(a.attributes.tripId), !isOver(trip, now: now) else {
+                await a.end(nil, dismissalPolicy: .immediate)
+                continue
+            }
+            let gone = trip.endTime.addingTimeInterval(now >= trip.endTime ? afterArrival : backgroundGrace)
+            await a.end(content(trip, now: now), dismissalPolicy: .after(gone))
+        }
+    }
+
+    /// App back in the foreground: activities handed over in the background are replaced by
+    /// running ones again (so live times, delays and platforms update), finished ones removed.
+    /// Returns the trips whose activity has to be started again.
+    static func resume(_ lookup: (String) -> SavedTrip?, now: Date = .now) async -> [SavedTrip] {
+        var restart: [SavedTrip] = []
+        for a in Activity<TripActivityAttributes>.activities {
+            let trip = lookup(a.attributes.tripId)
+            switch a.activityState {
+            case .active, .stale:
+                if trip.map({ isOver($0, now: now) }) ?? true { await a.end(nil, dismissalPolicy: .immediate) }
+            case .ended:
+                await a.end(nil, dismissalPolicy: .immediate)
+                if let trip, now < trip.endTime, !restart.contains(where: { $0.id == trip.id }) { restart.append(trip) }
+            default:
+                break
+            }
+        }
+        return restart
     }
 
     static func same(_ a: TripActivityAttributes.ContentState, _ b: TripActivityAttributes.ContentState) -> Bool {
@@ -82,6 +133,6 @@ enum LiveTripActivity {
     }
 
     private static func content(_ trip: SavedTrip, now: Date) -> ActivityContent<TripActivityAttributes.ContentState> {
-        ActivityContent(state: state(for: trip, now: now), staleDate: trip.endTime.addingTimeInterval(15 * 60))
+        ActivityContent(state: state(for: trip, now: now), staleDate: trip.endTime.addingTimeInterval(afterArrival))
     }
 }

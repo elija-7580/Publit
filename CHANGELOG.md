@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.6.0 (build 27)
+
+### Faster route search
+- Routes come back in about a second everywhere. Cycling and driving the whole way (the comparison under the routes) are now asked separately and show up as soon as they arrive: a car route through a big city took the server up to ten times as long as the transit search (Paris: 12 s instead of 1 s), and the whole list waited for it. Street routes are reused for 15 minutes; the guide's "next connection" search no longer asks for them at all.
+
+### Live Activity ends with the trip
+- After the arrival the Live Activity shows "Arrived" for three minutes and then disappears, instead of staying on the lock screen for hours.
+- When the app goes to the background, nothing can update the Live Activity any more: it now ends with its last state, keeps counting down and disappears by itself five minutes after the expected arrival. Back in the app it is running again with live times. Activities of removed or finished trips go at once.
+
+### Dark line colours stay visible
+- Near-black lines (e.g. Munich S8) on dark backgrounds and white or pale yellow ones on light backgrounds: badges get a visible edge, and route lines, timeline bars, progress, stop lines and map lines are lifted just enough to stand out. All other line colours stay exactly as the operator publishes them.
+
+### Tests and coverage
+- UI tests F02, F03 and F07 fixed: rows under the comparison map and under the live trip bar are scrolled into the clear before tapping (drags start above maps, which would pan instead), and F03 picks Home in the destination search (Plan has had no quick destinations since build 14). Failing UI tests now leave a screenshot (`failed-<test>.png`) in the CI results; their failure messages (`ui-failures.txt`) follow once `.github/workflows/ci.yml` is updated from docs/ci-workflow.yml (the agent may not change workflows).
+- docs/COVERAGE.md: what Transitous covers in Europe – cities without data (Athens, Malta, Minsk), partial networks (Istanbul, Kyiv, Pristina) and where live data is missing.
+
 ## 0.6.0 (build 26)
 
 ### Guide: finding your way in the city

@@ -117,6 +117,28 @@ final class TransitousClient: @unchecked Sendable {
         return q
     }
 
+    /// Cycling or driving the whole way, for the comparison under the routes. Without transit
+    /// (`transitModes` empty), so the server only routes on the streets. Street routes do not
+    /// follow the timetable: they are reused for a quarter of an hour.
+    func streetRoutes(from: LatLon, to: LatLon, time: Date?, arriveBy: Bool, mode: String) async throws -> [Itinerary] {
+        let res: PlanResponse = try await get("/api/v6/plan", Self.streetQuery(from: from, to: to, time: time, arriveBy: arriveBy, mode: mode),
+                                              cache: CachePolicy(maxAge: 900, persist: true))
+        return res.direct
+    }
+
+    static func streetQuery(from: LatLon, to: LatLon, time: Date?, arriveBy: Bool, mode: String) -> [URLQueryItem] {
+        var q = [
+            URLQueryItem(name: "fromPlace", value: from.apiValue),
+            URLQueryItem(name: "toPlace", value: to.apiValue),
+            URLQueryItem(name: "arriveBy", value: arriveBy ? "true" : "false"),
+            URLQueryItem(name: "directModes", value: mode),
+            URLQueryItem(name: "transitModes", value: ""),
+            URLQueryItem(name: "maxDirectTime", value: String(walkLimits.direct)),
+        ]
+        if let time { q.append(URLQueryItem(name: "time", value: DateParsing.format(time))) }
+        return q
+    }
+
     /// Fresh real-time state of a saved route (same vehicles, current delays and cancellations).
     /// Without fares: they do not change, `TripStore.update` keeps the ones saved with the trip,
     /// and the answer is smaller (this runs every minute or two for a Live Activity).

@@ -193,10 +193,15 @@ struct RootView: View {
             if scenePhase == .background {
                 LineAlertMonitor.scheduleBackgroundCheck()
                 location.pause()
+                // Nothing updates a Live Activity without the app: it goes by itself after the arrival.
+                await LiveTripActivity.handOver { trips.trip($0) }
             }
             // Keep running Live Activities current while the app is open.
             guard scenePhase == .active else { return }
             location.start()
+            for trip in await LiveTripActivity.resume({ trips.trip($0) }) {
+                LiveTripActivity.start(trip, hasTicket: !passes.passes(forTrip: trip.id, at: trip.startTime).isEmpty)
+            }
             await LineAlertMonitor.check()
             while !Task.isCancelled {
                 let wait = await refreshLiveTrips()

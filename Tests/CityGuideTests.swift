@@ -113,3 +113,32 @@ final class CityGuideTests: XCTestCase {
         XCTAssertNil(TripAlternative.pick([it], at: it.legs[3].startTime))
     }
 }
+
+final class LineContrastTests: XCTestCase {
+    func testNearBlackLinesAreLiftedInDarkModeOnly() {
+        // Munich S8: 1.2:1 against a dark card.
+        XCTAssertTrue(LineColors.blendsIn("2D2B29", dark: true))
+        XCTAssertFalse(LineColors.blendsIn("2D2B29", dark: false))
+        let lifted = LineColors.RGB(hex: LineColors.strokeHex("2D2B29", dark: true))!
+        XCTAssertGreaterThanOrEqual(LineColors.contrast(lifted, LineColors.darkSurface), LineColors.minimumSurfaceContrast)
+        XCTAssertGreaterThan(LineColors.contrast(lifted, LineColors.black), 1.5, "lifted towards white")
+        XCTAssertEqual(LineColors.strokeHex("2D2B29", dark: false), "2D2B29")
+    }
+
+    func testOrdinaryColoursStayExact() {
+        for hex in ["0065AE", "E3000F", "008D4F", "#9E2064"] {
+            XCTAssertFalse(LineColors.blendsIn(hex, dark: true), hex)
+            XCTAssertFalse(LineColors.blendsIn(hex, dark: false), hex)
+            XCTAssertEqual(LineColors.strokeHex(hex, dark: true), LineColors.normalized(hex))
+        }
+    }
+
+    func testWhiteAndPaleLinesAreDarkenedInLightMode() {
+        XCTAssertTrue(LineColors.blendsIn("FFFFFF", dark: false))
+        XCTAssertTrue(LineColors.blendsIn("FFF200", dark: false))
+        let darker = LineColors.RGB(hex: LineColors.strokeHex("FFF200", dark: false))!
+        XCTAssertGreaterThanOrEqual(LineColors.contrast(darker, LineColors.lightSurface), LineColors.minimumSurfaceContrast)
+        XCTAssertFalse(LineColors.blendsIn(nil, dark: true))
+        XCTAssertEqual(LineColors.RGB(r: 1, g: 0, b: 0.5).hex, "FF0080")
+    }
+}

@@ -170,7 +170,12 @@ struct RouteOptions: Codable, Hashable, Sendable {
          firstMile != .walk].filter { $0 }.count
     }
 
-    var directModes: [String] { compareStreetModes ? ["WALK", "BIKE", "CAR"] : ["WALK"] }
+    /// Walking the whole way comes with the routes (it joins the list when it is about as fast).
+    var directModes: [String] { ["WALK"] }
+
+    /// Cycling and driving the whole way, asked apart from the routes: a car route through a big
+    /// city takes the server up to ten times as long as the transit search (Paris: 12 s instead of 1 s).
+    var comparisonModes: [String] { compareStreetModes ? ["BIKE", "CAR"] : [] }
 
     /// Ways to the first stop. Walking always stays in, so the results mix variants
     /// (walk to the tram, or cycle to the train station) for comparison.

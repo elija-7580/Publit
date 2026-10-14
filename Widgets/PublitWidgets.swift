@@ -21,6 +21,7 @@ private extension Color {
 
 private struct LineChip: View {
     let state: TripActivityAttributes.ContentState
+    @Environment(\.colorScheme) private var scheme
     var body: some View {
         if let name = state.lineName {
             Text(name)
@@ -29,6 +30,12 @@ private struct LineChip: View {
                 .padding(.horizontal, 6).padding(.vertical, 2)
                 .background(Color(hexString: state.lineColor, fallback: .gray), in: RoundedRectangle(cornerRadius: 5))
                 .foregroundStyle(Color(hexString: state.lineTextColor, fallback: .white))
+                // Near-black lines on the dark Dynamic Island and lock screen get an edge.
+                .overlay {
+                    if LineColors.blendsIn(state.lineColor, dark: scheme == .dark) {
+                        RoundedRectangle(cornerRadius: 5).strokeBorder(Color.primary.opacity(0.45), lineWidth: 1)
+                    }
+                }
         } else {
             Image(systemName: "figure.walk")
         }
