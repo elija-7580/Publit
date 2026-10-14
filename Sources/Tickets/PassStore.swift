@@ -59,11 +59,12 @@ final class PassStore {
 
     func grouped(at date: Date = .now) -> [(group: PassGroup, passes: [TicketPass])] { PassGroup.grouped(passes, at: date) }
 
-    /// What a trip offers: its own single tickets, then passes valid at the trip's time.
+    /// What a trip offers: every ticket added for it (oldest first), then tickets valid at the trip's time:
+    /// passes, and dated tickets that belong to no trip (e.g. a single ticket added in the wallet).
     func passes(forTrip tripId: String?, at date: Date = .now) -> [TicketPass] {
-        let own = tripId.map { id in passes.filter { $0.tripId == id } } ?? []
+        let own = tripId.map { id in passes.filter { $0.tripId == id }.sorted { $0.createdAt < $1.createdAt } } ?? []
         let valid = passes.filter { p in
-            guard p.category.isPass, !own.contains(p) else { return false }
+            guard !own.contains(p), p.category.isPass || p.tripId == nil else { return false }
             if case .valid = p.validity(at: date) { return true }
             return false
         }

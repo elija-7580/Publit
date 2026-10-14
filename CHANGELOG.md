@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.0 (build 18)
+
+- Trip tickets: several tickets for one trip are all shown, oldest first. A ticket added from a trip now always belongs to that trip; before, only tickets recognised as a single ticket were linked, so one recognised (or changed on the check screen) as a day pass, return ticket or other could drop out of the trip. The ticket section on the trip lists all tickets instead of the first three.
+- Tickets added in the wallet without a trip now also show on a trip when their dates cover its departure, like passes. Not yet confirmed on a device.
+
 ## 0.6.0 (build 17)
 
 - Live trip bar: a trip that is under way now shows as a bar at the bottom of every tab, above the tab bar. It appears for a trip started with "Remind me to leave", otherwise for a saved trip from 30 minutes before departure until 5 minutes after arrival.

@@ -112,7 +112,7 @@ struct TripPassSection: View {
     var body: some View {
         let list = store.passes(forTrip: tripId, at: at)
         Section {
-            ForEach(list.prefix(3)) { pass in
+            ForEach(list) { pass in
                 Button { listing = true } label: {
                     HStack(spacing: 12) {
                         Image(systemName: pass.symbol.systemImage)

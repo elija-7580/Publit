@@ -273,6 +273,20 @@ final class PassStoreTests: XCTestCase {
         XCTAssertEqual(store.passes(forTrip: "t1", at: now).map(\.title), ["Own", "Month"])
     }
 
+    func testEveryTicketAddedForATripShows() async {
+        let store = PassStore(directory: directory())
+        let now = Date()
+        store.insert(TicketPass(title: "Adult", category: .single, tripId: "t1", createdAt: now - 60))
+        store.insert(TicketPass(title: "Child", category: .single, tripId: "t1", createdAt: now - 30))
+        store.insert(TicketPass(title: "Bike", category: .other, tripId: "t1", createdAt: now))
+        store.insert(TicketPass(title: "Day", category: .dayPass, validUntil: now - 86400, tripId: "t1", createdAt: now))
+        store.insert(TicketPass(title: "Wallet single", category: .single, validFrom: now - 3600, validUntil: now + 3600))
+        store.insert(TicketPass(title: "Undated", category: .single))
+        store.insert(TicketPass(title: "Other trip", category: .single, validUntil: now + 3600, tripId: "t2"))
+        XCTAssertEqual(store.passes(forTrip: "t1", at: now).map(\.title), ["Adult", "Child", "Bike", "Day", "Wallet single"])
+        XCTAssertEqual(store.passes(forTrip: nil, at: now).map(\.title), ["Wallet single"])
+    }
+
     func testImportsLegacyTicketsOnce() async throws {
         let dir = directory()
         let images = dir.appendingPathComponent("tickets", isDirectory: true)

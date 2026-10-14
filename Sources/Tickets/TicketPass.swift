@@ -208,7 +208,7 @@ struct TicketPass: Codable, Identifiable, Hashable, Sendable {
     var document: Document?
     var style: PassStyle
     var notes: String?
-    /// A single ticket can belong to one saved trip.
+    /// The saved trip it was added for, if any.
     var tripId: String?
     /// The old `Ticket` this pass was imported from.
     var legacyId: String?
