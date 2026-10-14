@@ -17230,6 +17230,101 @@
 }
 }
 },
+"Hide": {
+"extractionState": "manual",
+"localizations": {
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Hide"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Ausblenden"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Masquer"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Nascondi"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Ocultar"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Ocultar"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Verbergen"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Ukryj"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Сховати"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Ascunde"
+}
+},
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Skrýt"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Dölj"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Απόκρυψη"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Elrejtés"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Gizle"
+}
+}
+}
+},
 "High-speed": {
 "extractionState": "manual",
 "localizations": {
