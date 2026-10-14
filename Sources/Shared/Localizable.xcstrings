@@ -7445,6 +7445,101 @@
 }
 }
 },
+"Archive": {
+"extractionState": "manual",
+"localizations": {
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Archive"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Archiv"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Archives"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Archivio"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Archivo"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Arquivo"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Archief"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Archiwum"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Архів"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Arhivă"
+}
+},
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Archiv"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Arkiv"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Αρχείο"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Archívum"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Arşiv"
+}
+}
+}
+},
 "Arrive": {
 "extractionState": "manual",
 "localizations": {
@@ -12385,6 +12480,196 @@
 }
 }
 },
+"Delete all archived tickets?": {
+"extractionState": "manual",
+"localizations": {
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Delete all archived tickets?"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Alle archivierten Tickets löschen?"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Supprimer tous les billets archivés ?"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Eliminare tutti i biglietti archiviati?"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "¿Eliminar todos los billetes archivados?"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Apagar todos os bilhetes arquivados?"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Alle gearchiveerde tickets verwijderen?"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Usunąć wszystkie zarchiwizowane bilety?"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Видалити всі архівні квитки?"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Ștergi toate biletele arhivate?"
+}
+},
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Smazat všechny archivované jízdenky?"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Radera alla arkiverade biljetter?"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Διαγραφή όλων των αρχειοθετημένων εισιτηρίων;"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Törlöd az összes archivált jegyet?"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Tüm arşivlenmiş biletler silinsin mi?"
+}
+}
+}
+},
+"Delete archived tickets": {
+"extractionState": "manual",
+"localizations": {
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Delete archived tickets"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Archivierte Tickets löschen"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Supprimer les billets archivés"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Elimina biglietti archiviati"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Eliminar billetes archivados"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Apagar bilhetes arquivados"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Gearchiveerde tickets verwijderen"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Usuń zarchiwizowane bilety"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Видалити архівні квитки"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Șterge biletele arhivate"
+}
+},
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Smazat archivované jízdenky"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Radera arkiverade biljetter"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Διαγραφή αρχειοθετημένων εισιτηρίων"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Archivált jegyek törlése"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Arşivlenmiş biletleri sil"
+}
+}
+}
+},
 "Delete diagnostics": {
 "extractionState": "manual",
 "localizations": {
@@ -15136,6 +15421,101 @@
 "stringUnit": {
 "state": "translated",
 "value": "%@ tarihinde süresi doldu"
+}
+}
+}
+},
+"Expired tickets move here a day after they end. They stay on this iPhone until you delete them.": {
+"extractionState": "manual",
+"localizations": {
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Expired tickets move here a day after they end. They stay on this iPhone until you delete them."
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Abgelaufene Tickets landen einen Tag nach Ende ihrer Gültigkeit hier. Sie bleiben auf diesem iPhone, bis du sie löschst."
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Les billets expirés arrivent ici un jour après la fin de leur validité. Ils restent sur cet iPhone jusqu'à ce que vous les supprimiez."
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "I biglietti scaduti finiscono qui un giorno dopo la fine della validità. Restano su questo iPhone finché non li elimini."
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Los billetes caducados pasan aquí un día después de terminar su validez. Se quedan en este iPhone hasta que los elimines."
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Os bilhetes expirados passam para aqui um dia depois de terminar a validade. Ficam neste iPhone até os apagar."
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Verlopen tickets komen hier een dag nadat ze aflopen. Ze blijven op deze iPhone tot je ze verwijdert."
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Wygasłe bilety trafiają tutaj dzień po końcu ważności. Zostają na tym iPhonie, dopóki ich nie usuniesz."
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Прострочені квитки переміщуються сюди через день після завершення дії. Вони залишаються на цьому iPhone, доки ви їх не видалите."
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Biletele expirate ajung aici la o zi după ce li se termină valabilitatea. Rămân pe acest iPhone până le ștergi."
+}
+},
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Propadlé jízdenky se sem přesunou den po skončení platnosti. Zůstanou v tomto iPhonu, dokud je nesmažete."
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Utgångna biljetter hamnar här en dag efter att de slutat gälla. De ligger kvar på den här iPhonen tills du raderar dem."
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Τα ληγμένα εισιτήρια μεταφέρονται εδώ μία ημέρα μετά τη λήξη τους. Μένουν σε αυτό το iPhone μέχρι να τα διαγράψεις."
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "A lejárt jegyek egy nappal az érvényesség vége után kerülnek ide. Ezen az iPhone-on maradnak, amíg nem törlöd őket."
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Süresi dolan biletler, geçerlilikleri bittikten bir gün sonra buraya taşınır. Sen silene kadar bu iPhone'da kalır."
 }
 }
 }
@@ -22075,6 +22455,196 @@
 }
 }
 },
+"Move back to tickets": {
+"extractionState": "manual",
+"localizations": {
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Move back to tickets"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Zurück zu den Tickets"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Remettre dans les billets"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Riporta tra i biglietti"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Devolver a los billetes"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Voltar a pôr nos bilhetes"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Terug naar tickets"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Przywróć do biletów"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Повернути до квитків"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Mută înapoi la bilete"
+}
+},
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Vrátit mezi jízdenky"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Flytta tillbaka till biljetter"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Επιστροφή στα εισιτήρια"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Vissza a jegyekhez"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Biletlere geri taşı"
+}
+}
+}
+},
+"Move to archive": {
+"extractionState": "manual",
+"localizations": {
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Move to archive"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Ins Archiv verschieben"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Archiver"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Sposta nell'archivio"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Mover al archivo"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Mover para o arquivo"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Naar archief"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Przenieś do archiwum"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Перемістити в архів"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Mută în arhivă"
+}
+},
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Přesunout do archivu"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Flytta till arkivet"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Μετακίνηση στο αρχείο"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Archiválás"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Arşive taşı"
+}
+}
+}
+},
 "My tickets": {
 "extractionState": "manual",
 "localizations": {
@@ -23120,6 +23690,101 @@
 }
 }
 },
+"No archived tickets": {
+"extractionState": "manual",
+"localizations": {
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "No archived tickets"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Keine archivierten Tickets"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Aucun billet archivé"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Nessun biglietto archiviato"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "No hay billetes archivados"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Nenhum bilhete arquivado"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Geen gearchiveerde tickets"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Brak zarchiwizowanych biletów"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Немає архівних квитків"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Niciun bilet arhivat"
+}
+},
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Žádné archivované jízdenky"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Inga arkiverade biljetter"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Δεν υπάρχουν αρχειοθετημένα εισιτήρια"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Nincs archivált jegy"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Arşivlenmiş bilet yok"
+}
+}
+}
+},
 "No code": {
 "extractionState": "manual",
 "localizations": {
@@ -23591,6 +24256,101 @@
 "stringUnit": {
 "state": "translated",
 "value": "Bağlantı bulunamadı."
+}
+}
+}
+},
+"No current tickets": {
+"extractionState": "manual",
+"localizations": {
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "No current tickets"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Keine aktuellen Tickets"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Aucun billet en cours"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Nessun biglietto attuale"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "No hay billetes actuales"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Nenhum bilhete atual"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Geen actuele tickets"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Brak aktualnych biletów"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Немає актуальних квитків"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Niciun bilet curent"
+}
+},
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Žádné aktuální jízdenky"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Inga aktuella biljetter"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Δεν υπάρχουν τρέχοντα εισιτήρια"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Nincs aktuális jegy"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Güncel bilet yok"
 }
 }
 }
@@ -40980,6 +41740,101 @@
 }
 }
 },
+"Their copies and originals are removed from this iPhone.": {
+"extractionState": "manual",
+"localizations": {
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Their copies and originals are removed from this iPhone."
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Ihre Kopien und Originale werden von diesem iPhone entfernt."
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Leurs copies et originaux sont supprimés de cet iPhone."
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Le copie e gli originali vengono rimossi da questo iPhone."
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Sus copias y originales se eliminan de este iPhone."
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "As cópias e os originais são removidos deste iPhone."
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "De kopieën en originelen worden van deze iPhone verwijderd."
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Ich kopie i oryginały zostaną usunięte z tego iPhone'a."
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Їхні копії та оригінали буде видалено з цього iPhone."
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Copiile și originalele lor sunt eliminate de pe acest iPhone."
+}
+},
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Jejich kopie a originály se z tohoto iPhonu odstraní."
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Deras kopior och original tas bort från den här iPhonen."
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Τα αντίγραφα και τα πρωτότυπά τους αφαιρούνται από αυτό το iPhone."
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "A másolatok és az eredetik törlődnek erről az iPhone-ról."
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Kopyaları ve orijinalleri bu iPhone'dan kaldırılır."
+}
+}
+}
+},
 "This code cannot be added to Apple Wallet. Show it in Publit instead.": {
 "extractionState": "manual",
 "localizations": {
@@ -46676,6 +47531,101 @@
 "stringUnit": {
 "state": "translated",
 "value": "%@ durağında çok kısa aktarma"
+}
+}
+}
+},
+"Via": {
+"extractionState": "manual",
+"localizations": {
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Via"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Über"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Via"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Via"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Vía"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Via"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Via"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Przez"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Через"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Via"
+}
+},
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Přes"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Via"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Μέσω"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Érintve"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Üzerinden"
 }
 }
 }
