@@ -248,6 +248,8 @@ struct GeocodeMatch: Decodable, Identifiable, Hashable, Sendable {
     let houseNumber: String?
     let country: String?
     let areas: [GeocodeArea]
+    /// What kind of place (OSM based, e.g. "place_6", "suburb", "village", "restaurant_14"). Not for stops.
+    let category: String?
 
     var isStop: Bool { type == "STOP" }
     var subtitle: String {

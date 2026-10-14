@@ -15,6 +15,8 @@ enum MapSelection: Identifiable {
     case vehicle(LiveVehicle)
     case rentalStation(RentalsResponse.Station, provider: String)
     case rentalVehicle(RentalsResponse.Vehicle, provider: String)
+    /// A hit of the map search (town, address, stop, place).
+    case place(GeocodeMatch)
 
     var id: String {
         switch self {
@@ -22,8 +24,15 @@ enum MapSelection: Identifiable {
         case .vehicle(let v): return "v|\(v.id)"
         case .rentalStation(let s, _): return "rs|\(s.id)"
         case .rentalVehicle(let v, _): return "rv|\(v.id)"
+        case .place(let m): return "p|\(m.id)"
         }
     }
+}
+
+/// Where the map should fly after a search; a new version moves it again (also to the same place).
+struct MapFocus: Equatable {
+    let version: Int
+    let match: GeocodeMatch
 }
 
 /// Map content with a version number each: the map view only diffs what changed.
@@ -43,6 +52,9 @@ struct TransitMapContent {
 struct TransitMapView: UIViewRepresentable {
     let content: TransitMapContent
     let initialCenter: LatLon?
+    var look = MapLook()
+    /// Search hit to show with a marker; nil removes the marker.
+    var focus: MapFocus?
     /// Seconds a vehicle takes to glide to its next position (the refresh tick).
     let glide: TimeInterval
     let onRegion: (MKCoordinateRegion) -> Void
@@ -56,11 +68,12 @@ struct TransitMapView: UIViewRepresentable {
         map.showsUserLocation = true
         map.showsCompass = true
         map.showsScale = true
-        map.pointOfInterestFilter = .excludingAll
         map.isRotateEnabled = true
+        context.coordinator.applyLook(look, to: map, animated: false)
         map.register(StationPinView.self, forAnnotationViewWithReuseIdentifier: StationPinView.reuseId)
         map.register(VehiclePinView.self, forAnnotationViewWithReuseIdentifier: VehiclePinView.reuseId)
         map.register(RentalPinView.self, forAnnotationViewWithReuseIdentifier: RentalPinView.reuseId)
+        map.register(MKMarkerAnnotationView.self, forAnnotationViewWithReuseIdentifier: SearchPin.reuseId)
         map.register(MKMarkerAnnotationView.self, forAnnotationViewWithReuseIdentifier: MKMapViewDefaultClusterAnnotationViewReuseIdentifier)
         if let c = initialCenter {
             map.setRegion(MKCoordinateRegion(center: c.clCoordinate, latitudinalMeters: 1600, longitudinalMeters: 1600), animated: false)
@@ -82,6 +95,28 @@ struct TransitMapView: UIViewRepresentable {
     func updateUIView(_ map: MKMapView, context: Context) {
         context.coordinator.parent = self
         context.coordinator.apply(content, to: map)
+        context.coordinator.applyLook(look, to: map, animated: true)
+        context.coordinator.applyFocus(focus, to: map)
+    }
+
+    /// Apple's map configuration for a look. Public transport POIs stay off: the stations are our own pins.
+    static func configuration(_ look: MapLook) -> MKMapConfiguration {
+        let elevation: MKMapConfiguration.ElevationStyle = look.realistic3D ? .realistic : .flat
+        let poi: MKPointOfInterestFilter = look.showsPointsOfInterest ? MKPointOfInterestFilter(excluding: [.publicTransport]) : .excludingAll
+        switch look.base {
+        case .standard, .muted:
+            let c = MKStandardMapConfiguration(elevationStyle: elevation, emphasisStyle: look.base == .muted ? .muted : .default)
+            c.pointOfInterestFilter = poi
+            c.showsTraffic = look.showsTraffic
+            return c
+        case .satellite:
+            let c = MKHybridMapConfiguration(elevationStyle: elevation)
+            c.pointOfInterestFilter = poi
+            c.showsTraffic = look.showsTraffic
+            return c
+        case .imagery:
+            return MKImageryMapConfiguration(elevationStyle: elevation)
+        }
     }
 
     final class Coordinator: NSObject, MKMapViewDelegate {
@@ -92,8 +127,47 @@ struct TransitMapView: UIViewRepresentable {
         private var rentalPins: [String: RentalPin] = [:]
         private var overlays: [MKOverlay] = []
         private var reportedRegion = false
+        private var appliedLook: MapLook?
+        private var focusVersion = 0
+        private var searchPin: SearchPin?
 
         init(_ parent: TransitMapView) { self.parent = parent }
+
+        /// Swaps the configuration only when the look changed (a new one makes MapKit reload its tiles).
+        func applyLook(_ look: MapLook, to map: MKMapView, animated: Bool) {
+            guard look != appliedLook else { return }
+            let before = appliedLook
+            appliedLook = look
+            map.preferredConfiguration = TransitMapView.configuration(look)
+            // Names and pins stay readable on aerial imagery: dark style there, like Apple Maps.
+            map.overrideUserInterfaceStyle = look.base.isSatellite ? .dark : .unspecified
+            // Switching 3D on tilts the map so it shows; off lays it flat again.
+            if let before, before.realistic3D != look.realistic3D, animated {
+                let camera = map.camera.copy() as! MKMapCamera
+                camera.pitch = look.realistic3D ? 55 : 0
+                map.setCamera(camera, animated: true)
+            }
+        }
+
+        /// Flies to a new search hit and marks it; the hit sits in the upper part, above a half-open sheet.
+        func applyFocus(_ focus: MapFocus?, to map: MKMapView) {
+            guard let focus else {
+                if let old = searchPin { map.removeAnnotation(old); searchPin = nil }
+                return
+            }
+            guard focus.version != focusVersion else { return }
+            focusVersion = focus.version
+            let m = focus.match
+            if let old = searchPin { map.removeAnnotation(old) }
+            let pin = SearchPin(m)
+            searchPin = pin
+            map.addAnnotation(pin)
+            let meters = MapSearch.meters(m)
+            let center = CLLocationCoordinate2D(latitude: m.lat - meters / 111_000 * 0.22, longitude: m.lon)
+            guard CLLocationCoordinate2DIsValid(center) else { return }
+            map.setUserTrackingMode(.none, animated: false)
+            map.setRegion(MKCoordinateRegion(center: center, latitudinalMeters: meters, longitudinalMeters: meters), animated: true)
+        }
 
         func apply(_ c: TransitMapContent, to map: MKMapView) {
             if versions.stations != c.stationsVersion {
@@ -218,6 +292,18 @@ struct TransitMapView: UIViewRepresentable {
                 let v = mapView.dequeueReusableAnnotationView(withIdentifier: RentalPinView.reuseId, for: pin) as! RentalPinView
                 v.show(pin)
                 return v
+            case let pin as SearchPin:
+                let v = mapView.dequeueReusableAnnotationView(withIdentifier: SearchPin.reuseId, for: pin) as! MKMarkerAnnotationView
+                // Ink, not the yellow dot: that one only means "you" and "live".
+                v.markerTintColor = UIColor(Color.ink)
+                v.glyphTintColor = UIColor(Color.onInk)
+                v.glyphImage = UIImage(systemName: pin.glyph)
+                v.titleVisibility = .visible
+                v.displayPriority = .required
+                v.zPriority = .max
+                v.collisionMode = .none
+                v.accessibilityLabel = pin.match.name
+                return v
             case let cluster as MKClusterAnnotation:
                 let v = mapView.dequeueReusableAnnotationView(withIdentifier: MKMapViewDefaultClusterAnnotationViewReuseIdentifier,
                                                               for: cluster) as! MKMarkerAnnotationView
@@ -235,6 +321,7 @@ struct TransitMapView: UIViewRepresentable {
             switch annotation {
             case let pin as StationPin: parent.onSelect(.station(pin.station))
             case let pin as VehiclePin: parent.onSelect(.vehicle(pin.vehicle))
+            case let pin as SearchPin: parent.onSelect(.place(pin.match))
             case let pin as RentalPin:
                 switch pin.item {
                 case .station(let s, let p): parent.onSelect(.rentalStation(s, provider: p))
@@ -277,6 +364,22 @@ final class VehiclePin: NSObject, MKAnnotation {
     var vehicle: LiveVehicle
     var title: String? { vehicle.name }
     init(_ v: LiveVehicle) { vehicle = v; coordinate = v.coordinate.clCoordinate }
+}
+
+/// The place found by the map search.
+final class SearchPin: NSObject, MKAnnotation {
+    static let reuseId = "search"
+    let match: GeocodeMatch
+    let coordinate: CLLocationCoordinate2D
+    var title: String? { match.name }
+    var glyph: String {
+        switch match.type {
+        case "STOP": return "tram.fill"
+        case "ADDRESS": return "house.fill"
+        default: return MapSearch.meters(match) >= 2500 ? "building.2.fill" : "mappin"
+        }
+    }
+    init(_ m: GeocodeMatch) { match = m; coordinate = CLLocationCoordinate2D(latitude: m.lat, longitude: m.lon) }
 }
 
 final class RentalPin: NSObject, MKAnnotation {
@@ -333,12 +436,18 @@ final class StationPinView: MKAnnotationView {
         label.textColor = .label
         label.textAlignment = .center
         label.lineBreakMode = .byTruncatingTail
-        label.layer.shadowColor = UIColor.systemBackground.cgColor
         label.layer.shadowRadius = 2
         label.layer.shadowOpacity = 1
         label.layer.shadowOffset = .zero
         addSubview(iconView)
         addSubview(label)
+        updateColors()
+        // Layer colours do not follow dark mode by themselves (satellite maps switch to dark).
+        registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (view: StationPinView, _: UITraitCollection) in view.updateColors() }
+    }
+
+    private func updateColors() {
+        label.layer.shadowColor = UIColor.systemBackground.resolvedColor(with: traitCollection).cgColor
     }
 
     required init?(coder: NSCoder) { fatalError("not used") }
@@ -417,8 +526,13 @@ final class VehiclePinView: MKAnnotationView {
         let path = UIBezierPath()
         path.move(to: CGPoint(x: 0, y: -5)); path.addLine(to: CGPoint(x: 4, y: 2)); path.addLine(to: CGPoint(x: -4, y: 2)); path.close()
         arrow.path = path.cgPath
-        arrow.fillColor = UIColor.label.cgColor
         layer.addSublayer(arrow)
+        updateColors()
+        registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (view: VehiclePinView, _: UITraitCollection) in view.updateColors() }
+    }
+
+    private func updateColors() {
+        arrow.fillColor = UIColor.label.resolvedColor(with: traitCollection).cgColor
     }
 
     required init?(coder: NSCoder) { fatalError("not used") }

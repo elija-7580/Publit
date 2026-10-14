@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.0 (build 25)
+
+### Map: layers, satellite and search
+- The layers button opens a sheet instead of a menu. Map: Standard, Muted (paler streets, stations and lines stand out), Satellite (with names) and Satellite without names. Switches for 3D terrain and buildings (the map tilts when switched on), places of interest (shops, sights; Apple's transit icons stay off, the stations are Publit's own) and traffic. On the map: stations (new, can be hidden), lines, vehicles, bikes and scooters. Everything is kept for the next time.
+- On satellite maps the map, station names and pins switch to dark, like Apple Maps; pin label outlines and vehicle arrows now follow dark mode.
+- Search places and towns right on the map (field below the title): results prefer what is around the map's centre. Picking one flies there and marks it: a city or district as a whole (stations and live vehicles stay visible), a village, a stop, an address or a single place up close. Stops open their departures, places and addresses a sheet with distance, "Route here" (closes the map and plans from your position) and "Open in Apple Maps". Towns and districts leave the map free; tap the marker for the sheet.
+
+### Fix
+- Build 24 still did not compile. The real cause: the archive's "Delete archived tickets" action returned a number, which left the whole screen ambiguous for the compiler (reported at the toolbar).
+
 ## 0.6.0 (build 24)
 
 ### Navigation: a started trip guides you step by step

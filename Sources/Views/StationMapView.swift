@@ -20,6 +20,7 @@ final class TransitMapModel {
     @ObservationIgnored private var liveRetryAt: Date?
 
     var filter = ModeFilter() { didSet { if filter != oldValue { rebuildLive(); bumpStations() } } }
+    var showStations = true { didSet { if showStations != oldValue { bumpStations() } } }
     var showLines = true { didSet { if showLines != oldValue { publishShapes() } } }
     var showVehicles = true { didSet { if showVehicles != oldValue { tick() } } }
     var showSharing = false { didSet { if showSharing != oldValue { Task { await loadRentals(force: true) } } } }
@@ -174,9 +175,12 @@ final class TransitMapModel {
         bumpStations()
     }
 
+    /// Centre of what is on screen: the map search prefers places around it.
+    var center: LatLon? { region.map { LatLon(lat: $0.center.latitude, lon: $0.center.longitude) } }
+
     private func bumpStations() {
         let f = filter
-        content.stations = f.isActive ? allStations.filter { $0.modes.contains { f.allows($0) } } : allStations
+        content.stations = !showStations ? [] : f.isActive ? allStations.filter { $0.modes.contains { f.allows($0) } } : allStations
         content.stationsVersion += 1
     }
 
@@ -296,17 +300,34 @@ struct StationMapView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
     @Environment(LocationManager.self) private var location
+    @Environment(AppState.self) private var app
     @State private var model = TransitMapModel()
     @State private var selection: MapSelection?
     @State private var center: LatLon?
+    @State private var showLayers = false
+    @State private var query = ""
+    @State private var searching = false
+    @State private var results: [GeocodeMatch] = []
+    @State private var searchedFor: String?
+    @State private var focus: MapFocus?
     @AppStorage("mapModes") private var storedModes = ""
+    @AppStorage("mapStations") private var showStations = true
     @AppStorage("mapLines") private var showLines = true
     @AppStorage("mapVehicles") private var showVehicles = true
     @AppStorage("mapSharing") private var showSharing = false
+    @AppStorage("mapBase") private var storedBase = MapBase.standard.rawValue
+    @AppStorage("map3D") private var realistic3D = false
+    @AppStorage("mapPOI") private var pointsOfInterest = false
+    @AppStorage("mapTraffic") private var traffic = false
+
+    private var look: MapLook {
+        MapLook(base: MapBase(storageValue: storedBase), realistic3D: realistic3D, pointsOfInterest: pointsOfInterest, traffic: traffic)
+    }
 
     var body: some View {
         NavigationStack {
             TransitMapView(content: model.content, initialCenter: center ?? location.coordinate,
+                           look: look, focus: focus,
                            glide: TransitMapModel.tickSeconds,
                            onRegion: { model.regionChanged($0) },
                            onSelect: { selection = $0 })
@@ -317,25 +338,37 @@ struct StationMapView: View {
                 .navigationTitle("Stations")
                 .screenTrail("Station map")
                 .navigationBarTitleDisplayMode(.inline)
+                .searchable(text: $query, isPresented: $searching, placement: .navigationBarDrawer(displayMode: .always),
+                            prompt: Text("Search places and towns"))
+                .searchSuggestions { suggestions }
+                .onSubmit(of: .search) { if let first = results.first { show(first) } }
+                .task(id: query) { await search() }
                 .toolbar {
-                    ToolbarItem(placement: .topBarLeading) { layersMenu }
+                    ToolbarItem(placement: .topBarLeading) { layersButton }
                     ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } }
                 }
                 .sheet(item: $selection) { sel in
-                    NavigationStack { MapSelectionView(selection: sel) }
+                    NavigationStack { MapSelectionView(selection: sel, onRoute: route) }
                         .presentationDetents([.medium, .large])
                         .presentationBackgroundInteraction(.enabled(upThrough: .medium))
+                }
+                .sheet(isPresented: $showLayers) {
+                    MapLayersSheet(base: $storedBase, realistic3D: $realistic3D, pointsOfInterest: $pointsOfInterest, traffic: $traffic,
+                                   stations: $showStations, lines: $showLines, vehicles: $showVehicles, sharing: $showSharing)
+                        .presentationDetents([.medium, .large])
                 }
         }
         .onAppear {
             model.resume()
             if center == nil { center = location.coordinate }
             model.filter = ModeFilter(storageValue: storedModes)
+            model.showStations = showStations
             model.showLines = showLines
             model.showVehicles = showVehicles
             model.showSharing = showSharing
         }
         .onChange(of: storedModes) { model.filter = ModeFilter(storageValue: storedModes) }
+        .onChange(of: showStations) { model.showStations = showStations }
         .onChange(of: showLines) { model.showLines = showLines }
         .onChange(of: showVehicles) { model.showVehicles = showVehicles }
         .onChange(of: showSharing) { model.showSharing = showSharing }
@@ -376,26 +409,180 @@ struct StationMapView: View {
     }
 
     private var hint: String? {
-        if model.stationsHidden { return L10n.t("Zoom in to see stations") }
+        if model.stationsHidden && showStations { return L10n.t("Zoom in to see stations") }
         if model.liveHidden && (showLines || showVehicles) { return L10n.t("Zoom in to see lines and vehicles") }
         return nil
     }
 
-    private var layersMenu: some View {
-        Menu {
-            Toggle(isOn: $showLines) { Label("Lines", systemImage: "point.topleft.down.to.point.bottomright.curvepath") }
-            Toggle(isOn: $showVehicles) { Label("Vehicles", systemImage: "bus.doubledecker") }
-            Toggle(isOn: $showSharing) { Label("Bikes and scooters", systemImage: "bicycle") }
+    private var layersButton: some View {
+        Button {
+            guard selection != nil else { showLayers = true; return }
+            // One sheet at a time: the open one goes down first, else SwiftUI drops the new one.
+            selection = nil
+            Task { try? await Task.sleep(for: .milliseconds(400)); showLayers = true }
         } label: {
             Label("Map layers", systemImage: "square.3.layers.3d")
         }
         .accessibilityIdentifier("mapLayers")
+    }
+
+    // MARK: Search
+
+    @ViewBuilder
+    private var suggestions: some View {
+        ForEach(results) { m in
+            Button { show(m) } label: {
+                PlaceLabel(name: m.name, subtitle: m.subtitle, isStop: m.isStop)
+            }
+            .accessibilityIdentifier("mapSearchResult")
+        }
+        if results.isEmpty, let searchedFor, searchedFor == MapSearch.query(query) {
+            Text("No places found").foregroundStyle(.secondary)
+        }
+    }
+
+    private func search() async {
+        guard let text = MapSearch.query(query) else { results = []; searchedFor = nil; return }
+        // Debounce: the task is cancelled when the text changes again.
+        try? await Task.sleep(for: .milliseconds(300))
+        guard !Task.isCancelled else { return }
+        do {
+            let found = try await TransitousClient.shared.geocode(text, near: model.center ?? location.coordinate)
+            guard !Task.isCancelled else { return }
+            results = found
+            searchedFor = text
+        } catch {
+            // Typing on: the next text searches again. A failure leaves the last list.
+        }
+    }
+
+    /// Flies there and marks it. Stops, addresses and single places open their sheet;
+    /// towns and districts are for looking around, so the map stays free.
+    private func show(_ m: GeocodeMatch) {
+        searching = false
+        focus = MapFocus(version: (focus?.version ?? 0) + 1, match: m)
+        selection = MapSearch.meters(m) < 2500 ? MapSelection.place(m) : nil
+    }
+
+    /// "Route here" from a sheet: plan from the current position, on the Nearby tab under this map.
+    private func route(_ place: SavedPlace) {
+        selection = nil
+        app.goNow(to: place)
+        dismiss()
+    }
+}
+
+/// Map type, 3D and what is drawn on the map. Changes apply right away, the map stays visible above.
+struct MapLayersSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @Binding var base: String
+    @Binding var realistic3D: Bool
+    @Binding var pointsOfInterest: Bool
+    @Binding var traffic: Bool
+    @Binding var stations: Bool
+    @Binding var lines: Bool
+    @Binding var vehicles: Bool
+    @Binding var sharing: Bool
+
+    private var current: MapBase { MapBase(storageValue: base) }
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section("Map") {
+                    LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
+                        ForEach(MapBase.allCases) { b in tile(b) }
+                    }
+                    .listRowInsets(EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 12))
+                    Toggle(isOn: $realistic3D) { Label("3D terrain and buildings", systemImage: "mountain.2") }
+                    Toggle(isOn: $pointsOfInterest) { Label("Places of interest", systemImage: "fork.knife") }
+                        .disabled(!current.hasLabels)
+                    Toggle(isOn: $traffic) { Label("Traffic", systemImage: "car") }
+                        .disabled(!current.hasLabels)
+                }
+                Section {
+                    Toggle(isOn: $stations) { Label("Stations", systemImage: "tram.circle") }
+                    Toggle(isOn: $lines) { Label("Lines", systemImage: "point.topleft.down.to.point.bottomright.curvepath") }
+                    Toggle(isOn: $vehicles) { Label("Vehicles", systemImage: "bus.doubledecker") }
+                    Toggle(isOn: $sharing) { Label("Bikes and scooters", systemImage: "bicycle") }
+                } header: {
+                    Text("On the map")
+                } footer: {
+                    Text("Satellite maps load more data. In 3D, tilt the map with two fingers.")
+                }
+            }
+            .navigationTitle("Map layers")
+            .navigationBarTitleDisplayMode(.inline)
+            .screenTrail("Map layers")
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } }
+            }
+        }
+    }
+
+    private func tile(_ b: MapBase) -> some View {
+        let selected = b == current
+        return Button { base = b.rawValue } label: {
+            VStack(spacing: 6) {
+                Image(systemName: b.symbol).font(.title2)
+                    .frame(maxWidth: .infinity, minHeight: 34)
+                Text(b.title).font(.caption.weight(selected ? .semibold : .regular))
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.vertical, 10)
+            .padding(.horizontal, 6)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .foregroundStyle(selected ? Color.onInk : Color.primary)
+            .background(selected ? Color.ink : Color.inkFill, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(selected ? AccessibilityTraits.isSelected : [])
+        .accessibilityIdentifier("mapBase-\(b.rawValue)")
+    }
+}
+
+/// A search hit that is not a stop: where it is, how far, and a route there.
+struct MapPlaceView: View {
+    let match: GeocodeMatch
+    let onRoute: (SavedPlace) -> Void
+    @Environment(LocationManager.self) private var location
+
+    var body: some View {
+        List {
+            Section {
+                PlaceLabel(name: match.name, subtitle: match.subtitle, isStop: false)
+                if let here = location.coordinate {
+                    LabeledContent("Distance", value: Fmt.distance(meters: here.distance(to: LatLon(lat: match.lat, lon: match.lon))))
+                }
+            }
+            Section {
+                Button { onRoute(SavedPlace(match: match)) } label: {
+                    Label("Route here", systemImage: "arrow.triangle.turn.up.right.diamond")
+                }
+                .accessibilityIdentifier("mapPlaceRoute")
+                Button { openInMaps() } label: {
+                    Label("Open in Apple Maps", systemImage: "map")
+                }
+            }
+        }
+        .navigationTitle(match.name)
+        .navigationBarTitleDisplayMode(.inline)
+        .screenTrail("Map place")
+    }
+
+    private func openInMaps() {
+        let item = MKMapItem(placemark: MKPlacemark(coordinate: CLLocationCoordinate2D(latitude: match.lat, longitude: match.lon)))
+        item.name = match.name
+        item.openInMaps(launchOptions: nil)
     }
 }
 
 /// Sheet for whatever was tapped on the map.
 struct MapSelectionView: View {
     let selection: MapSelection
+    var onRoute: (SavedPlace) -> Void = { _ in }
 
     var body: some View {
         switch selection {
@@ -409,6 +596,12 @@ struct MapSelectionView: View {
         case .rentalVehicle(let v, let provider):
             RentalDetailView(title: RentalKind(v.formFactor).title, provider: provider, kinds: [RentalKind(v.formFactor)],
                              available: nil, link: [v.rentalUriIOS, v.rentalUriWeb])
+        case .place(let m):
+            if m.isStop {
+                StopDeparturesView(stopId: m.id, name: m.name, coordinate: LatLon(lat: m.lat, lon: m.lon))
+            } else {
+                MapPlaceView(match: m, onRoute: onRoute)
+            }
         }
     }
 }
