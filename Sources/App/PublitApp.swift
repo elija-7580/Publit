@@ -14,6 +14,7 @@ struct PublitApp: App {
     init() {
         UNUserNotificationCenter.current().delegate = NotificationRouter.shared
         HangLog.shared.start()
+        CrashReports.shared.start()
         // Offline copies older than a week are no use for departures or routes.
         DispatchQueue.global(qos: .utility).async { TransitousClient.shared.cache.prune(olderThan: 7 * 24 * 3600) }
     }
@@ -178,9 +179,9 @@ struct RootView: View {
         .onChange(of: app.tab) { _, tab in HangLog.shared.note("tab \(tab)") }
         .task(id: scenePhase) {
             switch scenePhase {
-            case .active: HangLog.shared.note("app active")
+            case .active: HangLog.shared.note("app active"); HangLog.shared.scene(active: true)
             case .inactive: HangLog.shared.note("app inactive")
-            case .background: HangLog.shared.note("app background")
+            case .background: HangLog.shared.note("app background"); HangLog.shared.scene(active: false)
             @unknown default: break
             }
             if scenePhase == .background {

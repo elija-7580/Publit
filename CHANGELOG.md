@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.0 (build 21)
+
+### Diagnostics
+- The diagnostics file now records more than freezes: crashes and hangs reported by iOS (MetricKit, delivered at the next launch, with the stack of the thread that crashed), unexpected exits (the app ended while it was open – crash, watchdog or out of memory), memory warnings, and failed requests (network error code, HTTP status, or the field that could not be read in an answer). The same error within 5 minutes is noted only once.
+- Each entry has a header with kind, time, version and build, device and iOS version, then the last 40 steps (screens, taps, requests with status and duration).
+- Settings → Diagnostics shows the counts, "Share diagnostics" (one text file with device, language, time zone, memory, power and thermal state, the current steps and all entries), "Report a problem" (opens a new GitHub issue with version, device and counts filled in) and "Delete diagnostics".
+- Still no places, stops or tickets in the log; nothing leaves the device unless shared.
+
 ## 0.6.0 (build 20)
 
 ### Design "Ink & Dot", first screen: Nearby

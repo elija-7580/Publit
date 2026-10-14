@@ -10,7 +10,28 @@ struct SettingsView: View {
     @AppStorage("mapSharing") private var mapSharing = false
     @AppStorage("routeTimelines") private var routeTimelines = true
     @AppStorage(LineAlertMonitor.enabledKey) private var lineAlerts = false
-    @State private var hasFreezeLog = HangLog.shared.hasEntries
+    @State private var summary: HangLog.Summary?
+    @State private var reportURL: URL?
+
+    /// A new GitHub issue with version, device and counts filled in; the diagnostics file is attached by hand.
+    private var issueURL: URL {
+        let s = summary ?? HangLog.Summary()
+        let body = """
+        **What happened?**
+
+
+        **What did you expect?**
+
+
+        ---
+        Publit \(AppInfo.version) (\(AppInfo.build)) · \(HangLog.device) · iOS \(UIDevice.current.systemVersion)
+        Recorded: \(s.freezes) freezes, \(s.errors) failed requests, \(s.crashes) crashes, \(s.exits) unexpected exits
+        If you can, attach the file from Settings → Diagnostics → Share diagnostics.
+        """
+        var c = URLComponents(url: AppInfo.repositoryURL.appendingPathComponent("issues/new"), resolvingAgainstBaseURL: false)
+        c?.queryItems = [URLQueryItem(name: "body", value: body)]
+        return c?.url ?? AppInfo.repositoryURL
+    }
 
     var body: some View {
         NavigationStack {
@@ -82,24 +103,43 @@ struct SettingsView: View {
                     Text("Times marked live come from the operator's real-time feed; all others are timetable times.")
                 }
                 Section {
-                    if hasFreezeLog {
-                        ShareLink(item: HangLog.shared.fileURL) {
-                            Label("Share freeze log", systemImage: "square.and.arrow.up")
+                    if let summary, summary.total > 0 {
+                        if summary.freezes > 0 { LabeledContent(L10n.t("Freezes"), value: "\(summary.freezes)") }
+                        if summary.errors > 0 { LabeledContent(L10n.t("Failed requests"), value: "\(summary.errors)") }
+                        if summary.crashes + summary.exits > 0 {
+                            LabeledContent(L10n.t("Crashes and unexpected exits"), value: "\(summary.crashes + summary.exits)")
+                        }
+                    } else if summary != nil {
+                        Text("No problems recorded").foregroundStyle(.secondary)
+                    }
+                    if let reportURL {
+                        ShareLink(item: reportURL) {
+                            Label("Share diagnostics", systemImage: "square.and.arrow.up")
                         }
                         .accessibilityIdentifier("shareFreezeLog")
+                    }
+                    Link(destination: issueURL) {
+                        Label("Report a problem", systemImage: "exclamationmark.bubble")
+                    }
+                    if summary?.total ?? 0 > 0 {
                         Button(role: .destructive) {
                             HangLog.shared.clear()
-                            hasFreezeLog = false
+                            summary = HangLog.Summary()
                         } label: {
-                            Label("Delete freeze log", systemImage: "trash")
+                            Label("Delete diagnostics", systemImage: "trash")
                         }
-                    } else {
-                        Text("No freezes recorded").foregroundStyle(.secondary)
                     }
                 } header: {
                     Text("Diagnostics")
                 } footer: {
-                    Text("If Publit stops responding for 2 seconds or more, the time and the screens opened just before are noted here. Nothing else is recorded, and nothing leaves this device unless you share it.")
+                    Text("Publit notes freezes of 2 seconds or more, crashes, unexpected exits and failed requests (only their kind), each with the screens opened just before. Places, stops and tickets are not recorded, and nothing leaves this device unless you share it.")
+                }
+                .task {
+                    let loaded = await Task.detached(priority: .utility) {
+                        (HangLog.shared.summary, HangLog.shared.writeReport())
+                    }.value
+                    summary = loaded.0
+                    reportURL = loaded.1
                 }
                 Section {
                     Link("Source code and feedback", destination: AppInfo.repositoryURL)

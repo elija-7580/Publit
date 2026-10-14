@@ -48,12 +48,94 @@ final class HangLogTests: XCTestCase {
     func testTrailKeepsOnlyTheLatestSteps() throws {
         let log = makeLog()
         let t0 = Date(timeIntervalSince1970: 1_000_000)
-        for i in 0..<40 { log.note("open Screen\(i)", at: t0) }
+        for i in 0..<60 { log.note("open Screen\(i)", at: t0) }
         log.tick(now: t0)
         log.tick(now: t0.addingTimeInterval(2.1))
         let text = try String(contentsOf: log.fileURL, encoding: .utf8)
-        XCTAssertFalse(text.contains("Screen14\n"))
-        XCTAssertTrue(text.contains("Screen15\n") && text.contains("Screen39\n"))
+        XCTAssertTrue(text.contains("— FREEZE · "))
+        XCTAssertFalse(text.contains("Screen19\n"))
+        XCTAssertTrue(text.contains("Screen20\n") && text.contains("Screen59\n"))
+    }
+
+    func testErrorsAreRecordedOnceWithinTheWindow() throws {
+        let log = makeLog()
+        let t0 = Date(timeIntervalSince1970: 1_000_000)
+        log.note("open Plan", at: t0)
+        log.error("plan", URLError(.timedOut), at: t0)
+        log.error("plan", URLError(.timedOut), at: t0.addingTimeInterval(60))
+        log.error("plan", CancellationError(), at: t0.addingTimeInterval(61))
+        log.error("refresh", URLError(.notConnectedToInternet), at: t0.addingTimeInterval(62))
+        log.error("plan", URLError(.timedOut), at: t0.addingTimeInterval(400))
+        let text = try String(contentsOf: log.fileURL, encoding: .utf8)
+        XCTAssertTrue(text.contains("plan: URLError \(URLError.Code.timedOut.rawValue)"))
+        XCTAssertTrue(text.contains("open Plan"))
+        let s = log.summary
+        XCTAssertEqual(s.errors, 3)
+        XCTAssertEqual(s.freezes, 0)
+        XCTAssertEqual(s.total, 3)
+        XCTAssertEqual(s.last, t0.addingTimeInterval(400))
+    }
+
+    func testDecodingErrorsNameTheFieldPath() {
+        struct Leg: Decodable { let lat: Double }
+        struct Root: Decodable { let legs: [Leg] }
+        let data = Data(#"{"legs":[{"lat":1},{"lon":2}]}"#.utf8)
+        do {
+            _ = try JSONDecoder().decode(Root.self, from: data)
+            XCTFail("should not decode")
+        } catch {
+            let text = HangLog.describe(error)
+            XCTAssertTrue(text.contains("legs[1]"), text)
+            XCTAssertTrue(text.contains("lat"), text)
+        }
+    }
+
+    func testAnExitWhileOpenIsNotedAtTheNextLaunch() throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let t0 = Date(timeIntervalSince1970: 1_000_000)
+        let first = HangLog(directory: dir)
+        first.scene(active: true, at: t0)
+        first.note("open Trip", at: t0)
+        first.flush()
+        let next = HangLog(directory: dir)
+        next.checkPreviousSession(at: t0.addingTimeInterval(30))
+        let text = try String(contentsOf: next.fileURL, encoding: .utf8)
+        XCTAssertTrue(text.contains("— EXIT · "))
+        XCTAssertTrue(text.contains("open Trip"))
+        XCTAssertEqual(next.summary.exits, 1)
+        // Checked once only.
+        next.checkPreviousSession(at: t0.addingTimeInterval(31))
+        XCTAssertEqual(next.summary.exits, 1)
+    }
+
+    func testABackgroundedSessionIsNotAnExit() {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let t0 = Date(timeIntervalSince1970: 1_000_000)
+        let first = HangLog(directory: dir)
+        first.scene(active: true, at: t0)
+        first.scene(active: false, at: t0.addingTimeInterval(5))
+        first.flush()
+        let next = HangLog(directory: dir)
+        next.checkPreviousSession(at: t0.addingTimeInterval(30))
+        XCTAssertFalse(next.hasEntries)
+    }
+
+    func testReportHasHeaderCountsAndEntries() throws {
+        let log = makeLog()
+        let t0 = Date(timeIntervalSince1970: 1_000_000)
+        log.error("departures", URLError(.badServerResponse), at: t0)
+        let text = try String(contentsOf: log.writeReport(at: t0), encoding: .utf8)
+        XCTAssertTrue(text.hasPrefix("Publit diagnostics · "))
+        XCTAssertTrue(text.contains("Entries: 0 freezes, 1 errors, 0 crashes, 0 unexpected exits"))
+        XCTAssertTrue(text.contains("— ERROR · "))
+        XCTAssertTrue(text.contains("departures: URLError"))
+    }
+
+    func testOldEntriesCountAsFreezes() throws {
+        let log = makeLog()
+        try FileManager.default.createDirectory(at: log.fileURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try "\n— 2025-01-02 10:00:00 · Publit 0.5 (12) · iPhone · iOS 18\nNo response for 2 s.\n".write(to: log.fileURL, atomically: true, encoding: .utf8)
+        XCTAssertEqual(log.summary.freezes, 1)
     }
 }
 

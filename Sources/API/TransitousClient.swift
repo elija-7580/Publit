@@ -253,13 +253,19 @@ final class TransitousClient: @unchecked Sendable {
 
         let data: Data
         let status: Int
+        // Diagnostics: the request type only ("plan", "stoptimes"), never its places or IDs.
+        let kind = Self.requestKind(path)
+        let started = Date()
         do {
             (data, status) = try await fetch(req)
         } catch {
+            HangLog.shared.error("request \(kind)", error)
             if Self.isOffline(error), let value: T = await offlineCopy(key, url: url, policy: policy) { return value }
             throw error
         }
+        HangLog.shared.note(String(format: "net %@ %d %.1f s", kind, status, Date().timeIntervalSince(started)))
         guard (200..<300).contains(status) else {
+            HangLog.shared.error("request \(kind)", APIError(message: "HTTP \(status)"))
             if status >= 500, let value: T = await offlineCopy(key, url: url, policy: policy) { return value }
             if let err = try? JSONDecoder().decode(ServerError.self, from: data) {
                 throw APIError(message: err.error)
@@ -272,11 +278,17 @@ final class TransitousClient: @unchecked Sendable {
             defer { PerformanceTrace.end(decodeTrace, "Decode transit response") }
             value = try Self.makeDecoder().decode(T.self, from: data)
         } catch {
+            HangLog.shared.error("answer \(kind)", error)
             throw APIError(message: L10n.t("Unexpected response from the routing service."))
         }
         cache.store(key, data: data, url: url.absoluteString, persist: policy.persist)
         await Connectivity.shared.reachedServer()
         return value
+    }
+
+    /// "/api/v5/plan" → "plan": what kind of request, for the diagnostics steps.
+    static func requestKind(_ path: String) -> String {
+        path.split(separator: "/").last.map(String.init) ?? path
     }
 
     private let running = RequestCoalescer()

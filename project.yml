@@ -10,7 +10,7 @@ settings:
   base:
     SWIFT_VERSION: "5.0"
     MARKETING_VERSION: "0.6.0"
-    CURRENT_PROJECT_VERSION: "20"
+    CURRENT_PROJECT_VERSION: "21"
     # Personal Team — Automatic Signing for local device installs.
     DEVELOPMENT_TEAM: "3D6S8GFSGK"
 targets:
@@ -110,6 +110,9 @@ targets:
       - Sources/Util/Palette.swift
       - Sources/Util/L10n.swift
       - Sources/Util/PerformanceTrace.swift
+      # TransitousClient notes failed requests in the diagnostics (in the widget they stay in its own container).
+      - Sources/Util/HangLog.swift
+      - Sources/Util/MainThreadSampler.swift
     info:
       path: Config/Widgets-Info.plist
       properties:
