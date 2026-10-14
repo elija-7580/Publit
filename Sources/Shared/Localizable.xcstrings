@@ -49871,6 +49871,101 @@
 }
 }
 },
+"min": {
+"extractionState": "manual",
+"localizations": {
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "min"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "min"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "min"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "min"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "min"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "min"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "min"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "min"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "хв"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "min"
+}
+},
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "min"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "min"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "λ."
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "perc"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "dk"
+}
+}
+}
+},
 "not set": {
 "extractionState": "manual",
 "localizations": {
