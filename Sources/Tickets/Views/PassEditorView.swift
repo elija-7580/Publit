@@ -55,17 +55,6 @@ struct PassEditorView: View {
 
     var body: some View {
         Form {
-            Section {
-                PassCardView(pass: pass, logo: logoData.flatMap { UIImage(data: $0) }, codeSource: codeSource)
-                    .padding(.vertical, 6)
-                    .listRowInsets(EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12))
-                    .listRowBackground(Color.clear)
-                    .accessibilityElement(children: .ignore)
-                    .accessibilityLabel(L10n.f("Preview: %@", pass.accessibilitySummary))
-            } footer: {
-                if isNew { Text("Read on your iPhone. Check every detail before you save.") }
-            }
-
             if let source = codeSource {
                 Section {
                     Button { mappingFields = true } label: {
@@ -75,7 +64,20 @@ struct PassEditorView: View {
                     .sheet(isPresented: $mappingFields) {
                         NavigationStack { TicketFieldMapper(source: source, pass: $pass) }
                     }
+                    Text("Tap a text on the ticket and choose what it is.")
+                        .font(.footnote).foregroundStyle(.secondary)
                 }
+            }
+
+            Section {
+                PassCardView(pass: pass, logo: logoData.flatMap { UIImage(data: $0) }, codeSource: codeSource)
+                    .padding(.vertical, 6)
+                    .listRowInsets(EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12))
+                    .listRowBackground(Color.clear)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(L10n.f("Preview: %@", pass.accessibilitySummary))
+            } footer: {
+                if isNew { Text("Read on your iPhone. Check every detail before you save.") }
             }
 
             Section(L10n.t("Ticket")) {

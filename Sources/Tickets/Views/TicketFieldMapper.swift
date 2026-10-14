@@ -86,7 +86,7 @@ struct TicketFieldMapper: View {
     @MainActor private func load() async {
         guard loading else { return }
         do {
-            let cg = try await Task.detached(priority: .userInitiated) { () throws -> CGImage in
+            let (cg, embedded) = try await Task.detached(priority: .userInitiated) { () throws -> (CGImage, [TicketTextPiece]) in
                 let data: Data
                 let kind: TicketPass.Document.Kind
                 let page: Int
@@ -98,12 +98,14 @@ struct TicketFieldMapper: View {
                     ? TicketRecognizer.renderPage(pdf: data, page: page)?.cgImage
                     : TicketRecognizer.loadImage(data)
                 guard let result else { throw TicketRecognizer.Failure.unreadable }
-                return result
+                return (result, kind == .pdf ? TicketRecognizer.pieces(pdf: data, page: page) : [])
             }.value
             try Task.checkCancellation()
             image = UIImage(cgImage: cg)
             // Preserve the document even when Vision is temporarily unavailable.
-            do { pieces = try await TicketRecognizer.pieces(image: cg) }
+            do {
+                pieces = embedded.isEmpty ? try await TicketRecognizer.pieces(image: cg) : embedded
+            }
             catch is CancellationError { throw CancellationError() }
             catch { self.error = error.localizedDescription }
             try Task.checkCancellation()

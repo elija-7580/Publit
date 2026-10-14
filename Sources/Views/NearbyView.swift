@@ -9,6 +9,7 @@ struct NearbyView: View {
     @State private var isVisible = false
     @State private var searching = false
     @State private var showMap = false
+    @State private var showSettings = false
     @State private var groups: [StopGroup] = []
     @State private var isLoading = false
     @State private var errorMessage: String?
@@ -28,6 +29,14 @@ struct NearbyView: View {
         ModeGroup.allCases.filter { seenGroups.contains($0) || filter.included.contains($0) }
     }
 
+    // Deterministic UI screenshots use the actual screen, without a network or GPS dependency.
+    private let fixtureGroups: [StopGroup]?
+    init(fixtureGroups: [StopGroup]? = nil) {
+        self.fixtureGroups = fixtureGroups
+        _groups = State(initialValue: fixtureGroups ?? [])
+        _seenGroups = State(initialValue: Set(ModeGroup.present(in: fixtureGroups?.flatMap { $0.departures.map(\.mode) } ?? [])))
+    }
+
     /// Where and when the board was last requested. A refined GPS fix does not restart a running request.
     @State private var loadedCenter: LatLon?
     @State private var loadedAt = Date.distantPast
@@ -39,73 +48,67 @@ struct NearbyView: View {
     static var refreshInterval: TimeInterval { Energy.interval(30) }
 
     var body: some View {
-        List {
-            goSection
-            activeTripSection
-            OfflineNote()
-            if !location.isDenied, availableGroups.count > 1 || filter.isActive {
-                ModeFilterBar(available: availableGroups, filter: filterBinding).chipRow()
-            }
-            if location.isDenied {
-                ContentUnavailableView("Location is off",
-                                       systemImage: "location.slash",
-                                       description: Text("Allow location access in Settings to see departures near you. Trip planning works without it."))
-            } else if groups.isEmpty {
-                if let errorMessage {
-                    ContentUnavailableView("Departures unavailable", systemImage: "exclamationmark.triangle",
-                                           description: Text(errorMessage))
-                } else if isLoading || !location.hasFix {
-                    LogoLoader()
-                } else if filter.isActive {
-                    ContentUnavailableView {
-                        Label("No departures for these modes", systemImage: "line.3.horizontal.decrease.circle")
-                    } description: {
-                        Text(verbatim: filter.summary ?? "")
-                    } actions: {
-                        Button("Show all modes") { storedModes = "" }
+        ScrollView {
+            LazyVStack(spacing: 12) {
+                InkPageHeader("Nearby", logo: true, identifier: "heading-nearby") {
+                    Button { searching = true } label: {
+                        Label("Where to now?", systemImage: "magnifyingglass").frame(width: 44, height: 44)
                     }
-                } else {
-                    ContentUnavailableView("No departures nearby", systemImage: "tram",
-                                           description: Text("No public transport stops within 1.5 km."))
-                }
-            }
-            if !groups.isEmpty, errorMessage != nil, !Connectivity.shared.isOffline {
-                Label("Couldn't refresh. Times may be out of date.", systemImage: "exclamationmark.triangle")
-                    .font(.footnote).foregroundStyle(.secondary)
-            }
-
-            ForEach(groups) { group in
-                Section {
-                    // Ink & Dot: the station heads its own card instead of a grey header above it.
-                    StopGroupHeader(group: group, nearest: group.id == groups.first?.id)
-                        .listRowSeparator(.hidden, edges: .bottom)
-                    ForEach(group.departures.prefix(5)) { st in
-                        // By value: the trip stays open when the board refreshes and this row
-                        // changes or leaves (the departure has gone).
-                        NavigationLink(value: TripTarget(stopTime: st, stationId: group.id, stationName: group.name,
-                                                         coordinate: group.coordinate)) {
-                            DepartureRow(stopTime: st)
+                    .accessibilityIdentifier("whereToNow")
+                    Menu {
+                        Button { showMap = true } label: { Label("Station map", systemImage: "map") }
+                        ForEach(favorites.pinned) { place in
+                            Button { go(.place(place)) } label: { Label(place.role?.title ?? place.name, systemImage: place.role?.symbol ?? "mappin") }
                         }
-                    }
-                    NavigationLink {
-                        StopDeparturesView(stopId: group.id, name: group.name, coordinate: group.coordinate, exact: group.isPole)
-                    } label: {
-                        Text("All departures").font(.subheadline.weight(.semibold))
+                        if let next = trips.activeTrip ?? trips.upcoming().first {
+                            Button { app.deepLink = .trip(next.id) } label: { Label(next.toName, systemImage: "point.topleft.down.curvedto.point.bottomright.up") }
+                        }
+                        Button { showSettings = true } label: { Label("Settings", systemImage: "gearshape") }
+                    } label: { Label("More", systemImage: "ellipsis").frame(width: 44, height: 44) }
+                }
+                OfflineNote()
+                if (!location.isDenied || fixtureGroups != nil), availableGroups.count > 1 || filter.isActive {
+                    ModeFilterBar(available: availableGroups, filter: filterBinding, horizontalInset: 0)
+                }
+                if location.isDenied && fixtureGroups == nil {
+                    ContentUnavailableView("Location is off",
+                                           systemImage: "location.slash",
+                                           description: Text("Allow location access in Settings to see departures near you. Trip planning works without it."))
+                } else if groups.isEmpty {
+                    if let errorMessage {
+                        ContentUnavailableView("Departures unavailable", systemImage: "exclamationmark.triangle",
+                                               description: Text(errorMessage))
+                    } else if isLoading || !location.hasFix {
+                        LogoLoader()
+                    } else if filter.isActive {
+                        ContentUnavailableView {
+                            Label("No departures for these modes", systemImage: "line.3.horizontal.decrease.circle")
+                        } description: {
+                            Text(verbatim: filter.summary ?? "")
+                        } actions: {
+                            Button("Show all modes") { storedModes = "" }
+                        }
+                    } else {
+                        ContentUnavailableView("No departures nearby", systemImage: "tram",
+                                               description: Text("No public transport stops within 1.5 km."))
                     }
                 }
-                .inkCard()
-            }
+                if !groups.isEmpty, errorMessage != nil, !Connectivity.shared.isOffline {
+                    Label("Couldn't refresh. Times may be out of date.", systemImage: "exclamationmark.triangle")
+                        .font(.footnote).foregroundStyle(.secondary)
+                }
 
-        }
-        .inkList()
-        .tint(Color.ink)
-        .navigationTitle("Nearby")
-        .screenTrail("Nearby")
-        .withSettingsButton()
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button { showMap = true } label: { Label("Station map", systemImage: "map") }
+                ForEach(groups) { group in
+                    NearbyStopCard(group: group, nearest: group.id == groups.first?.id, from: location.coordinate)
+                }
             }
+            .padding(.horizontal, 16).padding(.bottom, 16)
+        }
+        .background(Color.ground).liveBarPadding()
+        .tint(Color.ink).navigationTitle("").toolbar(.hidden, for: .navigationBar)
+        .screenTrail("Nearby")
+        .sheet(isPresented: $showSettings) {
+            SettingsView().environment(\.liveBarInset, 0)
         }
         .sheet(isPresented: $searching) {
             PlaceSearchView(title: "Where to?", allowCurrentLocation: false) { endpoint in go(endpoint) }
@@ -114,7 +117,7 @@ struct NearbyView: View {
         .navigationDestination(for: TripTarget.self) { t in
             TripView(stopTime: t.stopTime, stationId: t.stationId, stationName: t.stationName, stationCoordinate: t.coordinate)
         }
-        .fullScreenCover(isPresented: $showMap) { StationMapView() }
+        .fullScreenCover(isPresented: $showMap) { StationMapView().environment(\.liveBarInset, 0) }
         // "Route here/from here" on a map stop switches to Plan: the map closes so Plan is visible.
         .onChange(of: app.tab) { if app.tab != .nearby { showMap = false } }
         .refreshable { await load(force: true) }
@@ -125,7 +128,7 @@ struct NearbyView: View {
         .onAppear { isVisible = true }
         .onDisappear { isVisible = false }
         .task(id: "\(refreshEnabled)|\(storedModes)") {
-            guard refreshEnabled else { return }
+            guard fixtureGroups == nil, refreshEnabled else { return }
             if location.isDenied { app.firstBoardReady = true }
             await showLastBoard()
             // One loop for the screen. Before, every ~100 m change of the first, still improving GPS
@@ -141,55 +144,12 @@ struct NearbyView: View {
 
     private var refreshEnabled: Bool { isVisible && scenePhase == .active && app.tab == .nearby && !showMap && !app.showGoNow }
 
-    @ViewBuilder
-    private var activeTripSection: some View {
-        if let trip = trips.activeTrip {
-            Section("Active trip") {
-                NavigationLink { SavedTripView(tripId: trip.id) } label: {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Label(trip.toName, systemImage: "location.north.circle.fill").font(.headline)
-                        Text(TripStatus.at(.now, trip.itinerary).headline).font(.subheadline).foregroundStyle(.secondary)
-                        if let leg = trip.itinerary.firstTransitLeg { LineBadge(leg) }
-                    }
-                }
-                .accessibilityIdentifier("activeTrip")
-            }
-            .inkCard()
-        }
-    }
-
     /// "I have to get there now": route from the current location, leaving now.
     private func go(_ destination: Endpoint) {
         app.goNow.from = .currentLocation
         app.goNow.to = destination
         app.goNow.timeMode = .now
         app.showGoNow = true
-    }
-
-    @ViewBuilder
-    private var goSection: some View {
-        Section {
-            Button { searching = true } label: {
-                Label("Where to now?", systemImage: "magnifyingglass").foregroundStyle(.secondary)
-            }
-            .accessibilityLabel("Where to now? Route from your location")
-            .accessibilityIdentifier("whereToNow")
-            ForEach(favorites.pinned) { p in
-                Button { go(.place(p)) } label: {
-                    Label { Text(p.role?.title ?? p.name) + Text(verbatim: "  \(p.name)").foregroundStyle(.secondary) }
-                        icon: { Image(systemName: p.role?.symbol ?? "mappin") }
-                }
-            }
-            if let next = trips.upcoming().first, next.startTime.timeIntervalSinceNow < 3 * 3600 {
-                NavigationLink { SavedTripView(tripId: next.id) } label: {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Next trip: \(next.toName)").font(.subheadline.weight(.semibold))
-                        Text(TripStatus.at(.now, next.itinerary).headline).font(.caption).foregroundStyle(.secondary)
-                    }
-                }
-            }
-        }
-        .inkCard()
     }
 
     /// The last board (up to 30 min old, past departures removed) right away, so the screen is not
@@ -210,7 +170,7 @@ struct NearbyView: View {
     }
 
     private func load(force: Bool = false) async {
-        guard refreshEnabled, let here = location.coordinate else { return }
+        guard fixtureGroups == nil, refreshEnabled, let here = location.coordinate else { return }
         if isLoading, !force { return }
         if !force, loadedModes == storedModes, let c = loadedCenter, here.distance(to: c) < Self.reloadDistance,
            Date().timeIntervalSince(loadedAt) < Self.refreshInterval { return }

@@ -20,27 +20,21 @@ struct LineBadge: View {
     }
 
     var body: some View {
-        HStack(spacing: 4) {
-            Image(systemName: ModeStyle.symbol(mode))
-                .font(.caption.weight(.semibold))
-                .accessibilityHidden(true)
-            Text(verbatim: name)
-                .font(compact ? .caption.weight(.bold) : .subheadline.weight(.bold))
-                .lineLimit(2)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .padding(.horizontal, compact ? 6 : 8)
-        .padding(.vertical, compact ? 2 : 4)
-        .frame(minWidth: 44)
-        .foregroundStyle(textColor)
-        .background(color, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+        Text(verbatim: name)
+            .font(compact ? .caption.weight(.bold) : .subheadline.weight(.bold))
+            .lineLimit(1)
+            .padding(.horizontal, compact ? 6 : 8)
+            .padding(.vertical, compact ? 3 : 5)
+            .frame(minWidth: compact ? 30 : 34)
+            .foregroundStyle(textColor)
+            .background(color, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
         // Near-black badges on dark backgrounds (and white ones on light) get a visible edge;
         // the others the usual hairline.
         .overlay {
             if LineColors.blendsIn(hex, dark: scheme == .dark) {
-                RoundedRectangle(cornerRadius: 6).strokeBorder(Color.primary.opacity(0.45), lineWidth: 1)
+                RoundedRectangle(cornerRadius: 8).strokeBorder(Color.primary.opacity(0.45), lineWidth: 1)
             } else {
-                RoundedRectangle(cornerRadius: 6).stroke(Color.primary.opacity(0.12), lineWidth: 0.5)
+                RoundedRectangle(cornerRadius: 8).stroke(Color.primary.opacity(0.12), lineWidth: 0.5)
             }
         }
         .accessibilityElement(children: .ignore)
@@ -57,6 +51,7 @@ struct DepartureTimeView: View {
     var tz: String? = nil
 
     var now: Date = .now
+    var compact = false
 
     var body: some View {
         let minutes = Int(ceil(actual.timeIntervalSince(now) / 60))
@@ -86,17 +81,19 @@ struct DepartureTimeView: View {
                         Text(L10n.f("+%lld min", delayMinutes))
                             .font(.caption.weight(.bold).monospacedDigit()).foregroundStyle(Color.delay)
                     }
-                    if minutes < 60 || delayMinutes > 0 {
+                    if !compact && (minutes < 60 || delayMinutes > 0) {
                         Text(Fmt.time(actual, tz: tz)).font(.caption.weight(.medium).monospacedDigit())
                             .foregroundStyle(.secondary)
                     }
                 }
+                if !compact {
                 HStack(spacing: 3) {
                     Image(systemName: realTime ? "dot.radiowaves.left.and.right" : "calendar")
                     Text(realTime ? L10n.t("Live") : L10n.t("Timetable"))
                 }
                 .font(.caption2.weight(.medium))
                 .foregroundStyle(realTime ? Color.live : Color.secondary)
+                }
             }
         }
         .fixedSize(horizontal: true, vertical: true)

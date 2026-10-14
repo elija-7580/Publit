@@ -7,7 +7,9 @@ struct PlanView: View {
     @Environment(LocationManager.self) private var location
     @State private var picking: PickTarget?
     @State private var showMap = false
+    @State private var showSettings = false
     @State private var selectedId: String?
+    @State private var detailItinerary: Itinerary?
 
     /// Live refresh interval while planning for "now".
     static var refreshInterval: Duration { Energy.duration(60) }
@@ -18,6 +20,12 @@ struct PlanView: View {
         @Bindable var plan = app.plan
         List {
             Section {
+                InkPageHeader("Plan", identifier: "heading-plan") {
+                    if plan.to != nil {
+                        Button { app.plan.to = nil } label: { Label("Clear destination", systemImage: "xmark.circle").frame(width: 44, height: 44) }
+                    }
+                    Button { showSettings = true } label: { Label("Settings", systemImage: "gearshape").frame(width: 44, height: 44) }
+                }
                 // From and To with the swap button between them on the right.
                 HStack(spacing: 8) {
                     VStack(spacing: 0) {
@@ -37,16 +45,25 @@ struct PlanView: View {
                     .accessibilityLabel(Text("Swap"))
                     .accessibilityIdentifier("swapEndpoints")
                 }
-                .buttonStyle(.borderless)
-                // Plan is for later (tonight, next week). "From here, now" lives in Nearby.
-                Picker("When", selection: $plan.timeMode) {
-                    Text("Depart").tag(TimeMode.departAt)
-                    Text("Arrive").tag(TimeMode.arriveBy)
+                .buttonStyle(.plain)
+                .padding(.horizontal, 16).padding(.vertical, 8)
+                .background(Color.surface, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        timeChip("Now", mode: .now)
+                        timeChip("Depart", mode: .departAt)
+                        timeChip("Arrive", mode: .arriveBy)
+                        RouteOptionsButton(compact: true)
+                            .font(.caption.weight(.semibold)).padding(.horizontal, 12).frame(minHeight: 44)
+                            .background(Color.inkFill, in: Capsule())
+                    }
                 }
-                .pickerStyle(.segmented)
-                DatePicker(plan.timeMode == .arriveBy ? L10n.t("Arrive by") : L10n.t("Depart at"), selection: $plan.date)
-                RouteOptionsButton(compact: true)
+                if plan.timeMode != .now {
+                    DatePicker(plan.timeMode == .arriveBy ? L10n.t("Arrive by") : L10n.t("Depart at"), selection: $plan.date)
+                }
             }
+            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+            .listRowBackground(Color.clear)
 
             if plan.to != nil && !plan.searchStarted {
                 Section {
@@ -70,29 +87,30 @@ struct PlanView: View {
                                         fromName: plan.from.title, toName: plan.to?.title ?? "")
             }
         }
+        .listStyle(.plain).listRowSpacing(10).listRowSeparator(.hidden).listSectionSeparator(.hidden)
         .inkList()
-        .navigationTitle("Plan")
+        .navigationTitle("").toolbar(.hidden, for: .navigationBar)
         .screenTrail("Plan")
-        .withSettingsButton()
+        .sheet(isPresented: $showSettings) {
+            SettingsView().environment(\.liveBarInset, 0)
+        }
         .onAppear {
             isVisible = true
-            if plan.timeMode == .now { plan.timeMode = .departAt }
             if plan.date < .now.addingTimeInterval(-60) { plan.date = .now }
-        }
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                if plan.to != nil {
-                    Button { app.plan.to = nil } label: { Label("Clear destination", systemImage: "xmark.circle") }
-                }
-            }
         }
         .sheet(item: $picking) { target in
             PlaceSearchView(title: target == .from ? "From" : "To", allowCurrentLocation: true) { endpoint in
                 if target == .from { app.plan.from = endpoint } else { app.plan.to = endpoint }
             }
         }
+        .navigationDestination(isPresented: Binding(get: { detailItinerary != nil }, set: { if !$0 { detailItinerary = nil } })) {
+            if let itinerary = detailItinerary { detail(itinerary) }
+        }
         .onDisappear { isVisible = false }
         .task(id: "\(app.plan.queryKey)|\(scenePhase)|\(app.tab)|\(isVisible)|\(app.plan.searchStarted)") {
+            #if DEBUG
+            if ProcessInfo.processInfo.environment["PUBLIT_UI_SAMPLE"] == "reference-plan" { return }
+            #endif
             guard isVisible, scenePhase == .active, app.tab == .plan, app.plan.searchStarted else { return }
             selectedId = nil
             await app.plan.search(current: location.coordinate, locationDenied: location.isDenied)
@@ -118,16 +136,30 @@ struct PlanView: View {
         return d
     }
 
+    private func timeChip(_ title: LocalizedStringKey, mode: TimeMode) -> some View {
+        let selected = app.plan.timeMode == mode
+        return Button {
+            app.plan.timeMode = mode
+            if mode == .now { app.plan.date = .now }
+        } label: {
+            Text(title).font(.caption.weight(.semibold)).padding(.horizontal, 12).frame(minHeight: 44)
+                .foregroundStyle(selected ? Color.onInk : Color.ink)
+                .background(selected ? Color.ink : Color.inkFill, in: Capsule())
+        }
+        .buttonStyle(.plain).accessibilityAddTraits(selected ? .isSelected : [])
+        .accessibilityIdentifier("plan-time-\(mode.rawValue)")
+    }
+
     private func endpointButton(label: LocalizedStringKey, endpoint: Endpoint?, target: PickTarget) -> some View {
         Button { picking = target } label: {
             HStack {
-                Text(label).foregroundStyle(.secondary).lineLimit(1).fixedSize()
-                    .frame(minWidth: 56, alignment: .leading)
+                Text(label).font(.caption.weight(.semibold)).foregroundStyle(.secondary).lineLimit(1).fixedSize()
+                    .frame(minWidth: 42, alignment: .leading)
                 if let endpoint {
                     if case .currentLocation = endpoint {
                         SignatureDot(size: 10)
                     }
-                    Text(endpoint.title).foregroundStyle(.primary).lineLimit(1)
+                    Text(endpoint.title).font(.subheadline.weight(target == .to ? .semibold : .regular)).foregroundStyle(.primary).lineLimit(1)
                 } else {
                     Text("Where to?").foregroundStyle(.secondary)
                 }
@@ -190,6 +222,7 @@ struct PlanView: View {
                 ForEach(its) { it in
                     Button { selectedId = it.id } label: {
                         ItineraryRow(itinerary: it, windowStart: windowStart, windowEnd: windowEnd)
+                            .inkRouteCard()
                             .padding(.leading, 6)
                             .overlay(alignment: .leading) {
                                 if it.id == (selectedId ?? its.first?.id) {
@@ -202,11 +235,10 @@ struct PlanView: View {
                 }
             } else {
                 ForEach(its) { it in
-                    NavigationLink {
-                        detail(it)
-                    } label: {
-                        ItineraryRow(itinerary: it, windowStart: windowStart, windowEnd: windowEnd)
+                    Button { detailItinerary = it } label: {
+                        ItineraryRow(itinerary: it, windowStart: windowStart, windowEnd: windowEnd).inkRouteCard()
                     }
+                    .buttonStyle(.plain).accessibilityIdentifier("routeResult")
                 }
             }
 
@@ -230,6 +262,8 @@ struct PlanView: View {
                 .padding(.top, 8)
             }
         }
+        .listRowBackground(Color.clear)
+        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
     }
 }
 
@@ -256,20 +290,21 @@ struct ItineraryRow: View {
                 Spacer()
                 DurationFigure(seconds: itinerary.duration, size: 22)
             }
+            FlowRow(spacing: 6) {
+                ForEach(Array(itinerary.legs.enumerated()), id: \.offset) { _, leg in
+                    if leg.isTransit { LineBadge(leg, compact: true) }
+                    else if leg.duration >= 60 {
+                        Label(Fmt.duration(seconds: leg.duration), systemImage: ModeStyle.symbol(leg.mode))
+                            .font(.caption2).foregroundStyle(.secondary)
+                    }
+                }
+            }
             if showTimeline {
-                TimelineBar(itinerary: itinerary, windowStart: windowStart, windowEnd: windowEnd).frame(height: 42)
+                TimelineBar(itinerary: itinerary, windowStart: windowStart, windowEnd: windowEnd).frame(height: 26)
             }
-            HStack(spacing: 8) {
-                Text(Fmt.changes(itinerary.transfers))
-                if let first = itinerary.firstTransitLeg {
-                    Text("· \(first.lineName) from \(first.from.name)").lineLimit(1)
-                }
-                if itinerary.isCancelled {
-                    Text("Cancelled").foregroundStyle(Color.danger)
-                }
+            if itinerary.isCancelled {
+                Text("Cancelled").font(.caption.weight(.semibold)).foregroundStyle(Color.danger)
             }
-            .font(.caption)
-            .foregroundStyle(.secondary)
             if itinerary.transitLegs.contains(where: { !$0.serviceAlerts.isEmpty || $0.isReplacementBus }) {
                 Label("Service changes on this route", systemImage: "exclamationmark.triangle.fill")
                     .font(.caption.weight(.semibold)).foregroundStyle(Color.delay)
@@ -293,7 +328,7 @@ struct TimelineBar: View {
         GeometryReader { geo in
             let span = max(windowEnd.timeIntervalSince(windowStart), 60)
             let width = geo.size.width
-            let height: CGFloat = 22
+            let height: CGFloat = 6
             ZStack(alignment: .topLeading) {
                 ForEach(Array(itinerary.legs.enumerated()), id: \.offset) { index, leg in
                     if index > 0, itinerary.legs[index - 1].endTime < leg.startTime {
@@ -309,15 +344,6 @@ struct TimelineBar: View {
                     if leg.isTransit {
                         RoundedRectangle(cornerRadius: 4, style: .continuous)
                             .fill(leg.lineStroke)
-                            .overlay {
-                                if w > 36 {
-                                    Text(leg.lineName)
-                                        .font(.caption2.weight(.bold))
-                                        .foregroundStyle(leg.lineTextColor)
-                                        .lineLimit(1)
-                                        .padding(.horizontal, 2)
-                                }
-                            }
                             .frame(width: w, height: height)
                             .offset(x: x)
                     } else {

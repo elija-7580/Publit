@@ -47,7 +47,6 @@ struct PassCardView: View {
         }
         .foregroundStyle(foreground)
         .compositingGroup()
-        .shadow(color: .black.opacity(0.14), radius: 12, y: 5)
         .saturation(compact && expired ? 0 : 1)
         .opacity(compact && expired ? 0.7 : 1)
     }

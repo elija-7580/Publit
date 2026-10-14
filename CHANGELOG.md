@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.6.0 (build 32)
+
+### Reference layout, not a recolour
+- Rebuilt Nearby around compact station cards and horizontal departure rows. Search stays in the header; pinned destinations, map, next trip and settings remain reachable in the menu.
+- Plan has a From/To panel, explicit Now/Depart/Arrive chips and individual connection cards with line/walk chains and thin leg-duration timelines.
+- Started trips open with a prominent arrival card and complete vertical journey timeline. Guidance, map, voice cues and replanning remain below it.
+- Tickets use actual-code season-pass tiles and grouped compact single-ticket rows.
+- Replaced the native tab bar with the matte four-tab Ink & Dot dock. The live bar is compact in both started and upcoming states; scrolling reserves the measured combined height. Trip sheets show the dock without a redundant live bar.
+
+### Build and review fixes
+- Fixed the confirmed build 31 iOS compiler error: DurationFigure's ScaledMetric now has a declaration-time wrapped value.
+- Moved ticket field assignment above the large preview. Embedded PDF text supplies precise selectable boxes without requiring Vision inference; raster/rotated pages still use on-device OCR.
+- Settings shows the installed version and build number. Sheet roots reset bottom insets and do not add a nested NavigationStack around Settings.
+- Updated navigation tests to stable IDs; added production-screen light/dark/large-text screenshot fixtures and native PDF/ScaledMetric regression tests. Native compilation and visual approval remain CI/device checks, not claims inferred from Linux core tests.
+
 ## 0.6.0 (build 31)
 
 ### Reliability and clearer trips

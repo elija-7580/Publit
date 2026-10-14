@@ -3,7 +3,7 @@ import SwiftUI
 /// Localized duration with large tabular figures and quiet units, not a hard-coded "min" suffix.
 struct DurationFigure: View {
     let seconds: Int
-    @ScaledMetric(relativeTo: .title2) private var size: CGFloat
+    @ScaledMetric(relativeTo: .title2) private var size: CGFloat = 28
 
     init(seconds: Int, size: CGFloat = 28) {
         self.seconds = seconds

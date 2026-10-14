@@ -29,6 +29,16 @@ struct LiveTripView: View {
     }
 
     var body: some View {
+        Group {
+            if trip.itinerary.legs.isEmpty {
+                ItineraryDetailView(itinerary: trip.itinerary, fromName: trip.fromName, toName: trip.toName)
+            } else {
+                guide
+            }
+        }
+    }
+
+    private var guide: some View {
         let it = trip.itinerary
         let steps = TripGuide.steps(it)
         // Reading the fix here redraws on every fix: wanted on this screen (every few metres while walking).
@@ -50,16 +60,18 @@ struct LiveTripView: View {
             : check == .missed ? L10n.t("Missed it?") : L10n.t("Connection cancelled")
         List {
             Section {
-                GuideMap(itinerary: it, step: step,
-                         vehicle: step.kind == .ride ? ride.flatMap { TripProgress.position($0.progress, stops: leg.allStops) } : nil,
-                         focus: walkPos.flatMap { p in walk?.maneuvers[safe: p.index + 1]?.coordinate })
-                    .frame(height: 250)
-                    .listRowInsets(EdgeInsets())
-                StageStrip(steps: steps, itinerary: it, live: live, shown: index) { tapped in
-                    picked = tapped == live ? nil : steps[tapped].id
-                }
-                .listRowInsets(EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 12))
+                TripArrivalCard(trip: trip, now: now)
             }
+            .listRowInsets(EdgeInsets()).listRowBackground(Color.clear)
+            Section {
+                TripTimelineView(itinerary: it, fromName: trip.fromName, toName: trip.toName, now: now) { legIndex in
+                    if let selected = steps.first(where: { $0.legIndex == legIndex && $0.kind != .arrive }) {
+                        picked = selected.id
+                    }
+                }
+            }
+            .listRowInsets(EdgeInsets()).listRowBackground(Color.clear)
+            TripActionsSection(itinerary: it, fromName: trip.fromName, toName: trip.toName)
 
             if wrong {
                 Section {
@@ -82,18 +94,25 @@ struct LiveTripView: View {
             }
 
             Section {
+                GuideMap(itinerary: it, step: step,
+                         vehicle: step.kind == .ride ? ride.flatMap { TripProgress.position($0.progress, stops: leg.allStops) } : nil,
+                         focus: walkPos.flatMap { p in walk?.maneuvers[safe: p.index + 1]?.coordinate })
+                    .frame(height: 250)
+                    .listRowInsets(EdgeInsets())
+                StageStrip(steps: steps, itinerary: it, live: live, shown: index) { tapped in
+                    picked = tapped == live ? nil : steps[tapped].id
+                }
+                .listRowInsets(EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 12))
+            }
+
+            Section {
                 NavigationLink {
                     ItineraryDetailView(itinerary: it, fromName: trip.fromName, toName: trip.toName,
                                         statusAt: { TripStatus.at($0, it) }, refreshedAt: trip.refreshedAt)
                 } label: {
                     Label("Route details", systemImage: "list.bullet")
                 }
-                Button(role: .destructive) {
-                    Task { await TripSession.stop(trip, in: trips) }
-                } label: {
-                    Label("End trip", systemImage: "stop.circle")
-                }
-                .accessibilityIdentifier("endTrip")
+
             } footer: {
                 if let refreshedAt = trip.refreshedAt {
                     Text("Updated \(refreshedAt.formatted(date: .omitted, time: .shortened))")

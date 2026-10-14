@@ -122,7 +122,7 @@ final class PublitUITests: XCTestCase {
         app.launchArguments = ["-AppleLanguages", "(de)", "-AppleLocale", "de_AT"]
         app.launchEnvironment = ["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "plan"]
         app.launch()
-        XCTAssertTrue(app.navigationBars["Planen"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["heading-plan"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Von")).firstMatch.exists)
         XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Nach")).firstMatch.exists)
         sleep(3)
@@ -132,10 +132,10 @@ final class PublitUITests: XCTestCase {
         XCTAssertTrue(app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", "Öffentlicher Verkehr ohne Ablenkung.")).firstMatch.exists)
         snap("de-settings")
         app.buttons["Fertig"].tap()
-        app.tabBars.buttons.element(boundBy: 0).tap()
-        XCTAssertTrue(app.navigationBars["In der Nähe"].waitForExistence(timeout: 5))
+        app.buttons["tab-nearby"].tap()
+        XCTAssertTrue(app.staticTexts["heading-nearby"].waitForExistence(timeout: 5))
         snap("de-nearby")
-        app.tabBars.buttons["Gespeichert"].tap()
+        app.buttons["tab-favorites"].tap()
         XCTAssertTrue(app.navigationBars["Gespeichert"].waitForExistence(timeout: 5))
         snap("de-saved")
     }
@@ -253,7 +253,7 @@ final class PublitUITests: XCTestCase {
     func testF01NearbyShowsDepartures() {
         let app = launch()
         nudge(app) // lets the interruption monitor handle a permission alert
-        XCTAssertTrue(app.navigationBars["Nearby"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["heading-nearby"].waitForExistence(timeout: 10))
         // The board shows first (the link under it sits below the fold since the mode chips came).
         XCTAssertTrue(app.buttons["modeChip-all"].waitForExistence(timeout: timeout), "no departure board loaded")
         sleep(1)
@@ -265,7 +265,7 @@ final class PublitUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Save"].waitForExistence(timeout: 10))
         snap("stop")
         app.buttons["Save"].tap()
-        app.tabBars.buttons["Saved"].tap()
+        app.buttons["tab-favorites"].tap()
         let saved = app.descendants(matching: .any).matching(NSPredicate(format: "label == 'Marienplatz'")).firstMatch
         XCTAssertTrue(saved.waitForExistence(timeout: 5), "saved stop not listed")
     }
@@ -273,8 +273,8 @@ final class PublitUITests: XCTestCase {
     /// F02 Plan and compare: routes on one timeline, map overlay, route detail.
     func testF02PlanCompareAndDetail() {
         let app = launch(["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "plan"])
-        XCTAssertTrue(app.navigationBars["Plan"].waitForExistence(timeout: 10))
-        let routes = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'from Marienplatz'"))
+        XCTAssertTrue(app.staticTexts["heading-plan"].waitForExistence(timeout: 10))
+        let routes = app.buttons.matching(identifier: "routeResult")
         XCTAssertTrue(routes.firstMatch.waitForExistence(timeout: timeout), "no routes found")
         sleep(1)
         snap("plan")
@@ -314,7 +314,7 @@ final class PublitUITests: XCTestCase {
         snap("saved")
 
         // Plan has no quick destinations since build 14: Home comes first when picking a place.
-        app.tabBars.buttons["Plan"].tap()
+        app.buttons["tab-plan"].tap()
         let to = app.buttons["endpoint-to"]
         XCTAssertTrue(to.waitForExistence(timeout: 10), "no To field in Plan")
         to.tap()
@@ -375,7 +375,7 @@ final class PublitUITests: XCTestCase {
     /// F07 Save a planned route: it appears under Upcoming trips in Saved, with ticket links in the details.
     func testF07SaveTripAndTickets() {
         let app = launch(["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "plan"])
-        let routes = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'from Marienplatz'"))
+        let routes = app.buttons.matching(identifier: "routeResult")
         XCTAssertTrue(routes.firstMatch.waitForExistence(timeout: timeout), "no routes found")
         routes.firstMatch.tap()
         XCTAssertTrue(app.navigationBars["Route"].waitForExistence(timeout: 10))
@@ -397,7 +397,7 @@ final class PublitUITests: XCTestCase {
         app.navigationBars["Route"].buttons.firstMatch.tap()
         app.buttons["Clear destination"].tap()
         // Saved trips are listed in the Saved tab (Plan is for planning only).
-        app.tabBars.buttons["Saved"].tap()
+        app.buttons["tab-favorites"].tap()
         let row = app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS 'Flughafen München'")).firstMatch
         XCTAssertTrue(row.waitForExistence(timeout: 5), "saved trip not under Upcoming in Saved")
         snap("trips")
@@ -431,7 +431,7 @@ final class PublitUITests: XCTestCase {
         app.terminate()
 
         let plan = launch(["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "plan"])
-        let routes = plan.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'from Marienplatz'"))
+        let routes = plan.buttons.matching(identifier: "routeResult")
         XCTAssertTrue(routes.firstMatch.waitForExistence(timeout: timeout), "no routes found")
         // Driving comes a little after the routes (its own, slower request).
         let car = plan.buttons["compare-CAR"]
@@ -464,7 +464,7 @@ final class PublitUITests: XCTestCase {
         // Demo location so Lines has nearby data even when the simulator GPS is cold.
         let app = launch(["PUBLIT_DEMO": "munich"])
         nudge(app)
-        app.tabBars.buttons["Saved"].tap()
+        app.buttons["tab-favorites"].tap()
         XCTAssertTrue(app.buttons["findLine"].waitForExistence(timeout: 10))
         app.buttons["findLine"].tap()
         XCTAssertTrue(app.navigationBars["Lines"].waitForExistence(timeout: 10))
@@ -498,7 +498,7 @@ final class PublitUITests: XCTestCase {
         map.terminate()
 
         let plan = launch(["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "plan"])
-        let routes = plan.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'from Marienplatz'"))
+        let routes = plan.buttons.matching(identifier: "routeResult")
         XCTAssertTrue(routes.firstMatch.waitForExistence(timeout: timeout), "no routes found")
         // Any element type: a SwiftUI Menu in a list row is not always reported as a button.
         let sort = plan.descendants(matching: .any)["routeSortMenu"].firstMatch
@@ -523,7 +523,7 @@ final class PublitUITests: XCTestCase {
     func testF15TicketsTabAndStopActions() {
         let app = launch(["PUBLIT_TAB": "tickets"])
         nudge(app)
-        XCTAssertTrue(app.navigationBars["Tickets"].waitForExistence(timeout: 10), "no Tickets tab")
+        XCTAssertTrue(app.staticTexts["heading-tickets"].waitForExistence(timeout: 10), "no Tickets tab")
         let add = app.buttons["addPass"]
         XCTAssertTrue(add.waitForExistence(timeout: 5))
         snap("tickets-tab")
@@ -533,7 +533,7 @@ final class PublitUITests: XCTestCase {
         app.buttons["Cancel"].firstMatch.tap()
         XCTAssertTrue(add.waitForExistence(timeout: 5))
 
-        app.tabBars.buttons["Nearby"].tap()
+        app.buttons["tab-nearby"].tap()
         let all = app.buttons["All departures"].firstMatch
         XCTAssertTrue(reveal(all, in: app), "no link to all departures")
         all.tap()
@@ -589,20 +589,57 @@ final class PublitUITests: XCTestCase {
         XCTAssertTrue(bringUp(mapping, in: app))
         mapping.tap()
         let text = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "ticketText-")).firstMatch
-        if text.waitForExistence(timeout: 20) {
-            XCTAssertTrue(reveal(text, in: app))
-            text.tap()
-            XCTAssertTrue(app.textFields["ticketMappingText"].exists || app.textViews["ticketMappingText"].exists)
-            app.buttons["ticketField-title"].tap()
-        } else {
-            // PDF text import still works when the simulator's Vision engine is unavailable.
-            XCTAssertTrue(app.buttons["Done"].exists)
-        }
+        // This PDF has an embedded text layer: mapping must not depend on Vision inference.
+        XCTAssertTrue(text.waitForExistence(timeout: 20), "embedded PDF text must be selectable")
+        XCTAssertTrue(reveal(text, in: app))
+        text.tap()
+        XCTAssertTrue(app.textFields["ticketMappingText"].exists || app.textViews["ticketMappingText"].exists)
+        app.buttons["ticketField-title"].tap()
         snap("ticket-field-mapper")
         app.buttons["Done"].firstMatch.tap()
         XCTAssertTrue(app.buttons["savePass"].exists)
         app.buttons["Cancel"].firstMatch.tap()
         XCTAssertFalse(app.buttons["savePass"].exists)
+    }
+
+    /// Same production screens and dock in light/dark mode, plus large text.
+    /// Screenshot files are published by the existing CI workflow for human visual review.
+    func testF18ReferenceLayoutScreens() {
+        for kind in ["nearby", "plan", "trip", "trip-warning", "tickets"] {
+            for dark in [false, true] {
+                let app = sample("reference-" + kind, dark: dark)
+                let heading = kind.hasPrefix("trip") ? app.descendants(matching: .any)["tripArrivalCard"].firstMatch : app.staticTexts["heading-" + kind]
+                XCTAssertTrue(heading.waitForExistence(timeout: 10), "reference screen missing: \(kind)")
+                let dock = app.buttons["tab-nearby"]
+                XCTAssertTrue(dock.exists && dock.isHittable, "dock obscured")
+                if kind == "plan" {
+                    XCTAssertTrue(app.buttons["routeResult"].firstMatch.exists)
+                    XCTAssertTrue(app.buttons["routeOptions"].isHittable)
+                } else if kind == "tickets" {
+                    XCTAssertTrue(app.buttons["passCard"].firstMatch.exists)
+                } else if kind.hasPrefix("trip") {
+                    XCTAssertTrue(app.descendants(matching: .any)["tripTimeline"].firstMatch.exists)
+                    XCTAssertTrue(app.buttons["endTrip"].exists)
+                }
+                let live = app.buttons["liveTripBar"]
+                if live.exists { XCTAssertLessThanOrEqual(live.frame.maxY, dock.frame.minY, "live bar overlaps navigation") }
+                if kind == "trip-warning" {
+                    let warning = app.descendants(matching: .any)["tripRefreshWarning"].firstMatch
+                    XCTAssertTrue(warning.exists)
+                    XCTAssertLessThanOrEqual(warning.frame.maxY, live.frame.minY, "refresh warning overlaps live bar")
+                }
+                snap("reference-" + kind + (dark ? "-dark" : "-light"))
+                app.terminate()
+            }
+        }
+        for kind in ["nearby", "trip", "tickets"] {
+            let app = sample("reference-" + kind, large: true)
+            XCTAssertTrue(app.buttons["tab-nearby"].waitForExistence(timeout: 10))
+            snap("reference-" + kind + "-large")
+            app.swipeUp()
+            snap("reference-" + kind + "-large-scrolled")
+            app.terminate()
+        }
     }
 
 }

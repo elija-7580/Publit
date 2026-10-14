@@ -8,6 +8,7 @@ struct ModeFilterBar: View {
     /// Symbols only, in one fixed row without scrolling (station map). A horizontal scroll view
     /// floating over the map was sometimes not drawn on iOS 26+, while its chips still took taps.
     var iconsOnly = false
+    var horizontalInset: CGFloat = 16
 
     var body: some View {
         if iconsOnly { iconRow } else { scrollingRow }
@@ -49,13 +50,13 @@ struct ModeFilterBar: View {
                 chip(title: L10n.t("All"), symbol: nil, selected: !filter.isActive) { filter = .all }
                     .accessibilityIdentifier("modeChip-all")
                 ForEach(available) { group in
-                    chip(title: group.title, symbol: group.symbol, selected: filter.isActive && filter.included.contains(group)) {
+                    chip(title: group.title, symbol: nil, selected: filter.isActive && filter.included.contains(group)) {
                         filter.toggleOnly(group)
                     }
                     .accessibilityIdentifier("modeChip-\(group.rawValue)")
                 }
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, horizontalInset)
             .padding(.vertical, 6)
         }
         .accessibilityElement(children: .contain)
@@ -64,7 +65,7 @@ struct ModeFilterBar: View {
 
     private func chip(title: String, symbol: String?, selected: Bool, action: @escaping () -> Void) -> some View {
         Button {
-            withAnimation(.snappy(duration: 0.2)) { action() }
+            action()
         } label: {
             HStack(spacing: 5) {
                 if let symbol { Image(systemName: symbol).font(.caption.weight(.semibold)).accessibilityHidden(true) }

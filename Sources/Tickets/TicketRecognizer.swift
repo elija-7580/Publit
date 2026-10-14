@@ -116,6 +116,29 @@ enum TicketRecognizer {
         }.value
     }
 
+    /// Exact embedded PDF text with page-relative hit boxes. Raster-only/rotated PDFs use OCR.
+    /// Coordinates match renderPage's media-box thumbnail (upright, top-left origin).
+    static func pieces(pdf data: Data, page number: Int) -> [TicketTextPiece] {
+        guard let page = PDFDocument(data: data)?.page(at: number), page.rotation % 360 == 0 else { return [] }
+        let box = page.bounds(for: .mediaBox)
+        guard box.width > 0, box.height > 0,
+              let lines = page.selection(for: box)?.selectionsByLine() else { return [] }
+        let unit = CGRect(x: 0, y: 0, width: 1, height: 1)
+        let values = lines.compactMap { line -> (String, CGRect)? in
+            let text = TicketTextParser.clean(line.string ?? "")
+            let b = line.bounds(for: page)
+            guard !text.isEmpty, !b.isNull, b.width > 0, b.height > 0 else { return nil }
+            let rect = CGRect(x: (b.minX - box.minX) / box.width,
+                              y: 1 - (b.maxY - box.minY) / box.height,
+                              width: b.width / box.width, height: b.height / box.height).intersection(unit)
+            guard !rect.isNull, !rect.isEmpty else { return nil }
+            return (text, rect)
+        }.sorted { a, b in
+            a.1.minY == b.1.minY ? a.1.minX < b.1.minX : a.1.minY < b.1.minY
+        }
+        return values.enumerated().map { TicketTextPiece(id: $0.offset, text: $0.element.0, rect: $0.element.1) }
+    }
+
     /// Individually selectable OCR regions for the review screen; nothing leaves the device.
     static func pieces(image: CGImage) async throws -> [TicketTextPiece] {
         try await Task.detached(priority: .userInitiated) { () throws -> [TicketTextPiece] in

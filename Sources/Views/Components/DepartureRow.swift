@@ -22,15 +22,24 @@ struct DepartureRow: View {
                     time(now: now)
                 }
             } else {
-                HStack(alignment: .center, spacing: 12) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        identity
-                        DirectionLabel(direction: stopTime.directionName)
-                        platform
+                HStack(alignment: .center, spacing: 10) {
+                    LineBadge(stopTime, compact: true).frame(maxWidth: 62)
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(verbatim: stopTime.directionName ?? L10n.t("Direction unavailable"))
+                            .font(.subheadline.weight(.semibold)).lineLimit(1)
+                        HStack(spacing: 4) {
+                            platform
+                            if let detail = stopTime.serviceDetail {
+                                Text(verbatim: detail).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                            }
+                            if stopTime.realTime && !Connectivity.shared.isOffline {
+                                Circle().fill(Color.live).frame(width: 4, height: 4).accessibilityHidden(true)
+                            }
+                        }
                         serviceNote
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    time(now: now)
+                    time(now: now, compact: true)
                 }
             }
         }
@@ -68,10 +77,10 @@ struct DepartureRow: View {
         }
     }
 
-    private func time(now: Date) -> some View {
+    private func time(now: Date, compact: Bool = false) -> some View {
         DepartureTimeView(actual: stopTime.departureTime, delayMinutes: stopTime.delayMinutes,
                           realTime: stopTime.realTime && !Connectivity.shared.isOffline,
-                          cancelled: stopTime.isCancelled, tz: stopTime.place.tz, now: now)
+                          cancelled: stopTime.isCancelled, tz: stopTime.place.tz, now: now, compact: compact)
     }
 
     private var accessibilityText: String {

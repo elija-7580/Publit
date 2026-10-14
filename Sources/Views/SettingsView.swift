@@ -136,7 +136,7 @@ struct SettingsView: View {
                 }
                 Section {
                     Link("Source code and feedback", destination: AppInfo.repositoryURL)
-                    LabeledContent("Version", value: AppInfo.version)
+                    LabeledContent("Version", value: "\(AppInfo.version) (\(AppInfo.build))").accessibilityIdentifier("installedBuild")
                 } header: {
                     Text("About")
                 } footer: {
