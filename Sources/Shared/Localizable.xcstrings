@@ -18085,6 +18085,101 @@
 }
 }
 },
+"It may be too old or no longer in the timetable. You can search for it again.": {
+"extractionState": "manual",
+"localizations": {
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "It may be too old or no longer in the timetable. You can search for it again."
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Vielleicht ist sie zu alt oder nicht mehr im Fahrplan. Du kannst sie neu suchen."
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Il est peut-être trop ancien ou ne figure plus dans l’horaire. Vous pouvez le rechercher à nouveau."
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Potrebbe essere troppo vecchio o non più in orario. Puoi cercarlo di nuovo."
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Puede que sea demasiado antigua o que ya no esté en el horario. Puedes buscarla de nuevo."
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Pode ser demasiado antigo ou já não constar do horário. Pode procurá-lo novamente."
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Misschien is hij te oud of staat hij niet meer in de dienstregeling. Je kunt hem opnieuw zoeken."
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Może jest zbyt stara lub nie ma jej już w rozkładzie. Możesz wyszukać ją ponownie."
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Можливо, він застарів або його вже немає в розкладі. Ви можете знайти його знову."
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Poate este prea vechi sau nu mai figurează în orar. Îl poți căuta din nou."
+}
+},
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Možná je příliš staré nebo už není v jízdním řádu. Můžete ho vyhledat znovu."
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Den kan vara för gammal eller inte längre finnas i tidtabellen. Du kan söka efter den igen."
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Ίσως είναι πολύ παλιά ή δεν υπάρχει πια στο δρομολόγιο. Μπορείτε να την αναζητήσετε ξανά."
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Lehet, hogy túl régi, vagy már nincs a menetrendben. Újra rákereshetsz."
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Çok eski olabilir veya artık tarifede olmayabilir. Yeniden arayabilirsin."
+}
+}
+}
+},
 "It was removed from this device.": {
 "extractionState": "manual",
 "localizations": {
@@ -35090,6 +35185,101 @@
 }
 }
 },
+"Search this route": {
+"extractionState": "manual",
+"localizations": {
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Search this route"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Diese Verbindung suchen"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Rechercher cet itinéraire"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Cerca questo percorso"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Buscar esta ruta"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Procurar este percurso"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Deze route zoeken"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Wyszukaj tę trasę"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Знайти цей маршрут"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Caută acest traseu"
+}
+},
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Vyhledat toto spojení"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Sök den här resan"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Αναζήτηση αυτής της διαδρομής"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Útvonal keresése"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Bu rotayı ara"
+}
+}
+}
+},
 "Seat reservation": {
 "extractionState": "manual",
 "localizations": {
@@ -35945,6 +36135,101 @@
 }
 }
 },
+"Share departures": {
+"extractionState": "manual",
+"localizations": {
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Share departures"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Abfahrten teilen"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Partager les départs"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Condividi partenze"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Compartir salidas"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Partilhar partidas"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Vertrektijden delen"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Udostępnij odjazdy"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Поділитися відправленнями"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Distribuie plecările"
+}
+},
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Sdílet odjezdy"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Dela avgångar"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Κοινοποίηση αναχωρήσεων"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Indulások megosztása"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Kalkışları paylaş"
+}
+}
+}
+},
 "Share freeze log": {
 "extractionState": "manual",
 "localizations": {
@@ -36036,6 +36321,101 @@
 "stringUnit": {
 "state": "translated",
 "value": "Donma kaydını paylaş"
+}
+}
+}
+},
+"Share trip": {
+"extractionState": "manual",
+"localizations": {
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "Share trip"
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Fahrt teilen"
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Partager le trajet"
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Condividi viaggio"
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "Compartir viaje"
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Partilhar viagem"
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Reis delen"
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Udostępnij podróż"
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Поділитися поїздкою"
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Distribuie călătoria"
+}
+},
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Sdílet cestu"
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Dela resa"
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Κοινοποίηση διαδρομής"
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Út megosztása"
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Yolculuğu paylaş"
 }
 }
 }
@@ -40786,6 +41166,101 @@
 "stringUnit": {
 "state": "translated",
 "value": "Bu geçerli bir bağlantı değil."
+}
+}
+}
+},
+"This route could not be loaded.": {
+"extractionState": "manual",
+"localizations": {
+"en": {
+"stringUnit": {
+"state": "translated",
+"value": "This route could not be loaded."
+}
+},
+"de": {
+"stringUnit": {
+"state": "translated",
+"value": "Diese Verbindung konnte nicht geladen werden."
+}
+},
+"fr": {
+"stringUnit": {
+"state": "translated",
+"value": "Impossible de charger cet itinéraire."
+}
+},
+"it": {
+"stringUnit": {
+"state": "translated",
+"value": "Impossibile caricare questo percorso."
+}
+},
+"es": {
+"stringUnit": {
+"state": "translated",
+"value": "No se pudo cargar esta ruta."
+}
+},
+"pt-PT": {
+"stringUnit": {
+"state": "translated",
+"value": "Não foi possível carregar este percurso."
+}
+},
+"nl": {
+"stringUnit": {
+"state": "translated",
+"value": "Deze route kon niet worden geladen."
+}
+},
+"pl": {
+"stringUnit": {
+"state": "translated",
+"value": "Nie udało się wczytać tej trasy."
+}
+},
+"uk": {
+"stringUnit": {
+"state": "translated",
+"value": "Не вдалося завантажити цей маршрут."
+}
+},
+"ro": {
+"stringUnit": {
+"state": "translated",
+"value": "Acest traseu nu a putut fi încărcat."
+}
+},
+"cs": {
+"stringUnit": {
+"state": "translated",
+"value": "Toto spojení se nepodařilo načíst."
+}
+},
+"sv": {
+"stringUnit": {
+"state": "translated",
+"value": "Den här resan kunde inte laddas."
+}
+},
+"el": {
+"stringUnit": {
+"state": "translated",
+"value": "Δεν ήταν δυνατή η φόρτωση αυτής της διαδρομής."
+}
+},
+"hu": {
+"stringUnit": {
+"state": "translated",
+"value": "Ezt az útvonalat nem sikerült betölteni."
+}
+},
+"tr": {
+"stringUnit": {
+"state": "translated",
+"value": "Bu rota yüklenemedi."
 }
 }
 }
