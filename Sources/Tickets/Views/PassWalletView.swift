@@ -20,7 +20,7 @@ struct PassWalletView: View {
                 list
             }
         }
-        .background(Color(uiColor: .systemGroupedBackground))
+        .background(Color.ground)
         .navigationTitle(L10n.t("Tickets"))
         .screenTrail("Tickets")
         .navigationDestination(for: PassRoute.self) { PassDetailView(passId: $0.id) }
@@ -77,7 +77,7 @@ struct PassWalletView: View {
             Text("Add a ticket from a PDF, a photo or a screenshot. Publit reads the details on your iPhone and keeps the code ready for the gate.")
         } actions: {
             Button { importing = true } label: { Text("Add ticket") }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.ink)
         }
     }
 }

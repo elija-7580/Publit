@@ -25,7 +25,7 @@ private struct PDFDocumentView: UIViewRepresentable {
         view.autoScales = true
         view.displayMode = .singlePageContinuous
         view.displayDirection = .vertical
-        view.backgroundColor = .systemGroupedBackground
+        view.backgroundColor = UIColor(Color.ground)
         view.document = PDFDocument(url: url)
         if let p = view.document?.page(at: page) { view.go(to: p) }
         view.accessibilityIdentifier = "passOriginal"
@@ -64,7 +64,7 @@ final class ZoomingScrollView: UIScrollView {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        backgroundColor = .systemGroupedBackground
+        backgroundColor = UIColor(Color.ground)
         minimumZoomScale = 1
         maximumZoomScale = 6
         showsVerticalScrollIndicator = false

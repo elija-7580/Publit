@@ -91,6 +91,7 @@ struct PresentationSampleView: View {
                     RecentSearchesSection()
                 }
             }
+            .inkList()
             .navigationTitle(kind == "board" ? L10n.t("Departures") : kind == "leg" ? L10n.t("Route") : L10n.t("Trip"))
             .navigationBarTitleDisplayMode(.inline)
         }
@@ -118,6 +119,7 @@ struct PresentationSampleView: View {
                         TripActionsSection(itinerary: trip.itinerary, fromName: trip.fromName, toName: trip.toName)
                     }
                 }
+                .inkList()
                 .accessibilityIdentifier("activeTripList")
                 .navigationTitle("Active trip")
                 .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { app.deepLink = nil } } }

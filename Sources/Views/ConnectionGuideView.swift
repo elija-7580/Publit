@@ -21,7 +21,7 @@ struct ConnectionGuideView: View {
                     .font(.subheadline).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             }.padding()
         }
-        .background(Color(uiColor: .systemGroupedBackground))
+        .background(Color.ground)
         .navigationTitle(L10n.t("How to read connections"))
         .screenTrail("Connection guide")
         .navigationBarTitleDisplayMode(.inline)
@@ -34,7 +34,7 @@ struct ConnectionGuideView: View {
                 HStack(spacing: 0) {
                     Color.clear.frame(width: geometry.size.width * start)
                     RoundedRectangle(cornerRadius: 2).fill(Color.secondary).frame(width: geometry.size.width * 0.1, height: 4)
-                    RoundedRectangle(cornerRadius: 5).fill(Color.appAccent)
+                    RoundedRectangle(cornerRadius: 5).fill(Color.ink)
                         .overlay { Text(verbatim: "REG").font(.caption.bold()).foregroundStyle(.white) }
                         .frame(width: geometry.size.width * (start == 0 ? 0.775 : 0.65), height: 24)
                 }.frame(height: 24)
@@ -60,7 +60,7 @@ struct ConnectionSymbols: View {
         .font(.footnote).foregroundStyle(.secondary)
     }
     @ViewBuilder private var symbols: some View {
-        Label(L10n.t("Ride"), systemImage: "rectangle.fill").foregroundStyle(Color.appAccent)
+        Label(L10n.t("Ride"), systemImage: "rectangle.fill").foregroundStyle(Color.ink)
         Label(L10n.t("Walk"), systemImage: "figure.walk")
         Label(L10n.t("Wait"), systemImage: "ellipsis")
     }

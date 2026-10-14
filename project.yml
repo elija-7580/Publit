@@ -10,7 +10,7 @@ settings:
   base:
     SWIFT_VERSION: "5.0"
     MARKETING_VERSION: "0.6.0"
-    CURRENT_PROJECT_VERSION: "29"
+    CURRENT_PROJECT_VERSION: "30"
     # Personal Team — Automatic Signing for local device installs.
     DEVELOPMENT_TEAM: "3D6S8GFSGK"
 targets:
@@ -60,6 +60,7 @@ targets:
         TARGETED_DEVICE_FAMILY: "1"
         CODE_SIGN_STYLE: Automatic
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
       configs:
         Release:
           EXCLUDED_SOURCE_FILE_NAMES: DeparturesWidget.swift

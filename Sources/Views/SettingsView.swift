@@ -154,6 +154,7 @@ struct SettingsView: View {
                     }
                 }
             }
+            .inkList()
             .navigationTitle("Settings")
             .screenTrail("Settings")
             .navigationBarTitleDisplayMode(.inline)

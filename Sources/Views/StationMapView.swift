@@ -394,7 +394,7 @@ struct StationMapView: View {
         VStack(spacing: 6) {
             ModeFilterBar(available: ModeGroup.allCases.filter { $0 != .other }, filter: filterBinding, iconsOnly: true)
                 .frame(maxWidth: .infinity)
-                .background(Color(.systemBackground))
+                .background(Color.ground)
             if model.isLoadingLive && !model.hasLive {
                 ProgressView(L10n.t("Updating live layer…")).font(.footnote).padding(8).background(.regularMaterial, in: Capsule())
             } else if let message = model.stationsError ?? model.liveError {
@@ -511,6 +511,7 @@ struct MapLayersSheet: View {
                     Text("Satellite maps load more data. In 3D, tilt the map with two fingers.")
                 }
             }
+            .inkList()
             .navigationTitle("Map layers")
             .navigationBarTitleDisplayMode(.inline)
             .screenTrail("Map layers")
@@ -567,6 +568,7 @@ struct MapPlaceView: View {
                 }
             }
         }
+        .inkList()
         .navigationTitle(match.name)
         .navigationBarTitleDisplayMode(.inline)
         .screenTrail("Map place")
@@ -636,6 +638,7 @@ struct RentalDetailView: View {
                 Text("Renting needs the provider's app and an account there.")
             }
         }
+        .inkList()
         .navigationTitle(title)
         .screenTrail("Map stop")
         .navigationBarTitleDisplayMode(.inline)
@@ -661,7 +664,7 @@ struct VehicleTripView: View {
                     }
                 }
                 if vehicle.delayMinutes >= 1 {
-                    Text(L10n.f("%lld min late", vehicle.delayMinutes)).font(.footnote.weight(.semibold)).foregroundStyle(.orange)
+                    Text(L10n.f("%lld min late", vehicle.delayMinutes)).font(.footnote.weight(.semibold)).foregroundStyle(Color.delay)
                 }
             }
             if let leg {
@@ -692,6 +695,7 @@ struct VehicleTripView: View {
                 HStack { Spacer(); ProgressView(); Spacer() }
             }
         }
+        .inkList()
         .ticking(every: 15, now: $now)
         .navigationTitle(vehicle.lineName)
         .screenTrail("Map vehicle")

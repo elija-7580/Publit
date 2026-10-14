@@ -9,6 +9,28 @@ extension Color {
     static let ink = Color(Palette.ink)
     static let onInk = Color(Palette.onInk)
     static let signature = Color(Palette.signature)
+    static let inkAction = Color(Palette.inkAction)
+}
+
+/// The main action: an ink slab with the label in `onInk` (black on light, white on dark).
+struct InkButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.headline)
+            .foregroundStyle(Color.onInk)
+            .padding(.horizontal, 18)
+            .padding(.vertical, 11)
+            .frame(minHeight: 44)
+            .background(Color.ink, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .opacity(isEnabled ? (configuration.isPressed ? 0.75 : 1) : 0.35)
+    }
+}
+
+extension ButtonStyle where Self == InkButtonStyle {
+    static var ink: InkButtonStyle { InkButtonStyle() }
 }
 
 /// The logo's dot: where you are, what is live.

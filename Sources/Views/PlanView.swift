@@ -31,7 +31,7 @@ struct PlanView: View {
                         Image(systemName: "arrow.up.arrow.down")
                             .font(.body.weight(.semibold))
                             .frame(width: 40, height: 40)
-                            .background(Color(.tertiarySystemFill), in: Circle())
+                            .background(Color.inkFill, in: Circle())
                     }
                     .disabled(plan.to == nil)
                     .accessibilityLabel(Text("Swap"))
@@ -55,7 +55,7 @@ struct PlanView: View {
                             .font(.headline)
                             .frame(maxWidth: .infinity, minHeight: 34)
                     }
-                    .buttonStyle(.borderedProminent)
+                    .buttonStyle(.ink)
                     .listRowInsets(EdgeInsets())
                     .listRowBackground(Color.clear)
                     .accessibilityIdentifier("searchRoutes")
@@ -70,6 +70,7 @@ struct PlanView: View {
                                         fromName: plan.from.title, toName: plan.to?.title ?? "")
             }
         }
+        .inkList()
         .navigationTitle("Plan")
         .screenTrail("Plan")
         .withSettingsButton()
@@ -124,7 +125,7 @@ struct PlanView: View {
                     .frame(minWidth: 56, alignment: .leading)
                 if let endpoint {
                     if case .currentLocation = endpoint {
-                        Image(systemName: "location.fill").foregroundStyle(.blue)
+                        SignatureDot(size: 10)
                     }
                     Text(endpoint.title).foregroundStyle(.primary).lineLimit(1)
                 } else {
@@ -192,7 +193,7 @@ struct PlanView: View {
                             .padding(.leading, 6)
                             .overlay(alignment: .leading) {
                                 if it.id == (selectedId ?? its.first?.id) {
-                                    Capsule().fill(.blue).frame(width: 3)
+                                    Capsule().fill(Color.ink).frame(width: 3)
                                 }
                             }
                     }

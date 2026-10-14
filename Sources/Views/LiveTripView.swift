@@ -97,6 +97,7 @@ struct LiveTripView: View {
                 }
             }
         }
+        .inkList()
         .ticking(every: 15, now: $now)
         .navigationTitle(trip.toName)
         .navigationBarTitleDisplayMode(.inline)
@@ -351,7 +352,7 @@ struct LiveTripView: View {
                 } label: {
                     Text("End trip").font(.headline).frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.ink)
                 .controlSize(.large)
             }
         }
@@ -730,7 +731,7 @@ private struct AlternativeRow: View {
                     Label("Switch to this connection", systemImage: "arrow.triangle.branch")
                         .font(.subheadline.weight(.semibold))
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.ink)
                 .disabled(switching)
                 .accessibilityIdentifier("guideSwitchConnection")
             } else if searching {

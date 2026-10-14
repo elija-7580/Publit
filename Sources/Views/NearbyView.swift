@@ -416,12 +416,13 @@ struct StopDeparturesView: View {
                                 Label(favorites.containsLine(savedLine.id) ? L10n.t("Saved line") : L10n.t("Save line"),
                                       systemImage: favorites.containsLine(savedLine.id) ? "star.slash" : "star")
                             }
-                            .tint(.yellow)
+                            .tint(Color.inkAction)
                         }
                     }
                 }
             }
         }
+        .inkList()
         .navigationTitle(name)
         .screenTrail("Stop departures")
         .navigationBarTitleDisplayMode(.inline)

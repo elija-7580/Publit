@@ -29,6 +29,7 @@ struct TicketsView: View {
                 }
             }
         }
+        .inkList()
         .navigationTitle("My tickets")
         .screenTrail("My tickets")
         .toolbar {
@@ -120,6 +121,7 @@ struct AddTicketView: View {
                     }
                 }
             }
+            .inkList()
             .overlay { if isSaving { ProgressView().padding(20).background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12)) } }
             .alert("Ticket could not be saved", isPresented: Binding(get: { saveError != nil }, set: { if !$0 { saveError = nil } })) {
                 Button("Done") { saveError = nil }
@@ -230,7 +232,7 @@ struct TicketDisplayView: View {
                     Button { openURL(app) } label: {
                         Label("Open ticket app", systemImage: "arrow.up.forward.app").frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.borderedProminent).controlSize(.large)
+                    .buttonStyle(.ink).controlSize(.large)
                 }
                 if t.imageFile == nil && t.appURL == nil {
                     Text("This ticket has no screenshot or link.").foregroundStyle(.secondary)
@@ -240,7 +242,7 @@ struct TicketDisplayView: View {
             }
             .padding(16).padding(.bottom, 32)
         }
-        .background(Color(uiColor: .systemGroupedBackground))
+        .background(Color.ground)
         .sheet(item: $original) { ticket in
             NavigationStack {
                 if let url = store.imageURL(ticket) {
@@ -310,6 +312,7 @@ struct LinkedTicketAppsView: View {
                 }
             }
         }
+        .inkList()
         .navigationTitle("Ticket apps")
         .screenTrail("Ticket apps")
     }

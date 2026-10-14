@@ -47,7 +47,7 @@ struct PassImportView: View {
                     } description: {
                         Text(verbatim: message)
                     } actions: {
-                        Button(L10n.t("Try another file")) { stage = .choose }.buttonStyle(.borderedProminent)
+                        Button(L10n.t("Try another file")) { stage = .choose }.buttonStyle(.ink)
                     }
                 }
             }
@@ -118,6 +118,7 @@ struct PassImportView: View {
                 Text("Publit reads the ticket on your iPhone. Nothing is uploaded. Codes that change every few seconds only work in the operator's app.")
             }
         }
+        .inkList()
         .navigationTitle(L10n.t("Add ticket"))
         .screenTrail("Pass import")
         .navigationBarTitleDisplayMode(.inline)
@@ -192,7 +193,7 @@ struct PassImportView: View {
     private func added(_ pass: TicketPass, duplicate: Bool) -> some View {
         VStack(spacing: 20) {
             Image(systemName: duplicate ? "ticket" : "checkmark.circle.fill")
-                .font(.system(size: 48)).foregroundStyle(Color.appAccent)
+                .font(.system(size: 48)).foregroundStyle(Color.ink)
             Text(verbatim: duplicate ? L10n.t("Ticket already saved") : L10n.t("Ticket added"))
                 .font(.title2.bold()).accessibilityIdentifier("sharedTicketAdded")
             Text(verbatim: pass.displayTitle).font(.headline)
@@ -201,7 +202,7 @@ struct PassImportView: View {
             NavigationLink { PassDetailView(passId: pass.id) } label: {
                 Label(L10n.t("Check ticket"), systemImage: "ticket").frame(maxWidth: .infinity)
             }
-            .buttonStyle(.borderedProminent).controlSize(.large).accessibilityIdentifier("checkSharedTicket")
+            .buttonStyle(.ink).controlSize(.large).accessibilityIdentifier("checkSharedTicket")
             Button("Done") { dismiss() }.buttonStyle(.bordered)
         }
         .padding().navigationTitle(L10n.t("Add ticket")).navigationBarTitleDisplayMode(.inline)

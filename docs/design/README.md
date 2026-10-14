@@ -13,6 +13,6 @@ clickable preview in `prototype.html` (sample data, not the app).
 7. **Numbers first.** Minutes and times are large, bold and tabular; units small and grey.
 
 ## Per platform
-- iOS: SF Pro, system materials only for the glass layer.
+- iOS: SF Pro, system materials only for the glass layer. Every `List`/`Form` gets `.inkList()`, main actions `.buttonStyle(.ink)`, swipe actions `.tint(Color.inkAction)`; no system colours (`.blue`, `.borderedProminent`, `systemGroupedBackground`). The app tint and the `AccentColor` asset are ink.
 - Android: Roboto Flex / system font with the same scale; Compose with these tokens, not default Material colours or tonal elevation.
 - Web: system font stack (Inter as fallback), CSS variables from the tokens.

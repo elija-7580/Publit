@@ -86,6 +86,7 @@ struct LinesView: View {
                 }
             }
         }
+        .inkList()
         .navigationTitle("Lines")
         .screenTrail("Lines")
         .withSettingsButton()
@@ -223,6 +224,7 @@ struct LineDetailView: View {
                 HStack { Spacer(); ProgressView(); Spacer() }
             }
         }
+        .inkList()
         .navigationTitle(line.lineName)
         .screenTrail("Line")
         .navigationBarTitleDisplayMode(.inline)
@@ -422,6 +424,7 @@ struct LineTimetableView: View {
                 HStack { Spacer(); ProgressView(); Spacer() }
             }
         }
+        .inkList()
         .navigationTitle(stopName)
         .screenTrail("Line stop")
         .navigationBarTitleDisplayMode(.inline)

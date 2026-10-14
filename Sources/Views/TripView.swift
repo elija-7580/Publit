@@ -69,6 +69,7 @@ struct TripView: View {
                 HStack { Spacer(); ProgressView(); Spacer() }
             }
         }
+        .inkList()
         .ticking(every: 15, now: $now)
         .navigationTitle(stopTime.lineName)
         .screenTrail("Trip")
@@ -252,6 +253,7 @@ struct LineDeparturesView: View {
                 HStack { LineBadge(line); Text(L10n.f("At %@", line.stopName)).textCase(nil) }
             }
         }
+        .inkList()
         .navigationTitle(line.lineName)
         .screenTrail("Line trip")
         .navigationBarTitleDisplayMode(.inline)

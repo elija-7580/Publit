@@ -17,7 +17,7 @@ struct TripPassesView: View {
                 } description: {
                     Text("Add the ticket from a PDF, a photo or a screenshot. Day, weekly and annual passes show up for every trip while they are valid.")
                 } actions: {
-                    Button(L10n.t("Add ticket")) { adding = true }.buttonStyle(.borderedProminent)
+                    Button(L10n.t("Add ticket")) { adding = true }.buttonStyle(.ink)
                 }
             } else {
                 ScrollView {
@@ -38,7 +38,7 @@ struct TripPassesView: View {
                     }
                     .padding()
                 }
-                .background(Color(uiColor: .systemGroupedBackground))
+                .background(Color.ground)
             }
         }
         .navigationTitle(L10n.t("Tickets"))

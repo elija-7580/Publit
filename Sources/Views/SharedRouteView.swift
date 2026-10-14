@@ -26,7 +26,7 @@ struct SharedRouteView: View {
                         + Text("It may be too old or no longer in the timetable. You can search for it again.")
                 } actions: {
                     Button(L10n.t("Search this route")) { app.searchAgain(route) }
-                        .buttonStyle(.borderedProminent)
+                        .buttonStyle(.ink)
                         .accessibilityIdentifier("searchSharedRoute")
                 }
             } else {

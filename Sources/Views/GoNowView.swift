@@ -65,6 +65,7 @@ struct GoNowView: View {
                                     bestTransit: its.filter { !$0.isDirect }.map(\.duration).min(),
                                     fromName: L10n.t("Current location"), toName: plan.to?.title ?? "")
         }
+        .inkList()
         .navigationTitle(plan.to?.title ?? L10n.t("Route"))
         .screenTrail("Go now")
         .navigationBarTitleDisplayMode(.inline)

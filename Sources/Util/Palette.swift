@@ -17,6 +17,9 @@ public enum Palette {
     public static let fill    = Tone(light: "ebebe7", dark: "2a2a2d")
     public static let ink     = Tone(light: "111111", dark: "f4f4f2")
     public static let onInk   = Tone(light: "ffffff", dark: "111111")
+    /// Filled controls with a white label (swipe actions): ink in light mode, dark grey in dark mode,
+    /// where light ink would hide the label.
+    public static let inkAction = Tone(light: "111111", dark: "3a3a3d")
     /// The yellow dot of the logo: only for "you" and "live", never as a fill.
     public static let signature = Tone(light: "ffc531", dark: "ffc531")
     /// System background colours the tones are drawn on (light: white and grouped grey; dark: black and grouped dark grey).

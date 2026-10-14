@@ -100,6 +100,7 @@ struct ItineraryDetailView: View {
 
             if !isBikeOrCar { FareSection(itinerary: itinerary) }
         }
+        .inkList()
         .navigationTitle("Route")
         .screenTrail("Route")
         .navigationBarTitleDisplayMode(.inline)
@@ -231,11 +232,11 @@ struct RouteMap: View {
             }
             if let first = itinerary.legs.first {
                 Marker("Start", systemImage: "circle.fill", coordinate: first.from.coordinate.clCoordinate)
-                    .tint(.green)
+                    .tint(Color.inkAction)
             }
             if let last = itinerary.legs.last {
                 Marker("Destination", systemImage: "flag.fill", coordinate: last.to.coordinate.clCoordinate)
-                    .tint(.red)
+                    .tint(Color.inkAction)
             }
         }
         .mapStyle(.standard(pointsOfInterest: .excludingAll))
@@ -286,7 +287,7 @@ struct LegRow: View {
         } else {
             HStack(alignment: .top, spacing: 8) {
                 Image(systemName: leg.rental.map { $0.kind.symbol } ?? ModeStyle.symbol(leg.mode))
-                    .foregroundStyle(leg.rental == nil ? Color.secondary : Color.teal).frame(width: 24)
+                    .foregroundStyle(leg.rental == nil ? Color.secondary : Color.ink).frame(width: 24)
                 VStack(alignment: .leading, spacing: 4) {
                     if let r = leg.rental {
                         // Shared bike or scooter: whose, from where, and a link to rent it.

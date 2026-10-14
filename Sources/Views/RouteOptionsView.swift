@@ -90,6 +90,7 @@ struct RouteOptionsView: View {
                     Text("Driving times are without traffic and parking.")
                 }
             }
+            .inkList()
             .navigationTitle("Route options")
             .screenTrail("Route options")
             .navigationBarTitleDisplayMode(.inline)
@@ -131,31 +132,31 @@ struct RouteOptionsButton: View {
             if compact {
                 HStack(spacing: 8) {
                     Image(systemName: options.isDefault ? "slider.horizontal.3" : "line.3.horizontal.decrease.circle.fill")
-                        .foregroundStyle(options.isDefault ? Color.secondary : Color.appAccent)
+                        .foregroundStyle(options.isDefault ? Color.secondary : Color.ink)
                         .accessibilityHidden(true)
                     Text("Route options").font(.subheadline).foregroundStyle(.primary)
                     Spacer(minLength: 8)
                     Text(verbatim: options.summary ?? L10n.t("All modes"))
-                        .font(.caption).foregroundStyle(options.isDefault ? Color.secondary : Color.appAccent)
+                        .font(.caption).foregroundStyle(options.isDefault ? Color.secondary : Color.ink)
                         .lineLimit(1)
                 }
             } else {
             HStack(spacing: 10) {
                 Image(systemName: options.isDefault ? "slider.horizontal.3" : "line.3.horizontal.decrease.circle.fill")
-                    .foregroundStyle(options.isDefault ? Color.secondary : Color.appAccent)
+                    .foregroundStyle(options.isDefault ? Color.secondary : Color.ink)
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Route options").foregroundStyle(.primary)
                     Text(verbatim: options.summary ?? L10n.t("All modes"))
-                        .font(.caption).foregroundStyle(options.isDefault ? Color.secondary : Color.appAccent)
+                        .font(.caption).foregroundStyle(options.isDefault ? Color.secondary : Color.ink)
                         .lineLimit(2)
                 }
                 Spacer()
                 if options.activeCount > 0 {
                     Text(verbatim: "\(options.activeCount)")
-                        .font(.caption.weight(.bold)).foregroundStyle(.white)
+                        .font(.caption.weight(.bold)).foregroundStyle(Color.onInk)
                         .padding(.horizontal, 7).padding(.vertical, 2)
-                        .background(Color.appAccent, in: Capsule())
+                        .background(Color.ink, in: Capsule())
                         .accessibilityHidden(true)
                 }
             }
@@ -253,8 +254,8 @@ struct FirstMilePicker: View {
                                 .minimumScaleFactor(0.8)
                         }
                         .frame(maxWidth: .infinity, minHeight: 52)
-                        .foregroundStyle(selected ? Color.white : Color.primary)
-                        .background(selected ? Color.appAccent : Color(.tertiarySystemFill),
+                        .foregroundStyle(selected ? Color.onInk : Color.primary)
+                        .background(selected ? Color.ink : Color.inkFill,
                                     in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                         .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                     }

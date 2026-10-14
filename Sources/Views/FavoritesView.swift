@@ -14,7 +14,7 @@ struct FavoritesView: View {
                     if let p = favorites.place(for: role) {
                         Button { app.route(to: p) } label: {
                             HStack(spacing: 12) {
-                                Image(systemName: role.symbol).foregroundStyle(.blue).frame(width: 24)
+                                Image(systemName: role.symbol).foregroundStyle(Color.ink).frame(width: 24)
                                 VStack(alignment: .leading, spacing: 1) {
                                     Text(role.title).foregroundStyle(.primary)
                                     Text(p.name).font(.caption).foregroundStyle(.secondary).lineLimit(1)
@@ -76,14 +76,15 @@ struct FavoritesView: View {
                             PlaceLabel(name: p.name, subtitle: p.subtitle, isStop: false)
                         }
                         .swipeActions(edge: .leading) {
-                            Button { favorites.set(p, as: .home) } label: { Label("Home", systemImage: "house") }.tint(.blue)
-                            Button { favorites.set(p, as: .work) } label: { Label("Work", systemImage: "briefcase") }.tint(.indigo)
+                            Button { favorites.set(p, as: .home) } label: { Label("Home", systemImage: "house") }.tint(Color.inkAction)
+                            Button { favorites.set(p, as: .work) } label: { Label("Work", systemImage: "briefcase") }.tint(Color.inkAction)
                         }
                     }
                     .onDelete { idx in favorites.remove(idx.map { favorites.places[$0].id }) }
                 }
             }
         }
+        .inkList()
         .navigationTitle("Saved")
         .screenTrail("Saved")
         .withSettingsButton()
@@ -147,11 +148,12 @@ struct PastTripsView: View {
                 NavigationLink { SavedTripView(tripId: t.id) } label: { SavedTripRow(trip: t).opacity(0.7) }
                     .swipeActions(edge: .leading) {
                         Button { planAgain(t) } label: { Label("Plan again", systemImage: "arrow.clockwise") }
-                            .tint(.blue)
+                            .tint(Color.inkAction)
                     }
             }
             .onDelete { idx in idx.map { past[$0].id }.forEach(trips.remove) }
         }
+        .inkList()
         .overlay {
             if past.isEmpty { ContentUnavailableView("Past trips", systemImage: "clock.arrow.circlepath") }
         }

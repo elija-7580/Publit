@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0 (build 30)
+
+### Ink & Dot everywhere
+- The design now covers every screen, not just Nearby: all lists (Plan, routes, trips, lines, stops, map sheets, tickets, settings, search) sit on the flat warm grey ground; the system blue is gone. Main actions ("Search routes", "Add ticket", …) are ink slabs, links, toggles and selected options are ink, swipe actions are ink/dark grey instead of blue, indigo and yellow, the current location is the yellow dot.
+- System dialogs and share sheets follow too (accent colour in the asset catalog is ink).
+- Delays on the map use the delay colour; ticket screens use the same ground as the rest of the app.
+
 ## 0.6.0 (build 29)
 
 ### Backup server when Transitous is down

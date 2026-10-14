@@ -9,9 +9,9 @@ struct TicketSummaryCard: View {
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: "ticket.fill")
-                .font(.title2).foregroundStyle(Color.appAccent)
+                .font(.title2).foregroundStyle(Color.ink)
                 .frame(width: 44, height: 44)
-                .background(Color.appAccent.opacity(0.10), in: RoundedRectangle(cornerRadius: 10))
+                .background(Color.ink.opacity(0.10), in: RoundedRectangle(cornerRadius: 10))
             VStack(alignment: .leading, spacing: 6) {
                 Text(verbatim: ticket.name).font(.headline).foregroundStyle(.primary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -33,8 +33,8 @@ struct TicketSummaryCard: View {
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.appAccent.opacity(0.05), in: RoundedRectangle(cornerRadius: 14))
-        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.appAccent.opacity(0.16), lineWidth: 1))
+        .background(Color.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 14))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.ink.opacity(0.16), lineWidth: 1))
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("ticketCard")

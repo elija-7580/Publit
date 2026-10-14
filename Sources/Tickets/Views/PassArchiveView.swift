@@ -34,7 +34,7 @@ struct PassArchiveView: View {
                 }
             }
         }
-        .background(Color(uiColor: .systemGroupedBackground))
+        .background(Color.ground)
         .navigationTitle(L10n.t("Archive"))
         .screenTrail("Ticket archive")
         .searchable(text: $query)

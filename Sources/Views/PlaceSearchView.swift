@@ -92,11 +92,12 @@ struct PlaceSearchView: View {
                             Button { favorites.toggle(saved) } label: {
                                 Label("Save", systemImage: favorites.contains(saved) ? "star.slash" : "star")
                             }
-                            .tint(.yellow)
+                            .tint(Color.inkAction)
                         }
                     }
                 }
             }
+            .inkList()
             .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always),
                         prompt: "Address, stop or place")
             .searchScopes($scope, activation: .onTextEntry) {
@@ -190,7 +191,7 @@ struct PlaceLabel: View {
         HStack(spacing: 12) {
             Image(systemName: isStop ? "tram.circle.fill" : "mappin.circle.fill")
                 .font(.title3)
-                .foregroundStyle(isStop ? Color.blue : Color.red)
+                .foregroundStyle(isStop ? Color.ink : Color.secondary)
             VStack(alignment: .leading, spacing: 1) {
                 Text(name).foregroundStyle(.primary).lineLimit(1)
                 if let subtitle, !subtitle.isEmpty {

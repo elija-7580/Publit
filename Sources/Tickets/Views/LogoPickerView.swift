@@ -96,6 +96,7 @@ struct LogoPickerView: View {
                 }
             }
         }
+        .inkList()
         .navigationTitle(L10n.t("Logo"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

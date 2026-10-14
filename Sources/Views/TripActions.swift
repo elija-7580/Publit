@@ -38,7 +38,7 @@ struct TripActionsSection: View {
                         .font(.headline)
                         .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.ink)
                 .controlSize(.large)
                 .disabled(itinerary.isCancelled || itinerary.endTime < .now)
                 .accessibilityIdentifier("startTrip")
@@ -343,8 +343,8 @@ struct ActionLabelStyle: LabelStyle {
 struct ActionButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label.padding(12).frame(maxWidth: .infinity)
-            .foregroundStyle(Color.appAccent)
-            .background(Color.appAccent.opacity(configuration.isPressed ? 0.2 : 0.1), in: RoundedRectangle(cornerRadius: 14))
+            .foregroundStyle(Color.ink)
+            .background(Color.ink.opacity(configuration.isPressed ? 0.2 : 0.1), in: RoundedRectangle(cornerRadius: 14))
             .contentShape(RoundedRectangle(cornerRadius: 14))
     }
 }

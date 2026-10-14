@@ -61,7 +61,7 @@ struct PassDetailView: View {
             }
             .padding()
         }
-        .background(Color(uiColor: .systemGroupedBackground))
+        .background(Color.ground)
         .navigationTitle(pass.displayTitle)
         .screenTrail("Pass")
         .navigationBarTitleDisplayMode(.inline)
@@ -131,7 +131,7 @@ struct FullScreenCodeView: View {
             if let passenger = pass.passenger { Text(verbatim: passenger).font(.headline) }
             Spacer()
             Button { dismiss() } label: { Text("Done").foregroundStyle(.white).frame(maxWidth: .infinity) }
-                .buttonStyle(.borderedProminent).controlSize(.large).tint(.black)
+                .buttonStyle(.ink).controlSize(.large)
                 .padding(.horizontal)
                 .accessibilityIdentifier("closeCode")
         }

@@ -39,7 +39,7 @@ struct PublitApp: App {
                 .environment(tickets)
                 .environment(passes)
                 .environment(history)
-                .tint(Color.appAccent)
+                .tint(Color.ink)
                 .onOpenURL { app.open($0) }
                 .onAppear {
                     app.applyDemo(ProcessInfo.processInfo.environment["PUBLIT_DEMO"])

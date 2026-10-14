@@ -116,6 +116,7 @@ struct PassEditorView: View {
                     .lineLimit(2...6)
             }
         }
+        .inkList()
         .navigationTitle(isNew ? L10n.t("Check ticket") : L10n.t("Edit ticket"))
         .screenTrail("Pass editor")
         .navigationBarTitleDisplayMode(.inline)
