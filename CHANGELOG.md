@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.0 (build 17)
+
+- Live trip bar: a trip that is under way now shows as a bar at the bottom of every tab, above the tab bar. It appears for a trip started with "Remind me to leave", otherwise for a saved trip from 30 minutes before departure until 5 minutes after arrival.
+- The bar shows the line of the current or next vehicle (or walking/arrival), the status ("Leave in 4 min", "Change at …", "Arrived"), the delay and a progress line. A tap opens the trip; the x hides the bar for that trip. While visible it updates the times every 90 seconds.
+- Not yet confirmed on a device.
+
 ## 0.6.0 (build 16)
 
 - Freeze log from build 15: no more freezes on the trip screen. Two short ones remain: 3.2 s when opening "Where to now?" (the same SwiftUI loop asking itself for the next update), and text layout while the app went to the background.

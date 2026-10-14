@@ -67,6 +67,20 @@ final class TripStore {
         activeFile.saveInBackground("")
     }
 
+    /// Lead time before departure from which a saved trip shows in the live bar.
+    static let liveLead: TimeInterval = 30 * 60
+
+    /// The trip for the live bar: the one started by hand, otherwise a saved trip that is under way
+    /// or leaves within `liveLead`. Up to 5 min after arrival it still shows "Arrived".
+    func current(now: Date = .now) -> SavedTrip? {
+        if let id = activeTripId, let t = trip(id), t.endTime.addingTimeInterval(5 * 60) >= now,
+           t.startTime.addingTimeInterval(-3 * 3600) <= now, !pendingRemoval.contains(id) { return t }
+        return trips
+            .filter { !pendingRemoval.contains($0.id) && $0.startTime.addingTimeInterval(-Self.liveLead) <= now
+                && $0.endTime.addingTimeInterval(5 * 60) >= now }
+            .min { $0.startTime < $1.startTime }
+    }
+
     /// Not yet arrived, soonest first.
     func upcoming(now: Date = .now) -> [SavedTrip] {
         trips.filter { $0.endTime >= now }.sorted { $0.startTime < $1.startTime }

@@ -152,6 +152,27 @@ final class TransitEnhancementTests: XCTestCase {
         XCTAssertNil(TripStore(directory: dir).activeTripId)
     }
     @MainActor
+    func testLiveBarShowsStartedTripOtherwiseTheSavedTripUnderWay() async throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { JSONPersistence.flush(); try? FileManager.default.removeItem(at: dir) }
+        let store = TripStore(directory: dir)
+        let it = try itinerary()
+        let a = store.save(it, from: "A", to: "B")
+        let later = Itinerary(id: "later", duration: it.duration, startTime: it.startTime.addingTimeInterval(3600),
+                              endTime: it.endTime.addingTimeInterval(3600), transfers: 0, legs: [])
+        let b = store.save(later, from: "C", to: "D")
+        XCTAssertNil(store.current(now: a.startTime.addingTimeInterval(-TripStore.liveLead - 60)), "too early: no bar")
+        XCTAssertEqual(store.current(now: a.startTime.addingTimeInterval(-10 * 60))?.id, a.id, "shortly before departure")
+        XCTAssertEqual(store.current(now: a.endTime.addingTimeInterval(4 * 60))?.id, a.id, "still shows Arrived briefly")
+        XCTAssertEqual(store.current(now: b.startTime.addingTimeInterval(-60))?.id, a.id, "two overlap: the earlier one")
+        XCTAssertEqual(store.current(now: a.endTime.addingTimeInterval(10 * 60))?.id, b.id)
+        XCTAssertNil(store.current(now: b.endTime.addingTimeInterval(10 * 60)), "after arrival the bar goes away")
+        store.start(b.id)
+        XCTAssertEqual(store.current(now: a.startTime)?.id, b.id, "a trip started by hand wins")
+        store.markForRemoval(b.id)
+        XCTAssertEqual(store.current(now: a.startTime)?.id, a.id, "an unsaved trip is not shown")
+    }
+    @MainActor
     func testAsyncTicketImportPreservesExactImageBytes() async throws {
         let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { JSONPersistence.flush(); try? FileManager.default.removeItem(at: dir) }

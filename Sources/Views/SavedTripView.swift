@@ -38,19 +38,24 @@ struct SavedTripView: View {
     }
 
     private func refresh(_ t: SavedTrip) async {
+        errorMessage = await Self.refresh(t, in: trips) ? nil : L10n.t("Live status unavailable. Showing saved times.")
+    }
+
+    /// New live times for a saved trip, also for its Live Activity and leave reminder (trip screen and
+    /// live bar). False only for a real failure; a cancelled refresh counts as fine.
+    @discardableResult
+    static func refresh(_ t: SavedTrip, in trips: TripStore) async -> Bool {
         do {
             let fresh = try await TripRefreshCoordinator.shared.refresh(t.itinerary.id)
             try Task.checkCancellation()
             trips.update(t.id, with: fresh)
-            errorMessage = nil
             if let updated = trips.trip(t.id) {
                 await LiveTripActivity.update(updated)
                 await LeaveReminder.follow(t, to: updated)
             }
+            return true
         } catch {
-            if !(error is CancellationError) && (error as? URLError)?.code != .cancelled {
-                errorMessage = L10n.t("Live status unavailable. Showing saved times.")
-            }
+            return error is CancellationError || (error as? URLError)?.code == .cancelled
         }
     }
 }

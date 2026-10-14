@@ -105,15 +105,19 @@ struct RootView: View {
         @Bindable var app = app
         TabView(selection: $app.tab) {
             NavigationStack { NearbyView() }
+                .liveTripBar()
                 .tabItem { Label("Nearby", systemImage: "location.circle") }
                 .tag(AppTab.nearby)
             NavigationStack { PlanView() }
+                .liveTripBar()
                 .tabItem { Label("Plan", systemImage: "calendar") }
                 .tag(AppTab.plan)
             NavigationStack { PassWalletView() }
+                .liveTripBar()
                 .tabItem { Label("Tickets", systemImage: "ticket") }
                 .tag(AppTab.tickets)
             NavigationStack { FavoritesView() }
+                .liveTripBar()
                 .tabItem { Label("Saved", systemImage: "star") }
                 .tag(AppTab.favorites)
         }
