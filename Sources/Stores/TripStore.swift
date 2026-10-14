@@ -150,6 +150,16 @@ final class TripStore {
         persist()
     }
 
+    /// A new connection for a trip under way (missed, cancelled, off the path): same trip, new route
+    /// from where you are. The guide goes on with it.
+    func reroute(_ id: String, with itinerary: Itinerary, from name: String, at date: Date = .now) {
+        guard let i = trips.firstIndex(where: { $0.id == id }) else { return }
+        trips[i].itinerary = itinerary
+        trips[i].fromName = name
+        trips[i].refreshedAt = date
+        persist()
+    }
+
     /// Replace the stored route with a fresh real-time version.
     func update(_ id: String, with itinerary: Itinerary, at date: Date = .now) {
         guard let i = trips.firstIndex(where: { $0.id == id }) else { return }

@@ -39,6 +39,9 @@ struct TripStatus: Equatable, Sendable {
             } else {
                 line = L10n.f("%@ from %@", leg.lineName, leg.from.name)
             }
+            if let change = leg.from.platformChange {
+                return L10n.f("%@, Pl. %@ at %@", line, L10n.f("%@ (changed)", change.now), time)
+            }
             if let t = leg.from.track, !t.isEmpty { return L10n.f("%@, Pl. %@ at %@", line, t, time) }
             return L10n.f("%@ at %@", line, time)
         }

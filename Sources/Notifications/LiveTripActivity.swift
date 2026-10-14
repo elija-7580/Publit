@@ -19,10 +19,24 @@ enum LiveTripActivity {
 
     static func state(for trip: SavedTrip, now: Date = .now) -> TripActivityAttributes.ContentState {
         let s = TripStatus.at(now, trip.itinerary, countdown: false)
-        let leg = trip.itinerary.legs.first { $0.isTransit && $0.endTime > now } ?? trip.itinerary.firstTransitLeg
-        return .init(phase: s.phase.rawValue, headline: s.headline, detail: s.detail, nextEvent: s.nextEvent,
-                     delayMinutes: s.delayMinutes, arrival: trip.endTime, lineName: leg?.lineName,
-                     lineColor: leg?.lineColors.background, lineTextColor: leg?.lineColors.text, updatedAt: now)
+        let legs = trip.itinerary.legs
+        let leg = legs.first { $0.isTransit && $0.endTime > now } ?? trip.itinerary.firstTransitLeg
+        // The departure whose platform matters: the vehicle not yet left, else the next one.
+        let riding = leg.map { $0.startTime <= now } ?? false
+        let nextIndex = legs.firstIndex { $0.isTransit && $0.startTime > now }
+        let departing = nextIndex.map { legs[$0] }
+        var state = TripActivityAttributes.ContentState(
+            phase: s.phase.rawValue, headline: s.headline, detail: s.detail, nextEvent: s.nextEvent,
+            delayMinutes: s.delayMinutes, arrival: trip.endTime, lineName: leg?.lineName,
+            lineColor: leg?.lineColors.background, lineTextColor: leg?.lineColors.text, updatedAt: now)
+        if let departing, s.phase != .cancelled, s.phase != .arrived {
+            state.platform = TransitLabels.clean(departing.from.track).map { L10n.f("Pl. %@", $0) }
+            state.platformChanged = departing.from.platformChange != nil ? true : nil
+            if riding {
+                state.then = L10n.f("Then: %@", L10n.f("%@ at %@", departing.lineName, Fmt.time(departing.startTime, tz: departing.from.tz)))
+            }
+        }
+        return state
     }
 
     enum StartResult { case started, tooEarly, unavailable, failed(String) }

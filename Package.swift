@@ -18,6 +18,7 @@ let core = [
     "Models/WalkGuide.swift",
     "Models/TripGuide.swift",
     "Models/MapLayers.swift",
+    "Models/CityGuide.swift",
     "Util/Polyline.swift",
     "Util/LineColors.swift",
     "Util/Geo.swift",

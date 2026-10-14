@@ -35,6 +35,26 @@ private struct LineChip: View {
     }
 }
 
+/// The platform of the next departure; orange when it changed.
+private struct PlatformChip: View {
+    let state: TripActivityAttributes.ContentState
+    var body: some View {
+        if let p = state.platform {
+            let changed = state.platformChanged == true
+            HStack(spacing: 3) {
+                if changed { Image(systemName: "exclamationmark.triangle.fill") }
+                Text(p)
+            }
+            .font(.caption.weight(.bold))
+            .lineLimit(1)
+            .padding(.horizontal, 6).padding(.vertical, 2)
+            .foregroundStyle(changed ? Color.orange : Color.primary)
+            .background((changed ? Color.orange : Color.secondary).opacity(0.18), in: RoundedRectangle(cornerRadius: 5))
+            .fixedSize()
+        }
+    }
+}
+
 private struct Countdown: View {
     let state: TripActivityAttributes.ContentState
     var body: some View {
@@ -65,8 +85,14 @@ struct TripLiveActivity: Widget {
                 }
                 DynamicIslandExpandedRegion(.bottom) {
                     VStack(alignment: .leading, spacing: 6) {
-                        Text(context.state.headline).font(.headline)
+                        HStack(spacing: 6) {
+                            Text(context.state.headline).font(.headline).lineLimit(1)
+                            PlatformChip(state: context.state)
+                        }
                         Text(context.state.detail).font(.caption).foregroundStyle(.secondary).lineLimit(2)
+                        if let then = context.state.then {
+                            Text(then).font(.caption.weight(.semibold)).lineLimit(1)
+                        }
                         if context.attributes.hasTicket {
                             Link(destination: context.attributes.ticketsURL) {
                                 Label("Show ticket", systemImage: "ticket").font(.caption.weight(.semibold))
@@ -100,7 +126,13 @@ private struct LockScreenView: View {
                 Countdown(state: state).font(.title2.weight(.bold)).multilineTextAlignment(.trailing)
                     .frame(maxWidth: 110, alignment: .trailing)
             }
-            Text(state.detail).font(.subheadline).foregroundStyle(.secondary).lineLimit(2)
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                PlatformChip(state: state)
+                Text(state.detail).font(.subheadline).foregroundStyle(.secondary).lineLimit(2)
+            }
+            if let then = state.then {
+                Text(then).font(.caption.weight(.semibold)).lineLimit(1)
+            }
             HStack {
                 Text(attributes.title).font(.caption).lineLimit(1)
                 if state.delayMinutes > 0 {

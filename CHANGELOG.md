@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.6.0 (build 26)
+
+### Guide: finding your way in the city
+- Platform changes: when the live data moves a departure to another platform, the guide shows "Platform changed (was 3)" at the wait stage, the live bar and the Live Activity (lock screen and Dynamic Island) show the new platform marked as changed, and a notification tells you right away ("Platform change: S8 now leaves from platform 2."). Cancellations of a followed trip are announced the same way. Notifications only come if you already allowed them.
+- Exits: when a walk starts underground (U-Bahn, S-Bahn), the guide says which way to surface: "Exit towards Ludwigstraße", or the side of the station ("Exit on the north side") when no street is known.
+- Compass direction: the walk shows an arrow that turns with your iPhone ("Head north-east") and, at the end, "Destination in 120 m" with the arrow for the last metres. A new button turns the map with you. Without a compass the arrow has north at the top.
+- Haptics and optional spoken directions: a new stage, a turn, "get off at the next stop" and platform changes give a short vibration; spoken directions can be switched on in the guide's toolbar (they lower other audio briefly). Only while the guide is open.
+- Changes: a card shows where you change: from which line, from platform to platform (or "Same platform 4"), levels, the walk and the time to spare ("Very tight change" when it gets close).
+- Tickets: "Show ticket" right in the wait and ride stages when a saved ticket fits the trip.
+- Missed a connection or a cancellation: the guide looks for the next connection from where you are and offers it at the top with "Switch to this connection" (one tap, the guide continues with it) or "New route from here".
+- The Live Activity shows what comes next ("Then: U3 at 14:32").
+
 ## 0.6.0 (build 25)
 
 ### Map: layers, satellite and search

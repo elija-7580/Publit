@@ -254,6 +254,7 @@ struct RootView: View {
                 if let updated = trips.trip(trip.id) {
                     await LeaveReminder.follow(trip, to: updated)
                     await GetOffReminder.follow(from: trip.itinerary, to: updated.itinerary)
+                    await TripChangeAlert.follow(trip.id, from: trip.itinerary, to: updated.itinerary)
                     await ArrivalUpdates.follow(updated)
                 }
             }

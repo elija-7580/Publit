@@ -23,6 +23,16 @@ enum TripSession {
         return note
     }
 
+    /// Switches a running trip to a new connection: reminders and the Live Activity follow.
+    static func reroute(_ trip: SavedTrip, to itinerary: Itinerary, in trips: TripStore) async {
+        LeaveReminder.cancel(trip.id)
+        GetOffReminder.cancelAll(trip.itinerary)
+        trips.reroute(trip.id, with: itinerary, from: L10n.t("Current location"))
+        guard let updated = trips.trip(trip.id) else { return }
+        await LiveTripActivity.update(updated)
+        await GetOffReminder.scheduleAll(updated.itinerary)
+    }
+
     static func stop(_ trip: SavedTrip, in trips: TripStore) async {
         trips.stop(trip.id)
         LeaveReminder.cancel(trip.id)

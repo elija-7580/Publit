@@ -10,6 +10,9 @@ final class LocationManager: NSObject, CLLocationManagerDelegate {
     /// Changes once, when the first fix arrives. Safe to read in a view body.
     private(set) var hasFix = false
     private(set) var status: CLAuthorizationStatus
+    /// Where the top of the phone points (degrees from north), while the trip guide asks for it.
+    /// Read it only in small views: it changes often.
+    private(set) var heading: Double?
 
     private let manager: CLLocationManager
 
@@ -54,12 +57,24 @@ final class LocationManager: NSObject, CLLocationManagerDelegate {
         manager.distanceFilter = precise ? 5 : 50
     }
 
+    /// The compass, for "which way now" in the trip guide. Off elsewhere (it costs battery).
+    func setHeading(_ on: Bool) {
+        if on, CLLocationManager.headingAvailable() {
+            manager.headingFilter = 8
+            manager.startUpdatingHeading()
+        } else {
+            manager.stopUpdatingHeading()
+            if heading != nil { heading = nil }
+        }
+    }
+
     /// Metres of uncertainty of the last fix (large when unknown).
     var accuracy: Double { location.map { $0.horizontalAccuracy >= 0 ? $0.horizontalAccuracy : 1000 } ?? 1000 }
 
     /// In the background nothing shows the location: GPS off until the app is open again.
     func pause() {
         manager.stopUpdatingLocation()
+        manager.stopUpdatingHeading()
     }
 
     nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
@@ -67,6 +82,15 @@ final class LocationManager: NSObject, CLLocationManagerDelegate {
         Task { @MainActor in
             self.location = last
             if !self.hasFix { self.hasFix = true }
+        }
+    }
+
+    nonisolated func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
+        // A negative accuracy means the compass is not usable (interference, needs calibrating).
+        let value: Double? = newHeading.headingAccuracy < 0 ? nil
+            : (newHeading.trueHeading >= 0 ? newHeading.trueHeading : newHeading.magneticHeading)
+        Task { @MainActor in
+            if self.heading != value { self.heading = value }
         }
     }
 

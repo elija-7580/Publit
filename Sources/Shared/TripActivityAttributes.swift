@@ -18,6 +18,12 @@ struct TripActivityAttributes: ActivityAttributes {
         var lineColor: String?
         var lineTextColor: String?
         var updatedAt: Date
+        /// "Pl. 5" of the departure that matters now (waited for, or the next one).
+        var platform: String? = nil
+        /// The platform is not the planned one.
+        var platformChanged: Bool? = nil
+        /// During a ride: the next vehicle ("Then: U3 at 12:45").
+        var then: String? = nil
     }
 
     var tripId: String

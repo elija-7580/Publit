@@ -16,6 +16,15 @@ struct WalkManeuver: Equatable, Sendable {
     /// Level after this instruction (0 = street level), when the router knows it.
     var level: Double?
     var coordinate: LatLon
+    /// Coming up from underground: the first street after the exit, or the side of the station.
+    var exitTowards: String? = nil
+    var exitSide: Compass.Point? = nil
+
+    /// "Exit towards Ludwigstraße" / "Exit on the north-east side".
+    var exitNote: String? {
+        if let exitTowards { return L10n.f("Exit towards %@", exitTowards) }
+        return exitSide.map(Compass.exit)
+    }
 
     var symbol: String {
         switch kind {
@@ -170,7 +179,27 @@ struct WalkRoute: Sendable {
         let scale = leg.distance.map { walked > 0 ? $0 / walked : 1 }.flatMap { (0.7...1.6).contains($0) ? $0 : nil } ?? 1
         self.scale = scale
         for i in out.indices.dropLast() { out[i].distance = max(0, out[i + 1].along - out[i].along) * scale }
+        Self.markExit(&out, startLevel: marks.first?.step.fromLevel, start: leg.from.coordinate)
         maneuvers = out
+    }
+
+    /// Signs in stations name the street an exit leads to; failing that, its side of the station.
+    /// Only when the walk starts below street level (getting off an underground train).
+    private static func markExit(_ out: inout [WalkManeuver], startLevel: Double?, start: LatLon) {
+        guard var level = startLevel, level < 0 else { return }
+        for i in out.indices {
+            guard let next = out[i].level else { continue }
+            defer { level = next }
+            guard level < 0, next >= 0 else { continue }
+            let at = out[i].along
+            let street = out[(i + 1)...].first { $0.street != nil && $0.along - at <= 150 }?.street
+            if let street {
+                out[i].exitTowards = street
+            } else if start.distance(to: out[i].coordinate) >= 40 {
+                out[i].exitSide = Compass.point(PathGeometry.bearing(start, out[i].coordinate))
+            }
+            return
+        }
     }
 
     /// Street name; stairs and lifts carry entrance codes ("MP09") instead, which are not on signs.

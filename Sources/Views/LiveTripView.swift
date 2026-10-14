@@ -9,8 +9,15 @@ struct LiveTripView: View {
     @Environment(TripStore.self) private var trips
     @Environment(LocationManager.self) private var location
     @Environment(AppState.self) private var app
+    @Environment(PassStore.self) private var passes
     @Environment(\.scenePhase) private var scenePhase
+    @AppStorage("guideVoice") private var voice = false
     @State private var now = Date()
+    /// Cues already given (each turn, platform change, "get off next" once).
+    @State private var announced: Set<String> = []
+    @State private var feedback = 0
+    @State private var feedbackKind: GuideCue.Kind = .stage
+    @State private var showTickets = false
     /// A stage picked by hand; nil follows the trip.
     @State private var picked: String?
 
@@ -34,6 +41,10 @@ struct LiveTripView: View {
         let walkPos = here.flatMap { walk?.position(of: $0) }
         let ride = step.kind == .ride || step.kind == .wait ? TripGuide.ridePosition(leg, at: now, location: here) : nil
         let check = index == live ? TripGuide.check(step, it, at: now, location: here, accuracy: location.accuracy, walk: walk) : .fine
+        let cue = index == live ? GuideCues.current(step, it, at: now, walk: walk, position: walkPos, progress: ride?.progress) : nil
+        let wrong = index == live && TripAlternative.needed(check, it, at: now)
+        let wrongMessage: String = check == .offRoute ? L10n.t("You seem to be off the route.")
+            : check == .missed ? L10n.t("Missed it?") : L10n.t("Connection cancelled")
         List {
             Section {
                 GuideMap(itinerary: it, step: step,
@@ -47,6 +58,12 @@ struct LiveTripView: View {
                 .listRowInsets(EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 12))
             }
 
+            if wrong {
+                Section {
+                    AlternativeRow(trip: trip, from: here, message: wrongMessage, onMore: replan)
+                }
+            }
+
             if picked != nil {
                 Section {
                     Button { picked = nil } label: { Label("Back to now", systemImage: "location.fill") }
@@ -56,9 +73,9 @@ struct LiveTripView: View {
 
             switch step.kind {
             case .walk: walkSections(leg, index: step.legIndex, in: it, route: walk!, position: walkPos, check: check)
-            case .wait: waitSection(leg, in: it, check: check)
+            case .wait: waitSection(leg, index: step.legIndex, in: it)
             case .ride: rideSections(leg, progress: ride?.progress ?? .notStarted, fromGPS: ride?.fromGPS ?? false, check: check)
-            case .arrive: arriveSection(it)
+            case .arrive: arriveSection(it, here: here)
             }
 
             Section {
@@ -84,9 +101,33 @@ struct LiveTripView: View {
         .navigationTitle(trip.toName)
         .navigationBarTitleDisplayMode(.inline)
         .screenTrail("Live trip")
-        .onAppear { location.start(); location.setPrecise(scenePhase == .active) }
-        .onDisappear { location.setPrecise(false) }
-        .onChange(of: scenePhase) { _, phase in location.setPrecise(phase == .active) }
+        .toolbar { ToolbarItem(placement: .primaryAction) { voiceButton } }
+        .sheet(isPresented: $showTickets) {
+            NavigationStack {
+                TripPassesView(tripId: trip.id, at: now)
+                    .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { showTickets = false } } }
+            }
+        }
+        .sensoryFeedback(trigger: feedback) { _, _ in
+            feedbackKind == .platform ? SensoryFeedback.warning : SensoryFeedback.impact(weight: .heavy, intensity: 1)
+        }
+        .onChange(of: cue) { _, new in announce(new) }
+        .onAppear {
+            // What is on screen when it opens needs no announcement.
+            if let cue { announced.insert(cue.key) }
+            location.start()
+            location.setPrecise(scenePhase == .active)
+            location.setHeading(scenePhase == .active)
+        }
+        .onDisappear {
+            location.setPrecise(false)
+            location.setHeading(false)
+            GuideVoice.shared.stop()
+        }
+        .onChange(of: scenePhase) { _, phase in
+            location.setPrecise(phase == .active)
+            location.setHeading(phase == .active)
+        }
         .onChange(of: live) { _, _ in
             // The trip moved on: a stage picked earlier is over or now current.
             if let picked, let i = steps.firstIndex(where: { $0.id == picked }), i <= live { self.picked = nil }
@@ -103,6 +144,7 @@ struct LiveTripView: View {
         let remaining = position?.remaining ?? leg.distance ?? route.length * route.scale
         let pace = (leg.distance ?? 0) > 0 ? Double(leg.duration) / (leg.distance ?? 1) : 1 / 1.3
         let walkSeconds = Int(remaining * pace)
+        let nextIndex = it.legs[(index + 1)...].firstIndex(where: \.isTransit)
         Section {
             VStack(alignment: .leading, spacing: 8) {
                 HStack(spacing: 10) {
@@ -121,10 +163,13 @@ struct LiveTripView: View {
                     HStack(spacing: 6) {
                         LineBadge(next, compact: true)
                         Text(Self.departure(next, now: now)).font(.subheadline)
-                        if let track = TransitLabels.clean(next.from.track) {
+                        if let change = next.from.platformChange {
+                            Text(verbatim: "· " + L10n.f("Platform %@", change.now)).font(.subheadline.weight(.bold)).foregroundStyle(Color.delay)
+                        } else if let track = TransitLabels.clean(next.from.track) {
                             Text(verbatim: "· " + L10n.f("Platform %@", track)).font(.subheadline).foregroundStyle(.secondary)
                         }
                     }
+                    if let change = next.from.platformChange { PlatformChangeLabel(change: change) }
                     if spare < 60 && next.startTime > now {
                         Label("Walk faster to make it.", systemImage: "hare.fill")
                             .font(.subheadline.weight(.semibold)).foregroundStyle(Color.delay)
@@ -132,6 +177,9 @@ struct LiveTripView: View {
                 }
             }
             .padding(.vertical, 4)
+            if let b = route.bearing(at: position?.along ?? 0) {
+                HeadingRow(bearing: b, title: Compass.head(Compass.point(b)))
+            }
             if let position, let nextMove = route.maneuvers[safe: position.index + 1] {
                 HStack(spacing: 12) {
                     Image(systemName: nextMove.symbol).font(.title2.weight(.bold)).frame(width: 36)
@@ -139,11 +187,14 @@ struct LiveTripView: View {
                         Text(L10n.f("In %@", Fmt.distance(meters: position.toNext ?? 0)))
                             .font(.caption.weight(.semibold)).foregroundStyle(.secondary)
                         Text(nextMove.instruction(destination: target)).font(.headline)
+                        if let note = nextMove.exitNote {
+                            Text(note).font(.subheadline.weight(.semibold))
+                        }
                     }
                 }
                 .accessibilityElement(children: .combine)
             }
-            if check == .offRoute { replanRow(L10n.t("You seem to be off the route.")) }
+            if let nextIndex, let transfer = TransferInfo(before: nextIndex, in: it) { TransferCard(info: transfer) }
             Button { Self.openInMaps(leg.to, name: target) } label: {
                 Label("Open in Apple Maps", systemImage: "map")
             }
@@ -157,6 +208,9 @@ struct LiveTripView: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(m.instruction(destination: target))
                             .font(.subheadline.weight(isNow ? .bold : .regular))
+                        if let note = m.exitNote {
+                            Text(note).font(.caption.weight(.semibold))
+                        }
                         if m.kind != .arrive, m.distance >= 1 {
                             Text(Fmt.distance(meters: m.distance)).font(.caption).foregroundStyle(.secondary)
                         }
@@ -173,7 +227,7 @@ struct LiveTripView: View {
     // MARK: Wait
 
     @ViewBuilder
-    private func waitSection(_ leg: Leg, in it: Itinerary, check: TripGuide.Check) -> some View {
+    private func waitSection(_ leg: Leg, index legIndex: Int, in it: Itinerary) -> some View {
         let warnings = TransferRisk.warnings(for: it).filter { $0.stopName == leg.from.name }
         let rideSummary: String = [Fmt.stops(max(leg.allStops.count - 1, 1)), Fmt.duration(seconds: leg.duration),
                                    L10n.f("Get off at %@", leg.to.name)].joined(separator: " · ")
@@ -193,7 +247,13 @@ struct LiveTripView: View {
                     }
                 }
                 Text(verbatim: leg.from.name).font(.subheadline)
-                if let track = TransitLabels.clean(leg.from.track) {
+                if let change = leg.from.platformChange {
+                    Text(L10n.f("Platform %@", change.now)).font(.title3.weight(.bold))
+                        .padding(.horizontal, 10).padding(.vertical, 4)
+                        .foregroundStyle(Color.delay)
+                        .background(Color.delay.opacity(0.15), in: RoundedRectangle(cornerRadius: 8))
+                    PlatformChangeLabel(change: change)
+                } else if let track = TransitLabels.clean(leg.from.track) {
                     Text(L10n.f("Platform %@", track)).font(.title3.weight(.bold))
                         .padding(.horizontal, 10).padding(.vertical, 4)
                         .background(Color.inkFill, in: RoundedRectangle(cornerRadius: 8))
@@ -211,11 +271,12 @@ struct LiveTripView: View {
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(w.level == .missed ? Color.danger : Color.delay)
             }
+            if let transfer = TransferInfo(before: legIndex, in: it) { TransferCard(info: transfer) }
             ServiceAlertsView(alerts: leg.serviceAlerts)
             Label(rideSummary, systemImage: "arrow.right.circle")
                 .font(.subheadline).foregroundStyle(.secondary)
+            ticketRow
             GetOffButton(leg: leg)
-            if check == .missed { replanRow(L10n.t("Missed it?")) }
         }
     }
 
@@ -252,8 +313,8 @@ struct LiveTripView: View {
                     .font(.caption).foregroundStyle(.secondary)
             }
             .padding(.vertical, 4)
-            if check == .missed { replanRow(L10n.t("Missed it?")) }
             ServiceAlertsView(alerts: leg.serviceAlerts)
+            ticketRow
             GetOffButton(leg: leg)
         }
         Section("Stops") {
@@ -266,9 +327,11 @@ struct LiveTripView: View {
 
     // MARK: Arrive
 
-    private func arriveSection(_ it: Itinerary) -> some View {
+    private func arriveSection(_ it: Itinerary, here: LatLon?) -> some View {
         let last = it.legs.last
         let arrived = now >= it.endTime
+        let dest = last?.to.coordinate
+        let away = here.flatMap { h in dest.map { h.distance(to: $0) } }
         return Section {
             VStack(alignment: .leading, spacing: 8) {
                 Image(systemName: "flag.checkered").font(.title.weight(.semibold))
@@ -278,6 +341,10 @@ struct LiveTripView: View {
                     .font(.headline.monospacedDigit()).foregroundStyle(.secondary)
             }
             .padding(.vertical, 4)
+            // The last metres: how far and which way to the door, after the last stop.
+            if let here, let dest, let away, away > 15, away < 3000 {
+                HeadingRow(bearing: PathGeometry.bearing(here, dest), title: L10n.f("Destination in %@", Fmt.distance(meters: away)))
+            }
             if arrived {
                 Button {
                     Task { await TripSession.stop(trip, in: trips) }
@@ -292,17 +359,35 @@ struct LiveTripView: View {
 
     // MARK: Helpers
 
-    private func replanRow(_ message: String) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Label(message, systemImage: "exclamationmark.triangle.fill")
-                .font(.subheadline.weight(.semibold)).foregroundStyle(Color.delay)
-            Button { replan() } label: {
-                Label("New route from here", systemImage: "arrow.triangle.turn.up.right.diamond")
-                    .font(.subheadline.weight(.semibold))
+    /// Opens the tickets valid for this trip (from the wallet), right where you board.
+    @ViewBuilder
+    private var ticketRow: some View {
+        if Features.passes, !passes.passes(forTrip: trip.id, at: now).isEmpty {
+            Button { showTickets = true } label: {
+                Label("Show ticket", systemImage: "ticket")
             }
-            .buttonStyle(.bordered)
+            .accessibilityIdentifier("guideShowTicket")
         }
-        .padding(.vertical, 4)
+    }
+
+    private var voiceButton: some View {
+        Button {
+            voice.toggle()
+            if !voice { GuideVoice.shared.stop() }
+        } label: {
+            Label(voice ? L10n.t("Turn off spoken directions") : L10n.t("Turn on spoken directions"),
+                  systemImage: voice ? "speaker.wave.2.fill" : "speaker.slash")
+        }
+        .accessibilityIdentifier("guideVoice")
+    }
+
+    /// A vibration for each new cue, and the words when spoken directions are on.
+    private func announce(_ cue: GuideCue?) {
+        guard let cue, !announced.contains(cue.key) else { return }
+        announced.insert(cue.key)
+        feedbackKind = cue.kind
+        feedback += 1
+        if voice { GuideVoice.shared.say(cue.text) }
     }
 
     /// Routes from the current position to the trip's destination, leaving now.
@@ -468,6 +553,8 @@ private struct GuideMap: View {
     let vehicle: LatLon?
     let focus: LatLon?
     @State private var camera: MapCameraPosition = .automatic
+    /// The map turns with the phone (like a compass) and follows you.
+    @State private var followHeading = false
 
     var body: some View {
         let current = itinerary.legs[step.legIndex]
@@ -500,8 +587,29 @@ private struct GuideMap: View {
         }
         .mapStyle(.standard(pointsOfInterest: .excludingAll))
         .mapControls { MapUserLocationButton(); MapCompass() }
+        .overlay(alignment: .topLeading) {
+            Button {
+                followHeading.toggle()
+                withAnimation {
+                    camera = followHeading ? .userLocation(followsHeading: true, fallback: Self.camera(step, itinerary))
+                        : Self.camera(step, itinerary)
+                }
+            } label: {
+                Image(systemName: followHeading ? "location.north.line.fill" : "location.north.line")
+                    .font(.body.weight(.semibold))
+                    .frame(width: 44, height: 44)
+                    .background(.regularMaterial, in: Circle())
+            }
+            .buttonStyle(.plain)
+            .padding(8)
+            .accessibilityLabel(Text(followHeading ? L10n.t("Stop turning the map") : L10n.t("Turn the map with you")))
+            .accessibilityIdentifier("guideFollowHeading")
+        }
         .onAppear { camera = Self.camera(step, itinerary) }
-        .onChange(of: step) { _, s in withAnimation { camera = Self.camera(s, itinerary) } }
+        .onChange(of: step) { _, s in
+            guard !followHeading else { return }
+            withAnimation { camera = Self.camera(s, itinerary) }
+        }
     }
 
     static func camera(_ step: GuideStep, _ it: Itinerary) -> MapCameraPosition {
@@ -525,6 +633,125 @@ private struct GuideMap: View {
     }
 }
 
-extension Array {
-    subscript(safe i: Int) -> Element? { indices.contains(i) ? self[i] : nil }
+/// "Head north-east" with an arrow that points the way: turned by the compass while it works,
+/// otherwise drawn with north at the top.
+private struct HeadingRow: View {
+    let bearing: Double
+    let title: String
+    @Environment(LocationManager.self) private var location
+
+    var body: some View {
+        // Only this row reads the compass, so only it redraws when the phone turns.
+        let heading = location.heading
+        HStack(spacing: 12) {
+            Image(systemName: "location.north.fill")
+                .font(.title2.weight(.bold))
+                .rotationEffect(.degrees(heading.map { Compass.relative(bearing, heading: $0) } ?? bearing))
+                .foregroundStyle(heading == nil ? Color.secondary : Color.ink)
+                .frame(width: 36, height: 36)
+                .animation(.easeOut(duration: 0.25), value: heading)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).font(.headline)
+                if heading == nil {
+                    Text("No compass: the arrow has north at the top.").font(.caption).foregroundStyle(.secondary)
+                }
+            }
+        }
+        .accessibilityElement(children: .combine)
+    }
+}
+
+/// "Platform changed (was 3)".
+private struct PlatformChangeLabel: View {
+    let change: PlatformChange
+    var body: some View {
+        Label(L10n.f("Platform changed (was %@)", change.scheduled), systemImage: "exclamationmark.triangle.fill")
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(Color.delay)
+    }
+}
+
+/// The change between two vehicles: platforms, levels, walk and time to spare.
+private struct TransferCard: View {
+    let info: TransferInfo
+
+    var body: some View {
+        let walk = info.walkSeconds >= 30 ? L10n.f("%@ walk", Fmt.duration(seconds: max(60, info.walkSeconds))) : nil
+        let spare = info.spareSeconds >= 60 ? L10n.f("%@ to spare", Fmt.duration(seconds: info.spareSeconds)) : L10n.t("Very tight change")
+        VStack(alignment: .leading, spacing: 4) {
+            Label(L10n.f("Change from %@", info.fromLine), systemImage: "arrow.triangle.swap")
+                .font(.subheadline.weight(.semibold))
+            if let p = info.platforms { Text(p).font(.subheadline) }
+            if let l = info.levels { Text(l).font(.caption).foregroundStyle(.secondary) }
+            Text(verbatim: [walk, spare].compactMap { $0 }.joined(separator: " · "))
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(info.isTight ? Color.delay : Color.secondary)
+        }
+        .padding(.vertical, 2)
+        .accessibilityElement(children: .combine)
+    }
+}
+
+/// Missed, off the path or cancelled: the next connection from where you are, to switch to in
+/// one tap (the guide goes on with it), or all options.
+private struct AlternativeRow: View {
+    let trip: SavedTrip
+    let from: LatLon?
+    let message: String
+    let onMore: () -> Void
+    @Environment(TripStore.self) private var trips
+    @Environment(AppState.self) private var app
+    @State private var option: Itinerary?
+    @State private var searching = false
+    @State private var switching = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Label(message, systemImage: "exclamationmark.triangle.fill")
+                .font(.subheadline.weight(.semibold)).foregroundStyle(Color.delay)
+            if let option, let first = option.firstTransitLeg {
+                HStack(spacing: 8) {
+                    LineBadge(first, compact: true)
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(LiveTripView.departure(first, now: .now)).font(.subheadline.weight(.semibold))
+                        Text(verbatim: "\(first.from.name) · " + L10n.f("Arrive %@", Fmt.time(option.endTime, tz: option.legs.last?.to.tz)))
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+                .accessibilityElement(children: .combine)
+                Button {
+                    switching = true
+                    Task {
+                        await TripSession.reroute(trip, to: option, in: trips)
+                        switching = false
+                    }
+                } label: {
+                    Label("Switch to this connection", systemImage: "arrow.triangle.branch")
+                        .font(.subheadline.weight(.semibold))
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(switching)
+                .accessibilityIdentifier("guideSwitchConnection")
+            } else if searching {
+                ProgressView(L10n.t("Looking for the next connection…")).font(.footnote)
+            }
+            Button { onMore() } label: {
+                Label("New route from here", systemImage: "arrow.triangle.turn.up.right.diamond")
+                    .font(.subheadline.weight(.semibold))
+            }
+            .buttonStyle(.bordered)
+        }
+        .padding(.vertical, 4)
+        .task(id: trip.itinerary.id) { await search() }
+    }
+
+    private func search() async {
+        guard let from, let dest = trip.itinerary.legs.last?.to else { return }
+        searching = true
+        defer { searching = false }
+        guard let res = try? await TransitousClient.shared.plan(from: from, to: dest.coordinate, time: nil, arriveBy: false,
+                                                                 options: app.routeOptions) else { return }
+        option = TripAlternative.pick(res.itineraries, at: .now)
+    }
 }

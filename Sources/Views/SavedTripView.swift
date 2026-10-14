@@ -60,6 +60,9 @@ struct SavedTripView: View {
                 await LiveTripActivity.update(updated)
                 await LeaveReminder.follow(t, to: updated)
                 await GetOffReminder.follow(from: t.itinerary, to: updated.itinerary)
+                if trips.activeTripId == t.id || LiveTripActivity.isRunning(t.id) {
+                    await TripChangeAlert.follow(t.id, from: t.itinerary, to: updated.itinerary)
+                }
             }
             return true
         } catch {
