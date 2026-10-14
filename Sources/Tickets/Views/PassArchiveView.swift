@@ -40,10 +40,16 @@ struct PassArchiveView: View {
         .searchable(text: $query)
         .toolbar { archiveMenu(isEmpty: all.isEmpty) }
         .confirmationDialog(L10n.t("Delete all archived tickets?"), isPresented: $confirmingDelete, titleVisibility: .visible) {
-            Button(L10n.t("Delete archived tickets"), role: .destructive) { withAnimation { store.removeArchived(at: now) } }
+            Button(L10n.t("Delete archived tickets"), role: .destructive) { deleteAll() }
         } message: {
             Text("Their copies and originals are removed from this iPhone.")
         }
+    }
+
+    /// Statement body on purpose: `withAnimation { store.removeArchived(…) }` returns an Int, which left the
+    /// whole modifier chain ambiguous for the compiler (reported at `.toolbar`, builds 22–24).
+    private func deleteAll() {
+        withAnimation { _ = store.removeArchived(at: now) }
     }
 
     /// Typed as toolbar content: an `if` directly in `.toolbar {}` was ambiguous for the compiler (build 22).
