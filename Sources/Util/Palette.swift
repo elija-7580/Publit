@@ -11,6 +11,14 @@ public enum Palette {
     public static let danger = Tone(light: "d70015", dark: "ff453a")
     public static let accent = Tone(light: "0066d6", dark: "0a84ff")
     public static let all: [Tone] = [live, delay, danger, accent]
+    /// "Ink & Dot" surfaces (docs/design): flat warm grey ground, opaque cards, ink for the main action.
+    public static let ground  = Tone(light: "f4f4f2", dark: "0b0b0c")
+    public static let surface = Tone(light: "ffffff", dark: "19191b")
+    public static let fill    = Tone(light: "ebebe7", dark: "2a2a2d")
+    public static let ink     = Tone(light: "111111", dark: "f4f4f2")
+    public static let onInk   = Tone(light: "ffffff", dark: "111111")
+    /// The yellow dot of the logo: only for "you" and "live", never as a fill.
+    public static let signature = Tone(light: "ffc531", dark: "ffc531")
     /// System background colours the tones are drawn on (light: white and grouped grey; dark: black and grouped dark grey).
     public static let lightBackgrounds = ["ffffff", "f2f2f7"]
     public static let darkBackgrounds = ["000000", "1c1c1e"]

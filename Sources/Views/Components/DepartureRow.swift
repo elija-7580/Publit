@@ -22,7 +22,7 @@ struct DepartureRow: View {
                     time(now: now)
                 }
             } else {
-                HStack(alignment: .top, spacing: 12) {
+                HStack(alignment: .center, spacing: 12) {
                     VStack(alignment: .leading, spacing: 6) {
                         identity
                         DirectionLabel(direction: stopTime.directionName)

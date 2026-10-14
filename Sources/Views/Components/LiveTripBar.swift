@@ -25,7 +25,8 @@ struct LiveTripBar: View {
         let leg = it.transitLegs.first { $0.endTime > now }
         let total = max(it.endTime.timeIntervalSince(it.startTime), 60)
         let progress = min(max(now.timeIntervalSince(it.startTime) / total, 0), 1)
-        let color: Color = status.phase == .cancelled ? .danger : status.delayMinutes > 0 ? .delay : .appAccent
+        let alert = status.phase == .cancelled || status.delayMinutes > 0
+        let color: Color = status.phase == .cancelled ? .danger : status.delayMinutes > 0 ? .delay : .ink
         return HStack(spacing: 10) {
             Button { app.deepLink = .trip(trip.id) } label: {
                 HStack(spacing: 10) {
@@ -43,7 +44,7 @@ struct LiveTripBar: View {
                         }
                         Text(verbatim: status.detail.isEmpty ? trip.title : status.detail)
                             .font(.caption).foregroundStyle(.secondary).lineLimit(1)
-                        ProgressView(value: progress).tint(color)
+                        InkProgress(value: progress, tint: color).padding(.top, 2)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
@@ -60,8 +61,8 @@ struct LiveTripBar: View {
             .accessibilityLabel(Text("Hide"))
         }
         .padding(.horizontal, 12).padding(.vertical, 8)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(color.opacity(0.35)))
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).strokeBorder(alert ? color.opacity(0.35) : Color.primary.opacity(0.08)))
         .padding(.horizontal, 10).padding(.bottom, 6)
     }
 

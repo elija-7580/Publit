@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.0 (build 20)
+
+### Design "Ink & Dot", first screen: Nearby
+- New design language (docs/design: principles, tokens, clickable prototype): flat opaque cards on a warm grey ground, glass only for floating controls (tab bar, live trip bar), ink instead of a brand colour, the logo's yellow dot only for "you" and "live".
+- Nearby: each station heads its own card (bold name, distance; the nearest stop has the yellow dot) instead of a grey header above it; cards on the new ground; buttons and links in ink.
+- Departure boards (Nearby and a station's departures): the minutes are the big figure ("4 min", orange when late), clock time, delay and Live/Timetable small underneath; a cancelled departure shows its time struck through in red. Rows are centred vertically.
+- Mode chips everywhere: the selected chip is ink (black, white in dark mode) instead of blue.
+- Live trip bar: progress drawn as the logo's stroke with the yellow dot at the current position; hairline border unless late or cancelled; corner radius 22 like the cards.
+- Other screens are unchanged for now. Not yet seen on a device.
+
 ## 0.6.0 (build 19)
 
 ### Sharing

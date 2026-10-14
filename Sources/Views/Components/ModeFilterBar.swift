@@ -34,8 +34,8 @@ struct ModeFilterBar: View {
             Image(systemName: symbol)
                 .font(.subheadline.weight(.semibold))
                 .frame(maxWidth: .infinity, minHeight: 34)
-                .foregroundStyle(selected ? Color.white : Color.primary)
-                .background(selected ? Color.appAccent : Color(.secondarySystemFill), in: Capsule())
+                .foregroundStyle(selected ? Color.onInk : Color.primary)
+                .background(selected ? Color.ink : Color.inkFill, in: Capsule())
                 .contentShape(Capsule())
         }
         .buttonStyle(.plain)
@@ -72,8 +72,8 @@ struct ModeFilterBar: View {
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 7)
-            .foregroundStyle(selected ? Color.white : Color.primary)
-            .background(selected ? Color.appAccent : Color(.secondarySystemFill), in: Capsule())
+            .foregroundStyle(selected ? Color.onInk : Color.primary)
+            .background(selected ? Color.ink : Color.inkFill, in: Capsule())
             .contentShape(Capsule())
         }
         .buttonStyle(.plain)

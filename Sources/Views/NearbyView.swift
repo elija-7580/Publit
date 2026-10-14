@@ -76,6 +76,9 @@ struct NearbyView: View {
 
             ForEach(groups) { group in
                 Section {
+                    // Ink & Dot: the station heads its own card instead of a grey header above it.
+                    StopGroupHeader(group: group, nearest: group.id == groups.first?.id)
+                        .listRowSeparator(.hidden, edges: .bottom)
                     ForEach(group.departures.prefix(5)) { st in
                         // By value: the trip stays open when the board refreshes and this row
                         // changes or leaves (the departure has gone).
@@ -87,14 +90,15 @@ struct NearbyView: View {
                     NavigationLink {
                         StopDeparturesView(stopId: group.id, name: group.name, coordinate: group.coordinate, exact: group.isPole)
                     } label: {
-                        Text("All departures").font(.subheadline)
+                        Text("All departures").font(.subheadline.weight(.semibold))
                     }
-                } header: {
-                    StopGroupHeader(group: group)
                 }
+                .inkCard()
             }
 
         }
+        .inkList()
+        .tint(Color.ink)
         .navigationTitle("Nearby")
         .screenTrail("Nearby")
         .withSettingsButton()
@@ -150,6 +154,7 @@ struct NearbyView: View {
                 }
                 .accessibilityIdentifier("activeTrip")
             }
+            .inkCard()
         }
     }
 
@@ -184,6 +189,7 @@ struct NearbyView: View {
                 }
             }
         }
+        .inkCard()
     }
 
     /// The last board (up to 30 min old, past departures removed) right away, so the screen is not
@@ -261,17 +267,25 @@ struct NearbyView: View {
 /// Station name and distance; a street stop also says where its buses go, to tell it from the one across the road.
 struct StopGroupHeader: View {
     let group: StopGroup
+    /// The closest stop gets the logo's dot by its distance: "you are this close".
+    var nearest = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-            HStack {
-                Text(group.name)
+            HStack(alignment: .firstTextBaseline) {
+                Text(group.name).font(.title3.weight(.bold))
                 Spacer()
-                if let d = group.distance { Text(Fmt.distance(meters: d)) }
+                if let d = group.distance {
+                    HStack(spacing: 5) {
+                        if nearest { SignatureDot(size: 7) }
+                        Text(Fmt.distance(meters: d)).font(.subheadline.weight(.medium).monospacedDigit())
+                    }
+                    .foregroundStyle(.secondary)
+                }
             }
             if group.isPole, !group.directions.isEmpty {
                 Label(group.directions.joined(separator: " · "), systemImage: "arrow.right")
-                    .font(.caption).lineLimit(1)
+                    .font(.caption).foregroundStyle(.secondary).lineLimit(1)
                     .labelStyle(CompactLabelStyle())
             }
         }
