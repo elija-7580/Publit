@@ -138,6 +138,10 @@ final class PlanModel {
             if itineraries.isEmpty {
                 errorMessage = options.isDefault ? L10n.t("No connections found.")
                     : L10n.t("No connections found with these filters.")
+                // Say so when the area has no timetable at all (Athens, Malta, Minsk …), not just no route.
+                if let gap = await Self.coverageGap(from: f, to: t), token == myToken, itineraries.isEmpty {
+                    errorMessage = gap
+                }
             }
             // The routes are on screen; cycling and driving follow when the server has them.
             isLoading = false
@@ -217,6 +221,30 @@ final class PlanModel {
         guard enabled else { return [] }
         let listedIds = Set(listed.map(\.id))
         return StreetComparison.from(direct).filter { !($0.mode == "WALK" && listedIds.contains($0.itinerary.id)) }
+    }
+
+    /// No route found: is there any departure within 2 km of the start and of the destination?
+    /// Stops alone are not enough (Athens has stops but no trips in the data). An unanswered
+    /// check counts as covered: no claim without evidence.
+    nonisolated static func coverageGap(from: LatLon, to: LatLon) async -> String? {
+        async let start = hasService(near: from)
+        async let end = hasService(near: to)
+        let (s, e) = await (start, end)
+        return coverageMessage(startCovered: s, destinationCovered: e)
+    }
+
+    nonisolated static func hasService(near point: LatLon) async -> Bool {
+        guard let res = try? await TransitousClient.shared.departures(near: point, radius: 2000, count: 1) else { return true }
+        return !res.stopTimes.isEmpty
+    }
+
+    nonisolated static func coverageMessage(startCovered: Bool, destinationCovered: Bool) -> String? {
+        switch (startCovered, destinationCovered) {
+        case (false, false): return L10n.t("No timetable data for this area yet. Publit uses open timetables (Transitous), and none are published here.")
+        case (false, true): return L10n.t("No timetable data around the start yet. Publit uses open timetables (Transitous), and none are published there.")
+        case (true, false): return L10n.t("No timetable data around the destination yet. Publit uses open timetables (Transitous), and none are published there.")
+        case (true, true): return nil
+        }
     }
 
     private static func isCancellation(_ error: Error) -> Bool {

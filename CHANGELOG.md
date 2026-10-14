@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.0 (build 28)
+
+### Clear message where there are no timetables
+- When no route is found, Publit checks whether open timetables exist around the start and the destination. Instead of a plain "No routes" it then says "No timetable data for this area yet" (or names the start or the destination) and explains that Publit uses open timetables (Transitous) and none are published there. If the check itself fails, the usual message stays.
+
+### Docs
+- docs/DATA-SOURCES.md: sharing feeds (bikes, scooters, mopeds) that are public but missing in Transitous, backup timetable APIs per country (with/without key, status), and other useful open data (entrances, elevators, occupancy, national access points).
+
 ## 0.6.0 (build 27)
 
 ### Faster route search

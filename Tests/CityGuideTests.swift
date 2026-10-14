@@ -142,3 +142,12 @@ final class LineContrastTests: XCTestCase {
         XCTAssertEqual(LineColors.RGB(r: 1, g: 0, b: 0.5).hex, "FF0080")
     }
 }
+
+final class CoverageGapTests: XCTestCase {
+    func testMessageNamesTheEndWithoutData() {
+        XCTAssertNil(PlanModel.coverageMessage(startCovered: true, destinationCovered: true))
+        XCTAssertTrue(PlanModel.coverageMessage(startCovered: false, destinationCovered: false)!.contains("this area"))
+        XCTAssertTrue(PlanModel.coverageMessage(startCovered: false, destinationCovered: true)!.contains("start"))
+        XCTAssertTrue(PlanModel.coverageMessage(startCovered: true, destinationCovered: false)!.contains("destination"))
+    }
+}
