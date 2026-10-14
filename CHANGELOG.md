@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.6.0 (build 24)
+
+### Navigation: a started trip guides you step by step
+- "Start trip" (on the trip, or ▶ in the live bar) turns the trip screen into a guide in stages, like Moovit: walk → wait → ride → (change) → arrive. A row of stages at the top shows done, now (yellow dot) and ahead; tap one to look ahead, "Back to now" returns. The stage follows the live times and, while the screen is open, your position (at the stop early → waiting; still far from the stop → walking).
+- Walk: distance and time left, the departure you are walking to (with platform, and "Walk faster to make it." when it gets tight), the next instruction ("In 35 m · Turn left onto Ludwigstraße") and the full directions with stairs and levels ("Take the stairs down (level −1)"). The router marks stairs and levels but hardly ever turns, so turns are derived from the path's shape; stairs follow the walking direction. "Open in Apple Maps" hands the walk to Apple Maps with spoken guidance. Off the path → "New route from here".
+- Wait: line and direction, "Departs in 4 min", delay, platform, tight-change warnings, disruptions, stops and time to the stop to get off.
+- Ride: "Get off at …", stops left and arrival with delay, "Now at …" / "Next: …", progress in the line's colour and all stops on a line with the yellow dot where you are. While the screen is open the position comes from GPS (laid onto the line, accepted within three stops of the live times), otherwise from the live stop times. Still at the stop well after departure → "Missed it?" with a new route from here.
+- The map shows the stage's leg in full colour (the rest faded), you, the vehicle and the next turn, and moves to the stage.
+- GPS is precise (every 5 m) only while the guide is open and the app is in front; nothing runs in the background.
+- Starting a trip sets a get-off reminder for each ride when notifications are already allowed, and moves them with live delays; ending the trip removes them. Walking directions are kept with saved trips and refreshes.
+
+### Fix
+- Builds 22 and 23 did not compile ("ambiguous use of toolbar" in the ticket archive): the archive's menu is now typed toolbar content.
+
+### Live bar
+- A started trip shows like a running workout: a dark bar with a ring for the trip so far, "Live trip", what to do now, the line, and a big countdown to the next moment (leave, departure, get off). Tap opens the guide. Trips not started yet have ▶ to start them.
+
 ## 0.6.0 (build 23)
 
 ### Resource use

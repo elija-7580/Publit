@@ -48,6 +48,15 @@ final class LocationManager: NSObject, CLLocationManagerDelegate {
         }
     }
 
+    /// Walking directions need a fix every few metres; elsewhere every 50 m is plenty.
+    func setPrecise(_ precise: Bool) {
+        manager.desiredAccuracy = precise ? kCLLocationAccuracyBest : kCLLocationAccuracyHundredMeters
+        manager.distanceFilter = precise ? 5 : 50
+    }
+
+    /// Metres of uncertainty of the last fix (large when unknown).
+    var accuracy: Double { location.map { $0.horizontalAccuracy >= 0 ? $0.horizontalAccuracy : 1000 } ?? 1000 }
+
     /// In the background nothing shows the location: GPS off until the app is open again.
     func pause() {
         manager.stopUpdatingLocation()

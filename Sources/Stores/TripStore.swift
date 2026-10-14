@@ -153,7 +153,8 @@ final class TripStore {
     /// Replace the stored route with a fresh real-time version.
     func update(_ id: String, with itinerary: Itinerary, at date: Date = .now) {
         guard let i = trips.firstIndex(where: { $0.id == id }) else { return }
-        trips[i].itinerary = Self.keepingFares(of: trips[i].itinerary, in: itinerary)
+        trips[i].itinerary = Self.keepingSteps(of: trips[i].itinerary,
+                                               in: Self.keepingFares(of: trips[i].itinerary, in: itinerary))
         trips[i].refreshedAt = date
         persistSoon()
     }
@@ -166,6 +167,16 @@ final class TripStore {
         for j in fresh.legs.indices {
             fresh.legs[j].fareTransferIndex = old.legs[j].fareTransferIndex
             fresh.legs[j].effectiveFareLegIndex = old.legs[j].effectiveFareLegIndex
+        }
+        return fresh
+    }
+
+    /// Walking directions stay when a refresh comes without them.
+    nonisolated static func keepingSteps(of old: Itinerary, in new: Itinerary) -> Itinerary {
+        guard old.legs.count == new.legs.count else { return new }
+        var fresh = new
+        for j in fresh.legs.indices where fresh.legs[j].steps == nil && !fresh.legs[j].isTransit {
+            fresh.legs[j].steps = old.legs[j].steps
         }
         return fresh
     }

@@ -38,24 +38,27 @@ struct PassArchiveView: View {
         .navigationTitle(L10n.t("Archive"))
         .screenTrail("Ticket archive")
         .searchable(text: $query)
-        .toolbar {
-            if !all.isEmpty {
-                ToolbarItem(placement: .primaryAction) {
-                    Menu {
-                        Button(role: .destructive) { confirmingDelete = true } label: {
-                            Label(L10n.t("Delete archived tickets"), systemImage: "trash")
-                        }
-                    } label: {
-                        Label("More", systemImage: "ellipsis.circle")
-                    }
-                    .accessibilityIdentifier("archiveMenu")
-                }
-            }
-        }
+        .toolbar { archiveMenu(isEmpty: all.isEmpty) }
         .confirmationDialog(L10n.t("Delete all archived tickets?"), isPresented: $confirmingDelete, titleVisibility: .visible) {
             Button(L10n.t("Delete archived tickets"), role: .destructive) { withAnimation { store.removeArchived(at: now) } }
         } message: {
             Text("Their copies and originals are removed from this iPhone.")
+        }
+    }
+
+    /// Typed as toolbar content: an `if` directly in `.toolbar {}` was ambiguous for the compiler (build 22).
+    @ToolbarContentBuilder
+    private func archiveMenu(isEmpty: Bool) -> some ToolbarContent {
+        ToolbarItem(placement: .primaryAction) {
+            Menu {
+                Button(role: .destructive) { confirmingDelete = true } label: {
+                    Label(L10n.t("Delete archived tickets"), systemImage: "trash")
+                }
+            } label: {
+                Label("More", systemImage: "ellipsis.circle")
+            }
+            .disabled(isEmpty)
+            .accessibilityIdentifier("archiveMenu")
         }
     }
 }

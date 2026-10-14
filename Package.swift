@@ -15,6 +15,8 @@ let core = [
     "Models/ModeStyle.swift",
     "Models/TransferRisk.swift",
     "Models/TripProgress.swift",
+    "Models/WalkGuide.swift",
+    "Models/TripGuide.swift",
     "Util/Polyline.swift",
     "Util/LineColors.swift",
     "Util/Geo.swift",

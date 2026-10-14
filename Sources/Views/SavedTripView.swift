@@ -10,10 +10,17 @@ struct SavedTripView: View {
 
     var body: some View {
         if let trip = trips.trip(tripId) {
-            ItineraryDetailView(itinerary: trip.itinerary, fromName: trip.fromName, toName: trip.toName,
-                                statusAt: { TripStatus.at($0, trip.itinerary) }, refreshedAt: trip.refreshedAt)
-            .navigationTitle(trip.toName)
-            .screenTrail("Saved trip")
+            Group {
+                // Started by hand: the trip screen becomes the step-by-step guide until it is ended.
+                if trips.activeTrip?.id == tripId {
+                    LiveTripView(trip: trip)
+                } else {
+                    ItineraryDetailView(itinerary: trip.itinerary, fromName: trip.fromName, toName: trip.toName,
+                                        statusAt: { TripStatus.at($0, trip.itinerary) }, refreshedAt: trip.refreshedAt)
+                    .navigationTitle(trip.toName)
+                    .screenTrail("Saved trip")
+                }
+            }
             .overlay(alignment: .bottom) {
                 if let errorMessage {
                     Text(errorMessage).font(.caption).padding(8)
@@ -52,6 +59,7 @@ struct SavedTripView: View {
             if let updated = trips.trip(t.id) {
                 await LiveTripActivity.update(updated)
                 await LeaveReminder.follow(t, to: updated)
+                await GetOffReminder.follow(from: t.itinerary, to: updated.itinerary)
             }
             return true
         } catch {

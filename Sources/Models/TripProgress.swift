@@ -45,4 +45,39 @@ enum TripProgress: Equatable, Sendable {
         case .finished: return nil
         }
     }
+
+    /// Stops passed, as a number (2.5 = halfway between the third and fourth stop).
+    func stopValue(count: Int) -> Double {
+        switch self {
+        case .notStarted: return 0
+        case .atStop(let i): return Double(i)
+        case .between(let i, let f): return Double(i) + f
+        case .finished: return Double(max(count - 1, 0))
+        }
+    }
+
+    /// Where a phone on board is along the line: the fix laid onto the route's shape (or straight
+    /// lines between the stops). Nil when the fix is not near the line.
+    static func located(_ p: LatLon, stops: [Place], path: [LatLon], maxOffset: Double = 200) -> TripProgress? {
+        guard stops.count >= 2 else { return nil }
+        let line = path.count >= 2 ? path : stops.map(\.coordinate)
+        guard let me = PathGeometry.locate(p, on: line), me.offset <= maxOffset else { return nil }
+        var marks: [Double] = []
+        var last = 0.0
+        for s in stops {
+            last = max(last, PathGeometry.locate(s.coordinate, on: line)?.along ?? last)
+            marks.append(last)
+        }
+        // At a stop when within a platform's length of it.
+        if let (i, m) = marks.enumerated().min(by: { abs($0.element - me.along) < abs($1.element - me.along) }),
+           abs(m - me.along) < 60 {
+            return .atStop(index: i)
+        }
+        if me.along <= marks[0] { return .atStop(index: 0) }
+        for i in 0..<(marks.count - 1) where me.along < marks[i + 1] {
+            let span = marks[i + 1] - marks[i]
+            return .between(index: i, fraction: span > 0 ? (me.along - marks[i]) / span : 0)
+        }
+        return .atStop(index: stops.count - 1)
+    }
 }

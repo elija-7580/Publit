@@ -125,23 +125,13 @@ struct TripActionsSection: View {
 
     private func startTrip() async {
         let trip = ensureSaved()
-        let previous = trips.start(trip.id)
         app.open(trip.deepLink)
-        if let previous, previous != trip.id {
-            LeaveReminder.cancel(previous)
-            await LiveTripActivity.end(previous)
-        }
-        switch LiveTripActivity.start(trip, hasTicket: !passes.passes(forTrip: trip.id, at: trip.startTime).isEmpty) {
-        case .started: note = L10n.t("Follow it on the lock screen.")
-        case .tooEarly: note = L10n.t("Live updates on the lock screen start 8 hours before.")
-        case .unavailable, .failed: note = L10n.t("Live tracking is active in the app. Lock screen updates may be unavailable.")
-        }
+        note = await TripSession.start(trip, in: trips,
+                                       hasTicket: !passes.passes(forTrip: trip.id, at: trip.startTime).isEmpty)
     }
 
     private func stopTrip(_ trip: SavedTrip) async {
-        trips.stop(trip.id)
-        LeaveReminder.cancel(trip.id)
-        await LiveTripActivity.end(trip.id)
+        await TripSession.stop(trip, in: trips)
         reminderOn = false
         note = L10n.t("Trip ended")
     }

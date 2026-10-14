@@ -3,9 +3,11 @@ import SwiftUI
 /// A bar above the tab bar while a saved trip is on: what to do next ("Leave in 6 min",
 /// "Get off at …"), the line, delay and how far along the trip is. Tap for the trip with live status.
 /// Shown 30 min before leaving until 5 min after arrival, or for the trip started by hand.
+/// ▶ starts the trip; a started trip shows as a dark live bar with a ring and a countdown.
 struct LiveTripBar: View {
     @Environment(TripStore.self) private var trips
     @Environment(AppState.self) private var app
+    @Environment(PassStore.self) private var passes
     @Environment(\.scenePhase) private var scenePhase
     /// Hidden by hand for this trip only; the next trip shows again.
     @AppStorage("liveBarHiddenTrip") private var hiddenId = ""
@@ -21,7 +23,9 @@ struct LiveTripBar: View {
 
     private func bar(_ trip: SavedTrip, now: Date) -> some View {
         let it = trip.itinerary
-        let status = TripStatus.at(now, it)
+        let started = trips.activeTrip?.id == trip.id
+        // Started: the countdown stands on its own, so the headline says "Leave at 14:05".
+        let status = TripStatus.at(now, it, countdown: !started)
         let leg = it.transitLegs.first { $0.endTime > now }
         let total = max(it.endTime.timeIntervalSince(it.startTime), 60)
         let progress = min(max(now.timeIntervalSince(it.startTime) / total, 0), 1)
@@ -29,41 +33,134 @@ struct LiveTripBar: View {
         let color: Color = status.phase == .cancelled ? .danger : status.delayMinutes > 0 ? .delay : .ink
         return HStack(spacing: 10) {
             Button { app.deepLink = .trip(trip.id) } label: {
-                HStack(spacing: 10) {
-                    if let leg { LineBadge(leg) } else {
-                        Image(systemName: status.phase == .arrived ? "flag.checkered" : "figure.walk")
-                            .font(.body.weight(.semibold)).frame(width: 28)
-                    }
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack(spacing: 6) {
-                            Text(verbatim: status.headline).font(.subheadline.weight(.semibold)).lineLimit(1)
-                            if status.delayMinutes > 0 {
-                                Text(verbatim: "+\(status.delayMinutes)").font(.caption.weight(.bold).monospacedDigit())
-                                    .foregroundStyle(Color.delay)
-                            }
+                if started {
+                    liveContent(trip, status: status, leg: leg, progress: progress, now: now)
+                } else {
+                    HStack(spacing: 10) {
+                        if let leg { LineBadge(leg) } else {
+                            Image(systemName: status.phase == .arrived ? "flag.checkered" : "figure.walk")
+                                .font(.body.weight(.semibold)).frame(width: 28)
                         }
-                        Text(verbatim: status.detail.isEmpty ? trip.title : status.detail)
-                            .font(.caption).foregroundStyle(.secondary).lineLimit(1)
-                        InkProgress(value: progress, tint: color).padding(.top, 2)
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack(spacing: 6) {
+                                Text(verbatim: status.headline).font(.subheadline.weight(.semibold)).lineLimit(1)
+                                if status.delayMinutes > 0 {
+                                    Text(verbatim: "+\(status.delayMinutes)").font(.caption.weight(.bold).monospacedDigit())
+                                        .foregroundStyle(Color.delay)
+                                }
+                            }
+                            Text(verbatim: status.detail.isEmpty ? trip.title : status.detail)
+                                .font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                            InkProgress(value: progress, tint: color).padding(.top, 2)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
                 }
-                .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .accessibilityElement(children: .combine)
             .accessibilityIdentifier("liveTripBar")
-            Button { hiddenId = trip.id } label: {
-                Image(systemName: "xmark").font(.caption.weight(.bold)).foregroundStyle(.secondary)
-                    .frame(width: 32, height: 32).contentShape(Rectangle())
+            if !started {
+                if status.phase != .arrived && status.phase != .cancelled {
+                    // Like starting a workout: one tap and the trip screen guides you.
+                    Button { Task { await start(trip) } } label: {
+                        Image(systemName: "play.fill").font(.subheadline.weight(.bold)).foregroundStyle(Color.black)
+                            .frame(width: 36, height: 36)
+                            .background(Color.signature, in: Circle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(Text("Start trip"))
+                    .accessibilityIdentifier("liveTripBarStart")
+                }
+                Button { hiddenId = trip.id } label: {
+                    Image(systemName: "xmark").font(.caption.weight(.bold)).foregroundStyle(.secondary)
+                        .frame(width: 28, height: 32).contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(Text("Hide"))
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel(Text("Hide"))
         }
-        .padding(.horizontal, 12).padding(.vertical, 8)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).strokeBorder(alert ? color.opacity(0.35) : Color.primary.opacity(0.08)))
+        .padding(.horizontal, 12).padding(.vertical, started ? 10 : 8)
+        .background {
+            if started {
+                RoundedRectangle(cornerRadius: 24, style: .continuous).fill(Color.ink)
+                    .shadow(color: .black.opacity(0.18), radius: 10, y: 3)
+            } else {
+                RoundedRectangle(cornerRadius: 22, style: .continuous).fill(.regularMaterial)
+            }
+        }
+        .overlay(RoundedRectangle(cornerRadius: started ? 24 : 22, style: .continuous)
+            .strokeBorder(started ? Color.clear : alert ? color.opacity(0.35) : Color.primary.opacity(0.08)))
         .padding(.horizontal, 10).padding(.bottom, 6)
+    }
+
+    /// A started trip, like a running workout: a ring for the trip so far, what to do now,
+    /// and a big countdown to the next moment (leave, departure, get off).
+    private func liveContent(_ trip: SavedTrip, status: TripStatus, leg: Leg?, progress: Double, now: Date) -> some View {
+        let mins = Int(ceil(status.nextEvent.timeIntervalSince(now) / 60))
+        let showCountdown = status.phase != .arrived && status.phase != .cancelled && mins >= 0
+        let symbol: String = switch status.phase {
+        case .beforeLeaving: "figure.walk.departure"
+        case .walking: "figure.walk"
+        case .transfer: leg.map { ModeStyle.symbol($0.mode) } ?? "arrow.triangle.swap"
+        case .riding: leg.map { ModeStyle.symbol($0.mode) } ?? "tram.fill"
+        case .arrived: "flag.checkered"
+        case .cancelled: "exclamationmark.triangle.fill"
+        }
+        return HStack(spacing: 12) {
+            ZStack {
+                Circle().stroke(Color.onInk.opacity(0.18), lineWidth: 4)
+                Circle().trim(from: 0, to: max(progress, 0.02))
+                    .stroke(Color.signature, style: StrokeStyle(lineWidth: 4, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                Image(systemName: symbol).font(.system(size: 16, weight: .bold)).foregroundStyle(Color.onInk)
+            }
+            .frame(width: 42, height: 42)
+            .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(spacing: 5) {
+                    Circle().fill(status.phase == .cancelled ? Color.danger : Color.live).frame(width: 6, height: 6)
+                    Text("Live trip").font(.caption2.weight(.bold)).textCase(.uppercase)
+                        .foregroundStyle(Color.onInk.opacity(0.7))
+                    if let leg, status.phase == .riding || status.phase == .transfer {
+                        LineBadge(leg, compact: true)
+                    }
+                }
+                HStack(spacing: 6) {
+                    Text(verbatim: status.headline).font(.subheadline.weight(.bold)).lineLimit(1)
+                    if status.delayMinutes > 0 {
+                        Text(verbatim: "+\(status.delayMinutes)").font(.caption.weight(.bold).monospacedDigit())
+                            .foregroundStyle(Color.delay)
+                    }
+                }
+                .foregroundStyle(Color.onInk)
+                Text(verbatim: status.detail.isEmpty ? trip.title : status.detail)
+                    .font(.caption).foregroundStyle(Color.onInk.opacity(0.7)).lineLimit(1)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            if showCountdown {
+                VStack(spacing: 0) {
+                    if mins < 60 {
+                        Text(verbatim: "\(mins)").font(.title2.weight(.bold).monospacedDigit())
+                        Text("min").font(.caption2.weight(.semibold)).foregroundStyle(Color.onInk.opacity(0.7))
+                    } else {
+                        Text(Fmt.time(status.nextEvent, tz: trip.itinerary.legs.first?.from.tz))
+                            .font(.headline.weight(.bold).monospacedDigit())
+                    }
+                }
+                .foregroundStyle(Color.onInk)
+                .fixedSize()
+            }
+            Image(systemName: "chevron.up").font(.caption.weight(.bold)).foregroundStyle(Color.onInk.opacity(0.5))
+                .accessibilityHidden(true)
+        }
+        .contentShape(Rectangle())
+    }
+
+    private func start(_ trip: SavedTrip) async {
+        app.deepLink = .trip(trip.id)
+        await TripSession.start(trip, in: trips, hasTicket: !passes.passes(forTrip: trip.id, at: trip.startTime).isEmpty)
     }
 
     /// Live times every 90 s while the app is open and the trip is not over.

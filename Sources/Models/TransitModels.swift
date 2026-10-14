@@ -134,12 +134,27 @@ struct Leg: Codable, Sendable, RouteStyled {
     var rental: LegRental? = nil
     var fareTransferIndex: Int? = nil
     var effectiveFareLegIndex: Int? = nil
+    /// Walking (and cycling) directions: streets, stairs and levels, each with its piece of the path.
+    var steps: [StepInstruction]? = nil
 
     var directionName: String? { TransitLabels.clean(headsign) }
     var isTransit: Bool { ModeStyle.isTransit(mode) }
     var delayMinutes: Int { Int((startTime.timeIntervalSince(scheduledStartTime) / 60).rounded()) }
     /// Boarding stop, every stop in between, and the alighting stop.
     var allStops: [Place] { [from] + (intermediateStops ?? []) + [to] }
+}
+
+/// One piece of a walk as the router describes it. Turns are mostly "CONTINUE": `WalkGuide`
+/// derives left/right from the geometry.
+struct StepInstruction: Codable, Sendable {
+    let relativeDirection: String?
+    let distance: Double
+    var fromLevel: Double? = nil
+    var toLevel: Double? = nil
+    var polyline: EncodedPolyline? = nil
+    var streetName: String? = nil
+    var exit: String? = nil
+    var area: Bool? = nil
 }
 
 struct Itinerary: Codable, Identifiable, Sendable {
