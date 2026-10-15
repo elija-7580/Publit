@@ -10,25 +10,26 @@ struct PassRoute: Hashable {
 struct PassWalletView: View {
     @Environment(PassStore.self) private var store
     @State private var importing = false
-    @State private var showSettings = false
     var now: Date = .now
 
     var body: some View {
-        VStack(spacing: 0) {
-            InkPageHeader("Tickets", identifier: "heading-tickets") {
-                Button { importing = true } label: { Label("Add ticket", systemImage: "plus").frame(width: 44, height: 44) }
-                    .accessibilityIdentifier("addPass")
-                Button { showSettings = true } label: { Label("Settings", systemImage: "gearshape").frame(width: 44, height: 44) }
+        Group {
+            if store.passes.isEmpty {
+                empty
+            } else {
+                list
             }
-            .padding(.horizontal, 16)
-            if store.passes.isEmpty { empty } else { list }
         }
-        .liveBarPadding().background(Color.ground)
-        .navigationTitle("").toolbar(.hidden, for: .navigationBar)
+        .liveBarPadding()
+        .background(Color.ground)
+        .navigationTitle(L10n.t("Tickets"))
         .screenTrail("Tickets")
         .navigationDestination(for: PassRoute.self) { PassDetailView(passId: $0.id) }
-        .sheet(isPresented: $showSettings) {
-            SettingsView().environment(\.liveBarInset, 0)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button { importing = true } label: { Label(L10n.t("Add ticket"), systemImage: "plus") }
+                    .accessibilityIdentifier("addPass")
+            }
         }
         .sheet(isPresented: $importing) { PassImportView() }
     }
@@ -42,39 +43,10 @@ struct PassWalletView: View {
                     Text("No current tickets").font(.subheadline).foregroundStyle(.secondary).padding(.top, 8)
                 }
                 ForEach(groups, id: \.group) { section in
-                    InkSectionLabel(title: section.group.title)
-                    ForEach(section.passes.filter { $0.category.isPass }) { pass in
-                        NavigationLink(value: PassRoute(id: pass.id)) {
-                            WalletPassTile(pass: pass, now: now, source: source(pass))
-                        }
-                        .buttonStyle(.plain).accessibilityElement(children: .ignore)
-                        .accessibilityLabel(pass.accessibilitySummary).accessibilityIdentifier("passCard")
-                        .contextMenu { PassArchiveButton(pass: pass, now: now) }
-                        .accessibilityActions { PassArchiveButton(pass: pass, now: now) }
-                    }
-                    let singles = section.passes.filter { !$0.category.isPass }
-                    if !singles.isEmpty {
-                        VStack(spacing: 0) {
-                            ForEach(Array(singles.enumerated()), id: \.element.id) { index, pass in
-                                if index > 0 { Divider().padding(.leading, 16) }
-                                NavigationLink(value: PassRoute(id: pass.id)) {
-                                    WalletTicketRow(pass: pass, logo: PassLogoCache.image(pass, store: store))
-                                }
-                                .buttonStyle(.plain).accessibilityElement(children: .ignore)
-                                .accessibilityLabel(pass.accessibilitySummary).accessibilityIdentifier("passCard")
-                                .contextMenu { PassArchiveButton(pass: pass, now: now) }
-                                .accessibilityActions { PassArchiveButton(pass: pass, now: now) }
-                            }
-                        }
-                        .background(Color.surface, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-                    }
+                    Text(verbatim: section.group.title).font(.headline).padding(.top, 8)
+                        .accessibilityAddTraits(.isHeader)
+                    PassCards(passes: section.passes, now: now)
                 }
-                Button { importing = true } label: {
-                    Label("Add ticket", systemImage: "plus").font(.subheadline.weight(.semibold))
-                        .frame(maxWidth: .infinity, minHeight: 44)
-                        .background(Color.inkFill, in: RoundedRectangle(cornerRadius: 14))
-                }
-                .buttonStyle(.plain)
                 if archived > 0 {
                     NavigationLink {
                         PassArchiveView(now: now)
@@ -87,7 +59,7 @@ struct PassWalletView: View {
                                 .accessibilityHidden(true)
                         }
                         .padding(14)
-                        .background(Color.surface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
@@ -97,11 +69,6 @@ struct PassWalletView: View {
             }
             .padding()
         }
-    }
-
-    private func source(_ pass: TicketPass) -> BarcodeSource? {
-        guard let document = pass.document, let url = store.documentURL(pass) else { return nil }
-        return .file(url, document.kind, page: document.page)
     }
 
     private var empty: some View {

@@ -7,6 +7,7 @@ struct SavedTripView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var isVisible = false
     @State private var errorMessage: String?
+    @Environment(\.liveBarInset) private var liveInset
 
     var body: some View {
         if let trip = trips.trip(tripId) {
@@ -21,7 +22,14 @@ struct SavedTripView: View {
                     .screenTrail("Saved trip")
                 }
             }
-            .tripRefreshWarning(errorMessage)
+            .environment(\.liveBarInset, errorMessage == nil ? liveInset : 0)
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                if let errorMessage {
+                    Text(errorMessage).font(.caption).padding(8)
+                        .matteSurface(in: RoundedRectangle(cornerRadius: 12))
+                        .padding(.horizontal, 12).padding(.bottom, 8 + liveInset)
+                }
+            }
             .onAppear { isVisible = true }
             .onDisappear { isVisible = false }
             .task(id: "\(tripId)|\(scenePhase)|\(isVisible)") {
@@ -90,26 +98,4 @@ struct SavedTripRow: View {
         }
         .accessibilityElement(children: .combine)
     }
-}
-
-/// The same measured-inset behavior in production and warning-state screenshot tests.
-private struct TripRefreshWarning: ViewModifier {
-    let message: String?
-    @Environment(\.liveBarInset) private var dockHeight
-    func body(content: Content) -> some View {
-        content
-            .environment(\.liveBarInset, message == nil ? dockHeight : 0)
-            .safeAreaInset(edge: .bottom, spacing: 0) {
-                if let message {
-                    Text(verbatim: message).font(.caption).padding(8)
-                        .matteSurface(in: RoundedRectangle(cornerRadius: 12))
-                        .accessibilityIdentifier("tripRefreshWarning")
-                        .padding(.horizontal, 16).padding(.bottom, 8 + dockHeight)
-                }
-            }
-    }
-}
-
-extension View {
-    func tripRefreshWarning(_ message: String?) -> some View { modifier(TripRefreshWarning(message: message)) }
 }

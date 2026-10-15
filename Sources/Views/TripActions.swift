@@ -29,9 +29,8 @@ struct TripActionsSection: View {
             VStack(spacing: 16) {
             if let saved, trips.activeTripId == saved.id {
                 Button { Task { await stopTrip(saved) } } label: {
-                    Text("End trip").frame(maxWidth: .infinity)
+                    Label("End trip", systemImage: "stop.circle")
                 }
-                .buttonStyle(.ink)
                 .accessibilityIdentifier("endTrip")
             } else {
                 Button { Task { await startTrip() } } label: {
@@ -44,6 +43,7 @@ struct TripActionsSection: View {
                 .disabled(itinerary.isCancelled || itinerary.endTime < .now)
                 .accessibilityIdentifier("startTrip")
             }
+            Divider().frame(maxWidth: .infinity)
             // Not a LazyVGrid: a lazy grid inside a self-sizing list row is measured again on every pass.
             EqualColumns(columns: typeSize.isAccessibilitySize ? 1 : 2, spacing: 12) {
                 secondaryButtons
@@ -56,8 +56,6 @@ struct TripActionsSection: View {
             }
             .padding(.vertical, 4)
             .listRowSeparator(.hidden)
-            .listRowInsets(EdgeInsets())
-            .listRowBackground(Color.clear)
             .sheet(item: $calendarTrip) { trip in CalendarEventSheet(trip: trip).ignoresSafeArea() }
             // Here and not on TicketSection: on a Section it is copied onto every ticket row.
             .sheet(isPresented: $addingTicket) { AddTicketView(tripId: saved?.id) }
@@ -332,9 +330,12 @@ struct TileLabelStyle: LabelStyle {
 /// Fixed padding and unlimited wrapping, independent of iOS's automatic capsule button shapes.
 struct ActionLabelStyle: LabelStyle {
     func makeBody(configuration: Configuration) -> some View {
-        configuration.title.font(.subheadline.weight(.semibold))
-            .multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
-            .frame(maxWidth: .infinity, minHeight: 22, alignment: .center)
+        VStack(spacing: 8) {
+            configuration.icon.font(.title3.weight(.semibold))
+            configuration.title.font(.subheadline.weight(.semibold))
+                .multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, minHeight: 64, alignment: .center)
     }
 }
 
@@ -342,7 +343,7 @@ struct ActionButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label.padding(12).frame(maxWidth: .infinity)
             .foregroundStyle(Color.ink)
-            .background(configuration.isPressed ? Color.ink.opacity(0.2) : Color.inkFill, in: RoundedRectangle(cornerRadius: 14))
+            .background(Color.ink.opacity(configuration.isPressed ? 0.2 : 0.1), in: RoundedRectangle(cornerRadius: 14))
             .contentShape(RoundedRectangle(cornerRadius: 14))
     }
 }

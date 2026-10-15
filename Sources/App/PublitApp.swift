@@ -133,7 +133,6 @@ struct RootView: View {
                         ToolbarItem(placement: .confirmationAction) { Button("Done") { app.deepLink = nil } }
                     }
             }
-            .publitDock(showLiveBar: false)
         }
         .sheet(item: ticketLink) { link in
             NavigationStack {

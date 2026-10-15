@@ -66,18 +66,6 @@ final class PlanModel {
     @ObservationIgnored private var streetKey: String?
     @ObservationIgnored var history: SearchHistoryStore = .shared
 
-    #if DEBUG
-    /// Reproducible screenshots of PlanView itself, not a second mock layout.
-    func installScreenshotRoutes(_ routes: [Itinerary], from: Endpoint, to: Endpoint) {
-        self.from = from
-        self.to = to
-        timeMode = .now
-        searchStarted = true
-        itineraries = routes
-        options = RouteOptions()
-    }
-    #endif
-
     /// The routes in the order chosen in the options (fastest, fewest changes, …).
     var sortedItineraries: [Itinerary] { options.sort.apply(itineraries) }
 
@@ -277,8 +265,12 @@ enum AppTab: Hashable { case nearby, plan, tickets, favorites }
 @Observable
 final class AppState {
     var tab: AppTab = .nearby
-    /// Plan starts with "now"; the explicit chips also support future departures and arrivals.
-    let plan = PlanModel()
+    /// Plan tab: trips for later (tonight, next week).
+    let plan: PlanModel = {
+        let m = PlanModel()
+        m.timeMode = .departAt
+        return m
+    }()
     /// Nearby tab: "from here, now".
     let goNow = PlanModel()
     /// Set by publit:// links (calendar events, Live Activity buttons).

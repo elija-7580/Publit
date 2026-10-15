@@ -81,7 +81,6 @@ extension View {
         scrollContentBackground(.hidden)
             .background(Color.ground)
             .listSectionSpacing(12)
-            .toolbar(.visible, for: .navigationBar)
             .liveBarPadding()
     }
 

@@ -56,11 +56,7 @@ struct PresentationSampleView: View {
     }
 
     var body: some View {
-        if kind.hasPrefix("reference-") {
-            ReferenceSampleView(kind: kind)
-                .preferredColorScheme(dark ? .dark : .light)
-                .dynamicTypeSize(large ? .accessibility2 : .large)
-        } else if kind.hasPrefix("pass") {
+        if kind.hasPrefix("pass") {
             PassSampleView(kind: kind)
                 .preferredColorScheme(dark ? .dark : .light)
                 .dynamicTypeSize(large ? .accessibility2 : .large)
@@ -130,50 +126,6 @@ struct PresentationSampleView: View {
             }
             .presentationDetents([.large])
         }
-    }
-}
-
-/// No parallel HTML/mock implementation: screenshots run the production SwiftUI views.
-private struct ReferenceSampleView: View {
-    let kind: String
-    @State private var app: AppState
-    @State private var trips: TripStore
-    @State private var passes: PassStore
-    private let trip: SavedTrip
-
-    init(kind: String) {
-        self.kind = kind
-        let app = AppState()
-        app.tab = kind == "reference-plan" ? .plan : kind == "reference-tickets" ? .tickets : .nearby
-        let it = PresentationSamples.itinerary
-        let from = SavedPlace(id: "sample-from", name: "Marienplatz", subtitle: nil, lat: 48.137, lon: 11.575, stopId: "sample-Marienplatz")
-        let to = SavedPlace(id: "sample-to", name: "Nordfriedhof", subtitle: nil, lat: 48.17, lon: 11.58, stopId: "sample-Nordfriedhof")
-        app.plan.installScreenshotRoutes([it], from: .currentLocation, to: .place(to))
-        let directory = FileManager.default.temporaryDirectory.appendingPathComponent("publit-reference-\(UUID().uuidString)")
-        let store = TripStore(directory: directory)
-        let saved = store.save(it, from: from.name, to: to.name)
-        store.start(saved.id)
-        trip = saved
-        _app = State(initialValue: app)
-        _trips = State(initialValue: store)
-        _passes = State(initialValue: PassSamples.store())
-    }
-
-    var body: some View {
-        NavigationStack {
-            Group {
-                switch kind {
-                case "reference-nearby":
-                    NearbyView(fixtureGroups: StopGrouping.group(Array(PresentationSamples.departures.prefix(3)), around: LatLon(lat: 48.1371, lon: 11.5751)))
-                case "reference-plan": PlanView()
-                case "reference-trip", "reference-trip-warning":
-                    LiveTripView(trip: trip).tripRefreshWarning(kind == "reference-trip-warning" ? L10n.t("Live status unavailable. Showing saved times.") : nil)
-                default: PassWalletView()
-                }
-            }
-        }
-        .publitDock(showLiveBar: kind != "reference-trip")
-        .environment(app).environment(trips).environment(passes)
     }
 }
 #endif
