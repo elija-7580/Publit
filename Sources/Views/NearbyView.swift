@@ -10,6 +10,7 @@ struct NearbyView: View {
     @Environment(\.liveBarInset) private var liveBarInset
     @State private var isVisible = false
     @State private var searching = false
+    @State private var openedStop: StopTarget?
     @State private var showMap = false
     @State private var groups: [StopGroup] = []
     @State private var isLoading = false
@@ -91,8 +92,34 @@ struct NearbyView: View {
             ForEach(groups) { group in
                 Section {
                     // Ink & Dot: the station heads its own card instead of a grey header above it.
-                    StopGroupHeader(group: group, nearest: group.id == groups.first?.id)
-                        .listRowSeparator(.hidden, edges: .bottom)
+                    // Tap the station for its page; the arrow plans a route there from here, now.
+                    HStack(spacing: 12) {
+                        Button { openedStop = StopTarget(group) } label: {
+                            StopGroupHeader(group: group, nearest: group.id == groups.first?.id)
+                                .contentShape(Rectangle())
+                        }
+                        .accessibilityIdentifier("nearbyStation")
+                        Button { go(.place(StopTarget(group).place)) } label: {
+                            Image(systemName: "arrow.triangle.turn.up.right.diamond.fill")
+                                .font(.body.weight(.semibold))
+                                .foregroundStyle(Color.ink)
+                                .frame(width: 40, height: 40)
+                                .raisedKey(radius: 20)
+                        }
+                        .accessibilityLabel(Text("Route here"))
+                        .accessibilityIdentifier("nearbyRouteHere")
+                    }
+                    .buttonStyle(.borderless)
+                    .tint(.primary)
+                    .contextMenu {
+                        Button { go(.place(StopTarget(group).place)) } label: {
+                            Label("Route here", systemImage: "arrow.triangle.turn.up.right.diamond")
+                        }
+                        Button { openedStop = StopTarget(group) } label: {
+                            Label("All departures", systemImage: "list.bullet")
+                        }
+                    }
+                    .listRowSeparator(.hidden, edges: .bottom)
                     ForEach(group.departures.prefix(5)) { st in
                         // By value: the trip stays open when the board refreshes and this row
                         // changes or leaves (the departure has gone).
@@ -125,6 +152,9 @@ struct NearbyView: View {
             PlaceSearchView(title: "Where to?", allowCurrentLocation: false) { endpoint in go(endpoint) }
         }
         .navigationDestination(isPresented: Bindable(app).showGoNow) { GoNowView() }
+        .navigationDestination(item: $openedStop) { s in
+            StopDeparturesView(stopId: s.id, name: s.name, coordinate: s.coordinate, exact: s.exact)
+        }
         .navigationDestination(for: TripTarget.self) { t in
             TripView(stopTime: t.stopTime, stationId: t.stationId, stationName: t.stationName, stationCoordinate: t.coordinate)
         }
@@ -184,8 +214,14 @@ struct NearbyView: View {
     private var goSection: some View {
         Section {
             Button { searching = true } label: {
-                Label("Where to now?", systemImage: "magnifyingglass").foregroundStyle(.secondary)
+                Label("Where to now?", systemImage: "magnifyingglass")
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 12)
+                    .frame(maxWidth: .infinity, minHeight: 46, alignment: .leading)
+                    .bevelField()
+                    .contentShape(Rectangle())
             }
+            .buttonStyle(.plain)
             .accessibilityLabel("Where to now? Route from your location")
             .accessibilityIdentifier("whereToNow")
             ForEach(favorites.pinned) { p in
@@ -295,6 +331,29 @@ struct NearbyView: View {
 }
 
 /// Station name and distance; a street stop also says where its buses go, to tell it from the one across the road.
+/// A station from the board, to open its page or route there.
+struct StopTarget: Hashable, Identifiable {
+    let id: String
+    let name: String
+    let lat: Double
+    let lon: Double
+    let exact: Bool
+
+    init(_ group: StopGroup) {
+        id = group.id; name = group.name
+        lat = group.coordinate.lat; lon = group.coordinate.lon
+        exact = group.isPole
+    }
+
+    var coordinate: LatLon { LatLon(lat: lat, lon: lon) }
+
+    var place: SavedPlace {
+        var p = SavedPlace(id: id, name: name, subtitle: nil, lat: lat, lon: lon, stopId: id)
+        if exact { p.exact = true }
+        return p
+    }
+}
+
 struct StopGroupHeader: View {
     let group: StopGroup
     /// The closest stop gets the logo's dot by its distance: "you are this close".

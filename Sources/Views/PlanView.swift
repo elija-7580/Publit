@@ -21,19 +21,19 @@ struct PlanView: View {
         List {
             Section {
                 // From and To with the swap button between them on the right.
-                HStack(spacing: 8) {
-                    VStack(spacing: 0) {
+                HStack(spacing: 10) {
+                    VStack(spacing: 8) {
                         endpointButton(label: "From", endpoint: plan.from, target: .from)
                             .accessibilityIdentifier("endpoint-from")
-                        Divider()
                         endpointButton(label: "To", endpoint: plan.to, target: .to)
                             .accessibilityIdentifier("endpoint-to")
                     }
                     Button { app.plan.swap() } label: {
                         Image(systemName: "arrow.up.arrow.down")
                             .font(.body.weight(.semibold))
-                            .frame(width: 40, height: 40)
-                            .background(Color.inkFill, in: Circle())
+                            .foregroundStyle(Color.ink)
+                            .frame(width: 42, height: 42)
+                            .raisedKey(radius: 21)
                     }
                     .disabled(plan.to == nil)
                     .accessibilityLabel(Text("Swap"))
@@ -41,11 +41,9 @@ struct PlanView: View {
                 }
                 .buttonStyle(.borderless)
                 // Plan is for later (tonight, next week). "From here, now" lives in Nearby.
-                Picker("When", selection: $plan.timeMode) {
-                    Text("Depart").tag(TimeMode.departAt)
-                    Text("Arrive").tag(TimeMode.arriveBy)
-                }
-                .pickerStyle(.segmented)
+                BevelSegmented(selection: $plan.timeMode,
+                               options: [(TimeMode.departAt, L10n.t("Depart")), (TimeMode.arriveBy, L10n.t("Arrive"))])
+                    .accessibilityLabel(Text("When"))
                 DatePicker(plan.timeMode == .arriveBy ? L10n.t("Arrive by") : L10n.t("Depart at"), selection: $plan.date)
                 RouteOptionsButton(compact: true)
             }
@@ -136,7 +134,9 @@ struct PlanView: View {
                 }
                 Spacer()
             }
-            .frame(minHeight: 44)
+            .padding(.horizontal, 12)
+            .frame(minHeight: 46)
+            .bevelField()
             .contentShape(Rectangle())
         }
         .accessibilityElement(children: .combine)

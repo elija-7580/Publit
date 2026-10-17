@@ -215,3 +215,76 @@ struct ChipButtonStyle: ButtonStyle {
 extension ButtonStyle where Self == ChipButtonStyle {
     static var chip: ChipButtonStyle { ChipButtonStyle() }
 }
+
+/// Publit's own input look: a field pressed into the card (inner shadow at the top, a light edge
+/// at the bottom), instead of the flat system grey.
+struct BevelField: ViewModifier {
+    @Environment(\.colorScheme) private var scheme
+    var radius: CGFloat = 12
+
+    func body(content: Content) -> some View {
+        let shape = RoundedRectangle(cornerRadius: radius, style: .continuous)
+        let dark = scheme == .dark
+        content
+            .background(
+                shape.fill(Color.inkFill.shadow(.inner(color: .black.opacity(dark ? 0.55 : 0.16), radius: 2.5, x: 0, y: 1.5)))
+            )
+            .overlay(
+                shape.strokeBorder(LinearGradient(colors: [Color.black.opacity(dark ? 0.5 : 0.10),
+                                                           Color.white.opacity(dark ? 0.07 : 0.9)],
+                                                  startPoint: .top, endPoint: .bottom), lineWidth: 1)
+            )
+    }
+}
+
+/// The raised counterpart: a key standing on the card (light top edge, soft drop shadow).
+struct RaisedKey: ViewModifier {
+    @Environment(\.colorScheme) private var scheme
+    var radius: CGFloat = 12
+
+    func body(content: Content) -> some View {
+        let shape = RoundedRectangle(cornerRadius: radius, style: .continuous)
+        let dark = scheme == .dark
+        content
+            .background(shape.fill(Color.surface).shadow(color: .black.opacity(dark ? 0.6 : 0.14), radius: 1.5, x: 0, y: 1.5))
+            .overlay(
+                shape.strokeBorder(LinearGradient(colors: [Color.white.opacity(dark ? 0.14 : 1), Color.black.opacity(dark ? 0.3 : 0.08)],
+                                                  startPoint: .top, endPoint: .bottom), lineWidth: 1)
+            )
+    }
+}
+
+extension View {
+    func bevelField(radius: CGFloat = 12) -> some View { modifier(BevelField(radius: radius)) }
+    func raisedKey(radius: CGFloat = 12) -> some View { modifier(RaisedKey(radius: radius)) }
+}
+
+/// Two or three choices in a bevelled track; the chosen one is a raised key (replaces the system segmented control).
+struct BevelSegmented<Value: Hashable>: View {
+    @Binding var selection: Value
+    let options: [(Value, String)]
+
+    var body: some View {
+        HStack(spacing: 4) {
+            ForEach(options.indices, id: \.self) { i in
+                let value = options[i].0
+                let title = options[i].1
+                let selected = value == selection
+                Button {
+                    withAnimation(.snappy(duration: 0.2)) { selection = value }
+                } label: {
+                    Text(verbatim: title)
+                        .font(.subheadline.weight(selected ? .bold : .medium))
+                        .foregroundStyle(selected ? Color.ink : Color.secondary)
+                        .frame(maxWidth: .infinity, minHeight: 32)
+                        .background { if selected { Color.clear.raisedKey(radius: 9) } }
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(selected ? .isSelected : [])
+            }
+        }
+        .padding(3)
+        .bevelField(radius: 12)
+    }
+}
