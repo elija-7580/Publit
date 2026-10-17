@@ -18,8 +18,7 @@ struct CompareMapView: View {
                 ForEach(Array(it.legs.enumerated()), id: \.offset) { _, leg in
                     MapPolyline(coordinates: leg.legGeometry.clCoordinates)
                         .stroke(isSelected ? leg.lineStroke : Color.gray.opacity(0.45),
-                                style: StrokeStyle(lineWidth: isSelected ? 5 : 3, lineCap: leg.isTransit ? .round : .butt, lineJoin: .round,
-                                                   dash: leg.isTransit ? [] : [6, 4]))
+                                style: .leg(leg.isTransit, width: isSelected ? 5 : 3))
                 }
             }
         }
@@ -217,6 +216,15 @@ struct FlowRow: Layout {
     }
 }
 
+extension StrokeStyle {
+    /// Route lines on maps: rides solid, walks as a row of dots like in Apple Maps (thick dashes
+    /// next to each other looked like a rope ladder).
+    static func leg(_ isTransit: Bool, width: CGFloat) -> StrokeStyle {
+        isTransit ? StrokeStyle(lineWidth: width, lineCap: .round, lineJoin: .round)
+            : StrokeStyle(lineWidth: width, lineCap: .round, lineJoin: .round, dash: [0.1, width * 2])
+    }
+}
+
 /// The whole route on a map, with start and destination.
 struct RouteMap: View {
     let itinerary: Itinerary
@@ -227,8 +235,7 @@ struct RouteMap: View {
             ForEach(Array(itinerary.legs.enumerated()), id: \.offset) { _, leg in
                 MapPolyline(coordinates: leg.legGeometry.clCoordinates)
                     .stroke(leg.isTransit ? leg.lineStroke : Color.gray,
-                            style: StrokeStyle(lineWidth: leg.isTransit ? 5 : 4, lineCap: leg.isTransit ? .round : .butt, lineJoin: .round,
-                                               dash: leg.isTransit ? [] : [6, 4]))
+                            style: .leg(leg.isTransit, width: 5))
             }
             if let first = itinerary.legs.first {
                 Marker("Start", systemImage: "circle.fill", coordinate: first.from.coordinate.clCoordinate)
@@ -257,7 +264,7 @@ struct LegRow: View {
                     Spacer(minLength: 4)
                     DurationFigure(seconds: leg.duration, size: 22)
                 }
-                DirectionLabel(direction: leg.directionName)
+                DirectionLabel(direction: leg.shownDirection, circular: leg.isCircular)
                 if leg.isReplacementBus { Label("Rail replacement bus", systemImage: "bus.fill").font(.subheadline.weight(.semibold)).foregroundStyle(Color.delay) }
                 stopLine(label: "Board here", time: leg.startTime, delay: leg.delayMinutes,
                          name: leg.from.name, track: leg.from.track, tz: leg.from.tz)

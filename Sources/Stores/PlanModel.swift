@@ -54,6 +54,8 @@ final class PlanModel {
     private(set) var isLoading = false
     private(set) var isLoadingMore = false
     private(set) var errorMessage: String?
+    /// Said above the routes when they were only found with a longer walk than usual (the stop is far).
+    private(set) var walkNote: String?
 
     private var nextCursor: String?
     @ObservationIgnored private var lastRequest: (from: LatLon, to: LatLon, time: Date?, arriveBy: Bool, maxWalk: Int)?
@@ -108,6 +110,7 @@ final class PlanModel {
         if !silent { isLoading = true }
         defer { if token == myToken { isLoading = false } }
         errorMessage = nil
+        if !silent { walkNote = nil }
         let time: Date? = timeMode == .now ? nil : date
         let arriveBy = timeMode == .arriveBy
         let options = options
@@ -116,16 +119,22 @@ final class PlanModel {
             var res = try await TransitousClient.shared.plan(from: f, to: t, time: time, arriveBy: arriveBy,
                                                              maxWalk: maxWalk, options: options)
             try Task.checkCancellation()
-            if res.itineraries.isEmpty, options.maxWalkMinutes == RouteOptions.defaultWalkMinutes {
-                // Nothing within 30 min walk of a stop: try once more with a longer walk.
-                // Not when the user chose a shorter walk: that limit is theirs.
-                maxWalk = TransitousClient.widerWalkLimit
-                res = try await TransitousClient.shared.plan(from: f, to: t, time: time, arriveBy: arriveBy,
-                                                             maxWalk: maxWalk, options: options)
+            // Nothing within 30 min walk of a stop: try again with a longer walk (45 min, then 2 h),
+            // so a stop beyond the usual limit shows up as a route with a long walk, not as "no connections".
+            // Not when the user chose a shorter walk: that limit is theirs.
+            if options.maxWalkMinutes == RouteOptions.defaultWalkMinutes {
+                while res.itineraries.isEmpty, let wider = Reach.nextWalkStep(after: maxWalk) {
+                    try Task.checkCancellation()
+                    guard token == myToken else { return }
+                    maxWalk = wider
+                    res = try await TransitousClient.shared.plan(from: f, to: t, time: time, arriveBy: arriveBy,
+                                                                 maxWalk: maxWalk, options: options)
+                }
             }
             try Task.checkCancellation()
             guard token == myToken else { return }
             itineraries = Self.merge(transit: res.itineraries, direct: res.direct)
+            walkNote = maxWalk > RouteOptions.defaultWalkMinutes * 60 ? Reach.longWalkNote(res.itineraries) : nil
             let key = queryKey
             if streetKey != key { streetRoutes = [] }
             comparisons = Self.comparisons(direct: res.direct + streetRoutes, listed: itineraries, enabled: options.compareStreetModes)
@@ -137,6 +146,7 @@ final class PlanModel {
             if !silent { history.record(from: searchedFrom, to: to, mode: searchedMode, date: searchedDate) }
             if itineraries.isEmpty {
                 errorMessage = options.isDefault ? L10n.t("No connections found.")
+                    : options.maxWalkMinutes < RouteOptions.defaultWalkMinutes ? Reach.ownLimitNote(minutes: options.maxWalkMinutes)
                     : L10n.t("No connections found with these filters.")
                 // Say so when the area has no timetable at all (Athens, Malta, Minsk …), not just no route.
                 if let gap = await Self.coverageGap(from: f, to: t), token == myToken, itineraries.isEmpty {
@@ -298,6 +308,18 @@ final class AppState {
         case .trip, .route: tab = .plan
         case .stop: tab = .nearby
         case .ticket, .tripTickets, .go: break
+        case .place(let name, let lat, let lon):
+            // Shared from Google Maps or another map app: routes there from here, leaving now.
+            deepLink = nil
+            if let lat, let lon {
+                goNow(to: SavedPlace(id: "shared|\(lat),\(lon)", name: name, subtitle: nil, lat: lat, lon: lon, stopId: nil))
+            } else {
+                Task {
+                    guard let m = try? await TransitousClient.shared.geocode(name, near: nil).first else { return }
+                    goNow(to: SavedPlace(match: m))
+                }
+            }
+            return
         }
         deepLink = link
     }

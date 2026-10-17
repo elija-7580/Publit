@@ -158,6 +158,14 @@ struct PlanView: View {
             } else if let msg = plan.errorMessage, its.isEmpty {
                 Text(msg).foregroundStyle(.secondary)
             }
+            if let note = plan.walkNote, !its.isEmpty {
+                // Found only with a longer walk: say so, the walk is part of the decision.
+                Label(note, systemImage: "figure.walk")
+                    .font(.footnote).foregroundStyle(Color.delay)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityElement(children: .combine)
+                    .accessibilityIdentifier("longWalkNote")
+            }
 
             // Sort/map controls as a real list row: Menu buttons in Section headers are often
             // non-hittable for UI tests and awkward for VoiceOver.

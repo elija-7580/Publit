@@ -82,8 +82,8 @@ final class TransitousClient: @unchecked Sendable {
     /// The server default of 15 min drops many real connections, e.g. to airports or
     /// stations at the edge of town; 30 min matches what people actually walk.
     static let walkLimits = (prePost: 1800, direct: 3600)
-    /// Second attempt when nothing was found (limited by the server config).
-    static let widerWalkLimit = 2700
+    /// Second attempt when nothing was found; further steps in `Reach.walkSteps`.
+    static var widerWalkLimit: Int { Reach.walkSteps[1] }
 
     func plan(from: LatLon, to: LatLon, time: Date?, arriveBy: Bool, pageCursor: String? = nil,
               maxWalk: Int = TransitousClient.walkLimits.prePost, options: RouteOptions = RouteOptions()) async throws -> PlanResponse {

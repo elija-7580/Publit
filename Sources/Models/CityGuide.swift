@@ -164,7 +164,7 @@ enum GuideCues {
         case .wait:
             let line = leg.lineName
             let text: String
-            switch (leg.directionName, TransitLabels.clean(leg.from.track)) {
+            switch (leg.shownDirection, TransitLabels.clean(leg.from.track)) {
             case let (d?, t?): text = L10n.f("Take %@ towards %@ from platform %@", line, d, t)
             case let (d?, nil): text = L10n.f("Take %@ towards %@", line, d)
             default: text = L10n.f("Take %@", line)

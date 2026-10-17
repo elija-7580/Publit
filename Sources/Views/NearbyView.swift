@@ -19,6 +19,8 @@ struct NearbyView: View {
     /// Last answer, to re-filter at once when a chip is tapped.
     @State private var lastStopTimes: [StopTime] = []
     @State private var lastCenter: LatLon?
+    /// Distance to the nearest departures when they are beyond `Reach.farDistance`: said above the board.
+    @State private var farDistance: Double?
 
     private var filter: ModeFilter { ModeFilter(storageValue: storedModes) }
     private var filterBinding: Binding<ModeFilter> {
@@ -65,9 +67,23 @@ struct NearbyView: View {
                         Button("Show all modes") { storedModes = "" }
                     }
                 } else {
-                    ContentUnavailableView("No departures nearby", systemImage: "tram",
-                                           description: Text("No public transport stops within 1.5 km."))
+                    ContentUnavailableView {
+                        Label("No departures nearby", systemImage: "tram")
+                    } description: {
+                        Text("No departures within 5 km. The station map shows stops further away.")
+                    } actions: {
+                        Button("Station map") { showMap = true }
+                    }
                 }
+            }
+            if !groups.isEmpty, let farDistance {
+                // Far is not empty: the stops are listed, with how long the walk is.
+                Label(Reach.farNote(meters: farDistance), systemImage: "figure.walk")
+                    .font(.subheadline)
+                    .foregroundStyle(Color.delay)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityElement(children: .combine)
+                    .accessibilityIdentifier("nearbyFarNote")
             }
             if !groups.isEmpty, errorMessage != nil, !Connectivity.shared.isOffline {
                 Label("Couldn't refresh. Times may be out of date.", systemImage: "exclamationmark.triangle")
@@ -90,7 +106,7 @@ struct NearbyView: View {
                     NavigationLink {
                         StopDeparturesView(stopId: group.id, name: group.name, coordinate: group.coordinate, exact: group.isPole)
                     } label: {
-                        Text("All departures").font(.subheadline.weight(.semibold))
+                        Text("All departures").font(.subheadline.weight(.medium))
                     }
                 }
                 .inkCard()
@@ -182,8 +198,9 @@ struct NearbyView: View {
             }
             if let next = trips.upcoming().first, next.startTime.timeIntervalSinceNow < 3 * 3600 {
                 NavigationLink { SavedTripView(tripId: next.id) } label: {
+                    // Same weight as the other rows of this card ("Where to now?", Home, Work).
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Next trip: \(next.toName)").font(.subheadline.weight(.semibold))
+                        Text("Next trip: \(next.toName)")
                         Text(TripStatus.at(.now, next.itinerary).headline).font(.caption).foregroundStyle(.secondary)
                     }
                 }
@@ -201,12 +218,20 @@ struct NearbyView: View {
         let filter = filter
         seenGroups = Set(ModeGroup.present(in: last.response.stopTimes.map(\.mode)))
         groups = StopGrouping.group(StopTime.upcoming(last.response.stopTimes).filter { filter.allows($0.mode) }, around: here)
+        farDistance = Self.far(groups)
         if !groups.isEmpty { app.firstBoardReady = true }
     }
 
     private func regroup(_ stopTimes: [StopTime], around here: LatLon) {
         let filter = filter
         groups = StopGrouping.group(StopTime.upcoming(stopTimes).filter { filter.allows($0.mode) }, around: here)
+        farDistance = Self.far(groups)
+    }
+
+    /// Distance of the nearest stop when even that one is far.
+    private static func far(_ groups: [StopGroup]) -> Double? {
+        guard let nearest = groups.compactMap(\.distance).min(), nearest >= Reach.farDistance else { return nil }
+        return nearest
     }
 
     private func load(force: Bool = false) async {
@@ -226,9 +251,14 @@ struct NearbyView: View {
         let filter = filter
         let modes = storedModes
         do {
-            var res = try await TransitousClient.shared.departures(near: here, radius: 500, count: 40, modes: filter.apiValue)
-            if res.stopTimes.isEmpty {
-                res = try await TransitousClient.shared.departures(near: here, radius: 1500, count: 40, modes: filter.apiValue)
+            // Wider and wider until something runs: 500 m, 1.5 km, 5 km. A stop 3 km away is
+            // listed with its walking time instead of an empty "no departures".
+            var res = StopTimesResponse(stopTimes: [], place: nil, nextPageCursor: nil)
+            var radius = 0
+            for r in Reach.nearbyRadii where res.stopTimes.isEmpty {
+                radius = r
+                res = try await TransitousClient.shared.departures(near: here, radius: r, count: 40, modes: filter.apiValue)
+                try Task.checkCancellation()
             }
             try Task.checkCancellation()
             guard loadGeneration == generation else { return }
@@ -245,8 +275,9 @@ struct NearbyView: View {
             }.value
             try Task.checkCancellation()
             guard loadGeneration == generation else { return }
-            HangLog.shared.note("nearby loaded: \(regrouped.count) stops, \(stopTimes.count) departures")
+            HangLog.shared.note("nearby loaded: \(regrouped.count) stops, \(stopTimes.count) departures, radius \(radius) m")
             groups = regrouped
+            farDistance = Self.far(regrouped)
             loadedCenter = here
             loadedModes = modes
             loadedAt = Date()
@@ -279,6 +310,12 @@ struct StopGroupHeader: View {
                     HStack(spacing: 5) {
                         if nearest { SignatureDot(size: 7) }
                         Text(Fmt.distance(meters: d)).font(.subheadline.weight(.medium).monospacedDigit())
+                        if d >= Reach.walkHintDistance {
+                            // Far stops say how long the walk is, not only how far.
+                            Label(L10n.f("%lld min", Reach.walkMinutes(meters: d)), systemImage: "figure.walk")
+                                .font(.subheadline.weight(.medium).monospacedDigit())
+                                .labelStyle(CompactLabelStyle())
+                        }
                     }
                     .foregroundStyle(.secondary)
                 }

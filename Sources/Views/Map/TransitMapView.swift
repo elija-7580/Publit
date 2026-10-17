@@ -33,6 +33,8 @@ enum MapSelection: Identifiable {
 struct MapFocus: Equatable {
     let version: Int
     let match: GeocodeMatch
+    /// False for a place picked on the map itself: it is already in view, the map only marks it.
+    var moves = true
 }
 
 /// Map content with a version number each: the map view only diffs what changed.
@@ -59,6 +61,9 @@ struct TransitMapView: UIViewRepresentable {
     let glide: TimeInterval
     let onRegion: (MKCoordinateRegion) -> Void
     let onSelect: (MapSelection) -> Void
+    /// A place picked on the map: a tapped Apple Maps point of interest (museum, shop, beach …)
+    /// or a long press anywhere. Called again with `refined` true and a better name once the address is known.
+    var onPick: ((_ place: GeocodeMatch, _ refined: Bool) -> Void)? = nil
 
     func makeCoordinator() -> Coordinator { Coordinator(self) }
 
@@ -75,6 +80,10 @@ struct TransitMapView: UIViewRepresentable {
         map.register(RentalPinView.self, forAnnotationViewWithReuseIdentifier: RentalPinView.reuseId)
         map.register(MKMarkerAnnotationView.self, forAnnotationViewWithReuseIdentifier: SearchPin.reuseId)
         map.register(MKMarkerAnnotationView.self, forAnnotationViewWithReuseIdentifier: MKMapViewDefaultClusterAnnotationViewReuseIdentifier)
+        // Long press drops a pin anywhere ("I want to go there"), like in Apple Maps.
+        let press = UILongPressGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.longPressed(_:)))
+        press.minimumPressDuration = 0.5
+        map.addGestureRecognizer(press)
         if let c = initialCenter {
             map.setRegion(MKCoordinateRegion(center: c.clCoordinate, latitudinalMeters: 1600, longitudinalMeters: 1600), animated: false)
         } else {
@@ -139,6 +148,8 @@ struct TransitMapView: UIViewRepresentable {
             let before = appliedLook
             appliedLook = look
             map.preferredConfiguration = TransitMapView.configuration(look)
+            // Apple's points of interest can be tapped when they are shown; transit stays our own pins.
+            map.selectableMapFeatures = look.showsPointsOfInterest ? [.pointsOfInterest] : []
             // Names and pins stay readable on aerial imagery: dark style there, like Apple Maps.
             map.overrideUserInterfaceStyle = look.base.isSatellite ? .dark : .unspecified
             // Switching 3D on tilts the map so it shows; off lays it flat again.
@@ -162,6 +173,7 @@ struct TransitMapView: UIViewRepresentable {
             let pin = SearchPin(m)
             searchPin = pin
             map.addAnnotation(pin)
+            guard focus.moves else { return }
             let meters = MapSearch.meters(m)
             let center = CLLocationCoordinate2D(latitude: m.lat - meters / 111_000 * 0.22, longitude: m.lon)
             guard CLLocationCoordinate2DIsValid(center) else { return }
@@ -321,6 +333,7 @@ struct TransitMapView: UIViewRepresentable {
         func mapView(_ mapView: MKMapView, didSelect annotation: MKAnnotation) {
             defer { mapView.deselectAnnotation(annotation, animated: false) }
             switch annotation {
+            case let feature as MKMapFeatureAnnotation: pick(feature)
             case let pin as StationPin: parent.onSelect(.station(pin.station))
             case let pin as VehiclePin: parent.onSelect(.vehicle(pin.vehicle))
             case let pin as SearchPin: parent.onSelect(.place(pin.match))
@@ -336,6 +349,59 @@ struct TransitMapView: UIViewRepresentable {
             default: break
             }
         }
+
+        // MARK: Picking places on the map
+
+        private let geocoder = CLGeocoder()
+
+        /// A tapped point of interest: shown at once under its map label, then with address and category.
+        private func pick(_ feature: MKMapFeatureAnnotation) {
+            let point = LatLon(lat: feature.coordinate.latitude, lon: feature.coordinate.longitude)
+            guard point.isValidCoordinate else { return }
+            let label: String? = (feature as MKAnnotation).title ?? nil
+            let name = label.flatMap { $0.isEmpty ? nil : $0 } ?? L10n.t("Dropped pin")
+            parent.onPick?(.picked(name: name, at: point), false)
+            MKMapItemRequest(mapFeatureAnnotation: feature).getMapItem { [weak self] item, _ in
+                guard let self, let item else { return }
+                DispatchQueue.main.async {
+                    self.parent.onPick?(Self.match(item, name: item.name ?? name, at: point), true)
+                }
+            }
+        }
+
+        @objc func longPressed(_ gesture: UILongPressGestureRecognizer) {
+            guard gesture.state == .began, let map = gesture.view as? MKMapView else { return }
+            let c = map.convert(gesture.location(in: map), toCoordinateFrom: map)
+            let point = LatLon(lat: c.latitude, lon: c.longitude)
+            guard point.isValidCoordinate else { return }
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            parent.onPick?(.picked(name: L10n.t("Dropped pin"), at: point), false)
+            geocoder.cancelGeocode()
+            geocoder.reverseGeocodeLocation(CLLocation(latitude: c.latitude, longitude: c.longitude)) { [weak self] marks, _ in
+                guard let self, let mark = marks?.first else { return }
+                let name = [mark.thoroughfare, mark.subThoroughfare].compactMap { $0 }.joined(separator: " ")
+                let match = GeocodeMatch.picked(name: name.isEmpty ? (mark.name ?? L10n.t("Dropped pin")) : name, at: point,
+                                                locality: mark.locality, country: mark.isoCountryCode)
+                DispatchQueue.main.async { self.parent.onPick?(match, true) }
+            }
+        }
+
+        /// Apple's place in the same shape as a search hit; the position stays the tapped one, so the ID does not change.
+        static func match(_ item: MKMapItem, name: String, at point: LatLon) -> GeocodeMatch {
+            let mark = item.placemark
+            return .picked(name: name, at: point, street: mark.thoroughfare, houseNumber: mark.subThoroughfare,
+                           locality: mark.locality, country: mark.isoCountryCode,
+                           category: item.pointOfInterestCategory.map(MapPick.category))
+        }
+    }
+}
+
+/// Apple's point-of-interest categories as short words for the place sheet ("museum", "beach").
+enum MapPick {
+    static func category(_ c: MKPointOfInterestCategory) -> String {
+        var raw = c.rawValue
+        if raw.hasPrefix("MKPOICategory") { raw.removeFirst("MKPOICategory".count) }
+        return raw.lowercased()
     }
 }
 

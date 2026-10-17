@@ -23,6 +23,7 @@ struct WidgetDeparture: Identifiable, Hashable, RouteStyled {
     var routeColor: String? { background }
     var routeTextColor: String? { foreground }
     let headsign: String
+    let circular: Bool
     let time: Date
     let delayMinutes: Int
     let realTime: Bool
@@ -36,7 +37,8 @@ struct WidgetDeparture: Identifiable, Hashable, RouteStyled {
         background = st.lineColors.background
         foreground = st.lineColors.text
         service = st.serviceDetail
-        headsign = st.headsign
+        headsign = st.shownDirection ?? ""
+        circular = st.isCircular
         time = st.departureTime
         delayMinutes = st.delayMinutes
         realTime = st.realTime
@@ -164,7 +166,7 @@ struct DeparturesWidgetView: View {
                     .foregroundStyle(d.cancelled ? Color.danger : Color.primary)
                     .lineLimit(1).fixedSize()
             }
-            DirectionLabel(direction: d.headsign, font: .caption)
+            DirectionLabel(direction: d.headsign, circular: d.circular, font: .caption)
                 .lineLimit(2)
         }
     }
@@ -178,7 +180,7 @@ struct DeparturesWidgetView: View {
                     Text(Fmt.time(d.time, tz: d.tz)).font(.caption.monospacedDigit())
                         .strikethrough(d.cancelled)
                 }
-                DirectionLabel(direction: d.headsign, font: .caption2).lineLimit(1)
+                DirectionLabel(direction: d.headsign, circular: d.circular, font: .caption2).lineLimit(1)
             }
         }
     }

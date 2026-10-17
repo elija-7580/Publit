@@ -71,12 +71,13 @@ struct DepartureTimeView: View {
                 Text("Cancelled").font(.caption.weight(.semibold)).foregroundStyle(Color.danger)
             } else {
                 if minutes <= 0 {
-                    Text("now").font(.title3.weight(.bold))
+                    // Same size as the minute figures below it in the list, so "now" does not look smaller than "1 min".
+                    Text("now").font(.title.weight(.bold))
                 } else if minutes < 60 {
                     HStack(alignment: .firstTextBaseline, spacing: 2) {
                         Text(verbatim: "\(minutes)").font(.title.weight(.bold).monospacedDigit())
                             .foregroundStyle(delayMinutes > 0 ? Color.delay : Color.primary)
-                        Text("min").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+                        Text("min").font(.caption.weight(.medium)).foregroundStyle(.secondary)
                     }
                 } else {
                     Text(Fmt.time(actual, tz: tz)).font(.title3.weight(.bold).monospacedDigit()).lineLimit(1)
@@ -84,7 +85,7 @@ struct DepartureTimeView: View {
                 HStack(spacing: 4) {
                     if delayMinutes > 0 {
                         Text(L10n.f("+%lld min", delayMinutes))
-                            .font(.caption.weight(.bold).monospacedDigit()).foregroundStyle(Color.delay)
+                            .font(.caption.weight(.semibold).monospacedDigit()).foregroundStyle(Color.delay)
                     }
                     if minutes < 60 || delayMinutes > 0 {
                         Text(Fmt.time(actual, tz: tz)).font(.caption.weight(.medium).monospacedDigit())

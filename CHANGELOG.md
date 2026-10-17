@@ -1,5 +1,40 @@
 # Changelog
 
+## 0.6.0 (build 34)
+
+### Far stops are shown, not hidden
+- Nearby looks for departures within 500 m, 1.5 km and then 5 km. When the nearest stop is far (from 1.5 km), the board lists it anyway and says so above the list: "The nearest departures are 2.9 km away, about 48 min on foot." Station headers show the walking time from 400 m. Example: Cavallino-Treporti, 3 km from the Punta Sabbioni ferry, used to show an empty board.
+- Route search tries walks of 30 min, 45 min and then up to 2 h to the first and from the last stop before it says "No connections". Routes found with a longer walk than usual carry a note: "These routes include a long walk: up to 40 min to or from the stop."
+- With a shorter walking limit set in Route options, the message names that limit instead of a plain "No connections".
+- The empty board says "No departures within 5 km" and offers the station map.
+
+### Map: tap places, drop pins, search sights
+- Apple Maps points of interest (museums, shops, beaches …) are on by default on the station map and can be tapped: the place sheet shows distance, walking time, "Route here" and "Route from here".
+- A long press anywhere drops a pin with the same sheet; the address follows when Apple knows it.
+- The map search combines stops and towns from Transitous with places from Apple Maps ("Museum", a shop name) around the visible map.
+
+### Start screen type
+- Weights follow the type tokens: the destination in departure rows is semibold (the station name stays the heaviest text), "now" is as large as the minute figures, "min" and the delay are lighter, "Next trip" has the weight of the other rows in its card, "All departures" is medium.
+
+### Circle lines
+- Lines that start and end at the same place (ACTV 5.1/5.2 at Lido, town buses that loop) no longer read as going the wrong way. A leg on such a line says "Towards S. Alvise · Circle line" (where you get off); a departure board says "Circle line" instead of "Towards Lido" at Lido. Piers of the same place ("Lido S.M.E. "A"" and ""B"") count as one.
+
+### Started trip
+- The stop list draws one continuous line from the first to the last stop; the rows no longer break it into pieces (it looked like a rope ladder). Travelled parts are faded.
+- Walks on all route maps are a row of dots like in Apple Maps instead of thick dashes.
+- The map has two new buttons: "Show whole trip" (the whole route on the same map, with start and destination; tap again to go back to the stage) and "Trip overview" (the whole route full screen).
+
+### Places from other map apps
+- Publit is in the share sheet: share a place or a dropped pin from Google Maps, Apple Maps or any app that shares a map link, pick Publit, and Publit opens with routes there from where you are ("Where to now?"). Opening the app from the extension uses a way Apple does not allow for extensions: fine for own installs, may be rejected in App Review.
+- A map link pasted into the place search (Google Maps incl. short links maps.app.goo.gl, Apple Maps, OpenStreetMap, `geo:`) or plain coordinates ("45.4436, 12.3264") is shown as the place it points to. Short links are followed once; when a link only names a place, Publit searches that name.
+- New link `publit://place?name=…&lat=…&lon=…`: routes there from where you are ("Where to now?").
+
+### Apple Watch
+- First watch app (watchOS 10): the nearest stops with their next departures (line, direction, minutes, live), the same 500 m / 1.5 km / 5 km steps and far-stop note as on the iPhone. It loads from Transitous on its own and installs with the iPhone app.
+
+### Tests
+- ReachTests (radii, walk steps, walking time, long-walk note from a real Cavallino → San Zaccaria answer, picked places, merged search). SharedPlaceTests (circle lines with real ACTV names; Google, Apple Maps, OSM and geo links; Google short link with name; coordinates in a Google page; `publit://place`). UI tests F18 (far stop at Cavallino), F19 (dropped pin) and F20 (pasted map link). UI test failures are repeated as GitHub annotations, so they are visible on pull requests.
+
 ## 0.6.0 (build 33)
 
 ### Back to the build 31 layout

@@ -13,3 +13,4 @@ node_modules/
 
 # Decoded at build time from Config/AppIcon/*.png.b64
 Sources/App/Assets.xcassets/AppIcon.appiconset/*.png
+Watch/Assets.xcassets/AppIcon.appiconset/*.png

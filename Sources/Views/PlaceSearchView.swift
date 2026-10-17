@@ -168,6 +168,25 @@ struct PlaceSearchView: View {
         guard !Task.isCancelled else { return }
         isSearching = true
         defer { if searchToken == token { isSearching = false } }
+        // A pasted link from Google Maps, Apple Maps or OpenStreetMap: the place it points to.
+        if let link = MapLink.parse(text: text) {
+            let place = await MapLink.resolve(link)
+            guard !Task.isCancelled, searchToken == token else { return }
+            if let place, let lat = place.lat, let lon = place.lon {
+                results = [GeocodeMatch.picked(name: place.name ?? L10n.t("Place from the link"), at: LatLon(lat: lat, lon: lon))]
+                errorMessage = nil
+                searched = text + "|" + scope.rawValue
+                return
+            }
+            if let name = place?.name ?? link.name, name != text {
+                await searchNames(name, token: token)
+                return
+            }
+        }
+        await searchNames(text, token: token)
+    }
+
+    private func searchNames(_ text: String, token: UUID) async {
         do {
             let r = try await TransitousClient.shared.geocode(text, near: location.coordinate, type: scope.apiType)
             guard !Task.isCancelled, searchToken == token else { return }

@@ -240,7 +240,7 @@ struct LiveTripView: View {
             VStack(alignment: .leading, spacing: 10) {
                 HStack(spacing: 8) {
                     LineBadge(leg)
-                    DirectionLabel(direction: leg.directionName)
+                    DirectionLabel(direction: leg.shownDirection, circular: leg.isCircular)
                 }
                 Text(Self.departure(leg, now: now)).font(.title2.weight(.bold).monospacedDigit())
                 HStack(spacing: 8) {
@@ -297,7 +297,7 @@ struct LiveTripView: View {
             VStack(alignment: .leading, spacing: 10) {
                 HStack(spacing: 8) {
                     LineBadge(leg)
-                    DirectionLabel(direction: leg.directionName)
+                    DirectionLabel(direction: leg.shownDirection, circular: leg.isCircular)
                 }
                 Text(L10n.f("Get off at %@", leg.to.name)).font(.title3.weight(.bold))
                     .fixedSize(horizontal: false, vertical: true)
@@ -325,7 +325,9 @@ struct LiveTripView: View {
         Section("Stops") {
             ForEach(Array(stops.enumerated()), id: \.offset) { i, stop in
                 GuideStopRow(stop: stop, state: Self.stopState(i, progress: progress, count: stops.count),
-                             isLast: i == stops.count - 1, color: leg.lineStroke)
+                             isFirst: i == 0, isLast: i == stops.count - 1, color: leg.lineStroke)
+                    // No gaps between the rows: the line runs through like the line on a stop sign.
+                    .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
             }
         }
     }
@@ -505,10 +507,12 @@ private struct StageStrip: View {
 }
 
 /// One stop of the ride on a line in the line's colour; the yellow dot is where you are.
+/// The line starts at the first stop and ends at the last one, without breaks between the rows.
 struct GuideStopRow: View {
     enum Mark { case past, here, next, ahead }
     let stop: Place
     let state: Mark
+    var isFirst = false
     let isLast: Bool
     let color: Color
 
@@ -517,19 +521,8 @@ struct GuideStopRow: View {
         let scheduled = stop.scheduledArrival ?? stop.scheduledDeparture
         let delay = time.flatMap { t in scheduled.map { Int((t.timeIntervalSince($0) / 60).rounded()) } } ?? 0
         HStack(spacing: 12) {
-            ZStack {
-                Rectangle().fill(state == .past ? color.opacity(0.35) : color).frame(width: 4)
-                if state == .here || state == .next {
-                    Circle().fill(Color.signature).frame(width: 14, height: 14)
-                        .overlay(Circle().strokeBorder(Color.surface, lineWidth: 2.5))
-                } else {
-                    Circle().fill(Color.surface).frame(width: 10, height: 10)
-                        .overlay(Circle().strokeBorder(state == .past ? color.opacity(0.35) : color, lineWidth: 2.5))
-                }
-            }
-            .frame(width: 16)
-            .frame(maxHeight: .infinity)
-            .accessibilityHidden(true)
+            // Room for the line, drawn behind the whole row (padding included) so it has no gaps.
+            Color.clear.frame(width: 16, height: 1)
             Text(time.map { Fmt.time($0, tz: stop.tz) } ?? "–")
                 .font(.subheadline.monospacedDigit().weight(isLast ? .bold : .regular))
                 .lineLimit(1).fixedSize()
@@ -546,8 +539,30 @@ struct GuideStopRow: View {
                 Text(L10n.f("Pl. %@", track)).font(.caption).foregroundStyle(.secondary)
             }
         }
+        .padding(.vertical, 10)
+        .frame(minHeight: 44)
+        .background(alignment: .leading) { line.frame(width: 16).accessibilityHidden(true) }
         .foregroundStyle(state == .past ? Color.secondary : Color.primary)
         .listRowSeparator(.hidden)
+    }
+
+    private var line: some View {
+        let faded = color.opacity(0.35)
+        return ZStack {
+            VStack(spacing: 0) {
+                // Above the dot: travelled once you are here or past it.
+                Rectangle().fill(isFirst ? Color.clear : (state == .past || state == .here ? faded : color))
+                Rectangle().fill(isLast ? Color.clear : (state == .past ? faded : color))
+            }
+            .frame(width: 4)
+            if state == .here || state == .next {
+                Circle().fill(Color.signature).frame(width: 14, height: 14)
+                    .overlay(Circle().strokeBorder(Color.surface, lineWidth: 2.5))
+            } else {
+                Circle().fill(Color.surface).frame(width: 10, height: 10)
+                    .overlay(Circle().strokeBorder(state == .past ? faded : color, lineWidth: 2.5))
+            }
+        }
     }
 }
 
@@ -560,17 +575,23 @@ private struct GuideMap: View {
     @State private var camera: MapCameraPosition = .automatic
     /// The map turns with the phone (like a compass) and follows you.
     @State private var followHeading = false
+    /// The whole trip at once instead of the current stage.
+    @State private var overview = false
+    @State private var showsFullMap = false
 
     var body: some View {
         let current = itinerary.legs[step.legIndex]
         Map(position: $camera) {
             UserAnnotation()
             ForEach(Array(itinerary.legs.enumerated()), id: \.offset) { i, leg in
-                let active = i == step.legIndex
+                let active = overview || i == step.legIndex
                 MapPolyline(coordinates: leg.legGeometry.clCoordinates)
                     .stroke((leg.isTransit ? leg.lineStroke : Color.gray).opacity(active ? 1 : 0.35),
-                            style: StrokeStyle(lineWidth: active ? 6 : 4, lineCap: .round, lineJoin: .round,
-                                               dash: leg.isTransit ? [] : [6, 5]))
+                            style: .leg(leg.isTransit, width: active ? 6 : 4))
+            }
+            if overview, let first = itinerary.legs.first {
+                Marker("Start", systemImage: "circle.fill", coordinate: first.from.coordinate.clCoordinate)
+                    .tint(Color.inkAction)
             }
             if let vehicle {
                 Annotation("", coordinate: vehicle.clCoordinate) {
@@ -585,16 +606,22 @@ private struct GuideMap: View {
                         .overlay(Circle().strokeBorder(.black.opacity(0.6), lineWidth: 2))
                 }
             }
-            Marker(current.isTransit && step.kind == .wait ? current.from.name : current.to.name,
-                   systemImage: step.kind == .arrive ? "flag.fill" : "mappin",
-                   coordinate: (step.kind == .wait ? current.from : current.to).coordinate.clCoordinate)
-                .tint(step.kind == .arrive ? Color.danger : Color.ink)
+            if overview, let last = itinerary.legs.last {
+                Marker(last.to.name, systemImage: "flag.fill", coordinate: last.to.coordinate.clCoordinate)
+                    .tint(Color.danger)
+            } else {
+                Marker(current.isTransit && step.kind == .wait ? current.from.name : current.to.name,
+                       systemImage: step.kind == .arrive ? "flag.fill" : "mappin",
+                       coordinate: (step.kind == .wait ? current.from : current.to).coordinate.clCoordinate)
+                    .tint(step.kind == .arrive ? Color.danger : Color.ink)
+            }
         }
         .mapStyle(.standard(pointsOfInterest: .excludingAll))
         .mapControls { MapUserLocationButton(); MapCompass() }
         .overlay(alignment: .topLeading) {
             Button {
                 followHeading.toggle()
+                overview = false
                 withAnimation {
                     camera = followHeading ? .userLocation(followsHeading: true, fallback: Self.camera(step, itinerary))
                         : Self.camera(step, itinerary)
@@ -610,11 +637,54 @@ private struct GuideMap: View {
             .accessibilityLabel(Text(followHeading ? L10n.t("Stop turning the map") : L10n.t("Turn the map with you")))
             .accessibilityIdentifier("guideFollowHeading")
         }
+        .overlay(alignment: .bottomTrailing) {
+            // The whole trip: on this map, or full screen.
+            HStack(spacing: 8) {
+                Button {
+                    overview.toggle()
+                    followHeading = false
+                    withAnimation { camera = overview ? Self.overviewCamera(itinerary) : Self.camera(step, itinerary) }
+                } label: {
+                    Image(systemName: overview ? "scope" : "point.topleft.down.to.point.bottomright.curvepath")
+                        .font(.body.weight(.semibold))
+                        .frame(width: 44, height: 44)
+                        .matteSurface(in: Circle())
+                }
+                .accessibilityLabel(Text(overview ? L10n.t("Back to this stage") : L10n.t("Show whole trip")))
+                .accessibilityIdentifier("guideOverview")
+                Button { showsFullMap = true } label: {
+                    Image(systemName: "arrow.up.left.and.arrow.down.right")
+                        .font(.body.weight(.semibold))
+                        .frame(width: 44, height: 44)
+                        .matteSurface(in: Circle())
+                }
+                .accessibilityLabel(Text("Trip overview"))
+                .accessibilityIdentifier("guideFullMap")
+            }
+            .buttonStyle(.plain)
+            .padding(8)
+        }
+        .sheet(isPresented: $showsFullMap) {
+            NavigationStack {
+                RouteMap(itinerary: itinerary)
+                    .ignoresSafeArea(edges: .bottom)
+                    .navigationTitle(Text("Trip overview"))
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) { Button("Done") { showsFullMap = false } }
+                    }
+            }
+            .accessibilityIdentifier("tripOverviewMap")
+        }
         .onAppear { camera = Self.camera(step, itinerary) }
         .onChange(of: step) { _, s in
-            guard !followHeading else { return }
+            guard !followHeading, !overview else { return }
             withAnimation { camera = Self.camera(s, itinerary) }
         }
+    }
+
+    static func overviewCamera(_ it: Itinerary) -> MapCameraPosition {
+        .rect(rect(it.legs.flatMap { $0.legGeometry.mapPoints + [$0.from.coordinate, $0.to.coordinate] }))
     }
 
     static func camera(_ step: GuideStep, _ it: Itinerary) -> MapCameraPosition {

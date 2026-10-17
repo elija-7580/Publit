@@ -1,3 +1,4 @@
+import CoreLocation
 import XCTest
 
 /// End-to-end flows against the live Transitous API. Each test saves a screenshot
@@ -29,6 +30,17 @@ final class PublitUITests: XCTestCase {
             }
             return false
         }
+    }
+
+    /// Repeats each failure on its own line as a GitHub Actions annotation, so failing UI tests are
+    /// visible on pull requests (which do not publish to the ci-results branch). xcodebuild prints
+    /// the failure message as is, the runner's own stdout does not reach the job log.
+    override func record(_ issue: XCTIssue) {
+        var issue = issue
+        let line = issue.sourceCodeContext.location?.lineNumber ?? 0
+        let text = issue.compactDescription.replacingOccurrences(of: "\n", with: " ")
+        issue.compactDescription = text + "\n::error file=Tests/UI/PublitUITests.swift,line=\(line)::\(name) \(text) (error: UI test)"
+        super.record(issue)
     }
 
     override func tearDown() {
@@ -605,4 +617,53 @@ final class PublitUITests: XCTestCase {
         XCTAssertFalse(app.buttons["savePass"].exists)
     }
 
+    /// F18 Far from any stop (Cavallino-Treporti, 3 km from the Punta Sabbioni ferry; nothing within 1.5 km):
+    /// the board lists the ferries with distance and walking time and says they are far, instead of an empty board.
+    func testF18FarStopIsShownWithWalk() throws {
+        guard #available(iOS 16.4, *) else { throw XCTSkip("needs a simulated location") }
+        XCUIDevice.shared.location = XCUILocation(location: CLLocation(latitude: 45.4560, longitude: 12.4600))
+        defer { XCUIDevice.shared.location = XCUILocation(location: CLLocation(latitude: 48.13715, longitude: 11.57540)) }
+        let app = launch()
+        nudge(app)
+        XCTAssertTrue(app.navigationBars["Nearby"].waitForExistence(timeout: 10))
+        let note = app.descendants(matching: .any)["nearbyFarNote"]
+        XCTAssertTrue(note.waitForExistence(timeout: timeout), "far stops not pointed out")
+        XCTAssertTrue(note.label.contains("km"), note.label)
+        XCTAssertTrue(app.descendants(matching: .any)["departureRow"].firstMatch.waitForExistence(timeout: 10),
+                      "far departures not listed")
+        XCTAssertFalse(app.staticTexts["No departures nearby"].exists)
+        snap("nearby-far")
+    }
+
+    /// F19 Long press on the station map drops a pin with "Route here" and "Route from here", like Apple Maps.
+    func testF19DropPinOnMap() {
+        let app = launch()
+        nudge(app)
+        let mapButton = app.buttons["Station map"]
+        XCTAssertTrue(mapButton.waitForExistence(timeout: 10))
+        mapButton.tap()
+        XCTAssertTrue(app.navigationBars["Stations"].waitForExistence(timeout: 10))
+        sleep(3) // tiles
+        app.windows.firstMatch.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.6)).press(forDuration: 1.0)
+        XCTAssertTrue(app.buttons["mapPlaceRoute"].waitForExistence(timeout: 10), "no place sheet after long press")
+        XCTAssertTrue(app.buttons["mapPlaceRouteFrom"].exists)
+        snap("map-dropped-pin")
+        app.buttons["mapPlaceRoute"].tap()
+        XCTAssertTrue(app.navigationBars.element.waitForExistence(timeout: 10))
+    }
+
+    /// F20 A pasted Google Maps link in the destination search is the place it points to.
+    func testF20PastedMapLinkIsAPlace() {
+        let app = launch(["PUBLIT_TAB": "plan"])
+        let to = app.buttons["endpoint-to"]
+        XCTAssertTrue(to.waitForExistence(timeout: 10), "no To field in Plan")
+        to.tap()
+        let field = app.searchFields.firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout: 5))
+        field.tap()
+        field.typeText("https://www.google.com/maps/search/48.1351,+11.5820")
+        let hit = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Place from the link'")).firstMatch
+        XCTAssertTrue(hit.waitForExistence(timeout: 15), "pasted map link not recognised")
+        snap("search-map-link")
+    }
 }

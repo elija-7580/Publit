@@ -47,7 +47,7 @@ enum DepartureSpeech {
         let parts = list.prefix(3).map { st -> String in
             let mins = Int(floor(st.departureTime.timeIntervalSince(now) / 60))
             let identity = st.serviceDetail ?? st.lineName
-            let dest = st.directionName.map { L10n.f("%@ to %@", identity, $0) } ?? identity
+            let dest = st.shownDirection.map { L10n.f("%@ to %@", identity, $0) } ?? identity
             if st.isCancelled { return L10n.f("%@ is cancelled", dest) }
             return mins <= 0 ? L10n.f("%@ now", dest) : L10n.f("%@ in %lld min", dest, mins)
         }
@@ -65,7 +65,7 @@ private struct DeparturesSnippet: View {
                     LineBadge(st)
                     VStack(alignment: .leading, spacing: 4) {
                         if let detail = st.serviceDetail { Text(verbatim: detail).font(.caption) }
-                        DirectionLabel(direction: st.directionName)
+                        DirectionLabel(direction: st.shownDirection, circular: st.isCircular)
                     }
                     Spacer()
                     Text(Fmt.time(st.departureTime, tz: st.place.tz))

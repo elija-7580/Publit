@@ -29,6 +29,14 @@ struct GoNowView: View {
                 } else if let msg = plan.errorMessage, its.isEmpty {
                     Text(msg).foregroundStyle(.secondary)
                 }
+                if let note = plan.walkNote, !its.isEmpty {
+                    // Found only with a longer walk: say so, the walk is part of the decision.
+                    Label(note, systemImage: "figure.walk")
+                        .font(.footnote).foregroundStyle(Color.delay)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .accessibilityElement(children: .combine)
+                        .accessibilityIdentifier("longWalkNote")
+                }
                 if !its.isEmpty { ConnectionLegendRow(start: windowStart, end: windowEnd, tz: its.first?.legs.first?.from.tz) }
                 ForEach(its) { it in
                     NavigationLink {
