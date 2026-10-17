@@ -696,7 +696,7 @@ private struct GuideMap: View {
                 }
                 if part.ahead.count > 1 {
                     MapPolyline(coordinates: part.ahead.map(\.clCoordinate))
-                        .stroke(Color.routeAhead.opacity(active ? 1 : 0.45),
+                        .stroke((leg.isTransit ? leg.lineStroke : Color.routeAhead).opacity(active ? 1 : 0.6),
                                 style: .leg(leg.isTransit, width: width))
                 }
             }
@@ -706,7 +706,7 @@ private struct GuideMap: View {
             }
             if let vehicle {
                 Annotation("", coordinate: vehicle.clCoordinate) {
-                    Circle().fill(Color.routeAhead).frame(width: 18, height: 18)
+                    Circle().fill(current.lineStroke).frame(width: 18, height: 18)
                         .overlay(Circle().strokeBorder(.white, lineWidth: 3))
                         .shadow(radius: 2)
                 }

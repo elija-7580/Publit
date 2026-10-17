@@ -17,7 +17,7 @@ struct CompareMapView: View {
                 let isSelected = it.routeKey == selectedId
                 ForEach(Array(it.legs.enumerated()), id: \.offset) { _, leg in
                     MapPolyline(coordinates: leg.legGeometry.clCoordinates)
-                        .stroke(isSelected ? Color.routeAhead : Color.gray.opacity(0.45),
+                        .stroke(isSelected ? (leg.isTransit ? leg.lineStroke : Color.routeAhead) : Color.gray.opacity(0.45),
                                 style: .leg(leg.isTransit, width: isSelected ? 5 : 3))
                 }
             }
@@ -266,7 +266,7 @@ struct RouteMap: View {
             UserAnnotation()
             ForEach(Array(itinerary.legs.enumerated()), id: \.offset) { _, leg in
                 MapPolyline(coordinates: leg.legGeometry.clCoordinates)
-                    .stroke(Color.routeAhead, style: .leg(leg.isTransit, width: 5))
+                    .stroke(leg.isTransit ? leg.lineStroke : Color.routeAhead, style: .leg(leg.isTransit, width: 5))
             }
             if let first = itinerary.legs.first {
                 Marker("Start", systemImage: "circle.fill", coordinate: first.from.coordinate.clCoordinate)
@@ -460,7 +460,7 @@ struct TimelineLegRow: View {
                 .font(.subheadline.weight(.semibold).monospacedDigit())
                 .frame(width: 52, alignment: .trailing)
                 .padding(.top, 10)
-            TimelineRail(color: leg.isTransit ? Color.ink : Color.secondary, dotted: !leg.isTransit)
+            TimelineRail(color: leg.isTransit ? leg.lineStroke : Color.secondary, dotted: !leg.isTransit)
             LegRow(leg: leg, bar: false)
                 .padding(.vertical, 4)
                 .frame(maxWidth: .infinity, alignment: .leading)

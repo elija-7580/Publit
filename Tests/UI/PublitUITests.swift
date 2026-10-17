@@ -211,6 +211,37 @@ final class PublitUITests: XCTestCase {
         }
     }
 
+    /// The start screens (Nearby, Plan with results, Tickets, Saved), light and dark.
+    func testF22StartScreens() {
+        for dark in [false, true] {
+            let suffix = dark ? "-dark" : ""
+            let app = XCUIApplication()
+            app.launchArguments = ["-AppleLanguages", "(de)", "-AppleLocale", "de_AT"]
+            app.launchEnvironment = ["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "nearby", "PUBLIT_UI_DARK": dark ? "1" : "0"]
+            app.launch()
+            allowLocation()
+            sleep(10) // departures and map
+            snap("start-nearby\(suffix)")
+            app.swipeUp()
+            sleep(2)
+            snap("start-nearby-more\(suffix)")
+            let tabs = app.tabBars.buttons
+            tabs.element(boundBy: 1).tap()
+            sleep(12) // routes
+            snap("start-plan\(suffix)")
+            app.swipeUp()
+            sleep(2)
+            snap("start-plan-more\(suffix)")
+            tabs.element(boundBy: 2).tap()
+            sleep(2)
+            snap("start-tickets\(suffix)")
+            tabs.element(boundBy: 3).tap()
+            sleep(2)
+            snap("start-saved\(suffix)")
+            app.terminate()
+        }
+    }
+
     /// Answers the location prompt, which would cover the screenshot.
     private func allowLocation() {
         let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")

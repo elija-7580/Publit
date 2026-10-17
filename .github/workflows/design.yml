@@ -36,7 +36,8 @@ jobs:
           grep -q "TEST BUILD SUCCEEDED" ci/build.log
           xcodebuild test-without-building -project Publit.xcodeproj -scheme Publit \
             -destination "id=${{ steps.sim.outputs.udid }}" -derivedDataPath build \
-            -only-testing:PublitUITests/PublitUITests/testF21DesignScreens 2>&1 | tee ci/ui.log | grep -E "Test Case|error:" || true
+            -only-testing:PublitUITests/PublitUITests/testF21DesignScreens \
+            -only-testing:PublitUITests/PublitUITests/testF22StartScreens 2>&1 | tee ci/ui.log | grep -E "Test Case|error:" || true
           cp ~/publit-shots/*.png ci/screenshots/ 2>/dev/null || true
       - name: Upload screenshots
         if: always()
