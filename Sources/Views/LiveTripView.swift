@@ -50,9 +50,12 @@ struct LiveTripView: View {
             : check == .missed ? L10n.t("Missed it?") : L10n.t("Connection cancelled")
         List {
             Section {
+                let vehicle = step.kind == .ride ? ride.flatMap { TripProgress.position($0.progress, stops: leg.allStops) } : nil
                 GuideMap(itinerary: it, step: step,
-                         vehicle: step.kind == .ride ? ride.flatMap { TripProgress.position($0.progress, stops: leg.allStops) } : nil,
-                         focus: walkPos.flatMap { p in walk?.maneuvers[safe: p.index + 1]?.coordinate })
+                         vehicle: vehicle,
+                         focus: walkPos.flatMap { p in walk?.maneuvers[safe: p.index + 1]?.coordinate },
+                         trace: TripTrace.Progress(legIndex: steps[live].legIndex, kind: steps[live].kind,
+                                                   point: index == live && step.kind == .ride ? (vehicle ?? here) : here))
                     .frame(height: 250)
                     .listRowInsets(EdgeInsets())
                 StageStrip(steps: steps, itinerary: it, live: live, shown: index) { tapped in
@@ -572,6 +575,8 @@ private struct GuideMap: View {
     let step: GuideStep
     let vehicle: LatLon?
     let focus: LatLon?
+    /// Where the trip is now: what lies behind is drawn light blue.
+    let trace: TripTrace.Progress
     @State private var camera: MapCameraPosition = .automatic
     /// The map turns with the phone (like a compass) and follows you.
     @State private var followHeading = false
@@ -585,9 +590,17 @@ private struct GuideMap: View {
             UserAnnotation()
             ForEach(Array(itinerary.legs.enumerated()), id: \.offset) { i, leg in
                 let active = overview || i == step.legIndex
-                MapPolyline(coordinates: leg.legGeometry.clCoordinates)
-                    .stroke((leg.isTransit ? leg.lineStroke : Color.gray).opacity(active ? 1 : 0.35),
-                            style: .leg(leg.isTransit, width: active ? 6 : 4))
+                let width: CGFloat = active ? 6 : 4
+                let part = TripTrace.split(leg.legGeometry.mapPoints, legIndex: i, at: trace)
+                if part.done.count > 1 {
+                    MapPolyline(coordinates: part.done.map(\.clCoordinate))
+                        .stroke(Color.routeTraveled, style: .leg(true, width: width))
+                }
+                if part.ahead.count > 1 {
+                    MapPolyline(coordinates: part.ahead.map(\.clCoordinate))
+                        .stroke((leg.isTransit ? leg.lineStroke : Color.routeAhead).opacity(active ? 1 : 0.6),
+                                style: .leg(leg.isTransit, width: width))
+                }
             }
             if overview, let first = itinerary.legs.first {
                 Marker("Start", systemImage: "circle.fill", coordinate: first.from.coordinate.clCoordinate)

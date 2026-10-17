@@ -7,17 +7,17 @@ struct CompareMapView: View {
 
     /// Selected route is drawn last so it sits on top.
     private var ordered: [Itinerary] {
-        itineraries.filter { $0.id != selectedId } + itineraries.filter { $0.id == selectedId }
+        itineraries.filter { $0.routeKey != selectedId } + itineraries.filter { $0.routeKey == selectedId }
     }
 
     var body: some View {
         Map(initialPosition: .automatic) {
             UserAnnotation()
-            ForEach(ordered) { it in
-                let isSelected = it.id == selectedId
+            ForEach(ordered, id: \.routeKey) { it in
+                let isSelected = it.routeKey == selectedId
                 ForEach(Array(it.legs.enumerated()), id: \.offset) { _, leg in
                     MapPolyline(coordinates: leg.legGeometry.clCoordinates)
-                        .stroke(isSelected ? leg.lineStroke : Color.gray.opacity(0.45),
+                        .stroke(isSelected ? (leg.isTransit ? leg.lineStroke : Color.routeAhead) : Color.gray.opacity(0.45),
                                 style: .leg(leg.isTransit, width: isSelected ? 5 : 3))
                 }
             }
@@ -217,11 +217,10 @@ struct FlowRow: Layout {
 }
 
 extension StrokeStyle {
-    /// Route lines on maps: rides solid, walks as a row of dots like in Apple Maps (thick dashes
-    /// next to each other looked like a rope ladder).
+    /// Route lines on maps: always solid. Walks are told apart by colour (`Color.routeAhead`) and a
+    /// slightly thinner line; the dotted walks of earlier builds broke up or vanished on the map.
     static func leg(_ isTransit: Bool, width: CGFloat) -> StrokeStyle {
-        isTransit ? StrokeStyle(lineWidth: width, lineCap: .round, lineJoin: .round)
-            : StrokeStyle(lineWidth: width, lineCap: .round, lineJoin: .round, dash: [0.1, width * 2])
+        StrokeStyle(lineWidth: isTransit ? width : max(3, width - 1), lineCap: .round, lineJoin: .round)
     }
 }
 
@@ -234,7 +233,7 @@ struct RouteMap: View {
             UserAnnotation()
             ForEach(Array(itinerary.legs.enumerated()), id: \.offset) { _, leg in
                 MapPolyline(coordinates: leg.legGeometry.clCoordinates)
-                    .stroke(leg.isTransit ? leg.lineStroke : Color.gray,
+                    .stroke(leg.isTransit ? leg.lineStroke : Color.routeAhead,
                             style: .leg(leg.isTransit, width: 5))
             }
             if let first = itinerary.legs.first {
