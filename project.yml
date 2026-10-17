@@ -86,7 +86,6 @@ targets:
           done
     dependencies:
       - target: PublitWidgets
-      - target: PublitShare
   PublitWidgets:
     type: app-extension
     platform: iOS
