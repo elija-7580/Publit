@@ -20,6 +20,8 @@ struct LiveTripView: View {
     @State private var showTickets = false
     /// A stage picked by hand; nil follows the trip.
     @State private var picked: String?
+    /// The whole trip on the map instead of one stage (first card of the pager).
+    @State private var overview = false
 
     /// A recent fix only: an old one would put you at the wrong stop.
     private var fix: LatLon? {
@@ -48,22 +50,84 @@ struct LiveTripView: View {
         let wrong = index == live && TripAlternative.needed(check, it, at: now)
         let wrongMessage: String = check == .offRoute ? L10n.t("You seem to be off the route.")
             : check == .missed ? L10n.t("Missed it?") : L10n.t("Connection cancelled")
-        List {
-            Section {
-                let vehicle = step.kind == .ride ? ride.flatMap { TripProgress.position($0.progress, stops: leg.allStops) } : nil
-                GuideMap(itinerary: it, step: step,
-                         vehicle: vehicle,
-                         focus: walkPos.flatMap { p in walk?.maneuvers[safe: p.index + 1]?.coordinate },
-                         trace: TripTrace.Progress(legIndex: steps[live].legIndex, kind: steps[live].kind,
-                                                   point: index == live && step.kind == .ride ? (vehicle ?? here) : here))
-                    .frame(height: 250)
-                    .listRowInsets(EdgeInsets())
-                StageStrip(steps: steps, itinerary: it, live: live, shown: index) { tapped in
-                    picked = tapped == live ? nil : steps[tapped].id
+        let vehicle = step.kind == .ride ? ride.flatMap { TripProgress.position($0.progress, stops: leg.allStops) } : nil
+        // The map is the screen; the stages and their details sit in a panel you pull up over it.
+        ZStack(alignment: .bottom) {
+            GuideMap(itinerary: it, step: step,
+                     vehicle: vehicle,
+                     focus: walkPos.flatMap { p in walk?.maneuvers[safe: p.index + 1]?.coordinate },
+                     trace: TripTrace.Progress(legIndex: steps[live].legIndex, kind: steps[live].kind,
+                                               point: index == live && step.kind == .ride ? (vehicle ?? here) : here),
+                     overview: $overview)
+                // Frame the route in the part of the map the panel leaves free.
+                .safeAreaPadding(.bottom, TripPanelMetrics.peek + 24)
+                .ignoresSafeArea(edges: .bottom)
+            TripPanel {
+                VStack(spacing: 10) {
+                    StageStrip(steps: steps, itinerary: it, live: live, shown: overview ? nil : index) { tapped in
+                        overview = false
+                        picked = tapped == live ? nil : steps[tapped].id
+                    }
+                    StagePager(steps: steps, itinerary: it, live: live, shown: overview ? nil : index) { shown in
+                        if let shown {
+                            overview = false
+                            picked = shown == live ? nil : steps[shown].id
+                        } else {
+                            overview = true
+                        }
+                    }
                 }
-                .listRowInsets(EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 12))
+                .padding(.horizontal, 12)
+            } content: {
+                details(it: it, step: step, leg: leg, index: index, live: live, here: here, walk: walk,
+                        walkPos: walkPos, ride: ride, check: check, wrong: wrong, wrongMessage: wrongMessage)
             }
+        }
+        .ticking(every: 15, now: $now)
+        .navigationTitle(trip.toName)
+        .navigationBarTitleDisplayMode(.inline)
+        .screenTrail("Live trip")
+        .toolbar { ToolbarItem(placement: .primaryAction) { voiceButton } }
+        .sheet(isPresented: $showTickets) {
+            NavigationStack {
+                TripPassesView(tripId: trip.id, at: now)
+                    .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { showTickets = false } } }
+            }
+            .environment(\.liveBarInset, 0)
+        }
+        .sensoryFeedback(trigger: feedback) { _, _ in
+            feedbackKind == .platform ? SensoryFeedback.warning : SensoryFeedback.impact(weight: .heavy, intensity: 1)
+        }
+        .onChange(of: cue) { _, new in announce(new) }
+        .onAppear {
+            // What is on screen when it opens needs no announcement.
+            if let cue { announced.insert(cue.key) }
+            location.start()
+            location.setPrecise(scenePhase == .active)
+            location.setHeading(scenePhase == .active)
+        }
+        .onDisappear {
+            location.setPrecise(false)
+            location.setHeading(false)
+            GuideVoice.shared.stop()
+        }
+        .onChange(of: scenePhase) { _, phase in
+            location.setPrecise(phase == .active)
+            location.setHeading(phase == .active)
+        }
+        .onChange(of: live) { _, _ in
+            // The trip moved on: a stage picked earlier is over or now current.
+            if let picked, let i = steps.firstIndex(where: { $0.id == picked }), i <= live { self.picked = nil }
+        }
+    }
 
+    /// What the panel shows under the stages: the live stage in detail, then the trip actions.
+    @ViewBuilder
+    private func details(it: Itinerary, step: GuideStep, leg: Leg, index: Int, live: Int, here: LatLon?,
+                         walk: WalkRoute?, walkPos: WalkRoute.Position?,
+                         ride: (progress: TripProgress, fromGPS: Bool)?,
+                         check: TripGuide.Check, wrong: Bool, wrongMessage: String) -> some View {
+        List {
             if wrong {
                 Section {
                     AlternativeRow(trip: trip, from: here, message: wrongMessage, onMore: replan)
@@ -104,42 +168,6 @@ struct LiveTripView: View {
             }
         }
         .inkList()
-        .ticking(every: 15, now: $now)
-        .navigationTitle(trip.toName)
-        .navigationBarTitleDisplayMode(.inline)
-        .screenTrail("Live trip")
-        .toolbar { ToolbarItem(placement: .primaryAction) { voiceButton } }
-        .sheet(isPresented: $showTickets) {
-            NavigationStack {
-                TripPassesView(tripId: trip.id, at: now)
-                    .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { showTickets = false } } }
-            }
-            .environment(\.liveBarInset, 0)
-        }
-        .sensoryFeedback(trigger: feedback) { _, _ in
-            feedbackKind == .platform ? SensoryFeedback.warning : SensoryFeedback.impact(weight: .heavy, intensity: 1)
-        }
-        .onChange(of: cue) { _, new in announce(new) }
-        .onAppear {
-            // What is on screen when it opens needs no announcement.
-            if let cue { announced.insert(cue.key) }
-            location.start()
-            location.setPrecise(scenePhase == .active)
-            location.setHeading(scenePhase == .active)
-        }
-        .onDisappear {
-            location.setPrecise(false)
-            location.setHeading(false)
-            GuideVoice.shared.stop()
-        }
-        .onChange(of: scenePhase) { _, phase in
-            location.setPrecise(phase == .active)
-            location.setHeading(phase == .active)
-        }
-        .onChange(of: live) { _, _ in
-            // The trip moved on: a stage picked earlier is over or now current.
-            if let picked, let i = steps.firstIndex(where: { $0.id == picked }), i <= live { self.picked = nil }
-        }
     }
 
     // MARK: Walk
@@ -445,7 +473,8 @@ private struct StageStrip: View {
     let steps: [GuideStep]
     let itinerary: Itinerary
     let live: Int
-    let shown: Int
+    /// The stage on the map; nil while the whole trip is shown.
+    let shown: Int?
     let onTap: (Int) -> Void
 
     var body: some View {
@@ -463,9 +492,9 @@ private struct StageStrip: View {
                 }
                 .padding(.vertical, 2)
             }
-            .onAppear { if let id = steps[safe: shown]?.id { proxy.scrollTo(id, anchor: .center) } }
+            .onAppear { if let s = shown, let id = steps[safe: s]?.id { proxy.scrollTo(id, anchor: .center) } }
             .onChange(of: shown) { _, s in
-                guard let id = steps[safe: s]?.id else { return }
+                guard let s, let id = steps[safe: s]?.id else { return }
                 withAnimation { proxy.scrollTo(id, anchor: .center) }
             }
         }
@@ -499,7 +528,7 @@ private struct StageStrip: View {
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
-    private static func label(_ step: GuideStep, _ leg: Leg) -> String {
+    fileprivate static func label(_ step: GuideStep, _ leg: Leg) -> String {
         switch step.kind {
         case .walk: return L10n.f("Walk to %@", leg.to.name)
         case .wait: return L10n.f("%@ departs %@", leg.lineName, Fmt.time(leg.startTime, tz: leg.from.tz))
@@ -580,8 +609,8 @@ private struct GuideMap: View {
     @State private var camera: MapCameraPosition = .automatic
     /// The map turns with the phone (like a compass) and follows you.
     @State private var followHeading = false
-    /// The whole trip at once instead of the current stage.
-    @State private var overview = false
+    /// The whole trip at once instead of the current stage (also the first card of the pager).
+    @Binding var overview: Bool
     @State private var showsFullMap = false
 
     var body: some View {
@@ -632,31 +661,25 @@ private struct GuideMap: View {
         .mapStyle(.standard(pointsOfInterest: .excludingAll))
         .mapControls { MapUserLocationButton(); MapCompass() }
         .overlay(alignment: .topLeading) {
-            Button {
-                followHeading.toggle()
-                overview = false
-                withAnimation {
-                    camera = followHeading ? .userLocation(followsHeading: true, fallback: Self.camera(step, itinerary))
-                        : Self.camera(step, itinerary)
+            // The panel covers the bottom, so the map's own buttons sit at the top.
+            VStack(spacing: 8) {
+                Button {
+                    followHeading.toggle()
+                    overview = false
+                    withAnimation {
+                        camera = followHeading ? .userLocation(followsHeading: true, fallback: Self.camera(step, itinerary))
+                            : Self.camera(step, itinerary)
+                    }
+                } label: {
+                    Image(systemName: followHeading ? "location.north.line.fill" : "location.north.line")
+                        .font(.body.weight(.semibold))
+                        .frame(width: 44, height: 44)
+                        .matteSurface(in: Circle())
                 }
-            } label: {
-                Image(systemName: followHeading ? "location.north.line.fill" : "location.north.line")
-                    .font(.body.weight(.semibold))
-                    .frame(width: 44, height: 44)
-                    .matteSurface(in: Circle())
-            }
-            .buttonStyle(.plain)
-            .padding(8)
-            .accessibilityLabel(Text(followHeading ? L10n.t("Stop turning the map") : L10n.t("Turn the map with you")))
-            .accessibilityIdentifier("guideFollowHeading")
-        }
-        .overlay(alignment: .bottomTrailing) {
-            // The whole trip: on this map, or full screen.
-            HStack(spacing: 8) {
+                .accessibilityLabel(Text(followHeading ? L10n.t("Stop turning the map") : L10n.t("Turn the map with you")))
+                .accessibilityIdentifier("guideFollowHeading")
                 Button {
                     overview.toggle()
-                    followHeading = false
-                    withAnimation { camera = overview ? Self.overviewCamera(itinerary) : Self.camera(step, itinerary) }
                 } label: {
                     Image(systemName: overview ? "scope" : "point.topleft.down.to.point.bottomright.curvepath")
                         .font(.body.weight(.semibold))
@@ -689,10 +712,14 @@ private struct GuideMap: View {
             }
             .accessibilityIdentifier("tripOverviewMap")
         }
-        .onAppear { camera = Self.camera(step, itinerary) }
+        .onAppear { camera = overview ? Self.overviewCamera(itinerary) : Self.camera(step, itinerary) }
         .onChange(of: step) { _, s in
             guard !followHeading, !overview else { return }
             withAnimation { camera = Self.camera(s, itinerary) }
+        }
+        .onChange(of: overview) { _, whole in
+            if whole { followHeading = false } else if followHeading { return }
+            withAnimation { camera = whole ? Self.overviewCamera(itinerary) : Self.camera(step, itinerary) }
         }
     }
 
@@ -841,5 +868,210 @@ private struct AlternativeRow: View {
         guard let res = try? await TransitousClient.shared.plan(from: from, to: dest.coordinate, time: nil, arriveBy: false,
                                                                  options: app.routeOptions) else { return }
         option = TripAlternative.pick(res.itineraries, at: .now)
+    }
+}
+
+enum TripPanelMetrics {
+    /// How much of the panel shows when it is down: the stage strip and one stage card.
+    static let peek: CGFloat = 196
+}
+
+/// The panel over the trip map: down (stages only), half way or up (all details).
+/// It keeps one size and only moves, so dragging it does not lay the list out again.
+private struct TripPanel<Header: View, Content: View>: View {
+    enum Detent: CaseIterable { case peek, half, full }
+
+    let header: Header
+    let content: Content
+    @State private var detent: Detent = .peek
+    @GestureState(resetTransaction: Transaction(animation: .spring(response: 0.32, dampingFraction: 0.86)))
+    private var drag: CGFloat = 0
+
+    init(@ViewBuilder header: () -> Header, @ViewBuilder content: () -> Content) {
+        self.header = header()
+        self.content = content()
+    }
+
+    var body: some View {
+        GeometryReader { geo in
+            let height = geo.size.height
+            let y = Self.offset(detent, height: height)
+            let lowest = Self.offset(.peek, height: height)
+            // Past the top or the bottom it gives a little, then stops.
+            let moved = min(max(y + drag, -12), lowest + 40)
+            VStack(spacing: 0) {
+                VStack(spacing: 8) {
+                    Capsule()
+                        .fill(Color.secondary.opacity(0.45))
+                        .frame(width: 36, height: 5)
+                        .frame(maxWidth: .infinity, minHeight: 18)
+                        .contentShape(Rectangle())
+                        .onTapGesture { move(to: detent == .peek ? .half : .peek) }
+                        .accessibilityHidden(true)
+                    header
+                }
+                .padding(.bottom, 10)
+                .contentShape(Rectangle())
+                .simultaneousGesture(dragGesture(height: height))
+                content
+                    .frame(maxHeight: .infinity, alignment: .top)
+                    .scrollDisabled(detent == .peek)
+            }
+            .frame(width: geo.size.width, height: height, alignment: .top)
+            .background {
+                UnevenRoundedRectangle(topLeadingRadius: 22, topTrailingRadius: 22, style: .continuous)
+                    .fill(Color.ground)
+                    .shadow(color: .black.opacity(0.12), radius: 12, y: -2)
+                    // Down to the bottom edge of the screen, under the home indicator.
+                    .padding(.bottom, -120)
+            }
+            .offset(y: moved)
+        }
+    }
+
+    private static func offset(_ detent: Detent, height: CGFloat) -> CGFloat {
+        switch detent {
+        case .full: return 0
+        case .half: return height * 0.45
+        case .peek: return max(height - TripPanelMetrics.peek, 0)
+        }
+    }
+
+    private func move(to new: Detent) {
+        withAnimation(.spring(response: 0.32, dampingFraction: 0.86)) { detent = new }
+    }
+
+    private func dragGesture(height: CGFloat) -> some Gesture {
+        DragGesture(minimumDistance: 8)
+            .updating($drag) { value, state, _ in
+                // Sideways is for the stage cards.
+                guard abs(value.translation.height) > abs(value.translation.width) else { return }
+                state = value.translation.height
+            }
+            .onEnded { value in
+                guard abs(value.translation.height) > abs(value.translation.width) else { return }
+                let target = Self.offset(detent, height: height) + value.predictedEndTranslation.height
+                let nearest = Detent.allCases.min { abs(Self.offset($0, height: height) - target) < abs(Self.offset($1, height: height) - target) } ?? detent
+                move(to: nearest)
+            }
+    }
+}
+
+/// The stages as cards to swipe through, the whole trip first; the map shows the card in front.
+private struct StagePager: View {
+    let steps: [GuideStep]
+    let itinerary: Itinerary
+    let live: Int
+    /// The stage on the map; nil for the whole trip.
+    let shown: Int?
+    let onShow: (Int?) -> Void
+    /// The card in front: -1 is the whole trip.
+    @State private var position: Int?
+    /// Set while the pager scrolls by itself, so the cards it passes are not picked.
+    @State private var target: Int?
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            LazyHStack(spacing: 8) {
+                overviewCard
+                    .containerRelativeFrame(.horizontal) { w, _ in w - 32 }
+                    .id(-1)
+                ForEach(steps.indices, id: \.self) { i in
+                    card(i)
+                        .containerRelativeFrame(.horizontal) { w, _ in w - 32 }
+                        .id(i)
+                }
+            }
+            .scrollTargetLayout()
+        }
+        .contentMargins(.horizontal, 16, for: .scrollContent)
+        .scrollTargetBehavior(.viewAligned)
+        .scrollPosition(id: $position)
+        .padding(.horizontal, -12)
+        .onAppear { position = shown ?? -1 }
+        .onChange(of: shown) { _, s in
+            let wanted = s ?? -1
+            guard position != wanted else { return }
+            target = wanted
+            withAnimation { position = wanted }
+        }
+        .onChange(of: position) { _, p in
+            guard let p else { return }
+            if let target {
+                if p == target { self.target = nil }
+                return
+            }
+            let picked: Int? = p < 0 ? nil : p
+            if picked != shown { onShow(picked) }
+        }
+    }
+
+    private var overviewCard: some View {
+        let first = itinerary.legs.first, last = itinerary.legs.last
+        return frame(selected: shown == nil) {
+            Image(systemName: "point.topleft.down.to.point.bottomright.curvepath")
+                .font(.title3.weight(.semibold))
+                .frame(width: 36)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(L10n.t("Trip overview")).font(.headline).lineLimit(1)
+                if let first, let last {
+                    Text(verbatim: "\(Fmt.time(first.startTime, tz: first.from.tz)) – \(Fmt.time(last.endTime, tz: last.to.tz)) · \(Fmt.duration(seconds: Int(last.endTime.timeIntervalSince(first.startTime))))")
+                        .font(.subheadline).foregroundStyle(.secondary).monospacedDigit().lineLimit(1)
+                }
+            }
+        }
+        .onTapGesture { if shown != nil { onShow(nil) } }
+    }
+
+    private func card(_ i: Int) -> some View {
+        let step = steps[i]
+        let leg = itinerary.legs[step.legIndex]
+        return frame(selected: shown == i) {
+            Group {
+                if step.kind == .ride {
+                    LineBadge(leg, compact: true)
+                } else {
+                    Image(systemName: icon(step, leg)).font(.title3.weight(.semibold))
+                }
+            }
+            .frame(minWidth: 36)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(verbatim: "\(i + 1)/\(steps.count)")
+                    .font(.caption2.weight(.semibold)).foregroundStyle(.secondary).monospacedDigit()
+                Text(StageStrip.label(step, leg)).font(.headline).lineLimit(2)
+                if step.kind != .arrive {
+                    Text(verbatim: "\(Fmt.time(leg.startTime, tz: leg.from.tz)) – \(Fmt.time(leg.endTime, tz: leg.to.tz)) · \(Fmt.duration(seconds: leg.duration))")
+                        .font(.subheadline).foregroundStyle(.secondary).monospacedDigit().lineLimit(1)
+                } else {
+                    Text(verbatim: Fmt.time(leg.endTime, tz: leg.to.tz))
+                        .font(.subheadline).foregroundStyle(.secondary).monospacedDigit()
+                }
+            }
+            Spacer(minLength: 0)
+            if i == live { SignatureDot(size: 10) }
+        }
+        .opacity(i < live ? 0.55 : 1)
+        .onTapGesture { if shown != i { onShow(i) } }
+    }
+
+    private func icon(_ step: GuideStep, _ leg: Leg) -> String {
+        switch step.kind {
+        case .walk: return leg.rental.map { $0.kind.symbol } ?? ModeStyle.symbol(leg.mode)
+        case .wait: return "clock"
+        case .ride: return ModeStyle.symbol(leg.mode)
+        case .arrive: return "flag.checkered"
+        }
+    }
+
+    private func frame<C: View>(selected: Bool, @ViewBuilder _ content: () -> C) -> some View {
+        HStack(spacing: 12) { content() }
+            .padding(.horizontal, 14).padding(.vertical, 12)
+            .frame(maxWidth: .infinity, minHeight: 84, alignment: .leading)
+            .background(Color.surface, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .strokeBorder(selected ? Color.ink.opacity(0.35) : Color.primary.opacity(0.06)))
+            .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .accessibilityElement(children: .combine)
+            .accessibilityAddTraits(selected ? [.isButton, .isSelected] : .isButton)
     }
 }
