@@ -25,6 +25,7 @@
 - The map has two new buttons: "Show whole trip" (the whole route on the same map, with start and destination; tap again to go back to the stage) and "Trip overview" (the whole route full screen).
 
 ### Places from other map apps
+- Publit is in the share sheet: share a place or a dropped pin from Google Maps, Apple Maps or any app that shares a map link, pick Publit, and Publit opens with routes there from where you are ("Where to now?"). Opening the app from the extension uses a way Apple does not allow for extensions: fine for own installs, may be rejected in App Review.
 - A map link pasted into the place search (Google Maps incl. short links maps.app.goo.gl, Apple Maps, OpenStreetMap, `geo:`) or plain coordinates ("45.4436, 12.3264") is shown as the place it points to. Short links are followed once; when a link only names a place, Publit searches that name.
 - New link `publit://place?name=…&lat=…&lon=…`: routes there from where you are ("Where to now?").
 

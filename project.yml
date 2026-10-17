@@ -86,6 +86,7 @@ targets:
           done
     dependencies:
       - target: PublitWidgets
+      - target: PublitShare
       # The watch app installs with the iPhone app (Embed Watch Content).
       - target: PublitWatch
         embed: true
@@ -198,6 +199,33 @@ targets:
         script: |
           set -e
           /usr/bin/base64 -D -i "$SRCROOT/Config/AppIcon/AppIcon.png.b64" -o "$SRCROOT/Watch/Assets.xcassets/AppIcon.appiconset/AppIcon.png"
+  PublitShare:
+    type: app-extension
+    platform: iOS
+    sources:
+      - Share
+      - Sources/Models/MapLink.swift
+      - Sources/Util/L10n.swift
+      - Sources/Shared/Localizable.xcstrings
+    info:
+      path: Config/Share-Info.plist
+      properties:
+        CFBundleDisplayName: Publit
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.share-services
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ShareViewController
+          NSExtensionAttributes:
+            NSExtensionActivationRule:
+              NSExtensionActivationSupportsWebURLWithMaxCount: 1
+              NSExtensionActivationSupportsText: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.publit.app.share
+        TARGETED_DEVICE_FAMILY: "1"
+        CODE_SIGN_STYLE: Automatic
+        SKIP_INSTALL: YES
   PublitTests:
     type: bundle.unit-test
     platform: iOS
