@@ -19,6 +19,7 @@ final class PublitUITests: XCTestCase {
         let name = self.name
         let item = DispatchWorkItem {
             print("WATCHDOG: \(name) still running after \(Int(Self.watchdogSeconds)) s - stopping the runner")
+            print("::error::WATCHDOG \(name) still running after \(Int(Self.watchdogSeconds)) s")
             fflush(stdout)
             abort()
         }
@@ -30,6 +31,16 @@ final class PublitUITests: XCTestCase {
             }
             return false
         }
+    }
+
+    /// Also prints each failure as a GitHub Actions annotation, so failing UI tests are visible on
+    /// pull requests (which do not publish to the ci-results branch).
+    override func record(_ issue: XCTIssue) {
+        let line = issue.sourceCodeContext.location?.lineNumber ?? 0
+        let text = "\(name) \(issue.compactDescription)".replacingOccurrences(of: "\n", with: " ")
+        print("::error file=Tests/UI/PublitUITests.swift,line=\(line)::\(text)")
+        fflush(stdout)
+        super.record(issue)
     }
 
     override func tearDown() {
