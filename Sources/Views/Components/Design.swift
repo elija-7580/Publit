@@ -95,3 +95,48 @@ extension View {
     /// Rows of a list section as one flat card.
     func inkCard() -> some View { listRowBackground(Color.surface) }
 }
+
+/// A warning in one calm form for every screen: a coloured edge and symbol, the words in ink.
+/// Only `critical` (cancelled, missed) gets a tinted card, so it stands out from everything else.
+struct Notice: View {
+    enum Level { case critical, change, info }
+    let level: Level
+    let title: String
+    var detail: String? = nil
+
+    var tint: Color {
+        switch level {
+        case .critical: return .danger
+        case .change: return .delay
+        case .info: return .secondary
+        }
+    }
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 10) {
+            Image(systemName: level == .info ? "info.circle.fill" : "exclamationmark.circle.fill")
+                .font(.subheadline.weight(.bold))
+                .foregroundStyle(tint)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).font(.subheadline.weight(.semibold)).foregroundStyle(Color.ink)
+                if let detail { Text(detail).font(.footnote).foregroundStyle(.secondary) }
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.vertical, 2)
+        .accessibilityElement(children: .combine)
+        .listRowBackground(NoticeBackground(tint: tint, tinted: level == .critical))
+    }
+}
+
+/// The card behind a notice row: a 4 pt edge in its colour.
+struct NoticeBackground: View {
+    let tint: Color
+    var tinted = false
+
+    var body: some View {
+        Color.surface
+            .overlay(tinted ? tint.opacity(0.07) : Color.clear)
+            .overlay(alignment: .leading) { tint.frame(width: 4) }
+    }
+}

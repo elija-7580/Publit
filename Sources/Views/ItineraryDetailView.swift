@@ -17,7 +17,7 @@ struct CompareMapView: View {
                 let isSelected = it.routeKey == selectedId
                 ForEach(Array(it.legs.enumerated()), id: \.offset) { _, leg in
                     MapPolyline(coordinates: leg.legGeometry.clCoordinates)
-                        .stroke(isSelected ? (leg.isTransit ? leg.lineStroke : Color.routeAhead) : Color.gray.opacity(0.45),
+                        .stroke(isSelected ? Color.routeAhead : Color.gray.opacity(0.45),
                                 style: .leg(leg.isTransit, width: isSelected ? 5 : 3))
                 }
             }
@@ -79,18 +79,25 @@ struct ItineraryDetailView: View {
                         StatusBanner(status: statusAt(now), refreshedAt: refreshedAt)
                     }
                 }
-                RouteSummary(itinerary: itinerary)
-                ForEach(warnings, id: \.self) { w in
-                    Label(w.message, systemImage: "exclamationmark.triangle.fill")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(w.level == .missed ? Color.danger : Color.delay)
-                }
+                Clocked(every: 30) { now in LeaveHero(itinerary: itinerary, now: now) }
+                    .listRowInsets(EdgeInsets())
+                    .listRowBackground(Color.clear)
+                RouteSummary(itinerary: itinerary, showsTimes: false)
                 if let note = Fmt.foreignZoneNote(tz: itinerary.legs.first?.from.tz, at: itinerary.startTime) {
                     Label(note, systemImage: "clock").font(.footnote).foregroundStyle(.secondary)
                 }
                 if StreetComparison.streetMode(itinerary) == "CAR" {
                     Label("Driving times are without traffic and parking.", systemImage: "info.circle")
                         .font(.footnote).foregroundStyle(.secondary)
+                }
+            }
+
+            // Warnings in one calm form: a coloured edge, the words in ink.
+            if !warnings.isEmpty {
+                Section {
+                    ForEach(warnings, id: \.self) { w in
+                        Notice(level: w.level == .missed ? .critical : .change, title: w.message)
+                    }
                 }
             }
 
@@ -135,22 +142,26 @@ struct ItineraryDetailView: View {
 /// Time, duration and the chain of lines, e.g. 🚶 › S8 › U6 › 🚶.
 struct RouteSummary: View {
     let itinerary: Itinerary
+    /// Off under the leave card, which already shows them.
+    var showsTimes = true
     @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             // Chosen by text size, not ViewThatFits: measuring both layouts in a self-sizing row
             // can make the row's height flip between passes.
-            if typeSize.isAccessibilitySize {
-                stackedTimes
-            } else {
-                HStack(alignment: .firstTextBaseline) {
-                    Text("\(Fmt.time(itinerary.startTime, tz: itinerary.legs.first?.from.tz)) – \(Fmt.time(itinerary.endTime, tz: itinerary.legs.last?.to.tz))")
-                        .font(.title2.weight(.bold).monospacedDigit())
-                        .lineLimit(1).minimumScaleFactor(0.7)
-                    Spacer(minLength: 8)
-                    DurationFigure(seconds: itinerary.duration)
-                        .lineLimit(1).fixedSize()
+            if showsTimes {
+                if typeSize.isAccessibilitySize {
+                    stackedTimes
+                } else {
+                    HStack(alignment: .firstTextBaseline) {
+                        Text("\(Fmt.time(itinerary.startTime, tz: itinerary.legs.first?.from.tz)) – \(Fmt.time(itinerary.endTime, tz: itinerary.legs.last?.to.tz))")
+                            .font(.title2.weight(.bold).monospacedDigit())
+                            .lineLimit(1).minimumScaleFactor(0.7)
+                        Spacer(minLength: 8)
+                        DurationFigure(seconds: itinerary.duration)
+                            .lineLimit(1).fixedSize()
+                    }
                 }
             }
             legChain
@@ -255,8 +266,7 @@ struct RouteMap: View {
             UserAnnotation()
             ForEach(Array(itinerary.legs.enumerated()), id: \.offset) { _, leg in
                 MapPolyline(coordinates: leg.legGeometry.clCoordinates)
-                    .stroke(leg.isTransit ? leg.lineStroke : Color.routeAhead,
-                            style: .leg(leg.isTransit, width: 5))
+                    .stroke(Color.routeAhead, style: .leg(leg.isTransit, width: 5))
             }
             if let first = itinerary.legs.first {
                 Marker("Start", systemImage: "circle.fill", coordinate: first.from.coordinate.clCoordinate)
@@ -450,7 +460,7 @@ struct TimelineLegRow: View {
                 .font(.subheadline.weight(.semibold).monospacedDigit())
                 .frame(width: 52, alignment: .trailing)
                 .padding(.top, 10)
-            TimelineRail(color: leg.isTransit ? leg.lineStroke : Color.routeAhead, dotted: !leg.isTransit)
+            TimelineRail(color: leg.isTransit ? Color.ink : Color.secondary, dotted: !leg.isTransit)
             LegRow(leg: leg, bar: false)
                 .padding(.vertical, 4)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -511,5 +521,38 @@ private struct RailLine: Shape {
         p.move(to: CGPoint(x: rect.midX, y: rect.minY))
         p.addLine(to: CGPoint(x: rect.midX, y: rect.maxY))
         return p
+    }
+}
+
+/// The one number that decides: when to leave (or the times), and when you arrive. Ink slab, big type.
+struct LeaveHero: View {
+    let itinerary: Itinerary
+    let now: Date
+
+    var body: some View {
+        let tz = itinerary.legs.first?.from.tz
+        let minutes = Int((itinerary.startTime.timeIntervalSince(now) / 60).rounded(.up))
+        let big: String = minutes > 90 || minutes < -1
+            ? "\(Fmt.time(itinerary.startTime, tz: tz)) – \(Fmt.time(itinerary.endTime, tz: itinerary.legs.last?.to.tz))"
+            : minutes >= 1 ? L10n.f("Leave in %lld min", minutes) : L10n.t("Leave now")
+        HStack(alignment: .lastTextBaseline) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(Fmt.duration(seconds: itinerary.duration))
+                    .font(.caption.weight(.semibold)).opacity(0.65)
+                Text(verbatim: big)
+                    .font(.title2.weight(.heavy).monospacedDigit())
+                    .lineLimit(1).minimumScaleFactor(0.6)
+            }
+            Spacer(minLength: 12)
+            VStack(alignment: .trailing, spacing: 2) {
+                Text("Arrive").font(.caption.weight(.semibold)).opacity(0.65)
+                Text(Fmt.time(itinerary.endTime, tz: itinerary.legs.last?.to.tz))
+                    .font(.title2.weight(.heavy).monospacedDigit())
+            }
+        }
+        .foregroundStyle(Color.onInk)
+        .padding(.horizontal, 18).padding(.vertical, 14)
+        .background(Color.ink, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .accessibilityElement(children: .combine)
     }
 }

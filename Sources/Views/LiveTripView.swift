@@ -78,7 +78,7 @@ struct LiveTripView: View {
                         overview = false
                         picked = tapped == live ? nil : steps[tapped].id
                     }
-                    StagePager(steps: steps, itinerary: it, destination: trip.toName, live: live, shown: overview ? nil : index) { shown in
+                    StagePager(steps: steps, itinerary: it, destination: trip.toName, live: live, now: now, shown: overview ? nil : index) { shown in
                         if let shown {
                             overview = false
                             picked = shown == live ? nil : steps[shown].id
@@ -157,6 +157,7 @@ struct LiveTripView: View {
             if wrong {
                 Section {
                     AlternativeRow(trip: trip, from: here, message: wrongMessage, onMore: replan)
+                        .listRowBackground(NoticeBackground(tint: .danger, tinted: true))
                 }
             }
 
@@ -695,7 +696,7 @@ private struct GuideMap: View {
                 }
                 if part.ahead.count > 1 {
                     MapPolyline(coordinates: part.ahead.map(\.clCoordinate))
-                        .stroke((leg.isTransit ? leg.lineStroke : Color.routeAhead).opacity(active ? 1 : 0.6),
+                        .stroke(Color.routeAhead.opacity(active ? 1 : 0.45),
                                 style: .leg(leg.isTransit, width: width))
                 }
             }
@@ -705,7 +706,7 @@ private struct GuideMap: View {
             }
             if let vehicle {
                 Annotation("", coordinate: vehicle.clCoordinate) {
-                    Circle().fill(current.lineStroke).frame(width: 18, height: 18)
+                    Circle().fill(Color.routeAhead).frame(width: 18, height: 18)
                         .overlay(Circle().strokeBorder(.white, lineWidth: 3))
                         .shadow(radius: 2)
                 }
@@ -891,8 +892,12 @@ private struct AlternativeRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Label(message, systemImage: "exclamationmark.triangle.fill")
-                .font(.subheadline.weight(.semibold)).foregroundStyle(Color.delay)
+            Label {
+                Text(message).foregroundStyle(Color.ink)
+            } icon: {
+                Image(systemName: "exclamationmark.circle.fill").foregroundStyle(Color.danger)
+            }
+            .font(.subheadline.weight(.semibold))
             if let option, let first = option.firstTransitLeg {
                 HStack(spacing: 8) {
                     LineBadge(first, compact: true)
@@ -941,7 +946,7 @@ private struct AlternativeRow: View {
 
 enum TripPanelMetrics {
     /// How much of the panel shows when it is down: the stage strip and one stage card.
-    static let peek: CGFloat = 196
+    static let peek: CGFloat = 206
 }
 
 /// The panel over the trip map: down (stages only), half way or up (all details).
@@ -1031,6 +1036,7 @@ private struct StagePager: View {
     let itinerary: Itinerary
     let destination: String
     let live: Int
+    let now: Date
     /// The stage on the map; nil for the whole trip.
     let shown: Int?
     let onShow: (Int?) -> Void
@@ -1057,7 +1063,7 @@ private struct StagePager: View {
         .scrollTargetBehavior(.viewAligned)
         .scrollPosition(id: $position)
         // A sideways scroll view would take all the height it is offered.
-        .frame(height: 84)
+        .frame(height: 96)
         .padding(.horizontal, -12)
         .onAppear { position = shown ?? -1 }
         .onChange(of: shown) { _, s in
@@ -1097,29 +1103,37 @@ private struct StagePager: View {
     private func card(_ i: Int) -> some View {
         let step = steps[i]
         let leg = itinerary.legs[step.legIndex]
+        let isNow = i == live
+        // The stage you are on: what to do in big type, and how long it still takes.
+        let until: Date = step.kind == .wait ? leg.startTime : leg.endTime
+        let left = max(0, Int((until.timeIntervalSince(now) / 60).rounded(.up)))
         return frame(selected: shown == i) {
-            Group {
-                if step.kind == .ride {
-                    LineBadge(leg, compact: true)
-                } else {
-                    Image(systemName: Self.icon(step, leg)).font(.title3.weight(.semibold))
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(spacing: 6) {
+                    Text(verbatim: (isNow ? L10n.t("now").uppercased() + " · " : "") + "\(i + 1)/\(steps.count)")
+                        .font(.caption2.weight(.bold)).tracking(0.6)
+                        .foregroundStyle(.secondary).monospacedDigit()
+                    if step.kind == .ride || step.kind == .wait {
+                        LineBadge(leg, compact: true)
+                    } else {
+                        Image(systemName: Self.icon(step, leg)).font(.caption.weight(.bold)).foregroundStyle(.secondary)
+                    }
+                    if isNow { SignatureDot(size: 7) }
+                }
+                Text(StageStrip.label(step, in: itinerary, destination: destination))
+                    .font(isNow ? .title3.weight(.heavy) : .headline)
+                    .lineLimit(2).minimumScaleFactor(0.8)
+                Text(verbatim: step.kind == .arrive ? Fmt.time(leg.endTime, tz: leg.to.tz)
+                     : "\(Fmt.time(leg.startTime, tz: leg.from.tz)) – \(Fmt.time(leg.endTime, tz: leg.to.tz))")
+                    .font(.footnote).foregroundStyle(.secondary).monospacedDigit().lineLimit(1)
+            }
+            Spacer(minLength: 8)
+            if isNow, step.kind != .arrive {
+                VStack(alignment: .trailing, spacing: 0) {
+                    Text(verbatim: "\(left)").font(.system(size: 34, weight: .heavy).monospacedDigit())
+                    Text(verbatim: "min").font(.caption.weight(.bold)).foregroundStyle(.secondary)
                 }
             }
-            .frame(minWidth: 36)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(verbatim: "\(i + 1)/\(steps.count)")
-                    .font(.caption2.weight(.semibold)).foregroundStyle(.secondary).monospacedDigit()
-                Text(StageStrip.label(step, in: itinerary, destination: destination)).font(.headline).lineLimit(2)
-                if step.kind != .arrive {
-                    Text(verbatim: "\(Fmt.time(leg.startTime, tz: leg.from.tz)) – \(Fmt.time(leg.endTime, tz: leg.to.tz)) · \(Fmt.duration(seconds: leg.duration))")
-                        .font(.subheadline).foregroundStyle(.secondary).monospacedDigit().lineLimit(1)
-                } else {
-                    Text(verbatim: Fmt.time(leg.endTime, tz: leg.to.tz))
-                        .font(.subheadline).foregroundStyle(.secondary).monospacedDigit()
-                }
-            }
-            Spacer(minLength: 0)
-            if i == live { SignatureDot(size: 10) }
         }
         .opacity(i < live ? 0.55 : 1)
         .onTapGesture { if shown != i { onShow(i) } }
@@ -1137,7 +1151,7 @@ private struct StagePager: View {
     private func frame<C: View>(selected: Bool, @ViewBuilder _ content: () -> C) -> some View {
         HStack(spacing: 12) { content() }
             .padding(.horizontal, 14).padding(.vertical, 12)
-            .frame(maxWidth: .infinity, minHeight: 84, maxHeight: 84, alignment: .leading)
+            .frame(maxWidth: .infinity, minHeight: 96, maxHeight: 96, alignment: .leading)
             .background(Color.surface, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous)
                 .strokeBorder(selected ? Color.ink.opacity(0.35) : Color.primary.opacity(0.06)))
