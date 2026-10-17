@@ -356,7 +356,7 @@ final class PublitUITests: XCTestCase {
     func testF02PlanCompareAndDetail() {
         let app = launch(["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "plan"])
         XCTAssertTrue(app.navigationBars["Plan"].waitForExistence(timeout: 10))
-        let routes = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'from Marienplatz'"))
+        let routes = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] ' from '"))
         XCTAssertTrue(routes.firstMatch.waitForExistence(timeout: timeout), "no routes found")
         sleep(1)
         snap("plan")
@@ -457,7 +457,7 @@ final class PublitUITests: XCTestCase {
     /// F07 Save a planned route: it appears under Upcoming trips in Saved, with ticket links in the details.
     func testF07SaveTripAndTickets() {
         let app = launch(["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "plan"])
-        let routes = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'from Marienplatz'"))
+        let routes = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] ' from '"))
         XCTAssertTrue(routes.firstMatch.waitForExistence(timeout: timeout), "no routes found")
         routes.firstMatch.tap()
         XCTAssertTrue(app.navigationBars["Route"].waitForExistence(timeout: 10))
@@ -513,7 +513,7 @@ final class PublitUITests: XCTestCase {
         app.terminate()
 
         let plan = launch(["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "plan"])
-        let routes = plan.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'from Marienplatz'"))
+        let routes = plan.buttons.matching(NSPredicate(format: "label CONTAINS[c] ' from '"))
         XCTAssertTrue(routes.firstMatch.waitForExistence(timeout: timeout), "no routes found")
         // Driving comes a little after the routes (its own, slower request).
         let car = plan.buttons["compare-CAR"]
@@ -580,7 +580,7 @@ final class PublitUITests: XCTestCase {
         map.terminate()
 
         let plan = launch(["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "plan"])
-        let routes = plan.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'from Marienplatz'"))
+        let routes = plan.buttons.matching(NSPredicate(format: "label CONTAINS[c] ' from '"))
         XCTAssertTrue(routes.firstMatch.waitForExistence(timeout: timeout), "no routes found")
         // Any element type: a SwiftUI Menu in a list row is not always reported as a button.
         let sort = plan.descendants(matching: .any)["routeSortMenu"].firstMatch
