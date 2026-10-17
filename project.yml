@@ -103,6 +103,8 @@ targets:
       - Sources/Models/PlaceRole.swift
       - Sources/Models/TransitFilter.swift
       - Sources/Models/TransitExtras.swift
+      - Sources/Models/Reach.swift
+      - Sources/Stores/StopGrouping.swift
       - Sources/Views/Components/LineBadge.swift
       - Sources/Util/Geo.swift
       - Sources/Util/Polyline.swift
