@@ -20,6 +20,8 @@ let core = [
     "Models/MapLayers.swift",
     "Models/CityGuide.swift",
     "Models/Reach.swift",
+    "Models/CircularLine.swift",
+    "Models/MapLink.swift",
     "Util/Polyline.swift",
     "Util/LineColors.swift",
     "Util/Geo.swift",

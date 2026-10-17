@@ -16,7 +16,7 @@ struct DepartureRow: View {
             if typeSize.isAccessibilitySize {
                 VStack(alignment: .leading, spacing: 10) {
                     identity
-                    DirectionLabel(direction: stopTime.directionName)
+                    DirectionLabel(direction: stopTime.shownDirection, circular: stopTime.isCircular)
                     platform
                     serviceNote
                     time(now: now)
@@ -25,7 +25,7 @@ struct DepartureRow: View {
                 HStack(alignment: .center, spacing: 12) {
                     VStack(alignment: .leading, spacing: 6) {
                         identity
-                        DirectionLabel(direction: stopTime.directionName)
+                        DirectionLabel(direction: stopTime.shownDirection, circular: stopTime.isCircular)
                         platform
                         serviceNote
                     }
@@ -77,7 +77,8 @@ struct DepartureRow: View {
     private var accessibilityText: String {
         var parts = ["\(ModeStyle.label(stopTime.mode)) \(stopTime.lineName)"]
         if let detail = stopTime.serviceDetail { parts.append(detail) }
-        if let direction = stopTime.directionName { parts.append(L10n.f("Towards %@", direction)) }
+        if stopTime.isCircular { parts.append(L10n.t("Circle line")) }
+        else if let direction = stopTime.directionName { parts.append(L10n.f("Towards %@", direction)) }
         else { parts.append(L10n.t("Direction unavailable")) }
         if stopTime.isReplacementBus { parts.append(L10n.t("Rail replacement bus")) }
         parts.append(contentsOf: stopTime.serviceAlerts.map(\.headerText))

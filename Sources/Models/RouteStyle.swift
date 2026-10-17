@@ -17,7 +17,7 @@ extension ModeStyle {
     static func color(_ mode: String) -> Color { Color(hex: defaultHex(mode)) ?? .gray }
 }
 
-#if canImport(UIKit)
+#if canImport(UIKit) && !os(watchOS)
 import UIKit
 
 extension Color {
@@ -49,6 +49,27 @@ extension Color {
 
 extension RouteStyled {
     /// For route lines on maps, timeline bars, progress and stop lines (not for badge fills).
+    var lineStroke: Color { Color(lineStroke: lineColors.background) }
+}
+#elseif os(watchOS)
+// The watch is always dark and has no trait-based colours: the dark tones only.
+extension Color {
+    init(_ tone: Palette.Tone) {
+        let c = LineColors.RGB(hex: tone.dark) ?? LineColors.RGB(hex: tone.light)!
+        self.init(red: c.r, green: c.g, blue: c.b)
+    }
+    static let live = Color(Palette.live)
+    static let delay = Color(Palette.delay)
+    static let danger = Color(Palette.danger)
+    static let appAccent = Color(Palette.accent)
+
+    init(lineStroke hex: String) {
+        let c = LineColors.RGB(hex: LineColors.strokeHex(hex, dark: true)) ?? LineColors.white
+        self.init(red: c.r, green: c.g, blue: c.b)
+    }
+}
+
+extension RouteStyled {
     var lineStroke: Color { Color(lineStroke: lineColors.background) }
 }
 #endif

@@ -719,7 +719,7 @@ struct VehicleTripView: View {
                 HStack(spacing: 10) {
                     LineBadge(vehicle)
                     VStack(alignment: .leading, spacing: 2) {
-                        if let to = leg?.directionName { Text(L10n.f("Towards %@", to)).font(.subheadline.weight(.semibold)) }
+                        if let to = leg?.shownDirection { Text(L10n.f("Towards %@", to)).font(.subheadline.weight(.semibold)) }
                         Text(vehicle.realTime ? L10n.t("Live position") : L10n.t("Position from the timetable"))
                             .font(.caption).foregroundStyle(.secondary)
                     }

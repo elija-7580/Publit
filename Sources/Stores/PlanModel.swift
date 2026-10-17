@@ -308,6 +308,18 @@ final class AppState {
         case .trip, .route: tab = .plan
         case .stop: tab = .nearby
         case .ticket, .tripTickets, .go: break
+        case .place(let name, let lat, let lon):
+            // Shared from Google Maps or another map app: routes there from here, leaving now.
+            deepLink = nil
+            if let lat, let lon {
+                goNow(to: SavedPlace(id: "shared|\(lat),\(lon)", name: name, subtitle: nil, lat: lat, lon: lon, stopId: nil))
+            } else {
+                Task {
+                    guard let m = try? await TransitousClient.shared.geocode(name, near: nil).first else { return }
+                    goNow(to: SavedPlace(match: m))
+                }
+            }
+            return
         }
         deepLink = link
     }

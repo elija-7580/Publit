@@ -16,6 +16,9 @@ enum DeepLink: Hashable, Identifiable {
     case stop(id: String, name: String, lat: Double, lon: Double)
     /// Routes from here to Home or Work, leaving now: `publit://go/home` (from Siri).
     case go(PlaceRole)
+    /// Routes from here to a place shared from another map app: `publit://place?name=…&lat=…&lon=…`
+    /// (from the share extension, see `MapLink`). Without coordinates the name is searched.
+    case place(name: String, lat: Double?, lon: Double?)
 
     static let scheme = "publit"
 
@@ -47,6 +50,17 @@ enum DeepLink: Hashable, Identifiable {
         case "go":
             guard let role = arg.flatMap(PlaceRole.init(rawValue:)) else { return nil }
             self = .go(role)
+        case "place":
+            let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []
+            func value(_ n: String) -> String? { items.first { $0.name == n }?.value.flatMap { $0.isEmpty ? nil : $0 } }
+            let lat = value("lat").flatMap(Double.init), lon = value("lon").flatMap(Double.init)
+            if let lat, let lon {
+                guard lat.isFinite, lon.isFinite, abs(lat) <= 90, abs(lon) <= 180 else { return nil }
+                self = .place(name: value("name") ?? String(format: "%.5f, %.5f", lat, lon), lat: lat, lon: lon)
+            } else {
+                guard let name = value("name") else { return nil }
+                self = .place(name: name, lat: nil, lon: nil)
+            }
         default:
             return nil
         }
@@ -65,6 +79,13 @@ enum DeepLink: Hashable, Identifiable {
             c.queryItems = [URLQueryItem(name: "name", value: name),
                             URLQueryItem(name: "lat", value: String(lat)), URLQueryItem(name: "lon", value: String(lon))]
         case .go(let role): c.host = "go"; c.path = "/" + role.rawValue
+        case .place(let name, let lat, let lon):
+            c.host = "place"
+            var items = [URLQueryItem(name: "name", value: name)]
+            if let lat, let lon {
+                items += [URLQueryItem(name: "lat", value: String(lat)), URLQueryItem(name: "lon", value: String(lon))]
+            }
+            c.queryItems = items
         }
         return c.url!
     }

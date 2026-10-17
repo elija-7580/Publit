@@ -651,4 +651,19 @@ final class PublitUITests: XCTestCase {
         app.buttons["mapPlaceRoute"].tap()
         XCTAssertTrue(app.navigationBars.element.waitForExistence(timeout: 10))
     }
+
+    /// F20 A pasted Google Maps link in the destination search is the place it points to.
+    func testF20PastedMapLinkIsAPlace() {
+        let app = launch(["PUBLIT_TAB": "plan"])
+        let to = app.buttons["endpoint-to"]
+        XCTAssertTrue(to.waitForExistence(timeout: 10), "no To field in Plan")
+        to.tap()
+        let field = app.searchFields.firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout: 5))
+        field.tap()
+        field.typeText("https://www.google.com/maps/search/48.1351,+11.5820")
+        let hit = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Place from the link'")).firstMatch
+        XCTAssertTrue(hit.waitForExistence(timeout: 15), "pasted map link not recognised")
+        snap("search-map-link")
+    }
 }

@@ -16,8 +16,24 @@
 ### Start screen type
 - Weights follow the type tokens: the destination in departure rows is semibold (the station name stays the heaviest text), "now" is as large as the minute figures, "min" and the delay are lighter, "Next trip" has the weight of the other rows in its card, "All departures" is medium.
 
+### Circle lines
+- Lines that start and end at the same place (ACTV 5.1/5.2 at Lido, town buses that loop) no longer read as going the wrong way. A leg on such a line says "Towards S. Alvise · Circle line" (where you get off); a departure board says "Circle line" instead of "Towards Lido" at Lido. Piers of the same place ("Lido S.M.E. "A"" and ""B"") count as one.
+
+### Started trip
+- The stop list draws one continuous line from the first to the last stop; the rows no longer break it into pieces (it looked like a rope ladder). Travelled parts are faded.
+- Walks on all route maps are a row of dots like in Apple Maps instead of thick dashes.
+- The map has two new buttons: "Show whole trip" (the whole route on the same map, with start and destination; tap again to go back to the stage) and "Trip overview" (the whole route full screen).
+
+### Share places from other map apps
+- New share extension: share a place or a dropped pin from Google Maps, Apple Maps or any app that shares a map link, pick Publit, and Publit opens with routes there from where you are ("Where to now?"). Google short links (maps.app.goo.gl) are followed once; when a link only names a place, Publit searches that name.
+- A map link pasted into the place search (Google Maps, Apple Maps, OpenStreetMap, `geo:`) or plain coordinates ("45.4436, 12.3264") is shown as the place it points to.
+- New link `publit://place?name=…&lat=…&lon=…`.
+
+### Apple Watch
+- First watch app (watchOS 10): the nearest stops with their next departures (line, direction, minutes, live), the same 500 m / 1.5 km / 5 km steps and far-stop note as on the iPhone. It loads from Transitous on its own and installs with the iPhone app.
+
 ### Tests
-- ReachTests (radii, walk steps, walking time, long-walk note from a real Cavallino → San Zaccaria answer, picked places, merged search). UI tests F18 (far stop at Cavallino) and F19 (dropped pin).
+- ReachTests (radii, walk steps, walking time, long-walk note from a real Cavallino → San Zaccaria answer, picked places, merged search). SharedPlaceTests (circle lines with real ACTV names; Google, Apple Maps, OSM and geo links; Google short link with name; coordinates in a Google page; `publit://place`). UI tests F18 (far stop at Cavallino), F19 (dropped pin) and F20 (pasted map link). UI test failures are repeated as GitHub annotations, so they are visible on pull requests.
 
 ## 0.6.0 (build 33)
 
