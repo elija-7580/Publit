@@ -87,12 +87,6 @@ targets:
     dependencies:
       - target: PublitWidgets
       - target: PublitShare
-      # The watch app installs with the iPhone app (Embed Watch Content).
-      - target: PublitWatch
-        embed: true
-        copy:
-          destination: productsDirectory
-          subpath: $(CONTENTS_FOLDER_PATH)/Watch
   PublitWidgets:
     type: app-extension
     platform: iOS
