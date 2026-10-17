@@ -34,6 +34,7 @@ struct GoNowView: View {
                     Label(note, systemImage: "figure.walk")
                         .font(.footnote).foregroundStyle(Color.delay)
                         .fixedSize(horizontal: false, vertical: true)
+                        .accessibilityElement(children: .combine)
                         .accessibilityIdentifier("longWalkNote")
                 }
                 if !its.isEmpty { ConnectionLegendRow(start: windowStart, end: windowEnd, tz: its.first?.legs.first?.from.tz) }

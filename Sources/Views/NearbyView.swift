@@ -82,6 +82,7 @@ struct NearbyView: View {
                     .font(.subheadline)
                     .foregroundStyle(Color.delay)
                     .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityElement(children: .combine)
                     .accessibilityIdentifier("nearbyFarNote")
             }
             if !groups.isEmpty, errorMessage != nil, !Connectivity.shared.isOffline {
