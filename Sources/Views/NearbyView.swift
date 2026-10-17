@@ -6,6 +6,8 @@ struct NearbyView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Environment(FavoritesStore.self) private var favorites
     @Environment(TripStore.self) private var trips
+    /// The live bar is showing the trip already: no second card for it.
+    @Environment(\.liveBarInset) private var liveBarInset
     @State private var isVisible = false
     @State private var searching = false
     @State private var showMap = false
@@ -78,11 +80,7 @@ struct NearbyView: View {
             }
             if !groups.isEmpty, let farDistance {
                 // Far is not empty: the stops are listed, with how long the walk is.
-                Label(Reach.farNote(meters: farDistance), systemImage: "figure.walk")
-                    .font(.subheadline)
-                    .foregroundStyle(Color.delay)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .accessibilityElement(children: .combine)
+                InlineNotice(text: Reach.farNote(meters: farDistance), systemImage: "figure.walk")
                     .accessibilityIdentifier("nearbyFarNote")
             }
             if !groups.isEmpty, errorMessage != nil, !Connectivity.shared.isOffline {
@@ -159,7 +157,7 @@ struct NearbyView: View {
 
     @ViewBuilder
     private var activeTripSection: some View {
-        if let trip = trips.activeTrip {
+        if let trip = trips.activeTrip, liveBarInset == 0 {
             Section("Active trip") {
                 NavigationLink { SavedTripView(tripId: trip.id) } label: {
                     VStack(alignment: .leading, spacing: 6) {
@@ -196,7 +194,8 @@ struct NearbyView: View {
                         icon: { Image(systemName: p.role?.symbol ?? "mappin") }
                 }
             }
-            if let next = trips.upcoming().first, next.startTime.timeIntervalSinceNow < 3 * 3600 {
+            if let next = trips.upcoming().first, next.id != trips.activeTrip?.id,
+               next.startTime.timeIntervalSinceNow < 3 * 3600 {
                 NavigationLink { SavedTripView(tripId: next.id) } label: {
                     // Same weight as the other rows of this card ("Where to now?", Home, Work).
                     VStack(alignment: .leading, spacing: 2) {

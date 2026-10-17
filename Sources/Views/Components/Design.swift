@@ -140,3 +140,78 @@ struct NoticeBackground: View {
             .overlay(alignment: .leading) { tint.frame(width: 4) }
     }
 }
+
+/// A short warning inside a row: the symbol in its colour, the words in ink (same calm form as `Notice`).
+struct InlineNotice: View {
+    let text: String
+    var tint: Color = .delay
+    var systemImage = "exclamationmark.triangle.fill"
+
+    var body: some View {
+        Label {
+            Text(verbatim: text).foregroundStyle(Color.ink)
+        } icon: {
+            Image(systemName: systemImage).foregroundStyle(tint)
+        }
+        .font(.caption.weight(.semibold))
+        .fixedSize(horizontal: false, vertical: true)
+        .accessibilityElement(children: .combine)
+    }
+}
+
+/// One empty state for every tab: symbol, title, a line of help and an optional ink action.
+/// Wraps instead of truncating, also inside a list card.
+struct EmptyState<Action: View>: View {
+    let title: String
+    let systemImage: String
+    let message: String
+    @ViewBuilder var action: () -> Action
+
+    var body: some View {
+        VStack(spacing: 10) {
+            Image(systemName: systemImage)
+                .font(.system(size: 34, weight: .regular))
+                .foregroundStyle(.secondary)
+                .padding(.bottom, 4)
+                .accessibilityHidden(true)
+            Text(verbatim: title)
+                .font(.title3.weight(.bold))
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+            Text(verbatim: message)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+            action().padding(.top, 6)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 24)
+        .padding(.horizontal, 12)
+        .accessibilityElement(children: .contain)
+    }
+}
+
+extension EmptyState where Action == EmptyView {
+    init(title: String, systemImage: String, message: String) {
+        self.init(title: title, systemImage: systemImage, message: message) { EmptyView() }
+    }
+}
+
+/// Small controls above a list (sort, map): the same capsule as the mode chips.
+struct ChipButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(Color.ink)
+            .padding(.horizontal, 12)
+            .frame(minHeight: 34)
+            .background(Color.inkFill, in: Capsule())
+            .contentShape(Capsule())
+            .opacity(configuration.isPressed ? 0.7 : 1)
+    }
+}
+
+extension ButtonStyle where Self == ChipButtonStyle {
+    static var chip: ChipButtonStyle { ChipButtonStyle() }
+}

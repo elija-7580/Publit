@@ -164,10 +164,7 @@ struct PlanView: View {
             }
             if let note = plan.walkNote, !its.isEmpty {
                 // Found only with a longer walk: say so, the walk is part of the decision.
-                Label(note, systemImage: "figure.walk")
-                    .font(.footnote).foregroundStyle(Color.delay)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .accessibilityElement(children: .combine)
+                InlineNotice(text: note, systemImage: "figure.walk")
                     .accessibilityIdentifier("longWalkNote")
             }
 
@@ -176,16 +173,17 @@ struct PlanView: View {
             if !its.isEmpty {
                 // Borderless: two controls in one row, each with its own tap area
                 // (otherwise a tap anywhere in the row triggers both).
-                HStack {
+                HStack(spacing: 8) {
                     RouteSortMenu()
-                        .buttonStyle(.borderless)
                     Spacer()
-                    Button(showMap ? L10n.t("List") : L10n.t("Map")) { withAnimation { showMap.toggle() } }
-                        .font(.caption.weight(.semibold))
-                        .buttonStyle(.borderless)
-                        .frame(minHeight: 44)
-                        .accessibilityIdentifier("routeMapToggle")
+                    Button { withAnimation { showMap.toggle() } } label: {
+                        Label(showMap ? L10n.t("List") : L10n.t("Map"), systemImage: showMap ? "list.bullet" : "map")
+                    }
+                    .buttonStyle(.chip)
+                    .accessibilityIdentifier("routeMapToggle")
                 }
+                .frame(minHeight: 44)
+                .listRowInsets(EdgeInsets(top: 0, leading: 4, bottom: 0, trailing: 4))
                 .listRowBackground(Color.clear)
             }
 
@@ -247,8 +245,6 @@ struct PlanView: View {
                     }
                 }
             }
-        } header: {
-            Text("Routes")
         } footer: {
             if !its.isEmpty {
                 VStack(alignment: .leading, spacing: 6) {
@@ -298,13 +294,10 @@ struct ItineraryRow: View {
             .font(.caption)
             .foregroundStyle(.secondary)
             if itinerary.transitLegs.contains(where: { !$0.serviceAlerts.isEmpty || $0.isReplacementBus }) {
-                Label("Service changes on this route", systemImage: "exclamationmark.triangle.fill")
-                    .font(.caption.weight(.semibold)).foregroundStyle(Color.delay)
+                InlineNotice(text: L10n.t("Service changes on this route"))
             }
             ForEach(warnings, id: \.self) { w in
-                Label(w.message, systemImage: "exclamationmark.triangle.fill")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(w.level == .missed ? Color.danger : Color.delay)
+                InlineNotice(text: w.message, tint: w.level == .missed ? Color.danger : Color.delay)
             }
         }
         .padding(.vertical, 4)
@@ -383,10 +376,10 @@ struct RouteSortMenu: View {
             }
         } label: {
             Label(current.title, systemImage: "arrow.up.arrow.down")
-                .font(.caption.weight(.semibold))
                 .textCase(nil)
         }
+        .menuStyle(.button)
+        .buttonStyle(.chip)
         .accessibilityIdentifier("routeSortMenu")
-        .padding(.trailing, 8)
     }
 }
