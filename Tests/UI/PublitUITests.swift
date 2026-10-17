@@ -19,7 +19,6 @@ final class PublitUITests: XCTestCase {
         let name = self.name
         let item = DispatchWorkItem {
             print("WATCHDOG: \(name) still running after \(Int(Self.watchdogSeconds)) s - stopping the runner")
-            print("::error::WATCHDOG \(name) still running after \(Int(Self.watchdogSeconds)) s")
             fflush(stdout)
             abort()
         }
@@ -33,13 +32,14 @@ final class PublitUITests: XCTestCase {
         }
     }
 
-    /// Also prints each failure as a GitHub Actions annotation, so failing UI tests are visible on
-    /// pull requests (which do not publish to the ci-results branch).
+    /// Repeats each failure on its own line as a GitHub Actions annotation, so failing UI tests are
+    /// visible on pull requests (which do not publish to the ci-results branch). xcodebuild prints
+    /// the failure message as is, the runner's own stdout does not reach the job log.
     override func record(_ issue: XCTIssue) {
+        var issue = issue
         let line = issue.sourceCodeContext.location?.lineNumber ?? 0
-        let text = "\(name) \(issue.compactDescription)".replacingOccurrences(of: "\n", with: " ")
-        print("::error file=Tests/UI/PublitUITests.swift,line=\(line)::\(text)")
-        fflush(stdout)
+        let text = issue.compactDescription.replacingOccurrences(of: "\n", with: " ")
+        issue.compactDescription = text + "\n::error file=Tests/UI/PublitUITests.swift,line=\(line)::\(name) \(text) (error: UI test)"
         super.record(issue)
     }
 
