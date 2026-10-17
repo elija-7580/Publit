@@ -731,9 +731,13 @@ final class PublitUITests: XCTestCase {
         let field = app.searchFields.firstMatch
         XCTAssertTrue(field.waitForExistence(timeout: 5))
         field.tap()
-        field.typeText("https://www.google.com/maps/search/48.1351,+11.5820")
+        // In pieces: one long typeText on a busy runner can drop or reorder keys.
+        for part in ["https://", "www.google.com", "/maps/search/", "48.1351,+11.5820"] {
+            field.typeText(part)
+        }
         let hit = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Place from the link'")).firstMatch
-        XCTAssertTrue(hit.waitForExistence(timeout: 15), "pasted map link not recognised")
+        XCTAssertTrue(hit.waitForExistence(timeout: 15),
+                      "pasted map link not recognised; field: \(field.value as? String ?? "?")")
         snap("search-map-link")
     }
 }
