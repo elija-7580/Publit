@@ -79,7 +79,7 @@ struct LiveTripView: View {
                 }
                 .padding(.horizontal, 12)
             } content: {
-                details(it: it, step: step, leg: leg, index: index, live: live, here: here, walk: walk,
+                details(it: it, steps: steps, step: step, leg: leg, index: index, live: live, here: here, walk: walk,
                         walkPos: walkPos, ride: ride, check: check, wrong: wrong, wrongMessage: wrongMessage)
             }
         }
@@ -123,7 +123,7 @@ struct LiveTripView: View {
 
     /// What the panel shows under the stages: the live stage in detail, then the trip actions.
     @ViewBuilder
-    private func details(it: Itinerary, step: GuideStep, leg: Leg, index: Int, live: Int, here: LatLon?,
+    private func details(it: Itinerary, steps: [GuideStep], step: GuideStep, leg: Leg, index: Int, live: Int, here: LatLon?,
                          walk: WalkRoute?, walkPos: WalkRoute.Position?,
                          ride: (progress: TripProgress, fromGPS: Bool)?,
                          check: TripGuide.Check, wrong: Bool, wrongMessage: String) -> some View {
@@ -134,18 +134,35 @@ struct LiveTripView: View {
                 }
             }
 
-            if picked != nil {
+            if picked != nil || overview {
                 Section {
-                    Button { picked = nil } label: { Label("Back to now", systemImage: "location.fill") }
+                    Button { picked = nil; overview = false } label: { Label("Back to now", systemImage: "location.fill") }
                         .font(.subheadline.weight(.semibold))
                 }
             }
 
-            switch step.kind {
-            case .walk: walkSections(leg, index: step.legIndex, in: it, route: walk!, position: walkPos, check: check)
-            case .wait: waitSection(leg, index: step.legIndex, in: it)
-            case .ride: rideSections(leg, progress: ride?.progress ?? .notStarted, fromGPS: ride?.fromGPS ?? false, check: check)
-            case .arrive: arriveSection(it, here: here)
+            // Pulled up, the whole trip first: every stage at a glance, tap one to see it.
+            Section("Trip overview") {
+                ForEach(steps.indices, id: \.self) { i in
+                    Button {
+                        overview = false
+                        picked = i == live ? nil : steps[i].id
+                    } label: {
+                        StageRow(step: steps[i], leg: it.legs[steps[i].legIndex], number: i + 1, count: steps.count,
+                                 live: i == live, done: i < live, selected: !overview && i == index)
+                    }
+                    .buttonStyle(.plain)
+                    .listRowBackground(!overview && i == index ? Color.inkFill : Color.surface)
+                }
+            }
+
+            if !overview {
+                switch step.kind {
+                case .walk: walkSections(leg, index: step.legIndex, in: it, route: walk!, position: walkPos, check: check)
+                case .wait: waitSection(leg, index: step.legIndex, in: it)
+                case .ride: rideSections(leg, progress: ride?.progress ?? .notStarted, fromGPS: ride?.fromGPS ?? false, check: check)
+                case .arrive: arriveSection(it, here: here)
+                }
             }
 
             Section {
@@ -492,6 +509,7 @@ private struct StageStrip: View {
                 }
                 .padding(.vertical, 2)
             }
+            .frame(height: 38)
             .onAppear { if let s = shown, let id = steps[safe: s]?.id { proxy.scrollTo(id, anchor: .center) } }
             .onChange(of: shown) { _, s in
                 guard let s, let id = steps[safe: s]?.id else { return }
@@ -987,6 +1005,8 @@ private struct StagePager: View {
         .contentMargins(.horizontal, 16, for: .scrollContent)
         .scrollTargetBehavior(.viewAligned)
         .scrollPosition(id: $position)
+        // A sideways scroll view would take all the height it is offered.
+        .frame(height: 84)
         .padding(.horizontal, -12)
         .onAppear { position = shown ?? -1 }
         .onChange(of: shown) { _, s in
@@ -1031,7 +1051,7 @@ private struct StagePager: View {
                 if step.kind == .ride {
                     LineBadge(leg, compact: true)
                 } else {
-                    Image(systemName: icon(step, leg)).font(.title3.weight(.semibold))
+                    Image(systemName: Self.icon(step, leg)).font(.title3.weight(.semibold))
                 }
             }
             .frame(minWidth: 36)
@@ -1054,7 +1074,7 @@ private struct StagePager: View {
         .onTapGesture { if shown != i { onShow(i) } }
     }
 
-    private func icon(_ step: GuideStep, _ leg: Leg) -> String {
+    fileprivate static func icon(_ step: GuideStep, _ leg: Leg) -> String {
         switch step.kind {
         case .walk: return leg.rental.map { $0.kind.symbol } ?? ModeStyle.symbol(leg.mode)
         case .wait: return "clock"
@@ -1066,12 +1086,50 @@ private struct StagePager: View {
     private func frame<C: View>(selected: Bool, @ViewBuilder _ content: () -> C) -> some View {
         HStack(spacing: 12) { content() }
             .padding(.horizontal, 14).padding(.vertical, 12)
-            .frame(maxWidth: .infinity, minHeight: 84, alignment: .leading)
+            .frame(maxWidth: .infinity, minHeight: 84, maxHeight: 84, alignment: .leading)
             .background(Color.surface, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous)
                 .strokeBorder(selected ? Color.ink.opacity(0.35) : Color.primary.opacity(0.06)))
             .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
             .accessibilityElement(children: .combine)
             .accessibilityAddTraits(selected ? [.isButton, .isSelected] : .isButton)
+    }
+}
+
+/// One stage in the pulled-up list: what to do, from when to when; the current one has the yellow dot.
+private struct StageRow: View {
+    let step: GuideStep
+    let leg: Leg
+    let number: Int
+    let count: Int
+    let live: Bool
+    let done: Bool
+    let selected: Bool
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Group {
+                if step.kind == .ride {
+                    LineBadge(leg, compact: true)
+                } else {
+                    Image(systemName: StagePager.icon(step, leg)).font(.body.weight(.semibold))
+                }
+            }
+            .frame(minWidth: 32)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(StageStrip.label(step, leg)).font(.subheadline.weight(.semibold)).lineLimit(2)
+                Text(verbatim: step.kind == .arrive ? Fmt.time(leg.endTime, tz: leg.to.tz)
+                     : "\(Fmt.time(leg.startTime, tz: leg.from.tz)) – \(Fmt.time(leg.endTime, tz: leg.to.tz)) · \(Fmt.duration(seconds: leg.duration))")
+                    .font(.caption).foregroundStyle(.secondary).monospacedDigit()
+            }
+            Spacer(minLength: 0)
+            if live { SignatureDot(size: 9) }
+            Text(verbatim: "\(number)/\(count)").font(.caption2.weight(.semibold)).foregroundStyle(.tertiary).monospacedDigit()
+        }
+        .padding(.vertical, 2)
+        .opacity(done ? 0.5 : 1)
+        .contentShape(Rectangle())
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(selected ? [.isButton, .isSelected] : .isButton)
     }
 }
