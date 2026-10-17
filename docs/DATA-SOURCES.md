@@ -98,3 +98,23 @@ Not usable without an agreement or key: StadtRAD Hamburg (DB API Marketplace "Sh
 - **Elevator status:** DB FaSta (key), Wiener Linien OGD, TfL lift disruptions.
 - **Occupancy:** Entur and some GTFS-RT feeds carry `occupancy_status`; Transitous passes it through where present.
 - **EU National Access Points** (official open data per country, mostly GTFS/NeTEx/GBFS): Mobilithek (DE), transport.data.gouv.fr (FR, API works without key), opentransportdata.swiss (CH), NDOV (NL), Entur (NO), Trafiklab (SE), Fintraffic (FI), nap.transportes.gob.es (ES), data.gov.gr (GR). Good places to find feeds for Transitous gaps.
+
+## 4. Comparison with Abfahrt! (2026-10-17)
+
+[Abfahrt!](https://www.abfahrt.now/attributions/) shows live departures across Europe from operator interfaces (TRIAS, HAFAS, EFA, SIRI, own APIs) rather than one GTFS router. Its sources line up with the gaps measured for Transitous (live share of departures, 2026-10-06):
+
+| Gap in Publit (live share) | Source used by Abfahrt! | Access | Next step |
+| --- | --- | --- | --- |
+| Vienna (0–1 %) | Wiener Linien OGD, CC BY | no key, per stop (`monitor?stopId=`) | map Transitous stop IDs to RBL numbers; departure overlay, then a GTFS-RT converter for Transitous like `feeds/amtab-gtfsrt` |
+| ÖBB / Krems (0–1 %) | ÖBB | HAFAS is not an official open API | check Mobilitätsdaten Österreich for an official real-time feed first |
+| London Tube (0 %) | TfL Open Data | optional key | "Powered by TfL Open Data" attribution |
+| Milan (0 %) | ATM Milano | to check | licence and endpoint |
+| Stockholm (0 %) | Trafiklab, CC0 / CC BY 4.0 | free key | key via proxy, not in the app |
+| Copenhagen (0 %) | Rejseplanen | free key | terms |
+| Madrid (17 %) | EMT Madrid, CRTM, Renfe | key | |
+| Bari | AMTAB | no key | converter built, deploy open |
+| Rome, Naples | Roma Mobilità, ANM | to check | is the feed active in Transitous? |
+
+Venice (ACTV ferries) is missing at Abfahrt!; Transitous has the timetable (no live times).
+
+Abfahrt!'s licence column is coarse ("Open Data"): verify each licence before use. Order: Wiener Linien → ÖBB → TfL → ATM Milano → Trafiklab → Rejseplanen. A source that can be turned into GTFS-RT goes to Transitous (better routing and transfers for everyone); only otherwise an in-app overlay for departure boards. Every source used is credited in Settings → Data.

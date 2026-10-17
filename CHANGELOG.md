@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.6.0 (build 34)
+
+### Far stops are shown, not hidden
+- Nearby looks for departures within 500 m, 1.5 km and then 5 km. When the nearest stop is far (from 1.5 km), the board lists it anyway and says so above the list: "The nearest departures are 2.9 km away, about 48 min on foot." Station headers show the walking time from 400 m. Example: Cavallino-Treporti, 3 km from the Punta Sabbioni ferry, used to show an empty board.
+- Route search tries walks of 30 min, 45 min and then up to 2 h to the first and from the last stop before it says "No connections". Routes found with a longer walk than usual carry a note: "These routes include a long walk: up to 40 min to or from the stop."
+- With a shorter walking limit set in Route options, the message names that limit instead of a plain "No connections".
+- The empty board says "No departures within 5 km" and offers the station map.
+
+### Map: tap places, drop pins, search sights
+- Apple Maps points of interest (museums, shops, beaches …) are on by default on the station map and can be tapped: the place sheet shows distance, walking time, "Route here" and "Route from here".
+- A long press anywhere drops a pin with the same sheet; the address follows when Apple knows it.
+- The map search combines stops and towns from Transitous with places from Apple Maps ("Museum", a shop name) around the visible map.
+
+### Start screen type
+- Weights follow the type tokens: the destination in departure rows is semibold (the station name stays the heaviest text), "now" is as large as the minute figures, "min" and the delay are lighter, "Next trip" has the weight of the other rows in its card, "All departures" is medium.
+
+### Tests
+- ReachTests (radii, walk steps, walking time, long-walk note from a real Cavallino → San Zaccaria answer, picked places, merged search). UI tests F18 (far stop at Cavallino) and F19 (dropped pin).
+
 ## 0.6.0 (build 33)
 
 ### Back to the build 31 layout

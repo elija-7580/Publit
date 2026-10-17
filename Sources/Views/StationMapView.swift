@@ -317,7 +317,8 @@ struct StationMapView: View {
     @AppStorage("mapSharing") private var showSharing = false
     @AppStorage("mapBase") private var storedBase = MapBase.standard.rawValue
     @AppStorage("map3D") private var realistic3D = false
-    @AppStorage("mapPOI") private var pointsOfInterest = false
+    /// On by default: museums, shops and beaches can be tapped for "Route here".
+    @AppStorage("mapPOI") private var pointsOfInterest = true
     @AppStorage("mapTraffic") private var traffic = false
 
     private var look: MapLook {
@@ -330,7 +331,8 @@ struct StationMapView: View {
                            look: look, focus: focus,
                            glide: TransitMapModel.tickSeconds,
                            onRegion: { model.regionChanged($0) },
-                           onSelect: { selection = $0 })
+                           onSelect: { selection = $0 },
+                           onPick: { place, refined in pick(place, refined: refined) })
                 .ignoresSafeArea(edges: .bottom)
                 // Own space below the bar (an overlay could end up under the navigation bar,
                 // and then an active filter hid stations without showing why).
@@ -339,7 +341,7 @@ struct StationMapView: View {
                 .screenTrail("Station map")
                 .navigationBarTitleDisplayMode(.inline)
                 .searchable(text: $query, isPresented: $searching, placement: .navigationBarDrawer(displayMode: .always),
-                            prompt: Text("Search places and towns"))
+                            prompt: Text("Search places, sights and stops"))
                 .searchSuggestions { suggestions }
                 .onSubmit(of: .search) { if let first = results.first { show(first) } }
                 .task(id: query) { await search() }
@@ -348,7 +350,7 @@ struct StationMapView: View {
                     ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } }
                 }
                 .sheet(item: $selection) { sel in
-                    NavigationStack { MapSelectionView(selection: sel, onRoute: route) }
+                    NavigationStack { MapSelectionView(selection: sel, onRoute: route, onRouteFrom: routeFrom) }
                         .presentationDetents([.medium, .large])
                         .presentationBackgroundInteraction(.enabled(upThrough: .medium))
                 }
@@ -447,14 +449,53 @@ struct StationMapView: View {
         // Debounce: the task is cancelled when the text changes again.
         try? await Task.sleep(for: .milliseconds(300))
         guard !Task.isCancelled else { return }
+        let near = model.center ?? location.coordinate
+        // Stops and towns from the transit geocoder, sights and shops from Apple Maps ("Museum", "Lidl"), side by side.
+        async let apple = Self.applePlaces(text, near: near)
         do {
-            let found = try await TransitousClient.shared.geocode(text, near: model.center ?? location.coordinate)
+            let found = try await TransitousClient.shared.geocode(text, near: near)
+            let extra = await apple
             guard !Task.isCancelled else { return }
-            results = found
+            results = GeocodeMatch.merged(found, extra)
             searchedFor = text
         } catch {
-            // Typing on: the next text searches again. A failure leaves the last list.
+            // Typing on: the next text searches again. A failure of the transit geocoder still shows Apple's places.
+            let extra = await apple
+            guard !Task.isCancelled, !extra.isEmpty else { return }
+            results = extra
+            searchedFor = text
         }
+    }
+
+    /// Points of interest and addresses from Apple Maps around the visible map; none when Apple has no answer.
+    private static func applePlaces(_ text: String, near: LatLon?) async -> [GeocodeMatch] {
+        let request = MKLocalSearch.Request()
+        request.naturalLanguageQuery = text
+        request.resultTypes = [.pointOfInterest, .address]
+        if let near {
+            request.region = MKCoordinateRegion(center: near.clCoordinate, latitudinalMeters: 20_000, longitudinalMeters: 20_000)
+        }
+        guard let response = try? await MKLocalSearch(request: request).start() else { return [] }
+        return response.mapItems.prefix(8).compactMap { item in
+            let c = item.placemark.coordinate
+            let point = LatLon(lat: c.latitude, lon: c.longitude)
+            guard point.isValidCoordinate else { return nil }
+            return TransitMapView.Coordinator.match(item, name: item.name ?? text, at: point)
+        }
+    }
+
+    /// A place picked on the map: marked where it is (the map does not move) and opened in the place sheet.
+    /// The refined version (with address) only updates what is still open.
+    private func pick(_ place: GeocodeMatch, refined: Bool) {
+        if refined {
+            guard focus?.match.id == place.id else { return }
+            focus = MapFocus(version: (focus?.version ?? 0) + 1, match: place, moves: false)
+            if case .place(let open)? = selection, open.id == place.id { selection = .place(place) }
+            return
+        }
+        searching = false
+        focus = MapFocus(version: (focus?.version ?? 0) + 1, match: place, moves: false)
+        selection = .place(place)
     }
 
     /// Flies there and marks it. Stops, addresses and single places open their sheet;
@@ -469,6 +510,13 @@ struct StationMapView: View {
     private func route(_ place: SavedPlace) {
         selection = nil
         app.goNow(to: place)
+        dismiss()
+    }
+
+    /// "Route from here": this place as the start in Plan.
+    private func routeFrom(_ place: SavedPlace) {
+        selection = nil
+        app.route(from: place)
         dismiss()
     }
 }
@@ -549,6 +597,7 @@ struct MapLayersSheet: View {
 struct MapPlaceView: View {
     let match: GeocodeMatch
     let onRoute: (SavedPlace) -> Void
+    var onRouteFrom: ((SavedPlace) -> Void)? = nil
     @Environment(LocationManager.self) private var location
 
     var body: some View {
@@ -556,7 +605,11 @@ struct MapPlaceView: View {
             Section {
                 PlaceLabel(name: match.name, subtitle: match.subtitle, isStop: false)
                 if let here = location.coordinate {
-                    LabeledContent("Distance", value: Fmt.distance(meters: here.distance(to: LatLon(lat: match.lat, lon: match.lon))))
+                    let meters = here.distance(to: LatLon(lat: match.lat, lon: match.lon))
+                    LabeledContent("Distance", value: Fmt.distance(meters: meters))
+                    if meters <= 5000 {
+                        LabeledContent("On foot", value: L10n.f("%lld min", Reach.walkMinutes(meters: meters)))
+                    }
                 }
             }
             Section {
@@ -564,6 +617,12 @@ struct MapPlaceView: View {
                     Label("Route here", systemImage: "arrow.triangle.turn.up.right.diamond")
                 }
                 .accessibilityIdentifier("mapPlaceRoute")
+                if let onRouteFrom {
+                    Button { onRouteFrom(SavedPlace(match: match)) } label: {
+                        Label("Route from here", systemImage: "arrow.up.forward.circle")
+                    }
+                    .accessibilityIdentifier("mapPlaceRouteFrom")
+                }
                 Button { openInMaps() } label: {
                     Label("Open in Apple Maps", systemImage: "map")
                 }
@@ -586,6 +645,7 @@ struct MapPlaceView: View {
 struct MapSelectionView: View {
     let selection: MapSelection
     var onRoute: (SavedPlace) -> Void = { _ in }
+    var onRouteFrom: ((SavedPlace) -> Void)? = nil
 
     var body: some View {
         switch selection {
@@ -603,7 +663,7 @@ struct MapSelectionView: View {
             if m.isStop {
                 StopDeparturesView(stopId: m.id, name: m.name, coordinate: LatLon(lat: m.lat, lon: m.lon))
             } else {
-                MapPlaceView(match: m, onRoute: onRoute)
+                MapPlaceView(match: m, onRoute: onRoute, onRouteFrom: onRouteFrom)
             }
         }
     }
