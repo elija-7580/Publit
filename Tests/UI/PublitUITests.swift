@@ -181,6 +181,34 @@ final class PublitUITests: XCTestCase {
         widgets.terminate()
     }
 
+    /// F21 Design screenshots of the real trip screens on a longer sample trip, light and dark:
+    /// the route preview, the live trip with the panel down and pulled up.
+    func testF21DesignScreens() {
+        for dark in [false, true] {
+            let suffix = dark ? "-dark" : ""
+            var app = sample("route", dark: dark)
+            sleep(5) // map tiles
+            snap("design-route\(suffix)")
+            app.swipeUp()
+            sleep(1)
+            snap("design-route-steps\(suffix)")
+            app.terminate()
+
+            app = sample("live", dark: dark)
+            sleep(6)
+            snap("design-live\(suffix)")
+            let window = app.windows.firstMatch
+            window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.74))
+                .press(forDuration: 0.05, thenDragTo: window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.12)))
+            sleep(2)
+            snap("design-live-up\(suffix)")
+            app.swipeUp()
+            sleep(1)
+            snap("design-live-up-more\(suffix)")
+            app.terminate()
+        }
+    }
+
     func testF10StartEndTripAndEmbeddedTicket() {
         let app = sample("workflow")
         let start = app.buttons["startTrip"]
