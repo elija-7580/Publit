@@ -187,7 +187,8 @@ final class PublitUITests: XCTestCase {
         for dark in [false, true] {
             let suffix = dark ? "-dark" : ""
             var app = sample("route", dark: dark)
-            sleep(5) // map tiles
+            allowLocation()
+            sleep(6) // map tiles
             snap("design-route\(suffix)")
             app.swipeUp()
             sleep(1)
@@ -195,7 +196,8 @@ final class PublitUITests: XCTestCase {
             app.terminate()
 
             app = sample("live", dark: dark)
-            sleep(6)
+            allowLocation()
+            sleep(10) // map tiles
             snap("design-live\(suffix)")
             let window = app.windows.firstMatch
             window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.74))
@@ -206,6 +208,15 @@ final class PublitUITests: XCTestCase {
             sleep(1)
             snap("design-live-up-more\(suffix)")
             app.terminate()
+        }
+    }
+
+    /// Answers the location prompt, which would cover the screenshot.
+    private func allowLocation() {
+        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        for label in ["Allow While Using App", "Beim Verwenden der App erlauben"] {
+            let allow = springboard.buttons[label]
+            if allow.waitForExistence(timeout: 3) { allow.tap(); return }
         }
     }
 
