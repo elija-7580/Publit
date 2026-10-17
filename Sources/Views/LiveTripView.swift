@@ -22,6 +22,9 @@ struct LiveTripView: View {
     @State private var picked: String?
     /// The whole trip on the map instead of one stage (first card of the pager).
     @State private var overview = false
+    @State private var confirmEnd = false
+    /// The way on foot from where you are, when you are away from the planned walk.
+    @State private var detour = WalkDetour()
 
     /// A recent fix only: an old one would put you at the wrong stop.
     private var fix: LatLon? {
@@ -51,6 +54,12 @@ struct LiveTripView: View {
         let wrongMessage: String = check == .offRoute ? L10n.t("You seem to be off the route.")
             : check == .missed ? L10n.t("Missed it?") : L10n.t("Connection cancelled")
         let vehicle = step.kind == .ride ? ride.flatMap { TripProgress.position($0.progress, stops: leg.allStops) } : nil
+        // Away from the planned walk (it started where the trip was planned): walk from where you are now.
+        let detourTarget: LatLon? = index == live && step.kind == .walk && walkPos == nil && here != nil ? leg.to.coordinate : nil
+        let detourRoute = detourTarget.flatMap { t in detour.route?.to == t ? detour.route : nil }
+        let detourKey = detourTarget.flatMap { t in here.map { h in
+            "\(t.lat),\(t.lon)|\((h.lat * 2000).rounded())|\((h.lon * 2000).rounded())" } } ?? ""
+        let finished = steps[live].kind == .arrive && TripGuide.isFinished(it, at: now, location: here)
         // The map is the screen; the stages and their details sit in a panel you pull up over it.
         ZStack(alignment: .bottom) {
             GuideMap(itinerary: it, step: step,
@@ -58,17 +67,18 @@ struct LiveTripView: View {
                      focus: walkPos.flatMap { p in walk?.maneuvers[safe: p.index + 1]?.coordinate },
                      trace: TripTrace.Progress(legIndex: steps[live].legIndex, kind: steps[live].kind,
                                                point: index == live && step.kind == .ride ? (vehicle ?? here) : here),
+                     detour: detourRoute.map { (legIndex: step.legIndex, points: $0.points) },
                      overview: $overview)
                 // Frame the route in the part of the map the panel leaves free.
                 .safeAreaPadding(.bottom, TripPanelMetrics.peek + 24)
                 .ignoresSafeArea(edges: .bottom)
             TripPanel {
                 VStack(spacing: 10) {
-                    StageStrip(steps: steps, itinerary: it, live: live, shown: overview ? nil : index) { tapped in
+                    StageStrip(steps: steps, itinerary: it, destination: trip.toName, live: live, shown: overview ? nil : index) { tapped in
                         overview = false
                         picked = tapped == live ? nil : steps[tapped].id
                     }
-                    StagePager(steps: steps, itinerary: it, live: live, shown: overview ? nil : index) { shown in
+                    StagePager(steps: steps, itinerary: it, destination: trip.toName, live: live, shown: overview ? nil : index) { shown in
                         if let shown {
                             overview = false
                             picked = shown == live ? nil : steps[shown].id
@@ -80,14 +90,30 @@ struct LiveTripView: View {
                 .padding(.horizontal, 12)
             } content: {
                 details(it: it, steps: steps, step: step, leg: leg, index: index, live: live, here: here, walk: walk,
-                        walkPos: walkPos, ride: ride, check: check, wrong: wrong, wrongMessage: wrongMessage)
+                        walkPos: walkPos, detour: detourRoute, ride: ride, check: check, wrong: wrong, wrongMessage: wrongMessage)
             }
         }
         .ticking(every: 15, now: $now)
         .navigationTitle(trip.toName)
         .navigationBarTitleDisplayMode(.inline)
         .screenTrail("Live trip")
-        .toolbar { ToolbarItem(placement: .primaryAction) { voiceButton } }
+        .toolbar {
+            // Ending is always in reach, not at the bottom of the list.
+            ToolbarItem(placement: .topBarLeading) {
+                Button("End trip", role: .destructive) { confirmEnd = true }
+                .tint(Color.danger)
+                .accessibilityIdentifier("endTrip")
+            }
+            ToolbarItem(placement: .primaryAction) { voiceButton }
+        }
+        .confirmationDialog(Text("End trip"), isPresented: $confirmEnd, titleVisibility: .visible) {
+            Button("End trip", role: .destructive) { Task { await TripSession.stop(trip, in: trips) } }
+        }
+        .task(id: detourKey) { await detour.update(from: here, to: detourTarget) }
+        // At the destination the trip ends by itself.
+        .onChange(of: finished) { _, done in
+            if done { Task { await TripSession.stop(trip, in: trips) } }
+        }
         .sheet(isPresented: $showTickets) {
             NavigationStack {
                 TripPassesView(tripId: trip.id, at: now)
@@ -124,7 +150,7 @@ struct LiveTripView: View {
     /// What the panel shows under the stages: the live stage in detail, then the trip actions.
     @ViewBuilder
     private func details(it: Itinerary, steps: [GuideStep], step: GuideStep, leg: Leg, index: Int, live: Int, here: LatLon?,
-                         walk: WalkRoute?, walkPos: WalkRoute.Position?,
+                         walk: WalkRoute?, walkPos: WalkRoute.Position?, detour: WalkDetour.Route?,
                          ride: (progress: TripProgress, fromGPS: Bool)?,
                          check: TripGuide.Check, wrong: Bool, wrongMessage: String) -> some View {
         List {
@@ -141,27 +167,24 @@ struct LiveTripView: View {
                 }
             }
 
-            // Pulled up, the whole trip first: every stage at a glance, tap one to see it.
+            // Pulled up: the whole trip, with the stage on the map opened in its place.
+            let upTo = overview ? steps.count - 1 : index
             Section("Trip overview") {
-                ForEach(steps.indices, id: \.self) { i in
-                    Button {
-                        overview = false
-                        picked = i == live ? nil : steps[i].id
-                    } label: {
-                        StageRow(step: steps[i], leg: it.legs[steps[i].legIndex], number: i + 1, count: steps.count,
-                                 live: i == live, done: i < live, selected: !overview && i == index)
-                    }
-                    .buttonStyle(.plain)
-                    .listRowBackground(!overview && i == index ? Color.inkFill : Color.surface)
-                }
+                ForEach(0...upTo, id: \.self) { i in stageButton(i, steps: steps, it: it, index: index, live: live) }
             }
 
             if !overview {
                 switch step.kind {
-                case .walk: walkSections(leg, index: step.legIndex, in: it, route: walk!, position: walkPos, check: check)
+                case .walk: walkSections(leg, index: step.legIndex, in: it, route: walk!, position: walkPos, detour: detour, check: check)
                 case .wait: waitSection(leg, index: step.legIndex, in: it)
                 case .ride: rideSections(leg, progress: ride?.progress ?? .notStarted, fromGPS: ride?.fromGPS ?? false, check: check)
                 case .arrive: arriveSection(it, here: here)
+                }
+            }
+
+            if upTo + 1 < steps.count {
+                Section {
+                    ForEach((upTo + 1)..<steps.count, id: \.self) { i in stageButton(i, steps: steps, it: it, index: index, live: live) }
                 }
             }
 
@@ -172,12 +195,6 @@ struct LiveTripView: View {
                 } label: {
                     Label("Route details", systemImage: "list.bullet")
                 }
-                Button(role: .destructive) {
-                    Task { await TripSession.stop(trip, in: trips) }
-                } label: {
-                    Label("End trip", systemImage: "stop.circle")
-                }
-                .accessibilityIdentifier("endTrip")
             } footer: {
                 if let refreshedAt = trip.refreshedAt {
                     Text("Updated \(refreshedAt.formatted(date: .omitted, time: .shortened))")
@@ -187,16 +204,29 @@ struct LiveTripView: View {
         .inkList()
     }
 
+    private func stageButton(_ i: Int, steps: [GuideStep], it: Itinerary, index: Int, live: Int) -> some View {
+        Button {
+            overview = false
+            picked = i == live ? nil : steps[i].id
+        } label: {
+            StageRow(step: steps[i], itinerary: it, destination: trip.toName, number: i + 1, count: steps.count,
+                     live: i == live, done: i < live, selected: !overview && i == index)
+        }
+        .buttonStyle(.plain)
+        .listRowBackground(!overview && i == index ? Color.inkFill : Color.surface)
+    }
+
     // MARK: Walk
 
     @ViewBuilder
     private func walkSections(_ leg: Leg, index: Int, in it: Itinerary, route: WalkRoute,
-                              position: WalkRoute.Position?, check: TripGuide.Check) -> some View {
+                              position: WalkRoute.Position?, detour: WalkDetour.Route?, check: TripGuide.Check) -> some View {
         let next = it.legs[(index + 1)...].first(where: \.isTransit)
-        let target = next?.from.name ?? ItineraryDetailView.placeName(leg.to)
-        let remaining = position?.remaining ?? leg.distance ?? route.length * route.scale
+        let target = next?.from.name ?? (index == it.legs.count - 1 ? trip.toName : ItineraryDetailView.placeName(leg.to))
+        let away = position == nil ? detour : nil
+        let remaining = position?.remaining ?? away?.distance ?? leg.distance ?? route.length * route.scale
         let pace = (leg.distance ?? 0) > 0 ? Double(leg.duration) / (leg.distance ?? 1) : 1 / 1.3
-        let walkSeconds = Int(remaining * pace)
+        let walkSeconds = away.map { Int($0.seconds) } ?? Int(remaining * pace)
         let nextIndex = it.legs[(index + 1)...].firstIndex(where: \.isTransit)
         Section {
             VStack(alignment: .leading, spacing: 8) {
@@ -230,7 +260,7 @@ struct LiveTripView: View {
                 }
             }
             .padding(.vertical, 4)
-            if let b = route.bearing(at: position?.along ?? 0) {
+            if away == nil, let b = route.bearing(at: position?.along ?? 0) {
                 HeadingRow(bearing: b, title: Compass.head(Compass.point(b)))
             }
             if let position, let nextMove = route.maneuvers[safe: position.index + 1] {
@@ -252,6 +282,14 @@ struct LiveTripView: View {
                 Label("Open in Apple Maps", systemImage: "map")
             }
         }
+        if let away {
+            // The way from here, from Apple Maps, instead of the one planned from where you were.
+            Section("Directions") {
+                ForEach(Array(away.steps.enumerated()), id: \.offset) { _, line in
+                    Label(line, systemImage: "figure.walk").font(.subheadline)
+                }
+            }
+        } else {
         Section("Directions") {
             ForEach(Array(route.maneuvers.enumerated()), id: \.offset) { i, m in
                 let isNow = position?.index == i
@@ -274,6 +312,7 @@ struct LiveTripView: View {
                 .foregroundStyle(isPast ? Color.secondary : Color.primary)
                 .accessibilityElement(children: .combine)
             }
+        }
         }
     }
 
@@ -489,6 +528,7 @@ struct LiveTripView: View {
 private struct StageStrip: View {
     let steps: [GuideStep]
     let itinerary: Itinerary
+    let destination: String
     let live: Int
     /// The stage on the map; nil while the whole trip is shown.
     let shown: Int?
@@ -542,16 +582,23 @@ private struct StageStrip: View {
         .background(selected ? Color.inkFill : Color.clear, in: Capsule())
         .overlay(Capsule().strokeBorder(selected ? Color.ink.opacity(0.5) : Color.primary.opacity(0.1)))
         .opacity(index < live ? 0.5 : 1)
-        .accessibilityLabel(Text(Self.label(step, leg)))
+        .accessibilityLabel(Text(Self.label(step, in: itinerary, destination: destination)))
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
-    fileprivate static func label(_ step: GuideStep, _ leg: Leg) -> String {
+    /// What the stage is about, with a place: where to walk to, which line, where to get off.
+    fileprivate static func label(_ step: GuideStep, in it: Itinerary, destination: String) -> String {
+        let leg = it.legs[step.legIndex]
         switch step.kind {
-        case .walk: return L10n.f("Walk to %@", leg.to.name)
-        case .wait: return L10n.f("%@ departs %@", leg.lineName, Fmt.time(leg.startTime, tz: leg.from.tz))
+        case .walk:
+            let target = it.legs[(step.legIndex + 1)...].first(where: \.isTransit)?.from.name
+                ?? (step.legIndex == it.legs.count - 1 ? destination : ItineraryDetailView.placeName(leg.to))
+            return L10n.f("Walk to %@", target)
+        case .wait:
+            if let d = leg.shownDirection { return L10n.f("Take %@ towards %@", leg.lineName, d) }
+            return L10n.f("Take %@", leg.lineName)
         case .ride: return L10n.f("Get off at %@", leg.to.name)
-        case .arrive: return L10n.t("Arrived")
+        case .arrive: return L10n.f("Arrive at %@", destination)
         }
     }
 }
@@ -624,6 +671,8 @@ private struct GuideMap: View {
     let focus: LatLon?
     /// Where the trip is now: what lies behind is drawn light blue.
     let trace: TripTrace.Progress
+    /// The walk from where you are, replacing the planned one of that leg.
+    let detour: (legIndex: Int, points: [LatLon])?
     @State private var camera: MapCameraPosition = .automatic
     /// The map turns with the phone (like a compass) and follows you.
     @State private var followHeading = false
@@ -638,7 +687,8 @@ private struct GuideMap: View {
             ForEach(Array(itinerary.legs.enumerated()), id: \.offset) { i, leg in
                 let active = overview || i == step.legIndex
                 let width: CGFloat = active ? 6 : 4
-                let part = TripTrace.split(leg.legGeometry.mapPoints, legIndex: i, at: trace)
+                let part = detour?.legIndex == i ? TripTrace.Parts(done: [], ahead: detour?.points ?? [])
+                    : TripTrace.split(leg.legGeometry.mapPoints, legIndex: i, at: trace)
                 if part.done.count > 1 {
                     MapPolyline(coordinates: part.done.map(\.clCoordinate))
                         .stroke(Color.routeTraveled, style: .leg(true, width: width))
@@ -667,10 +717,10 @@ private struct GuideMap: View {
                 }
             }
             if overview, let last = itinerary.legs.last {
-                Marker(last.to.name, systemImage: "flag.fill", coordinate: last.to.coordinate.clCoordinate)
+                Marker(ItineraryDetailView.placeName(last.to), systemImage: "flag.fill", coordinate: last.to.coordinate.clCoordinate)
                     .tint(Color.danger)
             } else {
-                Marker(current.isTransit && step.kind == .wait ? current.from.name : current.to.name,
+                Marker(current.isTransit && step.kind == .wait ? current.from.name : ItineraryDetailView.placeName(current.to),
                        systemImage: step.kind == .arrive ? "flag.fill" : "mappin",
                        coordinate: (step.kind == .wait ? current.from : current.to).coordinate.clCoordinate)
                     .tint(step.kind == .arrive ? Color.danger : Color.ink)
@@ -979,6 +1029,7 @@ private struct TripPanel<Header: View, Content: View>: View {
 private struct StagePager: View {
     let steps: [GuideStep]
     let itinerary: Itinerary
+    let destination: String
     let live: Int
     /// The stage on the map; nil for the whole trip.
     let shown: Int?
@@ -1058,7 +1109,7 @@ private struct StagePager: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(verbatim: "\(i + 1)/\(steps.count)")
                     .font(.caption2.weight(.semibold)).foregroundStyle(.secondary).monospacedDigit()
-                Text(StageStrip.label(step, leg)).font(.headline).lineLimit(2)
+                Text(StageStrip.label(step, in: itinerary, destination: destination)).font(.headline).lineLimit(2)
                 if step.kind != .arrive {
                     Text(verbatim: "\(Fmt.time(leg.startTime, tz: leg.from.tz)) – \(Fmt.time(leg.endTime, tz: leg.to.tz)) · \(Fmt.duration(seconds: leg.duration))")
                         .font(.subheadline).foregroundStyle(.secondary).monospacedDigit().lineLimit(1)
@@ -1099,7 +1150,8 @@ private struct StagePager: View {
 /// One stage in the pulled-up list: what to do, from when to when; the current one has the yellow dot.
 private struct StageRow: View {
     let step: GuideStep
-    let leg: Leg
+    let itinerary: Itinerary
+    let destination: String
     let number: Int
     let count: Int
     let live: Bool
@@ -1107,6 +1159,7 @@ private struct StageRow: View {
     let selected: Bool
 
     var body: some View {
+        let leg = itinerary.legs[step.legIndex]
         HStack(spacing: 12) {
             Group {
                 if step.kind == .ride {
@@ -1117,7 +1170,7 @@ private struct StageRow: View {
             }
             .frame(minWidth: 32)
             VStack(alignment: .leading, spacing: 2) {
-                Text(StageStrip.label(step, leg)).font(.subheadline.weight(.semibold)).lineLimit(2)
+                Text(StageStrip.label(step, in: itinerary, destination: destination)).font(.subheadline.weight(.semibold)).lineLimit(2)
                 Text(verbatim: step.kind == .arrive ? Fmt.time(leg.endTime, tz: leg.to.tz)
                      : "\(Fmt.time(leg.startTime, tz: leg.from.tz)) – \(Fmt.time(leg.endTime, tz: leg.to.tz)) · \(Fmt.duration(seconds: leg.duration))")
                     .font(.caption).foregroundStyle(.secondary).monospacedDigit()
@@ -1131,5 +1184,34 @@ private struct StageRow: View {
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(selected ? [.isButton, .isSelected] : .isButton)
+    }
+}
+
+/// A walk from where you are to the stop, from Apple Maps; asked again as you move (about every 50 m).
+@MainActor @Observable
+final class WalkDetour {
+    struct Route {
+        let to: LatLon
+        let points: [LatLon]
+        let distance: Double
+        let seconds: TimeInterval
+        let steps: [String]
+    }
+
+    private(set) var route: Route?
+
+    func update(from: LatLon?, to: LatLon?) async {
+        guard let from, let to else { return }
+        let request = MKDirections.Request()
+        request.source = MKMapItem(placemark: MKPlacemark(coordinate: from.clCoordinate))
+        request.destination = MKMapItem(placemark: MKPlacemark(coordinate: to.clCoordinate))
+        request.transportType = .walking
+        guard let found = try? await MKDirections(request: request).calculate().routes.first, !Task.isCancelled else { return }
+        let line = found.polyline
+        var coords = [CLLocationCoordinate2D](repeating: kCLLocationCoordinate2DInvalid, count: line.pointCount)
+        line.getCoordinates(&coords, range: NSRange(location: 0, length: line.pointCount))
+        route = Route(to: to, points: [from] + coords.map { LatLon(lat: $0.latitude, lon: $0.longitude) },
+                      distance: found.distance, seconds: found.expectedTravelTime,
+                      steps: found.steps.map(\.instructions).filter { !$0.isEmpty })
     }
 }
