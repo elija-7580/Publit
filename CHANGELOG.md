@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.0 (build 39)
+
+### Google Maps in the app
+- Settings → Map → Map provider: route, compare and live trip maps can be drawn with Google Maps. Uses the same Google API key as the place search (enable “Maps SDK for iOS” in the Google project). Without a key, Apple Maps stays.
+
 ## 0.6.0 (build 38)
 
 ### Map and search, your choice
