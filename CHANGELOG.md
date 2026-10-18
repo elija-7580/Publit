@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.0 (build 47)
+
+### Live data where Transitous has none
+- Delays, cancellations, platforms and disruptions now also come straight from the operators: Wiener Linien (Vienna), ÖBB (all of Austria: trains, and buses/trams where the region reports them, plus construction notes), ACTV (Venice vaporetti and buses), SL (Stockholm) and TfL line status (London).
+- Routes appear as before and get live times about a second later; departure boards and the live trip refresh use them too. Walks after a late ride move with it.
+- Route detail shows where live times come from ("Live · ÖBB"). Settings → Data: "Live data from more operators" (on by default) with credits.
+
+### Fixed
+- "Walk from  does not run": a walk to a cancelled stop no longer marks the whole trip as cancelled; only rides count.
+
 ## 0.6.0 (build 46)
 
 ### Code review: fixes and speed

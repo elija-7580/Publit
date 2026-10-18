@@ -78,14 +78,14 @@ struct Place: Codable, Hashable, Sendable {
     let lat: Double
     let lon: Double
     let tz: String?
-    let arrival: Date?
-    let departure: Date?
+    var arrival: Date?
+    var departure: Date?
     let scheduledArrival: Date?
     let scheduledDeparture: Date?
-    let track: String?
+    var track: String?
     let scheduledTrack: String?
-    let cancelled: Bool?
-    let alerts: [Alert]?
+    var cancelled: Bool?
+    var alerts: [Alert]?
 
     var coordinate: LatLon { LatLon(lat: lat, lon: lon) }
     var alertsList: [Alert] { alerts ?? [] }
@@ -105,14 +105,14 @@ struct Alert: Codable, Hashable, Sendable {
 
 struct Leg: Codable, Sendable, RouteStyled {
     let mode: String
-    let from: Place
-    let to: Place
-    let duration: Int
-    let startTime: Date
-    let endTime: Date
+    var from: Place
+    var to: Place
+    var duration: Int
+    var startTime: Date
+    var endTime: Date
     let scheduledStartTime: Date
     let scheduledEndTime: Date
-    let realTime: Bool
+    var realTime: Bool
     let distance: Double?
     let headsign: String?
     let routeColor: String?
@@ -126,9 +126,9 @@ struct Leg: Codable, Sendable, RouteStyled {
     let ticketUrls: TicketUrls?
     let routeId: String?
     let tripId: String?
-    let cancelled: Bool?
-    let intermediateStops: [Place]?
-    let alerts: [Alert]?
+    var cancelled: Bool?
+    var intermediateStops: [Place]?
+    var alerts: [Alert]?
     let legGeometry: EncodedPolyline
     /// Bike or scooter sharing for `RENTAL` legs.
     var rental: LegRental? = nil
@@ -139,6 +139,8 @@ struct Leg: Codable, Sendable, RouteStyled {
     /// Other vehicles that can replace this ride and still keep the trip (smart routing asks for
     /// them with `numLegAlternatives`); each is walk, ride, walk.
     var alternatives: [[Leg]]? = nil
+    /// Extra real-time source that corrected this ride ("ÖBB"), see `LiveOverlay`.
+    var liveSource: String? = nil
 
     var directionName: String? { TransitLabels.clean(headsign) }
     var isTransit: Bool { ModeStyle.isTransit(mode) }
@@ -162,9 +164,9 @@ struct StepInstruction: Codable, Sendable {
 
 struct Itinerary: Codable, Identifiable, Sendable {
     let id: String
-    let duration: Int
-    let startTime: Date
-    let endTime: Date
+    var duration: Int
+    var startTime: Date
+    var endTime: Date
     let transfers: Int
     var legs: [Leg]
     var fareTransfers: [FareTransfer]? = nil
@@ -172,7 +174,9 @@ struct Itinerary: Codable, Identifiable, Sendable {
     var transitLegs: [Leg] { legs.filter(\.isTransit) }
     var firstTransitLeg: Leg? { legs.first(where: \.isTransit) }
     var hasRealtime: Bool { legs.contains { $0.isTransit && $0.realTime } }
-    var isCancelled: Bool { legs.contains { $0.cancelled == true } }
+    /// A cancelled ride; walks have no service to cancel (a "cancelled" walk to a cancelled stop
+    /// read "Walk from  does not run").
+    var isCancelled: Bool { legs.contains { $0.isTransit && $0.cancelled == true } }
     /// Walking (or cycling) only, no public transport.
     var isDirect: Bool { transitLegs.isEmpty }
     /// Departure of the first vehicle (the moment that cannot be missed).
@@ -239,9 +243,9 @@ struct PlanResponse: Decodable, Sendable {
 }
 
 struct StopTime: Decodable, Identifiable, Sendable, RouteStyled {
-    let place: Place
+    var place: Place
     let mode: String
-    let realTime: Bool
+    var realTime: Bool
     let headsign: String
     let agencyName: String?
     let routeId: String?
@@ -250,12 +254,14 @@ struct StopTime: Decodable, Identifiable, Sendable, RouteStyled {
     let displayName: String?
     let routeColor: String?
     let routeTextColor: String?
-    let cancelled: Bool?
+    var cancelled: Bool?
     let tripCancelled: Bool?
     /// Feed direction ("0"/"1"), when given; groups the two directions of a line.
     var directionId: String? = nil
     /// Last stop of the trip.
     var tripTo: SegmentStop? = nil
+    /// Extra real-time source that corrected this departure ("Wiener Linien"), see `LiveOverlay`.
+    var liveSource: String? = nil
 
     /// By the timetable time where known: a new delay must not turn a row into a different row
     /// (in a list that would close a screen opened from it).
@@ -282,7 +288,7 @@ extension StopTime {
 }
 
 struct StopTimesResponse: Decodable, Sendable {
-    let stopTimes: [StopTime]
+    var stopTimes: [StopTime]
     let place: Place?
     let nextPageCursor: String?
 }

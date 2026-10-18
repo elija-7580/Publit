@@ -201,6 +201,7 @@ final class PlanModel {
             }
             // The routes are on screen; cycling and driving follow when the server has them.
             isLoading = false
+            applyLiveSources(token: myToken)
             if !options.comparisonModes.isEmpty, streetKey != key {
                 await loadStreetRoutes(from: f, to: t, time: time, arriveBy: arriveBy, walking: res.direct,
                                        modes: options.comparisonModes, key: key, token: myToken)
@@ -217,6 +218,18 @@ final class PlanModel {
                     errorMessage = error.localizedDescription
                 }
             }
+        }
+    }
+
+    /// Live times and disruptions from other operators (ÖBB, Wiener Linien, ACTV, SL, TfL) where
+    /// Transitous has none. The routes are already on screen; corrected copies replace them.
+    private func applyLiveSources(token myToken: UUID) {
+        let snapshot = itineraries
+        guard LiveOverlay.enabled, !snapshot.isEmpty else { return }
+        Task { [weak self] in
+            let enriched = await LiveOverlay.apply(snapshot, budget: 5)
+            guard let self, self.token == myToken else { return }
+            self.itineraries = LiveOverlay.replace(self.itineraries, with: enriched)
         }
     }
 

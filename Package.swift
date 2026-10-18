@@ -8,6 +8,8 @@ let core = [
     "API/ResponseCache.swift",
     "API/MapStopCache.swift",
     "API/TripRefreshCoordinator.swift",
+    "API/LiveSources.swift",
+    "API/LiveSourceAdapters.swift",
     "App/AppInfo.swift",
     "Models/TransitModels.swift",
     "Models/ServiceAlerts.swift",

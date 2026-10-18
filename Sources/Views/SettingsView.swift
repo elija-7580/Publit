@@ -10,6 +10,7 @@ struct SettingsView: View {
     @AppStorage("mapSharing") private var mapSharing = false
     @AppStorage("routeTimelines") private var routeTimelines = true
     @AppStorage(LineAlertMonitor.enabledKey) private var lineAlerts = false
+    @AppStorage(LiveOverlay.defaultsKey) private var extraLive = true
     @AppStorage("mapBase") private var mapBase = MapBase.standard.rawValue
     @AppStorage("mapPOI") private var mapPOI = true
     @AppStorage(DirectionsApp.defaultsKey) private var directionsApp = DirectionsApp.apple.rawValue
@@ -141,10 +142,17 @@ struct SettingsView: View {
                 Section {
                     Link("Routing and timetables: Transitous and its data sources", destination: AppInfo.sourcesURL)
                     Link("Map data © OpenStreetMap contributors", destination: AppInfo.osmCopyrightURL)
+                    Toggle(isOn: $extraLive) {
+                        Label("Live data from more operators", systemImage: "dot.radiowaves.left.and.right")
+                    }
+                    .accessibilityIdentifier("extraLiveToggle")
                 } header: {
                     Text("Data")
                 } footer: {
-                    Text("Times marked live come from the operator's real-time feed; all others are timetable times.")
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Times marked live come from the operator's real-time feed; all others are timetable times.")
+                        Text("Where Transitous has no live times, Publit also asks ÖBB, Wiener Linien, ACTV (Venice), SL (Stockholm) and TfL (London, Powered by TfL Open Data) about delays, cancellations and disruptions. They only get the stop, line and time of a ride.")
+                    }
                 }
                 Section {
                     if let summary, summary.total > 0 {

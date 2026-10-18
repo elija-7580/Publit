@@ -366,7 +366,7 @@ struct LegRow: View {
                          name: leg.from.name, track: leg.from.track, tz: leg.from.tz)
                 HStack(spacing: 6) {
                     if let stops = leg.intermediateStops { Text(Fmt.stops(stops.count)); Text(verbatim: "·") }
-                    Text(leg.realTime && !Connectivity.shared.isOffline ? L10n.t("Live") : L10n.t("Timetable"))
+                    Text(leg.realTime && !Connectivity.shared.isOffline ? [L10n.t("Live"), leg.liveSource].compactMap { $0 }.joined(separator: " · ") : L10n.t("Timetable"))
                 }
                 .font(.caption).foregroundStyle(.secondary)
                 stopLine(label: "Get off here", time: leg.endTime,

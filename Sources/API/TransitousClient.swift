@@ -156,8 +156,10 @@ final class TransitousClient: @unchecked Sendable {
     /// Without fares: they do not change, `TripStore.update` keeps the ones saved with the trip,
     /// and the answer is smaller (this runs every minute or two for a Live Activity).
     func refresh(itineraryId: String) async throws -> Itinerary {
-        try await get("/api/v6/refresh-itinerary", [URLQueryItem(name: "itineraryId", value: itineraryId),
-                                                                  URLQueryItem(name: "withFares", value: "false")], cache: .noStore)
+        let fresh: Itinerary = try await get("/api/v6/refresh-itinerary", [URLQueryItem(name: "itineraryId", value: itineraryId),
+                                                                            URLQueryItem(name: "withFares", value: "false")], cache: .noStore)
+        // Where the feed has no live times (Austria, Venice, Stockholm …), other operators' data.
+        return await LiveOverlay.apply(fresh, budget: 3)
     }
 
     /// Stops inside a map rectangle, for the interactive station map.
@@ -183,8 +185,9 @@ final class TransitousClient: @unchecked Sendable {
         ]
         if let modes { q.append(URLQueryItem(name: "mode", value: modes)) }
         // A filtered board has its own slot: "only trams" must not come back as the full board offline.
-        return try await get("/api/v6/stoptimes", q,
-                             cache: CachePolicy(maxAge: 20, persist: true, slot: modes.map { "nearby|\($0)" } ?? "nearby"))
+        let res: StopTimesResponse = try await get("/api/v6/stoptimes", q,
+                                                   cache: CachePolicy(maxAge: 20, persist: true, slot: modes.map { "nearby|\($0)" } ?? "nearby"))
+        return await LiveOverlay.apply(res)
     }
 
     /// Departures at a stop. `radius` (metres) also includes nearby platforms of the same station.
@@ -196,7 +199,8 @@ final class TransitousClient: @unchecked Sendable {
         ]
         if let radius { q.append(URLQueryItem(name: "radius", value: String(radius))) }
         if let modes { q.append(URLQueryItem(name: "mode", value: modes)) }
-        return try await get("/api/v6/stoptimes", q, cache: .live)
+        let res: StopTimesResponse = try await get("/api/v6/stoptimes", q, cache: .live)
+        return await LiveOverlay.apply(res)
     }
 
     /// Departures over a time span, e.g. a whole day for a line timetable or the lines around a place.

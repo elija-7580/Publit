@@ -46,7 +46,7 @@ struct TripStatus: Equatable, Sendable {
             return L10n.f("%@ at %@", line, time)
         }
         if it.isCancelled {
-            let leg = it.legs.first { $0.cancelled == true }
+            let leg = it.legs.first { $0.isTransit && $0.cancelled == true }
             return TripStatus(phase: .cancelled, nextEvent: it.startTime, headline: L10n.t("Connection cancelled"),
                               detail: leg.map { L10n.f("%@ from %@ does not run.", $0.lineName, $0.from.name) } ?? L10n.t("Plan again."),
                               delayMinutes: 0)
