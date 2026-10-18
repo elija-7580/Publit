@@ -18,6 +18,10 @@ struct PlaceSearchView: View {
     @State private var searchToken = UUID()
     @State private var searched: String?
     @State private var scope: SearchScope = .all
+    /// Google's suggestions (Settings → Search), listed like the other hits; looked up when picked.
+    @State private var googleResults: [GooglePlaces.Suggestion] = []
+    @State private var googleSession = UUID().uuidString
+    @State private var resolving: String?
 
     /// Search everything, or only stops, addresses or places (shops, sights, airports…).
     enum SearchScope: String, CaseIterable, Identifiable {
@@ -80,7 +84,7 @@ struct PlaceSearchView: View {
                 } else {
                     if let errorMessage {
                         Text(errorMessage).foregroundStyle(.secondary)
-                    } else if results.isEmpty && !isSearching && searched == query.trimmingCharacters(in: .whitespaces) + "|" + scope.rawValue {
+                    } else if results.isEmpty && googleResults.isEmpty && !isSearching && searched == query.trimmingCharacters(in: .whitespaces) + "|" + scope.rawValue {
                         Text("No matches.").foregroundStyle(.secondary)
                     }
                     ForEach(results) { m in
@@ -93,6 +97,19 @@ struct PlaceSearchView: View {
                                 Label("Save", systemImage: favorites.contains(saved) ? "star.slash" : "star")
                             }
                             .tint(Color.inkAction)
+                        }
+                    }
+                    ForEach(googleResults) { g in
+                        Button { pick(g, save: false) } label: {
+                            HStack {
+                                PlaceLabel(name: g.name, subtitle: g.subtitle, isStop: false)
+                                if resolving == g.id { Spacer(); ProgressView() }
+                            }
+                        }
+                        .disabled(resolving != nil)
+                        .swipeActions {
+                            Button { pick(g, save: true) } label: { Label("Save", systemImage: "star") }
+                                .tint(Color.inkAction)
                         }
                     }
                 }
@@ -162,7 +179,7 @@ struct PlaceSearchView: View {
         let token = UUID()
         searchToken = token
         let text = query.trimmingCharacters(in: .whitespaces)
-        guard text.count >= 2 else { results = []; errorMessage = nil; searched = nil; isSearching = false; return }
+        guard text.count >= 2 else { results = []; googleResults = []; errorMessage = nil; searched = nil; isSearching = false; return }
         // Debounce: the task is cancelled when the query changes again.
         try? await Task.sleep(for: .milliseconds(300))
         guard !Task.isCancelled else { return }
@@ -174,6 +191,7 @@ struct PlaceSearchView: View {
             guard !Task.isCancelled, searchToken == token else { return }
             if let place, let lat = place.lat, let lon = place.lon {
                 results = [GeocodeMatch.picked(name: place.name ?? L10n.t("Place from the link"), at: LatLon(lat: lat, lon: lon))]
+                googleResults = []
                 errorMessage = nil
                 searched = text + "|" + scope.rawValue
                 return
@@ -187,15 +205,52 @@ struct PlaceSearchView: View {
     }
 
     private func searchNames(_ text: String, token: UUID) async {
+        let useGoogle = GooglePlaces.isActive && scope != .stops
+        async let transit = TransitousClient.shared.geocode(text, near: location.coordinate, type: useGoogle && scope == .all ? nil : scope.apiType)
+        var google: [GooglePlaces.Suggestion]?
+        if useGoogle {
+            google = try? await GooglePlaces.autocomplete(text, near: location.coordinate, session: googleSession)
+        }
         do {
-            let r = try await TransitousClient.shared.geocode(text, near: location.coordinate, type: scope.apiType)
+            var r = try await transit
             guard !Task.isCancelled, searchToken == token else { return }
+            if let google {
+                // Google for places and addresses, Transitous for the stops (they route best).
+                r = scope == .all ? Array(r.filter(\.isStop).prefix(4)) : []
+                googleResults = google.filter { g in
+                    !g.isStop && (scope == .addresses ? g.isAddress : scope == .places ? !g.isAddress : true)
+                }
+            } else {
+                googleResults = []
+            }
             results = r
             errorMessage = nil
             searched = text + "|" + scope.rawValue
         } catch {
             guard !Task.isCancelled, searchToken == token else { return }
-            if !(error is CancellationError) && (error as? URLError)?.code != .cancelled {
+            if let google, !google.isEmpty {
+                results = []
+                googleResults = google.filter { !$0.isStop }
+                errorMessage = nil
+                searched = text + "|" + scope.rawValue
+            } else if !(error is CancellationError) && (error as? URLError)?.code != .cancelled {
+                errorMessage = error.localizedDescription
+            }
+        }
+    }
+
+    /// A Google suggestion has no coordinates yet: look the place up, then use or save it.
+    private func pick(_ g: GooglePlaces.Suggestion, save: Bool) {
+        resolving = g.id
+        Task {
+            defer { resolving = nil }
+            do {
+                let m = try await GooglePlaces.place(g, session: googleSession)
+                // The session ends with the pick; the next typing starts a new one.
+                googleSession = UUID().uuidString
+                let saved = SavedPlace(match: m)
+                if save { favorites.toggle(saved) } else { select(.place(saved)) }
+            } catch {
                 errorMessage = error.localizedDescription
             }
         }

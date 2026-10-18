@@ -10,6 +10,11 @@ struct SettingsView: View {
     @AppStorage("mapSharing") private var mapSharing = false
     @AppStorage("routeTimelines") private var routeTimelines = true
     @AppStorage(LineAlertMonitor.enabledKey) private var lineAlerts = false
+    @AppStorage("mapBase") private var mapBase = MapBase.standard.rawValue
+    @AppStorage("mapPOI") private var mapPOI = true
+    @AppStorage(DirectionsApp.defaultsKey) private var directionsApp = DirectionsApp.apple.rawValue
+    @AppStorage(SearchProvider.defaultsKey) private var searchProvider = SearchProvider.transitous.rawValue
+    @AppStorage(GooglePlaces.keyDefaultsKey) private var googleKey = ""
     @State private var summary: HangLog.Summary?
     @State private var reportURL: URL?
 
@@ -54,10 +59,35 @@ struct SettingsView: View {
                     Toggle(L10n.t("Show connection timelines"), isOn: $routeTimelines)
                     NavigationLink { ConnectionGuideView() } label: { Label(L10n.t("How to read connections"), systemImage: "questionmark.circle") }
                 }
-                Section(L10n.t("Map layers")) {
+                Section(L10n.t("Map")) {
+                    Picker(L10n.t("Map style"), selection: $mapBase) {
+                        ForEach(MapBase.allCases) { Text($0.title).tag($0.rawValue) }
+                    }
+                    Toggle(L10n.t("Points of interest"), isOn: $mapPOI)
                     Toggle(L10n.t("Lines"), isOn: $mapLines)
                     Toggle(L10n.t("Vehicles"), isOn: $mapVehicles)
                     Toggle(L10n.t("Bikes and scooters"), isOn: $mapSharing)
+                    Picker(L10n.t("Open directions in"), selection: $directionsApp) {
+                        ForEach(DirectionsApp.allCases) { Text($0.title).tag($0.rawValue) }
+                    }
+                    .accessibilityIdentifier("directionsApp")
+                }
+                Section {
+                    Picker(L10n.t("Place search"), selection: $searchProvider) {
+                        ForEach(SearchProvider.allCases) { Text($0.title).tag($0.rawValue) }
+                    }
+                    .accessibilityIdentifier("searchProvider")
+                    if searchProvider == SearchProvider.google.rawValue {
+                        SecureField(L10n.t("Google API key"), text: $googleKey)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                    }
+                } header: {
+                    Text(L10n.t("Search"))
+                } footer: {
+                    Text(L10n.t(searchProvider == SearchProvider.google.rawValue
+                                ? "Shops, restaurants and sights come from Google; stops still come from Transitous. What you type and your approximate location go to Google."
+                                : "Stops, addresses and places from OpenStreetMap, through Transitous."))
                 }
                 if Features.tickets {
                     Section("Tickets") {

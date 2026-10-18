@@ -624,7 +624,7 @@ struct MapPlaceView: View {
                     .accessibilityIdentifier("mapPlaceRouteFrom")
                 }
                 Button { openInMaps() } label: {
-                    Label("Open in Apple Maps", systemImage: "map")
+                    Label(DirectionsApp.current.openLabel, systemImage: "map")
                 }
             }
         }
@@ -635,9 +635,7 @@ struct MapPlaceView: View {
     }
 
     private func openInMaps() {
-        let item = MKMapItem(placemark: MKPlacemark(coordinate: CLLocationCoordinate2D(latitude: match.lat, longitude: match.lon)))
-        item.name = match.name
-        item.openInMaps(launchOptions: nil)
+        DirectionsApp.current.open(LatLon(lat: match.lat, lon: match.lon), name: match.name, mode: .show)
     }
 }
 

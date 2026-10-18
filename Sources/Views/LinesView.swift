@@ -336,7 +336,7 @@ private struct LineMap: View {
                 .annotationTitles(.hidden)
             }
         }
-        .mapStyle(.standard(pointsOfInterest: .excludingAll))
+        .publitMapStyle()
         .mapControls { MapCompass() }
     }
 }
