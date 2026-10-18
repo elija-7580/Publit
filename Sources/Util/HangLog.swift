@@ -31,7 +31,8 @@ final class HangLog: @unchecked Sendable {
     }
 
     var hasEntries: Bool {
-        ((try? FileManager.default.attributesOfItem(atPath: fileURL.path)[.size] as? Int) ?? 0) > 0
+        Self.io.sync { }
+        return ((try? FileManager.default.attributesOfItem(atPath: fileURL.path)[.size] as? Int) ?? 0) > 0
     }
 
     func clear() {
@@ -135,7 +136,7 @@ final class HangLog: @unchecked Sendable {
     }
 
     /// Writes pending session steps now and waits until they are on disk (tests).
-    func flush() { queue.sync { writePendingSession() } }
+    func flush() { queue.sync { writePendingSession() }; Self.io.sync { } }
 
     static func isCancellation(_ error: Error) -> Bool {
         if error is CancellationError { return true }
@@ -174,6 +175,7 @@ final class HangLog: @unchecked Sendable {
     }
 
     var summary: Summary {
+        Self.io.sync { }
         guard let text = try? String(contentsOf: fileURL, encoding: .utf8) else { return Summary() }
         var s = Summary()
         for line in text.split(separator: "\n") where line.hasPrefix("— ") {
@@ -195,7 +197,7 @@ final class HangLog: @unchecked Sendable {
     /// One file to send: device and app, counts, the current steps, then every entry.
     func writeReport(at now: Date = Date()) -> URL {
         let url = fileURL.deletingLastPathComponent().appendingPathComponent("publit-diagnostics.txt")
-        let s = summary
+        let s = summary  // also waits for pending entries
         lock.lock()
         let steps = trail
         lock.unlock()
@@ -331,7 +333,16 @@ final class HangLog: @unchecked Sendable {
         }
     }
 
+    /// Entries are written in order on their own queue: errors and "responding again" are reported
+    /// from the main thread, and reading and rewriting up to 400 KB there would itself cause a hitch.
+    private static let io = DispatchQueue(label: "io.github.publit.hanglog.io", qos: .utility)
+
     private func append(_ text: String) {
+        Self.io.async { self.appendNow(text) }
+    }
+
+    /// Runs on `io`.
+    private func appendNow(_ text: String) {
         let fm = FileManager.default
         try? fm.createDirectory(at: fileURL.deletingLastPathComponent(), withIntermediateDirectories: true)
         var data = (try? Data(contentsOf: fileURL)) ?? Data()
@@ -347,17 +358,20 @@ final class HangLog: @unchecked Sendable {
 
     private static func clock(_ date: Date) -> String { format(date, "HH:mm:ss") }
     private static func dateTime(_ date: Date) -> String { format(date, "yyyy-MM-dd HH:mm:ss") }
-    private static func parseDateTime(_ s: String) -> Date? {
-        let f = DateFormatter()
-        f.locale = Locale(identifier: "en_US_POSIX")
-        f.dateFormat = "yyyy-MM-dd HH:mm:ss"
-        return f.date(from: s)
-    }
-    private static func format(_ date: Date, _ pattern: String) -> String {
+    private static func parseDateTime(_ s: String) -> Date? { posix("yyyy-MM-dd HH:mm:ss").date(from: s) }
+    private static func format(_ date: Date, _ pattern: String) -> String { posix(pattern).string(from: date) }
+
+    /// One formatter per pattern (a step is noted on every screen change; creating formatters is slow).
+    private static let formatterLock = NSLock()
+    private static var formatters: [String: DateFormatter] = [:]
+    private static func posix(_ pattern: String) -> DateFormatter {
+        formatterLock.lock(); defer { formatterLock.unlock() }
+        if let f = formatters[pattern] { return f }
         let f = DateFormatter()
         f.locale = Locale(identifier: "en_US_POSIX")
         f.dateFormat = pattern
-        return f.string(from: date)
+        formatters[pattern] = f
+        return f
     }
 }
 

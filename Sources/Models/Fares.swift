@@ -41,11 +41,22 @@ struct FareTransfer: Codable, Sendable {
 struct FareEstimate: Equatable, Sendable {
     let amount: Decimal
     let currency: String
+    /// One formatter per currency and locale (fares are shown in every route row).
+    private static let lock = NSLock()
+    private static var formatters: [String: NumberFormatter] = [:]
+
     static func format(_ amount: Decimal, currency: String) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.locale = .current
-        formatter.currencyCode = currency
+        lock.lock(); defer { lock.unlock() }
+        let key = Locale.current.identifier + "|" + currency
+        let formatter: NumberFormatter
+        if let cached = formatters[key] { formatter = cached } else {
+            formatter = NumberFormatter()
+            formatter.numberStyle = .currency
+            formatter.locale = .current
+            formatter.currencyCode = currency
+            if formatters.count >= 16 { formatters.removeAll() }
+            formatters[key] = formatter
+        }
         return formatter.string(from: amount as NSDecimalNumber) ?? "\(amount) \(currency)"
     }
     var formattedAmount: String { Self.format(amount, currency: currency) }

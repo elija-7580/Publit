@@ -72,6 +72,7 @@ final class ResourceUseTests: XCTestCase {
         log.flush()
         let next = HangLog(directory: dir)
         next.checkPreviousSession(at: t0.addingTimeInterval(60))
+        next.flush()
         let text = try String(contentsOf: next.fileURL, encoding: .utf8)
         XCTAssertTrue(text.contains("step 19"))
     }

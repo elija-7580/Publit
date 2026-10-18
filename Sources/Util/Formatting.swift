@@ -9,7 +9,8 @@ enum Fmt {
     }
 
     static func distance(meters: Double) -> String {
-        if meters < 1000 { return "\(Int(meters.rounded())) m" }
+        // 999.6 m is "1.0 km", not "1000 m".
+        if meters.rounded() < 1000 { return "\(Int(max(0, meters).rounded())) m" }
         numberLock.lock(); defer { numberLock.unlock() }
         let locale = Locale.current
         let f: NumberFormatter
