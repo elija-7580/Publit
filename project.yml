@@ -11,7 +11,7 @@ settings:
   base:
     SWIFT_VERSION: "5.0"
     MARKETING_VERSION: "0.6.0"
-    CURRENT_PROJECT_VERSION: "43"
+    CURRENT_PROJECT_VERSION: "44"
     # Personal Team — Automatic Signing for local device installs.
     DEVELOPMENT_TEAM: "3D6S8GFSGK"
 packages:
@@ -38,6 +38,7 @@ targets:
           - UIInterfaceOrientationPortrait
         NSLocationWhenInUseUsageDescription: Publit uses your location to show departures near you and to plan trips from where you are.
         NSMotionUsageDescription: Publit reads your walking speed from the step counter, only if you turn on “Use my walking speed”. It stays on your iPhone.
+        NSHealthShareUsageDescription: Publit reads your walking speed from Apple Health, only if you turn on “Use my walking speed”, so routes plan walks and changes at your pace. It stays on your iPhone.
         NSCameraUsageDescription: Publit uses the camera only when you choose to scan a paper ticket. The scan stays on your iPhone.
         NSCalendarsWriteOnlyAccessUsageDescription: Publit adds the trips you choose to your calendar.
         NSSupportsLiveActivities: true
@@ -63,6 +64,12 @@ targets:
         PublitContact: https://github.com/elija-7580/Publit
         # Optional Google Places key for release builds (set GOOGLE_API_KEY as a build setting; empty otherwise).
         GoogleAPIKey: $(GOOGLE_API_KEY)
+    # Apple Health: read the walking speed for smart routing (read only).
+    entitlements:
+      path: Config/Publit.entitlements
+      properties:
+        com.apple.developer.healthkit: true
+        com.apple.developer.healthkit.access: []
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: io.github.publit.app

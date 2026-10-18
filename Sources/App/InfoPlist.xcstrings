@@ -380,6 +380,101 @@
      }
     }
    }
+  },
+  "NSHealthShareUsageDescription": {
+   "extractionState": "manual",
+   "localizations": {
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit čte vaši rychlost chůze z aplikace Zdraví, jen pokud zapnete „Použít mou rychlost chůze“, aby trasy plánovaly chůzi a přestupy vaším tempem. Zůstává ve vašem iPhonu."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit liest dein Gehtempo aus Apple Health, nur wenn du „Mein Gehtempo verwenden“ einschaltest, damit Routen Fußwege und Umstiege in deinem Tempo planen. Es bleibt auf deinem iPhone."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Το Publit διαβάζει την ταχύτητα βαδίσματός σου από την Υγεία της Apple, μόνο αν ενεργοποιήσεις «Χρήση της ταχύτητας βαδίσματός μου», ώστε οι διαδρομές να υπολογίζουν περπάτημα και μετεπιβιβάσεις με τον ρυθμό σου. Μένει στο iPhone σου."
+     }
+    },
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit reads your walking speed from Apple Health, only if you turn on “Use my walking speed”, so routes plan walks and changes at your pace. It stays on your iPhone."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit lee tu velocidad al caminar de Salud de Apple, solo si activas «Usar mi velocidad al caminar», para planificar trayectos a pie y transbordos a tu ritmo. Se queda en tu iPhone."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit lit votre vitesse de marche dans l’app Santé, uniquement si vous activez « Utiliser ma vitesse de marche », pour planifier marches et correspondances à votre rythme. Elle reste sur votre iPhone."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "A Publit az Apple Egészség appból olvassa ki a gyaloglási sebességedet, csak ha bekapcsolod a „Saját gyaloglási tempóm használata” opciót, hogy az útvonalak a te tempódban tervezzék a gyaloglást és az átszállást. Az iPhone-odon marad."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit legge la tua velocità di camminata da Salute di Apple, solo se attivi «Usa la mia velocità a piedi», per pianificare percorsi a piedi e cambi al tuo ritmo. Resta sul tuo iPhone."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit leest je loopsnelheid uit Apple Gezondheid, alleen als je ‘Mijn looptempo gebruiken’ aanzet, zodat routes looptijden en overstappen op jouw tempo plannen. Het blijft op je iPhone."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit odczytuje Twoją prędkość chodu z aplikacji Zdrowie, tylko jeśli włączysz „Użyj mojego tempa chodu”, aby trasy planowały przejścia i przesiadki w Twoim tempie. Pozostaje na Twoim iPhonie."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O Publit lê a sua velocidade de marcha da app Saúde, só se ativar “Usar a minha velocidade a pé”, para planear percursos a pé e transbordos ao seu ritmo. Fica no seu iPhone."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit citește viteza ta de mers din Apple Sănătate, doar dacă activezi „Folosește viteza mea de mers”, ca rutele să planifice mersul pe jos și schimbările în ritmul tău. Rămâne pe iPhone-ul tău."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit läser din gånghastighet från Apple Hälsa, bara om du slår på ”Använd min gånghastighet”, så att rutter planerar promenader och byten i din takt. Den stannar på din iPhone."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit, yürüme hızını yalnızca “Yürüme hızımı kullan” seçeneğini açarsan Apple Sağlık’tan okur; böylece rotalar yürüyüşleri ve aktarmaları senin hızına göre planlar. iPhone’unda kalır."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit зчитує вашу швидкість ходьби з Apple Здоров’я, лише якщо ви ввімкнете «Використовувати мою швидкість ходьби», щоб маршрути планували пішохідні відрізки й пересадки у вашому темпі. Вона залишається на вашому iPhone."
+     }
+    }
+   }
   }
  },
  "version": "1.0"

@@ -140,7 +140,17 @@ struct RootView: View {
             NavigationStack {
                 SavedTripView(tripId: id.value)
                     .toolbar {
-                        ToolbarItem(placement: .confirmationAction) { Button("Done") { app.deepLink = nil } }
+                        // A started trip keeps running when the screen closes: it moves down into the live bar.
+                        if trips.activeTrip?.id == id.value {
+                            ToolbarItem(placement: .topBarLeading) {
+                                Button { app.deepLink = nil } label: {
+                                    Label(L10n.t("Minimize"), systemImage: "chevron.down")
+                                }
+                                .accessibilityIdentifier("minimizeTrip")
+                            }
+                        } else {
+                            ToolbarItem(placement: .confirmationAction) { Button("Done") { app.deepLink = nil } }
+                        }
                     }
             }
         }

@@ -42,6 +42,9 @@ struct RouteOptionsView: View {
                     Text("Bike & Ride: cycle to a station and park there. Park & Ride: drive to a car park at a station; this search can take up to half a minute. Walking routes stay in the list for comparison; buses, trams and trains are always included.")
                 }
 
+                // The same settings as Settings → Smart routing, right where routes are planned.
+                SmartRoutingSettingsSection()
+
                 Section("Changes") {
                     Picker("Changes", selection: $draft.maxTransfers) {
                         ForEach(RouteOptions.transferChoices, id: \.self) { n in

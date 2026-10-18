@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.6.0 (build 44)
+
+### Live trip
+- Closing a started trip is "Minimize" (chevron down): the trip keeps running in the live bar. Ending it is in the ••• menu, without a stray confirmation over the map.
+- The ••• menu also has the map style (Standard, Muted, Satellite, …) and 3D, the same settings as the Map tab, and spoken directions.
+- Ticket button: tap shows the default ticket right away (code full screen); hold to pick another ticket, make it the default, see all or add one.
+- A later walk picked in the trip shows its own way from where it starts (with a start dot), not from where you stand; "Open in Maps" for it starts there too.
+
+### Tickets
+- Looking at a route or a line shows no tickets; saved and started trips do.
+
+### Smart routing
+- Your walking speed comes from Apple Health (walking speed of the last 30 days) when you allow it, else from the step counter; Settings shows the source.
+- Smart routing settings are also in the route options of Plan.
+
 ## 0.6.0 (build 43)
 
 - Lines without an operator colour (e.g. many Italian feeds) now get a clear colour per mode instead of grey, so routes are colourful everywhere.

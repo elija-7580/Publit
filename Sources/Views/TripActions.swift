@@ -72,7 +72,8 @@ struct TripActionsSection: View {
                 addingTicket = true
             })
         }
-        if Features.passes, !itinerary.isDirect {
+        // Looking at a route shows no tickets; a saved or started trip does.
+        if Features.passes, !itinerary.isDirect, saved != nil {
             TripPassSection(tripId: saved?.id, at: itinerary.startTime, ensureTrip: { ensureSaved().id })
         }
     }
