@@ -228,6 +228,11 @@ struct PlanResponse: Decodable, Sendable {
     let itineraries: [Itinerary]
     let previousPageCursor: String?
     let nextPageCursor: String?
+
+    /// The same answer with another list of routes (paging cursors stay those of this search).
+    func replacingItineraries(_ list: [Itinerary]) -> PlanResponse {
+        PlanResponse(direct: direct, itineraries: list, previousPageCursor: previousPageCursor, nextPageCursor: nextPageCursor)
+    }
 }
 
 struct StopTime: Decodable, Identifiable, Sendable, RouteStyled {

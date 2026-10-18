@@ -116,8 +116,24 @@ final class PlanModel {
         let options = options
         do {
             var maxWalk = options.maxWalkMinutes * 60
-            var res = try await TransitousClient.shared.plan(from: f, to: t, time: time, arriveBy: arriveBy,
+            var res: PlanResponse
+            if options.maxWalkMinutes == RouteOptions.defaultWalkMinutes {
+                // Ask for a comfortable walk and the usual one at once; a long walk wins only when
+                // it arrives clearly earlier (the server alone prefers walking 30 min to save one).
+                async let shortRes = TransitousClient.shared.plan(from: f, to: t, time: time, arriveBy: arriveBy,
+                                                                  maxWalk: Reach.shortWalkSeconds, options: options)
+                async let longRes = TransitousClient.shared.plan(from: f, to: t, time: time, arriveBy: arriveBy,
+                                                                 maxWalk: maxWalk, options: options)
+                let long = try await longRes
+                if let short = try? await shortRes, !short.itineraries.isEmpty {
+                    res = long.replacingItineraries(Reach.preferShortWalks(short: short.itineraries, long: long.itineraries))
+                } else {
+                    res = long
+                }
+            } else {
+                res = try await TransitousClient.shared.plan(from: f, to: t, time: time, arriveBy: arriveBy,
                                                              maxWalk: maxWalk, options: options)
+            }
             try Task.checkCancellation()
             // Nothing within 30 min walk of a stop: try again with a longer walk (45 min, then 2 h),
             // so a stop beyond the usual limit shows up as a route with a long walk, not as "no connections".
