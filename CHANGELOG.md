@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0 (build 41)
+
+### Plan
+- Routes stay current: a departure time of now follows the clock, routes refresh live, pull down to refresh, “Updated” time below the list.
+- Where to go at a glance: each route shows the stop, platform and walk to get on; the route detail lists every boarding and the exit at the top.
+- Station map: the loading mark sits in the middle of the map.
+
 ## 0.6.0 (build 40)
 
 ### Smart routing
