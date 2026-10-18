@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.0 (build 36)
+
+### Better routes
+- Short walks first: Publit searches with a 15 and a 30 min walk to and from the stops at once and keeps a route with the longer walk only when it arrives at least 10 min earlier (Punta Sabbioni → Cannaregio now stays on the 5.1 instead of walking half an hour to save a minute).
+- No detours: routes that pass the destination and ride on, or come back to where an earlier leg started, are left out.
+- Times in route details stay on one line, also with AM/PM.
+
+### Sharing a place
+- A place shared from Google Maps or another app always opens Plan with routes from where you are now, leaving now. Publit waits briefly for a fresh location instead of using an old one, closes settings and other sheets, and says so when it cannot find the place.
+
 ## 0.6.0 (build 35)
 
 ### Start screens in one style
