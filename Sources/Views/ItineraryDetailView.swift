@@ -108,6 +108,8 @@ struct ItineraryDetailView: View {
                     .listRowInsets(EdgeInsets())
                     .listRowBackground(Color.clear)
                 RouteSummary(itinerary: itinerary, showsTimes: false)
+                // Where to get on, change and get off, without scrolling to the steps or starting the trip.
+                BoardingSteps(itinerary: itinerary)
                 if let note = Fmt.foreignZoneNote(tz: itinerary.legs.first?.from.tz, at: itinerary.startTime) {
                     Label(note, systemImage: "clock").font(.footnote).foregroundStyle(.secondary)
                 }

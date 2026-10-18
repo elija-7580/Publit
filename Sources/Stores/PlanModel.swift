@@ -43,7 +43,14 @@ final class PlanModel {
     /// Clearing the destination starts over.
     var searchStarted = false
     var timeMode: TimeMode = .now
-    var date = Date()
+    /// Set to about now (on opening, or picked as now): the departure time keeps following the clock,
+    /// so coming back later shows routes from then, not from when the search was made.
+    var date = Date() { didSet { dateFollowsNow = abs(date.timeIntervalSinceNow) < 90 } }
+    private(set) var dateFollowsNow = true
+    /// "Depart now": searched for the current time and refreshed live (delays, departed trips).
+    var isLive: Bool { timeMode == .now || (timeMode == .departAt && dateFollowsNow) }
+    /// When the routes on screen were fetched.
+    private(set) var updatedAt: Date?
 
     /// Filters and comparison, shared by Plan and Nearby → "Where to now?" (set through AppState).
     var options = RouteOptions.load()
@@ -84,7 +91,7 @@ final class PlanModel {
 
     /// Changes whenever a new search is needed.
     var queryKey: String {
-        let t = timeMode == .now ? "now" : String(Int(date.timeIntervalSince1970 / 60))
+        let t = isLive ? "now" : String(Int(date.timeIntervalSince1970 / 60))
         return "\(from.key)|\(to?.key ?? "-")|\(timeMode.rawValue)|\(t)|\(options.key)"
     }
 
@@ -117,6 +124,8 @@ final class PlanModel {
            let lastRequest, f.distance(to: lastRequest.from) < 150 { return }
         // Results of another query (new destination or time) must not stay on screen without a spinner.
         if !silent, resultsKey != queryKey { itineraries = []; comparisons = []; nextCursor = nil }
+        // Following the clock: the picker shows the time the routes are for.
+        if timeMode == .departAt, dateFollowsNow, abs(date.timeIntervalSinceNow) > 30 { date = .now }
         let searchedFrom = from
         let searchedMode = timeMode
         let searchedDate = date
@@ -126,7 +135,7 @@ final class PlanModel {
         defer { if token == myToken { isLoading = false } }
         errorMessage = nil
         if !silent { walkNote = nil }
-        let time: Date? = timeMode == .now ? nil : date
+        let time: Date? = isLive ? nil : date
         let arriveBy = timeMode == .arriveBy
         let options = options
         do {
@@ -172,6 +181,7 @@ final class PlanModel {
             comparisons = Self.comparisons(direct: res.direct + streetRoutes, listed: itineraries, enabled: options.compareStreetModes)
             resultsKey = queryKey
             completedAt = Date()
+            updatedAt = completedAt
             nextCursor = arriveBy ? res.previousPageCursor : res.nextPageCursor
             lastRequest = (f, t, time, arriveBy, maxWalk)
             lastOptions = options
