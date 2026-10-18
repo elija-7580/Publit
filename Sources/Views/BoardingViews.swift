@@ -14,8 +14,8 @@ struct BoardingLine: View {
                 Text(verbatim: Self.text(leg: leg, walkSeconds: walk))
                     .lineLimit(2)
             }
-            .font(.subheadline.weight(.medium))
-            .foregroundStyle(.primary)
+            .font(.footnote.weight(.medium))
+            .foregroundStyle(.secondary)
             .accessibilityIdentifier("boardingLine")
         }
     }
@@ -57,15 +57,20 @@ struct BoardingSteps: View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
             Text(Fmt.time(time, tz: tz))
                 .font(.subheadline.weight(.semibold).monospacedDigit())
-                .frame(minWidth: 46, alignment: .leading)
-            if let badge {
-                LineBadge(badge, compact: true)
-            } else {
-                Image(systemName: "flag.checkered").foregroundStyle(.secondary).accessibilityHidden(true)
+                .frame(width: TimelineTime.width, alignment: .leading)
+            // One column for the line badges, so every stop name starts at the same place.
+            Group {
+                if let badge {
+                    LineBadge(badge, compact: true)
+                } else {
+                    Image(systemName: "flag.checkered").font(.subheadline).foregroundStyle(.secondary).accessibilityHidden(true)
+                }
             }
+            .frame(minWidth: 44, alignment: .leading)
             VStack(alignment: .leading, spacing: 1) {
                 HStack(spacing: 4) {
                     Text(verbatim: title).font(.subheadline.weight(.medium)).lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
                     if let t = TransitLabels.clean(track) {
                         Text(verbatim: "· " + L10n.f("Pl. %@", t)).font(.subheadline).foregroundStyle(.secondary)
                     }

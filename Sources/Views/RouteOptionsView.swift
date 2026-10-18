@@ -121,16 +121,24 @@ struct RouteOptionsButton: View {
         let options = app.routeOptions
         Button { showing = true } label: {
             if compact {
+                // A soft chip row, like the time chips above it.
                 HStack(spacing: 8) {
                     Image(systemName: options.isDefault ? "slider.horizontal.3" : "line.3.horizontal.decrease.circle.fill")
+                        .font(.subheadline.weight(.semibold))
                         .foregroundStyle(options.isDefault ? Color.secondary : Color.ink)
                         .accessibilityHidden(true)
-                    Text("Route options").font(.subheadline).foregroundStyle(.primary)
+                    Text("Route options").font(.subheadline.weight(.semibold)).foregroundStyle(.primary)
                     Spacer(minLength: 8)
                     Text(verbatim: options.summary ?? L10n.t("All modes"))
-                        .font(.caption).foregroundStyle(options.isDefault ? Color.secondary : Color.ink)
+                        .font(.subheadline).foregroundStyle(options.isDefault ? Color.secondary : Color.ink)
                         .lineLimit(1)
+                    Image(systemName: "chevron.right").font(.caption.weight(.semibold)).foregroundStyle(.tertiary)
+                        .accessibilityHidden(true)
                 }
+                .padding(.horizontal, 14)
+                .frame(minHeight: 40)
+                .background(Color.inkFill, in: Capsule())
+                .contentShape(Capsule())
             } else {
             HStack(spacing: 10) {
                 Image(systemName: options.isDefault ? "slider.horizontal.3" : "line.3.horizontal.decrease.circle.fill")

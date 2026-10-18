@@ -18,20 +18,22 @@ struct PlanView: View {
         @Bindable var plan = app.plan
         List {
             Section {
-                // From and To with the swap button between them on the right.
-                HStack(spacing: 10) {
-                    VStack(spacing: 8) {
+                // From and To in one soft card, joined like the logo's stroke; the round swap key on the right.
+                HStack(spacing: 12) {
+                    EndpointConnector().frame(width: 12)
+                    VStack(spacing: 0) {
                         endpointButton(label: "From", endpoint: plan.from, target: .from)
                             .accessibilityIdentifier("endpoint-from")
+                        Rectangle().fill(Color.inkFill).frame(height: 1)
                         endpointButton(label: "To", endpoint: plan.to, target: .to)
                             .accessibilityIdentifier("endpoint-to")
                     }
                     Button { app.plan.swap() } label: {
                         Image(systemName: "arrow.up.arrow.down")
-                            .font(.body.weight(.semibold))
+                            .font(.subheadline.weight(.semibold))
                             .foregroundStyle(Color.ink)
-                            .frame(width: 42, height: 42)
-                            .raisedKey(radius: 21)
+                            .frame(width: 40, height: 40)
+                            .background(Color.inkFill, in: Circle())
                     }
                     .disabled(plan.to == nil)
                     .accessibilityLabel(Text("Swap"))
@@ -39,10 +41,16 @@ struct PlanView: View {
                 }
                 .buttonStyle(.borderless)
                 // Plan is for later (tonight, next week). "From here, now" lives in Nearby.
-                BevelSegmented(selection: $plan.timeMode,
-                               options: [(TimeMode.departAt, L10n.t("Depart")), (TimeMode.arriveBy, L10n.t("Arrive"))])
-                    .accessibilityLabel(Text("When"))
-                DatePicker(plan.timeMode == .arriveBy ? L10n.t("Arrive by") : L10n.t("Depart at"), selection: $plan.date)
+                HStack(spacing: 8) {
+                    BevelSegmented(selection: $plan.timeMode,
+                                   options: [(TimeMode.departAt, L10n.t("Depart")), (TimeMode.arriveBy, L10n.t("Arrive"))])
+                        .frame(maxWidth: 190)
+                        .accessibilityLabel(Text("When"))
+                    Spacer(minLength: 0)
+                    DatePicker(plan.timeMode == .arriveBy ? L10n.t("Arrive by") : L10n.t("Depart at"), selection: $plan.date)
+                        .labelsHidden()
+                        .datePickerStyle(.compact)
+                }
                 RouteOptionsButton(compact: true)
             }
 
@@ -69,6 +77,8 @@ struct PlanView: View {
             }
         }
         .inkList()
+        // The last footer ("Updated …") stays clear of the tab bar and the live bar.
+        .contentMargins(.bottom, 32, for: .scrollContent)
         // Pull down: fetch the routes again (delays, a train just gone).
         .refreshable {
             guard app.plan.searchStarted, app.plan.to != nil else { return }
@@ -130,22 +140,20 @@ struct PlanView: View {
 
     private func endpointButton(label: LocalizedStringKey, endpoint: Endpoint?, target: PickTarget) -> some View {
         Button { picking = target } label: {
-            HStack {
-                Text(label).foregroundStyle(.secondary).lineLimit(1).fixedSize()
-                    .frame(minWidth: 56, alignment: .leading)
+            HStack(spacing: 8) {
+                Text(label).font(.subheadline).foregroundStyle(.secondary).lineLimit(1).fixedSize()
+                    .frame(minWidth: 44, alignment: .leading)
                 if let endpoint {
                     if case .currentLocation = endpoint {
-                        SignatureDot(size: 10)
+                        SignatureDot(size: 9)
                     }
-                    Text(endpoint.title).foregroundStyle(.primary).lineLimit(1)
+                    Text(endpoint.title).font(.body.weight(.semibold)).foregroundStyle(.primary).lineLimit(1)
                 } else {
                     Text("Where to?").foregroundStyle(.secondary)
                 }
-                Spacer()
+                Spacer(minLength: 0)
             }
-            .padding(.horizontal, 12)
             .frame(minHeight: 46)
-            .bevelField()
             .contentShape(Rectangle())
         }
         .accessibilityElement(children: .combine)
@@ -219,6 +227,20 @@ struct PlanView: View {
                 .padding(.top, 8)
             }
         }
+    }
+}
+
+/// The line between From and To: an open ring at the start, a full dot at the end, joined by a
+/// round-capped stroke (the logo's line).
+struct EndpointConnector: View {
+    var body: some View {
+        VStack(spacing: 4) {
+            Circle().strokeBorder(Color.ink, lineWidth: 2.5).frame(width: 11, height: 11)
+            Capsule().fill(Color.ink.opacity(0.25)).frame(width: 2.5).frame(maxHeight: .infinity)
+            Circle().fill(Color.ink).frame(width: 11, height: 11)
+        }
+        .padding(.vertical, 18)
+        .accessibilityHidden(true)
     }
 }
 

@@ -120,6 +120,8 @@ struct NearbyView: View {
                         }
                     }
                     .listRowSeparator(.hidden, edges: .bottom)
+                    // The station sits right on its first departure, without an empty band between.
+                    .listRowInsets(EdgeInsets(top: 12, leading: 20, bottom: 0, trailing: 16))
                     ForEach(group.departures.prefix(5)) { st in
                         // By value: the trip stays open when the board refreshes and this row
                         // changes or leaves (the departure has gone).
