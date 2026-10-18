@@ -118,3 +118,17 @@ Not usable without an agreement or key: StadtRAD Hamburg (DB API Marketplace "Sh
 Venice (ACTV ferries) is missing at Abfahrt!; Transitous has the timetable (no live times).
 
 Abfahrt!'s licence column is coarse ("Open Data"): verify each licence before use. Order: Wiener Linien → ÖBB → TfL → ATM Milano → Trafiklab → Rejseplanen. A source that can be turned into GTFS-RT goes to Transitous (better routing and transfers for everyone); only otherwise an in-app overlay for departure boards. Every source used is credited in Settings → Data.
+
+## 5. Extra live sources (build 47)
+
+Transitous stays the router. Where its feed has no live time for a ride, `LiveOverlay` (Sources/API/LiveSources.swift) asks the operator's own system for the same ride (same line, timetable time within 90 s) and takes over the live departure, a cancellation and the platform; the arrival is estimated from the departure delay, and walks after the ride move with it. Alerts (diversions, closures, construction, disruptions) are added in any case, without duplicates. A live time from Transitous always wins. Lookups run side by side with a time budget (routes: shown first, corrected about a second later; boards: 2 s; live trip refresh: 3 s), answers are cached for 30–90 s, a failing server is left alone for a minute. Only the stop, line and time of a ride are sent; no account, no key.
+
+| Area | Source | What | Terms |
+|---|---|---|---|
+| Vienna | Wiener Linien OGD `ogd_realtime/monitor` (stop by DIVA from Transitous' stop ID) | Live countdowns U-Bahn, tram, bus; current disruptions per line | Open data, CC BY 4.0 Stadt Wien – data.wien.gv.at |
+| Austria | ÖBB HAFAS `fahrplan.oebb.at/bin/mgate.exe` (LocGeoPos, StationBoard) | Live times of trains (ÖBB, WESTbahn, GKB …) and of buses/trams where the regional network reports them (e.g. VVT Innsbruck); cancellations; platforms; HIM notes (construction, rail replacement) | Not an official open API (the ÖBB app's backend); used sparingly, cached. If it changes, rides keep their timetable times |
+| Venice | ACTV `oraritemporeale.actv.it/{nav,aut}/backend` | Live countdowns of vaporetti and buses where ACTV has them | Unofficial (the public departure screens) |
+| Stockholm | SL Transport API `transport.integration.sl.se/v1` | Live departures (metro, pendeltåg, tram, bus, boat), cancellations, track, deviations | Open, no key (Trafiklab) |
+| London | TfL Unified API `Line/Mode/…/Status` | Line status (delays, closures, part suspensions) for Underground, Overground, DLR, Elizabeth line, trams | Open data, "Powered by TfL Open Data" |
+
+Checked but not used: ViaggiaTreno (Trenitalia; blocks server requests, may work from devices – to test), Deutsche Bahn (Germany is already live through DELFI), iRail disturbances (redirects). Next candidates: Milan ATM, Copenhagen (Rejseplanen, needs key), Lisbon Carris, Brussels STIB (key), Prague is already live.

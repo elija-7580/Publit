@@ -25,6 +25,8 @@ These are samples. "No live data" may also mean the feed was down at that moment
 
 Vienna (Wiener Linien), Stockholm and Gothenburg (Sweden has no live feed), Copenhagen, Lisbon and Porto (only CP trains are live), Barcelona (only Rodalies), Valencia, Seville, Brussels (only SNCB trains, not STIB), Marseille, Milan (only Trenitalia), Naples (only Trenitalia), Luxembourg, Bratislava, Brno (only trains), Tallinn (only Elron trains), Manchester (only trains), Belgrade, Sarajevo, Podgorica, Tirana, Thessaloniki, Lviv, Istanbul, Ankara, Nicosia, Monaco, Andorra.
 
+Since build 47 Publit fills some of these gaps itself (Settings → Data → "Live data from more operators", on by default): **Vienna** (Wiener Linien open data), **all of Austria** (ÖBB journey planner: trains and, where the regional networks report them, buses and trams, plus construction notes), **Venice** (ACTV vaporetti and buses), **Stockholm** (SL) and **London** line status (TfL). See [DATA-SOURCES.md](DATA-SOURCES.md#5-extra-live-sources-build-47).
+
 Without live data the app shows "Timetable": no delays, cancellations or platform changes, and the trip guide, live bar and Live Activity follow the timetable.
 
 ## Timetable and live data
