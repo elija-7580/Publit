@@ -458,7 +458,9 @@ struct TimelineLegRow: View {
         HStack(alignment: .top, spacing: 10) {
             Text(Fmt.time(leg.startTime, tz: leg.from.tz))
                 .font(.subheadline.weight(.semibold).monospacedDigit())
-                .frame(width: 52, alignment: .trailing)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+                .frame(width: TimelineTime.width, alignment: .trailing)
                 .padding(.top, 10)
             TimelineRail(color: leg.isTransit ? leg.lineStroke : Color.secondary, dotted: !leg.isTransit)
             LegRow(leg: leg, bar: false)
@@ -480,7 +482,9 @@ struct TimelineEndRow: View {
         HStack(alignment: .center, spacing: 10) {
             Text(Fmt.time(time, tz: tz))
                 .font(.subheadline.weight(.semibold).monospacedDigit())
-                .frame(width: 52, alignment: .trailing)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+                .frame(width: TimelineTime.width, alignment: .trailing)
             Image(systemName: "flag.checkered.circle.fill")
                 .font(.title3).foregroundStyle(Color.ink)
                 .frame(width: 18)
@@ -555,4 +559,12 @@ struct LeaveHero: View {
         .background(Color.ink, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
         .accessibilityElement(children: .combine)
     }
+}
+
+/// The time column of the route timeline: wide enough for "12:59 PM" on one line.
+enum TimelineTime {
+    static let width: CGFloat = {
+        let pattern = DateFormatter.dateFormat(fromTemplate: "j", options: 0, locale: .current) ?? ""
+        return pattern.contains("a") ? 70 : 52
+    }()
 }

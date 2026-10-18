@@ -133,7 +133,7 @@ final class PlanModel {
             }
             try Task.checkCancellation()
             guard token == myToken else { return }
-            itineraries = Self.merge(transit: res.itineraries, direct: res.direct)
+            itineraries = Self.merge(transit: res.itineraries.withoutDetours, direct: res.direct)
             walkNote = maxWalk > RouteOptions.defaultWalkMinutes * 60 ? Reach.longWalkNote(res.itineraries) : nil
             let key = queryKey
             if streetKey != key { streetRoutes = [] }
@@ -208,7 +208,7 @@ final class PlanModel {
             // A new search started meanwhile: these results belong to the old query.
             guard token == myToken else { return }
             let known = Set(itineraries.map(\.id))
-            let fresh = res.itineraries.filter { !known.contains($0.id) }
+            let fresh = res.itineraries.withoutDetours.filter { !known.contains($0.id) }
             itineraries = (itineraries + fresh).sorted { $0.startTime < $1.startTime }
             nextCursor = req.arriveBy ? res.previousPageCursor : res.nextPageCursor
         } catch {

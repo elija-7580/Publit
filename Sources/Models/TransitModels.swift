@@ -184,7 +184,29 @@ struct Itinerary: Codable, Identifiable, Sendable {
     }
 }
 
+extension Itinerary {
+    /// A route that gets to the destination (or back to where it was) and then rides on, e.g.
+    /// 81 min on foot to Treporti, the ferry to Burano and the ferry back to Treporti. Such a
+    /// route is never the way to go: the walk on its own already arrives.
+    var isDetour: Bool {
+        guard legs.count > 1, let last = legs.last, let first = legs.first else { return false }
+        func point(_ p: Place) -> LatLon { LatLon(lat: p.lat, lon: p.lon) }
+        let destination = point(last.to)
+        // Start and destination next to each other: nothing to judge.
+        guard point(first.from).distance(to: destination) >= 400 else { return false }
+        for (i, leg) in legs.enumerated() {
+            let ridesOn = legs[(i + 1)...].contains { $0.isTransit }
+            if ridesOn, point(leg.to).distance(to: destination) < 250 { return true }
+            if leg.isTransit, legs[..<i].contains(where: { point($0.from).distance(to: point(leg.to)) < 150 }) { return true }
+        }
+        return false
+    }
+}
+
 extension Array where Element == Itinerary {
+    /// Without routes that pass the destination and ride on, or ride out and back (`isDetour`).
+    var withoutDetours: [Itinerary] { filter { !$0.isDetour } }
+
     /// One row per route: a page loaded twice or a refresh must not repeat an identity in a list.
     var uniqueRoutes: [Itinerary] {
         var seen = Set<String>()
