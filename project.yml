@@ -11,7 +11,7 @@ settings:
   base:
     SWIFT_VERSION: "5.0"
     MARKETING_VERSION: "0.6.0"
-    CURRENT_PROJECT_VERSION: "42"
+    CURRENT_PROJECT_VERSION: "43"
     # Personal Team — Automatic Signing for local device installs.
     DEVELOPMENT_TEAM: "3D6S8GFSGK"
 packages:
@@ -60,7 +60,7 @@ targets:
             LSItemContentTypes: [public.image]
         ITSAppUsesNonExemptEncryption: false
         # Contact sent in the User-Agent, required by the Transitous usage policy.
-        PublitContact: https://github.com/elija-7580/Publit-
+        PublitContact: https://github.com/elija-7580/Publit
         # Optional Google Places key for release builds (set GOOGLE_API_KEY as a build setting; empty otherwise).
         GoogleAPIKey: $(GOOGLE_API_KEY)
     settings:
@@ -140,7 +140,7 @@ targets:
       path: Config/Widgets-Info.plist
       properties:
         CFBundleDisplayName: Publit
-        PublitContact: https://github.com/elija-7580/Publit-
+        PublitContact: https://github.com/elija-7580/Publit
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         NSExtension:
@@ -193,7 +193,7 @@ targets:
         WKApplication: true
         WKCompanionAppBundleIdentifier: io.github.publit.app
         NSLocationWhenInUseUsageDescription: Publit uses your location to show departures near you.
-        PublitContact: https://github.com/elija-7580/Publit-
+        PublitContact: https://github.com/elija-7580/Publit
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: io.github.publit.app.watchkitapp

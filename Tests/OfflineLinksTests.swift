@@ -49,7 +49,7 @@ final class OfflineLinksTests: XCTestCase {
         let it = try TransitousClient.makeDecoder().decode(PlanResponse.self, from: data).itineraries[0]
         let route = SharedRoute(it, fromName: "Café & Bar = ü/1", toName: "Home?#")
         let web = ShareLinks.web(.route(route))
-        XCTAssertTrue(web.absoluteString.hasPrefix("https://elija-7580.github.io/Publit-/open/#route?i="))
+        XCTAssertTrue(web.absoluteString.hasPrefix("https://elija-7580.github.io/publit-site/open/#route?i="))
         XCTAssertFalse(web.absoluteString.contains("+"), "a + would turn into a space on the web page")
         for url in [DeepLink.route(route).url, web] {
             guard case .route(let back)? = DeepLink(url: url) else { return XCTFail("\(url)") }

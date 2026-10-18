@@ -23,5 +23,7 @@ enum AppInfo {
 
     static var repositoryURL: URL { URL(string: contact) ?? URL(string: "https://github.com")! }
     static let sourcesURL = URL(string: "https://transitous.org/sources/")!
+    static let websiteURL = URL(string: "https://elija-7580.github.io/publit-site/")!
+    static let privacyURL = URL(string: "https://elija-7580.github.io/publit-site/privacy/")!
     static let osmCopyrightURL = URL(string: "https://www.openstreetmap.org/copyright")!
 }

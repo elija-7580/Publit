@@ -39,8 +39,9 @@ final class TransitEnhancementTests: XCTestCase {
         XCTAssertEqual(route.serviceDetail, "ICE 615")
         XCTAssertNil(TestRoute(routeShortName: "RE3", displayName: "RE 3").serviceDetail)
     }
-    func testMissingColoursAreNeutralAndSmallTextHasAAContrast() {
-        XCTAssertEqual(TestRoute(routeShortName: "U1").lineColors.background, "4D4D59")
+    func testMissingColoursUseModeColourAndSmallTextHasAAContrast() {
+        XCTAssertEqual(TestRoute(routeShortName: "U1").lineColors.background, ModeStyle.defaultHex("SUBWAY"))
+        XCTAssertNotEqual(TestRoute(mode: "REGIONAL_RAIL").lineColors.background, "4D4D59")
         let pair = LineColors.resolve(routeColor: "777777", routeTextColor: "FFFFFF", fallback: "000000")
         XCTAssertEqual(pair.text, "000000")
         XCTAssertGreaterThanOrEqual(LineColors.contrast(LineColors.RGB(hex: pair.background)!, LineColors.RGB(hex: pair.text)!), 4.5)

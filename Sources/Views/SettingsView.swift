@@ -144,7 +144,7 @@ struct SettingsView: View {
                 } header: {
                     Text("Data")
                 } footer: {
-                    Text("Times marked live come from the operator's real-time feed; all others are timetable times. If Transitous cannot be reached, Publit asks the MOTIS project's Europe server, which uses the same data.")
+                    Text("Times marked live come from the operator's real-time feed; all others are timetable times.")
                 }
                 Section {
                     if let summary, summary.total > 0 {
@@ -180,6 +180,7 @@ struct SettingsView: View {
                 }
                 Section {
                     Link("Source code and feedback", destination: AppInfo.repositoryURL)
+                    Link("Privacy policy", destination: AppInfo.privacyURL)
                     LabeledContent("Version", value: "\(AppInfo.version) (\(AppInfo.build))").accessibilityIdentifier("installedBuild")
                 } header: {
                     Text("About")
