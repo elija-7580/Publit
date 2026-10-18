@@ -54,6 +54,12 @@ final class PlanModel {
     private(set) var isLoading = false
     private(set) var isLoadingMore = false
     private(set) var errorMessage: String?
+
+    /// A message instead of routes (a shared place that could not be found).
+    func showError(_ message: String) {
+        itineraries = []
+        errorMessage = message
+    }
     /// Said above the routes when they were only found with a longer walk than usual (the stop is far).
     private(set) var walkNote: String?
 
@@ -307,6 +313,8 @@ final class AppState {
     var showGoNow = false
     /// The first departure board is on screen (or could not load): the launch animation may end.
     var firstBoardReady = false
+    /// Raised when a shared place arrives: sheets (settings, place search) close themselves.
+    var dismissToken = 0
 
     func open(_ url: URL) {
         if url.isFileURL, Features.passes {
@@ -325,19 +333,38 @@ final class AppState {
         case .stop: tab = .nearby
         case .ticket, .tripTickets, .go: break
         case .place(let name, let lat, let lon):
-            // Shared from Google Maps or another map app: routes there from here, leaving now.
+            // Shared from Google Maps or another map app: the Plan tab with routes there from here, leaving now.
             deepLink = nil
             if let lat, let lon {
-                goNow(to: SavedPlace(id: "shared|\(lat),\(lon)", name: name, subtitle: nil, lat: lat, lon: lon, stopId: nil))
+                routeShared(to: SavedPlace(id: "shared|\(lat),\(lon)", name: name, subtitle: nil, lat: lat, lon: lon, stopId: nil))
             } else {
+                routeShared(to: nil)
                 Task {
-                    guard let m = try? await TransitousClient.shared.geocode(name, near: nil).first else { return }
-                    goNow(to: SavedPlace(match: m))
+                    if let m = try? await TransitousClient.shared.geocode(name, near: nil).first {
+                        routeShared(to: SavedPlace(match: m))
+                    } else {
+                        plan.showError(L10n.f("No place found for “%@”.", name))
+                    }
                 }
             }
             return
         }
         deepLink = link
+    }
+
+    /// A place shared from another app: always the Plan tab, from the current location, leaving now,
+    /// with nothing left open on top (settings, place search, "Where to now?").
+    /// `nil` while the place is still being looked up: the tab is already there.
+    func routeShared(to place: SavedPlace?) {
+        dismissToken &+= 1
+        showGoNow = false
+        tab = .plan
+        guard let place else { return }
+        plan.from = .currentLocation
+        plan.to = .place(place)
+        plan.timeMode = .now
+        plan.date = .now
+        plan.searchStarted = true
     }
 
     /// Routes from the current location to `place`, leaving now (Nearby → "Where to now?").

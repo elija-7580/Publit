@@ -174,11 +174,13 @@ struct SettingsView: View {
 
 /// Gear button for the navigation bar of each tab.
 struct SettingsButton: View {
+    @Environment(AppState.self) private var app
     @State private var showing = false
 
     var body: some View {
         Button { showing = true } label: { Label("Settings", systemImage: "gearshape") }
             .sheet(isPresented: $showing) { SettingsView().environment(\.liveBarInset, 0) }
+            .onChange(of: app.dismissToken) { showing = false }
     }
 }
 

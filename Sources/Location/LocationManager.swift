@@ -40,6 +40,21 @@ final class LocationManager: NSObject, CLLocationManagerDelegate {
         location.map { LatLon(lat: $0.coordinate.latitude, lon: $0.coordinate.longitude) }
     }
 
+    /// The location now: the last fix if it is recent, otherwise the next one (waits up to `wait`
+    /// seconds, then takes what there is). After the app was in the background the last fix can be
+    /// hours old and far away.
+    func freshCoordinate(maxAge: TimeInterval = 60, wait: TimeInterval = 6) async -> LatLon? {
+        guard !isDenied else { return coordinate }
+        if status != .notDetermined { manager.startUpdatingLocation() }
+        let start = Date()
+        while Date().timeIntervalSince(start) < wait {
+            if let l = location, Date().timeIntervalSince(l.timestamp) < maxAge { break }
+            try? await Task.sleep(for: .milliseconds(150))
+            if Task.isCancelled { break }
+        }
+        return coordinate
+    }
+
     var isDenied: Bool { status == .denied || status == .restricted }
 
     func start() {
