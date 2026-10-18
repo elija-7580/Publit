@@ -42,6 +42,14 @@ final class SharedPlaceTests: XCTestCase {
         XCTAssertFalse(name.hasCoordinate)
     }
 
+    func testLinksWithoutSlashesOrSchemeAreRecognised() throws {
+        let noSlashes = try XCTUnwrap(MapLink.parse(text: "https:www.google.com/maps/search/48.1351,+11.5820"))
+        XCTAssertEqual(noSlashes.lat ?? 0, 48.1351, accuracy: 1e-6)
+        let bare = try XCTUnwrap(MapLink.parse(text: "www.google.com/maps/search/48.1351,+11.5820"))
+        XCTAssertEqual(bare.lon ?? 0, 11.582, accuracy: 1e-6)
+        XCTAssertNil(MapLink.parse(text: "Hauptbahnhof"))
+    }
+
     func testGoogleShortLinkWithNameIsFollowedLater() throws {
         let link = try XCTUnwrap(MapLink.parse(text: "Caffè Cannaregio\nhttps://maps.app.goo.gl/AbCdEf123"))
         XCTAssertEqual(link.shortLink?.host, "maps.app.goo.gl")

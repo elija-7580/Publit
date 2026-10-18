@@ -24,6 +24,7 @@ final class HangLogTests: XCTestCase {
         XCTAssertTrue(log.tick(now: t0))
         for half in 1...11 { log.tick(now: t0.addingTimeInterval(Double(half) * 0.5)) }
         log.answered(now: t0.addingTimeInterval(5.6))
+        log.flush()
         let text = try String(contentsOf: log.fileURL, encoding: .utf8)
         XCTAssertTrue(text.contains("No response for 2 s"))
         XCTAssertTrue(text.contains("open Plan") && text.contains("open Route"))
@@ -51,6 +52,7 @@ final class HangLogTests: XCTestCase {
         for i in 0..<60 { log.note("open Screen\(i)", at: t0) }
         log.tick(now: t0)
         log.tick(now: t0.addingTimeInterval(2.1))
+        log.flush()
         let text = try String(contentsOf: log.fileURL, encoding: .utf8)
         XCTAssertTrue(text.contains("— FREEZE · "))
         XCTAssertFalse(text.contains("Screen19\n"))
@@ -66,6 +68,7 @@ final class HangLogTests: XCTestCase {
         log.error("plan", CancellationError(), at: t0.addingTimeInterval(61))
         log.error("refresh", URLError(.notConnectedToInternet), at: t0.addingTimeInterval(62))
         log.error("plan", URLError(.timedOut), at: t0.addingTimeInterval(400))
+        log.flush()
         let text = try String(contentsOf: log.fileURL, encoding: .utf8)
         XCTAssertTrue(text.contains("plan: URLError \(URLError.Code.timedOut.rawValue)"))
         XCTAssertTrue(text.contains("open Plan"))
@@ -99,6 +102,7 @@ final class HangLogTests: XCTestCase {
         first.flush()
         let next = HangLog(directory: dir)
         next.checkPreviousSession(at: t0.addingTimeInterval(30))
+        next.flush()
         let text = try String(contentsOf: next.fileURL, encoding: .utf8)
         XCTAssertTrue(text.contains("— EXIT · "))
         XCTAssertTrue(text.contains("open Trip"))

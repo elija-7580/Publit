@@ -38,14 +38,26 @@ struct MapLink: Equatable, Sendable {
     static func parse(text: String) -> MapLink? {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         if let c = coordinates(trimmed) { return MapLink(lat: c.0, lon: c.1) }
-        guard let r = trimmed.range(of: #"(?:https?://|geo:)[^\s<>"]+"#, options: [.regularExpression, .caseInsensitive]),
-              let url = URL(string: String(trimmed[r])), var link = parse(url: url) else { return nil }
+        // Also typed or cut-off links: "https:www.google.com/maps/…" (slashes lost) or "www.google.com/maps/…".
+        guard let r = trimmed.range(of: #"(?:https?:/{0,2}|geo:|(?<![\w.])(?:www\.google\.|maps\.google\.|google\.[a-z.]+/maps|maps\.apple\.com|maps\.app\.goo\.gl|goo\.gl/maps))[^\s<>"]+"#,
+                                    options: [.regularExpression, .caseInsensitive]),
+              let url = URL(string: normalizedLink(String(trimmed[r]))), var link = parse(url: url) else { return nil }
         if link.name == nil {
             let before = trimmed[..<r.lowerBound].split(whereSeparator: \.isNewline)
                 .map { $0.trimmingCharacters(in: .whitespaces) }.first { !$0.isEmpty }
             if let before, before.count <= 120 { link.name = before }
         }
         return link
+    }
+
+    /// "https:host/…", "https:/host/…" and "host/…" become "https://host/…"; other links stay as they are.
+    static func normalizedLink(_ s: String) -> String {
+        if s.lowercased().hasPrefix("geo:") { return s }
+        if let m = s.range(of: #"^https?:/{0,2}"#, options: [.regularExpression, .caseInsensitive]) {
+            let scheme = s[m].lowercased().hasPrefix("https") ? "https://" : "http://"
+            return scheme + s[m.upperBound...]
+        }
+        return "https://" + s
     }
 
     static func parse(url: URL) -> MapLink? {

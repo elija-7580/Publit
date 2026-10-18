@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.0 (build 46)
+
+### Code review: fixes and speed
+- Map links typed or pasted without the slashes ("https:www.google.com/maps/…") or without "https://" ("www.google.com/maps/…", "maps.apple.com/…") are recognised as places.
+- Diagnostics log: entries are written off the main thread (an error used to read and rewrite up to 400 KB on the main thread, a small hitch of its own); date formatters are reused instead of created per screen step.
+- Fare prices reuse one formatter per currency instead of building one for every route row.
+- 999.6 m shows as "1.0 km", not "1000 m".
+
 ## 0.6.0 (build 45)
 
 ### Design: softer and calmer
