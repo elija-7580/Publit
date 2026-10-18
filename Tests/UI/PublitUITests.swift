@@ -574,23 +574,9 @@ final class PublitUITests: XCTestCase {
         let plan = launch(["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "plan"])
         let routes = plan.buttons.matching(identifier: "routeRow")
         XCTAssertTrue(routes.firstMatch.waitForExistence(timeout: timeout), "no routes found")
-        // Any element type: a SwiftUI Menu in a list row is not always reported as a button.
-        let sort = plan.descendants(matching: .any)["routeSortMenu"].firstMatch
-        if !reveal(sort, in: plan) { print("SORT MENU: \(sort.exists ? sort.debugDescription : "missing")") }
-        XCTAssertTrue(sort.exists, "no sort menu")
-        tapCentre(sort)
-        let fastest = plan.buttons["Fastest"].firstMatch
-        XCTAssertTrue(fastest.waitForExistence(timeout: 5))
-        fastest.tap()
-        XCTAssertTrue(routes.firstMatch.waitForExistence(timeout: timeout))
+        // Always in time order now; what fits best is marked instead.
         sleep(1)
         snap("plan-sorted")
-        // Back to the default order for the next run (not part of the check: the menu may still be closing).
-        sleep(1)
-        if sort.exists {
-            tapCentre(sort)
-            if plan.buttons["Recommended"].firstMatch.waitForExistence(timeout: 5) { plan.buttons["Recommended"].firstMatch.tap() }
-        }
     }
 
     /// F15 Tickets tab: empty state, the add sheet and the way back; the stop screen's labelled actions.

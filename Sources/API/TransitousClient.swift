@@ -33,7 +33,9 @@ final class TransitousClient: @unchecked Sendable {
     static let backupServer = URL(string: "https://europe.motis-project.de")!
 
     init(base: URL = URL(string: "https://api.transitous.org")!,
-         backups: [URL] = [TransitousClient.backupServer],
+         // No fallback by default: Transitous' policy allows apps only on api.transitous.org,
+         // not on the servers behind it (*.motis-project.de). `backupServer` stays for tests.
+         backups: [URL] = [],
          userAgent: String = AppInfo.userAgent,
          cache: ResponseCache = ResponseCache()) {
         self.base = base

@@ -70,17 +70,6 @@ struct RouteOptionsView: View {
                     Text("Step-free routes avoid stairs where the data allows it. With sharing, routes can start or end on a rented bike or e-scooter; the search takes a little longer.")
                 }
 
-                Section("Sort routes by") {
-                    Picker("Sort routes by", selection: $draft.sort) {
-                        ForEach(RouteSort.allCases) { s in
-                            Label(s.title, systemImage: s.symbol).tag(s)
-                        }
-                    }
-                    .pickerStyle(.inline)
-                    .labelsHidden()
-                    .accessibilityIdentifier("routeSort")
-                }
-
                 Section {
                     Toggle(isOn: $draft.compareStreetModes) {
                         Label("Compare with walking, cycling and driving", systemImage: "car.side")
@@ -97,10 +86,9 @@ struct RouteOptionsView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Reset") {
-                        let compare = draft.compareStreetModes, sort = draft.sort
+                        let compare = draft.compareStreetModes
                         draft = RouteOptions()
                         draft.compareStreetModes = compare
-                        draft.sort = sort
                     }
                     .disabled(draft.isDefault)
                 }

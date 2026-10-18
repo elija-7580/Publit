@@ -171,7 +171,7 @@ struct SmartRoutingSettingsSection: View {
             Text(L10n.t("Smart routing"))
         } footer: {
             Text(L10n.t(enabled
-                ? "Routes are ranked by how long they feel: waiting, walking and changes count more than riding. Each change shows how likely it works and what to take if you miss it. Your choices tune this on your iPhone only."
+                ? "Routes stay in time order. The one that feels shortest is marked “Recommended”: waiting, walking and changes count more than riding. Each change shows how likely it works and what to take if you miss it. Your choices tune this on your iPhone only."
                 : "Routes are listed by departure, as the planner returns them."))
         }
         .task { if enabled && ownSpeed { await measure() } }

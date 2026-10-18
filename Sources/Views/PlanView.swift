@@ -159,8 +159,8 @@ struct PlanView: View {
     @ViewBuilder
     private func resultsSection(_ plan: PlanModel) -> some View {
         let its = plan.sortedItineraries.uniqueRoutes
-        let windowStart = its.map(\.startTime).min() ?? .now
-        let windowEnd = its.map(\.endTime).max() ?? .now
+        // Every bar starts at the left; the longest route fills the width, so lengths still compare.
+        let span = TimeInterval(its.map(\.duration).max() ?? 0)
         let zoneNote = its.first.flatMap { Fmt.foreignZoneNote(tz: $0.legs.first?.from.tz, at: $0.startTime) }
         // Smart routing: the suggested route and the best in each respect, with the reason in a few words.
         let badges = smartRouting ? SmartRouting.badges(its, arriveBy: plan.timeMode == .arriveBy) : [:]
@@ -180,22 +180,10 @@ struct PlanView: View {
                     .accessibilityIdentifier("longWalkNote")
             }
 
-            // Sort control as a real list row: Menu buttons in Section headers are often
-            // non-hittable for UI tests and awkward for VoiceOver.
-            if !its.isEmpty {
-                HStack(spacing: 8) {
-                    RouteSortMenu()
-                    Spacer()
-                }
-                .frame(minHeight: 44)
-                .listRowInsets(EdgeInsets(top: 0, leading: 4, bottom: 0, trailing: 4))
-                .listRowBackground(Color.clear)
-            }
-
             ForEach(its, id: \.routeKey) { it in
                 Button { opened = OpenedRoute(itinerary: it) } label: {
                     HStack(spacing: 8) {
-                        ItineraryRow(itinerary: it, windowStart: windowStart, windowEnd: windowEnd,
+                        ItineraryRow(itinerary: it, windowStart: it.startTime, windowEnd: it.startTime.addingTimeInterval(span),
                                      badges: badges[it.routeKey] ?? [], reason: it.routeKey == recommendedKey ? reason : nil)
                         Image(systemName: "chevron.right")
                             .font(.footnote.weight(.semibold))
@@ -254,6 +242,7 @@ struct ItineraryRow: View {
             ? SmartRouting.changes(itinerary).filter { $0.chance < 0.8 }.min { $0.chance < $1.chance } : nil
         VStack(alignment: .leading, spacing: 6) {
             if !badges.isEmpty { SmartBadgesRow(badges: badges, reason: reason) }
+
             HStack(alignment: .firstTextBaseline) {
                 Text("\(Fmt.time(itinerary.startTime, tz: tz)) – \(Fmt.time(itinerary.endTime, tz: itinerary.legs.last?.to.tz))")
                     .font(.headline.monospacedDigit())
@@ -293,6 +282,13 @@ struct ItineraryRow: View {
             }
         }
         .padding(.vertical, 4)
+        // The suggested route stands out by a mark at its edge, not by moving it to the top.
+        .overlay(alignment: .leading) {
+            if badges.contains(.recommended) {
+                Capsule().fill(Color.signature).frame(width: 3).padding(.vertical, 6).offset(x: -10)
+                    .accessibilityHidden(true)
+            }
+        }
     }
 }
 
@@ -349,32 +345,5 @@ struct TimelineBar: View {
             .frame(width: width, height: geo.size.height, alignment: .topLeading).clipped()
         }
         .accessibilityHidden(true)
-    }
-}
-
-/// Quick switch of the route order in the results header.
-struct RouteSortMenu: View {
-    @Environment(AppState.self) private var app
-    @AppStorage(SmartRouting.enabledKey) private var smartRouting = true
-
-    var body: some View {
-        let current = smartRouting ? app.routeOptions.sort : app.routeOptions.sort.effective
-        Menu {
-            Picker("Sort routes by", selection: Binding(get: { current }, set: { s in
-                var o = app.routeOptions
-                o.sort = s
-                app.setRouteOptions(o)
-            })) {
-                ForEach(smartRouting ? RouteSort.allCases : RouteSort.allCases.filter { $0 != .recommended }) { s in
-                    Label(s.title, systemImage: s.symbol).tag(s)
-                }
-            }
-        } label: {
-            Label(current.title, systemImage: "arrow.up.arrow.down")
-                .textCase(nil)
-        }
-        .menuStyle(.button)
-        .buttonStyle(.chip)
-        .accessibilityIdentifier("routeSortMenu")
     }
 }

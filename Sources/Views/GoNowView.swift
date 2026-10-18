@@ -11,8 +11,8 @@ struct GoNowView: View {
     var body: some View {
         let plan = app.goNow
         let its = plan.sortedItineraries
-        let windowStart = its.map(\.startTime).min() ?? .now
-        let windowEnd = its.map(\.endTime).max() ?? .now
+        let span = TimeInterval(its.map(\.duration).max() ?? 0)
+        let badges = SmartRouting.isEnabled ? SmartRouting.badges(its, arriveBy: false) : [:]
         List {
             if !its.isEmpty {
                 CompareMapView(itineraries: its, selectedId: selectedId ?? its.first?.routeKey)
@@ -37,7 +37,6 @@ struct GoNowView: View {
                         .accessibilityElement(children: .combine)
                         .accessibilityIdentifier("longWalkNote")
                 }
-                if !its.isEmpty { ConnectionLegendRow(start: windowStart, end: windowEnd, tz: its.first?.legs.first?.from.tz) }
                 ForEach(its) { it in
                     NavigationLink {
                         ItineraryDetailView(itinerary: it, fromName: L10n.t("Current location"), toName: plan.to?.title ?? "")
@@ -50,7 +49,8 @@ struct GoNowView: View {
                             } else {
                                 Text("Walk all the way").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
                             }
-                            ItineraryRow(itinerary: it, windowStart: windowStart, windowEnd: windowEnd)
+                            ItineraryRow(itinerary: it, windowStart: it.startTime, windowEnd: it.startTime.addingTimeInterval(span),
+                                         badges: badges[it.routeKey] ?? [])
                         }
                     }
                     .simultaneousGesture(TapGesture().onEnded { selectedId = it.routeKey })
@@ -59,11 +59,7 @@ struct GoNowView: View {
                     Button("Later connections") { Task { await plan.loadMore() } }
                 }
             } header: {
-                HStack {
-                    Text("From your location")
-                    Spacer()
-                    if !its.isEmpty { RouteSortMenu() }
-                }
+                Text("From your location")
             } footer: {
                 if let note = its.first.flatMap({ Fmt.foreignZoneNote(tz: $0.legs.first?.from.tz, at: $0.startTime) }) {
                     Label(note, systemImage: "clock")
