@@ -22,10 +22,10 @@ extension RouteStyled {
         return display
     }
 
-    /// A missing route colour must not masquerade as an official U-Bahn line colour.
+    /// Feeds without route colours (e.g. many Italian operators) still get a clear colour per mode.
     var lineColors: LineColors.Pair {
         LineColors.resolve(routeColor: routeColor, routeTextColor: routeTextColor,
-                           fallback: ModeStyle.isTransit(mode) ? "4D4D59" : ModeStyle.defaultHex(mode))
+                           fallback: ModeStyle.defaultHex(mode))
     }
 
 }
@@ -81,8 +81,13 @@ enum ModeStyle {
         case "SUBWAY", "METRO": return "5940B3"
         case "FERRY": return "0D8CA6"
         case "SUBURBAN": return "1A8C4D"
-        case "WALK", "BIKE", "RENTAL", "CAR": return "8E8E93"
-        default: return "4D4D59"
+        case "HIGHSPEED_RAIL", "LONG_DISTANCE": return "9E1B32"
+        case "NIGHT_RAIL": return "33308C"
+        case "FUNICULAR", "AERIAL_LIFT", "AREAL_LIFT", "CABLE_CAR": return "A15C0F"
+        case "AIRPLANE": return "1F6FA8"
+        case "ODM", "RIDE_SHARING": return "7A3DB8"
+        case "WALK", "BIKE", "RENTAL", "CAR", "CAR_PARKING", "CAR_DROPOFF", "HGV": return "8E8E93"
+        default: return "D0571B" // regional and other rail
         }
     }
 }

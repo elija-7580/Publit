@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.0 (build 43)
+
+- Lines without an operator colour (e.g. many Italian feeds) now get a clear colour per mode instead of grey, so routes are colourful everywhere.
+- Settings: link to the new privacy policy (website, German and English); the outdated note about a backup server is gone.
+- Shared links point to the website (`/publit-site/open/`), which works again; links from older builds are still understood.
+
 ## 0.6.0 (build 42)
 
 ### Plan and map
