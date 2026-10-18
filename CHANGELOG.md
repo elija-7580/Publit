@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.6.0 (build 35)
+
+### Start screens in one style
+- Nearby, Plan, Tickets and Saved share one look: settings on every tab, sort and map as round chips like the mode filters, one empty state (no more cut-off titles), "Find a line" as a row in Saved.
+- Warnings ("Tight change", "Long walk", service changes) look the same everywhere: the symbol in its colour, the words in ink. Critical ones get a tinted card.
+- The trip under way is shown once, in the live bar, not again as "Active trip" and "Next trip".
+
+### Bevelled inputs
+- "Where to now?" and From/To are fields pressed into the card; the swap button is a raised key; Depart/Arrive is Publit's own switch instead of the system segmented control.
+
+### Nearby stations
+- Tap a station to open it. The new button next to it plans a route there from where you are, leaving now. A long press offers "Route here" and "All departures".
+
+### Route taps and the trip
+- Route rows always open. Trip lines look like Apple Maps (the part ahead strong, travelled faded) in each line's colour.
+- The live trip is map-first with a panel (peek, half, full), swipeable stage cards with a big countdown, the stage details in the trip list, clear labels ("Take U6 towards …", "Get off at …"), a walk from where you are when you left the planned path, "End trip" at the top and an automatic end at the destination.
+- The route preview has a small map at the top and a timeline of the legs; a card says when to leave and when you arrive.
+
 ## 0.6.0 (build 34)
 
 ### Far stops are shown, not hidden
