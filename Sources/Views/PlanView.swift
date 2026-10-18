@@ -72,6 +72,11 @@ struct PlanView: View {
             }
         }
         .inkList()
+        // Pull down: fetch the routes again (delays, a train just gone).
+        .refreshable {
+            guard app.plan.searchStarted, app.plan.to != nil else { return }
+            await app.plan.search(current: location.coordinate, locationDenied: location.isDenied, silent: true)
+        }
         .navigationDestination(item: $opened) { route in detail(route.itinerary) }
         .navigationTitle("Plan")
         .screenTrail("Plan")
@@ -97,6 +102,8 @@ struct PlanView: View {
         .onDisappear { isVisible = false }
         .task(id: "\(app.plan.queryKey)|\(scenePhase)|\(app.tab)|\(isVisible)|\(app.plan.searchStarted)") {
             guard isVisible, scenePhase == .active, app.tab == .plan, app.plan.searchStarted else { return }
+            // Back after a while: a time that has passed becomes now (the routes from then are gone).
+            if app.plan.date < .now.addingTimeInterval(-60) { app.plan.date = .now }
             selectedId = nil
             // From here: a fresh fix, not the one from when the app was last open (another town, maybe).
             var here = location.coordinate
@@ -104,7 +111,7 @@ struct PlanView: View {
             guard !Task.isCancelled else { return }
             await app.plan.search(current: here, locationDenied: location.isDenied)
             // Keep "now" results live: delays, cancellations and departed trips change by the minute.
-            while app.plan.timeMode == .now, app.plan.to != nil, !Task.isCancelled {
+            while app.plan.isLive, app.plan.to != nil, !Task.isCancelled {
                 try? await Task.sleep(for: Self.refreshInterval)
                 guard !Task.isCancelled else { break }
                 await app.plan.search(current: location.coordinate, locationDenied: location.isDenied, silent: true)
@@ -261,6 +268,10 @@ struct PlanView: View {
             if !its.isEmpty {
                 VStack(alignment: .leading, spacing: 6) {
                     if let zoneNote { Label(zoneNote, systemImage: "clock") }
+                    if let updated = plan.updatedAt {
+                        Label(L10n.f("Updated %@", Fmt.time(updated)), systemImage: plan.isLive ? "dot.radiowaves.left.and.right" : "arrow.clockwise")
+                            .accessibilityIdentifier("routesUpdated")
+                    }
                 }
                 .padding(.top, 8)
             }
@@ -302,10 +313,12 @@ struct ItineraryRow: View {
             if showTimeline {
                 TimelineBar(itinerary: itinerary, windowStart: windowStart, windowEnd: windowEnd).frame(height: 42)
             }
+            // Where to go, at a glance: the stop and platform to get on at, without opening the route.
+            BoardingLine(itinerary: itinerary)
             HStack(spacing: 8) {
                 Text(Fmt.changes(itinerary.transfers))
-                if let first = itinerary.firstTransitLeg {
-                    Text("· \(first.lineName) from \(first.from.name)").lineLimit(1)
+                if let first = itinerary.firstTransitLeg, let dir = first.shownDirection {
+                    Text(verbatim: "· \(first.lineName) → \(dir)").lineLimit(1)
                 }
                 if itinerary.isCancelled {
                     Text("Cancelled").foregroundStyle(Color.danger)
