@@ -189,7 +189,7 @@ private struct TripMap: View, Equatable {
                 .annotationTitles(.hidden)
             }
         }
-        .mapStyle(.standard(pointsOfInterest: .excludingAll))
+        .publitMapStyle()
     }
 }
 

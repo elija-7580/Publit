@@ -280,7 +280,7 @@ struct LiveTripView: View {
             }
             if let nextIndex, let transfer = TransferInfo(before: nextIndex, in: it) { TransferCard(info: transfer) }
             Button { Self.openInMaps(leg.to, name: target) } label: {
-                Label("Open in Apple Maps", systemImage: "map")
+                Label(DirectionsApp.current.openLabel, systemImage: "map")
             }
         }
         if let away {
@@ -519,9 +519,7 @@ struct LiveTripView: View {
     }
 
     static func openInMaps(_ place: Place, name: String) {
-        let item = MKMapItem(placemark: MKPlacemark(coordinate: place.coordinate.clCoordinate))
-        item.name = name
-        item.openInMaps(launchOptions: [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeWalking])
+        DirectionsApp.current.open(place.coordinate, name: name, mode: .walking)
     }
 }
 
@@ -727,7 +725,7 @@ private struct GuideMap: View {
                     .tint(step.kind == .arrive ? Color.danger : Color.ink)
             }
         }
-        .mapStyle(.standard(pointsOfInterest: .excludingAll))
+        .publitMapStyle()
         .mapControls { MapUserLocationButton(); MapCompass() }
         .overlay(alignment: .topLeading) {
             // The panel covers the bottom, so the map's own buttons sit at the top.

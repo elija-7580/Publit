@@ -22,7 +22,7 @@ struct CompareMapView: View {
                 }
             }
         }
-        .mapStyle(.standard(pointsOfInterest: .excludingAll))
+        .publitMapStyle()
     }
 }
 
@@ -277,7 +277,7 @@ struct RouteMap: View {
                     .tint(Color.inkAction)
             }
         }
-        .mapStyle(.standard(pointsOfInterest: .excludingAll))
+        .publitMapStyle()
     }
 }
 

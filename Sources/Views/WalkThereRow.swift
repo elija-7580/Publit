@@ -39,9 +39,7 @@ struct WalkThereRow: View {
     }
 
     private func open() {
-        let item = MKMapItem(placemark: MKPlacemark(coordinate: coordinate.clCoordinate))
-        item.name = name
-        item.openInMaps(launchOptions: [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeWalking])
+        DirectionsApp.current.open(coordinate, name: name, mode: .walking)
     }
 }
 
