@@ -19,7 +19,20 @@ struct HafasSource: LiveSource {
     private static let day = J.formatter("yyyyMMdd", tz)
     private static let clock = J.formatter("HHmmss", tz)
 
-    func covers(_ point: LatLon) -> Bool { Self.area.contains(point) }
+    /// Austria's border, roughly: the rectangle alone takes in Munich, Passau, Bratislava and Bolzano.
+    static let outline = GeoOutline(points: [
+        (9.53, 47.27), (9.60, 47.53), (10.0, 47.58), (10.45, 47.55), (10.9, 47.48), (11.4, 47.58), (12.2, 47.72),
+        (12.75, 47.66), (13.0, 47.74), (12.96, 47.86), (12.85, 48.1), (13.03, 48.27), (13.43, 48.46), (13.73, 48.52),
+        (13.84, 48.77), (14.7, 48.6), (15.0, 49.02), (15.9, 48.84), (16.9, 48.62), (17.07, 48.12), (17.16, 48.0),
+        (16.9, 47.7), (16.65, 47.45), (16.45, 47.0), (16.1, 46.85), (16.0, 46.67), (15.5, 46.63), (14.9, 46.6),
+        (14.5, 46.42), (13.7, 46.52), (12.4, 46.65), (12.15, 47.0), (11.6, 46.98), (11.1, 46.78), (10.45, 46.86),
+        (10.1, 46.85), (9.85, 47.0), (9.53, 47.06),
+    ])
+
+    func covers(_ ride: LiveRide) -> Bool {
+        if let tz = ride.tz, tz != Self.tz { return false }
+        return Self.area.contains(ride.point) && Self.outline.contains(ride.point)
+    }
 
     func fix(for ride: LiveRide, now: Date) async throws -> LiveFix? {
         let point = ride.point
@@ -147,7 +160,7 @@ struct WienerLinienSource: LiveSource {
     private static let boards = TTLCache<[LiveDeparture]>(limit: 80)
     private static let stamp = J.formatter("yyyy-MM-dd'T'HH:mm:ss.SSSZ", "Europe/Vienna")
 
-    func covers(_ point: LatLon) -> Bool { Self.area.contains(point) }
+    func covers(_ ride: LiveRide) -> Bool { Self.area.contains(ride.point) }
 
     func fix(for ride: LiveRide, now: Date) async throws -> LiveFix? {
         guard let diva = ride.stopId.flatMap(Self.diva) else { return nil }
@@ -223,7 +236,7 @@ struct ACTVSource: LiveSource {
     private static let stopLists = TTLCache<[Stop]>(limit: 4)
     private static let boards = TTLCache<[LiveDeparture]>(limit: 80)
 
-    func covers(_ point: LatLon) -> Bool { Self.area.contains(point) }
+    func covers(_ ride: LiveRide) -> Bool { Self.area.contains(ride.point) }
 
     func fix(for ride: LiveRide, now: Date) async throws -> LiveFix? {
         let net = ride.mode == "FERRY" ? "nav" : "aut"
@@ -302,7 +315,7 @@ struct SLSource: LiveSource {
     private static let boards = TTLCache<[LiveDeparture]>(limit: 80)
     private static let stamp = J.formatter("yyyy-MM-dd'T'HH:mm:ss", "Europe/Stockholm")
 
-    func covers(_ point: LatLon) -> Bool { Self.area.contains(point) }
+    func covers(_ ride: LiveRide) -> Bool { Self.area.contains(ride.point) }
 
     func fix(for ride: LiveRide, now: Date) async throws -> LiveFix? {
         let all = try await Self.sites.value("sites", ttl: 7 * 86_400) {
@@ -365,7 +378,7 @@ struct TfLStatusSource: LiveSource {
     private static let status = TTLCache<[Line]>(limit: 2)
     private static let stamp: ISO8601DateFormatter = ISO8601DateFormatter()
 
-    func covers(_ point: LatLon) -> Bool { Self.area.contains(point) }
+    func covers(_ ride: LiveRide) -> Bool { Self.area.contains(ride.point) }
 
     func fix(for ride: LiveRide, now: Date) async throws -> LiveFix? {
         guard ride.mode != "BUS" && ride.mode != "COACH" else { return nil }
