@@ -126,6 +126,9 @@ struct ItineraryDetailView: View {
                 }
             }
 
+            // How sure each change is and what takes over if it breaks (smart routing).
+            SmartChangesSection(itinerary: itinerary)
+
             // 2. What you can do with it, right below: start, save, calendar, reminder.
             // Cycling and driving are shown for comparison only: no trip, reminder or fares.
             if !isBikeOrCar {

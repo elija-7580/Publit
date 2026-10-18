@@ -285,6 +285,101 @@
      }
     }
    }
+  },
+  "NSMotionUsageDescription": {
+   "extractionState": "manual",
+   "localizations": {
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit čte vaši rychlost chůze z krokoměru, jen pokud zapnete „Použít mou rychlost chůze“. Zůstává ve vašem iPhonu."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit liest dein Gehtempo aus dem Schrittzähler, nur wenn du „Mein Gehtempo verwenden“ einschaltest. Es bleibt auf deinem iPhone."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Το Publit διαβάζει την ταχύτητα βαδίσματός σου από τον μετρητή βημάτων, μόνο αν ενεργοποιήσεις «Χρήση της ταχύτητας βαδίσματός μου». Μένει στο iPhone σου."
+     }
+    },
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit reads your walking speed from the step counter, only if you turn on “Use my walking speed”. It stays on your iPhone."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit lee tu velocidad al caminar del podómetro solo si activas «Usar mi velocidad al caminar». Se queda en tu iPhone."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit lit votre vitesse de marche dans le podomètre, uniquement si vous activez « Utiliser ma vitesse de marche ». Elle reste sur votre iPhone."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "A Publit csak akkor olvassa ki a gyaloglási tempódat a lépésszámlálóból, ha bekapcsolod a „Saját gyaloglási tempóm használata” opciót. Az iPhone-odon marad."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit legge la tua velocità a piedi dal contapassi solo se attivi «Usa la mia velocità a piedi». Resta sul tuo iPhone."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit leest je looptempo uit de stappenteller, alleen als je „Mijn looptempo gebruiken” aanzet. Het blijft op je iPhone."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit odczytuje Twoje tempo chodu z krokomierza tylko wtedy, gdy włączysz „Użyj mojego tempa chodu”. Zostaje na Twoim iPhonie."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O Publit lê a sua velocidade a pé a partir do contador de passos, só se ativar «Usar a minha velocidade a pé». Fica no seu iPhone."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit citește viteza ta de mers din pedometru doar dacă activezi „Folosește viteza mea de mers”. Rămâne pe iPhone."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit läser din gånghastighet från stegräknaren, bara om du slår på ”Använd min gånghastighet”. Den stannar på din iPhone."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit, yürüme hızını adım sayardan yalnızca “Yürüme hızımı kullan” seçeneğini açarsan okur. iPhone'unda kalır."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit зчитує вашу швидкість ходьби з крокоміра, лише якщо ви ввімкнете «Використовувати мою швидкість ходьби». Вона залишається на вашому iPhone."
+     }
+    }
+   }
   }
  },
  "version": "1.0"

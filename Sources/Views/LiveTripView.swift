@@ -50,9 +50,17 @@ struct LiveTripView: View {
         let ride = step.kind == .ride || step.kind == .wait ? TripGuide.ridePosition(leg, at: now, location: here) : nil
         let check = index == live ? TripGuide.check(step, it, at: now, location: here, accuracy: location.accuracy, walk: walk) : .fine
         let cue = index == live ? GuideCues.current(step, it, at: now, walk: walk, position: walkPos, progress: ride?.progress) : nil
-        let wrong = index == live && TripAlternative.needed(check, it, at: now)
+        let needed = index == live && TripAlternative.needed(check, it, at: now)
+        // Smart routing: a change ahead that is unlikely to work is a reason to look for another way now.
+        let risk = index == live && !needed && SmartRouting.isEnabled ? SmartRouting.changeAtRisk(it, at: now) : nil
+        let wrong = needed || risk != nil
+        let riskMessage: String? = risk.map { r -> String in Self.riskMessage(r) }
         let wrongMessage: String = check == .offRoute ? L10n.t("You seem to be off the route.")
-            : check == .missed ? L10n.t("Missed it?") : L10n.t("Connection cancelled")
+            : check == .missed ? L10n.t("Missed it?")
+            : riskMessage ?? L10n.t("Connection cancelled")
+        // Searched from the stop of the shaky change at the time you get there, not from where you are now.
+        let searchFrom: (point: LatLon, time: Date)? = risk.map { ($0.incoming.to.coordinate, $0.incoming.endTime) }
+        let riskKey = risk.map { "\($0.stopName)|\($0.outgoing.tripId ?? $0.outgoing.lineName)" } ?? ""
         let vehicle = step.kind == .ride ? ride.flatMap { TripProgress.position($0.progress, stops: leg.allStops) } : nil
         // Away from the planned walk (it started where the trip was planned): walk from where you are now.
         let detourTarget: LatLon? = index == live && step.kind == .walk && walkPos == nil && here != nil ? leg.to.coordinate : nil
@@ -90,8 +98,15 @@ struct LiveTripView: View {
                 .padding(.horizontal, 12)
             } content: {
                 details(it: it, steps: steps, step: step, leg: leg, index: index, live: live, here: here, walk: walk,
-                        walkPos: walkPos, detour: detourRoute, ride: ride, check: check, wrong: wrong, wrongMessage: wrongMessage)
+                        walkPos: walkPos, detour: detourRoute, ride: ride, check: check, wrong: wrong, wrongMessage: wrongMessage,
+                        searchFrom: searchFrom)
             }
+        }
+        .onChange(of: riskKey) { _, key in
+            guard !key.isEmpty, let r = SmartRouting.changeAtRisk(trip.itinerary, at: .now) else { return }
+            feedbackKind = .platform
+            feedback += 1
+            ChangeRiskNotifier.notify(r, message: wrongMessage)
         }
         .ticking(every: 15, now: $now)
         .navigationTitle(trip.toName)
@@ -152,11 +167,12 @@ struct LiveTripView: View {
     private func details(it: Itinerary, steps: [GuideStep], step: GuideStep, leg: Leg, index: Int, live: Int, here: LatLon?,
                          walk: WalkRoute?, walkPos: WalkRoute.Position?, detour: WalkDetour.Route?,
                          ride: (progress: TripProgress, fromGPS: Bool)?,
-                         check: TripGuide.Check, wrong: Bool, wrongMessage: String) -> some View {
+                         check: TripGuide.Check, wrong: Bool, wrongMessage: String,
+                         searchFrom: (point: LatLon, time: Date)? = nil) -> some View {
         List {
             if wrong {
                 Section {
-                    AlternativeRow(trip: trip, from: here, message: wrongMessage, onMore: replan)
+                    AlternativeRow(trip: trip, from: searchFrom?.point ?? here, time: searchFrom?.time, message: wrongMessage, onMore: replan)
                         .listRowBackground(NoticeBackground(tint: .danger, tinted: true))
                 }
             }
@@ -491,6 +507,14 @@ struct LiveTripView: View {
         let place = SavedPlace(id: "trip-\(trip.id)", name: trip.toName, subtitle: nil, lat: dest.lat, lon: dest.lon, stopId: nil)
         app.deepLink = nil
         app.goNow(to: place)
+    }
+
+    /// "Your change at Ostbahnhof may not work (40 %). Backup: S7 at 13:27"
+    static func riskMessage(_ r: SmartRouting.Change) -> String {
+        let backup = SmartRouting.backup(for: r.outgoing).map { b -> String in
+            " " + L10n.f("Backup: %@ at %@", b.leg.lineName, Fmt.time(b.leg.startTime, tz: b.leg.from.tz))
+        } ?? ""
+        return L10n.f("Your change at %@ may not work (%lld %%).", r.stopName, r.percent) + backup
     }
 
     static func departure(_ leg: Leg, now: Date) -> String {
@@ -947,6 +971,8 @@ private struct TransferCard: View {
 private struct AlternativeRow: View {
     let trip: SavedTrip
     let from: LatLon?
+    /// When to leave `from`; nil = now.
+    var time: Date? = nil
     let message: String
     let onMore: () -> Void
     @Environment(TripStore.self) private var trips
@@ -1003,7 +1029,7 @@ private struct AlternativeRow: View {
         guard let from, let dest = trip.itinerary.legs.last?.to else { return }
         searching = true
         defer { searching = false }
-        guard let res = try? await TransitousClient.shared.plan(from: from, to: dest.coordinate, time: nil, arriveBy: false,
+        guard let res = try? await TransitousClient.shared.plan(from: from, to: dest.coordinate, time: time, arriveBy: false,
                                                                  options: app.routeOptions) else { return }
         option = TripAlternative.pick(res.itineraries, at: .now)
     }

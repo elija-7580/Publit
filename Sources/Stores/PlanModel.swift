@@ -75,7 +75,10 @@ final class PlanModel {
     @ObservationIgnored var history: SearchHistoryStore = .shared
 
     /// The routes in the order chosen in the options (fastest, fewest changes, …).
-    var sortedItineraries: [Itinerary] { options.sort.apply(itineraries) }
+    /// Smart routing drops routes another one beats on everything, then the chosen order applies.
+    var sortedItineraries: [Itinerary] {
+        options.sort.apply(SmartRouting.isEnabled ? SmartRouting.pruned(itineraries) : itineraries, arriveBy: timeMode == .arriveBy)
+    }
 
     var canLoadMore: Bool { nextCursor != nil && !itineraries.isEmpty }
 
@@ -83,6 +86,12 @@ final class PlanModel {
     var queryKey: String {
         let t = timeMode == .now ? "now" : String(Int(date.timeIntervalSince1970 / 60))
         return "\(from.key)|\(to?.key ?? "-")|\(timeMode.rawValue)|\(t)|\(options.key)"
+    }
+
+    /// What was offered, to learn from the route that gets saved (smart routing).
+    private func offerForLearning() {
+        SmartRouting.offered = itineraries
+        SmartRouting.offeredArriveBy = timeMode == .arriveBy
     }
 
     func swap() {
@@ -156,6 +165,7 @@ final class PlanModel {
             try Task.checkCancellation()
             guard token == myToken else { return }
             itineraries = Self.merge(transit: res.itineraries.withoutDetours, direct: res.direct)
+            offerForLearning()
             walkNote = maxWalk > RouteOptions.defaultWalkMinutes * 60 ? Reach.longWalkNote(res.itineraries) : nil
             let key = queryKey
             if streetKey != key { streetRoutes = [] }
@@ -232,6 +242,7 @@ final class PlanModel {
             let known = Set(itineraries.map(\.id))
             let fresh = res.itineraries.withoutDetours.filter { !known.contains($0.id) }
             itineraries = (itineraries + fresh).sorted { $0.startTime < $1.startTime }
+            offerForLearning()
             nextCursor = req.arriveBy ? res.previousPageCursor : res.nextPageCursor
         } catch {
             if !Self.isCancellation(error) { errorMessage = error.localizedDescription }

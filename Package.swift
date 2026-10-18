@@ -14,6 +14,7 @@ let core = [
     "Models/Fares.swift",
     "Models/ModeStyle.swift",
     "Models/TransferRisk.swift",
+    "Models/SmartRouting.swift",
     "Models/TripProgress.swift",
     "Models/WalkGuide.swift",
     "Models/TripGuide.swift",

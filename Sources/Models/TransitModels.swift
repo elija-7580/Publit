@@ -136,6 +136,9 @@ struct Leg: Codable, Sendable, RouteStyled {
     var effectiveFareLegIndex: Int? = nil
     /// Walking (and cycling) directions: streets, stairs and levels, each with its piece of the path.
     var steps: [StepInstruction]? = nil
+    /// Other vehicles that can replace this ride and still keep the trip (smart routing asks for
+    /// them with `numLegAlternatives`); each is walk, ride, walk.
+    var alternatives: [[Leg]]? = nil
 
     var directionName: String? { TransitLabels.clean(headsign) }
     var isTransit: Bool { ModeStyle.isTransit(mode) }

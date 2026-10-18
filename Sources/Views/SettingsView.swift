@@ -60,6 +60,7 @@ struct SettingsView: View {
                     Toggle(L10n.t("Show connection timelines"), isOn: $routeTimelines)
                     NavigationLink { ConnectionGuideView() } label: { Label(L10n.t("How to read connections"), systemImage: "questionmark.circle") }
                 }
+                SmartRoutingSettingsSection()
                 Section {
                     if MapProvider.googleAvailable {
                         Picker(L10n.t("Map provider"), selection: $mapProvider) {

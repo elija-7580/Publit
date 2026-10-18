@@ -597,7 +597,7 @@ final class PublitUITests: XCTestCase {
         sleep(1)
         if sort.exists {
             tapCentre(sort)
-            if plan.buttons["Departure"].firstMatch.waitForExistence(timeout: 5) { plan.buttons["Departure"].firstMatch.tap() }
+            if plan.buttons["Recommended"].firstMatch.waitForExistence(timeout: 5) { plan.buttons["Recommended"].firstMatch.tap() }
         }
     }
 
