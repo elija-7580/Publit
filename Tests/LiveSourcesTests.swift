@@ -67,7 +67,8 @@ final class LiveSourcesTests: XCTestCase {
         XCTAssertEqual(out.legs[0].endTime, date(9))
         XCTAssertEqual(out.legs[2].endTime, date(29))
         XCTAssertEqual(out.endTime, date(29))
-        XCTAssertEqual(out.duration, 29 * 60)
+        XCTAssertEqual(out.legs[0].startTime, date(4))
+        XCTAssertEqual(out.duration, 25 * 60)
         XCTAssertEqual(LiveOverlay.sourceNames(out), ["ÖBB"])
         // The same alert twice is listed once.
         XCTAssertEqual(LiveMerge.merge(out.legs[1], fix).alerts?.count, 1)
@@ -182,6 +183,24 @@ final class LiveSourcesTests: XCTestCase {
         XCTAssertEqual(lines[0].alerts.first?.impactPeriod?.count, 1)
         XCTAssertTrue(lines[1].alerts.isEmpty)
         XCTAssertTrue(LiveMatch.sameLine(["Bakerloo"], lines[0].names))
+    }
+
+    func testAustriaOutline() {
+        func covered(_ lat: Double, _ lon: Double, tz: String? = nil) -> Bool {
+            HafasSource().covers(LiveRide(point: LatLon(lat: lat, lon: lon), stopId: nil, stopName: "", lines: [], headsign: nil,
+                                          scheduled: Date(), mode: "BUS", tz: tz))
+        }
+        XCTAssertTrue(covered(48.41, 15.60))    // Krems
+        XCTAssertTrue(covered(48.21, 16.37))    // Vienna
+        XCTAssertTrue(covered(47.80, 13.04))    // Salzburg
+        XCTAssertTrue(covered(47.26, 11.39))    // Innsbruck
+        XCTAssertTrue(covered(47.50, 9.74))     // Bregenz
+        XCTAssertTrue(covered(46.62, 14.31))    // Klagenfurt
+        XCTAssertFalse(covered(48.14, 11.58))   // Munich
+        XCTAssertFalse(covered(48.57, 13.46))   // Passau
+        XCTAssertFalse(covered(48.15, 17.11))   // Bratislava
+        XCTAssertFalse(covered(46.50, 11.35))   // Bolzano
+        XCTAssertFalse(covered(48.21, 16.37, tz: "Europe/Berlin"))
     }
 
     func testOverlayStaysOutsideCoveredAreas() async throws {

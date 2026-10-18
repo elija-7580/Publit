@@ -18,6 +18,8 @@ struct LiveRide: Sendable, Hashable {
     let headsign: String?
     let scheduled: Date
     let mode: String
+    /// Time zone of the stop, when known: tells Austria from Bavaria next to the border.
+    var tz: String? = nil
 }
 
 /// A departure as an extra source reports it.
@@ -50,7 +52,7 @@ protocol LiveSource: Sendable {
     var name: String { get }
     /// How far ahead the source knows anything useful.
     var horizon: TimeInterval { get }
-    func covers(_ point: LatLon) -> Bool
+    func covers(_ ride: LiveRide) -> Bool
     func fix(for ride: LiveRide, now: Date) async throws -> LiveFix?
 }
 
@@ -58,6 +60,21 @@ protocol LiveSource: Sendable {
 struct GeoBox: Sendable {
     let minLat: Double, maxLat: Double, minLon: Double, maxLon: Double
     func contains(_ p: LatLon) -> Bool { p.lat >= minLat && p.lat <= maxLat && p.lon >= minLon && p.lon <= maxLon }
+}
+
+/// A rough outline (lon, lat), for areas a rectangle would overshoot.
+struct GeoOutline: Sendable {
+    let points: [(lon: Double, lat: Double)]
+    func contains(_ p: LatLon) -> Bool {
+        var inside = false
+        var j = points.count - 1
+        for i in points.indices {
+            let a = points[i], b = points[j]
+            if (a.lat > p.lat) != (b.lat > p.lat), p.lon < (b.lon - a.lon) * (p.lat - a.lat) / (b.lat - a.lat) + a.lon { inside.toggle() }
+            j = i
+        }
+        return inside
+    }
 }
 
 // MARK: Matching
@@ -238,18 +255,18 @@ enum LiveOverlay {
     static func ride(_ leg: Leg) -> LiveRide {
         LiveRide(point: leg.from.coordinate, stopId: leg.from.stopId, stopName: leg.from.name,
                  lines: [leg.routeShortName, leg.displayName].compactMap { $0 }.filter { !$0.isEmpty },
-                 headsign: leg.headsign, scheduled: leg.scheduledStartTime, mode: leg.mode)
+                 headsign: leg.headsign, scheduled: leg.scheduledStartTime, mode: leg.mode, tz: leg.from.tz)
     }
 
     static func ride(_ st: StopTime) -> LiveRide {
         LiveRide(point: st.place.coordinate, stopId: st.place.stopId, stopName: st.place.name,
                  lines: [st.routeShortName, st.displayName].compactMap { $0 }.filter { !$0.isEmpty },
-                 headsign: st.headsign, scheduled: st.scheduledDepartureTime ?? st.departureTime, mode: st.mode)
+                 headsign: st.headsign, scheduled: st.scheduledDepartureTime ?? st.departureTime, mode: st.mode, tz: st.place.tz)
     }
 
     static func wanted(_ ride: LiveRide, now: Date) -> Bool {
         guard ride.scheduled > now.addingTimeInterval(-30 * 60) else { return false }
-        return sources.contains { $0.covers(ride.point) && ride.scheduled < now.addingTimeInterval($0.horizon) }
+        return sources.contains { $0.covers(ride) && ride.scheduled < now.addingTimeInterval($0.horizon) }
     }
 
     /// Everything the sources know about one ride: times from the first that has them,
@@ -257,7 +274,7 @@ enum LiveOverlay {
     static func fix(for ride: LiveRide, now: Date) async -> LiveFix? {
         var result: LiveFix?
         var alerts: [Alert] = []
-        for source in sources where source.covers(ride.point) && ride.scheduled < now.addingTimeInterval(source.horizon) {
+        for source in sources where source.covers(ride) && ride.scheduled < now.addingTimeInterval(source.horizon) {
             guard let f = try? await source.fix(for: ride, now: now) else { continue }
             alerts += f.alerts
             if result == nil, f.hasTimes { result = f }
