@@ -1,10 +1,10 @@
 import XCTest
 @testable import Publit
 
-@MainActor
 final class PlanRefreshTests: XCTestCase {
     /// Coming back later must search from then: a departure time of "now" keeps following the clock.
-    func testDepartureAtNowFollowsTheClockUntilAnotherTimeIsPicked() {
+    func testDepartureAtNowFollowsTheClockUntilAnotherTimeIsPicked() async {
+        await MainActor.run {
         let m = PlanModel()
         m.timeMode = .departAt
         m.date = .now
@@ -17,5 +17,6 @@ final class PlanRefreshTests: XCTestCase {
         XCTAssertTrue(m.isLive)
         m.timeMode = .arriveBy
         XCTAssertFalse(m.isLive)
+        }
     }
 }

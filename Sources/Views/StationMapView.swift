@@ -337,6 +337,18 @@ struct StationMapView: View {
                 // Own space below the bar (an overlay could end up under the navigation bar,
                 // and then an active filter hid stations without showing why).
                 .safeAreaInset(edge: .top, spacing: 0) { header }
+                // Loading: the Publit mark in the middle of the map, small and out of the way of taps.
+                .overlay {
+                    if model.isLoadingLive && !model.hasLive {
+                        LogoLoader(label: nil, size: 34)
+                            .frame(width: 76, height: 76)
+                            .matteSurface(in: Circle())
+                            .accessibilityLabel(Text(verbatim: L10n.t("Updating live layer…")))
+                            .allowsHitTesting(false)
+                            .transition(.opacity.combined(with: .scale(scale: 0.85)))
+                    }
+                }
+                .animation(.easeInOut(duration: 0.25), value: model.isLoadingLive && !model.hasLive)
                 .navigationTitle("Stations")
                 .screenTrail("Station map")
                 .navigationBarTitleDisplayMode(.inline)
@@ -398,9 +410,7 @@ struct StationMapView: View {
             ModeFilterBar(available: ModeGroup.allCases.filter { $0 != .other }, filter: filterBinding, iconsOnly: true)
                 .frame(maxWidth: .infinity)
                 .background(Color.ground)
-            if model.isLoadingLive && !model.hasLive {
-                LogoLoader(label: L10n.t("Updating live layer…"), size: 28).matteSurface(in: RoundedRectangle(cornerRadius: 14))
-            } else if let message = model.stationsError ?? model.liveError {
+            if let message = model.stationsError ?? model.liveError {
                 Text(verbatim: message).font(.footnote).padding(8).matteSurface(in: RoundedRectangle(cornerRadius: 8))
             }
             if let hint {
