@@ -188,7 +188,7 @@ struct LiveTripView: View {
 
             if !overview {
                 switch step.kind {
-                case .walk: walkSections(leg, index: step.legIndex, in: it, route: walk!, position: walkPos, detour: detour, check: check)
+                case .walk: walkSections(leg, index: step.legIndex, in: it, route: walk!, position: walkPos, detour: detour, check: check, isLive: index == live)
                 case .wait: waitSection(leg, index: step.legIndex, in: it)
                 case .ride: rideSections(leg, progress: ride?.progress ?? .notStarted, fromGPS: ride?.fromGPS ?? false, check: check)
                 case .arrive: arriveSection(it, here: here)
@@ -233,7 +233,8 @@ struct LiveTripView: View {
 
     @ViewBuilder
     private func walkSections(_ leg: Leg, index: Int, in it: Itinerary, route: WalkRoute,
-                              position: WalkRoute.Position?, detour: WalkDetour.Route?, check: TripGuide.Check) -> some View {
+                              position: WalkRoute.Position?, detour: WalkDetour.Route?, check: TripGuide.Check,
+                              isLive: Bool = true) -> some View {
         let next = it.legs[(index + 1)...].first(where: \.isTransit)
         let target = next?.from.name ?? (index == it.legs.count - 1 ? trip.toName : ItineraryDetailView.placeName(leg.to))
         let away = position == nil ? detour : nil
@@ -292,7 +293,7 @@ struct LiveTripView: View {
             }
             if let nextIndex, let transfer = TransferInfo(before: nextIndex, in: it) { TransferCard(info: transfer) }
             // A later walk starts where the trip will be then, not where you stand now.
-            Button { Self.openInMaps(leg.to, name: target, from: index == live ? nil : leg.from) } label: {
+            Button { Self.openInMaps(leg.to, name: target, from: isLive ? nil : leg.from) } label: {
                 Label(DirectionsApp.current.openLabel, systemImage: "map")
             }
         }
