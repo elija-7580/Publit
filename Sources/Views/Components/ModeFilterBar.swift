@@ -34,8 +34,11 @@ struct ModeFilterBar: View {
             Image(systemName: symbol)
                 .font(.subheadline.weight(.semibold))
                 .frame(maxWidth: .infinity, minHeight: 34)
-                .foregroundStyle(selected ? Color.onInk : Color.primary)
-                .background(selected ? Color.ink : Color.inkFill, in: Capsule())
+                .foregroundStyle(selected ? Color.onInk : Color.ink)
+                // Over the map: white chips with a hairline, like the other map controls.
+                .background(selected ? Color.ink : Color.surface, in: Capsule())
+                .overlay(Capsule().strokeBorder(Color.ink.opacity(selected ? 0 : 0.09), lineWidth: 1))
+                .mapShadow()
                 .contentShape(Capsule())
         }
         .buttonStyle(.plain)

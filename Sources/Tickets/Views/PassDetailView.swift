@@ -40,7 +40,7 @@ struct PassDetailView: View {
                         Button { showingOriginal = true } label: {
                             Label(L10n.t("Show original"), systemImage: "doc.text.magnifyingglass").frame(maxWidth: .infinity)
                         }
-                        .buttonStyle(.bordered).controlSize(.large)
+                        .buttonStyle(.soft)
                         .accessibilityIdentifier("showOriginal")
                     }
                     if WalletPassConfig.current != nil, pass.barcode?.walletReady == true {

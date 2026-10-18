@@ -312,6 +312,7 @@ struct StationMapView: View {
     @State private var results: [GeocodeMatch] = []
     @State private var searchedFor: String?
     @State private var focus: MapFocus?
+    @State private var recenter = 0
     @AppStorage("mapModes") private var storedModes = ""
     @AppStorage("mapStations") private var showStations = true
     @AppStorage("mapLines") private var showLines = true
@@ -335,11 +336,25 @@ struct StationMapView: View {
                            onRegion: { model.regionChanged($0) },
                            onSelect: { selection = $0 },
                            onPick: { place, refined in pick(place, refined: refined) },
-                           onTapEmpty: { if selection != nil { selection = nil; focus = nil } })
+                           onTapEmpty: { if selection != nil { selection = nil; focus = nil } },
+                           recenter: recenter)
                 .ignoresSafeArea(edges: .bottom)
                 // Floating over the map, no bar behind it. The map does not reach under the
                 // navigation bar at the top, so the chips always stay visible below it.
                 .overlay(alignment: .top) { header.padding(.top, 8) }
+                // Map controls in one white column at the edge: layers, then my location.
+                .overlay(alignment: .bottomTrailing) {
+                    VStack(spacing: 10) {
+                        layersButton
+                        Button { recenter += 1 } label: {
+                            Image(systemName: "location.fill")
+                        }
+                        .buttonStyle(.mapControl)
+                        .accessibilityLabel(Text("My location"))
+                        .accessibilityIdentifier("mapMyLocation")
+                    }
+                    .padding(.trailing, 12).padding(.bottom, 28)
+                }
                 // Loading: the Publit mark in the middle of the map, small and out of the way of taps.
                 .overlay {
                     if model.isLoadingLive && !model.hasLive {
@@ -361,7 +376,6 @@ struct StationMapView: View {
                 .onSubmit(of: .search) { if let first = results.first { show(first) } }
                 .task(id: query) { await search() }
                 .toolbar {
-                    ToolbarItem(placement: .topBarLeading) { layersButton }
                     ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } }
                 }
                 .sheet(item: $selection, onDismiss: {
@@ -426,14 +440,14 @@ struct StationMapView: View {
         VStack(spacing: 6) {
             ModeFilterBar(available: ModeGroup.allCases.filter { $0 != .other }, filter: filterBinding, iconsOnly: true)
                 .frame(maxWidth: .infinity)
-                .shadow(color: .black.opacity(0.22), radius: 6, y: 2)
             if let message = model.stationsError ?? model.liveError {
-                Text(verbatim: message).font(.footnote).padding(8).matteSurface(in: RoundedRectangle(cornerRadius: 8))
+                Text(verbatim: message).font(.footnote).padding(10).matteSurface(in: RoundedRectangle(cornerRadius: 14, style: .continuous)).mapShadow()
             }
             if let hint {
                 Text(hint).font(.footnote.weight(.semibold))
                     .padding(.horizontal, 12).padding(.vertical, 6)
                     .matteSurface(in: Capsule())
+                    .mapShadow()
             }
         }
     }
@@ -451,8 +465,10 @@ struct StationMapView: View {
             selection = nil
             Task { try? await Task.sleep(for: .milliseconds(400)); showLayers = true }
         } label: {
-            Label("Map layers", systemImage: "square.3.layers.3d")
+            Image(systemName: "square.3.layers.3d")
         }
+        .buttonStyle(.mapControl)
+        .accessibilityLabel(Text("Map layers"))
         .accessibilityIdentifier("mapLayers")
     }
 

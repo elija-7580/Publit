@@ -43,6 +43,64 @@ extension ButtonStyle where Self == InkButtonStyle {
     static var ink: InkButtonStyle { InkButtonStyle() }
 }
 
+/// The secondary action next to an ink one ("Other connections", "Now", "Open in Maps"):
+/// a soft well with an ink label, the same corner as the ink button. Replaces system `.bordered`.
+struct SoftButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(Color.ink)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .frame(minHeight: 40)
+            .background(Color.inkFill, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .opacity(isEnabled ? (configuration.isPressed ? 0.7 : 1) : 0.35)
+    }
+}
+
+extension ButtonStyle where Self == SoftButtonStyle {
+    static var soft: SoftButtonStyle { SoftButtonStyle() }
+}
+
+/// A round control floating over a map (layers, my location): white, a hairline, one soft shadow
+/// so it stays apart from busy map tiles. 44 pt, ink symbol.
+struct MapControlStyle: ButtonStyle {
+    var selected = false
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.body.weight(.semibold))
+            .foregroundStyle(selected ? Color.onInk : Color.ink)
+            .frame(width: 44, height: 44)
+            .background(selected ? Color.ink : Color.surface, in: Circle())
+            .overlay(Circle().strokeBorder(Color.ink.opacity(selected ? 0 : 0.09), lineWidth: 1))
+            .mapShadow()
+            .contentShape(Circle())
+            .opacity(configuration.isPressed ? 0.75 : 1)
+    }
+}
+
+extension ButtonStyle where Self == MapControlStyle {
+    static var mapControl: MapControlStyle { MapControlStyle() }
+}
+
+extension View {
+    /// The one shadow in the design: things that float over a map. Lists and cards stay flat.
+    func mapShadow() -> some View {
+        shadow(color: .black.opacity(0.16), radius: 5, x: 0, y: 2)
+    }
+
+    /// A capsule floating over a map or list ("Back to now", "Recommended: …"): white, hairline, map shadow.
+    func floatingCapsule() -> some View {
+        padding(.horizontal, 14).padding(.vertical, 10)
+            .matteSurface(in: Capsule())
+            .mapShadow()
+    }
+}
+
 /// The logo's dot: where you are, what is live.
 struct SignatureDot: View {
     var size: CGFloat = 8

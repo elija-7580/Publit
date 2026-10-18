@@ -93,8 +93,8 @@ struct LiveTripView: View {
                         Label(away ? L10n.t("Back to now") : L10n.t("Trip overview"),
                               systemImage: away ? "location.fill" : "map")
                             .font(.subheadline.weight(.semibold))
-                            .padding(.horizontal, 14).padding(.vertical, 10)
-                            .matteSurface(in: Capsule())
+                            .foregroundStyle(Color.ink)
+                            .floatingCapsule()
                     }
                     .buttonStyle(.plain)
                     .padding(.leading, 12).padding(.top, 8)
@@ -1061,14 +1061,14 @@ private struct AlternativeRow: View {
                           systemImage: showAll ? "chevron.up" : "list.bullet")
                         .font(.subheadline.weight(.semibold))
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(.soft)
                 .accessibilityIdentifier("guideOtherConnections")
             } else if !searching {
                 Button { Task { await search() } } label: {
                     Label("New route from here", systemImage: "arrow.triangle.turn.up.right.diamond")
                         .font(.subheadline.weight(.semibold))
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(.soft)
             }
         }
         .padding(.vertical, 4)
