@@ -23,8 +23,8 @@ struct DurationFigure: View {
         func append() {
             guard !group.isEmpty else { return }
             var part = AttributedString(group)
-            part.font = .system(size: numeric ? size : size * 0.5, weight: numeric ? .bold : .medium,
-                                design: numeric ? .monospaced : .default)
+            // The app's own face with tabular digits (not SF Mono), so it matches the times next to it.
+            part.font = .system(size: numeric ? size : size * 0.5, weight: numeric ? .bold : .medium).monospacedDigit()
             part.foregroundColor = numeric ? Color.ink : Color.secondary
             result += part
         }

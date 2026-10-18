@@ -148,10 +148,9 @@ struct InlineNotice: View {
     var systemImage = "exclamationmark.triangle.fill"
 
     var body: some View {
-        Label {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
+            Image(systemName: systemImage).foregroundStyle(tint).frame(width: 16)
             Text(verbatim: text).foregroundStyle(Color.ink)
-        } icon: {
-            Image(systemName: systemImage).foregroundStyle(tint)
         }
         .font(.caption.weight(.semibold))
         .fixedSize(horizontal: false, vertical: true)
@@ -216,50 +215,36 @@ extension ButtonStyle where Self == ChipButtonStyle {
     static var chip: ChipButtonStyle { ChipButtonStyle() }
 }
 
-/// Publit's own input look: a field pressed into the card (inner shadow at the top, a light edge
-/// at the bottom), instead of the flat system grey.
+/// Publit's input look: a soft, flat well in the card (no inner shadow, no edge), with a generous
+/// continuous corner, the same family as the Nearby notice cards.
 struct BevelField: ViewModifier {
-    @Environment(\.colorScheme) private var scheme
-    var radius: CGFloat = 12
+    var radius: CGFloat = 16
 
     func body(content: Content) -> some View {
-        let shape = RoundedRectangle(cornerRadius: radius, style: .continuous)
-        let dark = scheme == .dark
-        content
-            .background(
-                shape.fill(Color.inkFill.shadow(.inner(color: .black.opacity(dark ? 0.55 : 0.16), radius: 2.5, x: 0, y: 1.5)))
-            )
-            .overlay(
-                shape.strokeBorder(LinearGradient(colors: [Color.black.opacity(dark ? 0.5 : 0.10),
-                                                           Color.white.opacity(dark ? 0.07 : 0.9)],
-                                                  startPoint: .top, endPoint: .bottom), lineWidth: 1)
-            )
+        content.background(Color.inkFill, in: RoundedRectangle(cornerRadius: radius, style: .continuous))
     }
 }
 
-/// The raised counterpart: a key standing on the card (light top edge, soft drop shadow).
+/// The raised counterpart: a round key on the card (surface, one soft shadow, no bevel).
 struct RaisedKey: ViewModifier {
     @Environment(\.colorScheme) private var scheme
-    var radius: CGFloat = 12
+    var radius: CGFloat = 16
 
     func body(content: Content) -> some View {
-        let shape = RoundedRectangle(cornerRadius: radius, style: .continuous)
-        let dark = scheme == .dark
-        content
-            .background(shape.fill(Color.surface).shadow(color: .black.opacity(dark ? 0.6 : 0.14), radius: 1.5, x: 0, y: 1.5))
-            .overlay(
-                shape.strokeBorder(LinearGradient(colors: [Color.white.opacity(dark ? 0.14 : 1), Color.black.opacity(dark ? 0.3 : 0.08)],
-                                                  startPoint: .top, endPoint: .bottom), lineWidth: 1)
-            )
+        content.background(
+            RoundedRectangle(cornerRadius: radius, style: .continuous)
+                .fill(Color.surface)
+                .shadow(color: .black.opacity(scheme == .dark ? 0.35 : 0.08), radius: 6, x: 0, y: 2)
+        )
     }
 }
 
 extension View {
-    func bevelField(radius: CGFloat = 12) -> some View { modifier(BevelField(radius: radius)) }
-    func raisedKey(radius: CGFloat = 12) -> some View { modifier(RaisedKey(radius: radius)) }
+    func bevelField(radius: CGFloat = 16) -> some View { modifier(BevelField(radius: radius)) }
+    func raisedKey(radius: CGFloat = 16) -> some View { modifier(RaisedKey(radius: radius)) }
 }
 
-/// Two or three choices in a bevelled track; the chosen one is a raised key (replaces the system segmented control).
+/// Two or three choices in a soft capsule track; the chosen one is a raised capsule (replaces the system segmented control).
 struct BevelSegmented<Value: Hashable>: View {
     @Binding var selection: Value
     let options: [(Value, String)]
@@ -277,14 +262,14 @@ struct BevelSegmented<Value: Hashable>: View {
                         .font(.subheadline.weight(selected ? .bold : .medium))
                         .foregroundStyle(selected ? Color.ink : Color.secondary)
                         .frame(maxWidth: .infinity, minHeight: 32)
-                        .background { if selected { Color.clear.raisedKey(radius: 9) } }
-                        .contentShape(Rectangle())
+                        .background { if selected { Color.clear.raisedKey(radius: 16) } }
+                        .contentShape(Capsule())
                 }
                 .buttonStyle(.plain)
                 .accessibilityAddTraits(selected ? .isSelected : [])
             }
         }
         .padding(3)
-        .bevelField(radius: 12)
+        .bevelField(radius: 19)
     }
 }

@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.6.0 (build 45)
+
+### Design: softer and calmer
+- Plan: From and To in one soft card joined by the logo's line (ring → dot), a round swap key; Depart/Arrive as a capsule switch next to the date and time; Route options as a soft chip. No more bevelled, edgy fields.
+- Inputs and switches everywhere are flat soft wells with round corners, like the Nearby cards.
+- One typeface: durations no longer use monospaced digits from a different font.
+- Routes list: the "Recommended" chip is solid ink and readable in dark mode; "Walk to … · 1 min" is a quiet secondary line; warnings sit closer to their icon; "Updated" is no longer hidden behind the tab bar.
+- Route preview: the leave/arrive card is a calm surface card instead of a bright white slab in dark mode, each time shown once; line chain with simple chevrons; boarding steps in aligned columns (time, line, stop).
+- Nearby: no empty band between a station and its first departure.
+- Fixed: Build 44 did not compile (live trip walk stage).
+
 ## 0.6.0 (build 44)
 
 ### Live trip

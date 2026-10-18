@@ -226,11 +226,12 @@ struct RouteSummary: View {
     private var legChain: some View {
         // Short walks between platforms are noise in the overview; the steps list keeps them.
         let legs = itinerary.legs.filter { $0.isTransit || $0.duration >= 120 }
-        return FlowRow(spacing: 4) {
+        return FlowRow(spacing: 6) {
             ForEach(Array(legs.enumerated()), id: \.offset) { i, leg in
-                HStack(spacing: 4) {
+                HStack(spacing: 6) {
                     if i > 0 {
-                        Image(systemName: "chevron.compact.right").font(.caption).foregroundStyle(.tertiary)
+                        Image(systemName: "chevron.right").font(.caption2.weight(.bold)).foregroundStyle(.tertiary)
+                            .accessibilityHidden(true)
                     }
                     if leg.isTransit {
                         LineBadge(leg)
@@ -590,35 +591,48 @@ private struct RailLine: Shape {
     }
 }
 
-/// The one number that decides: when to leave (or the times), and when you arrive. Ink slab, big type.
+/// The one number that decides: when to leave, and when you arrive. A soft card in the list's own
+/// surface (not a bright slab in dark mode); each time is shown once.
 struct LeaveHero: View {
     let itinerary: Itinerary
     let now: Date
 
     var body: some View {
         let tz = itinerary.legs.first?.from.tz
+        let endTz = itinerary.legs.last?.to.tz
         let minutes = Int((itinerary.startTime.timeIntervalSince(now) / 60).rounded(.up))
-        let big: String = minutes > 90 || minutes < -1
-            ? "\(Fmt.time(itinerary.startTime, tz: tz)) – \(Fmt.time(itinerary.endTime, tz: itinerary.legs.last?.to.tz))"
-            : minutes >= 1 ? L10n.f("Leave in %lld min", minutes) : L10n.t("Leave now")
-        HStack(alignment: .lastTextBaseline) {
+        let soon = minutes <= 90 && minutes >= -1
+        let big: String = soon
+            ? (minutes >= 1 ? L10n.f("Leave in %lld min", minutes) : L10n.t("Leave now"))
+            : "\(Fmt.time(itinerary.startTime, tz: tz)) – \(Fmt.time(itinerary.endTime, tz: endTz))"
+        HStack(alignment: .center, spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
-                Text(Fmt.duration(seconds: itinerary.duration))
-                    .font(.caption.weight(.semibold)).opacity(0.65)
+                HStack(spacing: 6) {
+                    if soon { SignatureDot(size: 8) }
+                    Group {
+                        if soon { Text(Fmt.time(itinerary.startTime, tz: tz)) }
+                        else { Text(itinerary.startTime, format: .dateTime.weekday(.abbreviated).day().month(.abbreviated)) }
+                    }
+                    .font(.caption.weight(.semibold).monospacedDigit()).foregroundStyle(.secondary)
+                }
                 Text(verbatim: big)
-                    .font(.title2.weight(.heavy).monospacedDigit())
+                    .font(.title2.weight(.bold).monospacedDigit())
+                    .foregroundStyle(Color.ink)
                     .lineLimit(1).minimumScaleFactor(0.6)
             }
-            Spacer(minLength: 12)
+            Spacer(minLength: 8)
             VStack(alignment: .trailing, spacing: 2) {
-                Text("Arrive").font(.caption.weight(.semibold)).opacity(0.65)
-                Text(Fmt.time(itinerary.endTime, tz: itinerary.legs.last?.to.tz))
-                    .font(.title2.weight(.heavy).monospacedDigit())
+                if soon {
+                    Text("Arrive").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+                    Text(Fmt.time(itinerary.endTime, tz: endTz))
+                        .font(.title2.weight(.bold).monospacedDigit()).foregroundStyle(Color.ink)
+                } else {
+                    DurationFigure(seconds: itinerary.duration, size: 24).fixedSize()
+                }
             }
         }
-        .foregroundStyle(Color.onInk)
-        .padding(.horizontal, 18).padding(.vertical, 14)
-        .background(Color.ink, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .padding(.horizontal, 16).padding(.vertical, 14)
+        .background(Color.surface, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
         .accessibilityElement(children: .combine)
     }
 }

@@ -11,9 +11,10 @@ struct SmartBadgesRow: View {
                 Label(badge.title, systemImage: badge.symbol)
                     .labelStyle(.titleAndIcon)
                     .font(.caption2.weight(.bold))
-                    .foregroundStyle(badge == .recommended ? Color.inkAction : Color.secondary)
-                    .padding(.horizontal, 7).padding(.vertical, 3)
-                    .background(badge == .recommended ? Color.inkAction.opacity(0.12) : Color.inkFill, in: Capsule())
+                    // The suggestion is a solid ink chip (readable in light and dark), the rest stay quiet.
+                    .foregroundStyle(badge == .recommended ? Color.onInk : Color.secondary)
+                    .padding(.horizontal, 8).padding(.vertical, 3)
+                    .background(badge == .recommended ? Color.ink : Color.inkFill, in: Capsule())
             }
             if let reason {
                 Text(verbatim: reason).font(.caption2).foregroundStyle(.secondary).lineLimit(1)
