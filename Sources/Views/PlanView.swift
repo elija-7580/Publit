@@ -7,9 +7,6 @@ struct PlanView: View {
     @State private var isVisible = false
     @Environment(LocationManager.self) private var location
     @State private var picking: PickTarget?
-    @State private var showMap = false
-    /// `routeKey` of the route picked on the map (stays picked across live refreshes).
-    @State private var selectedId: String?
     @State private var opened: OpenedRoute?
 
     /// Live refresh interval while planning for "now".
@@ -104,7 +101,6 @@ struct PlanView: View {
             guard isVisible, scenePhase == .active, app.tab == .plan, app.plan.searchStarted else { return }
             // Back after a while: a time that has passed becomes now (the routes from then are gone).
             if app.plan.date < .now.addingTimeInterval(-60) { app.plan.date = .now }
-            selectedId = nil
             // From here: a fresh fix, not the one from when the app was last open (another town, maybe).
             var here = location.coordinate
             if app.plan.from == .currentLocation { here = await location.freshCoordinate() }
@@ -163,7 +159,6 @@ struct PlanView: View {
     @ViewBuilder
     private func resultsSection(_ plan: PlanModel) -> some View {
         let its = plan.sortedItineraries.uniqueRoutes
-        let shownKey = its.contains { $0.routeKey == selectedId } ? selectedId : its.first?.routeKey
         let windowStart = its.map(\.startTime).min() ?? .now
         let windowEnd = its.map(\.endTime).max() ?? .now
         let zoneNote = its.first.flatMap { Fmt.foreignZoneNote(tz: $0.legs.first?.from.tz, at: $0.startTime) }
@@ -185,73 +180,33 @@ struct PlanView: View {
                     .accessibilityIdentifier("longWalkNote")
             }
 
-            // Sort/map controls as a real list row: Menu buttons in Section headers are often
+            // Sort control as a real list row: Menu buttons in Section headers are often
             // non-hittable for UI tests and awkward for VoiceOver.
             if !its.isEmpty {
-                // Borderless: two controls in one row, each with its own tap area
-                // (otherwise a tap anywhere in the row triggers both).
                 HStack(spacing: 8) {
                     RouteSortMenu()
                     Spacer()
-                    Button { withAnimation { showMap.toggle() } } label: {
-                        Label(showMap ? L10n.t("List") : L10n.t("Map"), systemImage: showMap ? "list.bullet" : "map")
-                    }
-                    .buttonStyle(.chip)
-                    .accessibilityIdentifier("routeMapToggle")
                 }
                 .frame(minHeight: 44)
                 .listRowInsets(EdgeInsets(top: 0, leading: 4, bottom: 0, trailing: 4))
                 .listRowBackground(Color.clear)
             }
 
-            if !showMap && !its.isEmpty {
-                ConnectionLegendRow(start: windowStart, end: windowEnd, tz: its.first?.legs.first?.from.tz, showSymbols: false)
-            }
-            if showMap && !its.isEmpty {
-                CompareMapView(itineraries: its, selectedId: shownKey)
-                    .frame(height: 320)
-                    .listRowInsets(EdgeInsets())
-                if let sel = its.first(where: { $0.routeKey == shownKey }) {
-                    Button("Details of selected route") { opened = OpenedRoute(itinerary: sel) }
-                }
-                ForEach(its, id: \.routeKey) { it in
-                    let isSelected = it.routeKey == shownKey
-                    // First tap picks the route on the map, a tap on the picked one opens it.
-                    Button {
-                        if isSelected { opened = OpenedRoute(itinerary: it) } else { selectedId = it.routeKey }
-                    } label: {
+            ForEach(its, id: \.routeKey) { it in
+                Button { opened = OpenedRoute(itinerary: it) } label: {
+                    HStack(spacing: 8) {
                         ItineraryRow(itinerary: it, windowStart: windowStart, windowEnd: windowEnd,
                                      badges: badges[it.routeKey] ?? [], reason: it.routeKey == recommendedKey ? reason : nil)
-                            .padding(.leading, 6)
-                            .overlay(alignment: .leading) {
-                                if isSelected {
-                                    Capsule().fill(Color.ink).frame(width: 3)
-                                }
-                            }
-                            // The whole row answers, not only its text and bars: a long trip
-                            // draws thin bars with lots of empty space between them.
-                            .contentShape(Rectangle())
+                        Image(systemName: "chevron.right")
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(.tertiary)
+                            .accessibilityHidden(true)
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityAddTraits(isSelected ? .isSelected : [])
-                    .accessibilityHint(isSelected ? Text("Opens the route") : Text("Shows the route on the map"))
+                    .contentShape(Rectangle())
                 }
-            } else {
-                ForEach(its, id: \.routeKey) { it in
-                    Button { opened = OpenedRoute(itinerary: it) } label: {
-                        HStack(spacing: 8) {
-                            ItineraryRow(itinerary: it, windowStart: windowStart, windowEnd: windowEnd,
-                                         badges: badges[it.routeKey] ?? [], reason: it.routeKey == recommendedKey ? reason : nil)
-                            Image(systemName: "chevron.right")
-                                .font(.footnote.weight(.semibold))
-                                .foregroundStyle(.tertiary)
-                                .accessibilityHidden(true)
-                        }
-                        .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityAddTraits(.isLink)
-                }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(.isLink)
+                .accessibilityIdentifier("routeRow")
             }
 
             if plan.canLoadMore {

@@ -356,21 +356,13 @@ final class PublitUITests: XCTestCase {
     func testF02PlanCompareAndDetail() {
         let app = launch(["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "plan"])
         XCTAssertTrue(app.navigationBars["Plan"].waitForExistence(timeout: 10))
-        let routes = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] ' from '"))
+        let routes = app.buttons.matching(identifier: "routeRow")
         XCTAssertTrue(routes.firstMatch.waitForExistence(timeout: timeout), "no routes found")
         sleep(1)
         snap("plan")
 
-        // By identifier: the label alone no longer matches once the control has an identifier.
-        let mapToggle = app.descendants(matching: .any)["routeMapToggle"].firstMatch
-        XCTAssertTrue(mapToggle.waitForExistence(timeout: 10), "no map toggle")
-        tapCentre(mapToggle)
-        // The link sits under the 320 pt map, below the fold since the first-stop picker was added.
-        let details = app.buttons["Details of selected route"].firstMatch
-        XCTAssertTrue(bringUp(details, in: app), "no route details link under the map")
-        sleep(3) // map tiles
-        snap("compare")
-
+        // The routes list has no map toggle any more: open the first route directly.
+        let details = routes.firstMatch
         details.tap()
         XCTAssertTrue(app.navigationBars["Route"].waitForExistence(timeout: 10))
         sleep(3)
@@ -457,7 +449,7 @@ final class PublitUITests: XCTestCase {
     /// F07 Save a planned route: it appears under Upcoming trips in Saved, with ticket links in the details.
     func testF07SaveTripAndTickets() {
         let app = launch(["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "plan"])
-        let routes = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] ' from '"))
+        let routes = app.buttons.matching(identifier: "routeRow")
         XCTAssertTrue(routes.firstMatch.waitForExistence(timeout: timeout), "no routes found")
         routes.firstMatch.tap()
         XCTAssertTrue(app.navigationBars["Route"].waitForExistence(timeout: 10))
@@ -513,7 +505,7 @@ final class PublitUITests: XCTestCase {
         app.terminate()
 
         let plan = launch(["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "plan"])
-        let routes = plan.buttons.matching(NSPredicate(format: "label CONTAINS[c] ' from '"))
+        let routes = plan.buttons.matching(identifier: "routeRow")
         XCTAssertTrue(routes.firstMatch.waitForExistence(timeout: timeout), "no routes found")
         // Driving comes a little after the routes (its own, slower request).
         let car = plan.buttons["compare-CAR"]
@@ -580,7 +572,7 @@ final class PublitUITests: XCTestCase {
         map.terminate()
 
         let plan = launch(["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "plan"])
-        let routes = plan.buttons.matching(NSPredicate(format: "label CONTAINS[c] ' from '"))
+        let routes = plan.buttons.matching(identifier: "routeRow")
         XCTAssertTrue(routes.firstMatch.waitForExistence(timeout: timeout), "no routes found")
         // Any element type: a SwiftUI Menu in a list row is not always reported as a button.
         let sort = plan.descendants(matching: .any)["routeSortMenu"].firstMatch
