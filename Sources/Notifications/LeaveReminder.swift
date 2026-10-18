@@ -67,11 +67,19 @@ final class NotificationRouter: NSObject, UNUserNotificationCenterDelegate, @unc
     static let shared = NotificationRouter()
     var open: (@MainActor (URL) -> Void)?
 
-    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification) async
-        -> UNNotificationPresentationOptions { [.banner, .sound] }
+    // Completion-handler versions on purpose: with the async ones, iOS finished the tap on a
+    // background thread and UIKit aborted the app (crash when opening a reminder).
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification,
+                                withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        DispatchQueue.main.async { completionHandler([.banner, .sound]) }
+    }
 
-    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
-        guard let s = response.notification.request.content.userInfo["url"] as? String, let url = URL(string: s) else { return }
-        await MainActor.run { open?(url) }
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse,
+                                withCompletionHandler completionHandler: @escaping () -> Void) {
+        let url = (response.notification.request.content.userInfo["url"] as? String).flatMap(URL.init(string:))
+        DispatchQueue.main.async {
+            if let url { MainActor.assumeIsolated { self.open?(url) } }
+            completionHandler()
+        }
     }
 }

@@ -7,9 +7,6 @@ struct PlanView: View {
     @State private var isVisible = false
     @Environment(LocationManager.self) private var location
     @State private var picking: PickTarget?
-    @State private var showMap = false
-    /// `routeKey` of the route picked on the map (stays picked across live refreshes).
-    @State private var selectedId: String?
     @State private var opened: OpenedRoute?
 
     /// Live refresh interval while planning for "now".
@@ -104,7 +101,6 @@ struct PlanView: View {
             guard isVisible, scenePhase == .active, app.tab == .plan, app.plan.searchStarted else { return }
             // Back after a while: a time that has passed becomes now (the routes from then are gone).
             if app.plan.date < .now.addingTimeInterval(-60) { app.plan.date = .now }
-            selectedId = nil
             // From here: a fresh fix, not the one from when the app was last open (another town, maybe).
             var here = location.coordinate
             if app.plan.from == .currentLocation { here = await location.freshCoordinate() }
@@ -163,9 +159,8 @@ struct PlanView: View {
     @ViewBuilder
     private func resultsSection(_ plan: PlanModel) -> some View {
         let its = plan.sortedItineraries.uniqueRoutes
-        let shownKey = its.contains { $0.routeKey == selectedId } ? selectedId : its.first?.routeKey
-        let windowStart = its.map(\.startTime).min() ?? .now
-        let windowEnd = its.map(\.endTime).max() ?? .now
+        // Every bar starts at the left; the longest route fills the width, so lengths still compare.
+        let span = TimeInterval(its.map(\.duration).max() ?? 0)
         let zoneNote = its.first.flatMap { Fmt.foreignZoneNote(tz: $0.legs.first?.from.tz, at: $0.startTime) }
         // Smart routing: the suggested route and the best in each respect, with the reason in a few words.
         let badges = smartRouting ? SmartRouting.badges(its, arriveBy: plan.timeMode == .arriveBy) : [:]
@@ -185,73 +180,21 @@ struct PlanView: View {
                     .accessibilityIdentifier("longWalkNote")
             }
 
-            // Sort/map controls as a real list row: Menu buttons in Section headers are often
-            // non-hittable for UI tests and awkward for VoiceOver.
-            if !its.isEmpty {
-                // Borderless: two controls in one row, each with its own tap area
-                // (otherwise a tap anywhere in the row triggers both).
-                HStack(spacing: 8) {
-                    RouteSortMenu()
-                    Spacer()
-                    Button { withAnimation { showMap.toggle() } } label: {
-                        Label(showMap ? L10n.t("List") : L10n.t("Map"), systemImage: showMap ? "list.bullet" : "map")
-                    }
-                    .buttonStyle(.chip)
-                    .accessibilityIdentifier("routeMapToggle")
-                }
-                .frame(minHeight: 44)
-                .listRowInsets(EdgeInsets(top: 0, leading: 4, bottom: 0, trailing: 4))
-                .listRowBackground(Color.clear)
-            }
-
-            if !showMap && !its.isEmpty {
-                ConnectionLegendRow(start: windowStart, end: windowEnd, tz: its.first?.legs.first?.from.tz, showSymbols: false)
-            }
-            if showMap && !its.isEmpty {
-                CompareMapView(itineraries: its, selectedId: shownKey)
-                    .frame(height: 320)
-                    .listRowInsets(EdgeInsets())
-                if let sel = its.first(where: { $0.routeKey == shownKey }) {
-                    Button("Details of selected route") { opened = OpenedRoute(itinerary: sel) }
-                }
-                ForEach(its, id: \.routeKey) { it in
-                    let isSelected = it.routeKey == shownKey
-                    // First tap picks the route on the map, a tap on the picked one opens it.
-                    Button {
-                        if isSelected { opened = OpenedRoute(itinerary: it) } else { selectedId = it.routeKey }
-                    } label: {
-                        ItineraryRow(itinerary: it, windowStart: windowStart, windowEnd: windowEnd,
+            ForEach(its, id: \.routeKey) { it in
+                Button { opened = OpenedRoute(itinerary: it) } label: {
+                    HStack(spacing: 8) {
+                        ItineraryRow(itinerary: it, windowStart: it.startTime, windowEnd: it.startTime.addingTimeInterval(span),
                                      badges: badges[it.routeKey] ?? [], reason: it.routeKey == recommendedKey ? reason : nil)
-                            .padding(.leading, 6)
-                            .overlay(alignment: .leading) {
-                                if isSelected {
-                                    Capsule().fill(Color.ink).frame(width: 3)
-                                }
-                            }
-                            // The whole row answers, not only its text and bars: a long trip
-                            // draws thin bars with lots of empty space between them.
-                            .contentShape(Rectangle())
+                        Image(systemName: "chevron.right")
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(.tertiary)
+                            .accessibilityHidden(true)
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityAddTraits(isSelected ? .isSelected : [])
-                    .accessibilityHint(isSelected ? Text("Opens the route") : Text("Shows the route on the map"))
+                    .contentShape(Rectangle())
                 }
-            } else {
-                ForEach(its, id: \.routeKey) { it in
-                    Button { opened = OpenedRoute(itinerary: it) } label: {
-                        HStack(spacing: 8) {
-                            ItineraryRow(itinerary: it, windowStart: windowStart, windowEnd: windowEnd,
-                                         badges: badges[it.routeKey] ?? [], reason: it.routeKey == recommendedKey ? reason : nil)
-                            Image(systemName: "chevron.right")
-                                .font(.footnote.weight(.semibold))
-                                .foregroundStyle(.tertiary)
-                                .accessibilityHidden(true)
-                        }
-                        .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityAddTraits(.isLink)
-                }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(.isLink)
+                .accessibilityIdentifier("routeRow")
             }
 
             if plan.canLoadMore {
@@ -299,6 +242,7 @@ struct ItineraryRow: View {
             ? SmartRouting.changes(itinerary).filter { $0.chance < 0.8 }.min { $0.chance < $1.chance } : nil
         VStack(alignment: .leading, spacing: 6) {
             if !badges.isEmpty { SmartBadgesRow(badges: badges, reason: reason) }
+
             HStack(alignment: .firstTextBaseline) {
                 Text("\(Fmt.time(itinerary.startTime, tz: tz)) – \(Fmt.time(itinerary.endTime, tz: itinerary.legs.last?.to.tz))")
                     .font(.headline.monospacedDigit())
@@ -338,6 +282,13 @@ struct ItineraryRow: View {
             }
         }
         .padding(.vertical, 4)
+        // The suggested route stands out by a mark at its edge, not by moving it to the top.
+        .overlay(alignment: .leading) {
+            if badges.contains(.recommended) {
+                Capsule().fill(Color.signature).frame(width: 3).padding(.vertical, 6).offset(x: -10)
+                    .accessibilityHidden(true)
+            }
+        }
     }
 }
 
@@ -394,32 +345,5 @@ struct TimelineBar: View {
             .frame(width: width, height: geo.size.height, alignment: .topLeading).clipped()
         }
         .accessibilityHidden(true)
-    }
-}
-
-/// Quick switch of the route order in the results header.
-struct RouteSortMenu: View {
-    @Environment(AppState.self) private var app
-    @AppStorage(SmartRouting.enabledKey) private var smartRouting = true
-
-    var body: some View {
-        let current = smartRouting ? app.routeOptions.sort : app.routeOptions.sort.effective
-        Menu {
-            Picker("Sort routes by", selection: Binding(get: { current }, set: { s in
-                var o = app.routeOptions
-                o.sort = s
-                app.setRouteOptions(o)
-            })) {
-                ForEach(smartRouting ? RouteSort.allCases : RouteSort.allCases.filter { $0 != .recommended }) { s in
-                    Label(s.title, systemImage: s.symbol).tag(s)
-                }
-            }
-        } label: {
-            Label(current.title, systemImage: "arrow.up.arrow.down")
-                .textCase(nil)
-        }
-        .menuStyle(.button)
-        .buttonStyle(.chip)
-        .accessibilityIdentifier("routeSortMenu")
     }
 }

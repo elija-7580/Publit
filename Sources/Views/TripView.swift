@@ -21,6 +21,7 @@ struct TripView: View {
     let stationCoordinate: LatLon
 
     @Environment(FavoritesStore.self) private var favorites
+    @Environment(AppState.self) private var app
     @Environment(\.scenePhase) private var scenePhase
     @State private var isVisible = false
     @State private var trip: Itinerary?
@@ -59,8 +60,26 @@ struct TripView: View {
                 }
                 Section("Stops") {
                     ForEach(Array(stops.enumerated()), id: \.offset) { i, stop in
-                        StopTimeRow(stop: stop, isFocus: focusStops.contains(i),
-                                    isPast: isPast(i, progress: progress), realTime: leg.realTime)
+                        // Tap a stop of the line: plan a route there (from this station or from here).
+                        Menu {
+                            if !focusStops.contains(i) {
+                                Button { app.route(from: stationPlace, to: Self.place(stop)) } label: {
+                                    Label(L10n.f("From %@ to here", stationName), systemImage: "tram")
+                                }
+                            }
+                            Button { app.route(to: Self.place(stop)) } label: {
+                                Label("Route here", systemImage: "arrow.triangle.turn.up.right.diamond")
+                            }
+                            Button { app.route(from: Self.place(stop)) } label: {
+                                Label("Route from here", systemImage: "arrow.uturn.right")
+                            }
+                        } label: {
+                            StopTimeRow(stop: stop, isFocus: focusStops.contains(i),
+                                        isPast: isPast(i, progress: progress), realTime: leg.realTime)
+                                .contentShape(Rectangle())
+                        }
+                        .tint(.primary)
+                        .accessibilityIdentifier("tripStop")
                     }
                 }
             } else if let errorMessage {
@@ -221,6 +240,20 @@ private struct StopTimeRow: View {
             }
         }
         .foregroundStyle(isPast ? Color.secondary : Color.primary)
+    }
+}
+
+extension TripView {
+    /// The station this trip was opened from, as a start for "From … to here".
+    var stationPlace: SavedPlace {
+        SavedPlace(id: "stop|\(stationId)", name: stationName, subtitle: nil,
+                   lat: stationCoordinate.lat, lon: stationCoordinate.lon, stopId: stationId)
+    }
+
+    static func place(_ stop: Place) -> SavedPlace {
+        let id = stop.parentId ?? stop.stopId
+        return SavedPlace(id: "stop|\(id ?? "\(stop.lat),\(stop.lon)")", name: stop.name, subtitle: nil,
+                          lat: stop.lat, lon: stop.lon, stopId: id)
     }
 }
 

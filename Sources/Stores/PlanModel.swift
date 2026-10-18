@@ -81,10 +81,14 @@ final class PlanModel {
     @ObservationIgnored private var streetKey: String?
     @ObservationIgnored var history: SearchHistoryStore = .shared
 
-    /// The routes in the order chosen in the options (fastest, fewest changes, …).
-    /// Smart routing drops routes another one beats on everything, then the chosen order applies.
+    /// The routes in time order, always: the list reads like a timetable. What fits best
+    /// (recommended, fastest, fewest changes, least walking) is marked, not sorted to the top.
+    /// Smart routing drops routes another one beats on everything.
     var sortedItineraries: [Itinerary] {
-        options.sort.apply(SmartRouting.isEnabled ? SmartRouting.pruned(itineraries) : itineraries, arriveBy: timeMode == .arriveBy)
+        let list = SmartRouting.isEnabled ? SmartRouting.pruned(itineraries) : itineraries
+        return list.enumerated().sorted { a, b in
+            a.element.startTime != b.element.startTime ? a.element.startTime < b.element.startTime : a.offset < b.offset
+        }.map(\.element)
     }
 
     var canLoadMore: Bool { nextCursor != nil && !itineraries.isEmpty }
@@ -408,6 +412,13 @@ final class AppState {
 
     func route(to place: SavedPlace) {
         if plan.from == .place(place) { plan.from = .currentLocation }
+        plan.to = .place(place)
+        tab = .plan
+    }
+
+    /// Plan tab from one stop to another (a stop picked on a line's trip).
+    func route(from start: SavedPlace, to place: SavedPlace) {
+        plan.from = .place(start)
         plan.to = .place(place)
         tab = .plan
     }

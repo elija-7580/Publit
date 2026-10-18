@@ -334,9 +334,9 @@ struct StationMapView: View {
                            onSelect: { selection = $0 },
                            onPick: { place, refined in pick(place, refined: refined) })
                 .ignoresSafeArea(edges: .bottom)
-                // Own space below the bar (an overlay could end up under the navigation bar,
-                // and then an active filter hid stations without showing why).
-                .safeAreaInset(edge: .top, spacing: 0) { header }
+                // Floating over the map, no bar behind it. The map does not reach under the
+                // navigation bar at the top, so the chips always stay visible below it.
+                .overlay(alignment: .top) { header.padding(.top, 8) }
                 // Loading: the Publit mark in the middle of the map, small and out of the way of taps.
                 .overlay {
                     if model.isLoadingLive && !model.hasLive {
@@ -409,7 +409,7 @@ struct StationMapView: View {
         VStack(spacing: 6) {
             ModeFilterBar(available: ModeGroup.allCases.filter { $0 != .other }, filter: filterBinding, iconsOnly: true)
                 .frame(maxWidth: .infinity)
-                .background(Color.ground)
+                .shadow(color: .black.opacity(0.22), radius: 6, y: 2)
             if let message = model.stationsError ?? model.liveError {
                 Text(verbatim: message).font(.footnote).padding(8).matteSurface(in: RoundedRectangle(cornerRadius: 8))
             }
