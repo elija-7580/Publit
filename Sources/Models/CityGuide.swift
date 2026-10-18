@@ -212,8 +212,28 @@ enum TripAlternative {
 
     /// The one that arrives first among those you can still catch.
     static func pick(_ options: [Itinerary], at now: Date) -> Itinerary? {
-        options.filter { !$0.isCancelled && ($0.firstTransitLeg?.startTime ?? $0.startTime) > now.addingTimeInterval(30) }
-            .min { $0.endTime < $1.endTime }
+        choices(options, at: now).first
+    }
+
+    /// Those you can still catch, the earliest arrival first, each route once.
+    static func choices(_ options: [Itinerary], at now: Date, limit: Int = 5) -> [Itinerary] {
+        Array(options.uniqueRoutes
+            .filter { !$0.isCancelled && ($0.firstTransitLeg?.startTime ?? $0.startTime) > now.addingTimeInterval(30) }
+            .sorted { $0.endTime < $1.endTime }
+            .prefix(limit))
+    }
+
+    /// Minutes a new route arrives after (+) or before (−) the trip as it stands.
+    static func minutesLater(_ option: Itinerary, than trip: Itinerary) -> Int {
+        Int((option.endTime.timeIntervalSince(trip.endTime) / 60).rounded())
+    }
+
+    /// "Arrives 8 min later than planned", for comparing a new route with the old one.
+    static func comparison(_ option: Itinerary, than trip: Itinerary) -> String {
+        let d = minutesLater(option, than: trip)
+        if d > 0 { return L10n.f("%lld min later than your trip", d) }
+        if d < 0 { return L10n.f("%lld min earlier than your trip", -d) }
+        return L10n.t("Arrives as your trip would")
     }
 }
 

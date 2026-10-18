@@ -147,6 +147,19 @@ struct Leg: Codable, Sendable, RouteStyled {
     var delayMinutes: Int { Int((startTime.timeIntervalSince(scheduledStartTime) / 60).rounded()) }
     /// Boarding stop, every stop in between, and the alighting stop.
     var allStops: [Place] { [from] + (intermediateStops ?? []) + [to] }
+    /// The line to draw. A walk without a shape (some refreshed routes, very short walks)
+    /// is a straight line from start to end instead of nothing.
+    var mapPath: [LatLon] {
+        let points = legGeometry.mapPoints
+        if points.count > 1 { return points }
+        let ends = [from.coordinate, to.coordinate]
+        return ends[0] == ends[1] ? [] : ends
+    }
+    /// `mapPath` thinned out for small overview maps (see `OverviewPaths`).
+    var overviewPath: [LatLon] {
+        let g = legGeometry.points
+        return OverviewPaths.path(mapPath, key: "\(g.count)|\(g.prefix(32))|\(g.suffix(32))")
+    }
 }
 
 /// One piece of a walk as the router describes it. Turns are mostly "CONTINUE": `WalkGuide`

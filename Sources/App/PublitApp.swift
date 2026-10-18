@@ -153,6 +153,9 @@ struct RootView: View {
                         }
                     }
             }
+            // Swiping the trip panel all the way down closed the whole screen ("the live trip
+            // disappears"); a started trip closes with Minimize only.
+            .interactiveDismissDisabled(trips.activeTrip?.id == id.value)
         }
         .sheet(item: ticketLink) { link in
             NavigationStack {

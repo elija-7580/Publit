@@ -77,3 +77,29 @@ enum Polyline {
         return points.indices.compactMap { keep[$0] ? points[$0] : nil }
     }
 }
+
+/// Fewer points for small overview maps: a 600 km train ride keeps thousands of points at 4 m,
+/// and drawing them made long trips slow to open. Tolerance grows with the size of the leg.
+enum OverviewPaths {
+    private static var cache: [String: [LatLon]] = [:]
+    private static let lock = NSLock()
+
+    static func path(_ points: [LatLon], key: String) -> [LatLon] {
+        guard points.count > 300 else { return points }
+        lock.lock()
+        if let hit = cache[key] { lock.unlock(); return hit }
+        lock.unlock()
+        var minLat = 90.0, maxLat = -90.0, minLon = 180.0, maxLon = -180.0
+        for p in points {
+            minLat = min(minLat, p.lat); maxLat = max(maxLat, p.lat)
+            minLon = min(minLon, p.lon); maxLon = max(maxLon, p.lon)
+        }
+        let span = LatLon(lat: minLat, lon: minLon).distance(to: LatLon(lat: maxLat, lon: maxLon))
+        let out = Polyline.simplify(points, toleranceMeters: max(4, span / 1500))
+        lock.lock()
+        if cache.count > 200 { cache.removeAll() }
+        cache[key] = out
+        lock.unlock()
+        return out
+    }
+}
