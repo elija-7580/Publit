@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.6.0 (build 49)
+
+### Plan
+- Depart/Arrive and the date and time are bigger and spaced out; a "Now" button sets the time back to now.
+- The ✕ (Clear destination) is gone; a search button sits right next to the destination.
+- Route rows: walks are dotted lines, minutes only where they fit (rides, and walks of 3 min or more).
+- When the recommended route is further down the list, a floating "Recommended: 08:12 – 09:30" capsule jumps to it; the list stays where it is otherwise, and the capsule hides once the route is in view.
+- Above the routes and in the route detail: the network and how to buy a ticket, e.g. "Venice · ACTV – Tickets in the AVM Venezia app or at ticket machines. Validate paper tickets before boarding." with a link to fares (14 cities so far).
+- Walking, cycling and driving comparisons only when they are realistic (no 3-hour walks next to a 40-minute train); each opens in Apple Maps (or the app chosen in Settings) from the row's menu or the route detail.
+- History shows where a destination came from: search 🔍, map pin 📍, favourite ⭐, line or link.
+
+### Route detail
+- One overview at the top, no repeated boarding list; each ride in the steps shows where to get on and off and opens to its stops, live source, notes and the get-off alarm.
+- "All information without guarantee" note under the route and in Settings → Data.
+
+### Map
+- A tapped place or stop closes with a tap on empty map, the ✕ or a swipe down; its marker goes too.
+- Buses, trams and ferries are drawn at the widest zoom that shows lines (the server only sent trains there).
+
 ## 0.6.0 (build 48)
 
 ### Live trip

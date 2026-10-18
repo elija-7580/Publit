@@ -20,12 +20,19 @@ struct RecentSearchesSection: View {
                             app.plan.searchStarted = true // a past search: run it again
                         }
                     } label: {
+                        HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: (search.source ?? .search).symbol)
+                            .font(.subheadline.weight(.semibold)).foregroundStyle(.secondary)
+                            .frame(width: 22).padding(.top, 2)
+                            .accessibilityHidden(true)
                         VStack(alignment: .leading, spacing: 4) {
                             Text(search.to.title).font(.subheadline.weight(.semibold)).foregroundStyle(.primary)
                             Text(L10n.f("from %@", search.from.title)).font(.caption).foregroundStyle(.secondary)
                             // To the minute from the shared clock: a `.relative` date redraws every second.
                             Text(verbatim: Fmt.ago(search.searchedAt, now: Ticker.minute.now))
                                 .font(.caption2).foregroundStyle(.secondary)
+                        }
+                        Spacer(minLength: 0)
                         }
                         .padding(.vertical, 3)
                     }

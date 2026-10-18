@@ -46,6 +46,7 @@ let core = [
     "Util/TicketLinks.swift",
     "Stores/MapStations.swift",
     "Models/TransitFilter.swift",
+    "Models/TransitRegions.swift",
     "Stores/LineGrouping.swift",
     "Models/TransitExtras.swift",
     "Models/LiveMap.swift",

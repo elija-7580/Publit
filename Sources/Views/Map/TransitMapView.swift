@@ -64,6 +64,8 @@ struct TransitMapView: UIViewRepresentable {
     /// A place picked on the map: a tapped Apple Maps point of interest (museum, shop, beach …)
     /// or a long press anywhere. Called again with `refined` true and a better name once the address is known.
     var onPick: ((_ place: GeocodeMatch, _ refined: Bool) -> Void)? = nil
+    /// A tap on empty map (no pin, station or place): closes what is open.
+    var onTapEmpty: (() -> Void)? = nil
 
     func makeCoordinator() -> Coordinator { Coordinator(self) }
 
@@ -84,6 +86,10 @@ struct TransitMapView: UIViewRepresentable {
         let press = UILongPressGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.longPressed(_:)))
         press.minimumPressDuration = 0.5
         map.addGestureRecognizer(press)
+        let tap = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.tapped(_:)))
+        tap.cancelsTouchesInView = false
+        tap.delegate = context.coordinator
+        map.addGestureRecognizer(tap)
         if let c = initialCenter {
             map.setRegion(MKCoordinateRegion(center: c.clCoordinate, latitudinalMeters: 1600, longitudinalMeters: 1600), animated: false)
         } else {
@@ -128,7 +134,7 @@ struct TransitMapView: UIViewRepresentable {
         }
     }
 
-    final class Coordinator: NSObject, MKMapViewDelegate {
+    final class Coordinator: NSObject, MKMapViewDelegate, UIGestureRecognizerDelegate {
         var parent: TransitMapView
         private var versions = (stations: -1, shapes: -1, vehicles: -1, rentals: -1)
         private var stationPins: [String: StationPin] = [:]
@@ -139,6 +145,8 @@ struct TransitMapView: UIViewRepresentable {
         private var appliedLook: MapLook?
         private var focusVersion = 0
         private var searchPin: SearchPin?
+        /// When something on the map was last selected: a tap that selects is not a tap on empty map.
+        private var lastSelect = Date.distantPast
 
         init(_ parent: TransitMapView) { self.parent = parent }
 
@@ -331,6 +339,7 @@ struct TransitMapView: UIViewRepresentable {
         }
 
         func mapView(_ mapView: MKMapView, didSelect annotation: MKAnnotation) {
+            lastSelect = Date()
             defer { mapView.deselectAnnotation(annotation, animated: false) }
             switch annotation {
             case let feature as MKMapFeatureAnnotation: pick(feature)
@@ -367,6 +376,27 @@ struct TransitMapView: UIViewRepresentable {
                     self.parent.onPick?(Self.match(item, name: item.name ?? name, at: point), true)
                 }
             }
+        }
+
+        @objc func tapped(_ gesture: UITapGestureRecognizer) {
+            guard gesture.state == .ended, parent.onTapEmpty != nil else { return }
+            // MapKit selects a tapped place a moment after the tap; wait for it before calling the map empty.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { [weak self] in
+                guard let self, Date().timeIntervalSince(self.lastSelect) > 0.6 else { return }
+                self.parent.onTapEmpty?()
+            }
+        }
+
+        func gestureRecognizer(_ g: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith other: UIGestureRecognizer) -> Bool { true }
+
+        func gestureRecognizer(_ g: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+            guard g is UITapGestureRecognizer else { return true }
+            var v: UIView? = touch.view
+            while let view = v {
+                if view is MKAnnotationView || view is UIControl { return false }
+                v = view.superview
+            }
+            return true
         }
 
         @objc func longPressed(_ gesture: UILongPressGestureRecognizer) {

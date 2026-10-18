@@ -247,6 +247,19 @@ struct StreetComparison: Identifiable, Sendable {
 
     static let order = ["WALK", "BIKE", "CAR"]
 
+    /// Worth showing next to public transport: nobody walks three hours to save ten minutes.
+    /// Walks up to 45 min and rides up to 90 min always; longer ones only when they are not
+    /// much slower than public transport, and never beyond 2 h on foot or 4 h by bike.
+    func isRealistic(bestTransit: Int?) -> Bool {
+        let minutes = duration / 60
+        let close = bestTransit.map { duration <= $0 * 5 / 4 } ?? true
+        switch mode {
+        case "WALK": return minutes <= 45 || (close && minutes <= 120)
+        case "BIKE": return minutes <= 90 || (close && minutes <= 240)
+        default: return true
+        }
+    }
+
     /// One per mode (the fastest), in the order walk, bike, car.
     static func from(_ direct: [Itinerary]) -> [StreetComparison] {
         var best: [String: Itinerary] = [:]

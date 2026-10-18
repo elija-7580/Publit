@@ -469,7 +469,6 @@ final class PublitUITests: XCTestCase {
         app.buttons["Cancel"].firstMatch.tap()
         sleep(1)
         app.navigationBars["Route"].buttons.firstMatch.tap()
-        app.buttons["Clear destination"].tap()
         // Saved trips are listed in the Saved tab (Plan is for planning only).
         app.tabBars.buttons["Saved"].tap()
         let row = app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS 'Flughafen München'")).firstMatch

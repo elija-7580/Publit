@@ -8,6 +8,8 @@ struct PlanView: View {
     @Environment(LocationManager.self) private var location
     @State private var picking: PickTarget?
     @State private var opened: OpenedRoute?
+    /// Route rows on screen, to offer a jump to the recommended one while it is out of sight.
+    @State private var visibleRows: Set<String> = []
 
     /// Live refresh interval while planning for "now".
     static var refreshInterval: Duration { Energy.duration(60) }
@@ -16,6 +18,8 @@ struct PlanView: View {
 
     var body: some View {
         @Bindable var plan = app.plan
+        let pick = smartPick(plan)
+        ScrollViewReader { proxy in
         List {
             Section {
                 // From and To in one soft card, joined like the logo's stroke; the round swap key on the right.
@@ -25,8 +29,22 @@ struct PlanView: View {
                         endpointButton(label: "From", endpoint: plan.from, target: .from)
                             .accessibilityIdentifier("endpoint-from")
                         Rectangle().fill(Color.inkFill).frame(height: 1)
-                        endpointButton(label: "To", endpoint: plan.to, target: .to)
-                            .accessibilityIdentifier("endpoint-to")
+                        HStack(spacing: 8) {
+                            endpointButton(label: "To", endpoint: plan.to, target: .to)
+                                .accessibilityIdentifier("endpoint-to")
+                            // Search right next to the destination (it replaced the old "Clear destination" ✕).
+                            if plan.to != nil {
+                                Button { startSearch() } label: {
+                                    Image(systemName: "magnifyingglass")
+                                        .font(.subheadline.weight(.bold))
+                                        .foregroundStyle(Color.onInk)
+                                        .frame(width: 34, height: 34)
+                                        .background(Color.ink, in: Circle())
+                                }
+                                .accessibilityLabel(Text("Search routes"))
+                                .accessibilityIdentifier("searchRoutes")
+                            }
+                        }
                     }
                     Button { app.plan.swap() } label: {
                         Image(systemName: "arrow.up.arrow.down")
@@ -41,42 +59,65 @@ struct PlanView: View {
                 }
                 .buttonStyle(.borderless)
                 // Plan is for later (tonight, next week). "From here, now" lives in Nearby.
-                HStack(spacing: 8) {
+                VStack(alignment: .leading, spacing: 12) {
                     BevelSegmented(selection: $plan.timeMode,
-                                   options: [(TimeMode.departAt, L10n.t("Depart")), (TimeMode.arriveBy, L10n.t("Arrive"))])
-                        .frame(maxWidth: 190)
+                                   options: [(TimeMode.departAt, L10n.t("Depart")), (TimeMode.arriveBy, L10n.t("Arrive"))],
+                                   large: true)
                         .accessibilityLabel(Text("When"))
-                    Spacer(minLength: 0)
-                    DatePicker(plan.timeMode == .arriveBy ? L10n.t("Arrive by") : L10n.t("Depart at"), selection: $plan.date)
-                        .labelsHidden()
-                        .datePickerStyle(.compact)
+                    HStack(spacing: 10) {
+                        DatePicker(plan.timeMode == .arriveBy ? L10n.t("Arrive by") : L10n.t("Depart at"), selection: $plan.date)
+                            .labelsHidden()
+                            .datePickerStyle(.compact)
+                            .controlSize(.large)
+                        Spacer(minLength: 0)
+                        // Back to the current time in one tap, without scrolling the wheels.
+                        Button {
+                            plan.date = .now
+                            if plan.timeMode == .arriveBy { plan.timeMode = .departAt }
+                        } label: {
+                            Label("Now", systemImage: "clock.arrow.circlepath").font(.subheadline.weight(.semibold))
+                        }
+                        .buttonStyle(.bordered)
+                        .tint(Color.ink)
+                        .disabled(plan.timeMode == .departAt && abs(plan.date.timeIntervalSinceNow) < 90)
+                        .accessibilityIdentifier("planTimeNow")
+                    }
                 }
+                .padding(.vertical, 6)
                 RouteOptionsButton(compact: true)
             }
 
-            if plan.to != nil && !plan.searchStarted {
-                Section {
-                    Button { app.plan.searchStarted = true } label: {
-                        Label("Search routes", systemImage: "magnifyingglass")
-                            .font(.headline)
-                            .frame(maxWidth: .infinity, minHeight: 34)
-                    }
-                    .buttonStyle(.ink)
-                    .listRowInsets(EdgeInsets())
-                    .listRowBackground(Color.clear)
-                    .accessibilityIdentifier("searchRoutes")
-                }
-            }
             if plan.to == nil || !plan.searchStarted {
                 RecentSearchesSection()
             } else {
-                resultsSection(plan)
+                resultsSection(plan, pick: pick)
                 StreetComparisonSection(comparisons: plan.comparisons,
                                         bestTransit: plan.itineraries.filter { !$0.isDirect }.map(\.duration).min(),
                                         fromName: plan.from.title, toName: plan.to?.title ?? "")
             }
         }
         .inkList()
+        // The suggested route out of sight (later in the list): a capsule jumps to it, the list stays put otherwise.
+        .overlay(alignment: .bottom) {
+            if plan.searchStarted, plan.to != nil, let key = pick.key, !visibleRows.contains(key),
+               let it = pick.list.first(where: { $0.routeKey == key }) {
+                Button {
+                    withAnimation(.snappy) { proxy.scrollTo(key, anchor: .center) }
+                } label: {
+                    Label(L10n.f("Recommended: %@", "\(Fmt.time(it.startTime, tz: it.legs.first?.from.tz)) – \(Fmt.time(it.endTime, tz: it.legs.last?.to.tz))"),
+                          systemImage: "sparkles")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color.ink)
+                        .padding(.horizontal, 16).padding(.vertical, 10)
+                        .matteSurface(in: Capsule())
+                }
+                .buttonStyle(.plain)
+                .padding(.bottom, 12)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+                .accessibilityIdentifier("jumpToRecommended")
+            }
+        }
+        }
         // The last footer ("Updated …") stays clear of the tab bar and the live bar.
         .contentMargins(.bottom, 32, for: .scrollContent)
         // Pull down: fetch the routes again (delays, a train just gone).
@@ -93,16 +134,9 @@ struct PlanView: View {
             if plan.timeMode == .now { plan.timeMode = .departAt }
             if plan.date < .now.addingTimeInterval(-60) { plan.date = .now }
         }
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                if plan.to != nil {
-                    Button { app.plan.to = nil } label: { Label("Clear destination", systemImage: "xmark.circle") }
-                }
-            }
-        }
         .sheet(item: $picking) { target in
             PlaceSearchView(title: target == .from ? "From" : "To", allowCurrentLocation: true) { endpoint in
-                if target == .from { app.plan.from = endpoint } else { app.plan.to = endpoint }
+                if target == .from { app.plan.from = endpoint } else { app.plan.to = endpoint; app.plan.source = .search }
             }
         }
         .onChange(of: app.dismissToken) { picking = nil }
@@ -129,6 +163,29 @@ struct PlanView: View {
                 Task { await app.plan.search(current: location.coordinate) }
             }
         }
+    }
+
+    /// Starts the search, or runs it again when the routes are already shown.
+    private func startSearch() {
+        if !app.plan.searchStarted { app.plan.searchStarted = true; return }
+        Task { await app.plan.search(current: location.coordinate, locationDenied: location.isDenied, silent: true) }
+    }
+
+    struct Pick {
+        var list: [Itinerary] = []
+        var badges: [String: [SmartRouting.Badge]] = [:]
+        var key: String?
+        var reason: String?
+    }
+
+    /// Smart routing: the suggested route and the best in each respect, with the reason in a few words.
+    private func smartPick(_ plan: PlanModel) -> Pick {
+        guard plan.searchStarted, plan.to != nil else { return Pick() }
+        let its = plan.sortedItineraries.uniqueRoutes
+        let badges = smartRouting ? SmartRouting.badges(its, arriveBy: plan.timeMode == .arriveBy) : [:]
+        let key = badges.first { $0.value.contains(.recommended) }?.key
+        let reason = its.first { $0.routeKey == key }.flatMap { SmartRouting.reason(for: $0, in: its) }
+        return Pick(list: its, badges: badges, key: key, reason: reason)
     }
 
     /// Same weekday and time, next time it comes round.
@@ -165,15 +222,14 @@ struct PlanView: View {
     }
 
     @ViewBuilder
-    private func resultsSection(_ plan: PlanModel) -> some View {
-        let its = plan.sortedItineraries.uniqueRoutes
+    private func resultsSection(_ plan: PlanModel, pick: Pick) -> some View {
+        let its = pick.list
         // Every bar starts at the left; the longest route fills the width, so lengths still compare.
         let span = TimeInterval(its.map(\.duration).max() ?? 0)
         let zoneNote = its.first.flatMap { Fmt.foreignZoneNote(tz: $0.legs.first?.from.tz, at: $0.startTime) }
-        // Smart routing: the suggested route and the best in each respect, with the reason in a few words.
-        let badges = smartRouting ? SmartRouting.badges(its, arriveBy: plan.timeMode == .arriveBy) : [:]
-        let recommendedKey = badges.first { $0.value.contains(.recommended) }?.key
-        let reason = its.first { $0.routeKey == recommendedKey }.flatMap { SmartRouting.reason(for: $0, in: its) }
+        let badges = pick.badges
+        let recommendedKey = pick.key
+        let reason = pick.reason
 
         Section {
             OfflineNote()
@@ -203,6 +259,9 @@ struct PlanView: View {
                 .buttonStyle(.plain)
                 .accessibilityAddTraits(.isLink)
                 .accessibilityIdentifier("routeRow")
+                .id(it.routeKey)
+                .onAppear { visibleRows.insert(it.routeKey) }
+                .onDisappear { visibleRows.remove(it.routeKey) }
             }
 
             if plan.canLoadMore {
@@ -214,6 +273,12 @@ struct PlanView: View {
                         if plan.isLoadingMore { Spacer(); LogoLoader(size: 24).frame(width: 48) }
                     }
                 }
+            }
+        } header: {
+            // "Venice · ACTV" above the routes when they all start in one network.
+            if let region = its.first.flatMap({ TransitRegion.along($0).first }),
+               its.allSatisfy({ TransitRegion.along($0).first == region }) {
+                Text(verbatim: region.title).accessibilityIdentifier("resultsRegion")
             }
         } footer: {
             if !its.isEmpty {
@@ -351,16 +416,20 @@ struct TimelineBar: View {
                             .frame(width: w, height: height)
                             .offset(x: x)
                     } else {
-                        Capsule()
-                            .fill(Color.secondary.opacity(0.35))
-                            .frame(width: w, height: 4)
-                            .offset(x: x, y: (height - 4) / 2)
+                        // A walk: a row of dots, like the walk in the route detail; waiting stays dashed.
+                        Path { p in p.move(to: CGPoint(x: x + 2, y: height / 2)); p.addLine(to: CGPoint(x: x + max(w - 2, 2), y: height / 2)) }
+                            .stroke(Color.secondary.opacity(0.7), style: StrokeStyle(lineWidth: 3.5, lineCap: .round, dash: [0.1, 6]))
                     }
-                    if w >= 28 {
-                        Text(verbatim: "\(max(1, Int((Double(leg.duration) / 60).rounded())))′")
-                            .font(.caption2.weight(.semibold).monospacedDigit())
-                            .foregroundStyle(.secondary).lineLimit(1)
-                            .frame(width: w, height: 16).offset(x: x, y: height + 3)
+                    // Minutes under a piece only where they fit and say something: rides, and walks of 3 min or more.
+                    let minutes = max(1, Int((Double(leg.duration) / 60).rounded()))
+                    if leg.isTransit ? w >= 28 : (w >= 40 && minutes >= 3) {
+                        HStack(spacing: 2) {
+                            if !leg.isTransit { Image(systemName: ModeStyle.symbol(leg.mode)).font(.system(size: 9, weight: .semibold)) }
+                            Text(verbatim: "\(minutes)′")
+                        }
+                        .font(.caption2.weight(.semibold).monospacedDigit())
+                        .foregroundStyle(.secondary).lineLimit(1)
+                        .frame(width: w, height: 16).offset(x: x, y: height + 3)
                     }
                 }
             }

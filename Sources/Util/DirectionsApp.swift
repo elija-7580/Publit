@@ -22,7 +22,7 @@ enum DirectionsApp: String, CaseIterable, Identifiable {
     /// "Open in Google Maps".
     var openLabel: String { L10n.f("Open in %@", title) }
 
-    enum Mode { case walking, transit, show }
+    enum Mode { case walking, transit, cycling, driving, show }
 
     /// Opens the place in the chosen app: directions from where you are (or from `from`, for a later
     /// walk of a trip), or just the place.
@@ -37,6 +37,8 @@ enum DirectionsApp: String, CaseIterable, Identifiable {
             switch mode {
             case .walking: options = [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeWalking]
             case .transit: options = [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeTransit]
+            case .driving: options = [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving]
+            case .cycling: options = [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDefault]
             case .show: options = nil
             }
             if let from, mode != .show {
@@ -51,6 +53,19 @@ enum DirectionsApp: String, CaseIterable, Identifiable {
         }
     }
 
+    /// How "Open in Maps" hands a street route over (router modes WALK, BIKE, CAR).
+    static func mode(street: String) -> Mode {
+        switch street { case "BIKE": return .cycling; case "CAR": return .driving; default: return .walking }
+    }
+
+    static func appleFlag(_ mode: Mode) -> String {
+        switch mode { case .walking: return "w"; case .driving: return "d"; case .cycling: return "c"; default: return "r" }
+    }
+
+    static func googleMode(_ mode: Mode) -> String {
+        switch mode { case .walking: return "walking"; case .driving: return "driving"; case .cycling: return "bicycling"; default: return "transit" }
+    }
+
     func url(_ point: LatLon, name: String, mode: Mode, from: (point: LatLon, name: String)? = nil) -> URL? {
         let coord = String(format: "%.6f,%.6f", point.lat, point.lon)
         let start = from.map { String(format: "%.6f,%.6f", $0.point.lat, $0.point.lon) }
@@ -59,7 +74,7 @@ enum DirectionsApp: String, CaseIterable, Identifiable {
             var c = URLComponents(string: "https://maps.apple.com/")!
             c.queryItems = mode == .show ? [URLQueryItem(name: "ll", value: coord), URLQueryItem(name: "q", value: name)]
                 : (start.map { [URLQueryItem(name: "saddr", value: $0)] } ?? [])
-                    + [URLQueryItem(name: "daddr", value: coord), URLQueryItem(name: "dirflg", value: mode == .walking ? "w" : "r")]
+                    + [URLQueryItem(name: "daddr", value: coord), URLQueryItem(name: "dirflg", value: Self.appleFlag(mode))]
             return c.url
         case .google:
             if mode == .show {
@@ -70,7 +85,7 @@ enum DirectionsApp: String, CaseIterable, Identifiable {
             var c = URLComponents(string: "https://www.google.com/maps/dir/")!
             c.queryItems = [URLQueryItem(name: "api", value: "1")] + (start.map { [URLQueryItem(name: "origin", value: $0)] } ?? [])
                 + [URLQueryItem(name: "destination", value: coord),
-                   URLQueryItem(name: "travelmode", value: mode == .walking ? "walking" : "transit")]
+                   URLQueryItem(name: "travelmode", value: Self.googleMode(mode))]
             return c.url
         case .citymapper:
             var c = URLComponents(string: "https://citymapper.com/directions")!

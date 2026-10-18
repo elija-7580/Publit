@@ -107,15 +107,27 @@ struct ItineraryDetailView: View {
                 Clocked(every: 30) { now in LeaveHero(itinerary: itinerary, now: now) }
                     .listRowInsets(EdgeInsets())
                     .listRowBackground(Color.clear)
+                // The chain of lines once; where to get on and off is in the steps below (each opens for its stops).
                 RouteSummary(itinerary: itinerary, showsTimes: false)
-                // Where to get on, change and get off, without scrolling to the steps or starting the trip.
-                BoardingSteps(itinerary: itinerary)
+                ForEach(TransitRegion.along(itinerary), id: \.network) { RegionTicketRow(region: $0) }
                 if let note = Fmt.foreignZoneNote(tz: itinerary.legs.first?.from.tz, at: itinerary.startTime) {
                     Label(note, systemImage: "clock").font(.footnote).foregroundStyle(.secondary)
                 }
                 if StreetComparison.streetMode(itinerary) == "CAR" {
                     Label("Driving times are without traffic and parking.", systemImage: "info.circle")
                         .font(.footnote).foregroundStyle(.secondary)
+                }
+                if let mode = StreetComparison.streetMode(itinerary), let start = itinerary.legs.first?.from,
+                   let end = itinerary.legs.last?.to {
+                    let app = DirectionsApp.current
+                    Button {
+                        app.open(end.coordinate, name: resolvedTo, mode: DirectionsApp.mode(street: mode),
+                                 from: (start.coordinate, resolvedFrom))
+                    } label: {
+                        Label(app.openLabel, systemImage: "arrow.up.forward.app").frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                    .accessibilityIdentifier("openStreetRouteInMaps")
                 }
             }
 
@@ -146,6 +158,12 @@ struct ItineraryDetailView: View {
             }
 
             if !isBikeOrCar { FareSection(itinerary: itinerary) }
+
+            Section {
+            } footer: {
+                Text("All information without guarantee. Times, platforms and prices come from the operators' open data and can change at short notice.")
+                    .accessibilityIdentifier("noGuaranteeNote")
+            }
         }
         .inkList()
         .sheet(isPresented: $showsMap) {
@@ -516,6 +534,8 @@ struct StatusBanner: View {
 /// dotted blue on foot) and the leg itself.
 struct TimelineLegRow: View {
     let leg: Leg
+    /// Rides open to their stops, notes and the get-off alarm; closed they say where to get on and off.
+    @State private var expanded = false
 
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
@@ -526,12 +546,90 @@ struct TimelineLegRow: View {
                 .frame(width: TimelineTime.width, alignment: .trailing)
                 .padding(.top, 10)
             TimelineRail(color: leg.isTransit ? leg.lineStroke : Color.secondary, dotted: !leg.isTransit)
-            LegRow(leg: leg, bar: false)
-                .padding(.vertical, 4)
-                .frame(maxWidth: .infinity, alignment: .leading)
+            Group {
+                if leg.isTransit { ride } else { LegRow(leg: leg, bar: false) }
+            }
+            .padding(.vertical, 4)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .listRowInsets(EdgeInsets(top: 0, leading: 8, bottom: 0, trailing: 16))
         .listRowSeparator(.hidden)
+    }
+
+    private var ride: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Button {
+                withAnimation(.snappy(duration: 0.25)) { expanded.toggle() }
+            } label: {
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(alignment: .firstTextBaseline, spacing: 8) {
+                        LineBadge(leg)
+                        if let detail = leg.serviceDetail {
+                            Text(verbatim: detail).font(.caption.weight(.semibold)).lineLimit(1)
+                        }
+                        Spacer(minLength: 4)
+                        DurationFigure(seconds: leg.duration, size: 22)
+                        Image(systemName: "chevron.down")
+                            .font(.footnote.weight(.semibold)).foregroundStyle(.tertiary)
+                            .rotationEffect(.degrees(expanded ? 180 : 0))
+                            .accessibilityHidden(true)
+                    }
+                    DirectionLabel(direction: leg.shownDirection, circular: leg.isCircular)
+                    stop(L10n.f("Board at %@", leg.from.name), track: leg.from.track, time: nil, delay: leg.delayMinutes)
+                    stop(L10n.f("Get off at %@", leg.to.name), track: leg.to.track, time: leg.endTime,
+                         delay: Int((leg.endTime.timeIntervalSince(leg.scheduledEndTime) / 60).rounded()))
+                    if !expanded, !leg.serviceAlerts.isEmpty || leg.isReplacementBus {
+                        Label("Service changes on this route", systemImage: "exclamationmark.triangle")
+                            .font(.caption.weight(.semibold)).foregroundStyle(Color.delay)
+                    }
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityHint(Text(expanded ? "Hide stops" : "Show stops"))
+            .accessibilityIdentifier("transitLeg")
+            if leg.cancelled == true {
+                Text("This trip is cancelled.").font(.caption.weight(.semibold)).foregroundStyle(Color.danger)
+            }
+            if expanded {
+                if leg.isReplacementBus {
+                    Label("Rail replacement bus", systemImage: "bus.fill").font(.subheadline.weight(.semibold)).foregroundStyle(Color.delay)
+                }
+                if let stops = leg.intermediateStops, !stops.isEmpty {
+                    VStack(alignment: .leading, spacing: 4) {
+                        ForEach(Array(stops.enumerated()), id: \.offset) { _, p in
+                            HStack(spacing: 8) {
+                                Text(verbatim: (p.departure ?? p.arrival).map { Fmt.time($0, tz: p.tz ?? leg.from.tz) } ?? "")
+                                    .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+                                    .frame(minWidth: 40, alignment: .leading)
+                                Text(verbatim: p.name).font(.caption).lineLimit(1)
+                                    .strikethrough(p.cancelled == true)
+                            }
+                        }
+                    }
+                    .padding(.leading, 2)
+                }
+                Text(leg.realTime && !Connectivity.shared.isOffline ? [L10n.t("Live"), leg.liveSource].compactMap { $0 }.joined(separator: " · ") : L10n.t("Timetable"))
+                    .font(.caption).foregroundStyle(.secondary)
+                ServiceAlertsView(alerts: leg.serviceAlerts)
+                GetOffButton(leg: leg)
+            }
+        }
+        .padding(.vertical, 6)
+    }
+
+    private func stop(_ title: String, track: String?, time: Date?, delay: Int) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
+            Text(verbatim: title).font(.subheadline.weight(.semibold)).fixedSize(horizontal: false, vertical: true)
+            if let t = TransitLabels.clean(track) {
+                Text(L10n.f("Platform %@", t)).font(.caption).foregroundStyle(.secondary)
+            }
+            Spacer(minLength: 4)
+            if let time {
+                Text(Fmt.time(time, tz: leg.to.tz)).font(.caption.weight(.semibold).monospacedDigit()).foregroundStyle(.secondary)
+            }
+            if delay > 0 { Text(L10n.f("+%lld min", delay)).font(.caption).foregroundStyle(Color.delay) }
+        }
     }
 }
 
