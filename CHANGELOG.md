@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.0 (build 37)
+
+### Live trip
+- Pulling up the panel over the map no longer jitters: it follows the finger smoothly, keeps its direction for the whole drag and settles at down, half way or up. Down and half way the whole panel drags; up, the list scrolls and the handle pulls it down again.
+
 ## 0.6.0 (build 36)
 
 ### Better routes
