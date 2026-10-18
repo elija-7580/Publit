@@ -15,6 +15,7 @@ struct SettingsView: View {
     @AppStorage(DirectionsApp.defaultsKey) private var directionsApp = DirectionsApp.apple.rawValue
     @AppStorage(SearchProvider.defaultsKey) private var searchProvider = SearchProvider.transitous.rawValue
     @AppStorage(GooglePlaces.keyDefaultsKey) private var googleKey = ""
+    @AppStorage(MapProvider.defaultsKey) private var mapProvider = MapProvider.apple.rawValue
     @State private var summary: HangLog.Summary?
     @State private var reportURL: URL?
 
@@ -59,7 +60,13 @@ struct SettingsView: View {
                     Toggle(L10n.t("Show connection timelines"), isOn: $routeTimelines)
                     NavigationLink { ConnectionGuideView() } label: { Label(L10n.t("How to read connections"), systemImage: "questionmark.circle") }
                 }
-                Section(L10n.t("Map")) {
+                Section {
+                    if MapProvider.googleAvailable {
+                        Picker(L10n.t("Map provider"), selection: $mapProvider) {
+                            ForEach(MapProvider.allCases) { Text($0.title).tag($0.rawValue) }
+                        }
+                        .accessibilityIdentifier("mapProvider")
+                    }
                     Picker(L10n.t("Map style"), selection: $mapBase) {
                         ForEach(MapBase.allCases) { Text($0.title).tag($0.rawValue) }
                     }
@@ -71,13 +78,19 @@ struct SettingsView: View {
                         ForEach(DirectionsApp.allCases) { Text($0.title).tag($0.rawValue) }
                     }
                     .accessibilityIdentifier("directionsApp")
+                } header: {
+                    Text(L10n.t("Map"))
+                } footer: {
+                    if mapProvider == MapProvider.google.rawValue {
+                        Text(L10n.t("Google Maps uses the Google API key under Search, with “Maps SDK for iOS” enabled. Without a key, Apple Maps is shown."))
+                    }
                 }
                 Section {
                     Picker(L10n.t("Place search"), selection: $searchProvider) {
                         ForEach(SearchProvider.allCases) { Text($0.title).tag($0.rawValue) }
                     }
                     .accessibilityIdentifier("searchProvider")
-                    if searchProvider == SearchProvider.google.rawValue {
+                    if searchProvider == SearchProvider.google.rawValue || mapProvider == MapProvider.google.rawValue {
                         SecureField(L10n.t("Google API key"), text: $googleKey)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()

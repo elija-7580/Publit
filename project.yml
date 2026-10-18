@@ -14,6 +14,11 @@ settings:
     CURRENT_PROJECT_VERSION: "38"
     # Personal Team — Automatic Signing for local device installs.
     DEVELOPMENT_TEAM: "3D6S8GFSGK"
+packages:
+  # Google's map, used instead of Apple's when chosen in Settings and an API key is set.
+  GoogleMaps:
+    url: https://github.com/googlemaps/ios-maps-sdk
+    from: 11.2.0
 targets:
   Publit:
     type: application
@@ -87,6 +92,8 @@ targets:
             /usr/bin/base64 -D -i "$SRC/$f.png.b64" -o "$DST/$f.png"
           done
     dependencies:
+      - package: GoogleMaps
+        product: GoogleMaps
       - target: PublitWidgets
       - target: PublitShare
       # The watch app installs with the iPhone app (Embed Watch Content).

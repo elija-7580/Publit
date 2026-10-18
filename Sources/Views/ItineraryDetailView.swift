@@ -10,7 +10,32 @@ struct CompareMapView: View {
         itineraries.filter { $0.routeKey != selectedId } + itineraries.filter { $0.routeKey == selectedId }
     }
 
+    @AppStorage(MapProvider.defaultsKey) private var mapProvider = MapProvider.apple.rawValue
+
     var body: some View {
+        #if canImport(GoogleMaps)
+        if MapProvider.usesGoogle(mapProvider) {
+            GoogleMapView(content: googleContent, camera: .fit(ordered.flatMap { $0.legs.flatMap(\.legGeometry.mapPoints) }))
+        } else {
+            appleMap
+        }
+        #else
+        appleMap
+        #endif
+    }
+
+    private var googleContent: GoogleMapContent {
+        GoogleMapContent(lines: ordered.flatMap { it in
+            let isSelected = it.routeKey == selectedId
+            return it.legs.map { leg in
+                GoogleMapContent.Line(points: leg.legGeometry.mapPoints,
+                                      color: isSelected ? (leg.isTransit ? leg.lineStroke : Color.routeAhead) : Color.gray.opacity(0.45),
+                                      width: isSelected ? (leg.isTransit ? 5 : 4) : 3)
+            }
+        })
+    }
+
+    private var appleMap: some View {
         Map(initialPosition: .automatic) {
             UserAnnotation()
             ForEach(ordered, id: \.routeKey) { it in
@@ -260,8 +285,38 @@ extension StrokeStyle {
 /// The whole route on a map, with start and destination.
 struct RouteMap: View {
     let itinerary: Itinerary
+    @AppStorage(MapProvider.defaultsKey) private var mapProvider = MapProvider.apple.rawValue
 
     var body: some View {
+        #if canImport(GoogleMaps)
+        if MapProvider.usesGoogle(mapProvider) {
+            GoogleMapView(content: googleContent,
+                          camera: .fit(itinerary.legs.flatMap { $0.legGeometry.mapPoints + [$0.from.coordinate, $0.to.coordinate] }))
+        } else {
+            appleMap
+        }
+        #else
+        appleMap
+        #endif
+    }
+
+    private var googleContent: GoogleMapContent {
+        var content = GoogleMapContent(lines: itinerary.legs.map {
+            GoogleMapContent.Line(points: $0.legGeometry.mapPoints, color: $0.isTransit ? $0.lineStroke : Color.routeAhead,
+                                  width: $0.isTransit ? 5 : 4)
+        })
+        if let first = itinerary.legs.first {
+            content.pins.append(.init(coordinate: first.from.coordinate,
+                                      kind: .dot(color: Color.inkAction, border: .white, size: 16, borderWidth: 3)))
+        }
+        if let last = itinerary.legs.last {
+            content.pins.append(.init(coordinate: last.to.coordinate,
+                                      kind: .marker(title: ItineraryDetailView.placeName(last.to), color: Color.inkAction)))
+        }
+        return content
+    }
+
+    private var appleMap: some View {
         Map(initialPosition: .automatic) {
             UserAnnotation()
             ForEach(Array(itinerary.legs.enumerated()), id: \.offset) { _, leg in
