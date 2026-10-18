@@ -16,6 +16,27 @@ enum Reach {
     /// while nothing is found. The last step is "show it anyway": routes behind a long walk, marked as such.
     /// The server accepts up to two hours (checked 2026-10-17 against api.transitous.org).
     static let walkSteps = [1800, 2700, 7200]
+    /// The comfortable walk asked for alongside the usual limit. The server picks the earliest arrival,
+    /// so with 30 min allowed a route that walks half an hour to arrive one minute earlier beats staying
+    /// on the boat (Punta Sabbioni → Cannaregio, 2026-10-18). Both searches run; the long walk stays
+    /// only when it really saves time.
+    static let shortWalkSeconds = 900
+    /// A route with a longer walk must arrive at least this much earlier than the comfortable one.
+    static let longWalkMustSave: TimeInterval = 10 * 60
+
+    /// Routes with a short walk, plus those with a longer walk that arrive clearly earlier
+    /// than any short-walk route leaving about as early.
+    static func preferShortWalks(short: [Itinerary], long: [Itinerary]) -> [Itinerary] {
+        guard !short.isEmpty else { return long }
+        let kept = long.filter { l in
+            // Already in the short list (same departure and arrival): not twice.
+            if short.contains(where: { $0.startTime == l.startTime && $0.endTime == l.endTime }) { return false }
+            let rivals = short.filter { $0.startTime >= l.startTime.addingTimeInterval(-longWalkMustSave) }
+            guard let best = rivals.map(\.endTime).min() else { return true }
+            return best.timeIntervalSince(l.endTime) >= longWalkMustSave
+        }
+        return (short + kept).sorted { ($0.startTime, $0.endTime) < ($1.startTime, $1.endTime) }
+    }
     /// Walks to or from a stop longer than this are pointed out above the routes.
     static let longWalkSeconds = 1800
 

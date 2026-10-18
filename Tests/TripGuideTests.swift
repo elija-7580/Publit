@@ -33,6 +33,36 @@ final class TripGuideTests: XCTestCase {
                          transfers: 1, legs: legs)
     }
 
+    /// Treporti: 81 min on foot to the pier at the destination, then the ferry to Burano and back.
+    func testRouteThatPassesTheDestinationIsADetour() throws {
+        let legs = [try leg("WALK", ("Cavallino", 11.000), ("Treporti", 11.068), start: 0, end: 81),
+                    try leg("FERRY", ("Treporti", 11.068), ("Burano", 11.040), start: 81, end: 96),
+                    try leg("WALK", ("Burano", 11.040), ("Burano", 11.040), start: 96, end: 98),
+                    try leg("FERRY", ("Burano", 11.040), ("Treporti", 11.068), start: 105, end: 120),
+                    try leg("WALK", ("Treporti", 11.068), ("Treporti centro", 11.069), start: 120, end: 121)]
+        let detour = Itinerary(id: "d", duration: 121 * 60, startTime: legs[0].startTime, endTime: legs[4].endTime,
+                               transfers: 1, legs: legs)
+        XCTAssertTrue(detour.isDetour)
+        XCTAssertFalse(try trip().isDetour, "an ordinary route with a short walk at the end")
+        XCTAssertEqual([detour, try trip()].withoutDetours.map(\.id), ["g"])
+    }
+
+    /// Punta Sabbioni → Cannaregio: the server liked a 30 min walk to arrive one minute earlier.
+    func testLongWalkStaysOnlyWhenItSavesTime() throws {
+        func route(_ id: String, _ start: Int, _ end: Int, walk: Int) throws -> Itinerary {
+            let legs = [try leg("FERRY", ("Punta Sabbioni", 12.42), ("Lido", 12.36), start: start, end: end - walk),
+                        try leg("WALK", ("Lido", 12.36), ("Cannaregio", 12.33), start: end - walk, end: end)]
+            return Itinerary(id: id, duration: (end - start) * 60, startTime: legs[0].startTime, endTime: legs[1].endTime,
+                             transfers: 0, legs: legs)
+        }
+        let boat = try route("boat", 0, 86, walk: 7)
+        let walkOneMinute = try route("walk1", 0, 85, walk: 30)
+        let walkMuchFaster = try route("walk20", 0, 60, walk: 28)
+        XCTAssertEqual(Reach.preferShortWalks(short: [boat], long: [walkOneMinute]).map(\.id), ["boat"])
+        XCTAssertEqual(Set(Reach.preferShortWalks(short: [boat], long: [walkMuchFaster]).map(\.id)), ["boat", "walk20"])
+        XCTAssertEqual(Reach.preferShortWalks(short: [], long: [walkOneMinute]).map(\.id), ["walk1"])
+    }
+
     func testStagesSkipTheShortChangeWalk() throws {
         let kinds = TripGuide.steps(try trip()).map { "\($0.kind.rawValue)\($0.legIndex)" }
         XCTAssertEqual(kinds, ["walk0", "wait1", "ride1", "wait3", "ride3", "walk4", "arrive4"])

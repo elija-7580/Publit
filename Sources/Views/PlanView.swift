@@ -92,11 +92,16 @@ struct PlanView: View {
                 if target == .from { app.plan.from = endpoint } else { app.plan.to = endpoint }
             }
         }
+        .onChange(of: app.dismissToken) { picking = nil }
         .onDisappear { isVisible = false }
         .task(id: "\(app.plan.queryKey)|\(scenePhase)|\(app.tab)|\(isVisible)|\(app.plan.searchStarted)") {
             guard isVisible, scenePhase == .active, app.tab == .plan, app.plan.searchStarted else { return }
             selectedId = nil
-            await app.plan.search(current: location.coordinate, locationDenied: location.isDenied)
+            // From here: a fresh fix, not the one from when the app was last open (another town, maybe).
+            var here = location.coordinate
+            if app.plan.from == .currentLocation { here = await location.freshCoordinate() }
+            guard !Task.isCancelled else { return }
+            await app.plan.search(current: here, locationDenied: location.isDenied)
             // Keep "now" results live: delays, cancellations and departed trips change by the minute.
             while app.plan.timeMode == .now, app.plan.to != nil, !Task.isCancelled {
                 try? await Task.sleep(for: Self.refreshInterval)
