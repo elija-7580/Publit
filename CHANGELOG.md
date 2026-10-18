@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.0 (build 40)
+
+### Smart routing
+- New default sort “Recommended”: routes ranked by how long they feel (waiting and walking count more, each change costs extra time), clearly worse routes are hidden. Badges: Recommended, Fastest, Fewest changes, Least walking, with a short reason.
+- Each change shows how likely it works (safe / likely / risky, in percent) and a backup connection if you miss it.
+- Live trip: warning and notification when a change is at risk, with the backup.
+- Settings → Smart routing: on/off, Faster ↔ Fewer changes, extra time per change, own walking speed (step counter, optional), avoid steep walks, learn from chosen trips.
+
 ## 0.6.0 (build 39)
 
 ### Google Maps in the app
