@@ -93,7 +93,6 @@ struct TripView: View {
         .navigationTitle(stopTime.lineName)
         .screenTrail("Trip")
         .navigationBarTitleDisplayMode(.inline)
-        .showPassToolbar(at: stopTime.departureTime, enabled: Features.passes)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button { favorites.toggle(savedLine) } label: {

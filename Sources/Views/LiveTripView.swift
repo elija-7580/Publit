@@ -12,6 +12,8 @@ struct LiveTripView: View {
     @Environment(PassStore.self) private var passes
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("guideVoice") private var voice = false
+    @AppStorage("mapBase") private var mapBase = MapBase.standard.rawValue
+    @AppStorage("map3D") private var map3D = false
     @State private var now = Date()
     /// Cues already given (each turn, platform change, "get off next" once).
     @State private var announced: Set<String> = []
@@ -22,7 +24,6 @@ struct LiveTripView: View {
     @State private var picked: String?
     /// The whole trip on the map instead of one stage (first card of the pager).
     @State private var overview = false
-    @State private var confirmEnd = false
     /// The way on foot from where you are, when you are away from the planned walk.
     @State private var detour = WalkDetour()
 
@@ -76,6 +77,7 @@ struct LiveTripView: View {
                      trace: TripTrace.Progress(legIndex: steps[live].legIndex, kind: steps[live].kind,
                                                point: index == live && step.kind == .ride ? (vehicle ?? here) : here),
                      detour: detourRoute.map { (legIndex: step.legIndex, points: $0.points) },
+                     isLive: index == live,
                      overview: $overview)
                 // Frame the route in the part of the map the panel leaves free.
                 .safeAreaPadding(.bottom, TripPanelMetrics.peek + 24)
@@ -112,17 +114,11 @@ struct LiveTripView: View {
         .navigationTitle(trip.toName)
         .navigationBarTitleDisplayMode(.inline)
         .screenTrail("Live trip")
+        // Tap: the default ticket at once. Hold: pick another one or make it the default.
+        .quickTicketToolbar(tripId: trip.id, at: now, enabled: Features.passes)
         .toolbar {
-            // Ending is always in reach, not at the bottom of the list.
-            ToolbarItem(placement: .topBarLeading) {
-                Button("End trip", role: .destructive) { confirmEnd = true }
-                .tint(Color.danger)
-                .accessibilityIdentifier("endTrip")
-            }
-            ToolbarItem(placement: .primaryAction) { voiceButton }
-        }
-        .confirmationDialog(Text("End trip"), isPresented: $confirmEnd, titleVisibility: .visible) {
-            Button("End trip", role: .destructive) { Task { await TripSession.stop(trip, in: trips) } }
+            // Closing the screen keeps the trip running (the live bar brings it back); ending it is in this menu.
+            ToolbarItem(placement: .topBarTrailing) { tripMenu }
         }
         .task(id: detourKey) { await detour.update(from: here, to: detourTarget) }
         // At the destination the trip ends by itself.
@@ -295,7 +291,8 @@ struct LiveTripView: View {
                 .accessibilityElement(children: .combine)
             }
             if let nextIndex, let transfer = TransferInfo(before: nextIndex, in: it) { TransferCard(info: transfer) }
-            Button { Self.openInMaps(leg.to, name: target) } label: {
+            // A later walk starts where the trip will be then, not where you stand now.
+            Button { Self.openInMaps(leg.to, name: target, from: index == live ? nil : leg.from) } label: {
                 Label(DirectionsApp.current.openLabel, systemImage: "map")
             }
         }
@@ -481,6 +478,34 @@ struct LiveTripView: View {
         }
     }
 
+    /// Spoken directions, the map look (the same setting as the Map tab) and ending the trip.
+    private var tripMenu: some View {
+        Menu {
+            voiceButton
+            Picker(selection: $mapBase) {
+                ForEach(MapBase.allCases) { base in
+                    Label(base.title, systemImage: base.symbol).tag(base.rawValue)
+                }
+            } label: {
+                Label(L10n.t("Map style"), systemImage: "map")
+            }
+            .pickerStyle(.menu)
+            Toggle(isOn: $map3D) {
+                Label(L10n.t("3D terrain and buildings"), systemImage: "view.3d")
+            }
+            Divider()
+            Button(role: .destructive) {
+                Task { await TripSession.stop(trip, in: trips) }
+            } label: {
+                Label(L10n.t("End trip"), systemImage: "stop.circle")
+            }
+            .accessibilityIdentifier("endTrip")
+        } label: {
+            Label(L10n.t("More"), systemImage: "ellipsis")
+        }
+        .accessibilityIdentifier("tripMenu")
+    }
+
     private var voiceButton: some View {
         Button {
             voice.toggle()
@@ -542,8 +567,9 @@ struct LiveTripView: View {
         }
     }
 
-    static func openInMaps(_ place: Place, name: String) {
-        DirectionsApp.current.open(place.coordinate, name: name, mode: .walking)
+    static func openInMaps(_ place: Place, name: String, from start: Place? = nil) {
+        DirectionsApp.current.open(place.coordinate, name: name, mode: .walking,
+                                   from: start.map { (point: $0.coordinate, name: ItineraryDetailView.placeName($0)) })
     }
 }
 
@@ -696,6 +722,8 @@ private struct GuideMap: View {
     let trace: TripTrace.Progress
     /// The walk from where you are, replacing the planned one of that leg.
     let detour: (legIndex: Int, points: [LatLon])?
+    /// The stage shown is the one you are on: only then does a walk follow your position.
+    var isLive = true
     @State private var camera: MapCameraPosition = .automatic
     /// The map turns with the phone (like a compass) and follows you.
     @State private var followHeading = false
@@ -713,8 +741,8 @@ private struct GuideMap: View {
                     followHeading.toggle()
                     overview = false
                     withAnimation {
-                        camera = followHeading ? .userLocation(followsHeading: true, fallback: Self.camera(step, itinerary))
-                            : Self.camera(step, itinerary)
+                        camera = followHeading ? .userLocation(followsHeading: true, fallback: Self.camera(step, itinerary, live: isLive))
+                            : Self.camera(step, itinerary, live: isLive)
                     }
                 } label: {
                     Image(systemName: followHeading ? "location.north.line.fill" : "location.north.line")
@@ -758,14 +786,18 @@ private struct GuideMap: View {
             }
             .accessibilityIdentifier("tripOverviewMap")
         }
-        .onAppear { camera = overview ? Self.overviewCamera(itinerary) : Self.camera(step, itinerary) }
+        .onAppear { camera = overview ? Self.overviewCamera(itinerary) : Self.camera(step, itinerary, live: isLive) }
         .onChange(of: step) { _, s in
             guard !followHeading, !overview else { return }
-            withAnimation { camera = Self.camera(s, itinerary) }
+            withAnimation { camera = Self.camera(s, itinerary, live: isLive) }
+        }
+        .onChange(of: isLive) { _, live in
+            guard !followHeading, !overview else { return }
+            withAnimation { camera = Self.camera(step, itinerary, live: live) }
         }
         .onChange(of: overview) { _, whole in
             if whole { followHeading = false } else if followHeading { return }
-            withAnimation { camera = whole ? Self.overviewCamera(itinerary) : Self.camera(step, itinerary) }
+            withAnimation { camera = whole ? Self.overviewCamera(itinerary) : Self.camera(step, itinerary, live: isLive) }
         }
     }
 
@@ -809,6 +841,13 @@ private struct GuideMap: View {
                     Circle().fill(current.lineStroke).frame(width: 18, height: 18)
                         .overlay(Circle().strokeBorder(.white, lineWidth: 3))
                         .shadow(radius: 2)
+                }
+            }
+            // A later walk: where it starts (you will be there then).
+            if !isLive, !overview, step.kind == .walk {
+                Annotation("", coordinate: current.from.coordinate.clCoordinate) {
+                    Circle().fill(Color.routeAhead).frame(width: 14, height: 14)
+                        .overlay(Circle().strokeBorder(.white, lineWidth: 3))
                 }
             }
             if let focus {
@@ -874,7 +913,7 @@ private struct GuideMap: View {
         let stage = leg.legGeometry.mapPoints + [leg.from.coordinate, leg.to.coordinate]
         if followHeading { return .follow(heading: true, fallback: stage) }
         switch step.kind {
-        case .walk: return .follow(heading: false, fallback: stage)
+        case .walk: return isLive ? .follow(heading: false, fallback: stage) : .fit(stage)
         case .wait: return .around(leg.from.coordinate, meters: 900)
         case .ride: return .fit(leg.legGeometry.mapPoints + leg.allStops.map(\.coordinate))
         case .arrive: return .around(leg.to.coordinate, meters: 900)
@@ -885,11 +924,13 @@ private struct GuideMap: View {
         .rect(rect(it.legs.flatMap { $0.legGeometry.mapPoints + [$0.from.coordinate, $0.to.coordinate] }))
     }
 
-    static func camera(_ step: GuideStep, _ it: Itinerary) -> MapCameraPosition {
+    static func camera(_ step: GuideStep, _ it: Itinerary, live: Bool = true) -> MapCameraPosition {
         let leg = it.legs[step.legIndex]
         switch step.kind {
         case .walk:
-            return .userLocation(fallback: .rect(rect(leg.legGeometry.mapPoints + [leg.from.coordinate, leg.to.coordinate])))
+            // A later walk: its own way from start to end, not where you stand now.
+            let whole = MapCameraPosition.rect(rect(leg.legGeometry.mapPoints + [leg.from.coordinate, leg.to.coordinate]))
+            return live ? .userLocation(fallback: whole) : whole
         case .wait:
             return .camera(MapCamera(centerCoordinate: leg.from.coordinate.clCoordinate, distance: 900))
         case .ride:

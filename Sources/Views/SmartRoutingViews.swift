@@ -152,6 +152,11 @@ struct SmartRoutingSettingsSection: View {
                             ProgressView()
                         } else if measuredSpeed > 0 {
                             LabeledContent(L10n.t("Your walking speed"), value: Self.speedText(measuredSpeed))
+                            if let source = WalkingPace.source {
+                                Label(source == .health ? L10n.t("From Apple Health") : L10n.t("From the step counter"),
+                                      systemImage: source == .health ? "heart.fill" : "figure.walk")
+                                    .font(.caption).foregroundStyle(.secondary)
+                            }
                         } else {
                             Text(L10n.t("Not enough walking measured yet.")).font(.caption).foregroundStyle(.secondary)
                         }
