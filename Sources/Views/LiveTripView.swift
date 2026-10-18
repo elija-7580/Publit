@@ -678,55 +678,10 @@ private struct GuideMap: View {
     /// The whole trip at once instead of the current stage (also the first card of the pager).
     @Binding var overview: Bool
     @State private var showsFullMap = false
+    @AppStorage(MapProvider.defaultsKey) private var mapProvider = MapProvider.apple.rawValue
 
     var body: some View {
-        let current = itinerary.legs[step.legIndex]
-        Map(position: $camera) {
-            UserAnnotation()
-            ForEach(Array(itinerary.legs.enumerated()), id: \.offset) { i, leg in
-                let active = overview || i == step.legIndex
-                let width: CGFloat = active ? 6 : 4
-                let part = detour?.legIndex == i ? TripTrace.Parts(done: [], ahead: detour?.points ?? [])
-                    : TripTrace.split(leg.legGeometry.mapPoints, legIndex: i, at: trace)
-                if part.done.count > 1 {
-                    MapPolyline(coordinates: part.done.map(\.clCoordinate))
-                        .stroke(Color.routeTraveled, style: .leg(true, width: width))
-                }
-                if part.ahead.count > 1 {
-                    MapPolyline(coordinates: part.ahead.map(\.clCoordinate))
-                        .stroke((leg.isTransit ? leg.lineStroke : Color.routeAhead).opacity(active ? 1 : 0.6),
-                                style: .leg(leg.isTransit, width: width))
-                }
-            }
-            if overview, let first = itinerary.legs.first {
-                Marker("Start", systemImage: "circle.fill", coordinate: first.from.coordinate.clCoordinate)
-                    .tint(Color.inkAction)
-            }
-            if let vehicle {
-                Annotation("", coordinate: vehicle.clCoordinate) {
-                    Circle().fill(current.lineStroke).frame(width: 18, height: 18)
-                        .overlay(Circle().strokeBorder(.white, lineWidth: 3))
-                        .shadow(radius: 2)
-                }
-            }
-            if let focus {
-                Annotation("", coordinate: focus.clCoordinate) {
-                    Circle().fill(Color.signature).frame(width: 14, height: 14)
-                        .overlay(Circle().strokeBorder(.black.opacity(0.6), lineWidth: 2))
-                }
-            }
-            if overview, let last = itinerary.legs.last {
-                Marker(ItineraryDetailView.placeName(last.to), systemImage: "flag.fill", coordinate: last.to.coordinate.clCoordinate)
-                    .tint(Color.danger)
-            } else {
-                Marker(current.isTransit && step.kind == .wait ? current.from.name : ItineraryDetailView.placeName(current.to),
-                       systemImage: step.kind == .arrive ? "flag.fill" : "mappin",
-                       coordinate: (step.kind == .wait ? current.from : current.to).coordinate.clCoordinate)
-                    .tint(step.kind == .arrive ? Color.danger : Color.ink)
-            }
-        }
-        .publitMapStyle()
-        .mapControls { MapUserLocationButton(); MapCompass() }
+        mapLayer
         .overlay(alignment: .topLeading) {
             // The panel covers the bottom, so the map's own buttons sit at the top.
             VStack(spacing: 8) {
@@ -787,6 +742,118 @@ private struct GuideMap: View {
         .onChange(of: overview) { _, whole in
             if whole { followHeading = false } else if followHeading { return }
             withAnimation { camera = whole ? Self.overviewCamera(itinerary) : Self.camera(step, itinerary) }
+        }
+    }
+
+    @ViewBuilder private var mapLayer: some View {
+        #if canImport(GoogleMaps)
+        if MapProvider.usesGoogle(mapProvider) {
+            GoogleMapView(content: googleContent, camera: googleCamera)
+        } else {
+            appleMap
+        }
+        #else
+        appleMap
+        #endif
+    }
+
+    private var appleMap: some View {
+        let current = itinerary.legs[step.legIndex]
+        return Map(position: $camera) {
+            UserAnnotation()
+            ForEach(Array(itinerary.legs.enumerated()), id: \.offset) { i, leg in
+                let active = overview || i == step.legIndex
+                let width: CGFloat = active ? 6 : 4
+                let part = detour?.legIndex == i ? TripTrace.Parts(done: [], ahead: detour?.points ?? [])
+                    : TripTrace.split(leg.legGeometry.mapPoints, legIndex: i, at: trace)
+                if part.done.count > 1 {
+                    MapPolyline(coordinates: part.done.map(\.clCoordinate))
+                        .stroke(Color.routeTraveled, style: .leg(true, width: width))
+                }
+                if part.ahead.count > 1 {
+                    MapPolyline(coordinates: part.ahead.map(\.clCoordinate))
+                        .stroke((leg.isTransit ? leg.lineStroke : Color.routeAhead).opacity(active ? 1 : 0.6),
+                                style: .leg(leg.isTransit, width: width))
+                }
+            }
+            if overview, let first = itinerary.legs.first {
+                Marker("Start", systemImage: "circle.fill", coordinate: first.from.coordinate.clCoordinate)
+                    .tint(Color.inkAction)
+            }
+            if let vehicle {
+                Annotation("", coordinate: vehicle.clCoordinate) {
+                    Circle().fill(current.lineStroke).frame(width: 18, height: 18)
+                        .overlay(Circle().strokeBorder(.white, lineWidth: 3))
+                        .shadow(radius: 2)
+                }
+            }
+            if let focus {
+                Annotation("", coordinate: focus.clCoordinate) {
+                    Circle().fill(Color.signature).frame(width: 14, height: 14)
+                        .overlay(Circle().strokeBorder(.black.opacity(0.6), lineWidth: 2))
+                }
+            }
+            if overview, let last = itinerary.legs.last {
+                Marker(ItineraryDetailView.placeName(last.to), systemImage: "flag.fill", coordinate: last.to.coordinate.clCoordinate)
+                    .tint(Color.danger)
+            } else {
+                Marker(current.isTransit && step.kind == .wait ? current.from.name : ItineraryDetailView.placeName(current.to),
+                       systemImage: step.kind == .arrive ? "flag.fill" : "mappin",
+                       coordinate: (step.kind == .wait ? current.from : current.to).coordinate.clCoordinate)
+                    .tint(step.kind == .arrive ? Color.danger : Color.ink)
+            }
+        }
+        .publitMapStyle()
+        .mapControls { MapUserLocationButton(); MapCompass() }
+    }
+
+    /// The same drawing as the Apple map, for Google's.
+    private var googleContent: GoogleMapContent {
+        let current = itinerary.legs[step.legIndex]
+        var content = GoogleMapContent()
+        for (i, leg) in itinerary.legs.enumerated() {
+            let active = overview || i == step.legIndex
+            let width: CGFloat = active ? 6 : 4
+            let part = detour?.legIndex == i ? TripTrace.Parts(done: [], ahead: detour?.points ?? [])
+                : TripTrace.split(leg.legGeometry.mapPoints, legIndex: i, at: trace)
+            content.lines.append(.init(points: part.done, color: Color.routeTraveled, width: width))
+            content.lines.append(.init(points: part.ahead, color: (leg.isTransit ? leg.lineStroke : Color.routeAhead).opacity(active ? 1 : 0.6),
+                                       width: leg.isTransit ? width : max(3, width - 1)))
+        }
+        if overview, let first = itinerary.legs.first {
+            content.pins.append(.init(coordinate: first.from.coordinate,
+                                      kind: .dot(color: Color.inkAction, border: .white, size: 16, borderWidth: 3)))
+        }
+        if overview, let last = itinerary.legs.last {
+            content.pins.append(.init(coordinate: last.to.coordinate,
+                                      kind: .marker(title: ItineraryDetailView.placeName(last.to), color: Color.danger)))
+        } else {
+            content.pins.append(.init(coordinate: (step.kind == .wait ? current.from : current.to).coordinate,
+                                      kind: .marker(title: current.isTransit && step.kind == .wait ? current.from.name
+                                                        : ItineraryDetailView.placeName(current.to),
+                                                    color: step.kind == .arrive ? Color.danger : Color.ink)))
+        }
+        if let vehicle {
+            content.pins.append(.init(coordinate: vehicle, kind: .dot(color: current.lineStroke, border: .white, size: 18, borderWidth: 3)))
+        }
+        if let focus {
+            content.pins.append(.init(coordinate: focus, kind: .dot(color: Color.signature, border: .black.opacity(0.6), size: 14, borderWidth: 2)))
+        }
+        return content
+    }
+
+    private var googleCamera: GoogleCamera {
+        let leg = itinerary.legs[step.legIndex]
+        if overview {
+            return .fit(itinerary.legs.flatMap { $0.legGeometry.mapPoints + [$0.from.coordinate, $0.to.coordinate] })
+        }
+        let stage = leg.legGeometry.mapPoints + [leg.from.coordinate, leg.to.coordinate]
+        if followHeading { return .follow(heading: true, fallback: stage) }
+        switch step.kind {
+        case .walk: return .follow(heading: false, fallback: stage)
+        case .wait: return .around(leg.from.coordinate, meters: 900)
+        case .ride: return .fit(leg.legGeometry.mapPoints + leg.allStops.map(\.coordinate))
+        case .arrive: return .around(leg.to.coordinate, meters: 900)
         }
     }
 
