@@ -96,7 +96,8 @@ final class TransitousClient: @unchecked Sendable {
 
     static func planQuery(from: LatLon, to: LatLon, time: Date?, arriveBy: Bool,
                           pageCursor: String? = nil, maxWalk: Int = walkLimits.prePost,
-                          options: RouteOptions = RouteOptions()) -> [URLQueryItem] {
+                          options: RouteOptions = RouteOptions(),
+                          smart: SmartRouting.Request = .current) -> [URLQueryItem] {
         var q = [
             URLQueryItem(name: "fromPlace", value: from.apiValue),
             URLQueryItem(name: "toPlace", value: to.apiValue),
@@ -123,6 +124,7 @@ final class TransitousClient: @unchecked Sendable {
         if options.wheelchair { q.append(URLQueryItem(name: "pedestrianProfile", value: "WHEELCHAIR")) }
         if let time { q.append(URLQueryItem(name: "time", value: DateParsing.format(time))) }
         if let pageCursor { q.append(URLQueryItem(name: "pageCursor", value: pageCursor)) }
+        q += smart.queryItems
         return q
     }
 

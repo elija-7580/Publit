@@ -134,12 +134,14 @@ struct RouteOptions: Codable, Hashable, Sendable {
     /// How to get to the first stop: walking, own bike (Bike & Ride) or car (Park & Ride).
     var firstMile = FirstMile.walk
     /// Order of the listed routes (sorting only, the same routes).
-    var sort = RouteSort.departure
+    var sort = RouteSort.recommended
 
     init() {}
 
     private enum CodingKeys: String, CodingKey {
-        case modes, maxTransfers, maxWalkMinutes, wheelchair, compareStreetModes, sharing, firstMile, sort
+        case modes, maxTransfers, maxWalkMinutes, wheelchair, compareStreetModes, sharing, firstMile
+        // Stored as "order" since smart routing: the old "sort" (departure by default) gives way to "Recommended".
+        case sort = "order"
     }
 
     /// Options saved by older versions lack the newer keys; they keep their defaults.
@@ -152,7 +154,7 @@ struct RouteOptions: Codable, Hashable, Sendable {
         compareStreetModes = try c.decodeIfPresent(Bool.self, forKey: .compareStreetModes) ?? true
         sharing = try c.decodeIfPresent(Bool.self, forKey: .sharing) ?? false
         firstMile = (try? c.decodeIfPresent(FirstMile.self, forKey: .firstMile)) ?? .walk
-        sort = (try? c.decodeIfPresent(RouteSort.self, forKey: .sort)) ?? .departure
+        sort = (try? c.decodeIfPresent(RouteSort.self, forKey: .sort)) ?? .recommended
     }
 
     static let defaultWalkMinutes = 30
@@ -194,7 +196,7 @@ struct RouteOptions: Codable, Hashable, Sendable {
 
     /// Part of the query key: other options mean other routes.
     var key: String {
-        "\(modes.storageValue)|\(maxTransfers.map(String.init) ?? "-")|\(maxWalkMinutes)|\(wheelchair)|\(compareStreetModes)|\(sharing)|\(firstMile.rawValue)"
+        "\(modes.storageValue)|\(maxTransfers.map(String.init) ?? "-")|\(maxWalkMinutes)|\(wheelchair)|\(compareStreetModes)|\(sharing)|\(firstMile.rawValue)|\(SmartRouting.Request.current.key)"
     }
 
     static func transferTitle(_ n: Int?) -> String {
@@ -266,12 +268,19 @@ struct StreetComparison: Identifiable, Sendable {
 
 /// How the planner orders its routes.
 enum RouteSort: String, Codable, CaseIterable, Identifiable, Sendable {
-    case departure, fastest, fewestChanges, leastWalking
+    case recommended, departure, fastest, fewestChanges, leastWalking
 
     var id: String { rawValue }
 
+    /// The order in use: "Recommended" falls back to departure while smart routing is off.
+    var effective: RouteSort { self == .recommended && !SmartRouting.isEnabled ? .departure : self }
+
+    /// The orders to offer in the menu.
+    static var offered: [RouteSort] { SmartRouting.isEnabled ? allCases : allCases.filter { $0 != .recommended } }
+
     var title: String {
         switch self {
+        case .recommended: return L10n.t("Recommended")
         case .departure: return L10n.t("Departure")
         case .fastest: return L10n.t("Fastest")
         case .fewestChanges: return L10n.t("Fewest changes")
@@ -281,6 +290,7 @@ enum RouteSort: String, Codable, CaseIterable, Identifiable, Sendable {
 
     var symbol: String {
         switch self {
+        case .recommended: return "sparkles"
         case .departure: return "clock"
         case .fastest: return "hare"
         case .fewestChanges: return "arrow.triangle.swap"
@@ -294,11 +304,13 @@ enum RouteSort: String, Codable, CaseIterable, Identifiable, Sendable {
     }
 
     /// Stable: ties keep the planner's order (by departure). `.departure` leaves the list as it is.
-    func apply(_ list: [Itinerary]) -> [Itinerary] {
-        guard self != .departure else { return list }
+    func apply(_ list: [Itinerary], arriveBy: Bool = false) -> [Itinerary] {
+        let order = effective
+        guard order != .departure else { return list }
+        if order == .recommended { return SmartRouting.ranked(list, arriveBy: arriveBy) }
         func key(_ it: Itinerary) -> (Int, Int) {
-            switch self {
-            case .departure: return (0, 0)
+            switch order {
+            case .departure, .recommended: return (0, 0)
             case .fastest: return (it.duration, it.transfers)
             case .fewestChanges: return (it.transfers, it.duration)
             case .leastWalking: return (Self.walkSeconds(it), it.duration)

@@ -84,6 +84,7 @@ struct TripActionsSection: View {
                 if pending { trips.keep(saved.id) } else { trips.markForRemoval(saved.id) }
             } else {
                 trips.save(itinerary, from: fromName, to: toName)
+                SmartRouting.learn(chosen: itinerary)
             }
         } label: {
             let isSaved = saved != nil && !pending

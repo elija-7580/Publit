@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct PlanView: View {
+    @AppStorage(SmartRouting.enabledKey) private var smartRouting = true
     @Environment(AppState.self) private var app
     @Environment(\.scenePhase) private var scenePhase
     @State private var isVisible = false
@@ -159,6 +160,10 @@ struct PlanView: View {
         let windowStart = its.map(\.startTime).min() ?? .now
         let windowEnd = its.map(\.endTime).max() ?? .now
         let zoneNote = its.first.flatMap { Fmt.foreignZoneNote(tz: $0.legs.first?.from.tz, at: $0.startTime) }
+        // Smart routing: the suggested route and the best in each respect, with the reason in a few words.
+        let badges = smartRouting ? SmartRouting.badges(its, arriveBy: plan.timeMode == .arriveBy) : [:]
+        let recommendedKey = badges.first { $0.value.contains(.recommended) }?.key
+        let reason = its.first { $0.routeKey == recommendedKey }.flatMap { SmartRouting.reason(for: $0, in: its) }
 
         Section {
             OfflineNote()
@@ -208,7 +213,8 @@ struct PlanView: View {
                     Button {
                         if isSelected { opened = OpenedRoute(itinerary: it) } else { selectedId = it.routeKey }
                     } label: {
-                        ItineraryRow(itinerary: it, windowStart: windowStart, windowEnd: windowEnd)
+                        ItineraryRow(itinerary: it, windowStart: windowStart, windowEnd: windowEnd,
+                                     badges: badges[it.routeKey] ?? [], reason: it.routeKey == recommendedKey ? reason : nil)
                             .padding(.leading, 6)
                             .overlay(alignment: .leading) {
                                 if isSelected {
@@ -227,7 +233,8 @@ struct PlanView: View {
                 ForEach(its, id: \.routeKey) { it in
                     Button { opened = OpenedRoute(itinerary: it) } label: {
                         HStack(spacing: 8) {
-                            ItineraryRow(itinerary: it, windowStart: windowStart, windowEnd: windowEnd)
+                            ItineraryRow(itinerary: it, windowStart: windowStart, windowEnd: windowEnd,
+                                         badges: badges[it.routeKey] ?? [], reason: it.routeKey == recommendedKey ? reason : nil)
                             Image(systemName: "chevron.right")
                                 .font(.footnote.weight(.semibold))
                                 .foregroundStyle(.tertiary)
@@ -264,15 +271,23 @@ struct PlanView: View {
 /// One route in the comparison list. All rows share one time axis so routes can be compared at a glance.
 struct ItineraryRow: View {
     @AppStorage("routeTimelines") private var showTimeline = true
+    @AppStorage(SmartRouting.enabledKey) private var smartRouting = true
     let itinerary: Itinerary
     let windowStart: Date
     let windowEnd: Date
+    /// Smart routing labels ("Recommended", "Fastest", …) and why the route is suggested.
+    var badges: [SmartRouting.Badge] = []
+    var reason: String? = nil
 
     private var tz: String? { itinerary.legs.first?.from.tz }
 
     var body: some View {
         let warnings = TransferRisk.warnings(for: itinerary)
+        // The weakest change, when it is not sure to work (the warnings above already cover broken ones).
+        let shaky = smartRouting && warnings.isEmpty
+            ? SmartRouting.changes(itinerary).filter { $0.chance < 0.8 }.min { $0.chance < $1.chance } : nil
         VStack(alignment: .leading, spacing: 6) {
+            if !badges.isEmpty { SmartBadgesRow(badges: badges, reason: reason) }
             HStack(alignment: .firstTextBaseline) {
                 Text("\(Fmt.time(itinerary.startTime, tz: tz)) – \(Fmt.time(itinerary.endTime, tz: itinerary.legs.last?.to.tz))")
                     .font(.headline.monospacedDigit())
@@ -303,6 +318,10 @@ struct ItineraryRow: View {
             }
             ForEach(warnings, id: \.self) { w in
                 InlineNotice(text: w.message, tint: w.level == .missed ? Color.danger : Color.delay)
+            }
+            if let shaky {
+                InlineNotice(text: L10n.f("Change at %@: %lld %% chance", shaky.stopName, shaky.percent),
+                             tint: shaky.level == .risky ? Color.danger : Color.delay)
             }
         }
         .padding(.vertical, 4)
@@ -368,16 +387,19 @@ struct TimelineBar: View {
 /// Quick switch of the route order in the results header.
 struct RouteSortMenu: View {
     @Environment(AppState.self) private var app
+    @AppStorage(SmartRouting.enabledKey) private var smartRouting = true
 
     var body: some View {
-        let current = app.routeOptions.sort
+        let current = smartRouting ? app.routeOptions.sort : app.routeOptions.sort.effective
         Menu {
             Picker("Sort routes by", selection: Binding(get: { current }, set: { s in
                 var o = app.routeOptions
                 o.sort = s
                 app.setRouteOptions(o)
             })) {
-                ForEach(RouteSort.allCases) { s in Label(s.title, systemImage: s.symbol).tag(s) }
+                ForEach(smartRouting ? RouteSort.allCases : RouteSort.allCases.filter { $0 != .recommended }) { s in
+                    Label(s.title, systemImage: s.symbol).tag(s)
+                }
             }
         } label: {
             Label(current.title, systemImage: "arrow.up.arrow.down")

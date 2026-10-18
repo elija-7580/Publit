@@ -196,7 +196,7 @@ final class LiveMapTests: XCTestCase {
         XCTAssertEqual(o.maxWalkMinutes, 15)
         XCTAssertTrue(o.wheelchair)
         XCTAssertFalse(o.sharing)
-        XCTAssertEqual(o.sort, .departure)
+        XCTAssertEqual(o.sort, .recommended)
         var n = RouteOptions()
         n.sharing = true
         n.sort = .fastest
@@ -205,8 +205,11 @@ final class LiveMapTests: XCTestCase {
         XCTAssertEqual(back.sort, .fastest)
         XCTAssertFalse(back.isDefault)
         XCTAssertNotEqual(back.key, RouteOptions().key)
-        let unknown = #"{"sort":"cheapest"}"#
-        XCTAssertEqual(try JSONDecoder().decode(RouteOptions.self, from: Data(unknown.utf8)).sort, .departure)
+        let unknown = #"{"order":"cheapest"}"#
+        XCTAssertEqual(try JSONDecoder().decode(RouteOptions.self, from: Data(unknown.utf8)).sort, .recommended)
+        // The old key (departure by default) is left behind: smart routing's order takes over.
+        let older = #"{"sort":"departure"}"#
+        XCTAssertEqual(try JSONDecoder().decode(RouteOptions.self, from: Data(older.utf8)).sort, .recommended)
     }
 
     // MARK: Disruptions and sharing
