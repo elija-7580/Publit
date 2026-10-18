@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0 (build 38)
+
+### Map and search, your choice
+- Settings → Map: map style (standard, muted, satellite) and points of interest for every map in the app, not only the station map.
+- "Open in …" goes to the app you choose: Apple Maps, Google Maps or Citymapper.
+- Settings → Search: place search with OpenStreetMap (Transitous) or Google. Google brings shops, restaurants and sights as in Google Maps, in the same list; stops still come from Transitous. Needs your own Google API key (Places API).
+
 ## 0.6.0 (build 37)
 
 ### Live trip
