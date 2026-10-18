@@ -133,18 +133,18 @@ struct GoogleMapView: UIViewRepresentable {
 
     /// Stops are Publit's own, so Google's transit stations stay off; other places follow the setting.
     static func styleJSON(muted: Bool, pointsOfInterest: Bool, dark: Bool) -> String {
-        var rules = [#"{"featureType":"transit.station","stylers":[{"visibility":"off"}]}"#]
-        if !pointsOfInterest { rules.append(#"{"featureType":"poi","stylers":[{"visibility":"off"}]}"#) }
-        if muted { rules.append(#"{"stylers":[{"saturation":-70}]}"#) }
+        var rules = [##"{"featureType":"transit.station","stylers":[{"visibility":"off"}]}"##]
+        if !pointsOfInterest { rules.append(##"{"featureType":"poi","stylers":[{"visibility":"off"}]}"##) }
+        if muted { rules.append(##"{"stylers":[{"saturation":-70}]}"##) }
         if dark {
             rules += [
-                #"{"elementType":"geometry","stylers":[{"color":"#242f3e"}]}"#,
-                #"{"elementType":"labels.text.fill","stylers":[{"color":"#a3a9b5"}]}"#,
-                #"{"elementType":"labels.text.stroke","stylers":[{"color":"#1b2230"}]}"#,
-                #"{"featureType":"road","elementType":"geometry","stylers":[{"color":"#3a4352"}]}"#,
-                #"{"featureType":"road","elementType":"geometry.stroke","stylers":[{"color":"#2a3240"}]}"#,
-                #"{"featureType":"water","elementType":"geometry","stylers":[{"color":"#17263c"}]}"#,
-                #"{"featureType":"poi.park","elementType":"geometry","stylers":[{"color":"#263c3f"}]}"#,
+                ##"{"elementType":"geometry","stylers":[{"color":"#242f3e"}]}"##,
+                ##"{"elementType":"labels.text.fill","stylers":[{"color":"#a3a9b5"}]}"##,
+                ##"{"elementType":"labels.text.stroke","stylers":[{"color":"#1b2230"}]}"##,
+                ##"{"featureType":"road","elementType":"geometry","stylers":[{"color":"#3a4352"}]}"##,
+                ##"{"featureType":"road","elementType":"geometry.stroke","stylers":[{"color":"#2a3240"}]}"##,
+                ##"{"featureType":"water","elementType":"geometry","stylers":[{"color":"#17263c"}]}"##,
+                ##"{"featureType":"poi.park","elementType":"geometry","stylers":[{"color":"#263c3f"}]}"##,
             ]
         }
         return "[" + rules.joined(separator: ",") + "]"
