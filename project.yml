@@ -120,6 +120,7 @@ targets:
       - Sources/Models/DeepLink.swift
       - Sources/Models/PlaceRole.swift
       - Sources/Models/TransitFilter.swift
+      - Sources/Models/SmartRouting.swift
       - Sources/Models/TransitExtras.swift
       - Sources/Models/Reach.swift
       - Sources/Models/CircularLine.swift
@@ -168,6 +169,7 @@ targets:
       - Sources/Models/DeepLink.swift
       - Sources/Models/PlaceRole.swift
       - Sources/Models/TransitFilter.swift
+      - Sources/Models/SmartRouting.swift
       - Sources/Models/TransitExtras.swift
       - Sources/Models/Reach.swift
       - Sources/Models/CircularLine.swift
