@@ -225,6 +225,10 @@ private struct LiveTripBarHost: ViewModifier {
     func body(content: Content) -> some View {
         content
             .environment(\.liveBarInset, height)
+            // Everything in the tab keeps clear of the bar, not only lists: buttons and notes
+            // pinned to the bottom (Plan's search key, "Updated", map controls) were hidden behind it.
+            // Scrolling content still runs under it.
+            .safeAreaPadding(.bottom, height)
             .overlay(alignment: .bottom) {
                 VStack(spacing: 0) { LiveTripBar() }
                     .fixedSize(horizontal: false, vertical: true)
@@ -246,7 +250,8 @@ private struct LiveTripBarHost: ViewModifier {
 
 private struct LiveBarPadding: ViewModifier {
     @Environment(\.liveBarInset) private var height
-    func body(content: Content) -> some View { content.safeAreaPadding(.bottom, height) }
+    /// The host already pads the whole tab (see `LiveTripBarHost`); kept so call sites stay valid.
+    func body(content: Content) -> some View { content }
 }
 
 extension View {

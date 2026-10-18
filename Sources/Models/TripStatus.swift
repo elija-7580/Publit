@@ -142,3 +142,16 @@ enum LiveRefresh {
             .min() ?? idle
     }
 }
+
+extension TripStatus {
+    /// Why a route cannot be started, or nil when it can.
+    static func startBlocked(_ it: Itinerary, now: Date) -> String? {
+        if it.endTime < now { return L10n.t("This connection is already over. Plan again for a new one.") }
+        if it.isCancelled {
+            let leg = it.legs.first { $0.isTransit && $0.cancelled == true }
+            return leg.map { L10n.f("%@ from %@ does not run. Choose another connection.", $0.lineName, $0.from.name) }
+                ?? L10n.t("A ride on this connection does not run. Choose another connection.")
+        }
+        return nil
+    }
+}

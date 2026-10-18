@@ -35,7 +35,7 @@ struct SavedTripView: View {
                 if let errorMessage, trips.activeTrip?.id != tripId {
                     Text(errorMessage).font(.caption).padding(8)
                         .matteSurface(in: RoundedRectangle(cornerRadius: 12))
-                        .padding(.horizontal, 12).padding(.bottom, 8 + liveInset)
+                        .padding(.horizontal, 12).padding(.bottom, 8)
                 }
             }
             .onAppear { isVisible = true }

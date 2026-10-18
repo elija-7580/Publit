@@ -40,8 +40,14 @@ struct TripActionsSection: View {
                 }
                 .buttonStyle(.ink)
                 .controlSize(.large)
-                .disabled(itinerary.isCancelled || itinerary.endTime < .now)
+                .disabled(TripStatus.startBlocked(itinerary, now: .now) != nil)
                 .accessibilityIdentifier("startTrip")
+                // A grey button with no reason looked broken.
+                if let reason = TripStatus.startBlocked(itinerary, now: .now) {
+                    Text(reason).font(.footnote).foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .center).multilineTextAlignment(.center)
+                        .accessibilityIdentifier("startTripReason")
+                }
             }
             Divider().frame(maxWidth: .infinity)
             // Not a LazyVGrid: a lazy grid inside a self-sizing list row is measured again on every pass.

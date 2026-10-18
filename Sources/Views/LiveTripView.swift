@@ -82,6 +82,24 @@ struct LiveTripView: View {
                 // Frame the route in the part of the map the panel leaves free.
                 .safeAreaPadding(.bottom, TripPanelMetrics.peek + 24)
                 .ignoresSafeArea(edges: .bottom)
+                // One key that swaps between the whole trip and where you are now, always in reach.
+                .overlay(alignment: .topLeading) {
+                    let away = overview || picked != nil
+                    Button {
+                        withAnimation(.snappy) {
+                            if away { picked = nil; overview = false } else { overview = true }
+                        }
+                    } label: {
+                        Label(away ? L10n.t("Back to now") : L10n.t("Trip overview"),
+                              systemImage: away ? "location.fill" : "map")
+                            .font(.subheadline.weight(.semibold))
+                            .padding(.horizontal, 14).padding(.vertical, 10)
+                            .matteSurface(in: Capsule())
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.leading, 12).padding(.top, 8)
+                    .accessibilityIdentifier("liveOverviewToggle")
+                }
             TripPanel {
                 VStack(spacing: 10) {
                     StageStrip(steps: steps, itinerary: it, destination: trip.toName, live: live, shown: overview ? nil : index) { tapped in
@@ -168,7 +186,7 @@ struct LiveTripView: View {
         List {
             if wrong {
                 Section {
-                    AlternativeRow(trip: trip, from: searchFrom?.point ?? here, time: searchFrom?.time, message: wrongMessage, onMore: replan)
+                    AlternativeRow(trip: trip, from: searchFrom?.point ?? here, time: searchFrom?.time, message: wrongMessage)
                         .listRowBackground(NoticeBackground(tint: .danger, tinted: true))
                 }
             }
@@ -527,14 +545,6 @@ struct LiveTripView: View {
         if voice { GuideVoice.shared.say(cue.text) }
     }
 
-    /// Routes from the current position to the trip's destination, leaving now.
-    private func replan() {
-        guard let dest = trip.itinerary.legs.last?.to else { return }
-        let place = SavedPlace(id: "trip-\(trip.id)", name: trip.toName, subtitle: nil, lat: dest.lat, lon: dest.lon, stopId: nil)
-        app.deepLink = nil
-        app.goNow(to: place)
-    }
-
     /// "Your change at Ostbahnhof may not work (40 %). Backup: S7 at 13:27"
     static func riskMessage(_ r: SmartRouting.Change) -> String {
         let backup = SmartRouting.backup(for: r.outgoing).map { b -> String in
@@ -822,7 +832,7 @@ private struct GuideMap: View {
                 let active = overview || i == step.legIndex
                 let width: CGFloat = active ? 6 : 4
                 let part = detour?.legIndex == i ? TripTrace.Parts(done: [], ahead: detour?.points ?? [])
-                    : TripTrace.split(leg.legGeometry.mapPoints, legIndex: i, at: trace)
+                    : TripTrace.split(i == step.legIndex ? leg.mapPath : leg.overviewPath, legIndex: i, at: trace)
                 if part.done.count > 1 {
                     MapPolyline(coordinates: part.done.map(\.clCoordinate))
                         .stroke(Color.routeTraveled, style: .leg(true, width: width))
@@ -879,7 +889,7 @@ private struct GuideMap: View {
             let active = overview || i == step.legIndex
             let width: CGFloat = active ? 6 : 4
             let part = detour?.legIndex == i ? TripTrace.Parts(done: [], ahead: detour?.points ?? [])
-                : TripTrace.split(leg.legGeometry.mapPoints, legIndex: i, at: trace)
+                : TripTrace.split(i == step.legIndex ? leg.mapPath : leg.overviewPath, legIndex: i, at: trace)
             content.lines.append(.init(points: part.done, color: Color.routeTraveled, width: width))
             content.lines.append(.init(points: part.ahead, color: (leg.isTransit ? leg.lineStroke : Color.routeAhead).opacity(active ? 1 : 0.6),
                                        width: leg.isTransit ? width : max(3, width - 1)))
@@ -1008,20 +1018,23 @@ private struct TransferCard: View {
     }
 }
 
-/// Missed, off the path or cancelled: the next connection from where you are, to switch to in
-/// one tap (the guide goes on with it), or all options.
+/// Missed, off the path or cancelled: the next connection from where you are, compared with the
+/// trip as planned, to switch to in one tap (the guide goes on with it). "Other connections"
+/// lists more choices in place: the old way of opening the planner closed the trip and often
+/// did not open anything (a screen cannot show over another one).
 private struct AlternativeRow: View {
     let trip: SavedTrip
     let from: LatLon?
     /// When to leave `from`; nil = now.
     var time: Date? = nil
     let message: String
-    let onMore: () -> Void
     @Environment(TripStore.self) private var trips
     @Environment(AppState.self) private var app
-    @State private var option: Itinerary?
+    @State private var choices: [Itinerary] = []
     @State private var searching = false
     @State private var switching = false
+    @State private var showAll = false
+    @State private var failed = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -1031,49 +1044,93 @@ private struct AlternativeRow: View {
                 Image(systemName: "exclamationmark.circle.fill").foregroundStyle(Color.danger)
             }
             .font(.subheadline.weight(.semibold))
-            if let option, let first = option.firstTransitLeg {
-                HStack(spacing: 8) {
-                    LineBadge(first, compact: true)
-                    VStack(alignment: .leading, spacing: 1) {
-                        Text(LiveTripView.departure(first, now: .now)).font(.subheadline.weight(.semibold))
-                        Text(verbatim: "\(first.from.name) · " + L10n.f("Arrive %@", Fmt.time(option.endTime, tz: option.legs.last?.to.tz)))
-                            .font(.caption).foregroundStyle(.secondary)
-                    }
-                }
-                .accessibilityElement(children: .combine)
-                Button {
-                    switching = true
-                    Task {
-                        await TripSession.reroute(trip, to: option, in: trips)
-                        switching = false
-                    }
-                } label: {
-                    Label("Switch to this connection", systemImage: "arrow.triangle.branch")
+            Text(verbatim: L10n.f("Your trip: arrive %@", Fmt.time(trip.itinerary.endTime, tz: trip.itinerary.legs.last?.to.tz)))
+                .font(.caption).foregroundStyle(.secondary)
+            ForEach(Array((showAll ? choices : Array(choices.prefix(1))).enumerated()), id: \.element.routeKey) { i, option in
+                if i > 0 { Divider() }
+                choice(option, primary: i == 0)
+            }
+            if searching {
+                LogoLoader(label: L10n.t("Looking for the next connection…"), size: 40)
+            } else if choices.isEmpty, failed {
+                Text("No other connection found right now.").font(.caption).foregroundStyle(.secondary)
+            }
+            if choices.count > 1 {
+                Button { withAnimation { showAll.toggle() } } label: {
+                    Label(showAll ? L10n.t("Fewer connections") : L10n.t("Other connections"),
+                          systemImage: showAll ? "chevron.up" : "list.bullet")
                         .font(.subheadline.weight(.semibold))
                 }
-                .buttonStyle(.ink)
-                .disabled(switching)
-                .accessibilityIdentifier("guideSwitchConnection")
-            } else if searching {
-                LogoLoader(label: L10n.t("Looking for the next connection…"), size: 40)
+                .buttonStyle(.bordered)
+                .accessibilityIdentifier("guideOtherConnections")
+            } else if !searching {
+                Button { Task { await search() } } label: {
+                    Label("New route from here", systemImage: "arrow.triangle.turn.up.right.diamond")
+                        .font(.subheadline.weight(.semibold))
+                }
+                .buttonStyle(.bordered)
             }
-            Button { onMore() } label: {
-                Label("New route from here", systemImage: "arrow.triangle.turn.up.right.diamond")
-                    .font(.subheadline.weight(.semibold))
-            }
-            .buttonStyle(.bordered)
         }
         .padding(.vertical, 4)
         .task(id: trip.itinerary.id) { await search() }
     }
 
+    @ViewBuilder private func choice(_ option: Itinerary, primary: Bool) -> some View {
+        let later = TripAlternative.minutesLater(option, than: trip.itinerary)
+        HStack(spacing: 8) {
+            if let first = option.firstTransitLeg {
+                LineBadge(first, compact: true)
+            } else {
+                Image(systemName: "figure.walk").frame(width: 28)
+            }
+            VStack(alignment: .leading, spacing: 1) {
+                Text(option.firstTransitLeg.map { LiveTripView.departure($0, now: .now) } ?? L10n.t("Walk"))
+                    .font(.subheadline.weight(.semibold))
+                Text(verbatim: [option.firstTransitLeg?.from.name, L10n.f("Arrive %@", Fmt.time(option.endTime, tz: option.legs.last?.to.tz)),
+                                Fmt.changes(option.transfers)].compactMap { $0 }.joined(separator: " · "))
+                    .font(.caption).foregroundStyle(.secondary)
+                Text(TripAlternative.comparison(option, than: trip.itinerary))
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(later > 2 ? Color.delay : later < 0 ? Color.live : Color.secondary)
+            }
+            Spacer(minLength: 4)
+            if !primary { switchButton(option, compact: true) }
+        }
+        .accessibilityElement(children: .combine)
+        if primary { switchButton(option, compact: false) }
+    }
+
+    @ViewBuilder private func switchButton(_ option: Itinerary, compact: Bool) -> some View {
+        Button {
+            switching = true
+            Task {
+                await TripSession.reroute(trip, to: option, in: trips)
+                switching = false
+                showAll = false
+            }
+        } label: {
+            if compact {
+                Text("Switch").font(.subheadline.weight(.semibold))
+            } else {
+                Label("Switch to this connection", systemImage: "arrow.triangle.branch")
+                    .font(.subheadline.weight(.semibold))
+            }
+        }
+        .buttonStyle(.ink)
+        .disabled(switching)
+        .accessibilityIdentifier(compact ? "guideSwitchOther" : "guideSwitchConnection")
+    }
+
     private func search() async {
-        guard let from, let dest = trip.itinerary.legs.last?.to else { return }
+        guard let from, let dest = trip.itinerary.legs.last?.to else { failed = true; return }
         searching = true
         defer { searching = false }
+        failed = false
         guard let res = try? await TransitousClient.shared.plan(from: from, to: dest.coordinate, time: time, arriveBy: false,
-                                                                 options: app.routeOptions) else { return }
-        option = TripAlternative.pick(res.itineraries, at: .now)
+                                                                 options: app.routeOptions) else { failed = true; return }
+        let enriched = await LiveOverlay.apply(res.itineraries, budget: 3)
+        choices = TripAlternative.choices(enriched, at: .now)
+        failed = choices.isEmpty
     }
 }
 

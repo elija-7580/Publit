@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.6.0 (build 48)
+
+### Live trip
+- The live trip sheet no longer closes when you swipe down by accident; close it with the button.
+- Walks are drawn on the map again, also when the router sends no shape (a straight line instead of nothing).
+- New route during a trip: alternatives are compared with your trip ("8 min later than your trip"), "Switch to this connection" takes it over, "Other connections" lists more to switch to, and "New route from here" searches right there (the old button did nothing).
+- A floating button on the map switches between "Back to now" and "Trip overview".
+- The live bar no longer covers buttons and the last rows of a screen.
+
+### Fixed
+- The start button explains why a trip cannot start (connection already over, or a ride does not run) instead of doing nothing.
+- Long trips (e.g. a 600 km train ride) open much faster: overview maps draw thinned lines instead of thousands of points. This load on the main thread was the likely cause of the app quitting on long trips.
+
 ## 0.6.0 (build 47)
 
 ### Live data where Transitous has none

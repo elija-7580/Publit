@@ -28,7 +28,7 @@ struct CompareMapView: View {
         GoogleMapContent(lines: ordered.flatMap { it in
             let isSelected = it.routeKey == selectedId
             return it.legs.map { leg in
-                GoogleMapContent.Line(points: leg.legGeometry.mapPoints,
+                GoogleMapContent.Line(points: leg.overviewPath,
                                       color: isSelected ? (leg.isTransit ? leg.lineStroke : Color.routeAhead) : Color.gray.opacity(0.45),
                                       width: isSelected ? (leg.isTransit ? 5 : 4) : 3)
             }
@@ -41,7 +41,7 @@ struct CompareMapView: View {
             ForEach(ordered, id: \.routeKey) { it in
                 let isSelected = it.routeKey == selectedId
                 ForEach(Array(it.legs.enumerated()), id: \.offset) { _, leg in
-                    MapPolyline(coordinates: leg.legGeometry.clCoordinates)
+                    MapPolyline(coordinates: leg.overviewPath.map(\.clCoordinate))
                         .stroke(isSelected ? (leg.isTransit ? leg.lineStroke : Color.routeAhead) : Color.gray.opacity(0.45),
                                 style: .leg(leg.isTransit, width: isSelected ? 5 : 3))
                 }
@@ -310,7 +310,7 @@ struct RouteMap: View {
 
     private var googleContent: GoogleMapContent {
         var content = GoogleMapContent(lines: itinerary.legs.map {
-            GoogleMapContent.Line(points: $0.legGeometry.mapPoints, color: $0.isTransit ? $0.lineStroke : Color.routeAhead,
+            GoogleMapContent.Line(points: $0.overviewPath, color: $0.isTransit ? $0.lineStroke : Color.routeAhead,
                                   width: $0.isTransit ? 5 : 4)
         })
         if let first = itinerary.legs.first {
@@ -328,7 +328,7 @@ struct RouteMap: View {
         Map(initialPosition: .automatic) {
             UserAnnotation()
             ForEach(Array(itinerary.legs.enumerated()), id: \.offset) { _, leg in
-                MapPolyline(coordinates: leg.legGeometry.clCoordinates)
+                MapPolyline(coordinates: leg.overviewPath.map(\.clCoordinate))
                     .stroke(leg.isTransit ? leg.lineStroke : Color.routeAhead, style: .leg(leg.isTransit, width: 5))
             }
             if let first = itinerary.legs.first {
