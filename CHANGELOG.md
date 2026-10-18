@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.6.0 (build 42)
+
+### Plan and map
+- Routes always in time order; the best one is marked (Recommended, Fastest, Fewest changes, Least walking) instead of re-sorted. No sort menu.
+- Route bars all start at the left; the longest route fills the width.
+- No map toggle and no time axis row in the routes list.
+- Trip of a line: tap any stop → “From <station> to here”, “Route here”, “Route from here”.
+- Station map: mode filters float over the map; loading mark in the middle.
+- Fix: crash when tapping a notification.
+- Transitous only (no fallback to motis-project.de servers, per Transitous policy).
+
 ## 0.6.0 (build 41)
 
 ### Plan
