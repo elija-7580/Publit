@@ -34,7 +34,7 @@ struct TripPassesView: View {
                         Button { adding = true } label: {
                             Label(L10n.t("Add ticket"), systemImage: "plus").frame(maxWidth: .infinity)
                         }
-                        .buttonStyle(.bordered).controlSize(.large)
+                        .buttonStyle(.soft)
                     }
                     .padding()
                 }

@@ -92,6 +92,7 @@ struct ItineraryDetailView: View {
                                 .font(.body.weight(.semibold))
                                 .frame(width: 40, height: 40)
                                 .matteSurface(in: Circle())
+                                .mapShadow()
                                 .padding(10)
                         }
                 }
@@ -126,7 +127,7 @@ struct ItineraryDetailView: View {
                     } label: {
                         Label(app.openLabel, systemImage: "arrow.up.forward.app").frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.bordered)
+                    .buttonStyle(.soft)
                     .accessibilityIdentifier("openStreetRouteInMaps")
                 }
             }

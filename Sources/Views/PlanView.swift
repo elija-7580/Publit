@@ -77,8 +77,7 @@ struct PlanView: View {
                         } label: {
                             Label("Now", systemImage: "clock.arrow.circlepath").font(.subheadline.weight(.semibold))
                         }
-                        .buttonStyle(.bordered)
-                        .tint(Color.ink)
+                        .buttonStyle(.soft)
                         .disabled(plan.timeMode == .departAt && abs(plan.date.timeIntervalSinceNow) < 90)
                         .accessibilityIdentifier("planTimeNow")
                     }
@@ -108,8 +107,7 @@ struct PlanView: View {
                           systemImage: "sparkles")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(Color.ink)
-                        .padding(.horizontal, 16).padding(.vertical, 10)
-                        .matteSurface(in: Capsule())
+                        .floatingCapsule()
                 }
                 .buttonStyle(.plain)
                 .padding(.bottom, 12)

@@ -66,6 +66,8 @@ struct TransitMapView: UIViewRepresentable {
     var onPick: ((_ place: GeocodeMatch, _ refined: Bool) -> Void)? = nil
     /// A tap on empty map (no pin, station or place): closes what is open.
     var onTapEmpty: (() -> Void)? = nil
+    /// Raised by the "My location" control: the map follows you again.
+    var recenter = 0
 
     func makeCoordinator() -> Coordinator { Coordinator(self) }
 
@@ -95,15 +97,8 @@ struct TransitMapView: UIViewRepresentable {
         } else {
             map.setUserTrackingMode(.follow, animated: false)
         }
-        let tracking = MKUserTrackingButton(mapView: map)
-        tracking.translatesAutoresizingMaskIntoConstraints = false
-        tracking.backgroundColor = .systemBackground.withAlphaComponent(0.9)
-        tracking.layer.cornerRadius = 8
-        map.addSubview(tracking)
-        NSLayoutConstraint.activate([
-            tracking.trailingAnchor.constraint(equalTo: map.safeAreaLayoutGuide.trailingAnchor, constant: -10),
-            tracking.bottomAnchor.constraint(equalTo: map.safeAreaLayoutGuide.bottomAnchor, constant: -24),
-        ])
+        // "My location" is a SwiftUI map control (white, round), next to the layers button: see `recenter`.
+        context.coordinator.recentered = recenter
         return map
     }
 
@@ -112,6 +107,10 @@ struct TransitMapView: UIViewRepresentable {
         context.coordinator.apply(content, to: map)
         context.coordinator.applyLook(look, to: map, animated: true)
         context.coordinator.applyFocus(focus, to: map)
+        if recenter != context.coordinator.recentered {
+            context.coordinator.recentered = recenter
+            map.setUserTrackingMode(.follow, animated: true)
+        }
     }
 
     /// Apple's map configuration for a look. Public transport POIs stay off: the stations are our own pins.
@@ -147,6 +146,7 @@ struct TransitMapView: UIViewRepresentable {
         private var searchPin: SearchPin?
         /// When something on the map was last selected: a tap that selects is not a tap on empty map.
         private var lastSelect = Date.distantPast
+        var recentered = 0
 
         init(_ parent: TransitMapView) { self.parent = parent }
 

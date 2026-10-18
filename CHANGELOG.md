@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.0 (build 50)
+
+### Design
+- The design language is written down in full (docs/design/README.md): colours, type, spacing, buttons, chips, sheets, floating controls, screens, motion, writing, accessibility and a review checklist.
+- Map: white mode chips with a hairline instead of grey ones; layers and "My location" are round white controls in one column at the bottom edge (the blue system location button and the layers button in the bar are gone); hints and errors float as white capsules.
+- Secondary buttons ("Other connections", "Now", "Open in Maps", ticket actions) share one soft style instead of the system's blue bordered buttons.
+- Floating capsules ("Back to now", "Recommended: …") and the map preview button share one white look with a soft shadow.
+
 ## 0.6.0 (build 49)
 
 ### Plan

@@ -221,7 +221,7 @@ struct TicketDisplayView: View {
                             Label("Show original", systemImage: "arrow.up.left.and.arrow.down.right")
                                 .frame(maxWidth: .infinity)
                         }
-                        .buttonStyle(.bordered)
+                        .buttonStyle(.soft)
                         .accessibilityIdentifier("showTicketOriginal")
                     }
                     .padding(16)
