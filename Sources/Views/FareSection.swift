@@ -20,3 +20,28 @@ struct FareSection: View {
         }
     }
 }
+
+/// "Venice · ACTV": the network a route rides in and how to get a ticket there.
+struct RegionTicketRow: View {
+    let region: TransitRegion
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Label {
+                Text(verbatim: region.title).font(.subheadline.weight(.semibold))
+            } icon: {
+                Image(systemName: "ticket").foregroundStyle(.secondary)
+            }
+            Text(verbatim: region.ticketText).font(.caption).foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            if let url = region.link {
+                Link(destination: url) {
+                    Text(L10n.f("Fares and tickets: %@", region.network)).font(.caption.weight(.semibold))
+                }
+            }
+        }
+        .padding(.vertical, 2)
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("regionTicket")
+    }
+}

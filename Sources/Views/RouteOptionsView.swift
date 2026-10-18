@@ -183,6 +183,8 @@ struct StreetComparisonSection: View {
                         ItineraryDetailView(itinerary: c.itinerary, fromName: fromName, toName: toName)
                     } label: { row(c) }
                     .accessibilityIdentifier("compare-\(c.mode)")
+                    .contextMenu { openButton(c) }
+                    .swipeActions(edge: .trailing) { openButton(c).tint(Color.ink) }
                 }
             } header: {
                 Text("Other ways")
@@ -191,6 +193,17 @@ struct StreetComparisonSection: View {
                     Text("Driving times are without traffic and parking.")
                 }
             }
+        }
+    }
+
+    /// The same way in Apple Maps (or the app chosen in Settings), with traffic and turn-by-turn.
+    @ViewBuilder
+    private func openButton(_ c: StreetComparison) -> some View {
+        if let start = c.itinerary.legs.first?.from, let end = c.itinerary.legs.last?.to {
+            let app = DirectionsApp.current
+            Button {
+                app.open(end.coordinate, name: toName, mode: DirectionsApp.mode(street: c.mode), from: (start.coordinate, fromName))
+            } label: { Label(app.openLabel, systemImage: "arrow.up.forward.app") }
         }
     }
 

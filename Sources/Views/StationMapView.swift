@@ -202,7 +202,9 @@ final class TransitMapModel {
            Date().timeIntervalSince(b.at) < Self.refreshEvery { return }
         let (lo, hi) = Self.box(r, grow: 0.25)
         let first = liveBox == nil || shapes.isEmpty
-        let zoom = Self.zoom(r)
+        // The server leaves buses, trams and ferries out below zoom 14 (only trains): at the widest
+        // view that still shows lines, ask as if zoomed in, so every line that runs there is drawn.
+        let zoom = max(14, Self.zoom(r))
         let now = Date()
         liveBox = (lo, hi, now)
         isLoadingLive = true
@@ -332,7 +334,8 @@ struct StationMapView: View {
                            glide: TransitMapModel.tickSeconds,
                            onRegion: { model.regionChanged($0) },
                            onSelect: { selection = $0 },
-                           onPick: { place, refined in pick(place, refined: refined) })
+                           onPick: { place, refined in pick(place, refined: refined) },
+                           onTapEmpty: { if selection != nil { selection = nil; focus = nil } })
                 .ignoresSafeArea(edges: .bottom)
                 // Floating over the map, no bar behind it. The map does not reach under the
                 // navigation bar at the top, so the chips always stay visible below it.
@@ -361,8 +364,22 @@ struct StationMapView: View {
                     ToolbarItem(placement: .topBarLeading) { layersButton }
                     ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } }
                 }
-                .sheet(item: $selection) { sel in
-                    NavigationStack { MapSelectionView(selection: sel, onRoute: route, onRouteFrom: routeFrom) }
+                .sheet(item: $selection, onDismiss: {
+                    // Closed by a swipe, ✕ or a tap on the map: the marker of a picked place goes too.
+                    if selection == nil { focus = nil }
+                }) { sel in
+                    NavigationStack {
+                        MapSelectionView(selection: sel, onRoute: route, onRouteFrom: routeFrom)
+                            .toolbar {
+                                ToolbarItem(placement: .topBarTrailing) {
+                                    Button { selection = nil } label: {
+                                        Image(systemName: "xmark").font(.footnote.weight(.bold))
+                                    }
+                                    .accessibilityLabel(Text("Close"))
+                                    .accessibilityIdentifier("closeMapSelection")
+                                }
+                            }
+                    }
                         .presentationDetents([.medium, .large])
                         .presentationBackgroundInteraction(.enabled(upThrough: .medium))
                 }

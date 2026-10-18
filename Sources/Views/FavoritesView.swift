@@ -12,7 +12,7 @@ struct FavoritesView: View {
             Section("Home and Work") {
                 ForEach(PlaceRole.allCases, id: \.self) { role in
                     if let p = favorites.place(for: role) {
-                        Button { app.route(to: p) } label: {
+                        Button { app.route(to: p, source: .favorite) } label: {
                             HStack(spacing: 12) {
                                 Image(systemName: role.symbol).foregroundStyle(Color.ink).frame(width: 24)
                                 VStack(alignment: .leading, spacing: 1) {
@@ -76,7 +76,7 @@ struct FavoritesView: View {
             if !favorites.places.isEmpty {
                 Section("Places") {
                     ForEach(favorites.places) { p in
-                        Button { app.route(to: p) } label: {
+                        Button { app.route(to: p, source: .favorite) } label: {
                             PlaceLabel(name: p.name, subtitle: p.subtitle, isStop: false)
                         }
                         .swipeActions(edge: .leading) {

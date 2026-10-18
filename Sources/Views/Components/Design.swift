@@ -248,6 +248,8 @@ extension View {
 struct BevelSegmented<Value: Hashable>: View {
     @Binding var selection: Value
     let options: [(Value, String)]
+    /// Taller keys for a main control (Plan: Depart/Arrive).
+    var large = false
 
     var body: some View {
         HStack(spacing: 4) {
@@ -259,10 +261,10 @@ struct BevelSegmented<Value: Hashable>: View {
                     withAnimation(.snappy(duration: 0.2)) { selection = value }
                 } label: {
                     Text(verbatim: title)
-                        .font(.subheadline.weight(selected ? .bold : .medium))
+                        .font((large ? Font.body : .subheadline).weight(selected ? .bold : .medium))
                         .foregroundStyle(selected ? Color.ink : Color.secondary)
-                        .frame(maxWidth: .infinity, minHeight: 32)
-                        .background { if selected { Color.clear.raisedKey(radius: 16) } }
+                        .frame(maxWidth: .infinity, minHeight: large ? 40 : 32)
+                        .background { if selected { Color.clear.raisedKey(radius: large ? 20 : 16) } }
                         .contentShape(Capsule())
                 }
                 .buttonStyle(.plain)
@@ -270,6 +272,6 @@ struct BevelSegmented<Value: Hashable>: View {
             }
         }
         .padding(3)
-        .bevelField(radius: 19)
+        .bevelField(radius: large ? 23 : 19)
     }
 }

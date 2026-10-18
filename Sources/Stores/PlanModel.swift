@@ -42,6 +42,8 @@ final class PlanModel {
     /// Plan tab: routes load after "Search routes"; from then on, changes search again by themselves.
     /// Clearing the destination starts over.
     var searchStarted = false
+    /// Where the destination was picked, kept in the history with an icon.
+    var source: RecentSearch.Source = .search
     var timeMode: TimeMode = .now
     /// Set to about now (on opening, or picked as now): the departure time keeps following the clock,
     /// so coming back later shows routes from then, not from when the search was made.
@@ -189,7 +191,7 @@ final class PlanModel {
             nextCursor = arriveBy ? res.previousPageCursor : res.nextPageCursor
             lastRequest = (f, t, time, arriveBy, maxWalk)
             lastOptions = options
-            if !silent { history.record(from: searchedFrom, to: to, mode: searchedMode, date: searchedDate) }
+            if !silent { history.record(from: searchedFrom, to: to, mode: searchedMode, date: searchedDate, source: source) }
             if itineraries.isEmpty {
                 errorMessage = options.isDefault ? L10n.t("No connections found.")
                     : options.maxWalkMinutes < RouteOptions.defaultWalkMinutes ? Reach.ownLimitNote(minutes: options.maxWalkMinutes)
@@ -290,7 +292,10 @@ final class PlanModel {
     nonisolated static func comparisons(direct: [Itinerary], listed: [Itinerary], enabled: Bool) -> [StreetComparison] {
         guard enabled else { return [] }
         let listedIds = Set(listed.map(\.id))
-        return StreetComparison.from(direct).filter { !($0.mode == "WALK" && listedIds.contains($0.itinerary.id)) }
+        let best = listed.filter { !$0.isDirect }.map(\.duration).min()
+        return StreetComparison.from(direct).filter {
+            !($0.mode == "WALK" && listedIds.contains($0.itinerary.id)) && $0.isRealistic(bestTransit: best)
+        }
     }
 
     /// No route found: is there any departure within 2 km of the start and of the destination?
@@ -400,15 +405,17 @@ final class AppState {
         guard let place else { return }
         plan.from = .currentLocation
         plan.to = .place(place)
+        plan.source = .shared
         plan.timeMode = .now
         plan.date = .now
         plan.searchStarted = true
     }
 
     /// Routes from the current location to `place`, leaving now (Nearby → "Where to now?").
-    func goNow(to place: SavedPlace) {
+    func goNow(to place: SavedPlace, source: RecentSearch.Source = .map) {
         goNow.from = .currentLocation
         goNow.to = .place(place)
+        goNow.source = source
         goNow.timeMode = .now
         tab = .nearby
         showGoNow = true
@@ -423,22 +430,25 @@ final class AppState {
         options.save()
     }
 
-    func route(to place: SavedPlace) {
+    func route(to place: SavedPlace, source: RecentSearch.Source = .map) {
         if plan.from == .place(place) { plan.from = .currentLocation }
         plan.to = .place(place)
+        plan.source = source
         tab = .plan
     }
 
     /// Plan tab from one stop to another (a stop picked on a line's trip).
-    func route(from start: SavedPlace, to place: SavedPlace) {
+    func route(from start: SavedPlace, to place: SavedPlace, source: RecentSearch.Source = .line) {
         plan.from = .place(start)
         plan.to = .place(place)
+        plan.source = source
         tab = .plan
     }
 
     /// Plan tab with `place` as the start; the destination stays unless it is the same place.
-    func route(from place: SavedPlace) {
+    func route(from place: SavedPlace, source: RecentSearch.Source = .map) {
         if plan.to == .place(place) { plan.to = nil }
+        plan.source = source
         plan.from = .place(place)
         tab = .plan
     }

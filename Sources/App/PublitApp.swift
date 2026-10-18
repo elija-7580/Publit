@@ -195,7 +195,7 @@ struct RootView: View {
             guard case .go(let role) = link else { return }
             app.deepLink = nil
             if let place = favorites.place(for: role) {
-                app.goNow(to: place)
+                app.goNow(to: place, source: .favorite)
             } else {
                 app.tab = .favorites // Home/Work not set yet: that is where it is set.
             }

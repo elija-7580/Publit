@@ -67,10 +67,10 @@ struct TripView: View {
                                     Label(L10n.f("From %@ to here", stationName), systemImage: "tram")
                                 }
                             }
-                            Button { app.route(to: Self.place(stop)) } label: {
+                            Button { app.route(to: Self.place(stop), source: .line) } label: {
                                 Label("Route here", systemImage: "arrow.triangle.turn.up.right.diamond")
                             }
-                            Button { app.route(from: Self.place(stop)) } label: {
+                            Button { app.route(from: Self.place(stop), source: .line) } label: {
                                 Label("Route from here", systemImage: "arrow.uturn.right")
                             }
                         } label: {
