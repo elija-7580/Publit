@@ -107,6 +107,6 @@ final class SmartRoutingTests: XCTestCase {
 
     func testOldSavedTripsDecodeWithoutAlternatives() throws {
         let plan = try TransitousClient.makeDecoder().decode(PlanResponse.self, from: Fixtures.data("plan"))
-        XCTAssertTrue(plan.itineraries.allSatisfy { $0.legs.allSatisfy { $0.alternatives == nil } })
+        XCTAssertTrue(plan.itineraries.allSatisfy { $0.legs.allSatisfy { ($0.alternatives ?? []).isEmpty } })
     }
 }
