@@ -66,8 +66,6 @@ def sign(bundle, name, extra=None):
     subprocess.run(["codesign", "-f", "-s", identity, "--timestamp", "--generate-entitlement-der",
                     "--entitlements", t.name, "--requirements", req, bundle], check=True)
     subprocess.run(["codesign", "--verify", "--strict", bundle], check=True)
-    dr = subprocess.run(["codesign", "-d", "-r-", bundle], capture_output=True).stdout
-    print("  DR has precomposed name:", CN_NFC in dr)
     print(f"signed {bid}: {sorted(ent)}")
 
 for w in sorted(os.listdir(os.path.join(app, "Watch"))) if os.path.isdir(os.path.join(app, "Watch")) else []:
