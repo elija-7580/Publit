@@ -170,7 +170,7 @@ struct SettingsView: View {
                 } footer: {
                     VStack(alignment: .leading, spacing: 6) {
                         Text("Times marked live come from the operator's real-time feed; all others are timetable times.")
-                        Text("Where Transitous has no live times, Publit also asks ÖBB, Wiener Linien, search.ch (Switzerland), VRR (North Rhine-Westphalia), ACTV (Venice), SL (Stockholm) and TfL (London, Powered by TfL Open Data) about delays, cancellations and disruptions. They only get the stop, line and time of a ride.")
+                        Text("Where Transitous has no live times, Publit also asks ÖBB, Wiener Linien, search.ch (Switzerland), regional networks in Germany (VRR, VBB, RMV, VBN, NAH.SH, VRN), ACTV (Venice), SL (Stockholm) and TfL (London, Powered by TfL Open Data) about delays, cancellations and disruptions. They only get the stop, line and time of a ride.")
                         Text("All information without guarantee. Times, platforms and prices come from the operators' open data and can change at short notice.")
                             .accessibilityIdentifier("noGuaranteeSettings")
                     }

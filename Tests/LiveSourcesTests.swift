@@ -187,7 +187,7 @@ final class LiveSourcesTests: XCTestCase {
 
     func testAustriaOutline() {
         func covered(_ lat: Double, _ lon: Double, tz: String? = nil) -> Bool {
-            HafasSource().covers(LiveRide(point: LatLon(lat: lat, lon: lon), stopId: nil, stopName: "", lines: [], headsign: nil,
+            HafasSource.oebb.covers(LiveRide(point: LatLon(lat: lat, lon: lon), stopId: nil, stopName: "", lines: [], headsign: nil,
                                           scheduled: Date(), mode: "BUS", tz: tz))
         }
         XCTAssertTrue(covered(48.41, 15.60))    // Krems
@@ -319,4 +319,65 @@ final class LiveSourcesTests: XCTestCase {
                             headsign: nil, scheduled: ISO8601DateFormatter().date(from: "2026-10-19T20:15:00Z")!, mode: "SUBWAY")
         XCTAssertEqual(LiveMatch.best(for: ride, in: deps)?.expected, deps[0].expected)
     }
+
+    func testMD5AndHafasChecksum() {
+        XCTAssertEqual(MD5.hex(Data()), "d41d8cd98f00b204e9800998ecf8427e")
+        XCTAssertEqual(MD5.hex(Data("The quick brown fox jumps over the lazy dog".utf8)), "9e107d9d372bb6826bd81d3542a419d6")
+        XCTAssertEqual(MD5.hex(Data("12345678901234567890123456789012345678901234567890123456789012345678901234567890".utf8)),
+                       "57edf4a22be3c955ac49da2e2107b67a")
+        let mic = MD5.hex(Data("{}".utf8))
+        XCTAssertEqual(HafasSource.checksum(Data("{}".utf8), salt: "x"), "mic=\(mic)&mac=\(MD5.hex(Data((mic + "x").utf8)))")
+    }
+
+    func testGermanHafasCoverage() {
+        func ride(_ stop: String, tz: String? = "Europe/Berlin", live: Bool = false) -> LiveRide {
+            LiveRide(point: LatLon(lat: 52.5, lon: 13.4), stopId: stop, stopName: "", lines: ["M41"], headsign: nil,
+                     scheduled: Date(), mode: "BUS", tz: tz, live: live)
+        }
+        XCTAssertTrue(HafasSource.vbb.covers(ride("de-VBB_de:11000:900029302::1")))        // Berlin-Spandau
+        XCTAssertTrue(HafasSource.vbb.covers(ride("de-DELFI_de:12054:900230999")))          // Potsdam
+        XCTAssertTrue(HafasSource.rmv.covers(ride("de-DELFI_de:06414:6907:0:1")))           // Wiesbaden
+        XCTAssertTrue(HafasSource.vbn.covers(ride("de-DELFI_de:03403:16750")))              // Oldenburg
+        XCTAssertTrue(HafasSource.vbn.covers(ride("de-DELFI_de:04011:1001")))               // Bremen
+        XCTAssertTrue(HafasSource.vbn.covers(ride("de-VBN_000000100063")))                  // Oldenburg ZOB, VBN's own feed
+        XCTAssertFalse(HafasSource.vbn.covers(ride("de-VBN_000000100063", tz: "Europe/Amsterdam")))
+        XCTAssertFalse(HafasSource.rmv.covers(ride("de-VBN_000000100063")))
+        XCTAssertTrue(HafasSource.nahsh.covers(ride("de-DELFI_de:01003:58085")))            // Lübeck
+        XCTAssertTrue(EFASource.vrn.covers(ride("de-DELFI_de:07312:9035")))                 // Kaiserslautern
+        XCTAssertFalse(HafasSource.rmv.covers(ride("de-DELFI_de:06414:6907", tz: "Europe/Vienna")))
+        XCTAssertFalse(HafasSource.vbb.covers(ride("de-DELFI_de:09162:6")))                  // Munich
+        XCTAssertFalse(HafasSource.vbb.covers(ride("at-PTA_at:49:1198")))
+        XCTAssertFalse(HafasSource.vbb.asks(ride("de-VBB_de:11000:900029302", live: true), now: Date()))
+        XCTAssertFalse(HafasSource.oebb.onlyWithoutLive)
+        // Each German stop is asked of one server at most.
+        let german = LiveOverlay.sources.filter { s in ["de:01", "de:03", "de:04", "de:05", "de:06", "de:07", "de:11", "de:12"]
+            .contains { p in s.covers(ride("de-DELFI_\(p)999:1")) } }
+        XCTAssertEqual(german.count, 6)
+        for p in ["de:01", "de:03", "de:04", "de:05", "de:06", "de:07", "de:11", "de:12"] {
+            XCTAssertEqual(LiveOverlay.sources.filter { $0.covers(ride("de-DELFI_\(p)999:1")) }.count, 1, p)
+        }
+        // Not covered: no server found with more live times than Transitous.
+        for p in ["de:02", "de:08", "de:09", "de:10", "de:13", "de:14", "de:15", "de:16"] {
+            XCTAssertTrue(LiveOverlay.sources.filter { $0.covers(ride("de-DELFI_\(p)999:1")) }.isEmpty, p)
+        }
+    }
+
+    func testHafasRequestBody() throws {
+        let vbn = try XCTUnwrap(JSONSerialization.jsonObject(with: HafasSource.vbn.body("StationBoard", [:])) as? [String: Any])
+        XCTAssertNil(vbn["ext"])
+        XCTAssertEqual(vbn["ver"] as? String, "1.42")
+        XCTAssertEqual((vbn["client"] as? [String: String])?["id"], "VBN")
+        let oebb = try XCTUnwrap(JSONSerialization.jsonObject(with: HafasSource.oebb.body("StationBoard", [:])) as? [String: Any])
+        XCTAssertEqual(oebb["ext"] as? String, "OEBB.1")
+        XCTAssertEqual((oebb["auth"] as? [String: String])?["aid"], "OWDL4fE4ixNiPBBm")
+    }
+
+    func testHafasBerlinTimes() throws {
+        // Summer: no offset in the reply, Berlin = UTC+2.
+        let t = try XCTUnwrap(HafasSource.clockTime("20260715", "081500", offset: nil, tz: "Europe/Berlin"))
+        XCTAssertEqual(t, ISO8601DateFormatter().date(from: "2026-07-15T06:15:00Z"))
+        XCTAssertEqual(HafasSource.clockTime("20260715", "01001500", offset: 120, tz: "Europe/Berlin"),
+                       ISO8601DateFormatter().date(from: "2026-07-15T22:15:00Z"))
+    }
 }
+

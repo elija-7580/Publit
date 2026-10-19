@@ -10,6 +10,7 @@ let core = [
     "API/TripRefreshCoordinator.swift",
     "API/LiveSources.swift",
     "API/LiveSourceAdapters.swift",
+    "API/MD5.swift",
     "App/AppInfo.swift",
     "Models/TransitModels.swift",
     "Models/ServiceAlerts.swift",

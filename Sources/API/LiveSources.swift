@@ -4,8 +4,9 @@ import FoundationNetworking
 #endif
 
 // Extra real-time sources for regions where Transitous has timetables but (almost) no live data:
-// Austria (ÖBB/VAO), Vienna (Wiener Linien), Switzerland (search.ch), North Rhine-Westphalia (VRR),
-// Venice (ACTV), Stockholm (SL) and London (TfL line status).
+// Austria (ÖBB/VAO), Vienna (Wiener Linien), Switzerland (search.ch), in Germany North Rhine-Westphalia
+// (VRR), Berlin/Brandenburg (VBB), Hesse (RMV), Lower Saxony/Bremen (VBN), Schleswig-Holstein (NAH.SH)
+// and Rhineland-Palatinate (VRN), Venice (ACTV), Stockholm (SL) and London (TfL line status).
 // Transitous stays the router; these only correct times, cancellations, platforms and add alerts
 // to rides it already found. A live time from Transitous always wins.
 
@@ -261,7 +262,8 @@ enum LiveOverlay {
     static let defaultsKey = "extraLiveSources"
     static var enabled: Bool { UserDefaults.standard.object(forKey: defaultsKey) as? Bool ?? true }
 
-    static let sources: [any LiveSource] = [WienerLinienSource(), HafasSource(), SearchChSource(), EFASource.vrr,
+    static let sources: [any LiveSource] = [WienerLinienSource(), HafasSource.oebb, SearchChSource(), EFASource.vrr,
+                                            HafasSource.vbb, HafasSource.rmv, HafasSource.vbn, HafasSource.nahsh, EFASource.vrn,
                                             ACTVSource(), SLSource(), TfLStatusSource()]
 
     /// Names of all extra sources, for the credits in Settings.

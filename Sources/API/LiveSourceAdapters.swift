@@ -3,21 +3,58 @@ import Foundation
 import FoundationNetworking
 #endif
 
-// MARK: ÖBB (HAFAS, all of Austria)
+// MARK: HAFAS (ÖBB for all of Austria; VBB, RMV, VBN, NAH.SH in Germany)
 
-/// ÖBB's journey planner backend (the one its app uses): live times for trains, and in many
-/// regions buses and trams (VOR, VVT, …), plus construction and disruption notes. Not an
-/// official open API: if it changes, rides simply keep their timetable times.
+/// A HAFAS journey planner backend (the one the operator's own app uses). ÖBB: live times for
+/// trains, and in many regions buses and trams (VOR, VVT, …), plus construction and disruption
+/// notes. The German ones fill in rides Transitous has no live time for. Not official open APIs:
+/// if one changes, rides simply keep their timetable times.
 struct HafasSource: LiveSource {
-    let name = "ÖBB"
-    let horizon: TimeInterval = 6 * 3600
+    let name: String
+    let horizon: TimeInterval
+    let onlyWithoutLive: Bool
+    let endpoint: URL
+    let client: [String: String]
+    let ext: String?
+    let ver: String
+    let aid: String
+    /// Salt of the request checksum ("mic"/"mac") some servers insist on.
+    var salt: String? = nil
+    /// German servers: DHID prefixes they have live data for ("de:06" = Hesse). nil = Austria.
+    var regions: [String]? = nil
+    /// Transitous feeds whose stop IDs are not DHIDs but belong to this server ("de-VBN_000000100063").
+    var feeds: [String] = []
+    var tz = "Europe/Vienna"
+
     static let area = GeoBox(minLat: 46.37, maxLat: 49.02, minLon: 9.53, maxLon: 17.17)
-    static let endpoint = URL(string: "https://fahrplan.oebb.at/bin/mgate.exe")!
-    static let tz = "Europe/Vienna"
     private static let stops = TTLCache<String>(limit: 400)
-    private static let boards = TTLCache<[LiveDeparture]>(limit: 120)
-    private static let day = J.formatter("yyyyMMdd", tz)
-    private static let clock = J.formatter("HHmmss", tz)
+    private static let boards = TTLCache<[LiveDeparture]>(limit: 200)
+
+    static let oebb = HafasSource(name: "ÖBB", horizon: 6 * 3600, onlyWithoutLive: false,
+                                  endpoint: URL(string: "https://fahrplan.oebb.at/bin/mgate.exe")!,
+                                  client: ["id": "OEBB", "type": "IPH", "name": "oebbPROD-ADHOC", "v": "6030600"],
+                                  ext: "OEBB.1", ver: "1.57", aid: "OWDL4fE4ixNiPBBm")
+    /// Berlin and Brandenburg.
+    static let vbb = HafasSource(name: "VBB", horizon: 3 * 3600, onlyWithoutLive: true,
+                                 endpoint: URL(string: "https://fahrinfo.vbb.de/bin/mgate.exe")!,
+                                 client: ["type": "WEB", "id": "VBB", "name": "VBB WebApp", "l": "vs_webapp_vbb"],
+                                 ext: "VBB.1", ver: "1.33", aid: "hafas-vbb-webapp", regions: ["de:11", "de:12"], tz: "Europe/Berlin")
+    /// Hesse (RMV and NVV).
+    static let rmv = HafasSource(name: "RMV", horizon: 3 * 3600, onlyWithoutLive: true,
+                                 endpoint: URL(string: "https://www.rmv.de/auskunft/bin/jp/mgate.exe")!,
+                                 client: ["type": "WEB", "id": "RMV", "name": "webapp", "l": "vs_webapp"],
+                                 ext: "RMV.1", ver: "1.44", aid: "x0k4ZR33ICN9CWmj", regions: ["de:06"], tz: "Europe/Berlin")
+    /// Lower Saxony and Bremen.
+    static let vbn = HafasSource(name: "VBN", horizon: 3 * 3600, onlyWithoutLive: true,
+                                 endpoint: URL(string: "https://fahrplaner.vbn.de/bin/mgate.exe")!,
+                                 client: ["type": "IPH", "id": "VBN", "v": "6000000", "name": "vbn"],
+                                 ext: nil, ver: "1.42", aid: "kaoxIXLn03zCr2KR", salt: "SP31mBufSyCLmNxp",
+                                 regions: ["de:03", "de:04"], feeds: ["de-VBN_"], tz: "Europe/Berlin")
+    /// Schleswig-Holstein.
+    static let nahsh = HafasSource(name: "NAH.SH", horizon: 3 * 3600, onlyWithoutLive: true,
+                                   endpoint: URL(string: "https://nahsh.hafas.cloud/gate")!,
+                                   client: ["type": "IPH", "id": "NAHSH", "v": "3000700", "name": "NAHSHPROD"],
+                                   ext: nil, ver: "1.30", aid: "r0Ot9FLFNAFxijLW", regions: ["de:01"], tz: "Europe/Berlin")
 
     /// Austria's border, roughly: the rectangle alone takes in Munich, Passau, Bratislava and Bolzano.
     static let outline = GeoOutline(points: [
@@ -30,34 +67,47 @@ struct HafasSource: LiveSource {
     ])
 
     func covers(_ ride: LiveRide) -> Bool {
-        if let tz = ride.tz, tz != Self.tz { return false }
+        if let tz = ride.tz, tz != self.tz { return false }
+        if let regions {
+            if let stop = ride.stopId, feeds.contains(where: { stop.hasPrefix($0) }) { return true }
+            guard let id = ride.stopId.flatMap(EFASource.dhid) else { return false }
+            return regions.contains { id.hasPrefix($0) }
+        }
         return Self.area.contains(ride.point) && Self.outline.contains(ride.point)
     }
 
     func fix(for ride: LiveRide, now: Date) async throws -> LiveFix? {
         let point = ride.point
-        let lid = try await Self.stops.value(LatLon.format(point.lat, 4) + "," + LatLon.format(point.lon, 4), ttl: 86_400) {
-            try await Self.nearestStop(point)
+        let lid = try await Self.stops.value(name + "|" + LatLon.format(point.lat, 4) + "," + LatLon.format(point.lon, 4), ttl: 86_400) {
+            try await nearestStop(point)
         }
         guard !lid.isEmpty else { return nil }
         let start = Date(timeIntervalSince1970: (ride.scheduled.timeIntervalSince1970 / 1800).rounded(.down) * 1800 - 120)
-        let deps = try await Self.boards.value("\(lid)|\(Int(start.timeIntervalSince1970))", ttl: 45) {
-            try await Self.board(lid, from: start)
+        let deps = try await Self.boards.value("\(name)|\(lid)|\(Int(start.timeIntervalSince1970))", ttl: 45) {
+            try await board(lid, from: start)
         }
         return LiveMatch.best(for: ride, in: deps).map { LiveMatch.fix($0, source: name) }
     }
 
-    static func body(_ method: String, _ req: [String: Any]) -> Data {
-        let body: [String: Any] = [
+    func body(_ method: String, _ req: [String: Any]) -> Data {
+        var body: [String: Any] = [
             "lang": "de", "svcReqL": [["meth": method, "req": req]],
-            "client": ["id": "OEBB", "type": "IPH", "name": "oebbPROD-ADHOC", "v": "6030600"],
-            "ext": "OEBB.1", "ver": "1.57", "auth": ["type": "AID", "aid": "OWDL4fE4ixNiPBBm"],
+            "client": client, "ver": ver, "auth": ["type": "AID", "aid": aid],
         ]
+        if let ext { body["ext"] = ext }
         return (try? JSONSerialization.data(withJSONObject: body)) ?? Data()
     }
 
-    static func call(_ body: Data) async throws -> [String: Any] {
-        var r = LiveHTTP.request(endpoint)
+    /// "?mic=md5(body)&mac=md5(mic + salt)", hex.
+    static func checksum(_ body: Data, salt: String) -> String {
+        let mic = MD5.hex(body)
+        return "mic=\(mic)&mac=\(MD5.hex(Data((mic + salt).utf8)))"
+    }
+
+    func call(_ body: Data) async throws -> [String: Any] {
+        var url = endpoint
+        if let salt, let signed = URL(string: endpoint.absoluteString + "?" + Self.checksum(body, salt: salt)) { url = signed }
+        var r = LiveHTTP.request(url)
         r.httpMethod = "POST"
         r.setValue("application/json", forHTTPHeaderField: "Content-Type")
         r.httpBody = body
@@ -69,12 +119,12 @@ struct HafasSource: LiveSource {
     }
 
     /// "" when there is no stop within 300 m (cached like a hit: no point asking again).
-    static func nearestStop(_ p: LatLon) async throws -> String {
+    func nearestStop(_ p: LatLon) async throws -> String {
         let res = try await call(body("LocGeoPos", [
             "ring": ["cCrd": ["x": Int(p.lon * 1e6), "y": Int(p.lat * 1e6)], "maxDist": 300],
             "getPOIs": false, "getStops": true, "maxLoc": 3,
         ]))
-        return parseNearest(res) ?? ""
+        return Self.parseNearest(res) ?? ""
     }
 
     static func parseNearest(_ res: [String: Any]) -> String? {
@@ -83,15 +133,15 @@ struct HafasSource: LiveSource {
             .flatMap { J.str($0["lid"]) }
     }
 
-    static func board(_ lid: String, from start: Date) async throws -> [LiveDeparture] {
+    func board(_ lid: String, from start: Date) async throws -> [LiveDeparture] {
         let res = try await call(body("StationBoard", [
-            "type": "DEP", "date": day.string(from: start), "time": clock.string(from: start),
-            "stbLoc": ["lid": lid], "dur": 60, "maxJny": 80,
+            "type": "DEP", "date": J.formatter("yyyyMMdd", tz).string(from: start), "time": J.formatter("HHmmss", tz).string(from: start),
+            "stbLoc": ["lid": lid], "dur": 60, "maxJny": 120,
         ]))
-        return parseBoard(res)
+        return Self.parseBoard(res, tz: tz)
     }
 
-    static func parseBoard(_ res: [String: Any]) -> [LiveDeparture] {
+    static func parseBoard(_ res: [String: Any], tz: String = "Europe/Vienna") -> [LiveDeparture] {
         let common = J.dict(res["common"])
         let prods = J.list(common["prodL"]).map { J.dict($0) }
         let hims = J.list(common["himL"]).map { J.dict($0) }
@@ -99,7 +149,7 @@ struct HafasSource: LiveSource {
             let s = J.dict(j["stbStop"])
             let date = J.str(j["date"])
             let offset = J.int(s["dTZOffset"])
-            guard let scheduled = Self.clockTime(date, J.str(s["dTimeS"]), offset: offset) else { return nil }
+            guard let scheduled = Self.clockTime(date, J.str(s["dTimeS"]), offset: offset, tz: tz) else { return nil }
             let prodIndex = J.int(j["prodX"]) ?? J.int(s["dProdX"]) ?? -1
             let prod = prods.indices.contains(prodIndex) ? prods[prodIndex] : [:]
             let ctx = J.dict(prod["prodCtx"])
@@ -112,21 +162,21 @@ struct HafasSource: LiveSource {
                 if J.list(m["tagL"]).compactMap { J.str($0) }.contains(where: { $0.contains("GLB") }) { return nil }
                 let him = hims[x]
                 if let mask = J.int(him["prod"]), let cls, mask & cls == 0 { return nil }
-                return alert(him)
+                return alert(him, tz: tz)
             }
             let track = J.str(J.dict(s["dPltfR"])["txt"]) ?? J.str(s["dPlatfR"]) ?? J.str(J.dict(s["dPltfS"])["txt"]) ?? J.str(s["dPlatfS"])
             return LiveDeparture(lines: lines, destination: J.str(j["dirTxt"]), scheduled: scheduled,
-                                 expected: Self.clockTime(date, J.str(s["dTimeR"]), offset: offset),
+                                 expected: Self.clockTime(date, J.str(s["dTimeR"]), offset: offset, tz: tz),
                                  cancelled: J.bool(s["dCncl"]) || J.bool(j["isCncl"]), track: track, alerts: alerts)
         }
     }
 
-    static func alert(_ him: [String: Any]) -> Alert? {
+    static func alert(_ him: [String: Any], tz: String = "Europe/Vienna") -> Alert? {
         let head = J.plain(J.str(him["head"]) ?? "")
         let text = J.plain(J.str(him["text"]) ?? "")
         guard !head.isEmpty || !text.isEmpty else { return nil }
-        let start = Self.clockTime(J.str(him["sDate"]), J.str(him["sTime"]), offset: nil)
-        let end = Self.clockTime(J.str(him["eDate"]), J.str(him["eTime"]), offset: nil)
+        let start = Self.clockTime(J.str(him["sDate"]), J.str(him["sTime"]), offset: nil, tz: tz)
+        let end = Self.clockTime(J.str(him["eDate"]), J.str(him["eTime"]), offset: nil, tz: tz)
         let prio = J.int(him["prio"]) ?? 100
         return Alert(headerText: head.isEmpty ? text : head, descriptionText: head.isEmpty ? "" : text, url: nil,
                      severityLevel: prio <= 25 ? "SEVERE" : "WARNING",
@@ -134,7 +184,7 @@ struct HafasSource: LiveSource {
     }
 
     /// HAFAS time "HHMMSS" or "DDHHMMSS" (days after `date`), local with `offset` minutes from UTC.
-    static func clockTime(_ date: String?, _ value: String?, offset: Int?) -> Date? {
+    static func clockTime(_ date: String?, _ value: String?, offset: Int?, tz: String = "Europe/Vienna") -> Date? {
         guard let date, date.count == 8, let value, value.count == 6 || value.count == 8,
               let y = Int(date.prefix(4)), let mo = Int(date.dropFirst(4).prefix(2)), let d = Int(date.suffix(2)) else { return nil }
         let digits = value.count == 8 ? String(value.suffix(6)) : value
@@ -529,6 +579,8 @@ struct EFASource: LiveSource {
     /// VRR: live times of the NRW operators (Rhein-Ruhr, Rhein-Sieg, Westfalen, Aachen), many of
     /// which reach Transitous without them.
     static let vrr = EFASource(name: "VRR", endpoint: URL(string: "https://efa.vrr.de/standard/XML_DM_REQUEST")!, regions: ["de:05"])
+    /// VRN: Rhineland-Palatinate's Palatinate and Rhine-Neckar operators.
+    static let vrn = EFASource(name: "VRN", endpoint: URL(string: "https://www.vrn.de/mngvrn/XML_DM_REQUEST")!, regions: ["de:07"])
 
     func covers(_ ride: LiveRide) -> Bool {
         if let tz = ride.tz, tz != Self.tz { return false }
