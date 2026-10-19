@@ -34,6 +34,8 @@ jobs:
         run: |
           test -n "$KEY_ID" && test -n "$ISSUER_ID" && test -n "$P8" || { echo "::error::Secrets ASC_KEY_ID, ASC_ISSUER_ID and ASC_KEY_P8 are required"; exit 1; }
           mkdir -p "$RUNNER_TEMP/keys"
+          # Xcode 16+ looks for downloaded profiles here; on a fresh runner the folder is missing.
+          mkdir -p "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles" "$HOME/Library/MobileDevice/Provisioning Profiles"
           printf '%s\n' "$P8" > "$RUNNER_TEMP/keys/AuthKey_$KEY_ID.p8"
       - name: Archive
         run: |
