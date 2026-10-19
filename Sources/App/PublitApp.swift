@@ -54,6 +54,10 @@ struct PublitApp: App {
                 .onOpenURL { app.open($0) }
                 .onAppear {
                     app.applyDemo(ProcessInfo.processInfo.environment["PUBLIT_DEMO"])
+                    if ProcessInfo.processInfo.environment["PUBLIT_TAB"] == nil,
+                       UserDefaults.standard.string(forKey: StartTab.defaultsKey) == StartTab.plan.rawValue {
+                        app.tab = .plan
+                    }
                     if let tab = ProcessInfo.processInfo.environment["PUBLIT_TAB"] {
                         app.tab = tab == "plan" ? .plan : tab == "saved" ? .favorites : tab == "lines" ? .favorites
                             : tab == "tickets" ? .tickets : .nearby
@@ -62,7 +66,8 @@ struct PublitApp: App {
                     if let sample = ProcessInfo.processInfo.environment["PUBLIT_IMPORT_SAMPLE"],
                        let url = try? SharedTicketSamples.file(sample) { app.open(url) }
                     #endif
-                    location.start()
+                    // First launch: the onboarding asks for the location with a reason first.
+                    if !OnboardingView.needed { location.start() }
                     // Tickets of the first ticket version become passes (once per ticket).
                     passes.importLegacy(tickets.tickets, imageDirectory: tickets.imageDirectory)
                     NotificationRouter.shared.open = { [app] url in app.open(url) }
@@ -89,6 +94,8 @@ struct RootView: View {
     @Environment(LocationManager.self) private var location
     /// The launch animation, while the first departures load underneath.
     @State private var splash = true
+    @State private var onboarding = OnboardingView.needed
+    @AppStorage(OnboardingView.doneKey) private var onboardingDone = false
 
     var body: some View {
         tabs
@@ -100,6 +107,8 @@ struct RootView: View {
                 }
             }
             .task { await endSplash() }
+            .fullScreenCover(isPresented: $onboarding) { OnboardingView() }
+            .onChange(of: onboardingDone) { _, done in if done { onboarding = false } }
     }
 
     /// At least 0.7 s (the animation), at most 2 s, ended earlier by the first board.

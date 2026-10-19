@@ -17,6 +17,8 @@ struct SettingsView: View {
     @AppStorage(SearchProvider.defaultsKey) private var searchProvider = SearchProvider.transitous.rawValue
     @AppStorage(GooglePlaces.keyDefaultsKey) private var googleKey = ""
     @AppStorage(MapProvider.defaultsKey) private var mapProvider = MapProvider.apple.rawValue
+    @AppStorage(StartTab.defaultsKey) private var startTab = StartTab.nearby.rawValue
+    @State private var exportURL: URL?
     @State private var summary: HangLog.Summary?
     @State private var reportURL: URL?
 
@@ -55,6 +57,13 @@ struct SettingsView: View {
                     }
                     .padding(.vertical, 4)
                     .accessibilityElement(children: .combine)
+                }
+                Section {
+                    Picker(L10n.t("Start screen"), selection: $startTab) {
+                        Text("Nearby").tag(StartTab.nearby.rawValue)
+                        Text("Plan").tag(StartTab.plan.rawValue)
+                    }
+                    .accessibilityIdentifier("startTab")
                 }
                 Section(L10n.t("Travel preferences")) {
                     RouteOptionsButton()
@@ -146,6 +155,16 @@ struct SettingsView: View {
                         Label("Live data from more operators", systemImage: "dot.radiowaves.left.and.right")
                     }
                     .accessibilityIdentifier("extraLiveToggle")
+                    NavigationLink { LiveSourcesView() } label: {
+                        Label("Live data sources", systemImage: "antenna.radiowaves.left.and.right")
+                    }
+                    .accessibilityIdentifier("liveSources")
+                    if let exportURL {
+                        ShareLink(item: exportURL) {
+                            Label("Export my data", systemImage: "square.and.arrow.up.on.square")
+                        }
+                        .accessibilityIdentifier("exportData")
+                    }
                 } header: {
                     Text("Data")
                 } footer: {
@@ -208,13 +227,14 @@ struct SettingsView: View {
             .task {
                 guard summary == nil else { return }
                 let loaded = await Task.detached(priority: .utility) {
-                    (HangLog.shared.summary, HangLog.shared.writeReport())
+                    (HangLog.shared.summary, HangLog.shared.writeReport(), DataExport.write())
                 }.value
                 var t = Transaction()
                 t.disablesAnimations = true
                 withTransaction(t) {
                     summary = loaded.0
                     reportURL = loaded.1
+                    exportURL = loaded.2
                 }
             }
             .navigationTitle("Settings")
