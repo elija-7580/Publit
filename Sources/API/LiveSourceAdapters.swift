@@ -411,3 +411,189 @@ struct TfLStatusSource: LiveSource {
         }
     }
 }
+
+// MARK: search.ch (Switzerland and Liechtenstein)
+
+/// search.ch's timetable API (no key; data of the Swiss public transport, opentransportdata.swiss):
+/// live delays, cancellations and track changes of trains, trams, buses, boats and cable cars.
+/// Transitous has the Swiss timetable but hardly any of its live times. Stops are matched by
+/// their Swiss number: Transitous' "ch:1:sloid:87349" is search.ch's stop 8587349.
+struct SearchChSource: LiveSource {
+    let name = "search.ch"
+    let horizon: TimeInterval = 3 * 3600
+    let onlyWithoutLive = true
+    static let area = GeoBox(minLat: 45.81, maxLat: 47.81, minLon: 5.95, maxLon: 10.50)
+    static let zones: Set<String> = ["Europe/Zurich", "Europe/Vaduz", "Europe/Busingen"]
+    static let tz = "Europe/Zurich"
+    static let api = "https://timetable.search.ch/api"
+    private static let stops = TTLCache<String>(limit: 400)
+    private static let boards = TTLCache<[LiveDeparture]>(limit: 120)
+    private static let stamp = J.formatter("yyyy-MM-dd HH:mm:ss", tz)
+    private static let day = J.formatter("dd.MM.yyyy", tz)
+    private static let clock = J.formatter("HH:mm", tz)
+
+    func covers(_ ride: LiveRide) -> Bool {
+        if ride.stopId.flatMap(Self.stopNumber) != nil { return true }
+        guard let tz = ride.tz, Self.zones.contains(tz) else { return false }
+        return Self.area.contains(ride.point)
+    }
+
+    func fix(for ride: LiveRide, now: Date) async throws -> LiveFix? {
+        let id: String
+        if let n = ride.stopId.flatMap(Self.stopNumber) {
+            id = n
+        } else {
+            let p = ride.point
+            id = try await Self.stops.value(LatLon.format(p.lat, 4) + "," + LatLon.format(p.lon, 4), ttl: 86_400) {
+                try await Self.nearestStop(p)
+            }
+        }
+        guard !id.isEmpty else { return nil }
+        let start = Date(timeIntervalSince1970: (ride.scheduled.timeIntervalSince1970 / 1800).rounded(.down) * 1800 - 120)
+        let deps = try await Self.boards.value("\(id)|\(Int(start.timeIntervalSince1970))", ttl: 30) {
+            try await Self.board(id, from: start)
+        }
+        return LiveMatch.best(for: ride, in: deps).map { LiveMatch.fix($0, source: name) }
+    }
+
+    /// "…_ch:1:sloid:87349::1" → "8587349" (Swiss stop numbers are 85 and five digits).
+    static func stopNumber(_ stopId: String) -> String? {
+        guard let r = stopId.range(of: "ch:1:sloid:") else { return nil }
+        let digits = stopId[r.upperBound...].prefix { $0.isASCII && $0.isNumber }
+        guard !digits.isEmpty, digits.count <= 5, let n = Int(digits), n > 0 else { return nil }
+        return "85" + String(repeating: "0", count: 5 - digits.count) + digits
+    }
+
+    /// "" when there is no stop within 100 m.
+    static func nearestStop(_ p: LatLon) async throws -> String {
+        var c = URLComponents(string: api + "/completion.json")!
+        c.queryItems = [URLQueryItem(name: "latlon", value: LatLon.format(p.lat, 6) + "," + LatLon.format(p.lon, 6)),
+                        URLQueryItem(name: "accuracy", value: "10"), URLQueryItem(name: "show_ids", value: "1")]
+        return parseNearest(try await LiveHTTP.json(LiveHTTP.request(c.url!))) ?? ""
+    }
+
+    static func parseNearest(_ root: Any) -> String? {
+        J.list(root).map { J.dict($0) }
+            .filter { J.str($0["id"]).map { !$0.isEmpty } ?? false && (J.double($0["dist"]) ?? .infinity) <= 100 }
+            .min { (J.double($0["dist"]) ?? .infinity) < (J.double($1["dist"]) ?? .infinity) }
+            .flatMap { J.str($0["id"]) }
+    }
+
+    static func board(_ id: String, from start: Date) async throws -> [LiveDeparture] {
+        var c = URLComponents(string: api + "/stationboard.json")!
+        c.queryItems = [URLQueryItem(name: "stop", value: id), URLQueryItem(name: "date", value: day.string(from: start)),
+                        URLQueryItem(name: "time", value: clock.string(from: start)), URLQueryItem(name: "limit", value: "150"),
+                        URLQueryItem(name: "show_delays", value: "1"), URLQueryItem(name: "show_tracks", value: "1"),
+                        URLQueryItem(name: "show_trackchanges", value: "1")]
+        return parseBoard(J.dict(try await LiveHTTP.json(LiveHTTP.request(c.url!))))
+    }
+
+    /// `dep_delay`: "+2" minutes late, "X" cancelled, missing when there is no live time (yet).
+    static func parseBoard(_ root: [String: Any]) -> [LiveDeparture] {
+        J.list(root["connections"]).map { J.dict($0) }.compactMap { c in
+            guard let scheduled = J.str(c["time"]).flatMap({ stamp.date(from: $0) }) else { return nil }
+            // Train numbers come zero-padded ("002650").
+            let number = J.str(c["*Z"]).map { String($0.drop { $0 == "0" }) }
+            let category = J.str(c["*G"])
+            let lines = [J.str(c["line"]), number, category.flatMap { g in number.map { g + " " + $0 } }]
+                .compactMap { $0?.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+            guard !lines.isEmpty else { return nil }
+            let delay = J.str(c["dep_delay"])?.trimmingCharacters(in: .whitespaces)
+            let cancelled = delay?.uppercased() == "X"
+            let minutes = delay.flatMap { Int($0.replacingOccurrences(of: "+", with: "")) }
+            let track = J.str(c["track"])?.replacingOccurrences(of: "!", with: "")
+            return LiveDeparture(lines: lines, destination: J.str(J.dict(c["terminal"])["name"]), scheduled: scheduled,
+                                 expected: minutes.map { scheduled.addingTimeInterval(TimeInterval($0 * 60)) },
+                                 cancelled: cancelled, track: track)
+        }
+    }
+}
+
+// MARK: EFA (German transport associations)
+
+/// A transport association's EFA journey planner (open rapidJSON departure monitor, no key).
+/// Stops are matched exactly by their national stop ID (DHID): Transitous' "de-DELFI_de:05113:9289:…"
+/// is the EFA stop "de:05113:9289". Only asked where Transitous has no live time.
+struct EFASource: LiveSource {
+    let name: String
+    let horizon: TimeInterval = 2 * 3600
+    let onlyWithoutLive = true
+    let endpoint: URL
+    /// DHID prefixes the server has live data for ("de:05" = North Rhine-Westphalia).
+    let regions: [String]
+    static let tz = "Europe/Berlin"
+    private static let boards = TTLCache<[LiveDeparture]>(limit: 160)
+    private static let day = J.formatter("yyyyMMdd", tz)
+    private static let clock = J.formatter("HHmm", tz)
+
+    /// VRR: live times of the NRW operators (Rhein-Ruhr, Rhein-Sieg, Westfalen, Aachen), many of
+    /// which reach Transitous without them.
+    static let vrr = EFASource(name: "VRR", endpoint: URL(string: "https://efa.vrr.de/standard/XML_DM_REQUEST")!, regions: ["de:05"])
+
+    func covers(_ ride: LiveRide) -> Bool {
+        if let tz = ride.tz, tz != Self.tz { return false }
+        guard let id = ride.stopId.flatMap(Self.dhid) else { return false }
+        return regions.contains { id.hasPrefix($0) }
+    }
+
+    func fix(for ride: LiveRide, now: Date) async throws -> LiveFix? {
+        guard let id = ride.stopId.flatMap(Self.dhid) else { return nil }
+        let start = Date(timeIntervalSince1970: (ride.scheduled.timeIntervalSince1970 / 1800).rounded(.down) * 1800 - 120)
+        let deps = try await Self.boards.value("\(name)|\(id)|\(Int(start.timeIntervalSince1970))", ttl: 30) {
+            try await board(id, from: start)
+        }
+        return LiveMatch.best(for: ride, in: deps).map { LiveMatch.fix($0, source: name) }
+    }
+
+    /// "de-DELFI_de:05113:9289:0:2" or "…_de:05113:9289_G" → "de:05113:9289".
+    static func dhid(_ stopId: String) -> String? {
+        guard let r = stopId.range(of: "de:") else { return nil }
+        let parts = stopId[r.lowerBound...].split(separator: ":", omittingEmptySubsequences: false)
+        guard parts.count >= 3, parts[1].count == 5, parts[1].allSatisfy({ $0.isASCII && $0.isNumber }) else { return nil }
+        // Parent stations carry a suffix: "de:05113:9289_G".
+        let stop = parts[2].prefix { $0.isASCII && ($0.isNumber || $0.isLetter) }
+        guard !stop.isEmpty else { return nil }
+        return "de:\(parts[1]):\(stop)"
+    }
+
+    func board(_ id: String, from start: Date) async throws -> [LiveDeparture] {
+        var c = URLComponents(url: endpoint, resolvingAgainstBaseURL: false)!
+        c.queryItems = [URLQueryItem(name: "outputFormat", value: "rapidJSON"), URLQueryItem(name: "type_dm", value: "stop"),
+                        URLQueryItem(name: "name_dm", value: id), URLQueryItem(name: "mode", value: "direct"),
+                        URLQueryItem(name: "useRealtime", value: "1"), URLQueryItem(name: "depType", value: "stopEvents"),
+                        URLQueryItem(name: "itdDate", value: Self.day.string(from: start)),
+                        URLQueryItem(name: "itdTime", value: Self.clock.string(from: start)),
+                        URLQueryItem(name: "limit", value: "120")]
+        return Self.parseStopEvents(J.dict(try await LiveHTTP.json(LiveHTTP.request(c.url!))))
+    }
+
+    private static let iso: ISO8601DateFormatter = ISO8601DateFormatter()
+
+    /// Live time only from a monitored ride; "TRIP_CANCELLED"/"STOP_CANCELLED" cancel it.
+    static func parseStopEvents(_ root: [String: Any]) -> [LiveDeparture] {
+        J.list(root["stopEvents"]).map { J.dict($0) }.compactMap { e in
+            guard let scheduled = (J.str(e["departureTimeBaseTimetable"]) ?? J.str(e["departureTimePlanned"])).flatMap({ iso.date(from: $0) })
+            else { return nil }
+            let t = J.dict(e["transportation"])
+            let lines = [J.str(t["number"]), J.str(t["disassembledName"]), J.str(t["name"])]
+                .compactMap { $0?.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+            guard !lines.isEmpty else { return nil }
+            let status = J.list(e["realtimeStatus"]).compactMap { J.str($0) }
+            let cancelled = J.bool(e["isCancelled"]) || status.contains("TRIP_CANCELLED") || status.contains("STOP_CANCELLED")
+            let monitored = J.bool(e["isRealtimeControlled"]) || status.contains("MONITORED")
+            let expected = monitored ? J.str(e["departureTimeEstimated"]).flatMap { iso.date(from: $0) } : nil
+            let props = J.dict(J.dict(e["location"])["properties"])
+            let track = J.str(props["platformName"]) ?? J.str(props["platform"])
+            let alerts: [Alert] = J.list(e["infos"]).map { J.dict($0) }.compactMap { info in
+                let head = J.plain(J.str(info["title"]) ?? J.str(info["subtitle"]) ?? "")
+                let text = J.plain(J.str(info["content"]) ?? "")
+                guard !head.isEmpty || !text.isEmpty else { return nil }
+                let prio = (J.str(info["priority"]) ?? "").lowercased()
+                return Alert(headerText: head.isEmpty ? text : head, descriptionText: head.isEmpty ? "" : text, url: nil,
+                             severityLevel: prio == "veryhigh" || prio == "high" ? "SEVERE" : "WARNING")
+            }
+            return LiveDeparture(lines: lines, destination: J.str(J.dict(t["destination"])["name"]), scheduled: scheduled,
+                                 expected: expected, cancelled: cancelled, track: track, alerts: alerts)
+        }
+    }
+}

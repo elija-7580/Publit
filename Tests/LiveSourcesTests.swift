@@ -219,4 +219,104 @@ final class LiveSourcesTests: XCTestCase {
         XCTAssertLessThan(Date().timeIntervalSince(started), 0.5)
         XCTAssertEqual(out.first?.startTime, it.startTime)
     }
+
+    func testSwissStopNumbersAndCoverage() {
+        XCTAssertEqual(SearchChSource.stopNumber("ch-opentransportdataswiss27_ch:1:sloid:87349::1"), "8587349")
+        XCTAssertEqual(SearchChSource.stopNumber("de-DELFI_ch:1:sloid:3000"), "8503000")
+        XCTAssertEqual(SearchChSource.stopNumber("ch-opentransportdataswiss27_ch:1:sloid:91067"), "8591067")
+        XCTAssertNil(SearchChSource.stopNumber("de-DELFI_de:05113:9289:0:2"))
+        func ride(_ lat: Double, _ lon: Double, stop: String? = nil, tz: String? = nil) -> LiveRide {
+            LiveRide(point: LatLon(lat: lat, lon: lon), stopId: stop, stopName: "", lines: ["S2"], headsign: nil,
+                     scheduled: Date(), mode: "SUBURBAN", tz: tz)
+        }
+        let source = SearchChSource()
+        XCTAssertTrue(source.covers(ride(47.38, 8.54, stop: "ch-opentransportdataswiss27_ch:1:sloid:3000")))
+        XCTAssertTrue(source.covers(ride(46.0, 8.95, tz: "Europe/Zurich")))           // Lugano, a non-Swiss stop ID
+        XCTAssertFalse(source.covers(ride(47.50, 9.74, tz: "Europe/Vienna")))         // Bregenz, inside the rectangle
+        XCTAssertFalse(source.covers(ride(47.66, 9.18, tz: "Europe/Berlin")))         // Konstanz
+        XCTAssertFalse(source.covers(ride(47.38, 8.54)))                               // no ID, no time zone: not guessed
+    }
+
+    func testSearchChBoard() throws {
+        let root = try XCTUnwrap(json("""
+        {"connections":[
+          {"time":"2026-10-19 22:17:00","*G":"S","*L":"2","*Z":"018285","type":"strain","line":"S2","terminal":{"name":"Ziegelbrücke"},
+           "track":"32!","dep_delay":"+3"},
+          {"time":"2026-10-19 23:04:00","*G":"IC","*L":"8","*Z":"000837","line":"IC 8","track":"34","dep_delay":"X"},
+          {"time":"2026-10-20 01:10:00","line":"7","type":"tram"},
+          {"time":"2026-10-19 22:20:00","*G":"R","*Z":"002650","line":"R 2650"}]}
+        """) as? [String: Any])
+        let deps = SearchChSource.parseBoard(root)
+        XCTAssertEqual(deps.count, 4)
+        XCTAssertEqual(deps[0].scheduled, ISO8601DateFormatter().date(from: "2026-10-19T20:17:00Z"))
+        XCTAssertEqual(deps[0].expected, ISO8601DateFormatter().date(from: "2026-10-19T20:20:00Z"))
+        XCTAssertEqual(deps[0].track, "32")
+        XCTAssertEqual(deps[0].destination, "Ziegelbrücke")
+        XCTAssertTrue(deps[1].cancelled)
+        XCTAssertNil(deps[1].expected)
+        XCTAssertTrue(deps[1].lines.contains("837"))
+        XCTAssertNil(deps[2].expected)                                        // beyond the live window
+        XCTAssertFalse(deps[2].cancelled)
+        // Zero-padded train numbers still match Transitous' "2650".
+        XCTAssertTrue(LiveMatch.sameLine(["2650"], deps[3].lines))
+        let near = try json("""
+        [{"label":"Hauptbahnhof Zuerich, Zürich","id":null,"dist":4},{"label":"Zürich, Bahnhofquai/HB","id":"8587349","dist":115},
+         {"label":"Zürich HB","id":"8503000","dist":0}]
+        """)
+        XCTAssertEqual(SearchChSource.parseNearest(near), "8503000")
+        XCTAssertNil(SearchChSource.parseNearest(try json("""
+        [{"label":"Zürich, Bahnhofquai/HB","id":"8587349","dist":115}]
+        """)))
+    }
+
+    func testEFAStopIDsAndCoverage() {
+        XCTAssertEqual(EFASource.dhid("de-DELFI_de:05113:9289:0:2"), "de:05113:9289")
+        XCTAssertEqual(EFASource.dhid("de-DELFI_de:05113:9289"), "de:05113:9289")
+        XCTAssertEqual(EFASource.dhid("de-DELFI_de:05113:9289_G"), "de:05113:9289")
+        XCTAssertEqual(EFASource.dhid("de-VBB_de:11000:900100003::1"), "de:11000:900100003")
+        XCTAssertNil(EFASource.dhid("de-DELFI_at:42:3654"))
+        XCTAssertNil(EFASource.dhid("ch-opentransportdataswiss27_ch:1:sloid:3000"))
+        func ride(_ stop: String, tz: String? = "Europe/Berlin", live: Bool = false) -> LiveRide {
+            LiveRide(point: LatLon(lat: 51.45, lon: 7.01), stopId: stop, stopName: "", lines: ["U11"], headsign: nil,
+                     scheduled: Date().addingTimeInterval(300), mode: "SUBWAY", tz: tz, live: live)
+        }
+        XCTAssertTrue(EFASource.vrr.covers(ride("de-DELFI_de:05113:9289:0:2")))      // Essen
+        XCTAssertFalse(EFASource.vrr.covers(ride("de-DELFI_de:09162:2:52:52")))      // Munich: not this server's region
+        XCTAssertFalse(EFASource.vrr.covers(ride("de-DELFI_de:05113:9289", tz: "Europe/Amsterdam")))
+        // A live time from Transitous: the source is not even asked.
+        XCTAssertTrue(EFASource.vrr.asks(ride("de-DELFI_de:05113:9289"), now: Date()))
+        XCTAssertFalse(EFASource.vrr.asks(ride("de-DELFI_de:05113:9289", live: true), now: Date()))
+        XCTAssertFalse(LiveOverlay.wanted(ride("de-DELFI_de:05113:9289", live: true), now: Date()))
+        XCTAssertTrue(LiveOverlay.wanted(ride("de-DELFI_de:05113:9289"), now: Date()))
+    }
+
+    func testEFAStopEvents() throws {
+        let root = try XCTUnwrap(json("""
+        {"stopEvents":[
+          {"realtimeStatus":["MONITORED"],"isRealtimeControlled":true,
+           "location":{"id":"de:05113:9289:14:2","properties":{"platformName":"2"}},
+           "departureTimePlanned":"2026-10-19T20:16:00Z","departureTimeBaseTimetable":"2026-10-19T20:15:00Z",
+           "departureTimeEstimated":"2026-10-19T20:16:18Z",
+           "transportation":{"name":"U-Bahn U11","disassembledName":"U11","number":"U11","destination":{"name":"Essen Messe W.-Süd/Gruga"}},
+           "infos":[{"priority":"high","title":"Umleitung","content":"Wegen Bauarbeiten <b>ab Hbf</b>"}]},
+          {"realtimeStatus":["TRIP_CANCELLED"],"isRealtimeControlled":true,
+           "departureTimePlanned":"2026-10-19T20:20:00Z","departureTimeEstimated":"2026-10-19T20:20:00Z",
+           "transportation":{"number":"107","disassembledName":"107"}},
+          {"departureTimePlanned":"2026-10-19T20:35:00Z","departureTimeEstimated":"2026-10-19T20:35:00Z",
+           "transportation":{"number":"SEV S3"}}]}
+        """) as? [String: Any])
+        let deps = EFASource.parseStopEvents(root)
+        XCTAssertEqual(deps.count, 3)
+        XCTAssertEqual(deps[0].scheduled, ISO8601DateFormatter().date(from: "2026-10-19T20:15:00Z"))   // timetable, not dispatch time
+        XCTAssertEqual(deps[0].expected, ISO8601DateFormatter().date(from: "2026-10-19T20:16:18Z"))
+        XCTAssertEqual(deps[0].track, "2")
+        XCTAssertEqual(deps[0].alerts.first?.headerText, "Umleitung")
+        XCTAssertEqual(deps[0].alerts.first?.descriptionText, "Wegen Bauarbeiten ab Hbf")
+        XCTAssertEqual(deps[0].alerts.first?.severityLevel, "SEVERE")
+        XCTAssertTrue(deps[1].cancelled)
+        XCTAssertNil(deps[2].expected)                                         // not monitored: no live time claimed
+        let ride = LiveRide(point: LatLon(lat: 51.45, lon: 7.01), stopId: "de-DELFI_de:05113:9289:14:2", stopName: "", lines: ["U11"],
+                            headsign: nil, scheduled: ISO8601DateFormatter().date(from: "2026-10-19T20:15:00Z")!, mode: "SUBWAY")
+        XCTAssertEqual(LiveMatch.best(for: ride, in: deps)?.expected, deps[0].expected)
+    }
 }

@@ -25,13 +25,23 @@ These are samples. "No live data" may also mean the feed was down at that moment
 
 Vienna (Wiener Linien), Stockholm and Gothenburg (Sweden has no live feed), Copenhagen, Lisbon and Porto (only CP trains are live), Barcelona (only Rodalies), Valencia, Seville, Brussels (only SNCB trains, not STIB), Marseille, Milan (only Trenitalia), Naples (only Trenitalia), Luxembourg, Bratislava, Brno (only trains), Tallinn (only Elron trains), Manchester (only trains), Belgrade, Sarajevo, Podgorica, Tirana, Thessaloniki, Lviv, Istanbul, Ankara, Nicosia, Monaco, Andorra.
 
-Since build 47 Publit fills some of these gaps itself (Settings → Data → "Live data from more operators", on by default): **Vienna** (Wiener Linien open data), **all of Austria** (ÖBB journey planner: trains and, where the regional networks report them, buses and trams, plus construction notes), **Venice** (ACTV vaporetti and buses), **Stockholm** (SL) and **London** line status (TfL). See [DATA-SOURCES.md](DATA-SOURCES.md#5-extra-live-sources-build-47).
+Since build 47 Publit fills some of these gaps itself (Settings → Data → "Live data from more operators", on by default): **Vienna** (Wiener Linien open data), **all of Austria** (ÖBB journey planner: trains and, where the regional networks report them, buses and trams, plus construction notes), **Venice** (ACTV vaporetti and buses), **Stockholm** (SL) and **London** line status (TfL); since build 58 also **Switzerland** (search.ch) and **North Rhine-Westphalia** (VRR). See [DATA-SOURCES.md](DATA-SOURCES.md#5-extra-live-sources-build-47).
 
 Without live data the app shows "Timetable": no delays, cancellations or platform changes, and the trip guide, live bar and Live Activity follow the timetable.
 
 ## Timetable and live data
 
-Berlin, Hamburg, Munich (and Germany as a whole through DELFI), Zürich, Geneva, Graz, Paris, Lyon, London, Dublin, Madrid (Cercanías), Rome, Amsterdam and Rotterdam (partly), Antwerp, Oslo, Helsinki, Riga, Vilnius, Warsaw, Kraków, Prague, Budapest, Ljubljana, Zagreb, Skopje, Sofia, Bucharest, Chișinău (partly), Tbilisi (partly), Reykjavík.
+Berlin, Hamburg, Munich (and Germany as a whole through DELFI), Graz, Paris, Lyon, London, Dublin, Madrid (Cercanías), Rome, Amsterdam and Rotterdam (partly), Antwerp, Oslo, Helsinki, Riga, Vilnius, Warsaw, Kraków, Prague, Budapest, Ljubljana, Zagreb, Skopje, Sofia, Bucharest, Chișinău (partly), Tbilisi (partly), Reykjavík.
+
+## Austria, Germany, Switzerland (checked 19 October 2026)
+
+Departures within ~700 m of the centre in the next hour, 78 places; "live" = with a live time. Script and raw results were not committed (one-off check).
+
+| Country | Timetable | Live from Transitous | What Publit adds |
+|---|---|---|---|
+| Germany | Everywhere (DELFI, VBB, VBN, KVV, AVV) | Most cities 80–100 %. Weak: Essen trams 3/33, Münster buses 45/123, Magdeburg buses 17/56, Kassel buses 31/56, Flensburg 2/11; none in Berchtesgaden | VRR (build 58) for NRW: Essen 37/40, Münster 30/40, Bonn, Aachen, Dortmund. Other German gaps: no open source found with more live data |
+| Switzerland | Everywhere (opentransportdata.swiss) | Almost none: Zürich HB 4/153, Bern 0/149, Basel 4/156, Lugano 0/139 (possibly because Transitous already routes on the 2027 timetable while its live feed belongs to 2026; to report upstream) | search.ch (build 58): Bern 3 → 42 of 48, Zürich Central 0 → 39 of 40, Lugano 0 → 28 of 42 |
+| Austria | Everywhere except **Carinthia**: Transitous skips the Carinthian feed (`PTA-Carinthia-Flex-2026`, `"skip": true`, "Stay Seated forever during MOTIS import"). Villach, Klagenfurt, Spittal, Wolfsberg have only trains and FlixBus; no local buses at all | Only Styria (Graz 147/152, Leoben) | ÖBB (build 47): the ride is found for 100 % of rides tested in St. Pölten, Salzburg, Innsbruck, Bregenz, Feldkirch, Linz; live for 79–100 %. Wiener Linien for Vienna. Carinthia cannot be fixed in the app: ÖBB has the buses live (Klagenfurt 68/68), but Transitous has no bus rides to correct |
 
 ## Other gaps
 

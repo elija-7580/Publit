@@ -4,7 +4,8 @@ import FoundationNetworking
 #endif
 
 // Extra real-time sources for regions where Transitous has timetables but (almost) no live data:
-// Austria (ÖBB/VAO), Vienna (Wiener Linien), Venice (ACTV), Stockholm (SL) and London (TfL line status).
+// Austria (ÖBB/VAO), Vienna (Wiener Linien), Switzerland (search.ch), North Rhine-Westphalia (VRR),
+// Venice (ACTV), Stockholm (SL) and London (TfL line status).
 // Transitous stays the router; these only correct times, cancellations, platforms and add alerts
 // to rides it already found. A live time from Transitous always wins.
 
@@ -20,6 +21,8 @@ struct LiveRide: Sendable, Hashable {
     let mode: String
     /// Time zone of the stop, when known: tells Austria from Bavaria next to the border.
     var tz: String? = nil
+    /// Transitous already has a live time for it.
+    var live = false
 }
 
 /// A departure as an extra source reports it.
@@ -54,6 +57,17 @@ protocol LiveSource: Sendable {
     var horizon: TimeInterval { get }
     func covers(_ ride: LiveRide) -> Bool
     func fix(for ride: LiveRide, now: Date) async throws -> LiveFix?
+    /// Only asked for rides without a live time from Transitous (it adds no alerts worth a request).
+    var onlyWithoutLive: Bool { get }
+}
+
+extension LiveSource {
+    var onlyWithoutLive: Bool { false }
+
+    /// Covers the ride and is worth asking about it now.
+    func asks(_ ride: LiveRide, now: Date) -> Bool {
+        !(onlyWithoutLive && ride.live) && ride.scheduled < now.addingTimeInterval(horizon) && covers(ride)
+    }
 }
 
 /// A latitude/longitude rectangle.
@@ -247,7 +261,8 @@ enum LiveOverlay {
     static let defaultsKey = "extraLiveSources"
     static var enabled: Bool { UserDefaults.standard.object(forKey: defaultsKey) as? Bool ?? true }
 
-    static let sources: [any LiveSource] = [WienerLinienSource(), HafasSource(), ACTVSource(), SLSource(), TfLStatusSource()]
+    static let sources: [any LiveSource] = [WienerLinienSource(), HafasSource(), SearchChSource(), EFASource.vrr,
+                                            ACTVSource(), SLSource(), TfLStatusSource()]
 
     /// Names of all extra sources, for the credits in Settings.
     static var sourceNames: [String] { sources.map { $0.name } }
@@ -255,18 +270,19 @@ enum LiveOverlay {
     static func ride(_ leg: Leg) -> LiveRide {
         LiveRide(point: leg.from.coordinate, stopId: leg.from.stopId, stopName: leg.from.name,
                  lines: [leg.routeShortName, leg.displayName].compactMap { $0 }.filter { !$0.isEmpty },
-                 headsign: leg.headsign, scheduled: leg.scheduledStartTime, mode: leg.mode, tz: leg.from.tz)
+                 headsign: leg.headsign, scheduled: leg.scheduledStartTime, mode: leg.mode, tz: leg.from.tz, live: leg.realTime)
     }
 
     static func ride(_ st: StopTime) -> LiveRide {
         LiveRide(point: st.place.coordinate, stopId: st.place.stopId, stopName: st.place.name,
                  lines: [st.routeShortName, st.displayName].compactMap { $0 }.filter { !$0.isEmpty },
-                 headsign: st.headsign, scheduled: st.scheduledDepartureTime ?? st.departureTime, mode: st.mode, tz: st.place.tz)
+                 headsign: st.headsign, scheduled: st.scheduledDepartureTime ?? st.departureTime, mode: st.mode, tz: st.place.tz,
+                 live: st.realTime)
     }
 
     static func wanted(_ ride: LiveRide, now: Date) -> Bool {
         guard ride.scheduled > now.addingTimeInterval(-30 * 60) else { return false }
-        return sources.contains { $0.covers(ride) && ride.scheduled < now.addingTimeInterval($0.horizon) }
+        return sources.contains { $0.asks(ride, now: now) }
     }
 
     /// Everything the sources know about one ride: times from the first that has them,
@@ -274,7 +290,7 @@ enum LiveOverlay {
     static func fix(for ride: LiveRide, now: Date) async -> LiveFix? {
         var result: LiveFix?
         var alerts: [Alert] = []
-        for source in sources where source.covers(ride) && ride.scheduled < now.addingTimeInterval(source.horizon) {
+        for source in sources where source.asks(ride, now: now) {
             guard let f = try? await source.fix(for: ride, now: now) else { continue }
             alerts += f.alerts
             if result == nil, f.hasTimes { result = f }

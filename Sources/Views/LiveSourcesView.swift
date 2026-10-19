@@ -13,6 +13,8 @@ struct LiveSourcesView: View {
         Source(name: "Transitous", area: L10n.t("Europe and beyond"), what: L10n.t("Routes, timetables and live times where operators publish them")),
         Source(name: "Wiener Linien", area: L10n.t("Vienna"), what: L10n.t("Live departures, disruptions, lifts out of service")),
         Source(name: "ÖBB", area: L10n.t("Austria"), what: L10n.t("Trains, and buses and trams where reported: delays, cancellations, construction work")),
+        Source(name: "search.ch", area: L10n.t("Switzerland"), what: L10n.t("Delays, cancellations and track changes of trains, trams, buses and boats")),
+        Source(name: "VRR", area: L10n.t("North Rhine-Westphalia"), what: L10n.t("Live times of buses, trams and trains where Transitous has none")),
         Source(name: "ACTV", area: L10n.t("Venice"), what: L10n.t("Live times of waterbuses and buses")),
         Source(name: "SL", area: L10n.t("Stockholm"), what: L10n.t("Live departures and disruptions")),
         Source(name: "TfL", area: L10n.t("London"), what: L10n.t("Line status and disruptions (Powered by TfL Open Data)")),
