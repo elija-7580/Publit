@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.0 (build 58)
+
+- Switzerland: live times everywhere. Transitous has the Swiss timetable but almost none of its live data, so Publit now asks search.ch (Swiss public transport data) for delays, cancellations and track changes of trains, trams, buses, boats and cable cars. Stops are matched exactly by their Swiss stop number, not by distance.
+- North Rhine-Westphalia: where Transitous has no live time, Publit asks VRR's journey planner; stops are matched exactly by their national stop ID (DHID). Essen, Münster, Bonn, Aachen and the Ruhr get live times for many buses and trams that had none.
+- More of Germany: where Transitous has no live time, Publit also asks VBB (Berlin and Brandenburg), RMV (Hesse), VBN (Lower Saxony and Bremen), NAH.SH (Schleswig-Holstein) and VRN (Rhineland-Palatinate). Measured: Wiesbaden 7 → 43 of 44 live, Oldenburg 19 → 34 of 44, Kaiserslautern 11 → 22 of 39, Bremen 31 → 40 of 42, Berlin-Spandau 35 → 41 of 41. Each German stop is asked of one server only, picked by its national stop ID.
+- The extra sources are only asked for rides without a live time from Transitous (fewer requests, Transitous still wins).
+- Carinthia (Villach, Klagenfurt, Spittal, Wolfsberg): local buses are still missing. Transitous currently skips the Carinthian timetable when importing, so there are no bus rides for ÖBB's live times to correct; this has to be fixed in Transitous.
+
 ## 0.6.0 (build 57)
 
 - Pasted map links are found again even when a few characters went missing while typing ("httwww.google.com/maps/…"); the leftover characters no longer become the place name.

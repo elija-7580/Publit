@@ -223,7 +223,7 @@ final class PlanModel {
         }
     }
 
-    /// Live times and disruptions from other operators (ÖBB, Wiener Linien, ACTV, SL, TfL) where
+    /// Live times and disruptions from other operators (ÖBB, Wiener Linien, search.ch, VRR, ACTV, SL, TfL) where
     /// Transitous has none. The routes are already on screen; corrected copies replace them.
     private func applyLiveSources(token myToken: UUID) {
         let snapshot = itineraries
