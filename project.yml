@@ -38,6 +38,8 @@ targets:
           - UIInterfaceOrientationPortrait
         NSLocationWhenInUseUsageDescription: Publit uses your location to show departures near you and to plan trips from where you are.
         NSMotionUsageDescription: Publit reads your walking speed from the step counter, only if you turn on “Use my walking speed”. It stays on your iPhone.
+        # Required by App Store validation because the HealthKit entitlement is present; Publit only reads.
+        NSHealthUpdateUsageDescription: Publit does not write to Apple Health. It only reads your walking speed, if you turn on “Use my walking speed”.
         NSHealthShareUsageDescription: Publit reads your walking speed from Apple Health, only if you turn on “Use my walking speed”, so routes plan walks and changes at your pace. It stays on your iPhone.
         NSCameraUsageDescription: Publit uses the camera only when you choose to scan a paper ticket. The scan stays on your iPhone.
         NSCalendarsWriteOnlyAccessUsageDescription: Publit adds the trips you choose to your calendar.

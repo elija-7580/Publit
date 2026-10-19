@@ -40,6 +40,21 @@ jobs:
           rm -rf "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"
           ln -s "$HOME/Library/MobileDevice/Provisioning Profiles" "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"
           printf '%s\n' "$P8" > "$RUNNER_TEMP/keys/AuthKey_$KEY_ID.p8"
+      - name: Keychain and Apple intermediates
+        run: |
+          # An unlocked default keychain for the certificates Xcode creates, plus Apple's current
+          # intermediate certificates: without them the signature does not verify ("Invalid Signature").
+          KC="$RUNNER_TEMP/build.keychain-db"
+          security create-keychain -p ci "$KC"
+          security set-keychain-settings -lut 21600 "$KC"
+          security unlock-keychain -p ci "$KC"
+          security list-keychains -d user -s "$KC" $(security list-keychains -d user | tr -d '"')
+          security default-keychain -s "$KC"
+          for c in AppleWWDRCAG3 AppleWWDRCAG6; do
+            curl -fsSL "https://www.apple.com/certificateauthority/$c.cer" -o "$RUNNER_TEMP/$c.cer"
+            security import "$RUNNER_TEMP/$c.cer" -k "$KC" -T /usr/bin/codesign || true
+          done
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k ci "$KC" >/dev/null 2>&1 || true
       - name: Archive
         run: |
           # A fresh profile is sometimes created but not yet downloadable (seen for the share extension):
@@ -54,7 +69,13 @@ jobs:
               > "$RUNNER_TEMP/archive.log" 2>&1
             code=$?
             set -e
-            if [ $code -eq 0 ] && [ -d "$RUNNER_TEMP/Publit.xcarchive" ]; then echo "Archived (attempt $attempt)"; break; fi
+            if [ $code -eq 0 ] && [ -d "$RUNNER_TEMP/Publit.xcarchive" ]; then
+              echo "Archived (attempt $attempt)"
+              security find-identity -v -p codesigning || true
+              codesign -dvv "$RUNNER_TEMP/Publit.xcarchive/Products/Applications/Publit.app" 2>&1 | grep -E "Authority|TeamIdentifier|Identifier" || true
+              codesign --verify --deep --strict "$RUNNER_TEMP/Publit.xcarchive/Products/Applications/Publit.app" && echo "Signature verifies" || true
+              break
+            fi
             echo "::warning::Archive attempt $attempt failed"
             grep -E "error:" "$RUNNER_TEMP/archive.log" | sort -u | head -20
             rm -rf "$RUNNER_TEMP/Publit.xcarchive"
