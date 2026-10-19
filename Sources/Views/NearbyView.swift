@@ -216,30 +216,24 @@ struct NearbyView: View {
     private var goSection: some View {
         Section {
             Button { searching = true } label: {
-                Label("Where to now?", systemImage: "magnifyingglass")
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, 12)
-                    .frame(maxWidth: .infinity, minHeight: 46, alignment: .leading)
-                    .bevelField()
-                    .contentShape(Rectangle())
+                // Plan's look: same label column, same semibold text, same round ink search key.
+                WhereToField(label: "To", prompt: "Where to now?")
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Where to now? Route from your location")
             .accessibilityIdentifier("whereToNow")
             ForEach(favorites.pinned) { p in
                 Button { go(.place(p)) } label: {
-                    Label { Text(p.role?.title ?? p.name) + Text(verbatim: "  \(p.name)").foregroundStyle(.secondary) }
-                        icon: { Image(systemName: p.role?.symbol ?? "mappin") }
+                    PlaceKeyRow(symbol: p.role?.symbol ?? "mappin", title: p.role?.title ?? p.name, detail: p.name, routes: true)
                 }
+                .buttonStyle(.plain)
             }
             if let next = trips.upcoming().first, next.id != trips.activeTrip?.id,
                next.startTime.timeIntervalSinceNow < 3 * 3600 {
                 NavigationLink { SavedTripView(tripId: next.id) } label: {
                     // Same weight as the other rows of this card ("Where to now?", Home, Work).
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Next trip: \(next.toName)")
-                        Text(TripStatus.at(.now, next.itinerary).headline).font(.caption).foregroundStyle(.secondary)
-                    }
+                    PlaceKeyRow(symbol: "calendar", title: L10n.f("Next trip: %@", next.toName),
+                                detail: TripStatus.at(.now, next.itinerary).headline)
                 }
             }
         }
