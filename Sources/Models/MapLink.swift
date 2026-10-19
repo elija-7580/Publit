@@ -38,11 +38,14 @@ struct MapLink: Equatable, Sendable {
     static func parse(text: String) -> MapLink? {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         if let c = coordinates(trimmed) { return MapLink(lat: c.0, lon: c.1) }
-        // Also typed or cut-off links: "https:www.google.com/maps/…" (slashes lost) or "www.google.com/maps/…".
-        guard let r = trimmed.range(of: #"(?:https?:/{0,2}|geo:|(?<![\w.])(?:www\.google\.|maps\.google\.|google\.[a-z.]+/maps|maps\.apple\.com|maps\.app\.goo\.gl|goo\.gl/maps))[^\s<>"]+"#,
+        // Also typed or cut-off links: "https:www.google.com/maps/…" (slashes lost), "www.google.com/maps/…"
+        // or "httwww.google.com/maps/…" (keys lost while typing): the host is found wherever it starts.
+        guard let r = trimmed.range(of: #"(?:https?:/{0,2}|geo:|(?:www\.google\.|maps\.google\.|google\.[a-z.]+/maps|maps\.apple\.com|maps\.app\.goo\.gl|goo\.gl/maps))[^\s<>"]+"#,
                                     options: [.regularExpression, .caseInsensitive]),
               let url = URL(string: normalizedLink(String(trimmed[r]))), var link = parse(url: url) else { return nil }
-        if link.name == nil {
+        // Text before the link names the place, unless it is the rest of a garbled link ("htt").
+        let standsAlone = r.lowerBound == trimmed.startIndex || trimmed[trimmed.index(before: r.lowerBound)].isWhitespace
+        if link.name == nil, standsAlone {
             let before = trimmed[..<r.lowerBound].split(whereSeparator: \.isNewline)
                 .map { $0.trimmingCharacters(in: .whitespaces) }.first { !$0.isEmpty }
             if let before, before.count <= 120 { link.name = before }
