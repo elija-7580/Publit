@@ -35,7 +35,10 @@ jobs:
           test -n "$KEY_ID" && test -n "$ISSUER_ID" && test -n "$P8" || { echo "::error::Secrets ASC_KEY_ID, ASC_ISSUER_ID and ASC_KEY_P8 are required"; exit 1; }
           mkdir -p "$RUNNER_TEMP/keys"
           # Xcode 16+ looks for downloaded profiles here; on a fresh runner the folder is missing.
-          mkdir -p "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles" "$HOME/Library/MobileDevice/Provisioning Profiles"
+          # One folder for both places, whichever this Xcode downloads into and reads from.
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles" "$HOME/Library/Developer/Xcode/UserData"
+          rm -rf "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"
+          ln -s "$HOME/Library/MobileDevice/Provisioning Profiles" "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"
           printf '%s\n' "$P8" > "$RUNNER_TEMP/keys/AuthKey_$KEY_ID.p8"
       - name: Archive
         run: |
@@ -46,7 +49,10 @@ jobs:
             -authenticationKeyPath "$RUNNER_TEMP/keys/AuthKey_$KEY_ID.p8" \
             -authenticationKeyID "$KEY_ID" -authenticationKeyIssuerID "$ISSUER_ID" \
             | tee "$RUNNER_TEMP/archive.log" | grep -E "error:|warning: .*signing|ARCHIVE" || true
-          test -d "$RUNNER_TEMP/Publit.xcarchive" || { grep -E "error" "$RUNNER_TEMP/archive.log" | head -40; exit 1; }
+          test -d "$RUNNER_TEMP/Publit.xcarchive" || {
+            grep -E "error" "$RUNNER_TEMP/archive.log" | head -40
+            ls -la "$HOME/Library/MobileDevice/Provisioning Profiles" "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles/" || true
+            exit 1; }
       - name: Upload
         run: |
           cat > "$RUNNER_TEMP/ExportOptions.plist" <<PLIST
