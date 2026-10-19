@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.0 (build 57)
+
+- Pasted map links are found again even when a few characters went missing while typing ("httwww.google.com/maps/…"); the leftover characters no longer become the place name.
+
 ## 0.6.0 (build 56)
 
 - Long trips open at once: the route screen shows time and lines first and the rest (changes, actions, steps) a moment later with a loader, instead of the tap seeming to do nothing.
