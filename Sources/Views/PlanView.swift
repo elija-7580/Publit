@@ -58,6 +58,8 @@ struct PlanView: View {
                     .accessibilityIdentifier("swapEndpoints")
                 }
                 .buttonStyle(.borderless)
+                // The card is held together by spacing: list separators drew stray lines under "To" and "Now".
+                .listRowSeparator(.hidden)
                 // Plan is for later (tonight, next week). "From here, now" lives in Nearby.
                 VStack(alignment: .leading, spacing: 12) {
                     BevelSegmented(selection: $plan.timeMode,
@@ -83,7 +85,9 @@ struct PlanView: View {
                     }
                 }
                 .padding(.vertical, 6)
+                .listRowSeparator(.hidden)
                 RouteOptionsButton(compact: true)
+                    .listRowSeparator(.hidden)
             }
 
             if plan.to == nil || !plan.searchStarted {

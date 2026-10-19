@@ -145,7 +145,9 @@ struct RootView: View {
         .sheet(item: $app.sharedTicketFile) { file in
             PassImportView(sharedURL: file.url)
         }
-        .sheet(item: tripLink) { id in
+        // Full screen, not a sheet: a sheet could still be swiped away while pulling the trip panel
+        // down ("the live view is suddenly gone"). It closes with Minimize or Done only.
+        .fullScreenCover(item: tripLink) { id in
             NavigationStack {
                 SavedTripView(tripId: id.value)
                     .toolbar {

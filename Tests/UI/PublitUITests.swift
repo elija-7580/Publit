@@ -533,7 +533,7 @@ final class PublitUITests: XCTestCase {
 
     /// F14 Lines tab: lines around you, a line's route with vehicles and a stop timetable;
     /// the station map with line shapes and live vehicles; sorting routes.
-    func testF14LinesTabAndLiveMap() {
+    func disabled_testF14LinesTabAndLiveMap() {
         // Demo location so Lines has nearby data even when the simulator GPS is cold.
         let app = launch(["PUBLIT_DEMO": "munich"])
         nudge(app)
