@@ -89,7 +89,7 @@ jobs:
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0"><dict>
             <key>method</key><string>app-store-connect</string>
-            <key>destination</key><string>upload</string>
+            <key>destination</key><string>export</string>
             <key>signingStyle</key><string>automatic</string>
             <key>teamID</key><string>3D6S8GFSGK</string>
             <key>manageAppVersionAndBuildNumber</key><false/>
@@ -101,6 +101,17 @@ jobs:
             -allowProvisioningUpdates \
             -authenticationKeyPath "$RUNNER_TEMP/keys/AuthKey_$KEY_ID.p8" \
             -authenticationKeyID "$KEY_ID" -authenticationKeyIssuerID "$ISSUER_ID"
+          IPA=$(ls "$RUNNER_TEMP/export/"*.ipa)
+          mkdir -p "$RUNNER_TEMP/ipa" && unzip -q "$IPA" -d "$RUNNER_TEMP/ipa"
+          APP=$(ls -d "$RUNNER_TEMP/ipa/Payload/"*.app)
+          for b in "$APP" "$APP"/PlugIns/*.appex "$APP"/Watch/*.app; do
+            echo "== $(basename "$b")"
+            codesign -dvv "$b" 2>&1 | grep -E "^Authority=|^Identifier=" || true
+            codesign --verify --strict "$b" && echo "verifies" || echo "DOES NOT VERIFY"
+          done
+          # Upload with the same API key (altool reads it from ~/private_keys).
+          mkdir -p "$HOME/private_keys" && cp "$RUNNER_TEMP/keys/AuthKey_$KEY_ID.p8" "$HOME/private_keys/"
+          xcrun altool --upload-app -f "$IPA" -t ios --apiKey "$KEY_ID" --apiIssuer "$ISSUER_ID"
       - name: Clean up key
         if: always()
-        run: rm -f "$RUNNER_TEMP/keys/"*.p8
+        run: rm -f "$RUNNER_TEMP/keys/"*.p8 "$HOME/private_keys/"*.p8
