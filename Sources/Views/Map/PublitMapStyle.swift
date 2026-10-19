@@ -4,7 +4,7 @@ import SwiftUI
 /// The map look chosen in Settings → Map (the same keys as the station map's layers sheet),
 /// for the SwiftUI maps on routes, trips and lines.
 private struct PublitMapStyle: ViewModifier {
-    @AppStorage("mapBase") private var storedBase = MapBase.standard.rawValue
+    @AppStorage("mapBase") private var storedBase = MapBase.defaultValue
     @AppStorage("map3D") private var realistic3D = false
     @AppStorage("mapPOI") private var pointsOfInterest = true
     @AppStorage("mapTraffic") private var traffic = false

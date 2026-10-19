@@ -68,6 +68,9 @@ struct TransitMapView: UIViewRepresentable {
     var onTapEmpty: (() -> Void)? = nil
     /// Raised by the "My location" control: the map follows you again.
     var recenter = 0
+    /// "Find nearby" hits (all restaurants, pharmacies … in view), as coloured Apple Maps style markers.
+    var places: [GeocodeMatch] = []
+    var placesVersion = 0
 
     func makeCoordinator() -> Coordinator { Coordinator(self) }
 
@@ -83,6 +86,7 @@ struct TransitMapView: UIViewRepresentable {
         map.register(VehiclePinView.self, forAnnotationViewWithReuseIdentifier: VehiclePinView.reuseId)
         map.register(RentalPinView.self, forAnnotationViewWithReuseIdentifier: RentalPinView.reuseId)
         map.register(MKMarkerAnnotationView.self, forAnnotationViewWithReuseIdentifier: SearchPin.reuseId)
+        map.register(MKMarkerAnnotationView.self, forAnnotationViewWithReuseIdentifier: PlacePin.reuseId)
         map.register(MKMarkerAnnotationView.self, forAnnotationViewWithReuseIdentifier: MKMapViewDefaultClusterAnnotationViewReuseIdentifier)
         // Long press drops a pin anywhere ("I want to go there"), like in Apple Maps.
         let press = UILongPressGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.longPressed(_:)))
@@ -107,6 +111,7 @@ struct TransitMapView: UIViewRepresentable {
         context.coordinator.apply(content, to: map)
         context.coordinator.applyLook(look, to: map, animated: true)
         context.coordinator.applyFocus(focus, to: map)
+        context.coordinator.applyPlaces(places, version: placesVersion, to: map)
         if recenter != context.coordinator.recentered {
             context.coordinator.recentered = recenter
             map.setUserTrackingMode(.follow, animated: true)
@@ -144,6 +149,8 @@ struct TransitMapView: UIViewRepresentable {
         private var appliedLook: MapLook?
         private var focusVersion = 0
         private var searchPin: SearchPin?
+        private var placePins: [String: PlacePin] = [:]
+        private var placesVersion = 0
         /// When something on the map was last selected: a tap that selects is not a tap on empty map.
         private var lastSelect = Date.distantPast
         var recentered = 0
@@ -187,6 +194,13 @@ struct TransitMapView: UIViewRepresentable {
             guard CLLocationCoordinate2DIsValid(center) else { return }
             map.setUserTrackingMode(.none, animated: false)
             map.setRegion(MKCoordinateRegion(center: center, latitudinalMeters: meters, longitudinalMeters: meters), animated: true)
+        }
+
+        /// Replaces the "Find nearby" markers when a new set arrives.
+        func applyPlaces(_ places: [GeocodeMatch], version: Int, to map: MKMapView) {
+            guard version != placesVersion else { return }
+            placesVersion = version
+            diff(places.map { ($0.id, $0) }, into: &placePins, map: map, make: PlacePin.init, update: { _, _ in })
         }
 
         func apply(_ c: TransitMapContent, to map: MKMapView) {
@@ -261,13 +275,20 @@ struct TransitMapView: UIViewRepresentable {
                 if groups[key] == nil { order.append(key); groups[key] = (s.mode, s.colorHex, []) }
                 groups[key]?.lines.append(line)
             }
-            let fresh: [MKOverlay] = order.compactMap { key in
+            // Like Apple Maps' transit view: every line on a light edge (casing), so lines lead and
+            // streets stay in the background. All edges first, then the lines on top of them.
+            let made: [(casing: LineOverlay, line: LineOverlay)] = order.compactMap { key in
                 guard let g = groups[key] else { return nil }
+                let casing = LineOverlay(g.lines)
+                casing.colorHex = g.color
+                casing.mode = g.mode
+                casing.isCasing = true
                 let multi = LineOverlay(g.lines)
                 multi.colorHex = g.color
                 multi.mode = g.mode
-                return multi
+                return (casing, multi)
             }
+            let fresh: [MKOverlay] = made.map(\.casing) + made.map(\.line)
             map.removeOverlays(overlays)
             map.addOverlays(fresh, level: .aboveRoads)
             overlays = fresh
@@ -293,8 +314,13 @@ struct TransitMapView: UIViewRepresentable {
             let r = MKMultiPolylineRenderer(multiPolyline: line)
             // Near-black lines are lifted on dark maps (satellite maps are dark too), pale ones darkened on light maps.
             let dark = mapView.traitCollection.userInterfaceStyle == .dark
-            r.strokeColor = UIColor(hex: LineColors.strokeHex(line.colorHex, dark: dark)).withAlphaComponent(0.85)
-            r.lineWidth = LineOverlay.width(line.mode)
+            if line.isCasing {
+                r.strokeColor = dark ? UIColor(white: 0.08, alpha: 0.9) : UIColor(white: 1, alpha: 0.95)
+                r.lineWidth = LineOverlay.width(line.mode) + 3
+            } else {
+                r.strokeColor = UIColor(hex: LineColors.strokeHex(line.colorHex, dark: dark))
+                r.lineWidth = LineOverlay.width(line.mode)
+            }
             r.lineCap = .round
             r.lineJoin = .round
             return r
@@ -314,11 +340,25 @@ struct TransitMapView: UIViewRepresentable {
                 let v = mapView.dequeueReusableAnnotationView(withIdentifier: RentalPinView.reuseId, for: pin) as! RentalPinView
                 v.show(pin)
                 return v
+            case let pin as PlacePin:
+                let v = mapView.dequeueReusableAnnotationView(withIdentifier: PlacePin.reuseId, for: pin) as! MKMarkerAnnotationView
+                let category = PlaceCategory.of(pin.match.category)
+                v.markerTintColor = category.map { UIColor(hex: $0.colorHex) } ?? UIColor(Color.ink)
+                v.glyphTintColor = .white
+                v.glyphImage = UIImage(systemName: category?.symbol ?? "mappin")
+                v.titleVisibility = .adaptive
+                v.subtitleVisibility = .hidden
+                v.displayPriority = .defaultHigh
+                v.zPriority = .init(rawValue: 600)
+                v.collisionMode = .circle
+                v.accessibilityLabel = pin.match.name
+                return v
             case let pin as SearchPin:
                 let v = mapView.dequeueReusableAnnotationView(withIdentifier: SearchPin.reuseId, for: pin) as! MKMarkerAnnotationView
-                // Ink, not the yellow dot: that one only means "you" and "live".
-                v.markerTintColor = UIColor(Color.ink)
-                v.glyphTintColor = UIColor(Color.onInk)
+                // Its category's colour like in Apple Maps; ink otherwise, not the yellow dot (that one only means "you" and "live").
+                let category = PlaceCategory.of(pin.match.category)
+                v.markerTintColor = category.map { UIColor(hex: $0.colorHex) } ?? UIColor(Color.ink)
+                v.glyphTintColor = category == nil ? UIColor(Color.onInk) : .white
                 v.glyphImage = UIImage(systemName: pin.glyph)
                 v.titleVisibility = .visible
                 v.displayPriority = .required
@@ -346,6 +386,7 @@ struct TransitMapView: UIViewRepresentable {
             case let pin as StationPin: parent.onSelect(.station(pin.station))
             case let pin as VehiclePin: parent.onSelect(.vehicle(pin.vehicle))
             case let pin as SearchPin: parent.onSelect(.place(pin.match))
+            case let pin as PlacePin: parent.onSelect(.place(pin.match))
             case let pin as RentalPin:
                 switch pin.item {
                 case .station(let s, let p): parent.onSelect(.rentalStation(s, provider: p))
@@ -440,12 +481,15 @@ enum MapPick {
 final class LineOverlay: MKMultiPolyline {
     var colorHex = "4D4D59"
     var mode = "BUS"
+    /// The light edge drawn under the line.
+    var isCasing = false
 
+    /// Bolder than before: the lines are what this map is about.
     static func width(_ mode: String) -> CGFloat {
         switch ModeGroup.of(mode) {
-        case .train, .suburban, .subway: return 4
-        case .tram: return 3
-        default: return 2.5
+        case .train, .suburban, .subway: return 5
+        case .tram: return 4
+        default: return 3
         }
     }
 }
@@ -471,12 +515,22 @@ final class SearchPin: NSObject, MKAnnotation {
     let coordinate: CLLocationCoordinate2D
     var title: String? { match.name }
     var glyph: String {
+        if let c = PlaceCategory.of(match.category) { return c.symbol }
         switch match.type {
         case "STOP": return "tram.fill"
         case "ADDRESS": return "house.fill"
         default: return MapSearch.meters(match) >= 2500 ? "building.2.fill" : "mappin"
         }
     }
+    init(_ m: GeocodeMatch) { match = m; coordinate = CLLocationCoordinate2D(latitude: m.lat, longitude: m.lon) }
+}
+
+/// One hit of "Find nearby".
+final class PlacePin: NSObject, MKAnnotation {
+    static let reuseId = "place"
+    let match: GeocodeMatch
+    let coordinate: CLLocationCoordinate2D
+    var title: String? { match.name }
     init(_ m: GeocodeMatch) { match = m; coordinate = CLLocationCoordinate2D(latitude: m.lat, longitude: m.lon) }
 }
 
@@ -584,11 +638,13 @@ final class StationPinView: MKAnnotationView {
         if let hit = cache[key] { return hit }
         let img = UIGraphicsImageRenderer(size: CGSize(width: size, height: size)).image { ctx in
             let rect = CGRect(x: 0, y: 0, width: size, height: size)
+            // A rounded square with the mode's symbol, as Apple Maps marks stations.
+            let shape = UIBezierPath(roundedRect: rect.insetBy(dx: 1, dy: 1), cornerRadius: size * 0.3)
             UIColor(hex: ModeStyle.defaultHex(mode)).setFill()
-            ctx.cgContext.fillEllipse(in: rect.insetBy(dx: 1, dy: 1))
+            shape.fill()
             UIColor.white.setStroke()
-            ctx.cgContext.setLineWidth(1.5)
-            ctx.cgContext.strokeEllipse(in: rect.insetBy(dx: 1, dy: 1))
+            shape.lineWidth = 1.5
+            shape.stroke()
             let cfg = UIImage.SymbolConfiguration(pointSize: size * 0.48, weight: .bold)
             if let sym = UIImage(systemName: ModeStyle.symbol(mode), withConfiguration: cfg)?.withTintColor(.white, renderingMode: .alwaysOriginal) {
                 sym.draw(in: CGRect(x: (size - sym.size.width) / 2, y: (size - sym.size.height) / 2, width: sym.size.width, height: sym.size.height))

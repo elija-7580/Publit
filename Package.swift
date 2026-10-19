@@ -22,6 +22,7 @@ let core = [
     "Models/TripGuide.swift",
     "Models/TripTrace.swift",
     "Models/MapLayers.swift",
+    "Models/PlaceCategories.swift",
     "Models/CityGuide.swift",
     "Models/Reach.swift",
     "Models/CircularLine.swift",
