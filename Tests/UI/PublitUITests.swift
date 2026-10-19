@@ -56,7 +56,7 @@ final class PublitUITests: XCTestCase {
     private func launch(_ env: [String: String] = [:]) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchEnvironment = env
-        app.launchArguments = ["-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
+        app.launchArguments = ["-onboardingDone", "YES", "-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
         app.launch()
         return app
     }
@@ -131,7 +131,7 @@ final class PublitUITests: XCTestCase {
     /// F08 German localization: navigation, route planning and long Settings footers.
     func testF08GermanLayout() {
         let app = XCUIApplication()
-        app.launchArguments = ["-AppleLanguages", "(de)", "-AppleLocale", "de_AT"]
+        app.launchArguments = ["-onboardingDone", "YES", "-AppleLanguages", "(de)", "-AppleLocale", "de_AT"]
         app.launchEnvironment = ["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "plan"]
         app.launch()
         XCTAssertTrue(app.navigationBars["Planen"].waitForExistence(timeout: 10))
@@ -154,7 +154,7 @@ final class PublitUITests: XCTestCase {
 
     private func sample(_ kind: String, dark: Bool = false, large: Bool = false) -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = ["-AppleLanguages", "(de)", "-AppleLocale", "de_AT"]
+        app.launchArguments = ["-onboardingDone", "YES", "-AppleLanguages", "(de)", "-AppleLocale", "de_AT"]
         app.launchEnvironment = ["PUBLIT_UI_SAMPLE": kind, "PUBLIT_UI_DARK": dark ? "1" : "0", "PUBLIT_UI_LARGE": large ? "1" : "0"]
         app.launch()
         return app
@@ -216,7 +216,7 @@ final class PublitUITests: XCTestCase {
         for dark in [false, true] {
             let suffix = dark ? "-dark" : ""
             let app = XCUIApplication()
-            app.launchArguments = ["-AppleLanguages", "(de)", "-AppleLocale", "de_AT"]
+            app.launchArguments = ["-onboardingDone", "YES", "-AppleLanguages", "(de)", "-AppleLocale", "de_AT"]
             app.launchEnvironment = ["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "nearby", "PUBLIT_UI_DARK": dark ? "1" : "0"]
             app.launch()
             allowLocation()

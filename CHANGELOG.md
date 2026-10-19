@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.0 (build 51)
+
+### Onboarding
+- First launch shows three short steps: what Publit is, why it asks for your location (Allow location / Not now), Home and Work (set them right there), and where the live trip and widget are. Skip at any time; shown once.
+
+### Settings
+- Start screen: open Publit on Nearby or Plan.
+- Live data sources: which operators Publit asks besides Transitous (Wiener Linien, ÖBB, ACTV, SL, TfL) and for what.
+- Export my data: saved places and lines, trips, search history and tickets as one JSON file via the share sheet.
+
 ## 0.6.0 (build 50)
 
 ### Design

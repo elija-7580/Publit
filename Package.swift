@@ -40,6 +40,7 @@ let core = [
     "Stores/TripStore.swift",
     "Stores/SearchHistoryStore.swift",
     "Stores/TicketStore.swift",
+    "Stores/DataExport.swift",
     "Models/DeepLink.swift",
     "Models/PlaceRole.swift",
     "Models/TripStatus.swift",
