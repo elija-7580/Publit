@@ -1,0 +1,69 @@
+name: TestFlight
+
+# Every build tag (v0.6.0-N) is archived, signed in the cloud with the App Store Connect API key
+# and uploaded to TestFlight. No Mac needed. Secrets: ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8 (Admin key).
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+concurrency:
+  group: testflight
+  cancel-in-progress: false
+
+jobs:
+  upload:
+    name: Archive and upload to TestFlight
+    runs-on: macos-15
+    timeout-minutes: 60
+    env:
+      KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Newest Xcode
+        run: |
+          XC=$(ls -d /Applications/Xcode_*.app | grep -v -i beta | sort -V | tail -1)
+          sudo xcode-select -s "$XC"
+          xcodebuild -version
+      - name: Generate project
+        run: brew install xcodegen && xcodegen generate
+      - name: API key
+        env:
+          P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          test -n "$KEY_ID" && test -n "$ISSUER_ID" && test -n "$P8" || { echo "::error::Secrets ASC_KEY_ID, ASC_ISSUER_ID and ASC_KEY_P8 are required"; exit 1; }
+          mkdir -p "$RUNNER_TEMP/keys"
+          printf '%s\n' "$P8" > "$RUNNER_TEMP/keys/AuthKey_$KEY_ID.p8"
+      - name: Archive
+        run: |
+          set -o pipefail
+          xcodebuild archive -project Publit.xcodeproj -scheme Publit -configuration Release \
+            -destination 'generic/platform=iOS' -archivePath "$RUNNER_TEMP/Publit.xcarchive" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$RUNNER_TEMP/keys/AuthKey_$KEY_ID.p8" \
+            -authenticationKeyID "$KEY_ID" -authenticationKeyIssuerID "$ISSUER_ID" \
+            | tee "$RUNNER_TEMP/archive.log" | grep -E "error:|warning: .*signing|ARCHIVE" || true
+          test -d "$RUNNER_TEMP/Publit.xcarchive" || { grep -E "error" "$RUNNER_TEMP/archive.log" | head -40; exit 1; }
+      - name: Upload
+        run: |
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>upload</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>teamID</key><string>3D6S8GFSGK</string>
+            <key>manageAppVersionAndBuildNumber</key><false/>
+            <key>uploadSymbols</key><true/>
+          </dict></plist>
+          PLIST
+          xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/Publit.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" -exportPath "$RUNNER_TEMP/export" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$RUNNER_TEMP/keys/AuthKey_$KEY_ID.p8" \
+            -authenticationKeyID "$KEY_ID" -authenticationKeyIssuerID "$ISSUER_ID"
+      - name: Clean up key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/keys/"*.p8

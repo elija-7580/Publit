@@ -7,7 +7,7 @@ import BackgroundTasks
 /// Notifications about alerts and cancellations on saved lines. Checked when the app opens and,
 /// when iOS allows it, in the background (at most every 30 minutes; iOS decides when).
 enum LineAlertMonitor {
-    static let taskId = "io.github.publit.app.lines"
+    static let taskId = "io.github.elija7580.publit.lines"
     static let enabledKey = "lineAlerts"
     static let lastCheckKey = "lineAlerts.lastCheck"
     /// Requests per check stay few: one per stop, at most this many stops.
