@@ -42,17 +42,25 @@ jobs:
           printf '%s\n' "$P8" > "$RUNNER_TEMP/keys/AuthKey_$KEY_ID.p8"
       - name: Archive
         run: |
-          set -o pipefail
-          xcodebuild archive -project Publit.xcodeproj -scheme Publit -configuration Release \
-            -destination 'generic/platform=iOS' -archivePath "$RUNNER_TEMP/Publit.xcarchive" \
-            -allowProvisioningUpdates \
-            -authenticationKeyPath "$RUNNER_TEMP/keys/AuthKey_$KEY_ID.p8" \
-            -authenticationKeyID "$KEY_ID" -authenticationKeyIssuerID "$ISSUER_ID" \
-            | tee "$RUNNER_TEMP/archive.log" | grep -E "error:|warning: .*signing|ARCHIVE" || true
-          test -d "$RUNNER_TEMP/Publit.xcarchive" || {
-            grep -E "error" "$RUNNER_TEMP/archive.log" | head -40
-            ls -la "$HOME/Library/MobileDevice/Provisioning Profiles" "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles/" || true
-            exit 1; }
+          # A fresh profile is sometimes created but not yet downloadable (seen for the share extension):
+          # the next attempt picks it up.
+          for attempt in 1 2 3; do
+            set +e
+            xcodebuild archive -project Publit.xcodeproj -scheme Publit -configuration Release \
+              -destination 'generic/platform=iOS' -archivePath "$RUNNER_TEMP/Publit.xcarchive" \
+              -allowProvisioningUpdates \
+              -authenticationKeyPath "$RUNNER_TEMP/keys/AuthKey_$KEY_ID.p8" \
+              -authenticationKeyID "$KEY_ID" -authenticationKeyIssuerID "$ISSUER_ID" \
+              > "$RUNNER_TEMP/archive.log" 2>&1
+            code=$?
+            set -e
+            if [ $code -eq 0 ] && [ -d "$RUNNER_TEMP/Publit.xcarchive" ]; then echo "Archived (attempt $attempt)"; break; fi
+            echo "::warning::Archive attempt $attempt failed"
+            grep -E "error:" "$RUNNER_TEMP/archive.log" | sort -u | head -20
+            rm -rf "$RUNNER_TEMP/Publit.xcarchive"
+            [ $attempt -eq 3 ] && exit 1
+            sleep 20
+          done
       - name: Upload
         run: |
           cat > "$RUNNER_TEMP/ExportOptions.plist" <<PLIST
