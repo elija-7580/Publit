@@ -333,3 +333,63 @@ struct BevelSegmented<Value: Hashable>: View {
         .bevelField(radius: large ? 23 : 19)
     }
 }
+
+/// One row type for places and quick routes (Nearby, Saved, onboarding): a round soft key with the
+/// symbol, the title in semibold like Plan's From/To, the detail below in secondary.
+struct PlaceKeyRow: View {
+    let symbol: String
+    let title: String
+    var detail: String? = nil
+    /// A route starts on tap: the ink arrow on the right says so.
+    var routes = false
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: symbol)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Color.ink)
+                .frame(width: 34, height: 34)
+                .background(Color.inkFill, in: Circle())
+            VStack(alignment: .leading, spacing: 1) {
+                Text(verbatim: title).font(.body.weight(.semibold)).foregroundStyle(.primary).lineLimit(1)
+                if let detail, !detail.isEmpty {
+                    Text(verbatim: detail).font(.subheadline).foregroundStyle(.secondary).lineLimit(1)
+                }
+            }
+            Spacer(minLength: 0)
+            if routes {
+                Image(systemName: "arrow.right")
+                    .font(.footnote.weight(.bold))
+                    .foregroundStyle(Color.secondary)
+            }
+        }
+        .frame(minHeight: 46)
+        .contentShape(Rectangle())
+        .accessibilityElement(children: .combine)
+    }
+}
+
+/// The search entry in Plan's look (Nearby "Where to now?"): the From/To connector dot, a
+/// secondary label, the prompt, and the round ink search key on the right.
+struct WhereToField: View {
+    let label: LocalizedStringKey
+    let prompt: LocalizedStringKey
+
+    var body: some View {
+        HStack(spacing: 12) {
+            SignatureDot(size: 11)
+                .frame(width: 12)
+            Text(label).font(.subheadline).foregroundStyle(.secondary).lineLimit(1).fixedSize()
+                .frame(minWidth: 44, alignment: .leading)
+            Text(prompt).font(.body.weight(.semibold)).foregroundStyle(.secondary).lineLimit(1)
+            Spacer(minLength: 0)
+            Image(systemName: "magnifyingglass")
+                .font(.subheadline.weight(.bold))
+                .foregroundStyle(Color.onInk)
+                .frame(width: 34, height: 34)
+                .background(Color.ink, in: Circle())
+        }
+        .frame(minHeight: 52)
+        .contentShape(Rectangle())
+    }
+}

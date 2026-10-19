@@ -13,14 +13,9 @@ struct FavoritesView: View {
                 ForEach(PlaceRole.allCases, id: \.self) { role in
                     if let p = favorites.place(for: role) {
                         Button { app.route(to: p, source: .favorite) } label: {
-                            HStack(spacing: 12) {
-                                Image(systemName: role.symbol).foregroundStyle(Color.ink).frame(width: 24)
-                                VStack(alignment: .leading, spacing: 1) {
-                                    Text(role.title).foregroundStyle(.primary)
-                                    Text(p.name).font(.caption).foregroundStyle(.secondary).lineLimit(1)
-                                }
-                            }
+                            PlaceKeyRow(symbol: role.symbol, title: role.title, detail: p.name, routes: true)
                         }
+                        .buttonStyle(.plain)
                         .swipeActions {
                             Button(role: .destructive) { favorites.clear(role) } label: { Label("Remove", systemImage: "trash") }
                             Button { settingRole = role } label: { Label("Change", systemImage: "pencil") }
@@ -28,8 +23,9 @@ struct FavoritesView: View {
                         .accessibilityHint("Plans a route to \(role.title)")
                     } else {
                         Button { settingRole = role } label: {
-                            Label("Set \(role.title)", systemImage: role.symbol)
+                            PlaceKeyRow(symbol: "plus", title: L10n.f("Set %@", role.title))
                         }
+                        .buttonStyle(.plain)
                     }
                 }
             }

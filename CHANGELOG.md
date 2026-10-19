@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.0 (build 52)
+
+### Design
+- Nearby "Where to now?" now looks like Plan's From/To card: same label column, semibold text and the round ink search key (no grey well any more).
+- Home, Work and the next trip use one row type everywhere (Nearby and Saved): a round soft key with the symbol, semibold title, place below, an arrow when the row starts a route.
 ## 0.6.0 (build 51)
 
 ### Onboarding
