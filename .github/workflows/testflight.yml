@@ -90,7 +90,9 @@ jobs:
           python3 scripts/ci-sign.py "$RUNNER_TEMP/Publit.xcarchive/Products/Applications/Publit.app" \
             "$RUNNER_TEMP/profiles" "$SIGN_ID" "$RUNNER_TEMP/Publit.ipa"
           mkdir -p "$HOME/private_keys" && cp "$RUNNER_TEMP/keys/AuthKey_$KEY_ID.p8" "$HOME/private_keys/"
-          xcrun altool --upload-app -f "$RUNNER_TEMP/Publit.ipa" -t ios --apiKey "$KEY_ID" --apiIssuer "$ISSUER_ID"
+          xcrun altool --upload-app -f "$RUNNER_TEMP/Publit.ipa" -t ios --apiKey "$KEY_ID" --apiIssuer "$ISSUER_ID" 2>&1 | tee "$RUNNER_TEMP/upload.log"
+          # altool can exit 0 after a failed validation.
+          grep -q "UPLOAD SUCCEEDED" "$RUNNER_TEMP/upload.log"
       - name: Clean up key
         if: always()
         run: |
