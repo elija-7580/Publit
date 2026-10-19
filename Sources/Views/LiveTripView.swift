@@ -69,6 +69,22 @@ struct LiveTripView: View {
         let detourKey = detourTarget.flatMap { t in here.map { h in
             "\(t.lat),\(t.lon)|\((h.lat * 2000).rounded())|\((h.lon * 2000).rounded())" } } ?? ""
         let finished = steps[live].kind == .arrive && TripGuide.isFinished(it, at: now, location: here)
+        // One key that swaps between the whole trip and where you are now: on the panel's top edge,
+        // bottom right, clear of the map's own buttons at the top, and it moves with the panel.
+        let away = overview || picked != nil
+        let overviewKey = Button {
+            withAnimation(.snappy) {
+                if away { picked = nil; overview = false } else { overview = true }
+            }
+        } label: {
+            Label(away ? L10n.t("Back to now") : L10n.t("Trip overview"),
+                  systemImage: away ? "location.fill" : "map")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Color.ink)
+                .floatingCapsule()
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("liveOverviewToggle")
         // The map is the screen; the stages and their details sit in a panel you pull up over it.
         ZStack(alignment: .bottom) {
             GuideMap(itinerary: it, step: step,
@@ -82,25 +98,7 @@ struct LiveTripView: View {
                 // Frame the route in the part of the map the panel leaves free.
                 .safeAreaPadding(.bottom, TripPanelMetrics.peek + 24)
                 .ignoresSafeArea(edges: .bottom)
-                // One key that swaps between the whole trip and where you are now, always in reach.
-                .overlay(alignment: .topLeading) {
-                    let away = overview || picked != nil
-                    Button {
-                        withAnimation(.snappy) {
-                            if away { picked = nil; overview = false } else { overview = true }
-                        }
-                    } label: {
-                        Label(away ? L10n.t("Back to now") : L10n.t("Trip overview"),
-                              systemImage: away ? "location.fill" : "map")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(Color.ink)
-                            .floatingCapsule()
-                    }
-                    .buttonStyle(.plain)
-                    .padding(.leading, 12).padding(.top, 8)
-                    .accessibilityIdentifier("liveOverviewToggle")
-                }
-            TripPanel {
+            TripPanel(accessory: AnyView(overviewKey)) {
                 VStack(spacing: 10) {
                     StageStrip(steps: steps, itinerary: it, destination: trip.toName, live: live, shown: overview ? nil : index) { tapped in
                         overview = false
@@ -763,16 +761,6 @@ private struct GuideMap: View {
                 }
                 .accessibilityLabel(Text(followHeading ? L10n.t("Stop turning the map") : L10n.t("Turn the map with you")))
                 .accessibilityIdentifier("guideFollowHeading")
-                Button {
-                    overview.toggle()
-                } label: {
-                    Image(systemName: overview ? "scope" : "point.topleft.down.to.point.bottomright.curvepath")
-                        .font(.body.weight(.semibold))
-                        .frame(width: 44, height: 44)
-                        .matteSurface(in: Circle())
-                }
-                .accessibilityLabel(Text(overview ? L10n.t("Back to this stage") : L10n.t("Show whole trip")))
-                .accessibilityIdentifier("guideOverview")
                 Button { showsFullMap = true } label: {
                     Image(systemName: "arrow.up.left.and.arrow.down.right")
                         .font(.body.weight(.semibold))
@@ -1155,11 +1143,14 @@ private struct TripPanel<Header: View, Content: View>: View {
 
     let header: Header
     let content: Content
+    /// Sits just above the panel's top edge on the right and moves with it (hidden when the panel is up).
+    let accessory: AnyView?
     @State private var detent: Detent = .peek
     @GestureState(resetTransaction: Transaction(animation: .spring(response: 0.34, dampingFraction: 0.88)))
     private var drag = Drag()
 
-    init(@ViewBuilder header: () -> Header, @ViewBuilder content: () -> Content) {
+    init(accessory: AnyView? = nil, @ViewBuilder header: () -> Header, @ViewBuilder content: () -> Content) {
+        self.accessory = accessory
         self.header = header()
         self.content = content()
     }
@@ -1195,6 +1186,14 @@ private struct TripPanel<Header: View, Content: View>: View {
                     .shadow(color: .black.opacity(0.12), radius: 12, y: -2)
                     // Down to the bottom edge of the screen, under the home indicator.
                     .padding(.bottom, -120)
+            }
+            .overlay(alignment: .topTrailing) {
+                if let accessory, detent != .full {
+                    accessory
+                        .alignmentGuide(.top) { $0[.bottom] + 10 }
+                        .padding(.trailing, 12)
+                        .transition(.opacity)
+                }
             }
             .offset(y: moved)
             // Measured on the screen, not on the panel: the panel moves under the finger, and

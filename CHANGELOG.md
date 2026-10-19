@@ -5,6 +5,7 @@
 ### Design
 - Nearby "Where to now?" now looks like Plan's From/To card: same label column, semibold text and the round ink search key (no grey well any more).
 - Home, Work and the next trip use one row type everywhere (Nearby and Saved): a round soft key with the symbol, semibold title, place below, an arrow when the row starts a route.
+- Live trip: "Trip overview / Back to now" moved off the map's buttons to the bottom right, on the top edge of the panel; it moves with the panel and hides when the panel is fully up. The duplicate round overview key on the map is gone.
 ## 0.6.0 (build 51)
 
 ### Onboarding
