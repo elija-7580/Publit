@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.0 (build 53)
+
+### Release
+- TestFlight without a Mac: every build tag is archived, signed in the cloud with the App Store Connect API key and uploaded by GitHub Actions (.github/workflows/testflight.yml).
+- Bundle ID is now io.github.elija7580.publit (widgets, watch app and share extension follow), matching the App Store Connect record.
+
 ## 0.6.0 (build 52)
 
 ### Design

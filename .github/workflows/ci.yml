@@ -51,7 +51,7 @@ jobs:
           xcrun simctl bootstatus "$UDID" -b
           xcrun simctl status_bar "$UDID" override --time "9:41" --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3 || true
           xcrun simctl location "$UDID" set 48.13715,11.57540
-          xcrun simctl privacy "$UDID" grant location io.github.publit.app || true
+          xcrun simctl privacy "$UDID" grant location io.github.elija7580.publit || true
       - name: Build
         run: |
           mkdir -p ci

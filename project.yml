@@ -1,6 +1,6 @@
 name: Publit
 options:
-  bundleIdPrefix: io.github.publit
+  bundleIdPrefix: io.github.elija7580
   deploymentTarget:
     iOS: "17.0"
     watchOS: "10.0"
@@ -11,7 +11,7 @@ settings:
   base:
     SWIFT_VERSION: "5.0"
     MARKETING_VERSION: "0.6.0"
-    CURRENT_PROJECT_VERSION: "52"
+    CURRENT_PROJECT_VERSION: "53"
     # Personal Team — Automatic Signing for local device installs.
     DEVELOPMENT_TEAM: "3D6S8GFSGK"
 packages:
@@ -43,10 +43,10 @@ targets:
         NSCalendarsWriteOnlyAccessUsageDescription: Publit adds the trips you choose to your calendar.
         NSSupportsLiveActivities: true
         # Background check of saved lines for disruptions (LineAlertMonitor).
-        BGTaskSchedulerPermittedIdentifiers: [io.github.publit.app.lines]
+        BGTaskSchedulerPermittedIdentifiers: [io.github.elija7580.publit.lines]
         UIBackgroundModes: [fetch]
         CFBundleURLTypes:
-          - CFBundleURLName: io.github.publit.app
+          - CFBundleURLName: io.github.elija7580.publit
             CFBundleURLSchemes: [publit]
         # iOS Open In / Copy to Publit; no App Group or paid-team entitlement required.
         LSSupportsOpeningDocumentsInPlace: false
@@ -72,7 +72,7 @@ targets:
         com.apple.developer.healthkit.access: []
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: io.github.publit.app
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.elija7580.publit
         TARGETED_DEVICE_FAMILY: "1"
         CODE_SIGN_STYLE: Automatic
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
@@ -154,7 +154,7 @@ targets:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: io.github.publit.app.widgets
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.elija7580.publit.widgets
         TARGETED_DEVICE_FAMILY: "1"
         CODE_SIGN_STYLE: Automatic
         SKIP_INSTALL: YES
@@ -198,12 +198,12 @@ targets:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         WKApplication: true
-        WKCompanionAppBundleIdentifier: io.github.publit.app
+        WKCompanionAppBundleIdentifier: io.github.elija7580.publit
         NSLocationWhenInUseUsageDescription: Publit uses your location to show departures near you.
         PublitContact: https://github.com/elija-7580/Publit
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: io.github.publit.app.watchkitapp
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.elija7580.publit.watchkitapp
         CODE_SIGN_STYLE: Automatic
         SKIP_INSTALL: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
@@ -241,7 +241,7 @@ targets:
               NSExtensionActivationSupportsText: true
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: io.github.publit.app.share
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.elija7580.publit.share
         TARGETED_DEVICE_FAMILY: "1"
         CODE_SIGN_STYLE: Automatic
         SKIP_INSTALL: YES
