@@ -242,6 +242,115 @@ final class PublitUITests: XCTestCase {
         }
     }
 
+    // MARK: Website screenshots (English, for every language of the site)
+
+    private func english(_ env: [String: String]) -> XCUIApplication {
+        let app = XCUIApplication()
+        app.launchArguments = ["-onboardingDone", "YES", "-AppleLanguages", "(en)", "-AppleLocale", "en_GB"]
+        app.launchEnvironment = env
+        app.launch()
+        return app
+    }
+
+    /// Route preview, live trip (panel down, up) and the live trip overview map.
+    private func websiteTripShots(dark: Bool) {
+        let suffix = dark ? "-dark" : ""
+        var app = english(["PUBLIT_UI_SAMPLE": "route", "PUBLIT_UI_DARK": dark ? "1" : "0"])
+        allowLocation()
+        sleep(6)
+        snap("web-route\(suffix)")
+        app.swipeUp()
+        sleep(1)
+        snap("web-route-steps\(suffix)")
+        app.terminate()
+
+        app = english(["PUBLIT_UI_SAMPLE": "live", "PUBLIT_UI_DARK": dark ? "1" : "0"])
+        allowLocation()
+        sleep(8)
+        snap("web-live\(suffix)")
+        let toggle = app.buttons["liveOverviewToggle"]
+        if toggle.waitForExistence(timeout: 5) {
+            toggle.tap()
+            sleep(4)
+            snap("web-live-overview\(suffix)")
+            toggle.tap()
+            sleep(2)
+        }
+        let window = app.windows.firstMatch
+        window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.74))
+            .press(forDuration: 0.05, thenDragTo: window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.12)))
+        sleep(2)
+        snap("web-live-up\(suffix)")
+        app.terminate()
+    }
+
+    /// Nearby, Plan, Tickets, Saved and the map with a category search.
+    private func websiteStartShots(dark: Bool) {
+        let suffix = dark ? "-dark" : ""
+        let app = english(["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "nearby", "PUBLIT_UI_DARK": dark ? "1" : "0"])
+        allowLocation()
+        sleep(8)
+        snap("web-nearby\(suffix)")
+        let tabs = app.tabBars.buttons
+        tabs.element(boundBy: 1).tap()
+        sleep(10)
+        snap("web-plan\(suffix)")
+        tabs.element(boundBy: 2).tap()
+        sleep(2)
+        snap("web-tickets\(suffix)")
+        tabs.element(boundBy: 3).tap()
+        sleep(2)
+        snap("web-saved\(suffix)")
+        tabs.element(boundBy: 0).tap()
+        sleep(1)
+        let map = app.buttons["Station map"]
+        if map.waitForExistence(timeout: 5) {
+            map.tap()
+            sleep(6)
+            snap("web-map\(suffix)")
+            let field = app.searchFields.firstMatch
+            if field.waitForExistence(timeout: 5) {
+                field.tap()
+                sleep(1)
+                snap("web-map-find\(suffix)")
+                let cafe = app.buttons["category-cafe"]
+                if cafe.waitForExistence(timeout: 5) {
+                    cafe.tap()
+                    sleep(6)
+                    snap("web-map-cafes\(suffix)")
+                }
+            }
+        }
+        app.terminate()
+    }
+
+    func testF24WebsiteTripLight() { websiteTripShots(dark: false) }
+    func testF25WebsiteTripDark() { websiteTripShots(dark: true) }
+    func testF26WebsiteStartLight() { websiteStartShots(dark: false) }
+    func testF27WebsiteStartDark() { websiteStartShots(dark: true) }
+
+    /// Ticket passes and the widgets, light.
+    func testF28WebsiteExtras() {
+        var app = english(["PUBLIT_UI_SAMPLE": "passes", "PUBLIT_UI_DARK": "0", "PUBLIT_UI_LARGE": "0"])
+        sleep(4)
+        snap("web-passes")
+        let card = app.buttons["passCard"].firstMatch
+        if card.waitForExistence(timeout: 5) {
+            card.tap()
+            sleep(2)
+            snap("web-pass-detail")
+        }
+        app.terminate()
+        app = english(["PUBLIT_UI_SAMPLE": "widget", "PUBLIT_UI_DARK": "0", "PUBLIT_UI_LARGE": "0"])
+        sleep(4)
+        snap("web-widgets")
+        app.terminate()
+        app = english(["PUBLIT_UI_SAMPLE": "widget", "PUBLIT_UI_DARK": "1", "PUBLIT_UI_LARGE": "0"])
+        sleep(4)
+        snap("web-widgets-dark")
+        app.terminate()
+    }
+
     /// Answers the location prompt, which would cover the screenshot.
     private func allowLocation() {
         let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")

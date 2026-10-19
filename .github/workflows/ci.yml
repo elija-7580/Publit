@@ -78,7 +78,12 @@ jobs:
             -destination "id=${{ steps.sim.outputs.udid }}" -derivedDataPath build \
             -only-testing:PublitUITests \
             -skip-testing:PublitUITests/PublitUITests/testF21DesignScreens \
-            -skip-testing:PublitUITests/PublitUITests/testF22StartScreens 2>&1 | tee ci/ui.log | grep -E "Test Case|error:|Executed" || true
+            -skip-testing:PublitUITests/PublitUITests/testF22StartScreens \
+            -skip-testing:PublitUITests/PublitUITests/testF24WebsiteTripLight \
+            -skip-testing:PublitUITests/PublitUITests/testF25WebsiteTripDark \
+            -skip-testing:PublitUITests/PublitUITests/testF26WebsiteStartLight \
+            -skip-testing:PublitUITests/PublitUITests/testF27WebsiteStartDark \
+            -skip-testing:PublitUITests/PublitUITests/testF28WebsiteExtras 2>&1 | tee ci/ui.log | grep -E "Test Case|error:|Executed" || true
           mkdir -p ci/screenshots && cp ~/publit-shots/*.png ci/screenshots/ 2>/dev/null || true
           grep -E ": error: |WATCHDOG" ci/ui.log | sed -E "s#${GITHUB_WORKSPACE}/##" > ci/ui-failures.txt || true
           grep -q "TEST EXECUTE SUCCEEDED" ci/ui.log
