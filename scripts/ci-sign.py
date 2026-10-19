@@ -27,6 +27,26 @@ def entitlements(prof, extra):
     ent.update(extra)
     return ent
 
+# The certificate's common name, precomposed (NFC) exactly as in the certificate: "Á" is c3 81.
+CN_NFC = "Apple Distribution: ELIU\u00c1 SAMUEL I. FRIEDRICH-ULRICH (3D6S8GFSGK)".encode()
+CN_ASCII = "Apple Distribution: ELIU@@ SAMUEL I. FRIEDRICH-ULRICH (3D6S8GFSGK)".encode()
+assert len(CN_NFC) == len(CN_ASCII)
+
+def requirement(bid):
+    """Xcode's usual designated requirement, compiled with an ASCII stand-in of the same byte
+    length, then patched to the precomposed name (csreq/codesign would store it decomposed)."""
+    work = tempfile.mkdtemp()
+    text = os.path.join(work, "req.txt")
+    blob = os.path.join(work, "req.bin")
+    with open(text, "w") as f:
+        f.write('designated => identifier "%s" and anchor apple generic and certificate leaf[subject.CN] = "%s" '
+                'and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */\n' % (bid, CN_ASCII.decode()))
+    subprocess.run(["csreq", "-r", text, "-b", blob], check=True)
+    data = open(blob, "rb").read()
+    assert data.count(CN_ASCII) == 1, "placeholder not found once"
+    open(blob, "wb").write(data.replace(CN_ASCII, CN_NFC))
+    return blob
+
 def sign(bundle, name, extra=None):
     path, prof = profile(name)
     shutil.copy(path, os.path.join(bundle, "embedded.mobileprovision"))
@@ -34,9 +54,7 @@ def sign(bundle, name, extra=None):
         bid = plistlib.load(f)["CFBundleIdentifier"]
     ent = entitlements(prof, extra or {})
     assert ent["application-identifier"] == f"{TEAM}.{bid}", (ent["application-identifier"], bid)
-    req = ('designated => anchor apple generic and identifier "%s" and (certificate leaf[field.1.2.840.113635.100.6.1.9] '
-           'or certificate 1[field.1.2.840.113635.100.6.2.6] and certificate leaf[field.1.2.840.113635.100.6.1.13] '
-           'and certificate leaf[subject.OU] = "%s")' % (bid, TEAM))
+    req = requirement(bid)
     # Nested code first: frameworks and loose dylibs inside this bundle.
     fw = os.path.join(bundle, "Frameworks")
     if os.path.isdir(fw):
@@ -46,8 +64,10 @@ def sign(bundle, name, extra=None):
     with tempfile.NamedTemporaryFile(suffix=".plist", delete=False) as t:
         plistlib.dump(ent, t)
     subprocess.run(["codesign", "-f", "-s", identity, "--timestamp", "--generate-entitlement-der",
-                    "--entitlements", t.name, "--requirements", "=" + req, bundle], check=True)
+                    "--entitlements", t.name, "--requirements", req, bundle], check=True)
     subprocess.run(["codesign", "--verify", "--strict", bundle], check=True)
+    dr = subprocess.run(["codesign", "-d", "-r-", bundle], capture_output=True).stdout
+    print("  DR has precomposed name:", CN_NFC in dr)
     print(f"signed {bid}: {sorted(ent)}")
 
 for w in sorted(os.listdir(os.path.join(app, "Watch"))) if os.path.isdir(os.path.join(app, "Watch")) else []:
