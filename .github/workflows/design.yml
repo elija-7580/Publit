@@ -11,7 +11,7 @@ jobs:
   shots:
     name: Design screenshots
     runs-on: macos-15
-    timeout-minutes: 40
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - name: Generate project
@@ -38,7 +38,12 @@ jobs:
             -destination "id=${{ steps.sim.outputs.udid }}" -derivedDataPath build \
             -only-testing:PublitUITests/PublitUITests/testF21DesignScreens \
             -only-testing:PublitUITests/PublitUITests/testF22StartScreens \
-            -only-testing:PublitUITests/PublitUITests/testF20PastedMapLinkIsAPlace 2>&1 | tee ci/ui.log | grep -E "Test Case|error:" || true
+            -only-testing:PublitUITests/PublitUITests/testF20PastedMapLinkIsAPlace \
+            -only-testing:PublitUITests/PublitUITests/testF24WebsiteTripLight \
+            -only-testing:PublitUITests/PublitUITests/testF25WebsiteTripDark \
+            -only-testing:PublitUITests/PublitUITests/testF26WebsiteStartLight \
+            -only-testing:PublitUITests/PublitUITests/testF27WebsiteStartDark \
+            -only-testing:PublitUITests/PublitUITests/testF28WebsiteExtras 2>&1 | tee ci/ui.log | grep -E "Test Case|error:" || true
           cp ~/publit-shots/*.png ci/screenshots/ 2>/dev/null || true
       - name: Upload screenshots
         if: always()
