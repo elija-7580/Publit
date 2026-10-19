@@ -70,7 +70,7 @@ enum GoogleCamera: Equatable {
 struct GoogleMapView: UIViewRepresentable {
     var content: GoogleMapContent
     var camera: GoogleCamera
-    @AppStorage("mapBase") private var storedBase = MapBase.standard.rawValue
+    @AppStorage("mapBase") private var storedBase = MapBase.defaultValue
     @AppStorage("mapPOI") private var pointsOfInterest = true
     @AppStorage("mapTraffic") private var traffic = false
     @Environment(\.colorScheme) private var colorScheme

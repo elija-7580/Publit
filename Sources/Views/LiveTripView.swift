@@ -12,7 +12,7 @@ struct LiveTripView: View {
     @Environment(PassStore.self) private var passes
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("guideVoice") private var voice = false
-    @AppStorage("mapBase") private var mapBase = MapBase.standard.rawValue
+    @AppStorage("mapBase") private var mapBase = MapBase.defaultValue
     @AppStorage("map3D") private var map3D = false
     @State private var now = Date()
     /// Cues already given (each turn, platform change, "get off next" once).

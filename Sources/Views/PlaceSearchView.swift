@@ -261,12 +261,18 @@ struct PlaceLabel: View {
     let name: String
     let subtitle: String?
     let isStop: Bool
+    /// Apple's kind of place ("restaurant"): its coloured symbol, as in Apple Maps.
+    var category: String? = nil
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: isStop ? "tram.circle.fill" : "mappin.circle.fill")
-                .font(.title3)
-                .foregroundStyle(isStop ? Color.ink : Color.secondary)
+            if !isStop, let c = PlaceCategory.of(category) {
+                CategoryIcon(category: c, size: 28)
+            } else {
+                Image(systemName: isStop ? "tram.circle.fill" : "mappin.circle.fill")
+                    .font(.title3)
+                    .foregroundStyle(isStop ? Color.ink : Color.secondary)
+            }
             VStack(alignment: .leading, spacing: 1) {
                 Text(name).foregroundStyle(.primary).lineLimit(1)
                 if let subtitle, !subtitle.isEmpty {
@@ -274,5 +280,20 @@ struct PlaceLabel: View {
                 }
             }
         }
+    }
+}
+
+/// A kind of place as Apple Maps draws it: white symbol on a circle in the category's colour.
+struct CategoryIcon: View {
+    let category: PlaceCategory
+    var size: CGFloat = 28
+
+    var body: some View {
+        Image(systemName: category.symbol)
+            .font(.system(size: size * 0.46, weight: .semibold))
+            .foregroundStyle(.white)
+            .frame(width: size, height: size)
+            .background(Color(uiColor: UIColor(hex: category.colorHex)), in: Circle())
+            .accessibilityHidden(true)
     }
 }

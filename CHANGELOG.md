@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.0 (build 55)
+
+- Map, Apple Maps style with the lines first: the new default look "Transit" (paler streets), bolder line colours on a light edge, stations as rounded squares with their mode symbol, Apple's places with their symbols.
+- Map search: a scope bar (All · Stops · Places · Addresses), up to 25 hits with distance and the place's coloured symbol.
+- "Find nearby": restaurants, cafés, bakeries, supermarkets, shops, pharmacies, hospitals, hotels, ATMs, parking, EV chargers, petrol stations, toilets, museums, parks and bars, all shown on the map in their colour; "Search this area" after moving the map. Typing a kind ("Pharmacies") offers all of them around.
+
 ## 0.6.0 (build 54)
 
 - Route: the preview map frames the route itself (not your location), uses Publit's own marks (ring at the start, ink dot at the destination, small rings where you change) and is drawn just after the screen opens, so routes open faster.

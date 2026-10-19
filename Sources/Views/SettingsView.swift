@@ -11,7 +11,7 @@ struct SettingsView: View {
     @AppStorage("routeTimelines") private var routeTimelines = true
     @AppStorage(LineAlertMonitor.enabledKey) private var lineAlerts = false
     @AppStorage(LiveOverlay.defaultsKey) private var extraLive = true
-    @AppStorage("mapBase") private var mapBase = MapBase.standard.rawValue
+    @AppStorage("mapBase") private var mapBase = MapBase.defaultValue
     @AppStorage("mapPOI") private var mapPOI = true
     @AppStorage(DirectionsApp.defaultsKey) private var directionsApp = DirectionsApp.apple.rawValue
     @AppStorage(SearchProvider.defaultsKey) private var searchProvider = SearchProvider.transitous.rawValue

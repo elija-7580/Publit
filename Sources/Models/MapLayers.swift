@@ -4,7 +4,8 @@ import Foundation
 enum MapBase: String, CaseIterable, Identifiable, Sendable {
     /// Apple's normal map.
     case standard
-    /// Paler streets and buildings: stations and lines stand out.
+    /// Paler streets and buildings: stations and lines stand out, like Apple Maps' transit view.
+    /// The default of every map (`defaultValue`).
     case muted
     /// Aerial imagery with street and place names.
     case satellite
@@ -16,7 +17,7 @@ enum MapBase: String, CaseIterable, Identifiable, Sendable {
     var title: String {
         switch self {
         case .standard: return L10n.t("Standard")
-        case .muted: return L10n.t("Muted")
+        case .muted: return L10n.t("Transit")
         case .satellite: return L10n.t("Satellite")
         case .imagery: return L10n.t("Satellite without names")
         }
@@ -25,7 +26,7 @@ enum MapBase: String, CaseIterable, Identifiable, Sendable {
     var symbol: String {
         switch self {
         case .standard: return "map"
-        case .muted: return "map.circle"
+        case .muted: return "tram.fill"
         case .satellite: return "globe.europe.africa.fill"
         case .imagery: return "photo"
         }
@@ -34,6 +35,9 @@ enum MapBase: String, CaseIterable, Identifiable, Sendable {
     var isSatellite: Bool { self == .satellite || self == .imagery }
     /// Traffic and points of interest only exist on maps with names.
     var hasLabels: Bool { self != .imagery }
+
+    /// What `mapBase` holds until it is changed: the transit look, lines first.
+    static let defaultValue = MapBase.muted.rawValue
 
     init(storageValue: String) { self = MapBase(rawValue: storageValue) ?? .standard }
 }

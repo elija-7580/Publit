@@ -313,12 +313,21 @@ struct StationMapView: View {
     @State private var searchedFor: String?
     @State private var focus: MapFocus?
     @State private var recenter = 0
+    /// Stops, places or addresses only (the scope bar under the search field).
+    @State private var scope: MapSearchScope = .all
+    /// "Find nearby": the category shown on the map, its hits and where it was searched.
+    @State private var category: PlaceCategory?
+    @State private var categoryHits: [GeocodeMatch] = []
+    @State private var categoryVersion = 0
+    @State private var categorySearchedIn: MKCoordinateRegion?
+    @State private var categoryLoading = false
+    @State private var region: MKCoordinateRegion?
     @AppStorage("mapModes") private var storedModes = ""
     @AppStorage("mapStations") private var showStations = true
     @AppStorage("mapLines") private var showLines = true
     @AppStorage("mapVehicles") private var showVehicles = true
     @AppStorage("mapSharing") private var showSharing = false
-    @AppStorage("mapBase") private var storedBase = MapBase.standard.rawValue
+    @AppStorage("mapBase") private var storedBase = MapBase.defaultValue
     @AppStorage("map3D") private var realistic3D = false
     /// On by default: museums, shops and beaches can be tapped for "Route here".
     @AppStorage("mapPOI") private var pointsOfInterest = true
@@ -333,11 +342,12 @@ struct StationMapView: View {
             TransitMapView(content: model.content, initialCenter: center ?? location.coordinate,
                            look: look, focus: focus,
                            glide: TransitMapModel.tickSeconds,
-                           onRegion: { model.regionChanged($0) },
+                           onRegion: { model.regionChanged($0); region = $0 },
                            onSelect: { selection = $0 },
                            onPick: { place, refined in pick(place, refined: refined) },
                            onTapEmpty: { if selection != nil { selection = nil; focus = nil } },
-                           recenter: recenter)
+                           recenter: recenter,
+                           places: categoryHits, placesVersion: categoryVersion)
                 .ignoresSafeArea(edges: .bottom)
                 // Floating over the map, no bar behind it. The map does not reach under the
                 // navigation bar at the top, so the chips always stay visible below it.
@@ -372,9 +382,14 @@ struct StationMapView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .searchable(text: $query, isPresented: $searching, placement: .navigationBarDrawer(displayMode: .always),
                             prompt: Text("Search places, sights and stops"))
+                .searchScopes($scope, activation: .onSearchPresentation) {
+                    ForEach(MapSearchScope.allCases) { Text($0.title).tag($0) }
+                }
                 .searchSuggestions { suggestions }
-                .onSubmit(of: .search) { if let first = results.first { show(first) } }
-                .task(id: query) { await search() }
+                .onSubmit(of: .search) {
+                    if let c = PlaceCategory.matching(query) { browse(c) } else if let first = results.first { show(first) }
+                }
+                .task(id: "\(query)|\(scope.rawValue)") { await search() }
                 .toolbar {
                     ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } }
                 }
@@ -443,6 +458,7 @@ struct StationMapView: View {
             if let message = model.stationsError ?? model.liveError {
                 Text(verbatim: message).font(.footnote).padding(10).matteSurface(in: RoundedRectangle(cornerRadius: 14, style: .continuous)).mapShadow()
             }
+            if let category { categoryBar(category) }
             if let hint {
                 Text(hint).font(.footnote.weight(.semibold))
                     .padding(.horizontal, 12).padding(.vertical, 6)
@@ -450,6 +466,51 @@ struct StationMapView: View {
                     .mapShadow()
             }
         }
+    }
+
+    /// The category on the map: how many, "Search this area" after moving, and ✕ to clear it.
+    private func categoryBar(_ c: PlaceCategory) -> some View {
+        HStack(spacing: 8) {
+            HStack(spacing: 6) {
+                CategoryIcon(category: c, size: 22)
+                Text(c.title).font(.subheadline.weight(.semibold)).lineLimit(1)
+                if categoryLoading {
+                    ProgressView().controlSize(.mini)
+                } else {
+                    Text(verbatim: "\(categoryHits.count)").font(.subheadline.monospacedDigit()).foregroundStyle(.secondary)
+                }
+                Button { clearCategory() } label: {
+                    Image(systemName: "xmark").font(.caption.weight(.bold)).foregroundStyle(.secondary)
+                        .frame(width: 24, height: 24)
+                }
+                .accessibilityLabel(Text("Close"))
+                .accessibilityIdentifier("clearCategory")
+            }
+            .padding(.leading, 6).padding(.trailing, 4).padding(.vertical, 4)
+            .matteSurface(in: Capsule())
+            .mapShadow()
+            if movedSinceCategorySearch {
+                Button { browse(c) } label: {
+                    Label("Search this area", systemImage: "arrow.clockwise")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color.ink)
+                        .floatingCapsule()
+                }
+                .accessibilityIdentifier("searchThisArea")
+                .transition(.opacity)
+            }
+        }
+        .buttonStyle(.plain)
+        .animation(.easeInOut(duration: 0.2), value: movedSinceCategorySearch)
+    }
+
+    /// The map moved a good way (or zoomed) since the category was searched.
+    private var movedSinceCategorySearch: Bool {
+        guard let a = categorySearchedIn, let b = region else { return false }
+        let moved = abs(a.center.latitude - b.center.latitude) > a.span.latitudeDelta * 0.35
+            || abs(a.center.longitude - b.center.longitude) > a.span.longitudeDelta * 0.35
+        let zoomed = b.span.latitudeDelta > a.span.latitudeDelta * 1.6 || b.span.latitudeDelta < a.span.latitudeDelta * 0.5
+        return moved || zoomed
     }
 
     private var hint: String? {
@@ -476,14 +537,102 @@ struct StationMapView: View {
 
     @ViewBuilder
     private var suggestions: some View {
-        ForEach(results) { m in
-            Button { show(m) } label: {
-                PlaceLabel(name: m.name, subtitle: m.subtitle, isStop: m.isStop)
+        if MapSearch.query(query) == nil {
+            // Nothing typed yet: find places by kind around what is on the map, like Apple Maps.
+            Section(L10n.t("Find nearby")) {
+                ForEach(PlaceCategory.allCases) { c in
+                    Button { browse(c) } label: {
+                        HStack(spacing: 12) {
+                            CategoryIcon(category: c, size: 30)
+                            Text(c.title).foregroundStyle(.primary)
+                        }
+                    }
+                    .accessibilityIdentifier("category-\(c.rawValue)")
+                }
             }
-            .accessibilityIdentifier("mapSearchResult")
+        } else {
+            if let c = PlaceCategory.matching(query), scope != .stops, scope != .addresses {
+                Button { browse(c) } label: {
+                    HStack(spacing: 12) {
+                        CategoryIcon(category: c, size: 30)
+                        Text(L10n.f("All %@ in this area", c.title)).foregroundStyle(.primary)
+                    }
+                }
+                .accessibilityIdentifier("categoryFromQuery")
+            }
+            ForEach(results) { m in
+                Button { show(m) } label: {
+                    PlaceLabel(name: m.name, subtitle: subtitle(m), isStop: m.isStop, category: m.category)
+                }
+                .accessibilityIdentifier("mapSearchResult")
+            }
+            if results.isEmpty, let searchedFor, searchedFor == MapSearch.query(query) {
+                Text("No places found").foregroundStyle(.secondary)
+            }
         }
-        if results.isEmpty, let searchedFor, searchedFor == MapSearch.query(query) {
-            Text("No places found").foregroundStyle(.secondary)
+    }
+
+    /// Address or area, with how far it is from the middle of the map.
+    private func subtitle(_ m: GeocodeMatch) -> String {
+        guard let from = model.center ?? location.coordinate else { return m.subtitle }
+        let d = from.distance(to: LatLon(lat: m.lat, lon: m.lon))
+        let distance = Fmt.distance(meters: d)
+        return m.subtitle.isEmpty ? distance : "\(distance) · \(m.subtitle)"
+    }
+
+    /// Every place of this kind in view, as markers on the map (Apple's points of interest).
+    private func browse(_ c: PlaceCategory) {
+        searching = false
+        query = ""
+        selection = nil
+        focus = nil
+        category = c
+        let area = region ?? MKCoordinateRegion(center: (model.center ?? location.coordinate ?? LatLon(lat: 48.2, lon: 16.37)).clCoordinate,
+                                                latitudinalMeters: 2500, longitudinalMeters: 2500)
+        categorySearchedIn = area
+        categoryLoading = true
+        Task {
+            let hits = await Self.applePlaces(in: area, category: c)
+            guard category == c else { return }
+            categoryHits = hits
+            categoryVersion += 1
+            categoryLoading = false
+        }
+    }
+
+    private func clearCategory() {
+        category = nil
+        categoryHits = []
+        categoryVersion += 1
+        categorySearchedIn = nil
+        categoryLoading = false
+    }
+
+    /// Apple's points of interest of one kind in an area (a little larger than the screen, at most ~25 km).
+    private static func applePlaces(in area: MKCoordinateRegion, category: PlaceCategory) async -> [GeocodeMatch] {
+        var r = area
+        r.span = MKCoordinateSpan(latitudeDelta: min(area.span.latitudeDelta * 1.1, 0.25),
+                                  longitudeDelta: min(area.span.longitudeDelta * 1.1, 0.35))
+        let request = MKLocalPointsOfInterestRequest(coordinateRegion: r)
+        request.pointOfInterestFilter = MKPointOfInterestFilter(including: [MKPointOfInterestCategory(rawValue: category.appleCategory)])
+        var items = (try? await MKLocalSearch(request: request).start())?.mapItems ?? []
+        if items.isEmpty {
+            // Some kinds come back only for a text search: ask by name in the same area.
+            let text = MKLocalSearch.Request()
+            text.naturalLanguageQuery = category.title
+            text.region = r
+            text.resultTypes = .pointOfInterest
+            text.pointOfInterestFilter = request.pointOfInterestFilter
+            items = (try? await MKLocalSearch(request: text).start())?.mapItems ?? []
+        }
+        return items.prefix(60).compactMap { item in
+            let c = item.placemark.coordinate
+            let point = LatLon(lat: c.latitude, lon: c.longitude)
+            guard point.isValidCoordinate else { return nil }
+            var m = TransitMapView.Coordinator.match(item, name: item.name ?? category.title, at: point)
+            if m.category == nil { m = .picked(name: m.name, at: point, street: m.street, houseNumber: m.houseNumber,
+                                               locality: m.areas.first?.name, country: m.country, category: category.word) }
+            return m
         }
     }
 
@@ -493,17 +642,20 @@ struct StationMapView: View {
         try? await Task.sleep(for: .milliseconds(300))
         guard !Task.isCancelled else { return }
         let near = model.center ?? location.coordinate
+        let scope = scope
         // Stops and towns from the transit geocoder, sights and shops from Apple Maps ("Museum", "Lidl"), side by side.
-        async let apple = Self.applePlaces(text, near: near)
+        // The scope bar narrows it down: stops only, places only or addresses only.
+        async let apple = Self.applePlaces(scope.usesApple ? text : nil, near: near, addresses: scope != .places)
         do {
-            let found = try await TransitousClient.shared.geocode(text, near: near)
+            var found: [GeocodeMatch] = []
+            if scope.usesTransit { found = try await TransitousClient.shared.geocode(text, near: near) }
             let extra = await apple
             guard !Task.isCancelled else { return }
-            results = GeocodeMatch.merged(found, extra)
+            results = scope.filter(GeocodeMatch.merged(found, extra, limit: 25))
             searchedFor = text
         } catch {
             // Typing on: the next text searches again. A failure of the transit geocoder still shows Apple's places.
-            let extra = await apple
+            let extra = scope.filter(await apple)
             guard !Task.isCancelled, !extra.isEmpty else { return }
             results = extra
             searchedFor = text
@@ -511,15 +663,16 @@ struct StationMapView: View {
     }
 
     /// Points of interest and addresses from Apple Maps around the visible map; none when Apple has no answer.
-    private static func applePlaces(_ text: String, near: LatLon?) async -> [GeocodeMatch] {
+    private static func applePlaces(_ text: String?, near: LatLon?, addresses: Bool = true) async -> [GeocodeMatch] {
+        guard let text else { return [] }
         let request = MKLocalSearch.Request()
         request.naturalLanguageQuery = text
-        request.resultTypes = [.pointOfInterest, .address]
+        request.resultTypes = addresses ? [.pointOfInterest, .address] : [.pointOfInterest]
         if let near {
             request.region = MKCoordinateRegion(center: near.clCoordinate, latitudinalMeters: 20_000, longitudinalMeters: 20_000)
         }
         guard let response = try? await MKLocalSearch(request: request).start() else { return [] }
-        return response.mapItems.prefix(8).compactMap { item in
+        return response.mapItems.prefix(12).compactMap { item in
             let c = item.placemark.coordinate
             let point = LatLon(lat: c.latitude, lon: c.longitude)
             guard point.isValidCoordinate else { return nil }
@@ -646,7 +799,7 @@ struct MapPlaceView: View {
     var body: some View {
         List {
             Section {
-                PlaceLabel(name: match.name, subtitle: match.subtitle, isStop: false)
+                PlaceLabel(name: match.name, subtitle: match.subtitle, isStop: false, category: match.category)
                 if let here = location.coordinate {
                     let meters = here.distance(to: LatLon(lat: match.lat, lon: match.lon))
                     LabeledContent("Distance", value: Fmt.distance(meters: meters))
