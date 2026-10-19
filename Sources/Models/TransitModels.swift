@@ -158,7 +158,9 @@ struct Leg: Codable, Sendable, RouteStyled {
     /// `mapPath` thinned out for small overview maps (see `OverviewPaths`).
     var overviewPath: [LatLon] {
         let g = legGeometry.points
-        return OverviewPaths.path(mapPath, key: "\(g.count)|\(g.prefix(32))|\(g.suffix(32))")
+        // utf8.count, not count: counting characters walks the whole (long) string on every draw.
+        let u = g.utf8
+        return OverviewPaths.path(mapPath, key: "\(u.count)|\(String(decoding: u.prefix(32), as: UTF8.self))|\(String(decoding: u.suffix(32), as: UTF8.self))")
     }
 }
 

@@ -1,9 +1,13 @@
 import SwiftUI
 import MapKit
 
-struct CompareMapView: View {
+struct CompareMapView: View, Equatable {
     let itineraries: [Itinerary]
     let selectedId: String?
+
+    static func == (a: CompareMapView, b: CompareMapView) -> Bool {
+        a.selectedId == b.selectedId && a.itineraries.map(\.routeKey) == b.itineraries.map(\.routeKey)
+    }
 
     /// Selected route is drawn last so it sits on top.
     private var ordered: [Itinerary] {
@@ -64,6 +68,9 @@ struct ItineraryDetailView: View {
     var refreshedAt: Date? = nil
     @State private var showsMap = false
     @State private var mapReady = false
+    /// The screen opens with the top (time, lines) at once; changes, actions and steps follow a
+    /// moment later, so a long trip never leaves the tap without an answer.
+    @State private var showsAll = false
 
     private var isBikeOrCar: Bool {
         let m = StreetComparison.streetMode(itinerary)
@@ -109,8 +116,10 @@ struct ItineraryDetailView: View {
                 .accessibilityIdentifier("routePreviewMap")
             }
             .task {
-                guard !mapReady else { return }
-                try? await Task.sleep(for: .milliseconds(350))
+                guard !mapReady || !showsAll else { return }
+                try? await Task.sleep(for: .milliseconds(60))
+                showsAll = true
+                try? await Task.sleep(for: .milliseconds(300))
                 withAnimation(.easeOut(duration: 0.2)) { mapReady = true }
             }
 
@@ -147,6 +156,11 @@ struct ItineraryDetailView: View {
                 }
             }
 
+            if !showsAll {
+                Section {
+                    LogoLoader().frame(maxWidth: .infinity)
+                }
+            } else {
             // Warnings in one calm form: a coloured edge, the words in ink.
             if !warnings.isEmpty {
                 Section {
@@ -179,6 +193,7 @@ struct ItineraryDetailView: View {
             } footer: {
                 Text("All information without guarantee. Times, platforms and prices come from the operators' open data and can change at short notice.")
                     .accessibilityIdentifier("noGuaranteeNote")
+            }
             }
         }
         .inkList()
