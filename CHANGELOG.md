@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.0 (build 56)
+
+- Long trips open at once: the route screen shows time and lines first and the rest (changes, actions, steps) a moment later with a loader, instead of the tap seeming to do nothing.
+- "Where to now?": tapping a route no longer redraws the comparison map with every route first; the map only redraws when the routes change.
+- Route shapes: a cheaper cache key (it walked the whole encoded line on every draw).
+
 ## 0.6.0 (build 55)
 
 - Map, Apple Maps style with the lines first: the new default look "Transit" (paler streets), bolder line colours on a light edge, stations as rounded squares with their mode symbol, Apple's places with their symbols.

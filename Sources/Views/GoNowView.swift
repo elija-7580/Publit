@@ -15,7 +15,10 @@ struct GoNowView: View {
         let badges = SmartRouting.isEnabled ? SmartRouting.badges(its, arriveBy: false) : [:]
         List {
             if !its.isEmpty {
+                // Redrawn only when the routes change, not on every refresh of this list (long routes
+                // with many points made opening one wait for the map).
                 CompareMapView(itineraries: its, selectedId: selectedId ?? its.first?.routeKey)
+                    .equatable()
                     .frame(height: 220)
                     .listRowInsets(EdgeInsets())
             }
@@ -53,7 +56,6 @@ struct GoNowView: View {
                                          badges: badges[it.routeKey] ?? [])
                         }
                     }
-                    .simultaneousGesture(TapGesture().onEnded { selectedId = it.routeKey })
                 }
                 if plan.canLoadMore {
                     Button("Later connections") { Task { await plan.loadMore() } }
