@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.6.0 (build 54)
+
+- Route: the preview map frames the route itself (not your location), uses Publit's own marks (ring at the start, ink dot at the destination, small rings where you change) and is drawn just after the screen opens, so routes open faster.
+- Route: time and lines sit in one calm card; the line chain has no arrows any more and walks are small chips, centred next to the line badges.
+- Live trip: "Trip overview / Back to now" is a round key in the map's button column at the top left instead of a capsule over the stage strip; the duplicate full-screen map key is gone. Start and destination use the same marks as on the route.
+- Live trip: opened full screen, so pulling the panel down can no longer swipe the whole trip away.
+- Saved: "Find a line" removed.
+- Plan: stray separator lines under "To" and under "Now" removed.
+
 ## 0.6.0 (build 53)
 
 ### Release

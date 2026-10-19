@@ -32,12 +32,8 @@ struct FavoritesView: View {
 
             upcomingTrips
 
-            Section("Lines") {
-                NavigationLink { LinesView() } label: {
-                    Label(L10n.t("Find a line"), systemImage: "magnifyingglass")
-                }
-                .accessibilityIdentifier("findLine")
-                if !favorites.lines.isEmpty {
+            if !favorites.lines.isEmpty {
+                Section("Lines") {
                     ForEach(favorites.lines) { line in
                         NavigationLink {
                             LineDetailView(line: LineRef(saved: line))
