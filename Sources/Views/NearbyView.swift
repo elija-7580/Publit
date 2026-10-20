@@ -140,6 +140,7 @@ struct NearbyView: View {
             }
 
         }
+        .readableWidth()
         .inkList()
         .tint(Color.ink)
         .navigationTitle("Nearby")
@@ -513,6 +514,7 @@ struct StopDeparturesView: View {
                 }
             }
         }
+        .readableWidth()
         .inkList()
         .navigationTitle(name)
         .screenTrail("Stop departures")

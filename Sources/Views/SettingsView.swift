@@ -221,6 +221,7 @@ struct SettingsView: View {
                     }
                 }
             }
+            .readableWidth()
             .inkList()
             // Once per opening, on the list: on the section it ran again each time the section scrolled
             // back in, and rows appearing and disappearing made the screen jump back and forth.

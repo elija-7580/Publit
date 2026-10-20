@@ -61,6 +61,8 @@ struct ModeFilterBar: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 6)
         }
+        // Lists on wide screens pass their readable-width margins down; the chip row keeps its own.
+        .contentMargins(.horizontal, 0, for: .scrollContent)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(L10n.t("Filter by mode"))
     }
