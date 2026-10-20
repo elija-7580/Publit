@@ -7,7 +7,7 @@ To get the images back:
 
 ```sh
 cd docs/appstore
-./unpack.sh        # creates docs/appstore/png/assets/appstore/*.png
+sh unpack.sh        # creates docs/appstore/png/assets/appstore/*.png
 ```
 
 The same images are also available as plain PNGs on the website repo:
