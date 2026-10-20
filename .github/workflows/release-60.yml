@@ -1,0 +1,21 @@
+name: release-60
+on:
+  push:
+    branches: [release-60]
+permissions:
+  contents: write
+  actions: write
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Tag and trigger TestFlight
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git tag v0.6.0-60 95031c85f03acc96f74bff1cb79377512deba0cd
+          git push origin v0.6.0-60
+          gh workflow run testflight.yml --ref v0.6.0-60
