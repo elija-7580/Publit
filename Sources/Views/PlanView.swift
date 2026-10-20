@@ -130,6 +130,8 @@ struct PlanView: View {
         }
         .navigationDestination(item: $opened) { route in detail(route.itinerary) }
         .navigationTitle("Plan")
+        // iPad: every route found on the big map, the recommended one strong.
+        .wideMapScene(plan.searchStarted && plan.to != nil && !pick.list.isEmpty ? .routes(pick.list, selected: pick.key) : .explore)
         .screenTrail("Plan")
         .withSettingsButton()
         .onAppear {

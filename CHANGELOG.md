@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.0 (build 60)
+
+- iPad and iPhone Duo (unfolded): their own layout. The map fills the screen and the content floats over it in a panel on the left, like Apple Maps on iPad.
+  - Nearby: the live transit map around you (stations, lines, moving vehicles) next to the departures.
+  - Plan and "Where to now?": every route found on the big map, the recommended one in its line colours with line badges where you board, the others pale underneath. An opened route fills the map with its start, changes and destination.
+  - Live trip: the stages and details stay open in the side panel, the map shows the whole way next to it (nothing to pull up).
+  - Tickets and Saved: the list on the left, what you open on the right.
+  - Tabs at the top that turn into a sidebar. In portrait and landscape the panel takes about a third to 40 % of the width, the map the rest.
+- iPhone, Slide Over, narrow Split View and the folded iPhone Duo keep the iPhone layout.
+
 ## 0.6.0 (build 59)
 
 - iPad: Publit now runs natively on iPad, in every orientation, in Split View and Stage Manager. Tabs sit in the floating tab bar at the top; lists, routes and settings stay in a readable column instead of stretching across the screen.

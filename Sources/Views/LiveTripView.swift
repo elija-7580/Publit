@@ -26,6 +26,8 @@ struct LiveTripView: View {
     @State private var overview = false
     /// The way on foot from where you are, when you are away from the planned walk.
     @State private var detour = WalkDetour()
+    @Environment(\.horizontalSizeClass) private var sizeClass
+    @State private var screenWidth: CGFloat = 0
 
     /// A recent fix only: an old one would put you at the wrong stop.
     private var fix: LatLon? {
@@ -71,47 +73,74 @@ struct LiveTripView: View {
         let finished = steps[live].kind == .arrive && TripGuide.isFinished(it, at: now, location: here)
         // The whole trip or where you are now: a round key in the map's own column at the top left.
         let away = overview || picked != nil
-        // The map is the screen; the stages and their details sit in a panel you pull up over it.
-        ZStack(alignment: .bottom) {
-            GuideMap(itinerary: it, step: step,
-                     vehicle: vehicle,
-                     focus: walkPos.flatMap { p in walk?.maneuvers[safe: p.index + 1]?.coordinate },
-                     trace: TripTrace.Progress(legIndex: steps[live].legIndex, kind: steps[live].kind,
-                                               point: index == live && step.kind == .ride ? (vehicle ?? here) : here),
-                     detour: detourRoute.map { (legIndex: step.legIndex, points: $0.points) },
-                     isLive: index == live,
-                     overview: $overview,
-                     away: away,
-                     toggleOverview: {
-                         withAnimation(.snappy) {
-                             if away { picked = nil; overview = false } else { overview = true }
-                         }
-                     })
-                // Frame the route in the part of the map the panel leaves free.
-                .safeAreaPadding(.bottom, TripPanelMetrics.peek + 24)
-                .ignoresSafeArea(edges: .bottom)
-            TripPanel {
-                VStack(spacing: 10) {
-                    StageStrip(steps: steps, itinerary: it, destination: trip.toName, live: live, shown: overview ? nil : index) { tapped in
-                        overview = false
-                        picked = tapped == live ? nil : steps[tapped].id
-                    }
-                    StagePager(steps: steps, itinerary: it, destination: trip.toName, live: live, now: now, shown: overview ? nil : index) { shown in
-                        if let shown {
-                            overview = false
-                            picked = shown == live ? nil : steps[shown].id
-                        } else {
-                            overview = true
-                        }
-                    }
+        let map = GuideMap(itinerary: it, step: step,
+             vehicle: vehicle,
+             focus: walkPos.flatMap { p in walk?.maneuvers[safe: p.index + 1]?.coordinate },
+             trace: TripTrace.Progress(legIndex: steps[live].legIndex, kind: steps[live].kind,
+                                       point: index == live && step.kind == .ride ? (vehicle ?? here) : here),
+             detour: detourRoute.map { (legIndex: step.legIndex, points: $0.points) },
+             isLive: index == live,
+             overview: $overview,
+             away: away,
+             toggleOverview: {
+                 withAnimation(.snappy) {
+                     if away { picked = nil; overview = false } else { overview = true }
+                 }
+             })
+        let stages = VStack(spacing: 10) {
+            StageStrip(steps: steps, itinerary: it, destination: trip.toName, live: live, shown: overview ? nil : index) { tapped in
+                overview = false
+                picked = tapped == live ? nil : steps[tapped].id
+            }
+            StagePager(steps: steps, itinerary: it, destination: trip.toName, live: live, now: now, shown: overview ? nil : index) { shown in
+                if let shown {
+                    overview = false
+                    picked = shown == live ? nil : steps[shown].id
+                } else {
+                    overview = true
                 }
-                .padding(.horizontal, 12)
-            } content: {
-                details(it: it, steps: steps, step: step, leg: leg, index: index, live: live, here: here, walk: walk,
-                        walkPos: walkPos, detour: detourRoute, ride: ride, check: check, wrong: wrong, wrongMessage: wrongMessage,
-                        searchFrom: searchFrom)
             }
         }
+        .padding(.horizontal, 12)
+        let panelDetails = details(it: it, steps: steps, step: step, leg: leg, index: index, live: live, here: here, walk: walk,
+                walkPos: walkPos, detour: detourRoute, ride: ride, check: check, wrong: wrong, wrongMessage: wrongMessage,
+                searchFrom: searchFrom)
+        Group {
+            if WideLayout.isWide(width: screenWidth, sizeClass: sizeClass) {
+                // iPad and iPhone Duo unfolded: the map over the whole screen, the stages and details
+                // in a panel on the left that stays open (nothing to pull up).
+                let width = WideLayout.panelWidth(for: screenWidth)
+                ZStack(alignment: .topLeading) {
+                    map
+                        .safeAreaPadding(.leading, width + WideLayout.margin * 2)
+                        .ignoresSafeArea(edges: .bottom)
+                    VStack(spacing: 0) {
+                        stages
+                            .padding(.top, 14)
+                            .padding(.bottom, 10)
+                        panelDetails
+                            .frame(maxHeight: .infinity, alignment: .top)
+                    }
+                    .environment(\.horizontalSizeClass, .compact)
+                    .frame(width: width)
+                    .frame(maxHeight: .infinity)
+                    .background(Color.ground)
+                    .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+                    .shadow(color: .black.opacity(0.16), radius: 18, y: 4)
+                    .padding(WideLayout.margin)
+                }
+            } else {
+                // The map is the screen; the stages and their details sit in a panel you pull up over it.
+                ZStack(alignment: .bottom) {
+                    map
+                        // Frame the route in the part of the map the panel leaves free.
+                        .safeAreaPadding(.bottom, TripPanelMetrics.peek + 24)
+                        .ignoresSafeArea(edges: .bottom)
+                    TripPanel { stages } content: { panelDetails }
+                }
+            }
+        }
+        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { screenWidth = $0 }
         .onChange(of: riskKey) { _, key in
             guard !key.isEmpty, let r = SmartRouting.changeAtRisk(trip.itinerary, at: .now) else { return }
             feedbackKind = .platform

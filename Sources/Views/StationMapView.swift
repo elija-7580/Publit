@@ -299,6 +299,10 @@ final class TransitMapModel {
 /// Interactive map of stations, the lines running around you and their vehicles moving live.
 /// Tap a station for its departures, a vehicle for its trip, a bike or scooter for its provider.
 struct StationMapView: View {
+    /// Behind the panel of the iPad layout: no bar, no Done, the controls clear of the panel.
+    let embedded: Bool
+    /// Width the panel covers on the left (iPad layout).
+    let leadingInset: CGFloat
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
     @Environment(LocationManager.self) private var location
@@ -333,6 +337,11 @@ struct StationMapView: View {
     @AppStorage("mapPOI") private var pointsOfInterest = true
     @AppStorage("mapTraffic") private var traffic = false
 
+    init(embedded: Bool = false, leadingInset: CGFloat = 0) {
+        self.embedded = embedded
+        self.leadingInset = leadingInset
+    }
+
     private var look: MapLook {
         MapLook(base: MapBase(storageValue: storedBase), realistic3D: realistic3D, pointsOfInterest: pointsOfInterest, traffic: traffic)
     }
@@ -351,7 +360,7 @@ struct StationMapView: View {
                 .ignoresSafeArea(edges: .bottom)
                 // Floating over the map, no bar behind it. The map does not reach under the
                 // navigation bar at the top, so the chips always stay visible below it.
-                .overlay(alignment: .top) { header.padding(.top, 8) }
+                .overlay(alignment: .top) { header.padding(.top, 8).padding(.leading, leadingInset) }
                 // Map controls in one white column at the edge: layers, then my location.
                 .overlay(alignment: .bottomTrailing) {
                     VStack(spacing: 10) {
@@ -391,8 +400,11 @@ struct StationMapView: View {
                 }
                 .task(id: "\(query)|\(scope.rawValue)") { await search() }
                 .toolbar {
-                    ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } }
+                    if !embedded {
+                        ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } }
+                    }
                 }
+                .toolbar(embedded ? .hidden : .automatic, for: .navigationBar)
                 .sheet(item: $selection, onDismiss: {
                     // Closed by a swipe, ✕ or a tap on the map: the marker of a picked place goes too.
                     if selection == nil { focus = nil }
@@ -706,14 +718,14 @@ struct StationMapView: View {
     private func route(_ place: SavedPlace) {
         selection = nil
         app.goNow(to: place)
-        dismiss()
+        if !embedded { dismiss() }
     }
 
     /// "Route from here": this place as the start in Plan.
     private func routeFrom(_ place: SavedPlace) {
         selection = nil
         app.route(from: place)
-        dismiss()
+        if !embedded { dismiss() }
     }
 }
 
