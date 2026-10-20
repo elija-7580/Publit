@@ -7,6 +7,8 @@ struct GoNowView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var isVisible = false
     @State private var selectedId: String?
+    /// iPad layout: the routes are on the big map, not in a small one at the top.
+    @Environment(WideMapState.self) private var wideMap: WideMapState?
 
     var body: some View {
         let plan = app.goNow
@@ -14,7 +16,7 @@ struct GoNowView: View {
         let span = TimeInterval(its.map(\.duration).max() ?? 0)
         let badges = SmartRouting.isEnabled ? SmartRouting.badges(its, arriveBy: false) : [:]
         List {
-            if !its.isEmpty {
+            if !its.isEmpty && wideMap == nil {
                 // Redrawn only when the routes change, not on every refresh of this list (long routes
                 // with many points made opening one wait for the map).
                 CompareMapView(itineraries: its, selectedId: selectedId ?? its.first?.routeKey)
@@ -74,6 +76,7 @@ struct GoNowView: View {
         .readableWidth()
         .inkList()
         .navigationTitle(plan.to?.title ?? L10n.t("Route"))
+        .wideMapScene(its.isEmpty ? .explore : .routes(its, selected: selectedId ?? its.first?.routeKey))
         .screenTrail("Go now")
         .navigationBarTitleDisplayMode(.inline)
         .refreshable { await plan.search(current: location.coordinate, locationDenied: location.isDenied, silent: true) }

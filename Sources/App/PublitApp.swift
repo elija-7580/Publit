@@ -94,6 +94,9 @@ struct RootView: View {
     @Environment(LocationManager.self) private var location
     /// The launch animation, while the first departures load underneath.
     @State private var splash = true
+    @Environment(\.horizontalSizeClass) private var sizeClass
+    /// Width of the window: the iPad layout needs room for the panel and the map.
+    @State private var rootWidth: CGFloat = 0
     @State private var onboarding = OnboardingView.needed
     @AppStorage(OnboardingView.doneKey) private var onboardingDone = false
 
@@ -124,24 +127,28 @@ struct RootView: View {
     @ViewBuilder
     private var tabs: some View {
         @Bindable var app = app
-        TabView(selection: $app.tab) {
-            NavigationStack { NearbyView() }
-                .liveTripBar()
-                .tabItem { Label("Nearby", systemImage: "location.circle") }
-                .tag(AppTab.nearby)
-            NavigationStack { PlanView() }
-                .liveTripBar()
-                .tabItem { Label("Plan", systemImage: "calendar") }
-                .tag(AppTab.plan)
-            NavigationStack { PassWalletView() }
-                .liveTripBar()
-                .tabItem { Label("Tickets", systemImage: "ticket") }
-                .tag(AppTab.tickets)
-            NavigationStack { FavoritesView() }
-                .liveTripBar()
-                .tabItem { Label("Saved", systemImage: "star") }
-                .tag(AppTab.favorites)
+        let wide = WideLayout.isWide(width: rootWidth, sizeClass: sizeClass)
+        Group {
+            if #available(iOS 18, *) {
+                AdaptiveTabs(tab: $app.tab, wide: wide)
+            } else {
+                TabView(selection: $app.tab) {
+                    RootTab.content(.nearby, wide: wide)
+                        .tabItem { Label("Nearby", systemImage: "location.circle") }
+                        .tag(AppTab.nearby)
+                    RootTab.content(.plan, wide: wide)
+                        .tabItem { Label("Plan", systemImage: "calendar") }
+                        .tag(AppTab.plan)
+                    RootTab.content(.tickets, wide: wide)
+                        .tabItem { Label("Tickets", systemImage: "ticket") }
+                        .tag(AppTab.tickets)
+                    RootTab.content(.favorites, wide: wide)
+                        .tabItem { Label("Saved", systemImage: "star") }
+                        .tag(AppTab.favorites)
+                }
+            }
         }
+        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { rootWidth = $0 }
         .sheet(item: $app.sharedTicketFile) { file in
             PassImportView(sharedURL: file.url)
         }
@@ -308,5 +315,48 @@ struct RootView: View {
         }
         let live = trips.upcoming(now: Date().addingTimeInterval(-15 * 60)).filter { LiveTripActivity.isRunning($0.id) || trips.activeTripId == $0.id }
         return LiveRefresh.interval(live.map(\.itinerary))
+    }
+}
+
+/// The four tabs: on iPhone in the tab bar, on iPad in the tab bar at the top that turns into a sidebar.
+@available(iOS 18, *)
+private struct AdaptiveTabs: View {
+    @Binding var tab: AppTab
+    let wide: Bool
+
+    var body: some View {
+        TabView(selection: $tab) {
+            Tab("Nearby", systemImage: "location.circle", value: AppTab.nearby) { RootTab.content(.nearby, wide: wide) }
+            Tab("Plan", systemImage: "calendar", value: AppTab.plan) { RootTab.content(.plan, wide: wide) }
+            Tab("Tickets", systemImage: "ticket", value: AppTab.tickets) { RootTab.content(.tickets, wide: wide) }
+            Tab("Saved", systemImage: "star", value: AppTab.favorites) { RootTab.content(.favorites, wide: wide) }
+        }
+        .tabViewStyle(.sidebarAdaptable)
+    }
+}
+
+/// What a tab shows: the iPhone screens in a navigation stack, or on a wide screen (iPad, iPhone Duo
+/// unfolded) the map with a floating panel (Nearby, Plan) or a list with details beside it (Tickets, Saved).
+enum RootTab {
+    @MainActor @ViewBuilder
+    static func content(_ tab: AppTab, wide: Bool) -> some View {
+        switch tab {
+        case .nearby:
+            if wide { WideMapScreen { NearbyView() } } else { NavigationStack { NearbyView() }.liveTripBar() }
+        case .plan:
+            if wide { WideMapScreen { PlanView() } } else { NavigationStack { PlanView() }.liveTripBar() }
+        case .tickets:
+            if wide {
+                WideSplitScreen(list: { PassWalletView() }, placeholder: "Choose a ticket", symbol: "ticket")
+            } else {
+                NavigationStack { PassWalletView() }.liveTripBar()
+            }
+        case .favorites:
+            if wide {
+                WideSplitScreen(list: { FavoritesView() }, placeholder: "Choose a trip or place", symbol: "star")
+            } else {
+                NavigationStack { FavoritesView() }.liveTripBar()
+            }
+        }
     }
 }

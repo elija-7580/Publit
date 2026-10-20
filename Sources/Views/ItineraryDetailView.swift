@@ -71,6 +71,7 @@ struct ItineraryDetailView: View {
     /// The screen opens with the top (time, lines) at once; changes, actions and steps follow a
     /// moment later, so a long trip never leaves the tap without an answer.
     @State private var showsAll = false
+    @Environment(WideMapState.self) private var wideMap: WideMapState?
 
     private var isBikeOrCar: Bool {
         let m = StreetComparison.streetMode(itinerary)
@@ -91,6 +92,8 @@ struct ItineraryDetailView: View {
         List {
             // 1. What matters first: the way at a glance, when, how long, which lines, live state and warnings.
             Section {
+                // iPad layout: the route is on the big map next to this panel already.
+                if wideMap == nil {
                 Button { showsMap = true } label: {
                     ZStack {
                         Color.surface
@@ -114,6 +117,7 @@ struct ItineraryDetailView: View {
                 .listRowSeparator(.hidden)
                 .accessibilityLabel(Text("Trip overview"))
                 .accessibilityIdentifier("routePreviewMap")
+                }
             }
             .task {
                 guard !mapReady || !showsAll else { return }
@@ -210,6 +214,7 @@ struct ItineraryDetailView: View {
             }
         }
         .navigationTitle("Route")
+        .wideMapScene(.route(itinerary))
         .screenTrail("Route")
         .navigationBarTitleDisplayMode(.inline)
         // Tickets only for a saved trip: looking at a route shows none.
