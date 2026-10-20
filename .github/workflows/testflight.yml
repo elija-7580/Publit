@@ -14,7 +14,7 @@ concurrency:
 jobs:
   upload:
     name: Archive and upload to TestFlight
-    runs-on: macos-15
+    runs-on: xcode-27
     timeout-minutes: 60
     env:
       KEY_ID: ${{ secrets.ASC_KEY_ID }}

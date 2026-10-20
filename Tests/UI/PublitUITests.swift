@@ -144,10 +144,10 @@ final class PublitUITests: XCTestCase {
         XCTAssertTrue(app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", "Öffentlicher Verkehr ohne Ablenkung.")).firstMatch.exists)
         snap("de-settings")
         app.buttons["Fertig"].tap()
-        app.tabBars.buttons.element(boundBy: 0).tap()
+        app.tab(0).tap()
         XCTAssertTrue(app.navigationBars["In der Nähe"].waitForExistence(timeout: 5))
         snap("de-nearby")
-        app.tabBars.buttons["Gespeichert"].tap()
+        app.tab(3).tap()
         XCTAssertTrue(app.navigationBars["Gespeichert"].waitForExistence(timeout: 5))
         snap("de-saved")
     }
@@ -225,17 +225,16 @@ final class PublitUITests: XCTestCase {
             app.swipeUp()
             sleep(2)
             snap("start-nearby-more\(suffix)")
-            let tabs = app.tabBars.buttons
-            tabs.element(boundBy: 1).tap()
+            app.tab(1).tap()
             sleep(12) // routes
             snap("start-plan\(suffix)")
             app.swipeUp()
             sleep(2)
             snap("start-plan-more\(suffix)")
-            tabs.element(boundBy: 2).tap()
+            app.tab(2).tap()
             sleep(2)
             snap("start-tickets\(suffix)")
-            tabs.element(boundBy: 3).tap()
+            app.tab(3).tap()
             sleep(2)
             snap("start-saved\(suffix)")
             app.terminate()
@@ -291,17 +290,16 @@ final class PublitUITests: XCTestCase {
         allowLocation()
         sleep(8)
         snap("web-nearby\(suffix)")
-        let tabs = app.tabBars.buttons
-        tabs.element(boundBy: 1).tap()
+        app.tab(1).tap()
         sleep(10)
         snap("web-plan\(suffix)")
-        tabs.element(boundBy: 2).tap()
+        app.tab(2).tap()
         sleep(2)
         snap("web-tickets\(suffix)")
-        tabs.element(boundBy: 3).tap()
+        app.tab(3).tap()
         sleep(2)
         snap("web-saved\(suffix)")
-        tabs.element(boundBy: 0).tap()
+        app.tab(0).tap()
         sleep(1)
         let map = app.buttons["Station map"]
         if map.waitForExistence(timeout: 5) {
@@ -456,7 +454,7 @@ final class PublitUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Save"].waitForExistence(timeout: 10))
         snap("stop")
         app.buttons["Save"].tap()
-        app.tabBars.buttons["Saved"].tap()
+        app.tab(3).tap()
         let saved = app.descendants(matching: .any).matching(NSPredicate(format: "label == 'Marienplatz'")).firstMatch
         XCTAssertTrue(saved.waitForExistence(timeout: 5), "saved stop not listed")
     }
@@ -497,7 +495,7 @@ final class PublitUITests: XCTestCase {
         snap("saved")
 
         // Plan has no quick destinations since build 14: Home comes first when picking a place.
-        app.tabBars.buttons["Plan"].tap()
+        app.tab(1).tap()
         let to = app.buttons["endpoint-to"]
         XCTAssertTrue(to.waitForExistence(timeout: 10), "no To field in Plan")
         to.tap()
@@ -579,7 +577,7 @@ final class PublitUITests: XCTestCase {
         sleep(1)
         app.navigationBars["Route"].buttons.firstMatch.tap()
         // Saved trips are listed in the Saved tab (Plan is for planning only).
-        app.tabBars.buttons["Saved"].tap()
+        app.tab(3).tap()
         let row = app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS 'Flughafen München'")).firstMatch
         XCTAssertTrue(row.waitForExistence(timeout: 5), "saved trip not under Upcoming in Saved")
         snap("trips")
@@ -646,7 +644,7 @@ final class PublitUITests: XCTestCase {
         // Demo location so Lines has nearby data even when the simulator GPS is cold.
         let app = launch(["PUBLIT_DEMO": "munich"])
         nudge(app)
-        app.tabBars.buttons["Saved"].tap()
+        app.tab(3).tap()
         XCTAssertTrue(app.buttons["findLine"].waitForExistence(timeout: 10))
         app.buttons["findLine"].tap()
         XCTAssertTrue(app.navigationBars["Lines"].waitForExistence(timeout: 10))
@@ -701,7 +699,7 @@ final class PublitUITests: XCTestCase {
         app.buttons["Cancel"].firstMatch.tap()
         XCTAssertTrue(add.waitForExistence(timeout: 5))
 
-        app.tabBars.buttons["Nearby"].tap()
+        app.tab(0).tap()
         let all = app.buttons["All departures"].firstMatch
         XCTAssertTrue(reveal(all, in: app), "no link to all departures")
         all.tap()
@@ -825,5 +823,18 @@ final class PublitUITests: XCTestCase {
         XCTAssertTrue(hit.waitForExistence(timeout: 15),
                       "pasted map link not recognised; field: \(field.value as? String ?? "?")")
         snap("search-map-link")
+    }
+}
+
+extension XCUIApplication {
+    /// The tab at `index` (Nearby, Plan, Tickets, Saved). iPhone has a classic tab bar; iPad and the
+    /// inner display of iPhone Duo show the floating tab bar at the top, whose items are not inside a
+    /// `TabBar` element, so they are found by their title instead.
+    func tab(_ index: Int) -> XCUIElement {
+        if tabBars.firstMatch.exists { return tabBars.buttons.element(boundBy: index) }
+        let titles = [["Nearby", "In der Nähe"], ["Plan", "Planen"], ["Tickets"], ["Saved", "Gespeichert"]][index]
+        let match = NSPredicate(format: "label IN %@", titles)
+        let button = buttons.matching(match).firstMatch
+        return button.exists ? button : cells.matching(match).firstMatch
     }
 }

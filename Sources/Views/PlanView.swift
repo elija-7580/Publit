@@ -99,6 +99,7 @@ struct PlanView: View {
                                         fromName: plan.from.title, toName: plan.to?.title ?? "")
             }
         }
+        .readableWidth()
         .inkList()
         // The suggested route out of sight (later in the list): a capsule jumps to it, the list stays put otherwise.
         .overlay(alignment: .bottom) {

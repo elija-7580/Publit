@@ -29,6 +29,7 @@ struct TicketsView: View {
                 }
             }
         }
+        .readableWidth()
         .inkList()
         .navigationTitle("My tickets")
         .screenTrail("My tickets")
@@ -312,6 +313,7 @@ struct LinkedTicketAppsView: View {
                 }
             }
         }
+        .readableWidth()
         .inkList()
         .liveBarPadding()
         .navigationTitle("Ticket apps")

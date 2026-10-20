@@ -80,6 +80,7 @@ struct FavoritesView: View {
                 }
             }
         }
+        .readableWidth()
         .inkList()
         .navigationTitle("Saved")
         .screenTrail("Saved")
@@ -145,6 +146,7 @@ struct PastTripsView: View {
             }
             .onDelete { idx in idx.map { past[$0].id }.forEach(trips.remove) }
         }
+        .readableWidth()
         .inkList()
         .overlay {
             if past.isEmpty { ContentUnavailableView("Past trips", systemImage: "clock.arrow.circlepath") }

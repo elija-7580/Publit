@@ -16,7 +16,7 @@ concurrency:
 jobs:
   shots:
     runs-on: xcode-27
-    timeout-minutes: 90
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
       - name: Xcode and simulators
@@ -39,7 +39,7 @@ jobs:
         if: always()
         run: |
           RT=$(xcrun simctl list runtimes -j | python3 -c "import json,sys; r=[x for x in json.load(sys.stdin)['runtimes'] if x['platform']=='iOS' and x['isAvailable']]; print(sorted(r,key=lambda x:[int(p) for p in x['version'].split('.')])[-1]['identifier'])")
-          for want in "iPhone 17 Pro" "iPad Pro 13-inch" "iPad Air 11-inch" "iPhone Duo"; do
+          for want in "iPhone Duo" "iPad Pro 13-inch"; do
             TYPE=$(xcrun simctl list devicetypes -j | python3 -c "import json,sys; w=sys.argv[1]; t=[d for d in json.load(sys.stdin)['devicetypes'] if d['name'].startswith(w)]; print(t[-1]['identifier'] if t else '')" "$want")
             [ -z "$TYPE" ] && { echo "no device type $want" >> out/env.txt; continue; }
             UDID=$(xcrun simctl create "shots-$want" "$TYPE" "$RT")
@@ -51,8 +51,8 @@ jobs:
             rm -rf ~/publit-shots
             xcodebuild test-without-building -project Publit.xcodeproj -scheme Publit \
               -destination "id=$UDID" -derivedDataPath build \
-              -only-testing:PublitUITests/PublitUITests/testF21DesignScreens \
-              -only-testing:PublitUITests/PublitUITests/testF22StartScreens 2>&1 | grep -E "Test Case|error:" > "out/ui-$want.log" || true
+              -only-testing:PublitUITests/PublitUITests/testF22StartScreens \
+              -only-testing:PublitUITests/PublitUITests/testF21DesignScreens 2>&1 | grep -E "Test Case|error:|Executed" > "out/ui-$want.log" || true
             D="out/$(echo "$want" | tr ' ' '-')"
             mkdir -p "$D"
             for f in ~/publit-shots/*.png; do [ -f "$f" ] && sips -Z 1100 "$f" --out "$D/$(basename "$f")" >/dev/null; done

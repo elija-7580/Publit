@@ -10,7 +10,7 @@ on:
 jobs:
   shots:
     name: Design screenshots
-    runs-on: macos-15
+    runs-on: xcode-27
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -19,7 +19,7 @@ jobs:
       - name: Simulator
         id: sim
         run: |
-          UDID=$(xcrun simctl list devices available -j | python3 -c "import json,sys; d=json.load(sys.stdin)['devices']; c=[x for k in sorted(d, reverse=True) if 'iOS' in k for x in d[k] if x['name'].startswith('iPhone 16 Pro') and 'Max' not in x['name']]; print(c[0]['udid'])")
+          UDID=$(xcrun simctl list devices available -j | python3 -c "import json,sys; d=json.load(sys.stdin)['devices']; p=[x for k in sorted(d, reverse=True) if 'iOS' in k for x in d[k] if x['name'].startswith('iPhone') and 'Max' not in x['name']]; c=[x for w in ('iPhone 18 Pro','iPhone 17 Pro','iPhone 16 Pro') for x in p if x['name'].startswith(w)]+p; print(c[0]['udid'])")
           echo "udid=$UDID" >> "$GITHUB_OUTPUT"
           xcrun simctl boot "$UDID" || true
           xcrun simctl bootstatus "$UDID" -b

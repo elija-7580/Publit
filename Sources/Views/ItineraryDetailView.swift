@@ -196,6 +196,7 @@ struct ItineraryDetailView: View {
             }
             }
         }
+        .readableWidth()
         .inkList()
         .sheet(isPresented: $showsMap) {
             NavigationStack {

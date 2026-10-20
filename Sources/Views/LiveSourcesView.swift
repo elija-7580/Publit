@@ -44,6 +44,7 @@ struct LiveSourcesView: View {
                 Text("The extra operators only get the stop, line and time of a ride, never your location or account.")
             }
         }
+        .readableWidth()
         .inkList()
         .navigationTitle("Live data sources")
         .navigationBarTitleDisplayMode(.inline)

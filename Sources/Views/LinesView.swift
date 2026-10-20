@@ -86,6 +86,7 @@ struct LinesView: View {
                 }
             }
         }
+        .readableWidth()
         .inkList()
         .navigationTitle("Lines")
         .screenTrail("Lines")
@@ -224,6 +225,7 @@ struct LineDetailView: View {
                 LogoLoader()
             }
         }
+        .readableWidth()
         .inkList()
         .navigationTitle(line.lineName)
         .screenTrail("Line")
@@ -424,6 +426,7 @@ struct LineTimetableView: View {
                 LogoLoader()
             }
         }
+        .readableWidth()
         .inkList()
         .navigationTitle(stopName)
         .screenTrail("Line stop")

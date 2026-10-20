@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.0 (build 59)
+
+- iPad: Publit now runs natively on iPad, in every orientation, in Split View and Stage Manager. Tabs sit in the floating tab bar at the top; lists, routes and settings stay in a readable column instead of stretching across the screen.
+- iPhone Duo: built with the iOS 27 SDK (Xcode 27), so the app fills the inner display and resizes when you unfold, instead of running letterboxed. On the inner display Publit uses the same wide layout as on iPad.
+- Builds, tests and TestFlight uploads now run on Xcode 27.
+
 ## 0.6.0 (build 58)
 
 - Switzerland: live times everywhere. Transitous has the Swiss timetable but almost none of its live data, so Publit now asks search.ch (Swiss public transport data) for delays, cancellations and track changes of trains, trams, buses, boats and cable cars. Stops are matched exactly by their Swiss stop number, not by distance.
