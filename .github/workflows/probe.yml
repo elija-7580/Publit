@@ -1,0 +1,25 @@
+name: ASC probe
+on:
+  push:
+    branches: [asc-probe]
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    env:
+      KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      P8: ${{ secrets.ASC_KEY_P8 }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install -q pyjwt cryptography requests && python3 .probe/probe.py
+      - name: Report
+        if: always()
+        run: |
+          test -f report.txt || echo "no report" > report.txt
+          mkdir r && cp report.txt r/ && cd r && git init -q -b asc-probe-report
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -q -m "ASC probe report"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/$GITHUB_REPOSITORY" asc-probe-report
