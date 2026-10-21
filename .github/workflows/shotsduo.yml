@@ -28,7 +28,7 @@ jobs:
           ls -d /Applications/Xcode*.app >> out/env.txt
       - name: Longer watchdog (the Duo simulator is slow)
         run: |
-          sed -i 's/watchdogSeconds: TimeInterval = 150/watchdogSeconds: TimeInterval = 700/' Tests/UI/PublitUITests.swift
+          python3 -c "p='Tests/UI/PublitUITests.swift'; s=open(p).read(); assert 'watchdogSeconds: TimeInterval = 150' in s; open(p,'w').write(s.replace('watchdogSeconds: TimeInterval = 150','watchdogSeconds: TimeInterval = 700'))"
           grep -n 'watchdogSeconds: TimeInterval' Tests/UI/PublitUITests.swift
       - name: Generate project
         run: brew install xcodegen && xcodegen generate
