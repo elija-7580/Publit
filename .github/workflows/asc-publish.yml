@@ -1,0 +1,51 @@
+name: App Store listing
+
+# One-off: fills the App Store version (texts, categories, age rating, price, availability,
+# build, screenshots) through the App Store Connect API. Does not submit for review.
+on:
+  push:
+    branches: [asc]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: asc-publish
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      P8: ${{ secrets.ASC_KEY_P8 }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Screenshots
+        run: |
+          set -e
+          sh docs/appstore/unpack.sh
+          S=appstore/screenshots
+          mkdir -p $S/APP_IPHONE_67/en-US $S/APP_IPHONE_67/de-DE $S/APP_IPAD_PRO_3GEN_129
+          cp docs/appstore/png/assets/appstore/en-*.png $S/APP_IPHONE_67/en-US/
+          cp docs/appstore/png/assets/appstore/de-*.png $S/APP_IPHONE_67/de-DE/
+          mkdir -p /tmp/ipad && cat $(ls appstore/ipad/part-* | sort) | base64 -d | tar x -C /tmp/ipad
+          mv /tmp/ipad/en $S/APP_IPAD_PRO_3GEN_129/en-US
+          mv /tmp/ipad/de $S/APP_IPAD_PRO_3GEN_129/de-DE
+          find $S -type f | sort
+      - name: Publish listing
+        run: |
+          python3 -m pip install -q pyjwt cryptography requests
+          python3 appstore/asc_publish.py
+      - name: Report
+        if: always()
+        run: |
+          cd appstore
+          test -f report.txt || echo "no report" > report.txt
+          git init -q -b asc-report r && cp report.txt r/ && cd r
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -q -m "App Store listing report"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/$GITHUB_REPOSITORY" asc-report
