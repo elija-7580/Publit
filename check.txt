@@ -1,0 +1,15 @@
+APP 6824481988 Publit io.github.elija7580.publit en-GB
+  VERSION fca98759-93a4-4757-bb2a-620b6a02480c IOS 0.6.0 PREPARE_FOR_SUBMISSION PREPARE_FOR_SUBMISSION
+    LOC en-GB desc=2132 kw=98 promo=159
+      SET APP_IPHONE_67 n=7 ['COMPLETE', 'COMPLETE', 'COMPLETE', 'COMPLETE', 'COMPLETE', 'COMPLETE', 'COMPLETE']
+      SET APP_IPAD_PRO_3GEN_129 n=4 ['COMPLETE', 'COMPLETE', 'COMPLETE', 'COMPLETE']
+    LOC en-US desc=2132 kw=98 promo=159
+      SET APP_IPHONE_67 n=7 ['COMPLETE', 'COMPLETE', 'COMPLETE', 'COMPLETE', 'COMPLETE', 'COMPLETE', 'COMPLETE']
+      SET APP_IPAD_PRO_3GEN_129 n=4 ['COMPLETE', 'COMPLETE', 'COMPLETE', 'COMPLETE']
+    LOC de-DE desc=2305 kw=93 promo=161
+      SET APP_IPHONE_67 n=6 ['COMPLETE', 'COMPLETE', 'COMPLETE', 'COMPLETE', 'COMPLETE', 'COMPLETE']
+      SET APP_IPAD_PRO_3GEN_129 n=6 ['COMPLETE', 'COMPLETE', 'COMPLETE', 'COMPLETE', 'COMPLETE', 'COMPLETE']
+  APPINFO 7ebd72f6-6089-4c76-9670-250cb89b8793 PREPARE_FOR_SUBMISSION PREPARE_FOR_SUBMISSION
+    INFOLOC de-DE name='Publit' subtitle='Öffis ohne Schnickschnack' privacy='https://elija-7580.github.io/publit-site/privacy/'
+    INFOLOC en-US name='Publit' subtitle='Public transport, no noise' privacy='https://elija-7580.github.io/publit-site/privacy/'
+    INFOLOC en-GB name='Publit' subtitle='Public transport, no noise' privacy='https://elija-7580.github.io/publit-site/privacy/'
