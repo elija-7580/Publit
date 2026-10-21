@@ -1,5 +1,6 @@
 import CoreLocation
 import XCTest
+import UIKit
 
 /// End-to-end flows against the live Transitous API. Each test saves a screenshot
 /// (`$SIMULATOR_HOST_HOME/publit-shots/<name>.png` on CI) for the README and website.
@@ -377,6 +378,95 @@ final class PublitUITests: XCTestCase {
         sleep(4)
         snap("web-widgets-dark")
         app.terminate()
+    }
+
+    // MARK: App Store screenshots
+
+    /// The App Store screens in one language (`PUBLIT_SHOT_LANG`, set on CI through
+    /// `TEST_RUNNER_PUBLIT_SHOT_LANG`). iPad takes them in landscape, the map-first wide layout.
+    func testF29AppStoreShots() {
+        let lang = ProcessInfo.processInfo.environment["PUBLIT_SHOT_LANG"] ?? "en"
+        let pad = UIDevice.current.userInterfaceIdiom == .pad
+        XCUIDevice.shared.orientation = pad ? .landscapeLeft : .portrait
+        func launch(_ env: [String: String]) -> XCUIApplication {
+            let app = XCUIApplication()
+            app.launchArguments = ["-onboardingDone", "YES", "-AppleLanguages", "(\(lang))",
+                                   "-AppleLocale", lang == "de" ? "de_DE" : "en_GB"]
+            app.launchEnvironment = env
+            app.launch()
+            return app
+        }
+        var app = launch(["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "nearby", "PUBLIT_UI_DARK": "0"])
+        allowLocation()
+        sleep(10)
+        snap("as-01-nearby")
+        app.tab(1).tap()
+        sleep(12)
+        snap("as-02-plan")
+        if pad {
+            let row = app.descendants(matching: .any).matching(identifier: "routeRow").firstMatch
+            if row.waitForExistence(timeout: 5) {
+                row.tap()
+                sleep(5)
+                snap("as-03-route")
+            }
+        }
+        app.tab(2).tap()
+        sleep(2)
+        snap("as-07-tickets")
+        app.tab(0).tap()
+        sleep(2)
+        if !pad {
+            let map = app.buttons[lang == "de" ? "Haltestellenkarte" : "Station map"]
+            if map.waitForExistence(timeout: 5) { map.tap(); sleep(6) }
+        }
+        let field = app.searchFields.firstMatch
+        if field.waitForExistence(timeout: 5) {
+            field.tap()
+            sleep(1)
+            let cafe = app.buttons["category-cafe"]
+            if cafe.waitForExistence(timeout: 5) {
+                cafe.tap()
+                sleep(7)
+                snap("as-05-map")
+            }
+        }
+        app.terminate()
+
+        if !pad {
+            app = launch(["PUBLIT_UI_SAMPLE": "route", "PUBLIT_UI_DARK": "0"])
+            allowLocation()
+            sleep(7)
+            snap("as-03-route")
+            app.terminate()
+        }
+        app = launch(["PUBLIT_UI_SAMPLE": "live", "PUBLIT_UI_DARK": "0"])
+        allowLocation()
+        sleep(10)
+        if !pad {
+            let window = app.windows.firstMatch
+            window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.74))
+                .press(forDuration: 0.05, thenDragTo: window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.12)))
+            sleep(2)
+        }
+        snap("as-04-live")
+        app.terminate()
+
+        app = launch(["PUBLIT_UI_SAMPLE": "route", "PUBLIT_UI_DARK": "1"])
+        allowLocation()
+        sleep(7)
+        snap("as-06-dark")
+        app.terminate()
+
+        app = launch(["PUBLIT_UI_SAMPLE": "passes", "PUBLIT_UI_DARK": "0", "PUBLIT_UI_LARGE": "0"])
+        sleep(4)
+        snap("as-08-passes")
+        app.terminate()
+        app = launch(["PUBLIT_UI_SAMPLE": "widget", "PUBLIT_UI_DARK": "0", "PUBLIT_UI_LARGE": "0"])
+        sleep(4)
+        snap("as-09-widgets")
+        app.terminate()
+        XCUIDevice.shared.orientation = .portrait
     }
 
     /// Answers the location prompt, which would cover the screenshot.

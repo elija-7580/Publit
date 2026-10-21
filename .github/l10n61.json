@@ -1,0 +1,192 @@
+{
+ "Choose a ticket": {
+  "extractionState": "manual",
+  "localizations": {
+   "cs": {
+    "stringUnit": {
+     "state": "translated",
+     "value": "Vyberte jízdenku"
+    }
+   },
+   "de": {
+    "stringUnit": {
+     "state": "translated",
+     "value": "Ticket auswählen"
+    }
+   },
+   "el": {
+    "stringUnit": {
+     "state": "translated",
+     "value": "Επιλέξτε εισιτήριο"
+    }
+   },
+   "en": {
+    "stringUnit": {
+     "state": "translated",
+     "value": "Choose a ticket"
+    }
+   },
+   "es": {
+    "stringUnit": {
+     "state": "translated",
+     "value": "Elige un billete"
+    }
+   },
+   "fr": {
+    "stringUnit": {
+     "state": "translated",
+     "value": "Choisissez un billet"
+    }
+   },
+   "hu": {
+    "stringUnit": {
+     "state": "translated",
+     "value": "Válasszon jegyet"
+    }
+   },
+   "it": {
+    "stringUnit": {
+     "state": "translated",
+     "value": "Scegli un biglietto"
+    }
+   },
+   "nl": {
+    "stringUnit": {
+     "state": "translated",
+     "value": "Kies een ticket"
+    }
+   },
+   "pl": {
+    "stringUnit": {
+     "state": "translated",
+     "value": "Wybierz bilet"
+    }
+   },
+   "pt-PT": {
+    "stringUnit": {
+     "state": "translated",
+     "value": "Escolha um bilhete"
+    }
+   },
+   "ro": {
+    "stringUnit": {
+     "state": "translated",
+     "value": "Alegeți un bilet"
+    }
+   },
+   "sv": {
+    "stringUnit": {
+     "state": "translated",
+     "value": "Välj en biljett"
+    }
+   },
+   "tr": {
+    "stringUnit": {
+     "state": "translated",
+     "value": "Bir bilet seçin"
+    }
+   },
+   "uk": {
+    "stringUnit": {
+     "state": "translated",
+     "value": "Виберіть квиток"
+    }
+   }
+  }
+ },
+ "Choose a trip or place": {
+  "extractionState": "manual",
+  "localizations": {
+   "cs": {
+    "stringUnit": {
+     "state": "translated",
+     "value": "Vyberte cestu nebo místo"
+    }
+   },
+   "de": {
+    "stringUnit": {
+     "state": "translated",
+     "value": "Fahrt oder Ort auswählen"
+    }
+   },
+   "el": {
+    "stringUnit": {
+     "state": "translated",
+     "value": "Επιλέξτε διαδρομή ή τόπο"
+    }
+   },
+   "en": {
+    "stringUnit": {
+     "state": "translated",
+     "value": "Choose a trip or place"
+    }
+   },
+   "es": {
+    "stringUnit": {
+     "state": "translated",
+     "value": "Elige un viaje o un lugar"
+    }
+   },
+   "fr": {
+    "stringUnit": {
+     "state": "translated",
+     "value": "Choisissez un trajet ou un lieu"
+    }
+   },
+   "hu": {
+    "stringUnit": {
+     "state": "translated",
+     "value": "Válasszon utat vagy helyet"
+    }
+   },
+   "it": {
+    "stringUnit": {
+     "state": "translated",
+     "value": "Scegli un viaggio o un luogo"
+    }
+   },
+   "nl": {
+    "stringUnit": {
+     "state": "translated",
+     "value": "Kies een rit of plek"
+    }
+   },
+   "pl": {
+    "stringUnit": {
+     "state": "translated",
+     "value": "Wybierz przejazd lub miejsce"
+    }
+   },
+   "pt-PT": {
+    "stringUnit": {
+     "state": "translated",
+     "value": "Escolha uma viagem ou um local"
+    }
+   },
+   "ro": {
+    "stringUnit": {
+     "state": "translated",
+     "value": "Alegeți o călătorie sau un loc"
+    }
+   },
+   "sv": {
+    "stringUnit": {
+     "state": "translated",
+     "value": "Välj en resa eller plats"
+    }
+   },
+   "tr": {
+    "stringUnit": {
+     "state": "translated",
+     "value": "Bir yolculuk veya yer seçin"
+    }
+   },
+   "uk": {
+    "stringUnit": {
+     "state": "translated",
+     "value": "Виберіть поїздку або місце"
+    }
+   }
+  }
+ }
+}

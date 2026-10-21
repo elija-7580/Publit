@@ -95,8 +95,8 @@ struct RootView: View {
     /// The launch animation, while the first departures load underneath.
     @State private var splash = true
     @Environment(\.horizontalSizeClass) private var sizeClass
-    /// Width of the window: the iPad layout needs room for the panel and the map.
-    @State private var rootWidth: CGFloat = 0
+    /// Size of the window: the iPad layout needs room for the panel and the map.
+    @State private var rootSize: CGSize = .zero
     @State private var onboarding = OnboardingView.needed
     @AppStorage(OnboardingView.doneKey) private var onboardingDone = false
 
@@ -127,7 +127,7 @@ struct RootView: View {
     @ViewBuilder
     private var tabs: some View {
         @Bindable var app = app
-        let wide = WideLayout.isWide(width: rootWidth, sizeClass: sizeClass)
+        let wide = WideLayout.isWide(size: rootSize, sizeClass: sizeClass)
         Group {
             if #available(iOS 18, *) {
                 AdaptiveTabs(tab: $app.tab, wide: wide)
@@ -148,7 +148,10 @@ struct RootView: View {
                 }
             }
         }
-        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { rootWidth = $0 }
+        // The unfolded iPhone Duo is compact like an iPhone; the wide layout (split views, sidebar
+        // tabs) needs regular, so it gets regular there.
+        .environment(\.horizontalSizeClass, wide ? .regular : sizeClass)
+        .onGeometryChange(for: CGSize.self) { $0.size } action: { rootSize = $0 }
         .sheet(item: $app.sharedTicketFile) { file in
             PassImportView(sharedURL: file.url)
         }

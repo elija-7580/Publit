@@ -1,0 +1,32 @@
+name: Apply build 61 strings
+
+# One-off: merges the translations in .github/l10n61.json into the String Catalog, then removes
+# itself and the JSON in the same commit.
+on:
+  push:
+    branches: [build61]
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Merge
+        run: |
+          test -f .github/l10n61.json || exit 0
+          python3 - <<'PY'
+          import json
+          p = "Sources/Shared/Localizable.xcstrings"
+          d = json.load(open(p, encoding="utf-8"))
+          d["strings"].update(json.load(open(".github/l10n61.json", encoding="utf-8")))
+          open(p, "w", encoding="utf-8").write(json.dumps(d, ensure_ascii=False, sort_keys=True, separators=(",", ":")))
+          PY
+          git rm -q .github/l10n61.json .github/workflows/apply61.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Sources/Shared/Localizable.xcstrings
+          git commit -q -m "Translations for the iPad placeholders (15 languages)"
+          git push

@@ -27,7 +27,7 @@ struct LiveTripView: View {
     /// The way on foot from where you are, when you are away from the planned walk.
     @State private var detour = WalkDetour()
     @Environment(\.horizontalSizeClass) private var sizeClass
-    @State private var screenWidth: CGFloat = 0
+    @State private var screenSize: CGSize = .zero
 
     /// A recent fix only: an old one would put you at the wrong stop.
     private var fix: LatLon? {
@@ -106,10 +106,10 @@ struct LiveTripView: View {
                 walkPos: walkPos, detour: detourRoute, ride: ride, check: check, wrong: wrong, wrongMessage: wrongMessage,
                 searchFrom: searchFrom)
         Group {
-            if WideLayout.isWide(width: screenWidth, sizeClass: sizeClass) {
+            if WideLayout.isWide(size: screenSize, sizeClass: sizeClass) {
                 // iPad and iPhone Duo unfolded: the map over the whole screen, the stages and details
                 // in a panel on the left that stays open (nothing to pull up).
-                let width = WideLayout.panelWidth(for: screenWidth)
+                let width = WideLayout.panelWidth(for: screenSize.width)
                 ZStack(alignment: .topLeading) {
                     map
                         .safeAreaPadding(.leading, width + WideLayout.margin * 2)
@@ -140,7 +140,7 @@ struct LiveTripView: View {
                 }
             }
         }
-        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { screenWidth = $0 }
+        .onGeometryChange(for: CGSize.self) { $0.size } action: { screenSize = $0 }
         .onChange(of: riskKey) { _, key in
             guard !key.isEmpty, let r = SmartRouting.changeAtRisk(trip.itinerary, at: .now) else { return }
             feedbackKind = .platform

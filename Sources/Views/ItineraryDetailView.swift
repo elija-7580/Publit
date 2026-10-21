@@ -119,13 +119,6 @@ struct ItineraryDetailView: View {
                 .accessibilityIdentifier("routePreviewMap")
                 }
             }
-            .task {
-                guard !mapReady || !showsAll else { return }
-                try? await Task.sleep(for: .milliseconds(60))
-                showsAll = true
-                try? await Task.sleep(for: .milliseconds(300))
-                withAnimation(.easeOut(duration: 0.2)) { mapReady = true }
-            }
 
             Section {
                 if let statusAt {
@@ -212,6 +205,15 @@ struct ItineraryDetailView: View {
                         ToolbarItem(placement: .confirmationAction) { Button("Done") { showsMap = false } }
                     }
             }
+        }
+        // On the List, not on the map's section: in the iPad layout that section is empty and an
+        // empty section never appears, so the rest of the screen stayed a placeholder.
+        .task {
+            guard !mapReady || !showsAll else { return }
+            try? await Task.sleep(for: .milliseconds(60))
+            showsAll = true
+            try? await Task.sleep(for: .milliseconds(300))
+            withAnimation(.easeOut(duration: 0.2)) { mapReady = true }
         }
         .navigationTitle("Route")
         .wideMapScene(.route(itinerary))

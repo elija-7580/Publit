@@ -10,8 +10,13 @@ enum WideLayout {
     /// iPhone Duo, narrow Split View) the iPhone layout is used.
     static let minWidth: CGFloat = 680
 
-    static func isWide(width: CGFloat, sizeClass: UserInterfaceSizeClass?) -> Bool {
-        sizeClass == .regular && width >= minWidth
+    /// The unfolded iPhone Duo reports a compact width like every iPhone, so a window that is big
+    /// in both directions counts as well. An iPhone in landscape is never tall enough for that.
+    static let minSquare: CGFloat = 580
+
+    static func isWide(size: CGSize, sizeClass: UserInterfaceSizeClass?) -> Bool {
+        if sizeClass == .regular, size.width >= minWidth { return true }
+        return size.width >= minSquare && size.height >= minSquare
     }
 
     /// The panel: a phone-like column, a bit wider on the big screens. About 40 % in portrait,

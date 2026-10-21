@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0 (build 61)
+
+- iPhone Duo (unfolded): now really gets the iPad layout with the map and the side panel. Its inner display reports a compact width like any iPhone, so Publit now also looks at the height; an iPhone in landscape keeps the iPhone layout.
+- iPad: an opened route no longer shows an empty card under the details; steps, actions and Smart Routing appear right away.
+- Placeholders "Choose a ticket" and "Choose a trip or place" translated into all 15 languages.
+- App Store: UI test for the store screenshots (iPhone 6.9", iPad 13", English and German).
+
 ## 0.6.0 (build 60)
 
 - iPad and iPhone Duo (unfolded): their own layout. The map fills the screen and the content floats over it in a panel on the left, like Apple Maps on iPad.
