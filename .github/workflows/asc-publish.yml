@@ -30,8 +30,10 @@ jobs:
           S=appstore/screenshots
           mkdir -p $S/APP_IPHONE_67/en-US $S/APP_IPHONE_67/de-DE $S/APP_IPAD_PRO_3GEN_129
           cp docs/appstore/png/assets/appstore/en-*.png $S/APP_IPHONE_67/en-US/
+          mkdir -p $S/APP_IPHONE_67/en-GB && cp docs/appstore/png/assets/appstore/en-*.png $S/APP_IPHONE_67/en-GB/
           cp docs/appstore/png/assets/appstore/de-*.png $S/APP_IPHONE_67/de-DE/
           mkdir -p /tmp/ipad && cat $(ls appstore/ipad/part-* | sort) | base64 -d | tar x -C /tmp/ipad
+          cp -r /tmp/ipad/en $S/APP_IPAD_PRO_3GEN_129/en-GB
           mv /tmp/ipad/en $S/APP_IPAD_PRO_3GEN_129/en-US
           mv /tmp/ipad/de $S/APP_IPAD_PRO_3GEN_129/de-DE
           find $S -type f | sort

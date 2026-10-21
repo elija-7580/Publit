@@ -93,11 +93,6 @@ if d and d.get("data"):
     AR = d["data"]["id"]
     have = d["data"]["attributes"]
     a = {}
-    for k, v in have.items():
-        if k in ("kidsAgeBand", "ageRatingOverride", "ageRatingOverrideV2", "koreaAgeRatingOverride", "developerAgeRatingInfoUrl"):
-            continue
-        a[k] = False if isinstance(v, bool) or k in ("gambling", "unrestrictedWebAccess", "lootBox", "messagingAndChat",
-              "parentalControls", "ageAssurance", "userGeneratedContent", "healthOrWellnessTopics", "advertising", "seventeenPlus") else "NONE"
     for k in ("gambling", "unrestrictedWebAccess", "lootBox", "messagingAndChat", "parentalControls", "ageAssurance",
               "userGeneratedContent", "healthOrWellnessTopics", "advertising"):
         a.setdefault(k, False)
