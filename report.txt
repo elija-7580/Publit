@@ -1,0 +1,41 @@
+app 6824481988 Publit primaryLocale en-GB
+using version fca98759-93a4-4757-bb2a-620b6a02480c 0.6.0 -> 0.6.0
+build 60 attached
+!! PATCH /v1/appStoreReviewDetails/cf7d06e0-cb5c-481e-be70-3507d0cbb0f0 -> 409: {
+  "errors" : [ {
+    "id" : "9e9cecde-cb0f-4aa1-957c-eabf21bc683c",
+    "status" : "409",
+    "code" : "ENTITY_ERROR.ATTRIBUTE.REQUIRED",
+    "title" : "The provided entity is missing a required attribute",
+    "detail" : "You must provide a value for the attribute 'contactFirstName' with this request",
+    "source" : {
+      "pointer" : "/data/attributes/contactFirstName"
+    }
+  }, {
+    "id" : "b0caca1e-a23e-468b-bf28-d4cddcc75b46",
+    "status" : "409",
+    "code" : "ENTITY_ERROR.ATTRIBUTE.REQUIRED",
+    "title" : "The provided entity is missing a required attribute",
+    "detail" : "You must provide a value for the attribute 'contactLastName' with this request",
+    "source" : {
+      "pointer" : "/data/attributes/contactLastName"
+    }
+  }, {
+    "id" : "9a731bfe-08f6-44af-ac8c-eb0
+review notes set (contact: missing)
+categories NAVIGATION TRAVEL ok
+age rating set (all none)
+app info en-GB ok
+app info en-US ok
+app info de-DE ok
+price schedule exists
+availability exists
+texts en-GB ok
+screenshots en-GB APP_IPAD_PRO_3GEN_129 4/4
+screenshots en-GB APP_IPHONE_67 7/7
+texts en-US ok
+screenshots en-US APP_IPAD_PRO_3GEN_129 4/4
+screenshots en-US APP_IPHONE_67 7/7
+texts de-DE ok
+screenshots de-DE APP_IPAD_PRO_3GEN_129 6/6
+screenshots de-DE APP_IPHONE_67 6/6
