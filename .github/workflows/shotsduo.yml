@@ -27,7 +27,9 @@ jobs:
           { xcodebuild -version; sw_vers; xcrun simctl list devicetypes; xcrun simctl list runtimes; xcrun simctl list devices available; } > out/env.txt 2>&1
           ls -d /Applications/Xcode*.app >> out/env.txt
       - name: Longer watchdog (the Duo simulator is slow)
-        run: sed -i 's/watchdogSeconds: TimeInterval = 150/watchdogSeconds: TimeInterval = 700/' Tests/UI/PublitUITests.swift
+        run: |
+          sed -i 's/watchdogSeconds: TimeInterval = 150/watchdogSeconds: TimeInterval = 700/' Tests/UI/PublitUITests.swift
+          grep -n 'watchdogSeconds: TimeInterval' Tests/UI/PublitUITests.swift
       - name: Generate project
         run: brew install xcodegen && xcodegen generate
       - name: Build
