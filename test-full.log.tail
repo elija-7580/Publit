@@ -1,0 +1,197 @@
+Command line invocation:
+    /Applications/Xcode_27.2_beta_2.app/Contents/Developer/usr/bin/xcodebuild test-without-building -project Publit.xcodeproj -scheme Publit -destination id=9104FB30-C168-4CA2-A302-B045881892F6 -derivedDataPath build -parallel-testing-enabled NO -test-timeouts-enabled YES -default-test-execution-time-allowance 600 -maximum-test-execution-time-allowance 600 "-only-testing:PublitUITests/PublitUITests/testF29AppStoreShots"
+
+Resolve Package Graph
+
+
+Resolved source packages:
+  GoogleMaps: https://github.com/googlemaps/ios-maps-sdk @ 11.2.0
+
+2026-10-21 10:02:28.209648+0000 PublitUITests-Runner[28389:79001] [Default] Running tests...
+2026-10-21 10:02:28.600564+0000 PublitUITests-Runner[28389:79001] [UIKit App Config] Update the Info.plist: Launch screens will soon be required.
+    t =      nans Interface orientation changed to Portrait
+Test Suite 'Selected tests' started at 2026-10-21 10:02:42.587.
+Test Suite 'PublitUITests.xctest' started at 2026-10-21 10:02:42.591.
+Test Suite 'PublitUITests' started at 2026-10-21 10:02:42.592.
+Test Case '-[PublitUITests.PublitUITests testF29AppStoreShots]' started.
+    t =     0.03s Start Test at 2026-10-21 10:02:42.626
+    t =     1.64s Set Up
+    t =     1.64s Setting device orientation to Landscape Left
+    t =     1.80s     Device orientation changed to Landscape Left
+objc[28389]: Class UIAccessibilityLoaderWebShared is implemented in both /private/var/run/com.apple.security.cryptexd/mnt/com.apple.iPhoneOS.SimulatorRuntime-v24.1.434.0.oES87p/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 27.0.simruntime/Contents/Resources/RuntimeRoot/System/Library/AccessibilityBundles/WebKit.axbundle/WebKit (0x1057c8398) and /private/var/run/com.apple.security.cryptexd/mnt/com.apple.iPhoneOS.SimulatorRuntime-v24.1.434.0.oES87p/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 27.0.simruntime/Contents/Resources/RuntimeRoot/System/Library/AccessibilityBundles/WebCore.axbundle/WebCore (0x105d38310). This may cause spurious casting failures and mysterious crashes. One of the duplicates must be removed or renamed.
+    t =     2.63s     Interface orientation changed to Landscape Right
+    t =     3.18s     Wait for com.apple.springboard to idle
+    t =     3.47s Open io.github.elija7580.publit
+    t =     3.47s     Launch io.github.elija7580.publit
+2026-10-21 10:02:48.688 xcodebuild[26873:74861] [MT] IDELaunchParametersSnapshot: debugger version lookup failed for path '<nil>': noURL
+2026-10-21 10:02:48.689 xcodebuild[26873:74861] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =    14.05s         Setting up automation session
+    t =    23.00s         Wait for io.github.elija7580.publit to idle
+    t =    40.01s Waiting 3.0s for "Allow While Using App" Button to exist
+    t =    41.05s     Checking `Expect predicate `existsNoRetry == 1` for object "Allow While Using App" Button`
+    t =    41.07s         Checking existence of `"Allow While Using App" Button`
+    t =    41.57s Tap "Allow While Using App" Button
+    t =    41.57s     Wait for com.apple.springboard to idle
+    t =    41.59s     Find the "Allow While Using App" Button
+    t =    41.64s     Check for interrupting elements affecting "Allow While Using App" Button
+    t =    42.30s     Synthesize event
+    t =    43.18s     Wait for com.apple.springboard to idle
+    t =    54.93s Added attachment named 'as-01-nearby'
+    t =    54.95s Checking existence of `TabBar (First Match)`
+    t =    86.16s Checking existence of `TabBar (First Match)` (retry 1)
+    t =   117.22s Checking existence of `TabBar (First Match)` (retry 2)
+    t =   141.72s Checking existence of `Button (First Match)`
+    t =   146.13s Tap Cell (First Match)
+    t =   146.13s     Wait for io.github.elija7580.publit to idle
+    t =   150.24s     Find the Cell (First Match)
+    t =   150.50s     Check for interrupting elements affecting "calendar" Cell
+    t =   154.10s         Wait for com.apple.springboard to idle
+    t =   154.35s     Synthesize event
+    t =   155.06s     Wait for io.github.elija7580.publit to idle
+    t =   170.86s Added attachment named 'as-02-plan'
+    t =   170.87s Waiting 5.0s for "routeRow" Any to exist
+    t =   171.91s     Checking `Expect predicate `existsNoRetry == 1` for object "routeRow" Any`
+    t =   171.94s         Checking existence of `"routeRow" Any`
+    t =   173.52s Tap "routeRow" Any
+    t =   173.52s     Wait for io.github.elija7580.publit to idle
+    t =   173.53s     Find the "routeRow" Any
+    t =   174.43s     Check for interrupting elements affecting "routeRow" Button
+    t =   174.71s         Wait for com.apple.springboard to idle
+    t =   174.89s     Synthesize event
+    t =   175.25s     Wait for io.github.elija7580.publit to idle
+    t =   182.13s Added attachment named 'as-03-route'
+    t =   182.14s Checking existence of `TabBar (First Match)`
+    t =   183.06s Checking existence of `Button (First Match)`
+    t =   183.60s Tap Cell (First Match)
+    t =   183.60s     Wait for io.github.elija7580.publit to idle
+    t =   183.61s     Find the Cell (First Match)
+    t =   183.68s     Check for interrupting elements affecting "ticket" Cell
+    t =   183.83s         Wait for com.apple.springboard to idle
+    t =   183.90s     Synthesize event
+    t =   184.23s     Wait for io.github.elija7580.publit to idle
+    t =   188.26s Added attachment named 'as-07-tickets'
+    t =   188.27s Checking existence of `TabBar (First Match)`
+    t =   188.83s Checking existence of `Button (First Match)`
+    t =   189.34s Tap Cell (First Match)
+    t =   189.34s     Wait for io.github.elija7580.publit to idle
+    t =   189.34s     Find the Cell (First Match)
+    t =   189.42s     Check for interrupting elements affecting "location.circle" Cell
+    t =   189.53s         Wait for com.apple.springboard to idle
+    t =   189.59s     Synthesize event
+    t =   189.93s     Wait for io.github.elija7580.publit to idle
+    t =   192.27s Waiting 5.0s for SearchField (First Match) to exist
+    t =   193.31s     Checking `Expect predicate `existsNoRetry == 1` for object SearchField (First Match)`
+    t =   193.32s         Checking existence of `SearchField (First Match)`
+    t =   197.59s         Capturing element debug description
+    t =   197.59s     Checking existence of `SearchField (First Match)`
+    t =   205.56s Collecting debug information to assist test failure triage
+    t =   205.56s     Requesting snapshot of accessibility hierarchy for app with pid 29075
+    t =   209.25s Terminate io.github.elija7580.publit:29075
+    t =   210.32s Open io.github.elija7580.publit
+    t =   210.32s     Launch io.github.elija7580.publit
+2026-10-21 10:06:18.676 xcodebuild[26873:74861] [MT] IDELaunchParametersSnapshot: debugger version lookup failed for path '<nil>': noURL
+2026-10-21 10:06:18.688 xcodebuild[26873:74861] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =   217.86s         Setting up automation session
+    t =   231.27s         Wait for io.github.elija7580.publit to idle
+    t =   238.30s Waiting 3.0s for "Allow While Using App" Button to exist
+    t =   239.36s     Checking `Expect predicate `existsNoRetry == 1` for object "Allow While Using App" Button`
+    t =   239.36s         Checking existence of `"Allow While Using App" Button`
+    t =   239.44s         Capturing element debug description
+    t =   240.38s     Checking `Expect predicate `existsNoRetry == 1` for object "Allow While Using App" Button`
+    t =   240.38s         Checking existence of `"Allow While Using App" Button`
+    t =   240.46s         Capturing element debug description
+    t =   241.32s     Checking `Expect predicate `existsNoRetry == 1` for object "Allow While Using App" Button`
+    t =   241.32s         Checking existence of `"Allow While Using App" Button`
+    t =   241.36s         Capturing element debug description
+    t =   241.36s     Checking existence of `"Allow While Using App" Button`
+    t =   241.40s Collecting debug information to assist test failure triage
+    t =   241.40s     Requesting snapshot of accessibility hierarchy for app with pid 25706
+    t =   241.50s Waiting 3.0s for "Beim Verwenden der App erlauben" Button to exist
+    t =   242.54s     Checking `Expect predicate `existsNoRetry == 1` for object "Beim Verwenden der App erlauben" Button`
+    t =   242.54s         Checking existence of `"Beim Verwenden der App erlauben" Button`
+    t =   242.58s         Capturing element debug description
+    t =   243.53s     Checking `Expect predicate `existsNoRetry == 1` for object "Beim Verwenden der App erlauben" Button`
+    t =   243.54s         Checking existence of `"Beim Verwenden der App erlauben" Button`
+    t =   243.59s         Capturing element debug description
+    t =   244.50s     Checking `Expect predicate `existsNoRetry == 1` for object "Beim Verwenden der App erlauben" Button`
+    t =   244.51s         Checking existence of `"Beim Verwenden der App erlauben" Button`
+    t =   244.55s         Capturing element debug description
+    t =   244.55s     Checking existence of `"Beim Verwenden der App erlauben" Button`
+    t =   244.58s Collecting debug information to assist test failure triage
+    t =   244.58s     Requesting snapshot of accessibility hierarchy for app with pid 25706
+    t =   255.19s Added attachment named 'as-04-live'
+    t =   255.20s Terminate io.github.elija7580.publit:31867
+    t =   256.25s Open io.github.elija7580.publit
+    t =   256.25s     Launch io.github.elija7580.publit
+2026-10-21 10:06:58.851 xcodebuild[26873:74861] [MT] IDELaunchParametersSnapshot: debugger version lookup failed for path '<nil>': noURL
+2026-10-21 10:06:58.852 xcodebuild[26873:74861] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =   256.72s         Setting up automation session
+    t =   265.37s         Wait for io.github.elija7580.publit to idle
+    t =   269.50s Waiting 3.0s for "Allow While Using App" Button to exist
+    t =   270.51s     Checking `Expect predicate `existsNoRetry == 1` for object "Allow While Using App" Button`
+    t =   270.51s         Checking existence of `"Allow While Using App" Button`
+    t =   270.55s         Capturing element debug description
+    t =   271.58s     Checking `Expect predicate `existsNoRetry == 1` for object "Allow While Using App" Button`
+    t =   271.59s         Checking existence of `"Allow While Using App" Button`
+    t =   271.63s         Capturing element debug description
+    t =   272.51s     Checking `Expect predicate `existsNoRetry == 1` for object "Allow While Using App" Button`
+    t =   272.51s         Checking existence of `"Allow While Using App" Button`
+    t =   272.55s         Capturing element debug description
+    t =   272.55s     Checking existence of `"Allow While Using App" Button`
+    t =   272.58s Collecting debug information to assist test failure triage
+    t =   272.58s     Requesting snapshot of accessibility hierarchy for app with pid 25706
+    t =   272.65s Waiting 3.0s for "Beim Verwenden der App erlauben" Button to exist
+    t =   273.69s     Checking `Expect predicate `existsNoRetry == 1` for object "Beim Verwenden der App erlauben" Button`
+    t =   273.69s         Checking existence of `"Beim Verwenden der App erlauben" Button`
+    t =   273.75s         Capturing element debug description
+    t =   274.69s     Checking `Expect predicate `existsNoRetry == 1` for object "Beim Verwenden der App erlauben" Button`
+    t =   274.69s         Checking existence of `"Beim Verwenden der App erlauben" Button`
+    t =   274.74s         Capturing element debug description
+    t =   275.65s     Checking `Expect predicate `existsNoRetry == 1` for object "Beim Verwenden der App erlauben" Button`
+    t =   275.65s         Checking existence of `"Beim Verwenden der App erlauben" Button`
+    t =   275.70s         Capturing element debug description
+    t =   275.70s     Checking existence of `"Beim Verwenden der App erlauben" Button`
+    t =   275.76s Collecting debug information to assist test failure triage
+    t =   275.76s     Requesting snapshot of accessibility hierarchy for app with pid 25706
+    t =   283.30s Added attachment named 'as-06-dark'
+    t =   283.32s Terminate io.github.elija7580.publit:33198
+    t =   294.33s Open io.github.elija7580.publit
+    t =   294.33s     Launch io.github.elija7580.publit
+2026-10-21 10:07:36.962 xcodebuild[26873:74861] [MT] IDELaunchParametersSnapshot: debugger version lookup failed for path '<nil>': noURL
+2026-10-21 10:07:36.962 xcodebuild[26873:74861] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =   295.29s         Setting up automation session
+    t =   306.15s         Wait for io.github.elija7580.publit to idle
+    t =   315.26s Added attachment named 'as-08-passes'
+    t =   315.28s Terminate io.github.elija7580.publit:34812
+    t =   316.35s Open io.github.elija7580.publit
+    t =   316.35s     Launch io.github.elija7580.publit
+2026-10-21 10:07:59.024 xcodebuild[26873:74861] [MT] IDELaunchParametersSnapshot: debugger version lookup failed for path '<nil>': noURL
+2026-10-21 10:07:59.025 xcodebuild[26873:74861] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =   317.62s         Setting up automation session
+    t =   326.48s         Wait for io.github.elija7580.publit to idle
+    t =   333.42s Added attachment named 'as-09-widgets'
+    t =   333.42s Terminate io.github.elija7580.publit:35385
+    t =   334.46s Setting device orientation to Portrait
+    t =   334.48s     Device orientation changed to Portrait
+    t =   334.87s     Interface orientation changed to Portrait
+    t =   334.88s     Wait for com.apple.springboard to idle
+    t =   334.89s Tear Down
+    t =   335.48s     Added attachment named 'failed-testF29AppStoreShots'
+TIMING: -[PublitUITests testF29AppStoreShots] 333 s
+Test Case '-[PublitUITests.PublitUITests testF29AppStoreShots]' passed (337.023 seconds).
+Test Suite 'PublitUITests' passed at 2026-10-21 10:08:19.653.
+	 Executed 1 test, with 0 failures (0 unexpected) in 337.023 (337.061) seconds
+Test Suite 'PublitUITests.xctest' passed at 2026-10-21 10:08:19.657.
+	 Executed 1 test, with 0 failures (0 unexpected) in 337.023 (337.066) seconds
+Test Suite 'Selected tests' passed at 2026-10-21 10:08:19.658.
+	 Executed 1 test, with 0 failures (0 unexpected) in 337.023 (337.071) seconds
+2026-10-21 10:08:20.582 xcodebuild[26873:74861] [MT] IDETestOperationsObserverDebug: 383.206 elapsed -- Testing started completed.
+2026-10-21 10:08:20.582 xcodebuild[26873:74861] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-10-21 10:08:20.582 xcodebuild[26873:74861] [MT] IDETestOperationsObserverDebug: 383.206 sec, +383.206 sec -- end
+
+Test session results, code coverage, and logs:
+	/Users/runner/work/Publit/Publit/build/Logs/Test/Test-Publit-2026.10.21_10-01-56-+0000.xcresult
+
+** TEST EXECUTE SUCCEEDED **
+
+Testing started
