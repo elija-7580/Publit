@@ -424,6 +424,19 @@ final class PublitUITests: XCTestCase {
         app.terminate()
     }
 
+    /// Live-trip ticket access must not treat an undated saved pass as an empty wallet.
+    func testLiveTripOpensSavedUndatedTicketInsteadOfImport() {
+        let app = sample("live-undated-ticket")
+        let ticket = app.buttons["quickTicket"]
+        XCTAssertTrue(ticket.waitForExistence(timeout: 15))
+        ticket.tap()
+        XCTAssertTrue(app.navigationBars["DEMO KlimaTicket — no dates"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["importFile"].exists, "must open the saved ticket, not Add ticket")
+        XCTAssertTrue(app.buttons["passMenu"].exists)
+        snap("live-undated-ticket")
+        app.terminate()
+    }
+
     /// F12 Ticket passes (built, not in the app yet): list, pass with code, full-screen code,
     /// check screen after recognition, import sources, dark mode and large type.
     func testF12TicketPassScreens() {

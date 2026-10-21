@@ -475,8 +475,45 @@ final class PassStoreTests: XCTestCase {
         store.insert(TicketPass(title: "Wallet single", category: .single, validFrom: now - 3600, validUntil: now + 3600))
         store.insert(TicketPass(title: "Undated", category: .single))
         store.insert(TicketPass(title: "Other trip", category: .single, validUntil: now + 3600, tripId: "t2"))
-        XCTAssertEqual(store.passes(forTrip: "t1", at: now).map(\.title), ["Adult", "Child", "Bike", "Day", "Wallet single"])
-        XCTAssertEqual(store.passes(forTrip: nil, at: now).map(\.title), ["Wallet single"])
+        XCTAssertEqual(store.passes(forTrip: "t1", at: now).map(\.title), ["Adult", "Child", "Bike", "Day", "Wallet single", "Undated"])
+        XCTAssertEqual(store.passes(forTrip: nil, at: now).map(\.title), ["Wallet single", "Undated"])
+    }
+
+    func testUndatedWalletTicketsRemainAvailableDuringLiveTrip() async {
+        let store = PassStore(directory: directory())
+        let now = Date(timeIntervalSince1970: 1_800_000_000)
+        let climate = TicketPass(title: "KlimaTicket Ö", category: .subscription)
+        let unclassified = TicketPass(title: "Klimaticket Österreich", category: .other)
+        store.insert(climate)
+        store.insert(unclassified)
+
+        XCTAssertEqual(store.passes(forTrip: "live-trip", at: now).map(\.id), [climate.id, unclassified.id])
+        XCTAssertEqual(store.passes(forTrip: nil, at: now).map(\.id), [climate.id, unclassified.id])
+        XCTAssertEqual(store.pass(climate.id)?.validity(at: now), .unknown)
+        XCTAssertEqual(store.pass(unclassified.id)?.validity(at: now), .unknown)
+        XCTAssertNil(store.pass(climate.id)?.validFrom)
+        XCTAssertNil(store.pass(climate.id)?.validUntil)
+    }
+
+    func testUndatedFallbackRespectsArchiveTripOwnershipAndKnownDates() async {
+        let store = PassStore(directory: directory())
+        let now = Date(timeIntervalSince1970: 1_800_000_000)
+        let own = TicketPass(title: "Own", category: .single, tripId: "t1")
+        let undated = TicketPass(title: "Undated", category: .period)
+        let valid = TicketPass(title: "Valid", category: .period, validUntil: now + 3600)
+        store.insert(undated)
+        store.insert(own)
+        store.insert(valid)
+        store.insert(TicketPass(title: "Other trip", category: .single, tripId: "t2"))
+        store.insert(TicketPass(title: "Future", category: .period, validFrom: now + 3600))
+        store.insert(TicketPass(title: "Expired", category: .period, validUntil: now - 60))
+        let archived = TicketPass(title: "Archived", category: .subscription)
+        store.insert(archived)
+        store.archive(archived.id, now: now)
+
+        XCTAssertEqual(store.passes(forTrip: "t1", at: now).map(\.id), [own.id, valid.id, undated.id])
+        XCTAssertEqual(store.passes(forTrip: nil, at: now).map(\.id), [valid.id, undated.id])
+        XCTAssertEqual(Set(store.passes(forTrip: "t1", at: now).map(\.id)).count, 3)
     }
 
     func testImportsLegacyTicketsOnce() async throws {

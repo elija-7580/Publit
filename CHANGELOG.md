@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.0 (build 61)
+
+- Live trip: the ticket button now opens saved tickets without recognised validity dates (including imported KlimaTickets) instead of offering only “Add ticket”. Undated tickets remain labelled without dates; no validity is inferred. Known expired/future tickets and tickets assigned only to another trip remain excluded from the shared suggestions.
+
 ## 0.6.0 (build 60)
 
 - iPad and iPhone Duo (unfolded): their own layout. The map fills the screen and the content floats over it in a panel on the left, like Apple Maps on iPad.

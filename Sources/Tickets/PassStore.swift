@@ -93,16 +93,17 @@ final class PassStore {
         return gone.count
     }
 
-    /// What a trip offers: every ticket added for it (oldest first), then tickets valid at the trip's time:
-    /// passes, and dated tickets that belong to no trip (e.g. a single ticket added in the wallet).
+    /// What a trip offers: every ticket added for it (oldest first), then reusable or unassigned
+    /// tickets valid at the trip's time, then those without dates. Unknown validity must not hide
+    /// a saved ticket (e.g. an imported KlimaTicket); its validity remains unknown in the UI.
     func passes(forTrip tripId: String?, at date: Date = .now) -> [TicketPass] {
         let own = tripId.map { id in passes.filter { $0.tripId == id }.sorted { $0.createdAt < $1.createdAt } } ?? []
-        let valid = passes.filter { p in
-            guard !own.contains(p), p.archivedAt == nil, p.category.isPass || p.tripId == nil else { return false }
-            if case .valid = p.validity(at: date) { return true }
-            return false
+        let candidates = passes.filter { p in
+            !own.contains(p) && p.archivedAt == nil && (p.category.isPass || p.tripId == nil)
         }
-        return own + valid
+        let valid = candidates.filter { if case .valid = $0.validity(at: date) { return true }; return false }
+        let undated = candidates.filter { $0.validity(at: date) == .unknown }
+        return own + valid + undated
     }
 
     /// Saves a checked pass. The document is written away from the main actor before the pass appears.

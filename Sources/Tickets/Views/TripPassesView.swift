@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// The tickets for one trip: its own single tickets, then passes valid at the trip's time.
-/// Without a trip: the passes valid now.
+/// Tickets for one trip: its own tickets, then valid and undated reusable/unassigned tickets.
+/// Undated tickets stay accessible without claiming that they are valid.
 struct TripPassesView: View {
     var tripId: String? = nil
     var at: Date = .now
@@ -96,7 +96,7 @@ struct ShowPassToolbar: ViewModifier {
 }
 
 /// The ticket button of a running trip. Tap: the default ticket at once (its code full screen).
-/// Hold: every ticket valid now, to show another one or make it the default; or add one.
+/// Hold: every available ticket, including undated ones, to show it or make it the default; or add one.
 struct QuickTicketToolbar: ViewModifier {
     static let defaultKey = "defaultPassId"
     var tripId: String?

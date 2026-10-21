@@ -26,6 +26,7 @@ enum DesignSamples {
 struct DesignSampleView: View {
     let kind: String
     @Environment(TripStore.self) private var trips
+    @Environment(PassStore.self) private var passes
     @State private var tripId: String?
 
     var body: some View {
@@ -43,6 +44,10 @@ struct DesignSampleView: View {
             let saved = trips.save(DesignSamples.itinerary, from: "Zuhause", to: "Flughafen München")
             trips.update(saved.id, with: DesignSamples.itinerary)
             _ = trips.start(saved.id)
+            if kind == "live-undated-ticket" {
+                for pass in passes.passes { passes.remove(pass.id) }
+                passes.insert(TicketPass(id: "demo-undated-climate", title: "DEMO KlimaTicket — no dates", category: .subscription))
+            }
             tripId = saved.id
         }
     }
