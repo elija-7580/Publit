@@ -63,7 +63,10 @@ jobs:
             rm -rf ~/publit-shots
             xcodebuild test-without-building -project Publit.xcodeproj -scheme Publit \
               -destination "id=$UDID" -derivedDataPath build \
-              -only-testing:PublitUITests/PublitUITests/testF23WideLayout 2>&1 | grep -E "Test Case|error:|Executed" > "out/ui-$want.log" || true
+              -only-testing:PublitUITests/PublitUITests/testF23WideLayout > "out/ui-full-$want.log" 2>&1 || true
+            grep -E "Test Case|error:|Executed|crash|Crash|failed" "out/ui-full-$want.log" > "out/ui-$want.log" || true
+            mkdir -p "out/crash-$want" && cp ~/Library/Logs/DiagnosticReports/*Publit* "out/crash-$want/" 2>/dev/null || true
+            find ~/Library/Logs/DiagnosticReports -newer out/build.log -type f | head -20 >> "out/crash-$want/list.txt" 2>/dev/null || true
             D="out/$(echo "$want" | tr ' ' '-')"
             mkdir -p "$D"
             for f in ~/publit-shots/*.png; do [ -f "$f" ] && sips -Z 1100 "$f" --out "$D/$(basename "$f")" >/dev/null; done
@@ -72,7 +75,7 @@ jobs:
       - name: Publish
         if: always()
         run: |
-          rm -f out/build-full.log
+          rm -f out/build-full.log; for f in out/ui-full-*.log; do tail -400 "$f" > "$f.tail"; rm -f "$f"; done
           cd out
           git init -q -b shots-61
           git config user.name "github-actions[bot]"
