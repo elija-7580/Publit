@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.0 (build 62)
+
+- Transfers: both vehicles with service identity, direction, arrival/departure station and platform, local times with live/timetable provenance, walking time and connection buffer. The shared overview is shown in route steps and ahead of the next change while riding, as well as on the connecting walk and boarding screen. Platform changes, cancellations and insufficient buffers are highlighted; unknown platforms are labelled.
+- Train division: explicit operator notices remain visible in route details and trip guidance, with the original text and operator link. Initial notice detection supports German, English, French and Italian. No front/rear carriage allocation is inferred; a missing notice does not mean the train will not divide.
+- New connection texts translated into all 15 app languages.
+
 ## 0.6.0 (build 61)
 
 - Live trip: the ticket button now opens saved tickets without recognised validity dates (including imported KlimaTickets) instead of offering only “Add ticket”. Undated tickets remain labelled without dates; no validity is inferred. Known expired/future tickets and tickets assigned only to another trip remain excluded from the shared suggestions.

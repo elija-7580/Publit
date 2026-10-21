@@ -2,7 +2,7 @@
 
 ## Scope
 
-First implementation in the main (iOS) Publit repository. No changes to the separate Android repository, no release/version bump, no merge to main.
+First implementation in the main (iOS) Publit repository, merged via PR #41 (60e338c). Prepared for TestFlight as version 0.6.0, build 62. No changes to the separate Android repository.
 
 ### Connection card
 
@@ -49,3 +49,7 @@ Suggested manual checks:
 5. Explicit train-division alert: notice remains visible with collapsed stops; original operator destination/section instructions and link are retained.
 6. No train-division data: no inferred front/rear recommendation or invented division marker.
 7. German/English, largest accessibility text, light/dark: wrapping, warning contrast and operator-link accessibility.
+
+## Release validation update (2026-10-21)
+
+PR CI: Linux core and feed converter checks passed. The iOS job failed with the same four UI failures present on the base main commit 640f3f9: F02 get-off reminder, F04 Cancel button, F17 ticket review, F19 map long press. These failures are not waived as test passes. The user explicitly requested merge and TestFlight publication; PR #41 was merged with those known pre-existing UI issues documented. Release archive/upload remains a separate verification step.
