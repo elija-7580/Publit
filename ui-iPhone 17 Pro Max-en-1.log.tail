@@ -1,0 +1,60 @@
+    t =   124.53s         Wait for io.github.elija7580.publit to idle
+    t =   129.67s Waiting 3.0s for "Allow While Using App" Button to exist
+    t =   130.74s     Checking `Expect predicate `existsNoRetry == 1` for object "Allow While Using App" Button`
+    t =   130.74s         Checking existence of `"Allow While Using App" Button`
+    t =   130.82s         Capturing element debug description
+    t =   131.68s     Checking `Expect predicate `existsNoRetry == 1` for object "Allow While Using App" Button`
+    t =   131.68s         Checking existence of `"Allow While Using App" Button`
+    t =   131.72s         Capturing element debug description
+    t =   132.68s     Checking `Expect predicate `existsNoRetry == 1` for object "Allow While Using App" Button`
+    t =   132.68s         Checking existence of `"Allow While Using App" Button`
+    t =   132.73s         Capturing element debug description
+    t =   132.73s     Checking existence of `"Allow While Using App" Button`
+    t =   132.76s Collecting debug information to assist test failure triage
+    t =   132.76s     Requesting snapshot of accessibility hierarchy for app with pid 7418
+    t =   132.84s Waiting 3.0s for "Beim Verwenden der App erlauben" Button to exist
+    t =   133.85s     Checking `Expect predicate `existsNoRetry == 1` for object "Beim Verwenden der App erlauben" Button`
+    t =   133.85s         Checking existence of `"Beim Verwenden der App erlauben" Button`
+    t =   133.90s         Capturing element debug description
+    t =   134.90s     Checking `Expect predicate `existsNoRetry == 1` for object "Beim Verwenden der App erlauben" Button`
+    t =   134.90s         Checking existence of `"Beim Verwenden der App erlauben" Button`
+    t =   134.94s         Capturing element debug description
+    t =   135.84s     Checking `Expect predicate `existsNoRetry == 1` for object "Beim Verwenden der App erlauben" Button`
+    t =   135.84s         Checking existence of `"Beim Verwenden der App erlauben" Button`
+    t =   135.87s         Capturing element debug description
+    t =   135.87s     Checking existence of `"Beim Verwenden der App erlauben" Button`
+    t =   135.91s Collecting debug information to assist test failure triage
+    t =   135.91s     Requesting snapshot of accessibility hierarchy for app with pid 7418
+    t =   143.24s Added attachment named 'as-03-route'
+    t =   143.24s Terminate io.github.elija7580.publit:12595
+    t =   144.32s Open io.github.elija7580.publit
+    t =   144.32s     Launch io.github.elija7580.publit
+2026-10-21 08:51:13.992 xcodebuild[8431:28991] [MT] IDELaunchParametersSnapshot: debugger version lookup failed for path '<nil>': noURL
+2026-10-21 08:51:13.993 xcodebuild[8431:28991] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =   149.48s         Setting up automation session
+WATCHDOG: -[PublitUITests testF29AppStoreShots] still running after 150 s - stopping the runner
+2026-10-21 08:53:03.563452+0000 PublitUITests-Runner[16336:50622] [Default] Running tests...
+    t =      nans Interface orientation changed to Portrait
+
+Restarting after unexpected exit, crash, or test timeout; summary will include totals from previous launches.
+
+Test Suite 'Selected tests' started at 2026-10-21 08:53:19.644.
+Test Suite 'PublitUITests.xctest' started at 2026-10-21 08:53:19.651.
+Test Suite 'PublitUITests.xctest' passed at 2026-10-21 08:53:19.652.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' passed at 2026-10-21 08:53:19.653.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.009) seconds
+2026-10-21 09:03:20.789 xcodebuild[8431:43396]  IDETestOperationsObserverDebug: Failure collecting diagnostics from simulator: Timed out after 600.0 seconds while waiting for a response from the invoked process
+2026-10-21 09:03:20.889 xcodebuild[8431:28991] [MT] IDETestOperationsObserverDebug: 893.119 elapsed -- Testing started completed.
+2026-10-21 09:03:20.889 xcodebuild[8431:28991] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-10-21 09:03:20.889 xcodebuild[8431:28991] [MT] IDETestOperationsObserverDebug: 893.119 sec, +893.119 sec -- end
+
+Test session results, code coverage, and logs:
+	/Users/runner/work/Publit/Publit/build/Logs/Test/Test-Publit-2026.10.21_08-48-26-+0000.xcresult
+
+Failing tests:
+	PublitUITests.testF29AppStoreShots()
+
+** TEST EXECUTE FAILED **
+
+Testing started

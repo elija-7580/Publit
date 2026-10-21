@@ -1,0 +1,135 @@
+    export ALLOW_BUILD_REQUEST_OVERRIDES\=NO
+    export BUILD_ACTIVE_RESOURCES_ONLY\=NO
+    export BUILD_COMPONENTS\=headers\ build
+    export BUILD_DIR\=/Users/runner/work/Publit/Publit/build/Build/Products
+    export BUILD_LIBRARY_FOR_DISTRIBUTION\=NO
+    export BUILD_ONLY_KNOWN_LOCALIZATIONS\=NO
+    export BUILD_ROOT\=/Users/runner/work/Publit/Publit/build/Build/Products
+    export BUILD_STYLE\=
+    export BUILD_VARIANTS\=normal
+    export CLANG_MODULES_BUILD_SESSION_FILE\=/Users/runner/work/Publit/Publit/build/ModuleCache.noindex/Session.modulevalidation
+    export CONFIGURATION_BUILD_DIR\=/Users/runner/work/Publit/Publit/build/Build/Products/Debug-watchsimulator
+    export FUSE_BUILD_PHASES\=YES
+    export FUSE_BUILD_SCRIPT_PHASES\=NO
+    export INFOPLIST_EXPAND_BUILD_SETTINGS\=YES
+    export IS_UNOPTIMIZED_BUILD\=YES
+    export MAC_OS_X_PRODUCT_BUILD_VERSION\=26A434
+    export PLATFORM_PRODUCT_BUILD_VERSION\=24S5091f
+    export SDK_PRODUCT_BUILD_VERSION\=24S5091f
+    export TARGET_BUILD_DIR\=/Users/runner/work/Publit/Publit/build/Build/Products/Debug-watchsimulator
+    export VERSION_INFO_BUILDER\=runner
+    export XCODE_PRODUCT_BUILD_VERSION\=27B5028f
+/Users/runner/work/Publit/Publit/Sources/API/LiveSourceAdapters.swift:162:49: warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+/Users/runner/work/Publit/Publit/Sources/API/LiveSourceAdapters.swift:259:80: warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+/Users/runner/work/Publit/Publit/Sources/API/LiveSourceAdapters.swift:256:54: warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+/Users/runner/work/Publit/Publit/Sources/API/LiveSourceAdapters.swift:255:53: warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+/Users/runner/work/Publit/Publit/Sources/API/LiveSourceAdapters.swift:162:49: warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+/Users/runner/work/Publit/Publit/Sources/API/LiveSourceAdapters.swift:259:80: warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+/Users/runner/work/Publit/Publit/Sources/API/LiveSourceAdapters.swift:256:54: warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+/Users/runner/work/Publit/Publit/Sources/API/LiveSourceAdapters.swift:255:53: warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+/Users/runner/work/Publit/Publit/Sources/API/LiveSourceAdapters.swift:162:49: warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+/Users/runner/work/Publit/Publit/Sources/API/LiveSourceAdapters.swift:259:80: warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+/Users/runner/work/Publit/Publit/Sources/API/LiveSourceAdapters.swift:256:54: warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+/Users/runner/work/Publit/Publit/Sources/API/LiveSourceAdapters.swift:255:53: warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+/Users/runner/work/Publit/Publit/Sources/API/LiveSourceAdapters.swift:162:49: warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+/Users/runner/work/Publit/Publit/Sources/API/LiveSourceAdapters.swift:259:80: warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+/Users/runner/work/Publit/Publit/Sources/API/LiveSourceAdapters.swift:256:54: warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+/Users/runner/work/Publit/Publit/Sources/API/LiveSourceAdapters.swift:255:53: warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+    export ALLOW_BUILD_REQUEST_OVERRIDES\=NO
+    export BUILD_ACTIVE_RESOURCES_ONLY\=NO
+    export BUILD_COMPONENTS\=headers\ build
+    export BUILD_DIR\=/Users/runner/work/Publit/Publit/build/Build/Products
+    export BUILD_LIBRARY_FOR_DISTRIBUTION\=NO
+    export BUILD_ONLY_KNOWN_LOCALIZATIONS\=NO
+    export BUILD_ROOT\=/Users/runner/work/Publit/Publit/build/Build/Products
+    export BUILD_STYLE\=
+    export BUILD_VARIANTS\=normal
+    export CLANG_MODULES_BUILD_SESSION_FILE\=/Users/runner/work/Publit/Publit/build/ModuleCache.noindex/Session.modulevalidation
+    export CONFIGURATION_BUILD_DIR\=/Users/runner/work/Publit/Publit/build/Build/Products/Debug-iphonesimulator
+    export FUSE_BUILD_PHASES\=YES
+    export FUSE_BUILD_SCRIPT_PHASES\=NO
+    export INFOPLIST_EXPAND_BUILD_SETTINGS\=YES
+    export IS_UNOPTIMIZED_BUILD\=YES
+    export MAC_OS_X_PRODUCT_BUILD_VERSION\=26A434
+    export PLATFORM_PRODUCT_BUILD_VERSION\=24B5089g
+    export SDK_PRODUCT_BUILD_VERSION\=24B5089g
+    export TARGET_BUILD_DIR\=/Users/runner/work/Publit/Publit/build/Build/Products/Debug-iphonesimulator
+    export VERSION_INFO_BUILDER\=runner
+    export XCODE_PRODUCT_BUILD_VERSION\=27B5028f
+/Users/runner/work/Publit/Publit/Sources/Views/PlaceSearchView.swift:209:113: warning: main actor-isolated property 'scope' can not be referenced from a nonisolated autoclosure
+/Users/runner/work/Publit/Publit/Sources/Stores/PlanModel.swift:156:75: warning: reference to captured var 'maxWalk' in concurrently-executing code; this is an error in the Swift 6 language mode [#SendableClosureCaptures]
+/Users/runner/work/Publit/Publit/Sources/Stores/PlanModel.swift:175:29: warning: 'maxWalk' mutated after capture by sendable closure
+/Users/runner/work/Publit/Publit/Sources/API/LiveSourceAdapters.swift:162:49: warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+/Users/runner/work/Publit/Publit/Sources/API/LiveSourceAdapters.swift:259:80: warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+/Users/runner/work/Publit/Publit/Sources/API/LiveSourceAdapters.swift:256:54: warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+/Users/runner/work/Publit/Publit/Sources/API/LiveSourceAdapters.swift:255:53: warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+/Users/runner/work/Publit/Publit/Sources/Views/PlaceSearchView.swift:209:113: warning: main actor-isolated property 'scope' can not be referenced from a nonisolated autoclosure
+/Users/runner/work/Publit/Publit/Sources/Stores/PlanModel.swift:156:75: warning: reference to captured var 'maxWalk' in concurrently-executing code; this is an error in the Swift 6 language mode [#SendableClosureCaptures]
+/Users/runner/work/Publit/Publit/Sources/Stores/PlanModel.swift:175:29: warning: 'maxWalk' mutated after capture by sendable closure
+/Users/runner/work/Publit/Publit/Sources/Tickets/Views/PassImportView.swift:137:41: warning: main actor-isolated static property 'maxDocumentBytes' cannot be accessed from outside of the actor; this is an error in the Swift 6 language mode
+/Users/runner/work/Publit/Publit/Sources/Tickets/Views/PassImportView.swift:140:66: warning: main actor-isolated static property 'maxDocumentBytes' cannot be accessed from outside of the actor; this is an error in the Swift 6 language mode
+/Users/runner/work/Publit/Publit/Sources/Tickets/Views/PassImportView.swift:141:48: warning: main actor-isolated static property 'maxDocumentBytes' cannot be accessed from outside of the actor; this is an error in the Swift 6 language mode
+/Users/runner/work/Publit/Publit/Sources/API/LiveSourceAdapters.swift:162:49: warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+/Users/runner/work/Publit/Publit/Sources/API/LiveSourceAdapters.swift:259:80: warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+/Users/runner/work/Publit/Publit/Sources/API/LiveSourceAdapters.swift:256:54: warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+/Users/runner/work/Publit/Publit/Sources/API/LiveSourceAdapters.swift:255:53: warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+/Users/runner/work/Publit/Publit/Sources/Tickets/Views/PassImportView.swift:137:41: warning: main actor-isolated static property 'maxDocumentBytes' cannot be accessed from outside of the actor; this is an error in the Swift 6 language mode
+/Users/runner/work/Publit/Publit/Sources/Tickets/Views/PassImportView.swift:140:66: warning: main actor-isolated static property 'maxDocumentBytes' cannot be accessed from outside of the actor; this is an error in the Swift 6 language mode
+/Users/runner/work/Publit/Publit/Sources/Tickets/Views/PassImportView.swift:141:48: warning: main actor-isolated static property 'maxDocumentBytes' cannot be accessed from outside of the actor; this is an error in the Swift 6 language mode
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:tr:Show my ticket in ${applicationName}: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:tr:Show my ticket in ${applicationName}: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:nl:Show my ticket in ${applicationName}: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:nl:Show my ticket in ${applicationName}: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:el:Show my ticket in ${applicationName}: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:el:Show my ticket in ${applicationName}: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:fr:Show my ticket in ${applicationName}: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:fr:Show my ticket in ${applicationName}: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:sv:Show my ticket in ${applicationName}: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:sv:Show my ticket in ${applicationName}: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:de:Show my ticket in ${applicationName}: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:de:Show my ticket in ${applicationName}: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:ro:Show my ticket in ${applicationName}: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:ro:Show my ticket in ${applicationName}: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:pl:Show my ticket in ${applicationName}: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:pl:Show my ticket in ${applicationName}: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:it:Show my ticket in ${applicationName}: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:it:Show my ticket in ${applicationName}: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:uk:Show my ticket in ${applicationName}: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:uk:Show my ticket in ${applicationName}: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:hu:Show my ticket in ${applicationName}: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:hu:Show my ticket in ${applicationName}: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:es:Show my ticket in ${applicationName}: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:es:Show my ticket in ${applicationName}: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:cs:Show my ticket in ${applicationName}: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:cs:Show my ticket in ${applicationName}: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:pt-PT:Show my ticket in ${applicationName}: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:pt-PT:Show my ticket in ${applicationName}: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:tr:Show my ${applicationName} ticket: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:tr:Show my ${applicationName} ticket: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:it:Show my ${applicationName} ticket: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:it:Show my ${applicationName} ticket: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:uk:Show my ${applicationName} ticket: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:uk:Show my ${applicationName} ticket: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:es:Show my ${applicationName} ticket: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:es:Show my ${applicationName} ticket: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:cs:Show my ${applicationName} ticket: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:cs:Show my ${applicationName} ticket: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:hu:Show my ${applicationName} ticket: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:hu:Show my ${applicationName} ticket: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:pt-PT:Show my ${applicationName} ticket: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:pt-PT:Show my ${applicationName} ticket: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:ro:Show my ${applicationName} ticket: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:ro:Show my ${applicationName} ticket: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:sv:Show my ${applicationName} ticket: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:sv:Show my ${applicationName} ticket: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:de:Show my ${applicationName} ticket: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:de:Show my ${applicationName} ticket: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:nl:Show my ${applicationName} ticket: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:nl:Show my ${applicationName} ticket: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:pl:Show my ${applicationName} ticket: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:pl:Show my ${applicationName} ticket: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:el:Show my ${applicationName} ticket: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:el:Show my ${applicationName} ticket: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:fr:Show my ${applicationName} ticket: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/App/AppShortcuts.xcstrings:fr:Show my ${applicationName} ticket: warning: This phrase is not used in any App Shortcut or as a Negative Phrase (in target 'Publit' from project 'Publit')
+** TEST BUILD SUCCEEDED **
