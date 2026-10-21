@@ -145,14 +145,16 @@ struct SharedRoute: Hashable, Sendable {
     }
 }
 
-/// Links for other people: `https://elija-7580.github.io/publit-site/open/#route?…` opens a small page
-/// (docs/open/index.html, published with the website on GitHub Pages) that shows what was shared, opens Publit, or falls back to maps.
+/// Links for other people: `https://publit.eu/open/#route?…` opens a small page
+/// (docs/open/index.html) that shows what was shared, opens Publit, or falls back to maps.
 /// The part after `#` never reaches the web server.
 enum ShareLinks {
-    static let webHost = "elija-7580.github.io"
-    static let webPath = "/publit-site/open/"
+    static let webHost = "publit.eu"
+    static let webPath = "/open/"
+    /// Existing share links on GitHub Pages keep working after the domain change.
+    static let legacyWebHosts = ["elija-7580.github.io"]
     /// Paths of links sent by older builds; still read when pasted.
-    static let legacyPaths = ["/Publit-/open/", "/Publit/open/"]
+    static let legacyPaths = ["/publit-site/open/", "/Publit-/open/", "/Publit/open/"]
 
     /// The https link for sending; the app link without `publit://` goes after `#`.
     static func web(_ link: DeepLink) -> URL {
@@ -163,7 +165,9 @@ enum ShareLinks {
 
     /// The `publit://` link inside a web share link (pasted, or opened as a universal link later).
     static func appURL(fromWeb url: URL) -> URL? {
-        guard url.scheme?.lowercased() == "https", url.host?.lowercased() == webHost,
+        let host = url.host?.lowercased()
+        guard url.scheme?.lowercased() == "https",
+              host == webHost || legacyWebHosts.contains(host ?? ""),
               ([webPath] + legacyPaths).contains(where: { url.path.hasPrefix(String($0.dropLast())) }),
               let fragment = URLComponents(url: url, resolvingAgainstBaseURL: false)?.percentEncodedFragment,
               !fragment.isEmpty else { return nil }
