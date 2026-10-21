@@ -1,0 +1,60 @@
+version fca98759-93a4-4757-bb2a-620b6a02480c 0.6.0
+existing sets ['APP_IPHONE_67', 'APP_IPAD_PRO_3GEN_129']
+invalid -> 409 {
+  "errors" : [ {
+    "id" : "d4a7dccf-8685-42d9-8622-a12d549d6293",
+    "status" : "409",
+    "code" : "ENTITY_ERROR.ATTRIBUTE.TYPE",
+    "title" : "An attribute in the provided entity has the wrong type",
+    "detail" : "'NOT_A_REAL_TYPE' is not a valid value for the attribute 'screenshotDisplayType'. Expected one of: 'IMESSAGE_APP_IPAD_PRO_129', 'APP_IPHONE_40', 'APP_IPHONE_67', 'APP_WATCH_ULTRA', 'APP_IPHONE_65', 'APP_IPHONE_61', 'IMESSAGE_APP_IPHONE_58', 'IMESSAGE_APP_IPHONE_55', 'APP_WATCH_SERIES_10', 'IMESSAGE_APP_IPAD_105', 'IMESSAGE_APP_IPAD_PRO_3GEN_129', 'APP_IPAD_PRO_3GEN_11', 'APP_IPHONE_35', 'IMESSAGE_APP_IPAD_PRO_3GEN_11', 'IMESSAGE_APP_IPAD_97', 'APP_WATCH_SERIES_7', 'APP_IPAD_PRO_129', 'APP_WATCH_SERIES_3', 'APP_WATCH_SERIES_4', 'APP_IPHONE_58', 'APP_APPLE_VISION_PRO', 'APP_IPHONE_55', 'APP_IPAD_PRO_3GEN_129', 'APP_DESKTOP', 'APP_IPAD_97', 'APP_APPLE_TV', 'IMESSAGE_APP_IPHONE_47', 'APP_IPAD_105', 'IMESSAGE_APP_IPHONE_DUO', 'IMESSAGE_APP_IPHONE_40', 'IMESSAGE_APP_IPHONE_67', 'IMESSAGE_APP_IPHONE_65', 'APP_IPHONE_DUO', 'IMESSAGE_APP_IPHONE_61', 'APP_IPHONE_47'",
+    "source" : {
+      "pointer" : "/data/attributes/screenshotDisplayType"
+    }
+  } ]
+}
+APP_IPHONE_DUO -> 201 {
+  "data" : {
+    "type" : "appScreenshotSets",
+    "id" : "cb43ecdf-1090-4e77-9c07-1bc54e57deed",
+    "attributes" : {
+      "screenshotDisplayType" : "APP_IPHONE_DUO"
+    },
+    "relationships" : {
+      "appScreenshots" : {
+        "links" : {
+          "self" : "https://api.appstoreconnect.appl
+APP_IPHONE_DUO_INNER -> 409 {
+  "errors" : [ {
+    "id" : "2895e325-d34b-4728-a69c-b42cd8564da4",
+    "status" : "409",
+    "code" : "ENTITY_ERROR.ATTRIBUTE.TYPE",
+    "title" : "An attribute in the provided entity has the wrong type",
+    "detail" : "'APP_IPHONE_DUO_INNER' is not a valid value for the attribute 'screenshotDis
+APP_IPHONE_DUO_OUTER -> 409 {
+  "errors" : [ {
+    "id" : "c2295b2a-3ffe-43b4-907b-82e1917499cf",
+    "status" : "409",
+    "code" : "ENTITY_ERROR.ATTRIBUTE.TYPE",
+    "title" : "An attribute in the provided entity has the wrong type",
+    "detail" : "'APP_IPHONE_DUO_OUTER' is not a valid value for the attribute 'screenshotDis
+APP_IPHONE_FOLDABLE -> 409 {
+  "errors" : [ {
+    "id" : "523c4e2a-2d2e-481f-a955-c475336e8d68",
+    "status" : "409",
+    "code" : "ENTITY_ERROR.ATTRIBUTE.TYPE",
+    "title" : "An attribute in the provided entity has the wrong type",
+    "detail" : "'APP_IPHONE_FOLDABLE' is not a valid value for the attribute 'screenshotDisp
+APP_IPHONE_69 -> 409 {
+  "errors" : [ {
+    "id" : "3142030a-b142-49a5-ab1d-4c3200023ef0",
+    "status" : "409",
+    "code" : "ENTITY_ERROR.ATTRIBUTE.TYPE",
+    "title" : "An attribute in the provided entity has the wrong type",
+    "detail" : "'APP_IPHONE_69' is not a valid value for the attribute 'screenshotDisplayTyp
+APP_IPHONE_PRO_MAX -> 409 {
+  "errors" : [ {
+    "id" : "c5fb0571-f542-4f9f-9b99-fa88e2b6ce47",
+    "status" : "409",
+    "code" : "ENTITY_ERROR.ATTRIBUTE.TYPE",
+    "title" : "An attribute in the provided entity has the wrong type",
+    "detail" : "'APP_IPHONE_PRO_MAX' is not a valid value for the attribute 'screenshotDispl
