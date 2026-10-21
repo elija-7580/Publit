@@ -1,0 +1,67 @@
+name: Release build 62
+on:
+  push:
+    branches: [release-62]
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: publit-release-62
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 70
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_SHA: 2e9d443d6c4df40c64f1ecf4f21a9b02ae864aeb
+      RELEASE_TAG: v0.6.0-62
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify and tag exact build 62
+        run: |
+          set -euo pipefail
+          git show "$RELEASE_SHA:project.yml" | grep -q 'CURRENT_PROJECT_VERSION: "62"'
+          if git rev-parse "refs/tags/$RELEASE_TAG" >/dev/null 2>&1; then
+            test "$(git rev-parse "refs/tags/$RELEASE_TAG^{commit}")" = "$RELEASE_SHA"
+          else
+            git tag "$RELEASE_TAG" "$RELEASE_SHA"
+            git push origin "$RELEASE_TAG"
+          fi
+      - name: Start existing signed TestFlight workflow
+        run: gh workflow run testflight.yml --ref "$RELEASE_TAG"
+      - name: Find upload run
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 24); do
+            ID=$(gh run list --workflow testflight.yml --commit "$RELEASE_SHA" --event workflow_dispatch --limit 5 --json databaseId,createdAt --jq 'sort_by(.createdAt) | last | .databaseId // empty')
+            if [ -n "$ID" ]; then
+              echo "UPLOAD_RUN_ID=$ID" >> "$GITHUB_ENV"
+              echo "TestFlight run: https://github.com/$GITHUB_REPOSITORY/actions/runs/$ID" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo '::error::Dispatched TestFlight run not found'
+          exit 1
+      - name: Wait for archive and upload result
+        run: gh run watch "$UPLOAD_RUN_ID" --exit-status --interval 30
+      - name: Publish non-secret upload result
+        if: always()
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/release-report"
+          if [ -n "${UPLOAD_RUN_ID:-}" ]; then
+            gh api "repos/$GITHUB_REPOSITORY/actions/runs/$UPLOAD_RUN_ID" --jq '{id,html_url,status,conclusion,head_sha,created_at,updated_at}' > "$RUNNER_TEMP/release-report/testflight.json"
+            gh api "repos/$GITHUB_REPOSITORY/actions/runs/$UPLOAD_RUN_ID/jobs" --jq '{jobs: [.jobs[] | {name,status,conclusion,steps: [.steps[] | {name,status,conclusion}]}]}' > "$RUNNER_TEMP/release-report/jobs.json"
+          fi
+          printf '%s\n' "$RELEASE_SHA" > "$RUNNER_TEMP/release-report/release-sha.txt"
+          cd "$RUNNER_TEMP/release-report"
+          git init -q -b release-62-report
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .
+          git commit -qm 'TestFlight build 62 result'
+          git push -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:refs/heads/release-62-report
