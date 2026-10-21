@@ -1,0 +1,7 @@
+Test Case '-[PublitUITests.PublitUITests testF23WideLayout]' started.
+2026-10-21 09:32:57.629 xcodebuild[57588:366832] [MT] IDELaunchParametersSnapshot: debugger version lookup failed for path '<nil>': noURL
+objc[57769]: Class UIAccessibilityLoaderWebShared is implemented in both /private/var/run/com.apple.security.cryptexd/mnt/com.apple.iPhoneOS.SimulatorRuntime-v24.1.434.0.5oybqK/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 27.0.simruntime/Contents/Resources/RuntimeRoot/System/Library/AccessibilityBundles/WebKit.axbundle/WebKit (0x109dac398) and /private/var/run/com.apple.security.cryptexd/mnt/com.apple.iPhoneOS.SimulatorRuntime-v24.1.434.0.5oybqK/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 27.0.simruntime/Contents/Resources/RuntimeRoot/System/Library/AccessibilityBundles/WebCore.axbundle/WebCore (0x10a718310). This may cause spurious casting failures and mysterious crashes. One of the duplicates must be removed or renamed.
+2026-10-21 09:35:34.388 xcodebuild[57588:366832] [MT] IDELaunchParametersSnapshot: debugger version lookup failed for path '<nil>': noURL
+Restarting after unexpected exit, crash, or test timeout; summary will include totals from previous launches.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds

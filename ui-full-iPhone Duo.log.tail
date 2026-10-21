@@ -1,0 +1,126 @@
+Command line invocation:
+    /Applications/Xcode_27.2_beta_2.app/Contents/Developer/usr/bin/xcodebuild test-without-building -project Publit.xcodeproj -scheme Publit -destination id=F36CB1A9-5A1F-4324-A305-8C3C847F6CBF -derivedDataPath build "-only-testing:PublitUITests/PublitUITests/testF23WideLayout"
+
+Resolve Package Graph
+
+
+Resolved source packages:
+  GoogleMaps: https://github.com/googlemaps/ios-maps-sdk @ 11.2.0
+
+2026-10-21 09:08:50.669 xcodebuild[18425:268295] [MT] IDESchemeActionDeviceRecord: versionAndBuild = 27.1 (24A94425), error = invalidDigitCount(94425).
+2026-10-21 09:09:13.240338+0000 PublitUITests-Runner[20176:273394] [Default] Running tests...
+    t =      nans Interface orientation changed to Portrait
+Test Suite 'Selected tests' started at 2026-10-21 09:09:27.428.
+Test Suite 'PublitUITests.xctest' started at 2026-10-21 09:09:27.429.
+Test Suite 'PublitUITests' started at 2026-10-21 09:09:27.429.
+Test Case '-[PublitUITests.PublitUITests testF23WideLayout]' started.
+    t =     0.01s Start Test at 2026-10-21 09:09:27.437
+    t =     1.13s Set Up
+    t =     1.13s Setting device orientation to Portrait
+    t =     1.20s     Device orientation changed to Portrait
+    t =     1.32s     Wait for com.apple.springboard to idle
+    t =     1.61s Open io.github.elija7580.publit
+    t =     1.61s     Launch io.github.elija7580.publit
+2026-10-21 09:09:30.900 xcodebuild[18425:268295] [MT] IDELaunchParametersSnapshot: debugger version lookup failed for path '<nil>': noURL
+2026-10-21 09:09:30.901 xcodebuild[18425:268295] [MT] IDELaunchParametersSnapshot: no debugger version
+objc[20176]: Class UIAccessibilityLoaderWebShared is implemented in both /private/var/run/com.apple.security.cryptexd/mnt/com.apple.iPhoneOS.SimulatorRuntime-v24.1.94425.0.3UKB2Y/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 27.1.simruntime/Contents/Resources/RuntimeRoot/System/Library/AccessibilityBundles/WebCore.axbundle/WebCore (0x10a238310) and /private/var/run/com.apple.security.cryptexd/mnt/com.apple.iPhoneOS.SimulatorRuntime-v24.1.94425.0.3UKB2Y/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 27.1.simruntime/Contents/Resources/RuntimeRoot/System/Library/AccessibilityBundles/WebKit.axbundle/WebKit (0x112684398). This may cause spurious casting failures and mysterious crashes. One of the duplicates must be removed or renamed.
+2026-10-21 09:09:31.757 xcodebuild[18425:268295] [MT] IDESchemeActionDeviceRecord: versionAndBuild = 27.1 (24A94425), error = invalidDigitCount(94425).
+    t =     9.90s         Setting up automation session
+    t =    19.00s         Wait for io.github.elija7580.publit to idle
+    t =    24.88s Waiting 3.0s for "Allow While Using App" Button to exist
+    t =    25.96s     Checking `Expect predicate `existsNoRetry == 1` for object "Allow While Using App" Button`
+    t =    25.98s         Checking existence of `"Allow While Using App" Button`
+    t =    26.56s Tap "Allow While Using App" Button
+    t =    26.56s     Wait for com.apple.springboard to idle
+    t =    26.71s     Find the "Allow While Using App" Button
+    t =    27.05s     Check for interrupting elements affecting "Allow While Using App" Button
+    t =    27.80s     Synthesize event
+    t =    28.75s     Wait for com.apple.springboard to idle
+    t =    40.71s Added attachment named 'wide-nearby'
+    t =    40.73s Checking existence of `TabBar (First Match)`
+    t =    56.74s Checking existence of `Button (First Match)`
+    t =    58.31s Tap Button (First Match)
+    t =    58.31s     Wait for io.github.elija7580.publit to idle
+    t =    58.34s     Find the Button (First Match)
+    t =    59.57s     Check for interrupting elements affecting "calendar" Button
+    t =    60.00s         Wait for com.apple.springboard to idle
+    t =    60.11s     Synthesize event
+    t =    60.50s     Wait for io.github.elija7580.publit to idle
+    t =    75.81s Added attachment named 'wide-plan'
+    t =    75.82s Waiting 5.0s for "routeRow" Any to exist
+    t =    76.87s     Checking `Expect predicate `existsNoRetry == 1` for object "routeRow" Any`
+    t =    76.87s         Checking existence of `"routeRow" Any`
+    t =    81.10s         Capturing element debug description
+    t =    81.11s     Checking existence of `"routeRow" Any`
+    t =    84.04s Tap "routeRow" Any
+    t =    84.04s     Wait for io.github.elija7580.publit to idle
+    t =    84.04s     Find the "routeRow" Any
+    t =    85.68s     Check for interrupting elements affecting "routeRow" Button
+    t =    85.90s         Wait for com.apple.springboard to idle
+    t =    86.14s     Synthesize event
+    t =    86.46s     Wait for io.github.elija7580.publit to idle
+    t =    90.97s Added attachment named 'wide-route'
+    t =    90.98s Checking existence of `TabBar (First Match)`
+    t =    94.32s Checking existence of `Button (First Match)`
+    t =    95.35s Tap Button (First Match)
+    t =    95.35s     Wait for io.github.elija7580.publit to idle
+    t =    95.36s     Find the Button (First Match)
+    t =    95.64s     Check for interrupting elements affecting "star" Button
+    t =    95.73s         Wait for com.apple.springboard to idle
+    t =    95.78s     Synthesize event
+    t =    96.16s     Wait for io.github.elija7580.publit to idle
+    t =   100.08s Added attachment named 'wide-saved'
+    t =   100.08s Terminate io.github.elija7580.publit:20784
+2026-10-21 09:11:12.879 xcodebuild[18425:268295] [MT] IDESchemeActionDeviceRecord: versionAndBuild = 27.1 (24A94425), error = invalidDigitCount(94425).
+2026-10-21 09:11:13.196 xcodebuild[18425:268295] [MT] IDESchemeActionDeviceRecord: versionAndBuild = 27.1 (24A94425), error = invalidDigitCount(94425).
+2026-10-21 09:11:13.937 xcodebuild[18425:268295] [MT] IDESchemeActionDeviceRecord: versionAndBuild = 27.1 (24A94425), error = invalidDigitCount(94425).
+    t =   106.09s Setting device orientation to Landscape Left
+    t =   106.09s     Device orientation changed to Landscape Left
+    t =   106.10s     Wait for com.apple.springboard to idle
+    t =   106.10s Open io.github.elija7580.publit
+    t =   106.10s     Launch io.github.elija7580.publit
+2026-10-21 09:11:14.622 xcodebuild[18425:268295] [MT] IDELaunchParametersSnapshot: debugger version lookup failed for path '<nil>': noURL
+2026-10-21 09:11:14.622 xcodebuild[18425:268295] [MT] IDELaunchParametersSnapshot: no debugger version
+2026-10-21 09:11:19.048 xcodebuild[18425:268295] [MT] IDESchemeActionDeviceRecord: versionAndBuild = 27.1 (24A94425), error = invalidDigitCount(94425).
+    t =   147.93s         Setting up automation session
+    t =   148.10s         Wait for io.github.elija7580.publit to idle
+    t =   149.11s Waiting 3.0s for "Allow While Using App" Button to exist
+    t =   150.16s     Checking `Expect predicate `existsNoRetry == 1` for object "Allow While Using App" Button`
+    t =   150.16s         Checking existence of `"Allow While Using App" Button`
+    t =   150.25s         Capturing element debug description
+WATCHDOG: -[PublitUITests testF23WideLayout] still running after 150 s - stopping the runner
+2026-10-21 09:11:58.683 xcodebuild[18425:268295] [MT] IDESchemeActionDeviceRecord: versionAndBuild = 27.1 (24A94425), error = invalidDigitCount(94425).
+2026-10-21 09:11:58.683 xcodebuild[18425:268295] [MT] IDESchemeActionDeviceRecord: versionAndBuild = 27.1 (24A94425), error = invalidDigitCount(94425).
+2026-10-21 09:11:58.917 xcodebuild[18425:268295] [MT] IDESchemeActionDeviceRecord: versionAndBuild = 27.1 (24A94425), error = invalidDigitCount(94425).
+2026-10-21 09:14:04.158 xcodebuild[18425:268295] [MT] IDESchemeActionDeviceRecord: versionAndBuild = 27.1 (24A94425), error = invalidDigitCount(94425).
+2026-10-21 09:14:04.258 xcodebuild[18425:268295] [MT] IDESchemeActionDeviceRecord: versionAndBuild = 27.1 (24A94425), error = invalidDigitCount(94425).
+2026-10-21 09:14:04.271 xcodebuild[18425:268295] [MT] IDESchemeActionDeviceRecord: versionAndBuild = 27.1 (24A94425), error = invalidDigitCount(94425).
+2026-10-21 09:14:04.632 xcodebuild[18425:268295] [MT] IDESchemeActionDeviceRecord: versionAndBuild = 27.1 (24A94425), error = invalidDigitCount(94425).
+2026-10-21 09:14:10.554344+0000 PublitUITests-Runner[24460:286669] [Default] Running tests...
+    t =      nans Interface orientation changed to Portrait
+
+Restarting after unexpected exit, crash, or test timeout; summary will include totals from previous launches.
+
+Test Suite 'Selected tests' started at 2026-10-21 09:14:21.830.
+Test Suite 'PublitUITests.xctest' started at 2026-10-21 09:14:21.831.
+Test Suite 'PublitUITests.xctest' passed at 2026-10-21 09:14:21.831.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-21 09:14:21.832.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.002) seconds
+2026-10-21 09:14:21.937 xcodebuild[18425:268295] [MT] IDESchemeActionDeviceRecord: versionAndBuild = 27.1 (24A94425), error = invalidDigitCount(94425).
+2026-10-21 09:14:21.942 xcodebuild[18425:268295] [MT] IDESchemeActionDeviceRecord: versionAndBuild = 27.1 (24A94425), error = invalidDigitCount(94425).
+2026-10-21 09:14:21.947 xcodebuild[18425:268295] [MT] IDESchemeActionDeviceRecord: versionAndBuild = 27.1 (24A94425), error = invalidDigitCount(94425).
+2026-10-21 09:24:22.990 xcodebuild[18425:287284]  IDETestOperationsObserverDebug: Failure collecting diagnostics from simulator: Timed out after 600.0 seconds while waiting for a response from the invoked process
+2026-10-21 09:24:23.098 xcodebuild[18425:268295] [MT] IDETestOperationsObserverDebug: 934.521 elapsed -- Testing started completed.
+2026-10-21 09:24:23.098 xcodebuild[18425:268295] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-10-21 09:24:23.099 xcodebuild[18425:268295] [MT] IDETestOperationsObserverDebug: 934.521 sec, +934.521 sec -- end
+
+Test session results, code coverage, and logs:
+	/Users/runner/work/Publit/Publit/build/Logs/Test/Test-Publit-2026.10.21_09-08-47-+0000.xcresult
+
+Failing tests:
+	PublitUITests.testF23WideLayout()
+
+** TEST EXECUTE FAILED **
+
+Testing started

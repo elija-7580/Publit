@@ -1,0 +1,110 @@
+Command line invocation:
+    /Applications/Xcode_27.2_beta_2.app/Contents/Developer/usr/bin/xcodebuild test-without-building -project Publit.xcodeproj -scheme Publit -destination id=374CF874-B7B2-4EE6-A71E-A1911BFA1405 -derivedDataPath build "-only-testing:PublitUITests/PublitUITests/testF23WideLayout"
+
+Resolve Package Graph
+
+
+Resolved source packages:
+  GoogleMaps: https://github.com/googlemaps/ios-maps-sdk @ 11.2.0
+
+2026-10-21 09:32:33.098263+0000 PublitUITests-Runner[57769:368070] [Default] Running tests...
+2026-10-21 09:32:33.393789+0000 PublitUITests-Runner[57769:368070] [UIKit App Config] Update the Info.plist: Launch screens will soon be required.
+    t =      nans Interface orientation changed to Portrait
+Test Suite 'Selected tests' started at 2026-10-21 09:32:54.174.
+Test Suite 'PublitUITests.xctest' started at 2026-10-21 09:32:54.185.
+Test Suite 'PublitUITests' started at 2026-10-21 09:32:54.185.
+Test Case '-[PublitUITests.PublitUITests testF23WideLayout]' started.
+    t =     0.01s Start Test at 2026-10-21 09:32:54.191
+    t =     1.23s Set Up
+    t =     1.24s Setting device orientation to Portrait
+    t =     1.27s     Device orientation changed to Portrait
+    t =     1.38s     Wait for com.apple.springboard to idle
+    t =     1.67s Open io.github.elija7580.publit
+    t =     1.67s     Launch io.github.elija7580.publit
+2026-10-21 09:32:57.629 xcodebuild[57588:366832] [MT] IDELaunchParametersSnapshot: debugger version lookup failed for path '<nil>': noURL
+2026-10-21 09:32:57.630 xcodebuild[57588:366832] [MT] IDELaunchParametersSnapshot: no debugger version
+objc[57769]: Class UIAccessibilityLoaderWebShared is implemented in both /private/var/run/com.apple.security.cryptexd/mnt/com.apple.iPhoneOS.SimulatorRuntime-v24.1.434.0.5oybqK/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 27.0.simruntime/Contents/Resources/RuntimeRoot/System/Library/AccessibilityBundles/WebKit.axbundle/WebKit (0x109dac398) and /private/var/run/com.apple.security.cryptexd/mnt/com.apple.iPhoneOS.SimulatorRuntime-v24.1.434.0.5oybqK/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 27.0.simruntime/Contents/Resources/RuntimeRoot/System/Library/AccessibilityBundles/WebCore.axbundle/WebCore (0x10a718310). This may cause spurious casting failures and mysterious crashes. One of the duplicates must be removed or renamed.
+    t =    20.37s         Setting up automation session
+    t =    28.73s         Wait for io.github.elija7580.publit to idle
+    t =    41.31s Waiting 3.0s for "Allow While Using App" Button to exist
+    t =    42.36s     Checking `Expect predicate `existsNoRetry == 1` for object "Allow While Using App" Button`
+    t =    42.36s         Checking existence of `"Allow While Using App" Button`
+    t =    42.71s Tap "Allow While Using App" Button
+    t =    42.71s     Wait for com.apple.springboard to idle
+    t =    42.81s     Find the "Allow While Using App" Button
+    t =    42.95s     Check for interrupting elements affecting "Allow While Using App" Button
+    t =    43.72s     Synthesize event
+    t =    44.40s     Wait for com.apple.springboard to idle
+    t =    56.72s Added attachment named 'wide-nearby'
+    t =    56.74s Checking existence of `TabBar (First Match)`
+    t =    87.87s Checking existence of `TabBar (First Match)` (retry 1)
+    t =   102.62s Checking existence of `Button (First Match)`
+    t =   102.96s Tap Button (First Match)
+    t =   102.96s     Wait for io.github.elija7580.publit to idle
+    t =   103.08s     Find the Button (First Match)
+    t =   104.28s     Check for interrupting elements affecting "calendar" Button
+    t =   108.40s         Wait for com.apple.springboard to idle
+    t =   108.49s     Synthesize event
+    t =   108.98s     Wait for io.github.elija7580.publit to idle
+    t =   125.21s Added attachment named 'wide-plan'
+    t =   125.22s Waiting 5.0s for "routeRow" Any to exist
+    t =   126.27s     Checking `Expect predicate `existsNoRetry == 1` for object "routeRow" Any`
+    t =   126.27s         Checking existence of `"routeRow" Any`
+    t =   127.63s Tap "routeRow" Any
+    t =   127.63s     Wait for io.github.elija7580.publit to idle
+    t =   127.65s     Find the "routeRow" Any
+    t =   128.60s     Check for interrupting elements affecting "routeRow" Button
+    t =   128.80s         Wait for com.apple.springboard to idle
+    t =   128.89s Ignoring failure to get hierarchy for remote element in process 58349 (Error getting main window kAXErrorServerNotFound)
+    t =   128.90s Ignoring failure to get hierarchy for remote element in process 58349 (Error getting main window kAXErrorServerNotFound)
+    t =   129.04s     Synthesize event
+    t =   129.37s     Wait for io.github.elija7580.publit to idle
+    t =   134.72s Added attachment named 'wide-route'
+    t =   134.73s Checking existence of `TabBar (First Match)`
+    t =   136.28s Checking existence of `Button (First Match)`
+    t =   136.41s Tap Button (First Match)
+    t =   136.41s     Wait for io.github.elija7580.publit to idle
+    t =   136.42s     Find the Button (First Match)
+    t =   136.48s     Check for interrupting elements affecting "star" Button
+    t =   136.72s         Wait for com.apple.springboard to idle
+    t =   136.79s Ignoring failure to get hierarchy for remote element in process 58349 (Error getting main window kAXErrorServerNotFound)
+    t =   136.79s Ignoring failure to get hierarchy for remote element in process 58349 (Error getting main window kAXErrorServerNotFound)
+    t =   136.80s     Synthesize event
+    t =   137.14s     Wait for io.github.elija7580.publit to idle
+    t =   142.66s Added attachment named 'wide-saved'
+    t =   142.67s Terminate io.github.elija7580.publit:58032
+    t =   146.72s Setting device orientation to Landscape Left
+    t =   146.88s     Interface orientation changed to Landscape Right
+    t =   146.88s     Device orientation changed to Landscape Left
+    t =   147.03s     Wait for com.apple.springboard to idle
+    t =   147.03s Open io.github.elija7580.publit
+    t =   147.03s     Launch io.github.elija7580.publit
+WATCHDOG: -[PublitUITests testF23WideLayout] still running after 150 s - stopping the runner
+2026-10-21 09:35:34.388 xcodebuild[57588:366832] [MT] IDELaunchParametersSnapshot: debugger version lookup failed for path '<nil>': noURL
+2026-10-21 09:35:34.467 xcodebuild[57588:366832] [MT] IDELaunchParametersSnapshot: no debugger version
+2026-10-21 09:37:40.149798+0000 PublitUITests-Runner[58881:374295] [Default] Running tests...
+2026-10-21 09:37:40.349185+0000 PublitUITests-Runner[58881:374295] [UIKit App Config] Update the Info.plist: Launch screens will soon be required.
+    t =      nans Interface orientation changed to Landscape Right
+
+Restarting after unexpected exit, crash, or test timeout; summary will include totals from previous launches.
+
+Test Suite 'Selected tests' started at 2026-10-21 09:37:50.089.
+Test Suite 'PublitUITests.xctest' started at 2026-10-21 09:37:50.090.
+Test Suite 'PublitUITests.xctest' passed at 2026-10-21 09:37:50.090.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-21 09:37:50.090.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+2026-10-21 09:47:50.888 xcodebuild[57588:374270]  IDETestOperationsObserverDebug: Failure collecting diagnostics from simulator: Timed out after 600.0 seconds while waiting for a response from the invoked process
+2026-10-21 09:47:50.990 xcodebuild[57588:366832] [MT] IDETestOperationsObserverDebug: 955.592 elapsed -- Testing started completed.
+2026-10-21 09:47:50.990 xcodebuild[57588:366832] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-10-21 09:47:50.990 xcodebuild[57588:366832] [MT] IDETestOperationsObserverDebug: 955.592 sec, +955.592 sec -- end
+
+Test session results, code coverage, and logs:
+	/Users/runner/work/Publit/Publit/build/Logs/Test/Test-Publit-2026.10.21_09-31-54-+0000.xcresult
+
+Failing tests:
+	PublitUITests.testF23WideLayout()
+
+** TEST EXECUTE FAILED **
+
+Testing started
