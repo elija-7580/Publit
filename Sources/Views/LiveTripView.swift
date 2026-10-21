@@ -227,7 +227,7 @@ struct LiveTripView: View {
                 switch step.kind {
                 case .walk: walkSections(leg, index: step.legIndex, in: it, route: walk!, position: walkPos, detour: detour, check: check, isLive: index == live)
                 case .wait: waitSection(leg, index: step.legIndex, in: it)
-                case .ride: rideSections(leg, progress: ride?.progress ?? .notStarted, fromGPS: ride?.fromGPS ?? false, check: check)
+                case .ride: rideSections(leg, index: step.legIndex, in: it, progress: ride?.progress ?? .notStarted, fromGPS: ride?.fromGPS ?? false, check: check)
                 case .arrive: arriveSection(it, here: here)
                 }
             }
@@ -416,6 +416,7 @@ struct LiveTripView: View {
                     .foregroundStyle(w.level == .missed ? Color.danger : Color.delay)
             }
             if let transfer = TransferInfo(before: legIndex, in: it) { TransferCard(info: transfer) }
+            TrainDivisionNotice(leg: leg)
             ServiceAlertsView(alerts: leg.serviceAlerts)
             Label(rideSummary, systemImage: "arrow.right.circle")
                 .font(.subheadline).foregroundStyle(.secondary)
@@ -427,7 +428,7 @@ struct LiveTripView: View {
     // MARK: Ride
 
     @ViewBuilder
-    private func rideSections(_ leg: Leg, progress: TripProgress, fromGPS: Bool, check: TripGuide.Check) -> some View {
+    private func rideSections(_ leg: Leg, index: Int, in it: Itinerary, progress: TripProgress, fromGPS: Bool, check: TripGuide.Check) -> some View {
         let stops = leg.allStops
         let left = TripGuide.stopsLeft(progress, count: stops.count)
         let arrivalDelay = Int((leg.endTime.timeIntervalSince(leg.scheduledEndTime) / 60).rounded())
@@ -457,6 +458,12 @@ struct LiveTripView: View {
                     .font(.caption).foregroundStyle(.secondary)
             }
             .padding(.vertical, 4)
+            TrainDivisionNotice(leg: leg)
+            if index + 1 < it.legs.count,
+               let next = it.legs[(index + 1)...].firstIndex(where: \.isTransit),
+               let transfer = TransferInfo(before: next, in: it) {
+                TransferCard(info: transfer)
+            }
             ServiceAlertsView(alerts: leg.serviceAlerts)
             ticketRow
             GetOffButton(leg: leg)
@@ -993,27 +1000,6 @@ private struct PlatformChangeLabel: View {
         Label(L10n.f("Platform changed (was %@)", change.scheduled), systemImage: "exclamationmark.triangle.fill")
             .font(.subheadline.weight(.semibold))
             .foregroundStyle(Color.delay)
-    }
-}
-
-/// The change between two vehicles: platforms, levels, walk and time to spare.
-private struct TransferCard: View {
-    let info: TransferInfo
-
-    var body: some View {
-        let walk = info.walkSeconds >= 30 ? L10n.f("%@ walk", Fmt.duration(seconds: max(60, info.walkSeconds))) : nil
-        let spare = info.spareSeconds >= 60 ? L10n.f("%@ to spare", Fmt.duration(seconds: info.spareSeconds)) : L10n.t("Very tight change")
-        VStack(alignment: .leading, spacing: 4) {
-            Label(L10n.f("Change from %@", info.fromLine), systemImage: "arrow.triangle.swap")
-                .font(.subheadline.weight(.semibold))
-            if let p = info.platforms { Text(p).font(.subheadline) }
-            if let l = info.levels { Text(l).font(.caption).foregroundStyle(.secondary) }
-            Text(verbatim: [walk, spare].compactMap { $0 }.joined(separator: " · "))
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(info.isTight ? Color.delay : Color.secondary)
-        }
-        .padding(.vertical, 2)
-        .accessibilityElement(children: .combine)
     }
 }
 

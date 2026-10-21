@@ -185,7 +185,10 @@ struct ItineraryDetailView: View {
 
             // 3. The way, step by step, as a timeline: times on the left, the line in its colour.
             Section("Steps") {
-                ForEach(Array(itinerary.legs.enumerated()), id: \.offset) { _, leg in
+                ForEach(Array(itinerary.legs.enumerated()), id: \.offset) { index, leg in
+                    if let transfer = TransferInfo(before: index, in: itinerary) {
+                        TransferCard(info: transfer)
+                    }
                     TimelineLegRow(leg: leg)
                 }
                 TimelineEndRow(time: itinerary.endTime, tz: itinerary.legs.last?.to.tz, name: resolvedTo)
@@ -693,6 +696,7 @@ struct TimelineLegRow: View {
             if leg.cancelled == true {
                 Text("This trip is cancelled.").font(.caption.weight(.semibold)).foregroundStyle(Color.danger)
             }
+            TrainDivisionNotice(leg: leg)
             if expanded {
                 if leg.isReplacementBus {
                     Label("Rail replacement bus", systemImage: "bus.fill").font(.subheadline.weight(.semibold)).foregroundStyle(Color.delay)

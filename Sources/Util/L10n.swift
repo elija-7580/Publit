@@ -8,8 +8,16 @@ enum L10n {
         NSLocalizedString(key, bundle: .main, comment: "")
     }
 
+    /// Connection-specific strings have their own catalog to keep the main table small.
+    static func transfer(_ key: String, _ args: Any...) -> String {
+        format(NSLocalizedString(key, tableName: "Transfers", bundle: .main, comment: ""), args)
+    }
+
     static func f(_ key: String, _ args: Any...) -> String {
-        let format = NSLocalizedString(key, bundle: .main, comment: "")
+        format(t(key), args)
+    }
+
+    private static func format(_ format: String, _ args: [Any]) -> String {
         #if canImport(Darwin)
         // Goes through NSString formatting so plural variations in the catalog apply.
         let cArgs: [CVarArg] = args.map { arg in

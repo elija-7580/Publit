@@ -86,6 +86,9 @@ struct Place: Codable, Hashable, Sendable {
     let scheduledTrack: String?
     var cancelled: Bool?
     var alerts: [Alert]?
+    /// MOTIS event-level time source. Optional for older feeds and saved trips.
+    var arrivalTimestampReason: String? = nil
+    var departureTimestampReason: String? = nil
 
     var coordinate: LatLon { LatLon(lat: lat, lon: lon) }
     var alertsList: [Alert] { alerts ?? [] }

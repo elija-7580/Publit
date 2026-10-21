@@ -58,6 +58,9 @@ struct TripView: View {
                         .listRowInsets(EdgeInsets())
                     statusLine(progress: progress, stops: stops, leg: leg)
                 }
+                if !leg.trainDivisionAlerts.isEmpty {
+                    Section { TrainDivisionNotice(leg: leg) }
+                }
                 Section("Stops") {
                     ForEach(Array(stops.enumerated()), id: \.offset) { i, stop in
                         // Tap a stop of the line: plan a route there (from this station or from here).
