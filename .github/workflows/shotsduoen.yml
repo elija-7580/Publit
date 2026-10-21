@@ -1,0 +1,77 @@
+name: Duo screenshots English
+
+on:
+  push:
+    branches: [shotsduo-en]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: shotsduoen
+  cancel-in-progress: true
+
+jobs:
+  shots:
+    runs-on: xcode-27
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: Xcode and simulators
+        run: |
+          XC=$(ls -d /Applications/Xcode*.app | grep -v -i beta | sort -V | tail -1)
+          sudo xcode-select -s "$XC"
+          mkdir -p out
+          { xcodebuild -version; sw_vers; xcrun simctl list devicetypes; xcrun simctl list runtimes; xcrun simctl list devices available; } > out/env.txt 2>&1
+      - name: Longer watchdog and English UI
+        run: |
+          python3 -c "p='Tests/UI/PublitUITests.swift'; s=open(p).read(); assert 'watchdogSeconds: TimeInterval = 150' in s; s=s.replace('watchdogSeconds: TimeInterval = 150','watchdogSeconds: TimeInterval = 700'); a='\"-AppleLanguages\", \"(de)\", \"-AppleLocale\", \"de_AT\"'; assert a in s; s=s.replace(a,'\"-AppleLanguages\", \"(en)\", \"-AppleLocale\", \"en_GB\"'); open(p,'w').write(s)"
+          grep -n 'watchdogSeconds: TimeInterval' Tests/UI/PublitUITests.swift
+      - name: Generate project
+        run: brew install xcodegen && xcodegen generate
+      - name: Build
+        run: |
+          set -o pipefail
+          xcodebuild build-for-testing -project Publit.xcodeproj -scheme Publit \
+            -destination "generic/platform=iOS Simulator" -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO 2>&1 | tee out/build-full.log | grep -E ": (error|warning):|BUILD" > out/build.log || true
+          grep -q "TEST BUILD SUCCEEDED" out/build-full.log
+      - name: Newer iOS simulator runtime (iPhone Duo needs iOS 27.1+)
+        continue-on-error: true
+        timeout-minutes: 40
+        run: |
+          xcodebuild -downloadPlatform iOS -buildVersion 27.1 > out/runtime.log 2>&1 || true
+          xcrun simctl list runtimes >> out/runtime.log
+      - name: Screenshots
+        if: always()
+        shell: bash {0}
+        run: |
+          want="iPhone Duo"
+          TYPE=$(xcrun simctl list devicetypes -j | python3 -c "import json,sys; w=sys.argv[1]; t=[d for d in json.load(sys.stdin)['devicetypes'] if d['name'].startswith(w)]; print(t[-1]['identifier'] if t else '')" "$want")
+          UDID=""
+          for R in $(xcrun simctl list runtimes -j | python3 -c "import json,sys; [print(x['identifier']) for x in json.load(sys.stdin)['runtimes'] if x['platform']=='iOS' and x['isAvailable']]"); do
+            UDID=$(xcrun simctl create "shots-$want" "$TYPE" "$R" 2>>out/env.txt) && { echo "created on $R" >> out/env.txt; break; }
+          done
+          [ -z "$UDID" ] && { echo "create failed" >> out/env.txt; exit 0; }
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl status_bar "$UDID" override --time "9:41" --batteryState charged --batteryLevel 100 || true
+          xcrun simctl location "$UDID" set 48.15000,11.58030
+          xcrun simctl privacy "$UDID" grant location io.github.elija7580.publit || true
+          rm -rf ~/publit-shots
+          xcodebuild test-without-building -project Publit.xcodeproj -scheme Publit \
+            -destination "id=$UDID" -derivedDataPath build \
+            -only-testing:PublitUITests/PublitUITests/testF23WideLayout 2>&1 | grep -E "Test Case|error:|Executed" > "out/ui.log" || true
+          mkdir -p out/iPhone-Duo
+          for f in ~/publit-shots/*.png; do [ -f "$f" ] && cp "$f" "out/iPhone-Duo/$(basename "$f")"; done
+          xcrun simctl shutdown "$UDID" || true
+      - name: Publish
+        if: always()
+        run: |
+          rm -f out/build-full.log
+          cd out
+          git init -q -b shots-duo-en
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -q -m "English Duo screenshots ($GITHUB_SHA)"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/$GITHUB_REPOSITORY" shots-duo-en
