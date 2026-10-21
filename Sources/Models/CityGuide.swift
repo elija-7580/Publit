@@ -80,6 +80,18 @@ extension WalkRoute {
 /// The change from one vehicle to the next: platforms, levels, walk and time to spare.
 struct TransferInfo: Equatable, Sendable {
     let fromLine: String
+    let toLine: String
+    let fromService: String?
+    let toService: String?
+    let fromDirection: String?
+    let toDirection: String?
+    let arrivalStop: Place
+    let departureStop: Place
+    let arrivalTime: Date
+    let departureTime: Date
+    let arrivalIsLive: Bool
+    let departureIsLive: Bool
+    let isCancelled: Bool
     let fromTrack: String?
     let toTrack: String?
     let fromLevel: Double?
@@ -94,6 +106,19 @@ struct TransferInfo: Equatable, Sendable {
         let arriving = it.legs[p], departing = it.legs[legIndex]
         let walks = it.legs[(p + 1)..<legIndex].filter { !$0.isTransit }
         fromLine = arriving.lineName
+        toLine = departing.lineName
+        fromService = arriving.serviceDetail
+        toService = departing.serviceDetail
+        fromDirection = arriving.shownDirection
+        toDirection = departing.shownDirection
+        arrivalStop = arriving.to
+        departureStop = departing.from
+        arrivalTime = arriving.endTime
+        departureTime = departing.startTime
+        arrivalIsLive = Self.isLive(reason: arriving.to.arrivalTimestampReason, leg: arriving)
+        departureIsLive = Self.isLive(reason: departing.from.departureTimestampReason, leg: departing)
+        isCancelled = arriving.cancelled == true || departing.cancelled == true
+            || arriving.to.cancelled == true || departing.from.cancelled == true
         fromTrack = TransitLabels.clean(arriving.to.track)
         toTrack = TransitLabels.clean(departing.from.track)
         fromLevel = walks.first?.steps?.first?.fromLevel
@@ -102,15 +127,35 @@ struct TransferInfo: Equatable, Sendable {
         spareSeconds = Int(departing.startTime.timeIntervalSince(arriving.endTime)) - walkSeconds
     }
 
+    /// Respect per-event provenance when supplied. Direct live overlays supersede MOTIS's
+    /// original reasons; older saved trips fall back to their existing leg-level flag.
+    private static func isLive(reason: String?, leg: Leg) -> Bool {
+        if leg.realTime && leg.liveSource != nil { return true }
+        guard let reason else { return leg.realTime }
+        return ["OBSERVED", "PROPAGATED", "PREDICTED"].contains(reason)
+    }
+
     /// "From platform 1 to platform 7"; nil when neither is known.
     var platforms: String? {
         switch (fromTrack, toTrack) {
-        case let (a?, b?) where TransitLabels.identity(a) == TransitLabels.identity(b): return L10n.f("Same platform %@", b)
+        case let (a?, b?) where !changesStation && TransitLabels.identity(a) == TransitLabels.identity(b): return L10n.f("Same platform %@", b)
         case let (a?, b?): return L10n.f("From platform %@ to platform %@", a, b)
         case let (nil, b?): return L10n.f("To platform %@", b)
+        case let (a?, nil): return L10n.transfer("From platform %@", a)
         default: return nil
         }
     }
+
+    /// Station identity, not platform identity: two platforms at one station are not a station change.
+    var changesStation: Bool {
+        if arrivalStop.stationId == departureStop.stationId { return false }
+        let sameName = TransitLabels.identity(arrivalStop.name) == TransitLabels.identity(departureStop.name)
+        return !sameName || arrivalStop.coordinate.distance(to: departureStop.coordinate) > 500
+    }
+
+    /// Total scheduled/live time between vehicles, before deducting the connecting walk.
+    var connectionSeconds: Int { Int(departureTime.timeIntervalSince(arrivalTime)) }
+    var isMissed: Bool { spareSeconds < 0 }
 
     /// "level −2 → level −1" when the change goes up or down.
     var levels: String? {

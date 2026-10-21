@@ -61,3 +61,31 @@ extension StopTime {
         return name == "SEV" || name.hasPrefix("SEV ") || (displayName ?? "").lowercased().contains("schienenersatz")
     }
 }
+
+// A hint from an operator's explicit wording, never from headsign changes, trip IDs,
+// common tracks or nearby trains. Keep the source text; it is not structured carriage data.
+extension Alert {
+    var isTrainDivisionInfo: Bool {
+        let text = (headerText + " " + descriptionText)
+            .folding(options: [.caseInsensitive, .diacriticInsensitive], locale: Locale(identifier: "en_US_POSIX"))
+        let phrases = [
+            #"\bzugteilung\b"#, #"\bflugelung\b"#,
+            #"\bzug\s+wird\s+(?:in\s+.+?\s+)?geteilt\b"#,
+            #"\btrain\s+(?:will\s+be\s+|is\s+)?(?:split|divided|splits)\b"#,
+            #"\btrain\s+division\b"#,
+            #"\bdivision\s+du\s+train\b"#, #"\btrain\s+(?:sera\s+)?divise\b"#,
+            #"\b(?:divisione|separazione)\s+del\s+treno\b"#,
+            #"\btreno\s+(?:viene\s+)?diviso\b"#
+        ]
+        return phrases.contains { text.range(of: $0, options: .regularExpression) != nil }
+    }
+}
+
+extension Leg {
+    var trainDivisionAlerts: [Alert] {
+        // A bus diversion mentioning a split train is not a division of this vehicle.
+        guard ["RAIL", "REGIONAL_RAIL", "REGIONAL_FAST_RAIL", "SUBURBAN", "HIGHSPEED_RAIL",
+               "LONG_DISTANCE", "NIGHT_RAIL"].contains(mode) else { return [] }
+        return serviceAlerts.filter(\.isTrainDivisionInfo)
+    }
+}

@@ -26,7 +26,7 @@ final class LocalizationTests: XCTestCase {
     }
 
     func testEveryCatalogHasAllLanguagesAndPreservesPlaceholders() throws {
-        for path in ["Sources/Shared/Localizable.xcstrings", "Sources/App/AppShortcuts.xcstrings", "Sources/App/InfoPlist.xcstrings"] {
+        for path in ["Sources/Shared/Localizable.xcstrings", "Sources/Shared/Transfers.xcstrings", "Sources/App/AppShortcuts.xcstrings", "Sources/App/InfoPlist.xcstrings"] {
             let data = try catalog(path)
             XCTAssertEqual(data["sourceLanguage"] as? String, "en")
             let strings = try XCTUnwrap(data["strings"] as? [String: [String: Any]])
