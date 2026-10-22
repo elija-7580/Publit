@@ -1,7 +1,7 @@
 name: ASC Duo screenshots
 on:
   push:
-    branches: [ascduo]
+    branches: [ascduo2]
 permissions:
   contents: write
 jobs:
@@ -13,12 +13,24 @@ jobs:
       P8: ${{ secrets.ASC_KEY_P8 }}
     steps:
       - uses: actions/checkout@v4
-      - run: python3 -m pip install -q pyjwt cryptography requests pillow && python3 .duo/duo_upload.py
+      - name: Inputs (captures, Xcode device chrome, font)
+        run: |
+          sudo apt-get install -y -q poppler-utils > /dev/null
+          git clone -q --depth 1 -b shots-inner "https://github.com/$GITHUB_REPOSITORY" shots
+          git clone -q --depth 1 -b shots-outer "https://github.com/$GITHUB_REPOSITORY" shots-o
+          cp shots-o/de/outer-*.png shots/de/; cp shots-o/en/outer-*.png shots/en/
+          git clone -q --depth 1 -b chrome-duo "https://github.com/$GITHUB_REPOSITORY" chrome
+          curl -sL -o NotoSans-VF.ttf "https://github.com/google/fonts/raw/main/ofl/notosans/NotoSans%5Bwdth%2Cwght%5D.ttf"
+      - name: Compose mockups
+        run: |
+          python3 -m pip install -q pillow
+          FONT="$PWD/NotoSans-VF.ttf" python3 .duo/compose_duo.py shots chrome/chrome composed
+      - run: python3 -m pip install -q pyjwt cryptography requests pillow && python3 .duo/duo_upload2.py
       - name: Report
         if: always()
         run: |
           test -f report.txt || echo "no report" > report.txt
-          mkdir r && cp report.txt r/ && cd r && git init -q -b ascduo-report
+          mkdir r && cp report.txt r/ && cp -r composed r/ 2>/dev/null; cd r && git init -q -b ascduo-report
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A && git commit -q -m "Duo upload report"
