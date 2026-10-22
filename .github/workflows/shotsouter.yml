@@ -1,0 +1,99 @@
+name: Duo outer display shots
+
+# One-off: builds with the Xcode 27 SDK, runs the app on iPhone Duo (cover display and unfolded
+# inner display via duoctl) and commits the screenshots to the shots-outer branch.
+on:
+  push:
+    branches: [shotsouter]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: shotsouter
+  cancel-in-progress: true
+
+jobs:
+  shots:
+    runs-on: xcode-27
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: Xcode and simulators
+        run: |
+          XC=$(ls -d /Applications/Xcode*.app | grep -v -i beta | sort -V | tail -1)
+          sudo xcode-select -s "$XC"
+          mkdir -p out
+          { xcodebuild -version; sw_vers; xcrun simctl list runtimes; } > out/env.txt 2>&1
+      - name: Generate project
+        run: brew install xcodegen && xcodegen generate
+      - name: Build
+        run: |
+          set -o pipefail
+          xcodebuild build -project Publit.xcodeproj -scheme Publit \
+            -destination "generic/platform=iOS Simulator" -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO 2>&1 | tee out/build-full.log | grep -E ": (error|warning):|BUILD" > out/build.log || true
+          grep -q "BUILD SUCCEEDED" out/build-full.log
+      - name: Newer iOS simulator runtime (iPhone Duo needs iOS 27.1+)
+        continue-on-error: true
+        timeout-minutes: 40
+        run: |
+          xcodebuild -downloadPlatform iOS -buildVersion 27.1 > out/runtime.log 2>&1 || true
+          tail -5 out/runtime.log
+          xcrun simctl list runtimes >> out/runtime.log
+      - name: duoctl
+        continue-on-error: true
+        run: |
+          brew install skarol/tap/duoctl > out/duoctl-install.log 2>&1 || true
+          { which duoctl; duoctl --help; } > out/duoctl-help.txt 2>&1 || true
+      - name: Screenshots
+        if: always()
+        shell: bash {0}
+        run: |
+          RT=$(xcrun simctl list runtimes -j | python3 -c "import json,sys; r=[x for x in json.load(sys.stdin)['runtimes'] if x['platform']=='iOS' and x['isAvailable']]; print(sorted(r,key=lambda x:[int(p) for p in x['version'].split('.')])[-1]['identifier'])")
+          TYPE=$(xcrun simctl list devicetypes -j | python3 -c "import json,sys; t=[d for d in json.load(sys.stdin)['devicetypes'] if d['name'].startswith('iPhone Duo')]; print(t[-1]['identifier'] if t else '')")
+          UDID=$(xcrun simctl create "shots-duo" "$TYPE" "$RT" 2>>out/env.txt)
+          echo "created $UDID on $RT ($TYPE)" >> out/env.txt
+          export DUOCTL_UDID=$UDID
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl status_bar "$UDID" override --time "9:41" --batteryState charged --batteryLevel 100 || true
+          xcrun simctl location "$UDID" set 48.15000,11.58030
+          APP=$(find build/Build/Products -maxdepth 2 -name Publit.app | head -1)
+          xcrun simctl install "$UDID" "$APP"
+          xcrun simctl privacy "$UDID" grant location io.github.elija7580.publit || true
+          xcrun simctl io "$UDID" enumerate > out/enumerate.txt 2>&1
+          duoctl state > out/state0.txt 2>&1
+          BID=io.github.elija7580.publit
+          shoot() { # lang locale scene wait env...
+            L=$1; LOC=$2; S=$3; W=$4; shift 4
+            mkdir -p out/$L
+            duoctl close > /dev/null 2>&1; sleep 3
+            xcrun simctl terminate "$UDID" $BID > /dev/null 2>&1
+            for kv in "$@"; do export "SIMCTL_CHILD_$kv"; done
+            xcrun simctl launch "$UDID" $BID -onboardingDone YES -AppleLanguages "($L)" -AppleLocale $LOC >> out/launch.log 2>&1
+            sleep $W
+            duoctl screenshot out/$L/outer-$S.png >> out/duoctl.log 2>&1
+            xcrun simctl io "$UDID" screenshot --display=1 --type=png out/$L/outerb-$S.png >> out/shot.log 2>&1
+            duoctl state >> out/state-$L-$S.txt 2>&1
+            for kv in "$@"; do unset "SIMCTL_CHILD_${kv%%=*}"; done
+          }
+          for pair in "de de_AT" "en en_GB"; do
+            set -- $pair
+            shoot $1 $2 nearby 30 PUBLIT_DEMO=munich PUBLIT_TAB=nearby PUBLIT_UI_DARK=0
+            shoot $1 $2 plan 35 PUBLIT_DEMO=munich PUBLIT_TAB=plan PUBLIT_UI_DARK=0
+            shoot $1 $2 route 20 PUBLIT_UI_SAMPLE=route PUBLIT_UI_DARK=0
+            shoot $1 $2 live 25 PUBLIT_UI_SAMPLE=live PUBLIT_UI_DARK=0
+            shoot $1 $2 dark 30 PUBLIT_DEMO=munich PUBLIT_TAB=nearby PUBLIT_UI_DARK=1
+          done
+          xcrun simctl shutdown "$UDID" || true
+      - name: Publish
+        if: always()
+        run: |
+          rm -f out/build-full.log
+          cd out
+          git init -q -b shots-outer
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -q -m "Duo outer shots ($GITHUB_SHA)"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/$GITHUB_REPOSITORY" shots-outer
