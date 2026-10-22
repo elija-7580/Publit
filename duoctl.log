@@ -1,0 +1,540 @@
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "inner",
+  "displayId": 3,
+  "displayUUID": "7708394C-CFE0-439A-9976-2EC8D4685A66",
+  "rotation": "rot90",
+  "orientation": "landscape",
+  "sizePoints": [
+    951.0,
+    669.0
+  ]
+}
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "inner",
+  "displayId": 3,
+  "displayUUID": "7708394C-CFE0-439A-9976-2EC8D4685A66",
+  "rotation": "rot90",
+  "orientation": "landscape",
+  "sizePoints": [
+    951.0,
+    669.0
+  ]
+}
+out/de/inner-nearby.png
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "inner",
+  "displayId": 3,
+  "displayUUID": "7708394C-CFE0-439A-9976-2EC8D4685A66",
+  "rotation": "rot0",
+  "orientation": "portrait",
+  "sizePoints": [
+    669.0,
+    951.0
+  ]
+}
+out/de/innerp-nearby.png
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "cover",
+  "displayId": 1,
+  "displayUUID": "002BA9F8-9B8D-4226-BF67-0FB5CA044243",
+  "rotation": "rot0",
+  "orientation": "portrait",
+  "sizePoints": [
+    466.0,
+    678.0
+  ]
+}
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "inner",
+  "displayId": 3,
+  "displayUUID": "7708394C-CFE0-439A-9976-2EC8D4685A66",
+  "rotation": "rot0",
+  "orientation": "portrait",
+  "sizePoints": [
+    669.0,
+    951.0
+  ]
+}
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "inner",
+  "displayId": 3,
+  "displayUUID": "7708394C-CFE0-439A-9976-2EC8D4685A66",
+  "rotation": "rot90",
+  "orientation": "landscape",
+  "sizePoints": [
+    951.0,
+    669.0
+  ]
+}
+out/de/inner-plan.png
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "inner",
+  "displayId": 3,
+  "displayUUID": "7708394C-CFE0-439A-9976-2EC8D4685A66",
+  "rotation": "rot0",
+  "orientation": "portrait",
+  "sizePoints": [
+    669.0,
+    951.0
+  ]
+}
+out/de/innerp-plan.png
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "cover",
+  "displayId": 1,
+  "displayUUID": "002BA9F8-9B8D-4226-BF67-0FB5CA044243",
+  "rotation": "rot0",
+  "orientation": "portrait",
+  "sizePoints": [
+    466.0,
+    678.0
+  ]
+}
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "inner",
+  "displayId": 3,
+  "displayUUID": "7708394C-CFE0-439A-9976-2EC8D4685A66",
+  "rotation": "rot0",
+  "orientation": "portrait",
+  "sizePoints": [
+    669.0,
+    951.0
+  ]
+}
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "inner",
+  "displayId": 3,
+  "displayUUID": "7708394C-CFE0-439A-9976-2EC8D4685A66",
+  "rotation": "rot90",
+  "orientation": "landscape",
+  "sizePoints": [
+    951.0,
+    669.0
+  ]
+}
+out/de/inner-route.png
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "inner",
+  "displayId": 3,
+  "displayUUID": "7708394C-CFE0-439A-9976-2EC8D4685A66",
+  "rotation": "rot0",
+  "orientation": "portrait",
+  "sizePoints": [
+    669.0,
+    951.0
+  ]
+}
+out/de/innerp-route.png
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "cover",
+  "displayId": 1,
+  "displayUUID": "002BA9F8-9B8D-4226-BF67-0FB5CA044243",
+  "rotation": "rot0",
+  "orientation": "portrait",
+  "sizePoints": [
+    466.0,
+    678.0
+  ]
+}
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "inner",
+  "displayId": 3,
+  "displayUUID": "7708394C-CFE0-439A-9976-2EC8D4685A66",
+  "rotation": "rot0",
+  "orientation": "portrait",
+  "sizePoints": [
+    669.0,
+    951.0
+  ]
+}
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "inner",
+  "displayId": 3,
+  "displayUUID": "7708394C-CFE0-439A-9976-2EC8D4685A66",
+  "rotation": "rot90",
+  "orientation": "landscape",
+  "sizePoints": [
+    951.0,
+    669.0
+  ]
+}
+out/de/inner-live.png
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "inner",
+  "displayId": 3,
+  "displayUUID": "7708394C-CFE0-439A-9976-2EC8D4685A66",
+  "rotation": "rot0",
+  "orientation": "portrait",
+  "sizePoints": [
+    669.0,
+    951.0
+  ]
+}
+out/de/innerp-live.png
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "cover",
+  "displayId": 1,
+  "displayUUID": "002BA9F8-9B8D-4226-BF67-0FB5CA044243",
+  "rotation": "rot0",
+  "orientation": "portrait",
+  "sizePoints": [
+    466.0,
+    678.0
+  ]
+}
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "inner",
+  "displayId": 3,
+  "displayUUID": "7708394C-CFE0-439A-9976-2EC8D4685A66",
+  "rotation": "rot0",
+  "orientation": "portrait",
+  "sizePoints": [
+    669.0,
+    951.0
+  ]
+}
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "inner",
+  "displayId": 3,
+  "displayUUID": "7708394C-CFE0-439A-9976-2EC8D4685A66",
+  "rotation": "rot90",
+  "orientation": "landscape",
+  "sizePoints": [
+    951.0,
+    669.0
+  ]
+}
+out/de/inner-dark.png
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "inner",
+  "displayId": 3,
+  "displayUUID": "7708394C-CFE0-439A-9976-2EC8D4685A66",
+  "rotation": "rot0",
+  "orientation": "portrait",
+  "sizePoints": [
+    669.0,
+    951.0
+  ]
+}
+out/de/innerp-dark.png
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "cover",
+  "displayId": 1,
+  "displayUUID": "002BA9F8-9B8D-4226-BF67-0FB5CA044243",
+  "rotation": "rot0",
+  "orientation": "portrait",
+  "sizePoints": [
+    466.0,
+    678.0
+  ]
+}
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "inner",
+  "displayId": 3,
+  "displayUUID": "7708394C-CFE0-439A-9976-2EC8D4685A66",
+  "rotation": "rot0",
+  "orientation": "portrait",
+  "sizePoints": [
+    669.0,
+    951.0
+  ]
+}
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "inner",
+  "displayId": 3,
+  "displayUUID": "7708394C-CFE0-439A-9976-2EC8D4685A66",
+  "rotation": "rot90",
+  "orientation": "landscape",
+  "sizePoints": [
+    951.0,
+    669.0
+  ]
+}
+out/en/inner-nearby.png
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "inner",
+  "displayId": 3,
+  "displayUUID": "7708394C-CFE0-439A-9976-2EC8D4685A66",
+  "rotation": "rot0",
+  "orientation": "portrait",
+  "sizePoints": [
+    669.0,
+    951.0
+  ]
+}
+out/en/innerp-nearby.png
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "cover",
+  "displayId": 1,
+  "displayUUID": "002BA9F8-9B8D-4226-BF67-0FB5CA044243",
+  "rotation": "rot0",
+  "orientation": "portrait",
+  "sizePoints": [
+    466.0,
+    678.0
+  ]
+}
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "inner",
+  "displayId": 3,
+  "displayUUID": "7708394C-CFE0-439A-9976-2EC8D4685A66",
+  "rotation": "rot0",
+  "orientation": "portrait",
+  "sizePoints": [
+    669.0,
+    951.0
+  ]
+}
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "inner",
+  "displayId": 3,
+  "displayUUID": "7708394C-CFE0-439A-9976-2EC8D4685A66",
+  "rotation": "rot90",
+  "orientation": "landscape",
+  "sizePoints": [
+    951.0,
+    669.0
+  ]
+}
+out/en/inner-plan.png
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "inner",
+  "displayId": 3,
+  "displayUUID": "7708394C-CFE0-439A-9976-2EC8D4685A66",
+  "rotation": "rot0",
+  "orientation": "portrait",
+  "sizePoints": [
+    669.0,
+    951.0
+  ]
+}
+out/en/innerp-plan.png
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "cover",
+  "displayId": 1,
+  "displayUUID": "002BA9F8-9B8D-4226-BF67-0FB5CA044243",
+  "rotation": "rot0",
+  "orientation": "portrait",
+  "sizePoints": [
+    466.0,
+    678.0
+  ]
+}
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "inner",
+  "displayId": 3,
+  "displayUUID": "7708394C-CFE0-439A-9976-2EC8D4685A66",
+  "rotation": "rot0",
+  "orientation": "portrait",
+  "sizePoints": [
+    669.0,
+    951.0
+  ]
+}
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "inner",
+  "displayId": 3,
+  "displayUUID": "7708394C-CFE0-439A-9976-2EC8D4685A66",
+  "rotation": "rot90",
+  "orientation": "landscape",
+  "sizePoints": [
+    951.0,
+    669.0
+  ]
+}
+out/en/inner-route.png
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "inner",
+  "displayId": 3,
+  "displayUUID": "7708394C-CFE0-439A-9976-2EC8D4685A66",
+  "rotation": "rot0",
+  "orientation": "portrait",
+  "sizePoints": [
+    669.0,
+    951.0
+  ]
+}
+out/en/innerp-route.png
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "cover",
+  "displayId": 1,
+  "displayUUID": "002BA9F8-9B8D-4226-BF67-0FB5CA044243",
+  "rotation": "rot0",
+  "orientation": "portrait",
+  "sizePoints": [
+    466.0,
+    678.0
+  ]
+}
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "inner",
+  "displayId": 3,
+  "displayUUID": "7708394C-CFE0-439A-9976-2EC8D4685A66",
+  "rotation": "rot0",
+  "orientation": "portrait",
+  "sizePoints": [
+    669.0,
+    951.0
+  ]
+}
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "inner",
+  "displayId": 3,
+  "displayUUID": "7708394C-CFE0-439A-9976-2EC8D4685A66",
+  "rotation": "rot90",
+  "orientation": "landscape",
+  "sizePoints": [
+    951.0,
+    669.0
+  ]
+}
+out/en/inner-live.png
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "inner",
+  "displayId": 3,
+  "displayUUID": "7708394C-CFE0-439A-9976-2EC8D4685A66",
+  "rotation": "rot0",
+  "orientation": "portrait",
+  "sizePoints": [
+    669.0,
+    951.0
+  ]
+}
+out/en/innerp-live.png
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "cover",
+  "displayId": 1,
+  "displayUUID": "002BA9F8-9B8D-4226-BF67-0FB5CA044243",
+  "rotation": "rot0",
+  "orientation": "portrait",
+  "sizePoints": [
+    466.0,
+    678.0
+  ]
+}
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "inner",
+  "displayId": 3,
+  "displayUUID": "7708394C-CFE0-439A-9976-2EC8D4685A66",
+  "rotation": "rot0",
+  "orientation": "portrait",
+  "sizePoints": [
+    669.0,
+    951.0
+  ]
+}
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "inner",
+  "displayId": 3,
+  "displayUUID": "7708394C-CFE0-439A-9976-2EC8D4685A66",
+  "rotation": "rot90",
+  "orientation": "landscape",
+  "sizePoints": [
+    951.0,
+    669.0
+  ]
+}
+out/en/inner-dark.png
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "inner",
+  "displayId": 3,
+  "displayUUID": "7708394C-CFE0-439A-9976-2EC8D4685A66",
+  "rotation": "rot0",
+  "orientation": "portrait",
+  "sizePoints": [
+    669.0,
+    951.0
+  ]
+}
+out/en/innerp-dark.png
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "cover",
+  "displayId": 1,
+  "displayUUID": "002BA9F8-9B8D-4226-BF67-0FB5CA044243",
+  "rotation": "rot0",
+  "orientation": "portrait",
+  "sizePoints": [
+    466.0,
+    678.0
+  ]
+}

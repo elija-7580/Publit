@@ -1,0 +1,29 @@
+/opt/homebrew/bin/duoctl
+usage: duoctl [-h] [-d DEVICE] [--version]
+              {state,open,close,half,hinge,rotate,tap,long-press,swipe,screenshot,elements} ...
+
+duoctl — fold, rotate and touch the iPhone Duo simulator from the command
+line.
+
+positional arguments:
+  {state,open,close,half,hinge,rotate,tap,long-press,swipe,screenshot,elements}
+    state               print hinge angle, active screen, orientation and size
+                        as JSON
+    open                set the hinge to 180°
+    close               set the hinge to 0°
+    half                set the hinge to 90°
+    hinge               set the hinge angle (0 closed … 180 flat)
+    rotate              rotate the active screen's interface
+    tap                 tap a point (interface points of the active screen) or
+                        an element
+    long-press          long-press a point or an element
+    swipe               swipe between two points (interface points)
+    screenshot          save a PNG of the screen that is showing the interface
+    elements            list labelled accessibility elements with frames
+                        (needs AXe)
+
+options:
+  -h, --help            show this help message and exit
+  -d, --device DEVICE   simulator UDID or name (default: the only booted
+                        iPhone Duo)
+  --version             show program's version number and exit

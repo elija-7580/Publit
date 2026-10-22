@@ -1,0 +1,13 @@
+{
+  "udid": "8B9B0174-B23E-4700-943B-A84AD3D16B00",
+  "hingeAngle": null,
+  "activeScreen": "cover",
+  "displayId": 1,
+  "displayUUID": "002BA9F8-9B8D-4226-BF67-0FB5CA044243",
+  "rotation": "rot0",
+  "orientation": "portrait",
+  "sizePoints": [
+    466.0,
+    678.0
+  ]
+}
