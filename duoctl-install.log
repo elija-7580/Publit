@@ -1,0 +1,13 @@
+[34m==>[0m [1mTapping skarol/tap[0m
+Cloning into '/opt/homebrew/Library/Taps/skarol/homebrew-tap'...
+Tapped 1 formula (14 files, 7.5KB).
+[34m==>[0m [1mTrusted formula skarol/tap/duoctl[0m
+[32m==>[0m [1mFetching downloads for: [32mduoctl[39m[0m
+✔︎ Formula duoctl (0.2.0)
+[34m==>[0m [1mInstalling duoctl from skarol/tap[0m
+🍺  /opt/homebrew/Cellar/duoctl/0.2.0: 8 files, 40.7KB, built in 6 seconds
+[32m==>[0m [1mCaveats[0m
+[34m==>[0m [1mduoctl[0m
+duoctl needs Xcode 27.1 or later with a booted iPhone Duo simulator.
+The first run compiles a small helper with Xcode's clang and caches it in ~/.cache/duoctl.
+--label, --id and `duoctl elements` also need AXe: brew install cameroncooke/axe/axe
