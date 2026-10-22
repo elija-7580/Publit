@@ -1,0 +1,37 @@
+name: Duo chrome assets
+
+on:
+  push:
+    branches: [chromeduo]
+
+permissions:
+  contents: write
+
+jobs:
+  find:
+    runs-on: xcode-27
+    timeout-minutes: 30
+    steps:
+      - name: Find device chrome
+        shell: bash {0}
+        run: |
+          XC=$(ls -d /Applications/Xcode*.app | grep -v -i beta | sort -V | tail -1)
+          mkdir -p out/chrome
+          { echo "$XC"; ls -d /Applications/Xcode*.app; } > out/list.txt
+          find "$XC" /Library/Developer -iname "*duo*" -not -path "*/node_modules/*" 2>/dev/null >> out/list.txt
+          find "$XC" /Library/Developer -iname "*.devicechrome" -maxdepth 9 2>/dev/null | head -80 >> out/list.txt
+          find "$XC" /Library/Developer -iname "*.simdevicetype" -maxdepth 9 2>/dev/null | grep -i -E "duo|fold" >> out/list.txt
+          for d in $(find "$XC" /Library/Developer -maxdepth 9 \( -iname "*duo*.devicechrome" -o -iname "*duo*.simdevicetype" \) 2>/dev/null); do
+            n=$(basename "$d"); mkdir -p "out/chrome/$n"; cp -R "$d/." "out/chrome/$n/" 2>/dev/null
+          done
+          du -sh out/chrome/* >> out/list.txt 2>&1
+          find out/chrome -type f | head -100 >> out/list.txt
+      - name: Publish
+        if: always()
+        run: |
+          cd out
+          git init -q -b chrome-duo
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -q -m "Duo chrome"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/$GITHUB_REPOSITORY" chrome-duo
