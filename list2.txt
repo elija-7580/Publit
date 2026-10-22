@@ -1,0 +1,137 @@
+/Library/Developer/CoreSimulator/Profiles/DeviceTypes/iPhone Duo.simdevicetype
+/Library/Developer/CoreSimulator/Profiles/DeviceTypes/iPhone Duo.simdevicetype/Contents
+/Library/Developer/CoreSimulator/Profiles/DeviceTypes/iPhone Duo.simdevicetype/Contents/_CodeSignature
+/Library/Developer/CoreSimulator/Profiles/DeviceTypes/iPhone Duo.simdevicetype/Contents/_CodeSignature/CodeResources
+/Library/Developer/CoreSimulator/Profiles/DeviceTypes/iPhone Duo.simdevicetype/Contents/MacOS
+/Library/Developer/CoreSimulator/Profiles/DeviceTypes/iPhone Duo.simdevicetype/Contents/MacOS/iPhone Duo
+/Library/Developer/CoreSimulator/Profiles/DeviceTypes/iPhone Duo.simdevicetype/Contents/Resources
+/Library/Developer/CoreSimulator/Profiles/DeviceTypes/iPhone Duo.simdevicetype/Contents/Resources/en.lproj
+/Library/Developer/CoreSimulator/Profiles/DeviceTypes/iPhone Duo.simdevicetype/Contents/Resources/en.lproj/InfoPlist.strings
+/Library/Developer/CoreSimulator/Profiles/DeviceTypes/iPhone Duo.simdevicetype/Contents/Resources/capabilities.plist
+/Library/Developer/CoreSimulator/Profiles/DeviceTypes/iPhone Duo.simdevicetype/Contents/Resources/1C896A2B-F0D7-405C-8D0F-66E4B80AD044.pdf
+/Library/Developer/CoreSimulator/Profiles/DeviceTypes/iPhone Duo.simdevicetype/Contents/Resources/sensor_bar_class_04.pdf
+/Library/Developer/CoreSimulator/Profiles/DeviceTypes/iPhone Duo.simdevicetype/Contents/Resources/profile.plist
+/Library/Developer/CoreSimulator/Profiles/DeviceTypes/iPhone Duo.simdevicetype/Contents/Resources/BF0DC480-5EE2-4EC1-B02B-C75E94759832.pdf
+/Library/Developer/CoreSimulator/Profiles/DeviceTypes/iPhone Duo.simdevicetype/Contents/Info.plist
+/Library/Developer/CoreSimulator/Profiles/DeviceTypes/iPhone Duo.simdevicetype/Contents/version.plist
+total 0
+drwxr-xr-x  31 root  wheel  992 Oct 12 05:28 .
+drwxr-xr-x   5 root  wheel  160 Oct 12 05:28 ..
+drwxr-xr-x   3 root  wheel   96 Aug 24 01:13 phone.devicechrome
+drwxr-xr-x   3 root  wheel   96 Aug 24 01:13 phone10.devicechrome
+drwxr-xr-x   3 root  wheel   96 Aug 24 01:13 phone11.devicechrome
+drwxr-xr-x   3 root  wheel   96 Aug 24 01:13 phone12.devicechrome
+drwxr-xr-x   3 root  wheel   96 Aug 24 01:13 phone13.devicechrome
+drwxr-xr-x   3 root  wheel   96 Sep 11 00:28 phone14.devicechrome
+drwxr-xr-x   3 root  wheel   96 Sep 11 00:28 phone15.devicechrome
+drwxr-xr-x   3 root  wheel   96 Aug 24 01:13 phone2.devicechrome
+drwxr-xr-x   3 root  wheel   96 Aug 24 01:13 phone3.devicechrome
+drwxr-xr-x   3 root  wheel   96 Aug 24 01:13 phone4.devicechrome
+drwxr-xr-x   3 root  wheel   96 Aug 24 01:13 phone5.devicechrome
+drwxr-xr-x   3 root  wheel   96 Aug 24 01:13 phone6.devicechrome
+drwxr-xr-x   3 root  wheel   96 Aug 24 01:13 phone7.devicechrome
+drwxr-xr-x   3 root  wheel   96 Aug 24 01:13 phone8.devicechrome
+drwxr-xr-x   3 root  wheel   96 Aug 24 01:13 phone9.devicechrome
+drwxr-xr-x   3 root  wheel   96 Aug 24 01:13 tablet.devicechrome
+drwxr-xr-x   3 root  wheel   96 Aug 24 01:13 tablet2.devicechrome
+drwxr-xr-x   3 root  wheel   96 Aug 24 01:13 tablet3.devicechrome
+drwxr-xr-x   3 root  wheel   96 Aug 24 01:13 tablet4.devicechrome
+drwxr-xr-x   3 root  wheel   96 Aug 24 01:13 tablet5.devicechrome
+drwxr-xr-x   3 root  wheel   96 Aug 24 01:15 watch.devicechrome
+drwxr-xr-x   3 root  wheel   96 Aug 24 01:15 watch2.devicechrome
+drwxr-xr-x   3 root  wheel   96 Aug 24 01:15 watch2b.devicechrome
+drwxr-xr-x   3 root  wheel   96 Aug 24 01:15 watch3b.devicechrome
+drwxr-xr-x   3 root  wheel   96 Aug 24 01:15 watch3s.devicechrome
+drwxr-xr-x   3 root  wheel   96 Aug 24 01:15 watch4.devicechrome
+drwxr-xr-x   3 root  wheel   96 Aug 24 01:15 watch5b.devicechrome
+drwxr-xr-x   3 root  wheel   96 Aug 24 01:15 watch5s.devicechrome
+drwxr-xr-x   3 root  wheel   96 Aug 24 01:15 watch6.devicechrome
+/Library/Developer/DeviceKit/Chrome/phone.devicechrome:       22 files, 196K
+/Library/Developer/DeviceKit/Chrome/phone10.devicechrome:       23 files, 208K
+/Library/Developer/DeviceKit/Chrome/phone11.devicechrome:       23 files, 168K
+/Library/Developer/DeviceKit/Chrome/phone12.devicechrome:       23 files, 192K
+/Library/Developer/DeviceKit/Chrome/phone13.devicechrome:       20 files, 168K
+/Library/Developer/DeviceKit/Chrome/phone14.devicechrome:       23 files, 152K
+/Library/Developer/DeviceKit/Chrome/phone15.devicechrome:       23 files, 152K
+/Library/Developer/DeviceKit/Chrome/phone2.devicechrome:       20 files, 184K
+/Library/Developer/DeviceKit/Chrome/phone3.devicechrome:       20 files, 160K
+/Library/Developer/DeviceKit/Chrome/phone4.devicechrome:       20 files, 164K
+/Library/Developer/DeviceKit/Chrome/phone5.devicechrome:       20 files, 160K
+/Library/Developer/DeviceKit/Chrome/phone6.devicechrome:       20 files, 184K
+/Library/Developer/DeviceKit/Chrome/phone7.devicechrome:       23 files, 204K
+/Library/Developer/DeviceKit/Chrome/phone8.devicechrome:       23 files, 204K
+/Library/Developer/DeviceKit/Chrome/phone9.devicechrome:       23 files, 208K
+/Library/Developer/DeviceKit/Chrome/tablet.devicechrome:       20 files, 156K
+/Library/Developer/DeviceKit/Chrome/tablet2.devicechrome:       18 files, 148K
+/Library/Developer/DeviceKit/Chrome/tablet3.devicechrome:       18 files, 168K
+/Library/Developer/DeviceKit/Chrome/tablet4.devicechrome:       18 files, 168K
+/Library/Developer/DeviceKit/Chrome/tablet5.devicechrome:       18 files, 148K
+/Library/Developer/DeviceKit/Chrome/watch.devicechrome:       18 files, 128K
+/Library/Developer/DeviceKit/Chrome/watch2.devicechrome:       18 files, 204K
+/Library/Developer/DeviceKit/Chrome/watch2b.devicechrome:       18 files, 200K
+/Library/Developer/DeviceKit/Chrome/watch3b.devicechrome:       18 files, 168K
+/Library/Developer/DeviceKit/Chrome/watch3s.devicechrome:       18 files, 168K
+/Library/Developer/DeviceKit/Chrome/watch4.devicechrome:       22 files, 256K
+/Library/Developer/DeviceKit/Chrome/watch5b.devicechrome:       19 files, 140K
+/Library/Developer/DeviceKit/Chrome/watch5s.devicechrome:       19 files, 140K
+/Library/Developer/DeviceKit/Chrome/watch6.devicechrome:       22 files, 244K
+/Library/Developer/DeviceKit/Chrome/phone4.devicechrome/Contents/_CodeSignature/CodeResources
+/Library/Developer/DeviceKit/Chrome/watch5s.devicechrome/Contents/_CodeSignature/CodeResources
+/Library/Developer/DeviceKit/Chrome/phone13.devicechrome/Contents/_CodeSignature/CodeResources
+  "chromeIdentifier" => "com.apple.dt.devicekit.chrome.phone15"
+    "com.apple.hid.touch-screen" => true
+152K	/Library/Developer/DeviceKit/Chrome/phone14.devicechrome
+152K	/Library/Developer/DeviceKit/Chrome/phone15.devicechrome
+out/chrome/simdevicetype-resources/en.lproj/InfoPlist.strings
+out/chrome/simdevicetype-resources/capabilities.plist
+out/chrome/simdevicetype-resources/1C896A2B-F0D7-405C-8D0F-66E4B80AD044.pdf
+out/chrome/simdevicetype-resources/sensor_bar_class_04.pdf
+out/chrome/simdevicetype-resources/profile.plist
+out/chrome/simdevicetype-resources/BF0DC480-5EE2-4EC1-B02B-C75E94759832.pdf
+out/chrome/phone15.devicechrome/Contents/_CodeSignature/CodeResources
+out/chrome/phone15.devicechrome/Contents/MacOS/phone15
+out/chrome/phone15.devicechrome/Contents/Resources/Phone TR.pdf
+out/chrome/phone15.devicechrome/Contents/Resources/Phone Left.pdf
+out/chrome/phone15.devicechrome/Contents/Resources/Phone BL.pdf
+out/chrome/phone15.devicechrome/Contents/Resources/Home BTN.pdf
+out/chrome/phone15.devicechrome/Contents/Resources/Phone Base.pdf
+out/chrome/phone15.devicechrome/Contents/Resources/chrome.json
+out/chrome/phone15.devicechrome/Contents/Resources/Vol BTN.pdf
+out/chrome/phone15.devicechrome/Contents/Resources/PhoneComposite.pdf
+out/chrome/phone15.devicechrome/Contents/Resources/Screen.pdf
+out/chrome/phone15.devicechrome/Contents/Resources/Phone Top.pdf
+out/chrome/phone15.devicechrome/Contents/Resources/X_Power BTN.pdf
+out/chrome/phone15.devicechrome/Contents/Resources/Phone Right.pdf
+out/chrome/phone15.devicechrome/Contents/Resources/Vol BTN Dn.pdf
+out/chrome/phone15.devicechrome/Contents/Resources/Mute BTN Dn.pdf
+out/chrome/phone15.devicechrome/Contents/Resources/X_Power BTN Dn.pdf
+out/chrome/phone15.devicechrome/Contents/Resources/Mute BTN.pdf
+out/chrome/phone15.devicechrome/Contents/Resources/Phone TL.pdf
+out/chrome/phone15.devicechrome/Contents/Resources/Phone BR.pdf
+out/chrome/phone15.devicechrome/Contents/Resources/Home BTN Dn.pdf
+out/chrome/phone15.devicechrome/Contents/Info.plist
+out/chrome/phone15.devicechrome/Contents/version.plist
+out/chrome/phone14.devicechrome/Contents/_CodeSignature/CodeResources
+out/chrome/phone14.devicechrome/Contents/MacOS/phone14
+out/chrome/phone14.devicechrome/Contents/Resources/Phone TR.pdf
+out/chrome/phone14.devicechrome/Contents/Resources/Phone Left.pdf
+out/chrome/phone14.devicechrome/Contents/Resources/Phone BL.pdf
+out/chrome/phone14.devicechrome/Contents/Resources/Home BTN.pdf
+out/chrome/phone14.devicechrome/Contents/Resources/Phone Base.pdf
+out/chrome/phone14.devicechrome/Contents/Resources/chrome.json
+out/chrome/phone14.devicechrome/Contents/Resources/Vol BTN.pdf
+out/chrome/phone14.devicechrome/Contents/Resources/X Power BTN Dn.pdf
+out/chrome/phone14.devicechrome/Contents/Resources/PhoneComposite.pdf
+out/chrome/phone14.devicechrome/Contents/Resources/Screen.pdf
+out/chrome/phone14.devicechrome/Contents/Resources/Phone Top.pdf
+out/chrome/phone14.devicechrome/Contents/Resources/Phone Right.pdf
+out/chrome/phone14.devicechrome/Contents/Resources/Vol BTN Dn.pdf
+out/chrome/phone14.devicechrome/Contents/Resources/Mute BTN Dn.pdf
+out/chrome/phone14.devicechrome/Contents/Resources/X Power BTN.pdf
+out/chrome/phone14.devicechrome/Contents/Resources/Mute BTN.pdf
+out/chrome/phone14.devicechrome/Contents/Resources/Phone TL.pdf
+out/chrome/phone14.devicechrome/Contents/Resources/Phone BR.pdf
+out/chrome/phone14.devicechrome/Contents/Resources/Home BTN Dn.pdf
+out/chrome/phone14.devicechrome/Contents/Info.plist
+out/chrome/phone14.devicechrome/Contents/version.plist
+out/chrome/profile.plist

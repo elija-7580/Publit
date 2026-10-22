@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>files</key>
+	<dict>
+		<key>Resources/Home BTN Dn.pdf</key>
+		<data>
+		9FrJMUDwpBCLW7tQ1R9SEumGGIM=
+		</data>
+		<key>Resources/Home BTN.pdf</key>
+		<data>
+		74a0F5rQDfp+173DJezQj3ASYO4=
+		</data>
+		<key>Resources/Mute BTN Dn.pdf</key>
+		<data>
+		dBVrso9eoqEXgWQuhyiHl6N64+0=
+		</data>
+		<key>Resources/Mute BTN.pdf</key>
+		<data>
+		/e8hj6dHyvm/5Xt/dIo+JIkZcq8=
+		</data>
+		<key>Resources/Phone BL.pdf</key>
+		<data>
+		h1Ve36i9F7c0hTRrEJXeQ/TwPvI=
+		</data>
+		<key>Resources/Phone BR.pdf</key>
+		<data>
+		NchQ0uV5eKI8zvpGjbtJYRqVAe0=
+		</data>
+		<key>Resources/Phone Base.pdf</key>
+		<data>
+		+qTmbjfKkxWWMUZaaSo9QjrLEWo=
+		</data>
+		<key>Resources/Phone Left.pdf</key>
+		<data>
+		OuhtiGVlTsskkmkRsx0EIba/G2w=
+		</data>
+		<key>Resources/Phone Right.pdf</key>
+		<data>
+		hIoJr/FHJBEwj8/2eexnLBaacho=
+		</data>
+		<key>Resources/Phone TL.pdf</key>
+		<data>
+		dy8QgdTLrZwQUxLz/pqQeOaajm8=
+		</data>
+		<key>Resources/Phone TR.pdf</key>
+		<data>
+		vYzCj9uC0aUEkXosXKmCZw+8hVg=
+		</data>
+		<key>Resources/Phone Top.pdf</key>
+		<data>
+		AkoXd2s8CvueVleS0DU467LzqrA=
+		</data>
+		<key>Resources/PhoneComposite.pdf</key>
+		<data>
+		jZ1wVoyq11BEwCTftHs3T8g5LHY=
+		</data>
+		<key>Resources/Screen.pdf</key>
+		<data>
+		MbpytAPYFeKQmSYhlGdfDKT7J1M=
+		</data>
+		<key>Resources/Vol BTN Dn.pdf</key>
+		<data>
+		/FMPfzsDtJl1roOGCNLnNKcJV+4=
+		</data>
+		<key>Resources/Vol BTN.pdf</key>
+		<data>
+		/Fev4I1oOZ5C9AC1J+xjR96dY28=
+		</data>
+		<key>Resources/X_Power BTN Dn.pdf</key>
+		<data>
+		DWyMqv70VkqNwj4c1sEC1wuWt+Y=
+		</data>
+		<key>Resources/X_Power BTN.pdf</key>
+		<data>
+		WfXj4mwCRjvPFXjVH6vozwe8lWI=
+		</data>
+		<key>Resources/chrome.json</key>
+		<data>
+		AcHv5LDtvi+08aYBDx0bb217LLw=
+		</data>
+		<key>version.plist</key>
+		<data>
+		Y7tT/9GzkYHaqfIS/6yeY/Aq/7M=
+		</data>
+	</dict>
+	<key>files2</key>
+	<dict>
+		<key>Resources/Home BTN Dn.pdf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			RNnYCypOXu39FZddxmCfDCeBDppqOukpiW0dmDfSnJY=
+			</data>
+		</dict>
+		<key>Resources/Home BTN.pdf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			A9MCGXgO5wzqvpIbBzxSAIDEtjrPbWKTnFcrKe/Nfjk=
+			</data>
+		</dict>
+		<key>Resources/Mute BTN Dn.pdf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			OrgznL8M0cWdm8UZMO0hoW3e5fMiKrTrWl0HgvgLt0o=
+			</data>
+		</dict>
+		<key>Resources/Mute BTN.pdf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			8FyekFejIAs5lBMFi1uKR8pCzxCTuwiiPRh4Q/ienlo=
+			</data>
+		</dict>
+		<key>Resources/Phone BL.pdf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			iCR6I+UlYuVNe3bqdeEC700oDsOuM6mfkh1eJM5j+H8=
+			</data>
+		</dict>
+		<key>Resources/Phone BR.pdf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			/bj08hHcFmXEsPd7IYSdFOZdf0SPXKmUgj4bt8VhW0g=
+			</data>
+		</dict>
+		<key>Resources/Phone Base.pdf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			nnC7iG0z1dJ78igFRmoqfv753FzDprkMnyUV01jxBD4=
+			</data>
+		</dict>
+		<key>Resources/Phone Left.pdf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			CYt5YSFFCXew86bpYe8uD37/YVUwODrWbBQNOmMCZZo=
+			</data>
+		</dict>
+		<key>Resources/Phone Right.pdf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			5U1X2fzNYOBr8xXngyut2No9T34lDP4sKcL9+dAqe8A=
+			</data>
+		</dict>
+		<key>Resources/Phone TL.pdf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			oS++gEFOpZslXGgw6m+XYo/5IoNVKB3fVvPrZBIbCNY=
+			</data>
+		</dict>
+		<key>Resources/Phone TR.pdf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			+16dSHfp7+QDbC2TAJFI6KX9Pjn798TN1rcHtWYkyns=
+			</data>
+		</dict>
+		<key>Resources/Phone Top.pdf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			XXCoBJInEA94j3fJaZr9769Gj5Zf1C+W4qQEn72O25w=
+			</data>
+		</dict>
+		<key>Resources/PhoneComposite.pdf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			w46oiDf30UH/IrAJJ1zi3UXhKhbpuLoLspsiAavVlWo=
+			</data>
+		</dict>
+		<key>Resources/Screen.pdf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			q8IHjPkZuZYCW5+8EWdikoDUijWt2FJ6r7WkH4NFZvE=
+			</data>
+		</dict>
+		<key>Resources/Vol BTN Dn.pdf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			Nup7gpjvCEvgEEXILTOOgLlPukTeQHHK4XUOEOcB654=
+			</data>
+		</dict>
+		<key>Resources/Vol BTN.pdf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			9jjTeuwuZ3KMdxsFaH9fXNM0AzpUVBiGMv7apHAHWmw=
+			</data>
+		</dict>
+		<key>Resources/X_Power BTN Dn.pdf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			O3xiwhyT+Qx2901uIy93ZIFUmnqCF81oLgbOGNZCuds=
+			</data>
+		</dict>
+		<key>Resources/X_Power BTN.pdf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			2IMF29BWFSH5JZiAJ8fY7f2dqOCjBFOvdLoeAjh8Few=
+			</data>
+		</dict>
+		<key>Resources/chrome.json</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			JV5wD5YRXSXc6cqsyXyAJFgV+JDyaHX4SzEFGf0dYEM=
+			</data>
+		</dict>
+		<key>version.plist</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			EffixIhlD2X5JflU3Wip+DR7gdAbsu1fuBN29N0o+Uc=
+			</data>
+		</dict>
+	</dict>
+	<key>rules</key>
+	<dict>
+		<key>^Resources/</key>
+		<true/>
+		<key>^Resources/.*\.lproj/</key>
+		<dict>
+			<key>optional</key>
+			<true/>
+			<key>weight</key>
+			<real>1000</real>
+		</dict>
+		<key>^Resources/.*\.lproj/locversion.plist$</key>
+		<dict>
+			<key>omit</key>
+			<true/>
+			<key>weight</key>
+			<real>1100</real>
+		</dict>
+		<key>^Resources/Base\.lproj/</key>
+		<dict>
+			<key>weight</key>
+			<real>1010</real>
+		</dict>
+		<key>^version.plist$</key>
+		<true/>
+	</dict>
+	<key>rules2</key>
+	<dict>
+		<key>.*\.dSYM($|/)</key>
+		<dict>
+			<key>weight</key>
+			<real>11</real>
+		</dict>
+		<key>^(.*/)?\.DS_Store$</key>
+		<dict>
+			<key>omit</key>
+			<true/>
+			<key>weight</key>
+			<real>2000</real>
+		</dict>
+		<key>^(Frameworks|SharedFrameworks|PlugIns|Plug-ins|XPCServices|Helpers|MacOS|Library/(Automator|Spotlight|LoginItems))/</key>
+		<dict>
+			<key>nested</key>
+			<true/>
+			<key>weight</key>
+			<real>10</real>
+		</dict>
+		<key>^.*</key>
+		<true/>
+		<key>^Info\.plist$</key>
+		<dict>
+			<key>omit</key>
+			<true/>
+			<key>weight</key>
+			<real>20</real>
+		</dict>
+		<key>^PkgInfo$</key>
+		<dict>
+			<key>omit</key>
+			<true/>
+			<key>weight</key>
+			<real>20</real>
+		</dict>
+		<key>^Resources/</key>
+		<dict>
+			<key>weight</key>
+			<real>20</real>
+		</dict>
+		<key>^Resources/.*\.lproj/</key>
+		<dict>
+			<key>optional</key>
+			<true/>
+			<key>weight</key>
+			<real>1000</real>
+		</dict>
+		<key>^Resources/.*\.lproj/locversion.plist$</key>
+		<dict>
+			<key>omit</key>
+			<true/>
+			<key>weight</key>
+			<real>1100</real>
+		</dict>
+		<key>^Resources/Base\.lproj/</key>
+		<dict>
+			<key>weight</key>
+			<real>1010</real>
+		</dict>
+		<key>^[^/]+$</key>
+		<dict>
+			<key>nested</key>
+			<true/>
+			<key>weight</key>
+			<real>10</real>
+		</dict>
+		<key>^embedded\.provisionprofile$</key>
+		<dict>
+			<key>weight</key>
+			<real>20</real>
+		</dict>
+		<key>^version\.plist$</key>
+		<dict>
+			<key>weight</key>
+			<real>20</real>
+		</dict>
+	</dict>
+</dict>
+</plist>
