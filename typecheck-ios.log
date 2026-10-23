@@ -1,0 +1,77 @@
+Sources/API/LiveSourceAdapters.swift:162:49: warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+160 |                 guard J.str(m["type"]) == "HIM", let x = J.int(m["himX"]), hims.indices.contains(x) else { return nil }
+161 |                 // Summary headers ("SUM_GLB_…") are network-wide notes, not about this ride.
+162 |                 if J.list(m["tagL"]).compactMap { J.str($0) }.contains(where: { $0.contains("GLB") }) { return nil }
+    |                                                 `- warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+163 |                 let him = hims[x]
+164 |                 if let mask = J.int(him["prod"]), let cls, mask & cls == 0 { return nil }
+
+Sources/API/LiveSourceAdapters.swift:259:80: warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+257 |                 guard let name = J.str(line["name"]) else { continue }
+258 |                 let alerts = infos.filter { $0.lines.contains(name) }.map { $0.alert }
+259 |                 for dep in J.list(J.dict(line["departures"])["departure"]).map { J.dict($0) } {
+    |                                                                                `- warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+260 |                     let t = J.dict(dep["departureTime"])
+261 |                     guard let planned = J.str(t["timePlanned"]).flatMap({ stamp.date(from: $0) }) else { continue }
+
+Sources/API/LiveSourceAdapters.swift:256:54: warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+254 |         var out: [LiveDeparture] = []
+255 |         for monitor in J.list(data["monitors"]).map { J.dict($0) } {
+256 |             for line in J.list(monitor["lines"]).map { J.dict($0) } {
+    |                                                      `- warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+257 |                 guard let name = J.str(line["name"]) else { continue }
+258 |                 let alerts = infos.filter { $0.lines.contains(name) }.map { $0.alert }
+
+Sources/API/LiveSourceAdapters.swift:255:53: warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+253 |         }
+254 |         var out: [LiveDeparture] = []
+255 |         for monitor in J.list(data["monitors"]).map { J.dict($0) } {
+    |                                                     `- warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+256 |             for line in J.list(monitor["lines"]).map { J.dict($0) } {
+257 |                 guard let name = J.str(line["name"]) else { continue }
+Sources/Stores/PlanModel.swift:156:75: warning: reference to captured var 'maxWalk' in concurrently-executing code; this is an error in the Swift 6 language mode [#SendableClosureCaptures]
+154 |                                                                   maxWalk: Reach.shortWalkSeconds, options: options)
+155 |                 async let longRes = TransitousClient.shared.plan(from: f, to: t, time: time, arriveBy: arriveBy,
+156 |                                                                  maxWalk: maxWalk, options: options)
+    |                                                                           `- warning: reference to captured var 'maxWalk' in concurrently-executing code; this is an error in the Swift 6 language mode [#SendableClosureCaptures]
+157 |                 let long = try await longRes
+158 |                 if let short = try? await shortRes, !short.itineraries.isEmpty {
+
+[#SendableClosureCaptures]: <https://docs.swift.org/compiler/documentation/diagnostics/sendable-closure-captures>
+Sources/Tickets/Views/PassImportView.swift:137:41: warning: main actor-isolated static property 'maxDocumentBytes' cannot be accessed from outside of the actor; this is an error in the Swift 6 language mode
+135 |             let data = try await Task.detached(priority: .userInitiated) {
+136 |                 let size = try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
+137 |                 guard size <= PassStore.maxDocumentBytes else { throw PassStore.Failure.documentTooLarge }
+    |                                         `- warning: main actor-isolated static property 'maxDocumentBytes' cannot be accessed from outside of the actor; this is an error in the Swift 6 language mode
+138 |                 let handle = try FileHandle(forReadingFrom: url)
+139 |                 defer { try? handle.close() }
+
+Sources/Tickets/Views/PassImportView.swift:140:66: warning: main actor-isolated static property 'maxDocumentBytes' cannot be accessed from outside of the actor; this is an error in the Swift 6 language mode
+138 |                 let handle = try FileHandle(forReadingFrom: url)
+139 |                 defer { try? handle.close() }
+140 |                 let bytes = try handle.read(upToCount: PassStore.maxDocumentBytes + 1) ?? Data()
+    |                                                                  `- warning: main actor-isolated static property 'maxDocumentBytes' cannot be accessed from outside of the actor; this is an error in the Swift 6 language mode
+141 |                 guard bytes.count <= PassStore.maxDocumentBytes else { throw PassStore.Failure.documentTooLarge }
+142 |                 guard !bytes.isEmpty else { throw TicketRecognizer.Failure.unreadable }
+
+Sources/Tickets/Views/PassImportView.swift:141:48: warning: main actor-isolated static property 'maxDocumentBytes' cannot be accessed from outside of the actor; this is an error in the Swift 6 language mode
+139 |                 defer { try? handle.close() }
+140 |                 let bytes = try handle.read(upToCount: PassStore.maxDocumentBytes + 1) ?? Data()
+141 |                 guard bytes.count <= PassStore.maxDocumentBytes else { throw PassStore.Failure.documentTooLarge }
+    |                                                `- warning: main actor-isolated static property 'maxDocumentBytes' cannot be accessed from outside of the actor; this is an error in the Swift 6 language mode
+142 |                 guard !bytes.isEmpty else { throw TicketRecognizer.Failure.unreadable }
+143 |                 return bytes
+Sources/Views/PlaceSearchView.swift:214:113: warning: main actor-isolated property 'scope' can not be referenced from a nonisolated autoclosure
+ 18 |     @State private var searchToken = UUID()
+ 19 |     @State private var searched: String?
+ 20 |     @State private var scope: SearchScope = .all
+    |                        `- note: property declared here
+ 21 |     /// Google's suggestions (Settings → Search), listed like the other hits; looked up when picked.
+ 22 |     @State private var googleResults: [GooglePlaces.Suggestion] = []
+    :
+212 |     private func searchNames(_ text: String, token: UUID) async {
+213 |         let useGoogle = GooglePlaces.isActive && scope != .stops
+214 |         async let transit = TransitousClient.shared.geocode(text, near: location.coordinate, type: useGoogle && scope == .all ? nil : scope.apiType)
+    |                                                                                                                 `- warning: main actor-isolated property 'scope' can not be referenced from a nonisolated autoclosure
+215 |         var google: [GooglePlaces.Suggestion]?
+216 |         if useGoogle {

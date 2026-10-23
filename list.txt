@@ -1,0 +1,36 @@
+Command line invocation:
+    /Applications/Xcode_27.1.app/Contents/Developer/usr/bin/xcodebuild -list -project Publit.xcodeproj
+
+Resolve Package Graph
+
+Fetching from https://github.com/googlemaps/ios-maps-sdk
+
+Creating working copy of package ‘ios-maps-sdk’
+
+Checking out 11.2.0 of package ‘ios-maps-sdk’
+
+
+Resolved source packages:
+  GoogleMaps: https://github.com/googlemaps/ios-maps-sdk @ 11.2.0
+
+Information about project "Publit":
+    Targets:
+        Publit
+        PublitWidgets
+        PublitWatch
+        PublitShare
+        PublitTests
+        PublitUITests
+
+    Build Configurations:
+        Debug
+        Release
+
+    If no build configuration is specified and -scheme is not passed then "Debug" is used.
+
+    Schemes:
+        Publit
+        PublitShare
+        PublitWatch
+        PublitWidgets
+
