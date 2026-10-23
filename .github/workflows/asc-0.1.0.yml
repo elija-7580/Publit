@@ -1,0 +1,23 @@
+name: ASC 0.1.0
+on:
+  push:
+    branches: [ops/asc-0.1.0]
+permissions:
+  contents: write
+jobs:
+  asc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 80
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install pyjwt cryptography requests
+      - env:
+          KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          P8: ${{ secrets.ASC_KEY_P8 }}
+        run: python3 tools/appstore/asc_release.py
+      - if: always()
+        run: |
+          mkdir r && cp asc-report.txt r/ || echo none > r/asc-report.txt
+          cd r && git init -q -b asc-report && git config user.name bot && git config user.email bot@x
+          git add . && git commit -qm report && git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" HEAD:refs/heads/asc-report
