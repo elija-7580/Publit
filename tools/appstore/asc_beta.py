@@ -36,9 +36,29 @@ try:
     if any(not g["attributes"].get("isInternalGroup") for g in call("GET", f"/v1/apps/{APP}/betaGroups")["data"]):
         r = call("POST", "/v1/betaAppReviewSubmissions", {"data": {"type": "betaAppReviewSubmissions", "relationships": {"build": {"data": {"type": "builds", "id": BUILD}}}}}, quiet=True)
         log("beta app review submitted", r is not None)
+    # Free price, base territory USA
+    if not call("GET", f"/v1/apps/{APP}/appPriceSchedule", quiet=True) or True:
+        pp = None; url = f"/v1/apps/{APP}/appPricePoints?filter[territory]=USA&limit=200"
+        while url and not pp:
+            d = call("GET", url)
+            pp = next((p["id"] for p in d["data"] if float(p["attributes"].get("customerPrice") or 1) == 0), None)
+            url = d.get("links", {}).get("next")
+        r = call("POST", "/v1/appPriceSchedules", {"data": {"type": "appPriceSchedules", "relationships": {
+            "app": {"data": {"type": "apps", "id": APP}}, "baseTerritory": {"data": {"type": "territories", "id": "USA"}},
+            "manualPrices": {"data": [{"type": "appPrices", "id": "${p1}"}]}}},
+            "included": [{"type": "appPrices", "id": "${p1}", "attributes": {"startDate": None},
+                          "relationships": {"appPricePoint": {"data": {"type": "appPricePoints", "id": pp}}}}]})
+        log("price free", r is not None)
+    VER0 = call("GET", f"/v1/apps/{APP}/appStoreVersions?filter[versionString]=0.1.0&filter[platform]=IOS")["data"][0]["id"]
+    rd = call("GET", f"/v1/appStoreVersions/{VER0}/appStoreReviewDetail")["data"]["id"]
+    r = call("PATCH", f"/v1/appStoreReviewDetails/{rd}", {"data": {"type": "appStoreReviewDetails", "id": rd, "attributes": {
+        "contactFirstName": "Elija Samuel", "contactLastName": "Friedrich-Ulrich",
+        "contactEmail": os.environ["REVIEW_EMAIL"], "contactPhone": os.environ["REVIEW_PHONE"]}}})
+    log("review contact", r is not None)
     if os.environ.get("SUBMIT") == "1":
         VER = call("GET", f"/v1/apps/{APP}/appStoreVersions?filter[versionString]=0.1.0&filter[platform]=IOS")["data"][0]["id"]
-        s = call("POST", "/v1/reviewSubmissions", {"data": {"type": "reviewSubmissions", "attributes": {"platform": "IOS"}, "relationships": {"app": {"data": {"type": "apps", "id": APP}}}}})
+        ex = call("GET", f"/v1/reviewSubmissions?filter[app]={APP}&filter[state]=READY_FOR_REVIEW")["data"]
+        s = {"data": ex[0]} if ex else call("POST", "/v1/reviewSubmissions", {"data": {"type": "reviewSubmissions", "attributes": {"platform": "IOS"}, "relationships": {"app": {"data": {"type": "apps", "id": APP}}}}})
         if s is None:
             ex = call("GET", f"/v1/reviewSubmissions?filter[app]={APP}&filter[state]=READY_FOR_REVIEW")["data"]
             S = ex[0]["id"] if ex else None

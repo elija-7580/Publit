@@ -16,6 +16,8 @@ jobs:
           ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           P8: ${{ secrets.ASC_KEY_P8 }}
           SUBMIT: "1"
+          REVIEW_EMAIL: elija@friedrich-ulrich.com
+          REVIEW_PHONE: "+43 676 7359197"
         run: python3 tools/appstore/asc_beta.py
       - if: always()
         run: |
