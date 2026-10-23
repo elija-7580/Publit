@@ -290,3 +290,82 @@ jobs:
         if: always()
         run: |
           grep -q success ci/RESULT
+
+  # The unit and UI tests of ci.yml, with their logs on the branch uitests-results (ci.yml publishes none for pull requests).
+  # Runs when the commit message has [ui] in it (it takes about 25 minutes), or by hand.
+  uitests:
+    name: Unit and UI tests
+    needs: strings
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[ui]') }}
+    runs-on: xcode-27
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - name: Generate project
+        run: |
+          mkdir -p ci
+          brew install xcodegen && xcodegen generate
+      - name: Simulator
+        id: sim
+        run: |
+          UDID=$(xcrun simctl list devices available -j | python3 -c "import json,sys; d=json.load(sys.stdin)['devices']; p=[x for k in sorted(d, reverse=True) if 'iOS' in k for x in d[k] if x['name'].startswith('iPhone') and 'Max' not in x['name']]; c=[x for w in ('iPhone 18 Pro','iPhone 17 Pro','iPhone 16 Pro') for x in p if x['name'].startswith(w)]+p; print(c[0]['udid'])")
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl location "$UDID" set 48.13715,11.57540
+          xcrun simctl privacy "$UDID" grant location io.github.elija7580.publit || true
+      - name: Build
+        run: |
+          set +e
+          xcodebuild build-for-testing -project Publit.xcodeproj -scheme Publit \
+            -destination "id=${{ steps.sim.outputs.udid }}" -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO > ci/build.log 2>&1
+          grep -q "TEST BUILD SUCCEEDED" ci/build.log
+          echo $? > ci/build.status
+          grep -E ": error:" ci/build.log | sed -E "s#${GITHUB_WORKSPACE}/##" | sort -u | head -40 | tee ci/build-errors.txt || true
+      - name: Unit tests
+        run: |
+          set +e
+          if [ "$(cat ci/build.status)" != "0" ]; then echo 1 > ci/unit.status; exit 0; fi
+          xcodebuild test-without-building -project Publit.xcodeproj -scheme Publit \
+            -destination "id=${{ steps.sim.outputs.udid }}" -derivedDataPath build \
+            -only-testing:PublitTests > ci/unit.log 2>&1
+          grep -q "TEST EXECUTE SUCCEEDED" ci/unit.log
+          echo $? > ci/unit.status
+          grep -E ": error: |Failing tests|^\s+PublitTests\." ci/unit.log | sed -E "s#${GITHUB_WORKSPACE}/##" | head -40 | tee ci/unit-failures.txt || true
+      - name: UI tests
+        run: |
+          set +e
+          if [ "$(cat ci/build.status)" != "0" ]; then echo 1 > ci/ui.status; exit 0; fi
+          xcodebuild test-without-building -project Publit.xcodeproj -scheme Publit \
+            -destination "id=${{ steps.sim.outputs.udid }}" -derivedDataPath build \
+            -only-testing:PublitUITests \
+            -skip-testing:PublitUITests/PublitUITests/testF21DesignScreens \
+            -skip-testing:PublitUITests/PublitUITests/testF22StartScreens \
+            -skip-testing:PublitUITests/PublitUITests/testF24WebsiteTripLight \
+            -skip-testing:PublitUITests/PublitUITests/testF25WebsiteTripDark \
+            -skip-testing:PublitUITests/PublitUITests/testF26WebsiteStartLight \
+            -skip-testing:PublitUITests/PublitUITests/testF27WebsiteStartDark \
+            -skip-testing:PublitUITests/PublitUITests/testF28WebsiteExtras > ci/ui.log 2>&1
+          # The tests that failed are the result; a failing test is not a failing job here (main has four failing UI tests).
+          grep -E ": error: |WATCHDOG" ci/ui.log | sed -E "s#${GITHUB_WORKSPACE}/##" | cut -c1-400 > ci/ui-failures.txt || true
+          grep -E "^\s+PublitUITests\.|Executed [0-9]+ tests" ci/ui.log | sort -u > ci/ui-summary.txt || true
+          cat ci/ui-summary.txt
+          echo 0 > ci/ui.status
+      - name: Publish results to the uitests-results branch
+        if: always()
+        run: |
+          echo "${{ github.sha }} $(cat ci/build.status 2>/dev/null) $(cat ci/unit.status 2>/dev/null) $(cat ci/ui.status 2>/dev/null)" > ci/RESULT
+          for f in ci/*.log; do [ -f "$f" ] && tail -n 300 "$f" > "$f.tail" && mv "$f.tail" "$f"; done
+          cd ci
+          git init -q -b uitests-results
+          git config user.name "github-actions"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -qm "Test results for ${{ github.sha }}"
+          for i in 1 2 3; do
+            git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" uitests-results && exit 0
+            sleep $((i * 10))
+          done
+          exit 1
