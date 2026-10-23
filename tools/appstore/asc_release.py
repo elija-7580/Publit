@@ -38,7 +38,7 @@ try:
         log("build", BUILD, "attached" if r is not None else "NOT attached")
     else:
         log("!! build", BUILD, "not ready")
-    v = call("GET", f"/v1/appStoreVersions/{VER}?include=build,appStoreReviewDetail,ageRatingDeclaration")
+    v = call("GET", f"/v1/appStoreVersions/{VER}?include=build,appStoreReviewDetail")
     a = v["data"]["attributes"]; log("now:", a["versionString"], a.get("appStoreState"), "copyright", a.get("copyright"))
     rels = v["data"]["relationships"]
     log("build linked:", bool(rels["build"]["data"]), "review detail:", bool(rels.get("appStoreReviewDetail", {}).get("data")))
