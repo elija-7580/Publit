@@ -41,6 +41,7 @@ jobs:
   watch:
     name: Watch app
     needs: strings
+    if: ${{ !contains(github.event.head_commit.message, '[ui4]') }}
     runs-on: xcode-27
     timeout-minutes: 60
     steps:
@@ -166,6 +167,7 @@ jobs:
   iphone:
     name: iPhone app
     needs: strings
+    if: ${{ !contains(github.event.head_commit.message, '[ui4]') }}
     runs-on: xcode-27
     timeout-minutes: 60
     steps:
@@ -296,7 +298,7 @@ jobs:
   uitests:
     name: Unit and UI tests
     needs: strings
-    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[ui]') }}
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[ui]') || contains(github.event.head_commit.message, '[ui4]') }}
     runs-on: xcode-27
     timeout-minutes: 60
     steps:
@@ -339,9 +341,13 @@ jobs:
         run: |
           set +e
           if [ "$(cat ci/build.status)" != "0" ]; then echo 1 > ci/ui.status; exit 0; fi
+          ONLY="-only-testing:PublitUITests"
+          if [ -n "${{ contains(github.event.head_commit.message, '[ui4]') && 'x' || '' }}" ]; then
+            ONLY="-only-testing:PublitUITests/PublitUITests/testF02PlanCompareAndDetail -only-testing:PublitUITests/PublitUITests/testF04SearchEdgeCases -only-testing:PublitUITests/PublitUITests/testF17TicketFieldReview -only-testing:PublitUITests/PublitUITests/testF19DropPinOnMap"
+          fi
           xcodebuild test-without-building -project Publit.xcodeproj -scheme Publit \
             -destination "id=${{ steps.sim.outputs.udid }}" -derivedDataPath build \
-            -only-testing:PublitUITests \
+            $ONLY \
             -skip-testing:PublitUITests/PublitUITests/testF21DesignScreens \
             -skip-testing:PublitUITests/PublitUITests/testF22StartScreens \
             -skip-testing:PublitUITests/PublitUITests/testF24WebsiteTripLight \
@@ -354,6 +360,7 @@ jobs:
           grep -E "^\s+PublitUITests\.|Executed [0-9]+ tests" ci/ui.log | sort -u > ci/ui-summary.txt || true
           cat ci/ui-summary.txt
           echo 0 > ci/ui.status
+          mkdir -p ci/shots && cp ~/publit-shots/* ci/shots/ 2>/dev/null || true
       - name: Publish results to the uitests-results branch
         if: always()
         run: |
