@@ -1,0 +1,17 @@
+watch simulator: DDF8A7F2-1CFF-48DF-8B0F-5A1FD0F79D30
+app: build/Products/Debug-watchsimulator/PublitWatch.app
+total 2288
+-rw-r--r--@ 1 runner  staff  107364 Oct 23 18:48 watch-gap.png
+-rw-r--r--@ 1 runner  staff   40208 Oct 23 18:46 watch-home.png
+-rw-r--r--@ 1 runner  staff   70602 Oct 23 18:47 watch-leg-s8.png
+-rw-r--r--@ 1 runner  staff   81245 Oct 23 18:47 watch-leg.png
+-rw-r--r--@ 1 runner  staff  187126 Oct 23 18:47 watch-legmap.png
+-rw-r--r--@ 1 runner  staff   50521 Oct 23 18:49 watch-nearby-gap.png
+-rw-r--r--@ 1 runner  staff   49182 Oct 23 18:48 watch-nearby.png
+-rw-r--r--@ 1 runner  staff   41812 Oct 23 18:48 watch-plan-gap.png
+-rw-r--r--@ 1 runner  staff  160198 Oct 23 18:48 watch-plan.png
+-rw-r--r--@ 1 runner  staff   53411 Oct 23 18:48 watch-saved.png
+-rw-r--r--@ 1 runner  staff   16125 Oct 23 18:48 watch-ticket.png
+-rw-r--r--@ 1 runner  staff   45541 Oct 23 18:47 watch-tickets.png
+-rw-r--r--@ 1 runner  staff  106732 Oct 23 18:46 watch-trip.png
+-rw-r--r--@ 1 runner  staff  126190 Oct 23 18:47 watch-tripmap.png
