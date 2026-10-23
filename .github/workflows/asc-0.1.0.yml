@@ -15,7 +15,8 @@ jobs:
           KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           P8: ${{ secrets.ASC_KEY_P8 }}
-        run: python3 tools/appstore/asc_release.py
+          SUBMIT: "1"
+        run: python3 tools/appstore/asc_beta.py
       - if: always()
         run: |
           mkdir r && cp asc-report.txt r/ || echo none > r/asc-report.txt
