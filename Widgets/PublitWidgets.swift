@@ -2,15 +2,30 @@ import SwiftUI
 import WidgetKit
 import ActivityKit
 
+/// Picks the bundle at launch: from iOS 18 the Live Activity is also offered to Apple Watch.
 @main
+enum PublitWidgetsEntry {
+    static func main() {
+        if #available(iOS 18.0, *) {
+            PublitWidgetsWithWatch.main()
+        } else {
+            PublitWidgets.main()
+        }
+    }
+}
+
 struct PublitWidgets: WidgetBundle {
     var body: some Widget {
         DeparturesWidget()
-        if #available(iOS 18.0, *) {
-            WatchTripLiveActivity()
-        } else {
-            TripLiveActivity()
-        }
+        TripLiveActivity()
+    }
+}
+
+@available(iOS 18.0, *)
+struct PublitWidgetsWithWatch: WidgetBundle {
+    var body: some Widget {
+        DeparturesWidget()
+        WatchTripLiveActivity()
     }
 }
 
