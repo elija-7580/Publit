@@ -1,0 +1,155 @@
+name: Watch
+
+# A quick look at the Apple Watch app and the iPhone side that talks to it, without the 30 minutes of the full CI:
+# type-checks both (a few minutes), builds the watch app, and takes screenshots of its demo screens in the
+# watch simulator. Runs by hand or on branches named watch/... or feature/watch...
+# The results (logs, errors, screenshots) go to the branch watch-results.
+on:
+  workflow_dispatch:
+  push:
+    branches: ["watch/**", "feature/watch**"]
+
+permissions:
+  contents: write
+
+jobs:
+  # The String Catalog is one line of 1 MB. New strings travel as a small file (tools/l10n/pending-strings.json)
+  # and are added here, in a commit on the same branch.
+  strings:
+    name: Add pending strings
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - name: Add tools/l10n/pending-strings.json to the String Catalog
+        run: |
+          if [ ! -f tools/l10n/pending-strings.json ]; then echo "Nothing pending."; exit 0; fi
+          python3 tools/l10n/add_strings.py Sources/Shared/Localizable.xcstrings tools/l10n/pending-strings.json
+          git rm -q tools/l10n/pending-strings.json
+          git config user.name "github-actions"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Sources/Shared/Localizable.xcstrings
+          git commit -qm "Add the new strings of the watch app and the coverage warnings to the String Catalog"
+          git push origin "HEAD:${{ github.ref_name }}"
+
+  watch:
+    name: Watch app
+    needs: strings
+    runs-on: xcode-27
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - name: Tools
+        run: |
+          mkdir -p ci/screenshots
+          brew install xcodegen
+          python3 -c "import yaml" 2>/dev/null || python3 -m pip install --quiet --user --break-system-packages pyyaml || python3 -m pip install --quiet --user pyyaml
+          xcodebuild -version | tee ci/xcode.txt
+          xcrun simctl list runtimes | tee ci/runtimes.txt
+          xcrun simctl list devices available | tee ci/devices.txt
+          uname -m | tee ci/arch.txt
+      - name: Type-check the watch app
+        run: |
+          ARCH=$(uname -m)
+          python3 tools/ci/target_files.py . PublitWatch > ci/watch-files.txt
+          SDK=$(xcrun --sdk watchsimulator --show-sdk-path)
+          set +e
+          xcrun swiftc -typecheck -swift-version 5 -sdk "$SDK" -target "$ARCH-apple-watchos10.0-simulator" \
+            -module-name PublitWatch -D DEBUG $(tr '\n' ' ' < ci/watch-files.txt) > ci/typecheck-watch.log 2>&1
+          echo $? > ci/typecheck-watch.status
+          set -e
+          grep -E "error:" ci/typecheck-watch.log | sed -E "s#${GITHUB_WORKSPACE}/##" | sort -u | head -80 | tee ci/typecheck-watch-errors.txt || true
+      - name: Type-check the iPhone app
+        run: |
+          ARCH=$(uname -m)
+          python3 tools/ci/target_files.py . Publit > ci/ios-files.txt
+          SDK=$(xcrun --sdk iphonesimulator --show-sdk-path)
+          set +e
+          xcrun swiftc -typecheck -swift-version 5 -sdk "$SDK" -target "$ARCH-apple-ios17.0-simulator" \
+            -module-name Publit -D DEBUG $(tr '\n' ' ' < ci/ios-files.txt) > ci/typecheck-ios.log 2>&1
+          echo $? > ci/typecheck-ios.status
+          set -e
+          grep -E "error:" ci/typecheck-ios.log | sed -E "s#${GITHUB_WORKSPACE}/##" | sort -u | head -80 | tee ci/typecheck-ios-errors.txt || true
+      - name: Generate project
+        run: |
+          xcodegen generate
+          xcodebuild -list -project Publit.xcodeproj 2>&1 | tee ci/list.txt
+      - name: Build the watch app
+        run: |
+          set +e
+          if grep -q "^ *PublitWatch$" ci/list.txt; then
+            xcodebuild build -project Publit.xcodeproj -scheme PublitWatch -sdk watchsimulator -configuration Debug \
+              -derivedDataPath build CODE_SIGNING_ALLOWED=NO > ci/build-watch.log 2>&1
+          else
+            xcodebuild build -project Publit.xcodeproj -target PublitWatch -sdk watchsimulator -configuration Debug \
+              SYMROOT="$PWD/build/Products" CODE_SIGNING_ALLOWED=NO > ci/build-watch.log 2>&1
+          fi
+          echo $? > ci/build-watch.status
+          set -e
+          grep -E ": error:" ci/build-watch.log | sed -E "s#${GITHUB_WORKSPACE}/##" | sort -u | head -60 | tee ci/build-watch-errors.txt || true
+          grep -E "BUILD (SUCCEEDED|FAILED)" ci/build-watch.log || true
+      - name: Screenshots of the demo screens
+        run: |
+          set +e
+          UDID=$(xcrun simctl list devices available -j | python3 -c "
+          import json, sys
+          d = json.load(sys.stdin)['devices']
+          watches = [x for k in sorted(d, reverse=True) if 'watchOS' in k for x in d[k] if 'Apple Watch' in x['name']]
+          best = [x for w in ('Ultra', '46mm', '49mm', '45mm') for x in watches if w in x['name']] + watches
+          print(best[0]['udid'] if best else '')
+          ")
+          echo "watch simulator: $UDID" | tee ci/watch-simulator.txt
+          if [ -z "$UDID" ]; then echo 1 > ci/screenshots.status; exit 0; fi
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
+          APP=$(find build -type d -name PublitWatch.app -path "*watchsimulator*" | head -1)
+          echo "app: $APP" | tee -a ci/watch-simulator.txt
+          BUNDLE=io.github.elija7580.publit.watchkitapp
+          xcrun simctl install "$UDID" "$APP" 2>&1 | tee ci/install.log
+          xcrun simctl location "$UDID" set 48.13715,11.57540 || true
+          xcrun simctl privacy "$UDID" grant location "$BUNDLE" || true
+          for screen in home trip leg leg-s8 tripmap legmap tickets ticket saved plan nearby gap; do
+            xcrun simctl terminate "$UDID" "$BUNDLE" 2>/dev/null
+            SIMCTL_CHILD_PUBLIT_WATCH_DEMO=$screen xcrun simctl launch "$UDID" "$BUNDLE" 2>&1 | tee -a ci/launch.log
+            case "$screen" in *map) sleep 12 ;; *) sleep 7 ;; esac
+            xcrun simctl io "$UDID" screenshot "ci/screenshots/watch-$screen.png" 2>&1 | tee -a ci/launch.log
+          done
+          ls -l ci/screenshots | tee -a ci/watch-simulator.txt
+          echo 0 > ci/screenshots.status
+      - name: Result
+        if: always()
+        run: |
+          fail=0
+          for f in ci/*.status; do
+            if [ "$(cat "$f")" != "0" ]; then echo "failed: $f"; fail=1; fi
+          done
+          echo "${{ github.sha }} $([ $fail = 0 ] && echo success || echo failure)" > ci/RESULT
+          cat ci/RESULT
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: watch-screenshots
+          path: ci/screenshots
+          if-no-files-found: ignore
+      - name: Publish results to the watch-results branch
+        if: always()
+        run: |
+          for f in ci/*.log; do [ -f "$f" ] && tail -n 300 "$f" > "$f.tail" && mv "$f.tail" "$f"; done
+          cd ci
+          git init -q -b watch-results
+          git config user.name "github-actions"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -qm "Watch results for ${{ github.sha }}"
+          for i in 1 2 3; do
+            git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" watch-results && exit 0
+            sleep $((i * 10))
+          done
+          exit 1
+      - name: Fail when something failed
+        if: always()
+        run: |
+          grep -q success ci/RESULT
