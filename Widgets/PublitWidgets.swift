@@ -2,11 +2,30 @@ import SwiftUI
 import WidgetKit
 import ActivityKit
 
+/// Picks the bundle at launch: from iOS 18 the Live Activity is also offered to Apple Watch.
 @main
+enum PublitWidgetsEntry {
+    static func main() {
+        if #available(iOS 18.0, *) {
+            PublitWidgetsWithWatch.main()
+        } else {
+            PublitWidgets.main()
+        }
+    }
+}
+
 struct PublitWidgets: WidgetBundle {
     var body: some Widget {
         DeparturesWidget()
         TripLiveActivity()
+    }
+}
+
+@available(iOS 18.0, *)
+struct PublitWidgetsWithWatch: WidgetBundle {
+    var body: some Widget {
+        DeparturesWidget()
+        WatchTripLiveActivity()
     }
 }
 
@@ -74,11 +93,73 @@ private struct Countdown: View {
     }
 }
 
+/// The same Live Activity, also offered to Apple Watch (Smart Stack) and CarPlay in the small family.
+@available(iOS 18.0, *)
+struct WatchTripLiveActivity: Widget {
+    var body: some WidgetConfiguration {
+        TripLiveActivity().body.supplementalActivityFamilies([.small])
+    }
+}
+
+/// Picks the compact watch layout for the small family, the full one elsewhere.
+@available(iOS 18.0, *)
+private struct FamilyAdaptiveView: View {
+    let attributes: TripActivityAttributes
+    let state: TripActivityAttributes.ContentState
+    @Environment(\.activityFamily) private var family
+
+    var body: some View {
+        switch family {
+        case .small:
+            SmallActivityView(state: state).padding(8)
+        default:
+            LockScreenView(attributes: attributes, state: state).padding(16)
+        }
+    }
+}
+
+/// Watch Smart Stack: line, next step, countdown, platform – readable at a glance.
+private struct SmallActivityView: View {
+    let state: TripActivityAttributes.ContentState
+    var body: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            HStack(spacing: 4) {
+                LineChip(state: state)
+                Spacer(minLength: 2)
+                Countdown(state: state).font(.headline.weight(.bold)).multilineTextAlignment(.trailing)
+                    .frame(maxWidth: 70, alignment: .trailing)
+            }
+            Text(state.headline).font(.footnote.weight(.semibold)).lineLimit(1)
+            HStack(spacing: 4) {
+                PlatformChip(state: state)
+                if state.delayMinutes > 0 {
+                    Text("+\(state.delayMinutes) min").font(.caption2.weight(.semibold)).foregroundStyle(.orange)
+                }
+                if let then = state.then {
+                    Text(then).font(.caption2).foregroundStyle(.secondary).lineLimit(1)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+private struct ActivityContent: View {
+    let attributes: TripActivityAttributes
+    let state: TripActivityAttributes.ContentState
+    var body: some View {
+        if #available(iOS 18.0, *) {
+            FamilyAdaptiveView(attributes: attributes, state: state)
+        } else {
+            LockScreenView(attributes: attributes, state: state).padding(16)
+        }
+    }
+}
+
 struct TripLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: TripActivityAttributes.self) { context in
-            LockScreenView(attributes: context.attributes, state: context.state)
-                .padding(16)
+            ActivityContent(attributes: context.attributes, state: context.state)
                 .activityBackgroundTint(Color(.systemBackground).opacity(0.85))
                 .widgetURL(context.attributes.tripURL)
         } dynamicIsland: { context in

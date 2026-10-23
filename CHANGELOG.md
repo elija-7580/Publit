@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.0 (build 64) – first App Store release
+
+- Version reset to 0.1.0 for the first public release (earlier 0.6.0 builds were TestFlight only).
+- Live Activity on Apple Watch: the trip's Live Activity appears in the watch Smart Stack with a compact layout (line, countdown, platform, next step).
+- Watch tickets: code on pure white, details hidden in Always On so the code stays visible, system overlays hidden.
+
 ## 0.6.0 (build 63)
 
 ### Missing data is now said out loud
