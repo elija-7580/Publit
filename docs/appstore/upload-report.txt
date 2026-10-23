@@ -1,0 +1,26 @@
+version 0.6.0 PREPARE_FOR_SUBMISSION
+locales ['en-GB', 'en-US', 'de-DE']
+uploaded iphone de-DE 8 / 8
+uploaded iphone en-GB 8 / 8
+uploaded iphone en-US 8 / 8
+uploaded ipad de-DE 5 / 5
+uploaded ipad en-GB 5 / 5
+uploaded ipad en-US 5 / 5
+uploaded duo de-DE 10 / 10
+uploaded duo en-GB 10 / 10
+uploaded duo en-US 10 / 10
+uploaded watch de-DE 7 / 7
+uploaded watch en-GB 7 / 7
+uploaded watch en-US 7 / 7
+check en-GB APP_IPHONE_67 8 ['COMPLETE']
+check en-GB APP_WATCH_ULTRA 7 ['COMPLETE', 'UPLOAD_COMPLETE']
+check en-GB APP_IPAD_PRO_3GEN_129 5 ['COMPLETE']
+check en-GB APP_IPHONE_DUO 10 ['COMPLETE', 'UPLOAD_COMPLETE']
+check en-US APP_WATCH_ULTRA 7 ['COMPLETE', 'UPLOAD_COMPLETE']
+check en-US APP_IPHONE_67 8 ['COMPLETE']
+check en-US APP_IPHONE_DUO 10 ['COMPLETE', 'UPLOAD_COMPLETE']
+check en-US APP_IPAD_PRO_3GEN_129 5 ['COMPLETE']
+check de-DE APP_WATCH_ULTRA 7 ['COMPLETE', 'UPLOAD_COMPLETE']
+check de-DE APP_IPHONE_67 8 ['COMPLETE']
+check de-DE APP_IPHONE_DUO 10 ['COMPLETE']
+check de-DE APP_IPAD_PRO_3GEN_129 5 ['COMPLETE']

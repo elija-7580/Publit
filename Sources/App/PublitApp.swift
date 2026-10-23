@@ -73,6 +73,8 @@ struct PublitApp: App {
                     NotificationRouter.shared.open = { [app] url in app.open(url) }
                     IntentBridge.connect { [app] url in app.open(url) }
                     PublitShortcuts.updateAppShortcutParameters()
+                    // The paired Apple Watch shows saved trips, stops and tickets from here.
+                    WatchSyncHub.shared.attach(trips: trips, favorites: favorites, passes: passes)
                 }
                 .onChange(of: favorites.stops.count) { PublitShortcuts.updateAppShortcutParameters() }
         }

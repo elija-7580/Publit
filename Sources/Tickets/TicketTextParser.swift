@@ -796,3 +796,11 @@ enum TicketTextParser {
         }
     }
 }
+
+extension PassStyle {
+    /// Operator colour when the operator is known.
+    static func suggested(forOperator name: String?) -> PassStyle? {
+        guard let name, let known = KnownOperators.find(name) else { return nil }
+        return PassStyle(background: known.color)
+    }
+}

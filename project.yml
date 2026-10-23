@@ -11,7 +11,7 @@ settings:
   base:
     SWIFT_VERSION: "5.0"
     MARKETING_VERSION: "0.6.0"
-    CURRENT_PROJECT_VERSION: "62"
+    CURRENT_PROJECT_VERSION: "63"
     # Personal Team — Automatic Signing for local device installs.
     DEVELOPMENT_TEAM: "3D6S8GFSGK"
 packages:
@@ -190,6 +190,23 @@ targets:
       - Sources/Models/Reach.swift
       - Sources/Models/CircularLine.swift
       - Sources/Stores/StopGrouping.swift
+      # What the iPhone sends (saved trips and places, tickets), the rules for the live trip, and the coverage warnings.
+      - Sources/Models/SavedTrip.swift
+      - Sources/Models/SavedPlace.swift
+      - Sources/Models/WatchTrip.swift
+      - Sources/Models/WatchSync.swift
+      - Sources/Models/TripStatus.swift
+      - Sources/Models/TripProgress.swift
+      - Sources/Models/CityGuide.swift
+      - Sources/Models/WalkGuide.swift
+      - Sources/Models/TripGuide.swift
+      - Sources/Models/Coverage.swift
+      - Sources/Models/CoverageAtlasData.swift
+      - Sources/Stores/JSONFileStore.swift
+      - Sources/Tickets/TicketPass.swift
+      - Sources/Tickets/PassStyle.swift
+      # Made-up trip for the demo screens (debug builds only).
+      - Sources/App/DesignSampleTrip.swift
       - Sources/Views/Components/LineBadge.swift
       - Sources/Util/Geo.swift
       - Sources/Util/Polyline.swift

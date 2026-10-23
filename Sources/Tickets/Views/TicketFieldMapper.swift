@@ -48,38 +48,9 @@ struct TicketFieldMapper: View {
         }
         .task { await load() }
         .sheet(item: $selection) { piece in
-            NavigationStack {
-                Form {
-                    Section(L10n.t("Text")) {
-                        TextField(L10n.t("Text"), text: $text, axis: .vertical)
-                            .autocorrectionDisabled()
-                            .textInputAutocapitalization(.never)
-                            .accessibilityIdentifier("ticketMappingText")
-                    }
-                    Section(L10n.t("Assign fields on the ticket")) {
-                        ForEach(TicketField.allCases) { field in
-                            Button(field.title) {
-                                if field.apply(text, to: &pass) {
-                                    assigned[field] = piece.id
-                                    selection = nil
-                                } else { dateError = true }
-                            }
-                            .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                            .accessibilityIdentifier("ticketField-\(field.rawValue)")
-                        }
-                    }
-                }
-                .inkList()
-                .navigationTitle(L10n.t("Ticket"))
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) { Button("Cancel") { selection = nil } }
-                }
-                .alert(L10n.t("No date found in this text."), isPresented: $dateError) {
-                    Button("OK", role: .cancel) {}
-                }
-            }
-            .environment(\.liveBarInset, 0)
+            // Its own view, so the field buttons follow the text as it is edited (a sheet closure keeps the old value).
+            TicketFieldAssignSheet(piece: piece, text: $text, pass: $pass, assigned: $assigned,
+                                   selection: $selection, dateError: $dateError)
         }
     }
 
@@ -221,5 +192,50 @@ private final class TicketMappingScrollView: UIScrollView, UIScrollViewDelegate 
             zoom(to: CGRect(x: point.x - size.width / 2, y: point.y - size.height / 2,
                             width: size.width, height: size.height), animated: true)
         }
+    }
+}
+
+/// Correct the tapped text and choose which ticket field it fills.
+private struct TicketFieldAssignSheet: View {
+    let piece: TicketTextPiece
+    @Binding var text: String
+    @Binding var pass: TicketPass
+    @Binding var assigned: [TicketField: Int]
+    @Binding var selection: TicketTextPiece?
+    @Binding var dateError: Bool
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section(L10n.t("Text")) {
+                    TextField(L10n.t("Text"), text: $text, axis: .vertical)
+                        .autocorrectionDisabled()
+                        .textInputAutocapitalization(.never)
+                        .accessibilityIdentifier("ticketMappingText")
+                }
+                Section(L10n.t("Assign fields on the ticket")) {
+                    ForEach(TicketField.allCases) { field in
+                        Button(field.title) {
+                            if field.apply(text, to: &pass) {
+                                assigned[field] = piece.id
+                                selection = nil
+                            } else { dateError = true }
+                        }
+                        .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        .accessibilityIdentifier("ticketField-\(field.rawValue)")
+                    }
+                }
+            }
+            .inkList()
+            .navigationTitle(L10n.t("Ticket"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { selection = nil } }
+            }
+            .alert(L10n.t("No date found in this text."), isPresented: $dateError) {
+                Button("OK", role: .cancel) {}
+            }
+        }
+        .environment(\.liveBarInset, 0)
     }
 }

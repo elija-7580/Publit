@@ -115,6 +115,15 @@ final class PublitUITests: XCTestCase {
         if element.isHittable { element.tap() } else { element.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap() }
     }
 
+    /// Screenshot plus the element tree, for a test that is about to fail on CI.
+    private func dump(_ app: XCUIApplication, _ name: String) {
+        snap(name)
+        if let home = ProcessInfo.processInfo.environment["SIMULATOR_HOST_HOME"] {
+            let url = URL(fileURLWithPath: home).appendingPathComponent("publit-shots/\(name).txt")
+            try? app.debugDescription.write(to: url, atomically: true, encoding: .utf8)
+        }
+    }
+
     private func snap(_ name: String) {
         let shot = XCUIScreen.main.screenshot()
         let attachment = XCTAttachment(screenshot: shot)
@@ -505,6 +514,7 @@ final class PublitUITests: XCTestCase {
     /// F02 Plan and compare: routes on one timeline, map overlay, route detail.
     func testF02PlanCompareAndDetail() {
         let app = launch(["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "plan"])
+        nudge(app)   // the location prompt can cover the routes
         XCTAssertTrue(app.navigationBars["Plan"].waitForExistence(timeout: 10))
         let routes = app.buttons.matching(identifier: "routeRow")
         XCTAssertTrue(routes.firstMatch.waitForExistence(timeout: timeout), "no routes found")
@@ -517,8 +527,12 @@ final class PublitUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Route"].waitForExistence(timeout: 10))
         sleep(3)
         snap("detail")
-        // In the steps, below the trip actions.
-        XCTAssertTrue(bringUp(app.buttons["Remind me to get off"].firstMatch, in: app), "no get-off reminder in the steps")
+        // In the steps: the reminder sits in the unfolded ride, like its stops.
+        let leg = app.buttons["transitLeg"].firstMatch
+        XCTAssertTrue(bringUp(leg, in: app), "no ride in the steps")
+        leg.tap()
+        let remind = app.buttons["Remind me to get off"].firstMatch
+        XCTAssertTrue(bringUp(remind, in: app), "no get-off reminder in the unfolded ride")
     }
 
     /// F03 Search and Home: find a stop, set it as Home, plan there with one tap.
@@ -560,7 +574,9 @@ final class PublitUITests: XCTestCase {
         XCTAssertFalse(app.staticTexts["No matches."].waitForExistence(timeout: 2), "searched with 1 character")
         field.typeText("qzqzqzqzqzqz😀ä")
         XCTAssertTrue(app.staticTexts["No matches."].waitForExistence(timeout: timeout))
-        app.buttons["Cancel"].tap()
+        // iOS 26 and later show a close (x) button instead of "Cancel" next to the search field.
+        let close = app.buttons["Close"].exists ? app.buttons["Close"] : app.buttons["Cancel"]
+        close.firstMatch.tap()
         XCTAssertTrue(app.navigationBars["Saved"].waitForExistence(timeout: 5))
     }
 

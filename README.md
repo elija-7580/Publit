@@ -27,7 +27,7 @@ This README covers the code: architecture, build, tests and CI.
 
 ## Status
 
-`v0.6.0`, build 58. Distributed via TestFlight; not on the App Store yet. Changes per build: [CHANGELOG.md](CHANGELOG.md).
+`v0.6.0`, build 63. Distributed via TestFlight; not on the App Store yet. Changes per build: [CHANGELOG.md](CHANGELOG.md).
 
 ## Architecture
 
@@ -52,7 +52,7 @@ flowchart LR
 | --- | --- | --- |
 | `Publit` | iOS 17+ | Main app, SwiftUI. App Intents / Siri shortcuts, Live Activities, local notifications |
 | `PublitWidgets` | iOS | WidgetKit departures widget and the live-trip Live Activity |
-| `PublitWatch` | watchOS 10+ | Nearby departures on the watch |
+| `PublitWatch` | watchOS 10+ | Live trip, saved trips, tickets, trip search and nearby departures on the watch ([docs/watch.md](docs/watch.md)) |
 | `PublitShare` | iOS | Share extension: open a shared map link or address in Publit and plan a route to it |
 | `PublitTests` / UI tests | iOS | Unit tests with recorded fixtures, UI tests that also produce the screenshots |
 | `Package.swift` | Linux / macOS | The platform-independent core (API client, models, routing logic) as a SwiftPM package, so it builds and tests without Xcode |
@@ -65,7 +65,7 @@ The Xcode project is generated from [`project.yml`](project.yml) with XcodeGen; 
 Sources/
   App/            entry point, tabs, app info, privacy manifest, InfoPlist / shortcut strings
   API/            TransitousClient, response + map stop caches, trip refresh, live source adapters, Google Places
-  Models/         transit models, routing (SmartRouting, TransferRisk), trip progress/trace, map layers, fares, alerts
+  Models/         transit models, routing (SmartRouting, TransferRisk), trip progress/trace, map layers, fares, alerts, coverage atlas (missing data), watch sync
   Stores/         favourites, plan state, search history, JSON file store, data export
   Location/       CoreLocation wrapper, walking pace
   Notifications/  leave / get-off reminders, line alerts, trip change alerts, Live Activity session
@@ -74,7 +74,8 @@ Sources/
   Shared/         code and String Catalog shared with widgets and watch
   Util/           polyline decoder, formatting
   Views/          SwiftUI screens
-Widgets/  Watch/  Share/     extension targets
+Widgets/  Watch/  Share/     extension targets (Widgets/ too)
+tools/coverage/   generator of the coverage atlas (monthly)
 Tests/            unit tests + Fixtures/ (recorded API responses), UI/ (UI tests)
 feeds/            data converters contributed to Transitous
 services/         pass-signer (Cloudflare Worker for Wallet pass signatures)
@@ -89,6 +90,8 @@ docs/             design, data sources, coverage, CI, localization notes
 - **Place search:** Transitous geocoding by default; Google Places is opt-in (key via the `GOOGLE_API_KEY` build setting, empty otherwise).
 - **Storage:** everything (favourites, trips, tickets) stays on the device as JSON files. No account, no analytics, no backend except the optional pass signer.
 - **Upstream fixes:** where a city's feed is missing or broken, it is fixed upstream so every open app benefits, e.g. [`feeds/amtab-gtfsrt`](feeds/amtab-gtfsrt) converts the Bari city bus (AMTAB) real-time data into standard GTFS-Realtime.
+
+- **Missing data:** `Sources/Models/Coverage.swift` knows where Transitous has no or only partial data (generated atlas, offline) and the app says "Not reliable here" with what is missing: Plan, route, Nearby, stops, search and a map layer.
 
 Details: [docs/DATA-SOURCES.md](docs/DATA-SOURCES.md), [docs/COVERAGE.md](docs/COVERAGE.md), [docs/tickets.md](docs/tickets.md), [services/pass-signer](services/pass-signer).
 

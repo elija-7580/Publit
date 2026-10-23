@@ -1,0 +1,378 @@
+name: Watch
+
+# A quick look at the Apple Watch app and the iPhone side that talks to it, without the 30 minutes of the full CI:
+# type-checks both (a few minutes), builds the watch app, and takes screenshots of its demo screens in the
+# watch simulator. Runs by hand or on branches named watch/... or feature/watch...
+# The results (logs, errors, screenshots) go to the branch watch-results.
+on:
+  workflow_dispatch:
+  push:
+    branches: ["watch/**", "feature/watch**"]
+
+permissions:
+  contents: write
+
+# A newer push replaces the run of the older one.
+concurrency:
+  group: watch-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # The String Catalog is one line of 1 MB. New strings travel as a small file (tools/l10n/pending-strings.json)
+  # and are added here, in a commit on the same branch.
+  strings:
+    name: Add pending strings
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - name: Add tools/l10n/pending-strings.json to the String Catalog
+        run: |
+          if [ ! -f tools/l10n/pending-strings.json ]; then echo "Nothing pending."; exit 0; fi
+          python3 tools/l10n/add_strings.py Sources/Shared/Localizable.xcstrings tools/l10n/pending-strings.json
+          git rm -q tools/l10n/pending-strings.json
+          git config user.name "github-actions"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Sources/Shared/Localizable.xcstrings
+          git commit -qm "Add the new strings of the watch app and the coverage warnings to the String Catalog"
+          git push origin "HEAD:${{ github.ref_name }}"
+
+  watch:
+    name: Watch app
+    needs: strings
+    if: ${{ !contains(github.event.head_commit.message, '[ui4]') }}
+    runs-on: xcode-27
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - name: Tools
+        run: |
+          mkdir -p ci/screenshots
+          brew install xcodegen
+          python3 -c "import yaml" 2>/dev/null || python3 -m pip install --quiet --user --break-system-packages pyyaml || python3 -m pip install --quiet --user pyyaml
+          xcodebuild -version | tee ci/xcode.txt
+          xcrun simctl list runtimes | tee ci/runtimes.txt
+          xcrun simctl list devices available | tee ci/devices.txt
+          uname -m | tee ci/arch.txt
+      - name: Type-check the watch app
+        run: |
+          ARCH=$(uname -m)
+          python3 tools/ci/target_files.py . PublitWatch > ci/watch-files.txt
+          SDK=$(xcrun --sdk watchsimulator --show-sdk-path)
+          set +e
+          xcrun swiftc -typecheck -swift-version 5 -sdk "$SDK" -target "$ARCH-apple-watchos10.0-simulator" \
+            -module-name PublitWatch -D DEBUG $(tr '\n' ' ' < ci/watch-files.txt) > ci/typecheck-watch.log 2>&1
+          echo $? > ci/typecheck-watch.status
+          set -e
+          grep -E "error:" ci/typecheck-watch.log | sed -E "s#${GITHUB_WORKSPACE}/##" | sort -u | head -80 | tee ci/typecheck-watch-errors.txt || true
+      - name: Type-check the iPhone app
+        run: |
+          ARCH=$(uname -m)
+          python3 tools/ci/target_files.py . Publit > ci/ios-files.txt
+          SDK=$(xcrun --sdk iphonesimulator --show-sdk-path)
+          set +e
+          xcrun swiftc -typecheck -swift-version 5 -sdk "$SDK" -target "$ARCH-apple-ios17.0-simulator" \
+            -module-name Publit -D DEBUG $(tr '\n' ' ' < ci/ios-files.txt) > ci/typecheck-ios.log 2>&1
+          echo $? > ci/typecheck-ios.status
+          set -e
+          grep -E "error:" ci/typecheck-ios.log | sed -E "s#${GITHUB_WORKSPACE}/##" | sort -u | head -80 | tee ci/typecheck-ios-errors.txt || true
+      - name: Generate project
+        run: |
+          xcodegen generate
+          xcodebuild -list -project Publit.xcodeproj 2>&1 | tee ci/list.txt
+      - name: Build the watch app
+        run: |
+          # Only the watch target (the scheme of the same name would also pull in the iPhone app and Google Maps).
+          set +e
+          xcodebuild build -project Publit.xcodeproj -target PublitWatch -sdk watchsimulator -configuration Debug \
+            SYMROOT="$PWD/build/Products" CODE_SIGNING_ALLOWED=NO > ci/build-watch.log 2>&1
+          echo $? > ci/build-watch.status
+          set -e
+          grep -E ": error:" ci/build-watch.log | sed -E "s#${GITHUB_WORKSPACE}/##" | sort -u | head -60 | tee ci/build-watch-errors.txt || true
+          grep -E "BUILD (SUCCEEDED|FAILED)" ci/build-watch.log || true
+      - name: Screenshots of the demo screens
+        run: |
+          set +e
+          UDID=$(xcrun simctl list devices available -j | python3 -c "
+          import json, sys
+          d = json.load(sys.stdin)['devices']
+          watches = [x for k in sorted(d, reverse=True) if 'watchOS' in k for x in d[k] if 'Apple Watch' in x['name']]
+          best = [x for w in ('Ultra', '46mm', '49mm', '45mm') for x in watches if w in x['name']] + watches
+          print(best[0]['udid'] if best else '')
+          ")
+          echo "watch simulator: $UDID" | tee ci/watch-simulator.txt
+          if [ -z "$UDID" ]; then echo 1 > ci/screenshots.status; exit 0; fi
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
+          APP=$(find build -type d -name PublitWatch.app | head -1)
+          echo "app: $APP" | tee -a ci/watch-simulator.txt
+          if [ -z "$APP" ]; then echo 1 > ci/screenshots.status; exit 0; fi
+          BUNDLE=io.github.elija7580.publit.watchkitapp
+          xcrun simctl install "$UDID" "$APP" 2>&1 | tee ci/install.log
+          xcrun simctl location "$UDID" set 48.13715,11.57540 || true
+          xcrun simctl privacy "$UDID" grant location "$BUNDLE" || true
+          for screen in home trip leg leg-s8 tripmap legmap tickets ticket saved plan plan-gap nearby gap; do
+            xcrun simctl terminate "$UDID" "$BUNDLE" 2>/dev/null
+            SIMCTL_CHILD_PUBLIT_WATCH_DEMO=$screen xcrun simctl launch "$UDID" "$BUNDLE" 2>&1 | tee -a ci/launch.log
+            case "$screen" in *map) sleep 12 ;; *) sleep 7 ;; esac
+            xcrun simctl io "$UDID" screenshot "ci/screenshots/watch-$screen.png" 2>&1 | tee -a ci/launch.log
+          done
+          # In Carinthia (Klagenfurt) the Nearby screen says that data is missing.
+          xcrun simctl location "$UDID" set 46.6228,14.3053 || true
+          xcrun simctl terminate "$UDID" "$BUNDLE" 2>/dev/null
+          SIMCTL_CHILD_PUBLIT_WATCH_DEMO=nearby xcrun simctl launch "$UDID" "$BUNDLE" 2>&1 | tee -a ci/launch.log
+          sleep 14
+          xcrun simctl io "$UDID" screenshot "ci/screenshots/watch-nearby-gap.png" 2>&1 | tee -a ci/launch.log
+          ls -l ci/screenshots | tee -a ci/watch-simulator.txt
+          echo 0 > ci/screenshots.status
+      - name: Result
+        if: always()
+        run: |
+          fail=0
+          for f in ci/*.status; do
+            if [ "$(cat "$f")" != "0" ]; then echo "failed: $f"; fail=1; fi
+          done
+          echo "${{ github.sha }} $([ $fail = 0 ] && echo success || echo failure)" > ci/RESULT
+          cat ci/RESULT
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: watch-screenshots
+          path: ci/screenshots
+          if-no-files-found: ignore
+      - name: Publish results to the watch-results branch
+        if: always()
+        run: |
+          for f in ci/*.log; do [ -f "$f" ] && tail -n 300 "$f" > "$f.tail" && mv "$f.tail" "$f"; done
+          cd ci
+          git init -q -b watch-results
+          git config user.name "github-actions"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -qm "Watch results for ${{ github.sha }}"
+          for i in 1 2 3; do
+            git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" watch-results && exit 0
+            sleep $((i * 10))
+          done
+          exit 1
+      - name: Fail when something failed
+        if: always()
+        run: |
+          grep -q success ci/RESULT
+
+  # The iPhone app (with the watch app inside it): builds, and shows the coverage warnings on the iPhone and the iPad.
+  iphone:
+    name: iPhone app
+    needs: strings
+    if: ${{ !contains(github.event.head_commit.message, '[ui4]') }}
+    runs-on: xcode-27
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - name: Generate project
+        run: |
+          mkdir -p ci/screenshots
+          brew install xcodegen && xcodegen generate
+          xcrun simctl list devices available | tee ci/devices.txt
+      - name: Build
+        run: |
+          UDID=$(xcrun simctl list devices available -j | python3 -c "import json,sys; d=json.load(sys.stdin)['devices']; p=[x for k in sorted(d, reverse=True) if 'iOS' in k for x in d[k] if x['name'].startswith('iPhone') and 'Max' not in x['name']]; c=[x for w in ('iPhone 18 Pro','iPhone 17 Pro','iPhone 16 Pro') for x in p if x['name'].startswith(w)]+p; print(c[0]['udid'])")
+          echo "$UDID" > ci/phone-udid.txt
+          set +e
+          xcodebuild build -project Publit.xcodeproj -scheme Publit -destination "id=$UDID" -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO > ci/build-ios.log 2>&1
+          echo $? > ci/build-ios.status
+          set -e
+          grep -E ": error:" ci/build-ios.log | sed -E "s#${GITHUB_WORKSPACE}/##" | sort -u | head -60 | tee ci/build-ios-errors.txt || true
+          grep -E "BUILD (SUCCEEDED|FAILED)" ci/build-ios.log || true
+      - name: Screenshots
+        run: |
+          set +e
+          BUNDLE=io.github.elija7580.publit
+          APP=$(find build/Build/Products -maxdepth 2 -type d -name Publit.app | head -1)
+          echo "app: $APP" | tee ci/screenshots-info.txt
+          ls "$APP/Watch" 2>&1 | tee -a ci/screenshots-info.txt
+          if [ -z "$APP" ]; then echo 1 > ci/screenshots.status; exit 0; fi
+          # What has happened so far goes to the branch iphone-results after every step (a hanging simulator leaves a trace).
+          note() {
+            echo "$(date +%T) $*" >> ci/progress.txt
+            (cd ci && rm -rf .git && git init -q -b iphone-results && git config user.name github-actions \
+              && git config user.email "41898282+github-actions[bot]@users.noreply.github.com" \
+              && git add -A && git commit -qm "iPhone results (running) for ${{ github.sha }}" \
+              && git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" iphone-results) > /dev/null 2>&1
+          }
+          # limited <seconds> <command>...: stops a command that hangs.
+          limited() {
+            secs=$1; shift
+            "$@" &
+            pid=$!
+            i=0
+            while kill -0 $pid 2>/dev/null; do
+              if [ $i -ge $secs ]; then kill $pid 2>/dev/null; echo "TIMEOUT after ${secs}s: $*" >> ci/progress.txt; return 1; fi
+              sleep 1; i=$((i + 1))
+            done
+            return 0
+          }
+          boot() {
+            note "boot $1"
+            limited 420 xcrun simctl bootstatus "$1" -b > "ci/bootstatus-$1.log" 2>&1
+            note "booted $1"
+          }
+          # shoot <udid> <name> <language> <locale> <environment of the app>...
+          shoot() {
+            udid=$1; name=$2; lang=$3; locale=$4; shift 4
+            limited 30 xcrun simctl terminate "$udid" "$BUNDLE" > /dev/null 2>&1
+            limited 60 env "$@" xcrun simctl launch "$udid" "$BUNDLE" -onboardingDone YES -AppleLanguages "($lang)" -AppleLocale "$locale" >> ci/launch.log 2>&1
+            sleep 16
+            limited 60 xcrun simctl io "$udid" screenshot "ci/screenshots/$name.png" >> ci/launch.log 2>&1
+            note "screenshot $name"
+          }
+          PHONE=$(cat ci/phone-udid.txt)
+          boot "$PHONE"
+          limited 30 xcrun simctl status_bar "$PHONE" override --time "9:41" --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3
+          limited 120 xcrun simctl install "$PHONE" "$APP" >> ci/install.log 2>&1
+          note "installed on the iPhone"
+          limited 30 xcrun simctl privacy "$PHONE" grant location "$BUNDLE"
+          limited 30 xcrun simctl location "$PHONE" set 46.6228,14.3053
+          shoot "$PHONE" iphone-route-gap-en en en_US SIMCTL_CHILD_PUBLIT_UI_SAMPLE=route-gap SIMCTL_CHILD_PUBLIT_UI_DARK=0
+          shoot "$PHONE" iphone-route-gap-de de de_AT SIMCTL_CHILD_PUBLIT_UI_SAMPLE=route-gap SIMCTL_CHILD_PUBLIT_UI_DARK=0
+          shoot "$PHONE" iphone-route-munich-en en en_US SIMCTL_CHILD_PUBLIT_UI_SAMPLE=route SIMCTL_CHILD_PUBLIT_UI_DARK=0
+          shoot "$PHONE" iphone-plan-gap-en en en_US SIMCTL_CHILD_PUBLIT_DEMO=carinthia SIMCTL_CHILD_PUBLIT_TAB=plan
+          shoot "$PHONE" iphone-nearby-gap-en en en_US SIMCTL_CHILD_PUBLIT_TAB=nearby
+          shoot "$PHONE" iphone-nearby-gap-de de de_AT SIMCTL_CHILD_PUBLIT_TAB=nearby
+          limited 60 xcrun simctl shutdown "$PHONE"
+          # The iPad shows the map beside the departures: the areas with missing data are marked on it.
+          PAD=$(xcrun simctl list devices available -j | python3 -c "import json,sys; d=json.load(sys.stdin)['devices']; p=[x for k in sorted(d, reverse=True) if 'iOS' in k for x in d[k] if x['name'].startswith('iPad Pro 13')]; print(p[0]['udid'] if p else '')")
+          echo "pad: $PAD" | tee -a ci/screenshots-info.txt
+          if [ -n "$PAD" ]; then
+            boot "$PAD"
+            limited 120 xcrun simctl install "$PAD" "$APP" >> ci/install.log 2>&1
+            limited 30 xcrun simctl privacy "$PAD" grant location "$BUNDLE"
+            limited 30 xcrun simctl location "$PAD" set 46.6228,14.3053
+            shoot "$PAD" ipad-map-gap-en en en_US SIMCTL_CHILD_PUBLIT_TAB=nearby
+          fi
+          ls -l ci/screenshots | tee -a ci/screenshots-info.txt
+          echo 0 > ci/screenshots.status
+      - name: Result
+        if: always()
+        run: |
+          fail=0
+          for f in ci/*.status; do
+            if [ "$(cat "$f")" != "0" ]; then echo "failed: $f"; fail=1; fi
+          done
+          echo "${{ github.sha }} $([ $fail = 0 ] && echo success || echo failure)" > ci/RESULT
+          cat ci/RESULT
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iphone-screenshots
+          path: ci/screenshots
+          if-no-files-found: ignore
+      - name: Publish results to the iphone-results branch
+        if: always()
+        run: |
+          for f in ci/*.log; do [ -f "$f" ] && tail -n 300 "$f" > "$f.tail" && mv "$f.tail" "$f"; done
+          cd ci
+          git init -q -b iphone-results
+          git config user.name "github-actions"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -qm "iPhone results for ${{ github.sha }}"
+          for i in 1 2 3; do
+            git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" iphone-results && exit 0
+            sleep $((i * 10))
+          done
+          exit 1
+      - name: Fail when something failed
+        if: always()
+        run: |
+          grep -q success ci/RESULT
+
+  # The unit and UI tests of ci.yml, with their logs on the branch uitests-results (ci.yml publishes none for pull requests).
+  # Runs when the commit message has [ui] in it (it takes about 25 minutes), or by hand.
+  uitests:
+    name: Unit and UI tests
+    needs: strings
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[ui]') || contains(github.event.head_commit.message, '[ui4]') }}
+    runs-on: xcode-27
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - name: Generate project
+        run: |
+          mkdir -p ci
+          brew install xcodegen && xcodegen generate
+      - name: Simulator
+        id: sim
+        run: |
+          UDID=$(xcrun simctl list devices available -j | python3 -c "import json,sys; d=json.load(sys.stdin)['devices']; p=[x for k in sorted(d, reverse=True) if 'iOS' in k for x in d[k] if x['name'].startswith('iPhone') and 'Max' not in x['name']]; c=[x for w in ('iPhone 18 Pro','iPhone 17 Pro','iPhone 16 Pro') for x in p if x['name'].startswith(w)]+p; print(c[0]['udid'])")
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl location "$UDID" set 48.13715,11.57540
+          xcrun simctl privacy "$UDID" grant location io.github.elija7580.publit || true
+      - name: Build
+        run: |
+          set +e
+          xcodebuild build-for-testing -project Publit.xcodeproj -scheme Publit \
+            -destination "id=${{ steps.sim.outputs.udid }}" -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO > ci/build.log 2>&1
+          grep -q "TEST BUILD SUCCEEDED" ci/build.log
+          echo $? > ci/build.status
+          grep -E ": error:" ci/build.log | sed -E "s#${GITHUB_WORKSPACE}/##" | sort -u | head -40 | tee ci/build-errors.txt || true
+      - name: Unit tests
+        run: |
+          set +e
+          if [ "$(cat ci/build.status)" != "0" ]; then echo 1 > ci/unit.status; exit 0; fi
+          xcodebuild test-without-building -project Publit.xcodeproj -scheme Publit \
+            -destination "id=${{ steps.sim.outputs.udid }}" -derivedDataPath build \
+            -only-testing:PublitTests > ci/unit.log 2>&1
+          grep -q "TEST EXECUTE SUCCEEDED" ci/unit.log
+          echo $? > ci/unit.status
+          grep -E ": error: |Failing tests|^\s+PublitTests\." ci/unit.log | sed -E "s#${GITHUB_WORKSPACE}/##" | head -40 | tee ci/unit-failures.txt || true
+      - name: UI tests
+        run: |
+          set +e
+          if [ "$(cat ci/build.status)" != "0" ]; then echo 1 > ci/ui.status; exit 0; fi
+          ONLY="-only-testing:PublitUITests"
+          if [ -n "${{ contains(github.event.head_commit.message, '[ui4]') && 'x' || '' }}" ]; then
+            ONLY="-only-testing:PublitUITests/PublitUITests/testF02PlanCompareAndDetail -only-testing:PublitUITests/PublitUITests/testF04SearchEdgeCases -only-testing:PublitUITests/PublitUITests/testF17TicketFieldReview -only-testing:PublitUITests/PublitUITests/testF19DropPinOnMap"
+          fi
+          xcodebuild test-without-building -project Publit.xcodeproj -scheme Publit \
+            -destination "id=${{ steps.sim.outputs.udid }}" -derivedDataPath build \
+            $ONLY \
+            -skip-testing:PublitUITests/PublitUITests/testF21DesignScreens \
+            -skip-testing:PublitUITests/PublitUITests/testF22StartScreens \
+            -skip-testing:PublitUITests/PublitUITests/testF24WebsiteTripLight \
+            -skip-testing:PublitUITests/PublitUITests/testF25WebsiteTripDark \
+            -skip-testing:PublitUITests/PublitUITests/testF26WebsiteStartLight \
+            -skip-testing:PublitUITests/PublitUITests/testF27WebsiteStartDark \
+            -skip-testing:PublitUITests/PublitUITests/testF28WebsiteExtras > ci/ui.log 2>&1
+          # The tests that failed are the result; a failing test is not a failing job here (main has four failing UI tests).
+          grep -E ": error: |WATCHDOG" ci/ui.log | sed -E "s#${GITHUB_WORKSPACE}/##" | cut -c1-400 > ci/ui-failures.txt || true
+          grep -E "^\s+PublitUITests\.|Executed [0-9]+ tests" ci/ui.log | sort -u > ci/ui-summary.txt || true
+          cat ci/ui-summary.txt
+          echo 0 > ci/ui.status
+          mkdir -p ci/shots && cp ~/publit-shots/* ci/shots/ 2>/dev/null || true
+      - name: Publish results to the uitests-results branch
+        if: always()
+        run: |
+          echo "${{ github.sha }} $(cat ci/build.status 2>/dev/null) $(cat ci/unit.status 2>/dev/null) $(cat ci/ui.status 2>/dev/null)" > ci/RESULT
+          for f in ci/*.log; do [ -f "$f" ] && tail -n 300 "$f" > "$f.tail" && mv "$f.tail" "$f"; done
+          cd ci
+          git init -q -b uitests-results
+          git config user.name "github-actions"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -qm "Test results for ${{ github.sha }}"
+          for i in 1 2 3; do
+            git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" uitests-results && exit 0
+            sleep $((i * 10))
+          done
+          exit 1

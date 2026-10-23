@@ -90,7 +90,12 @@ struct PlaceSearchView: View {
                     ForEach(results) { m in
                         let saved = SavedPlace(match: m)
                         Button { select(.place(saved)) } label: {
-                            PlaceLabel(name: m.name, subtitle: m.subtitle, isStop: m.isStop)
+                            HStack(spacing: 8) {
+                                PlaceLabel(name: m.name, subtitle: m.subtitle, isStop: m.isStop)
+                                Spacer(minLength: 0)
+                                // Data is missing around this place: said before it is picked.
+                                CoverageMark(point: saved.coordinate)
+                            }
                         }
                         .swipeActions {
                             Button { favorites.toggle(saved) } label: {

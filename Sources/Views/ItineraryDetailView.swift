@@ -128,6 +128,11 @@ struct ItineraryDetailView: View {
             }
 
             Section {
+                // Data missing along the way: the trip below may not be what really runs.
+                let coverage = isBikeOrCar ? [] : CoverageGuide.notices(for: itinerary)
+                if !coverage.isEmpty {
+                    CoverageBanner(notices: coverage).coverageRow()
+                }
                 if let statusAt {
                     Clocked(every: 30) { now in
                         StatusBanner(status: statusAt(now), refreshedAt: refreshedAt)

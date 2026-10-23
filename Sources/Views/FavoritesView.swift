@@ -59,7 +59,11 @@ struct FavoritesView: View {
                         NavigationLink {
                             StopDeparturesView(stopId: s.stopId ?? s.id, name: s.name, coordinate: s.coordinate, exact: s.exact == true)
                         } label: {
-                            PlaceLabel(name: s.name, subtitle: s.subtitle, isStop: true)
+                            HStack(spacing: 8) {
+                                PlaceLabel(name: s.name, subtitle: s.subtitle, isStop: true)
+                                Spacer(minLength: 0)
+                                CoverageMark(point: s.coordinate)
+                            }
                         }
                     }
                     .onDelete { idx in favorites.remove(idx.map { favorites.stops[$0].id }) }
@@ -69,7 +73,11 @@ struct FavoritesView: View {
                 Section("Places") {
                     ForEach(favorites.places) { p in
                         Button { app.route(to: p, source: .favorite) } label: {
-                            PlaceLabel(name: p.name, subtitle: p.subtitle, isStop: false)
+                            HStack(spacing: 8) {
+                                PlaceLabel(name: p.name, subtitle: p.subtitle, isStop: false)
+                                Spacer(minLength: 0)
+                                CoverageMark(point: p.coordinate)
+                            }
                         }
                         .swipeActions(edge: .leading) {
                             Button { favorites.set(p, as: .home) } label: { Label("Home", systemImage: "house") }.tint(Color.inkAction)

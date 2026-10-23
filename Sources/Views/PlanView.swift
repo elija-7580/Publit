@@ -90,6 +90,13 @@ struct PlanView: View {
                     .listRowSeparator(.hidden)
             }
 
+            // Data missing at the start or the destination: said before any route is trusted.
+            let coverage = CoverageGuide.notices(start: plan.from.coordinate(current: location.coordinate),
+                                                 destination: plan.to?.coordinate(current: location.coordinate))
+            if !coverage.isEmpty {
+                CoverageBanner(notices: coverage).coverageRow()
+            }
+
             if plan.to == nil || !plan.searchStarted {
                 RecentSearchesSection()
             } else {

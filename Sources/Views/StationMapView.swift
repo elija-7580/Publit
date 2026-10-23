@@ -336,6 +336,8 @@ struct StationMapView: View {
     /// On by default: museums, shops and beaches can be tapped for "Route here".
     @AppStorage("mapPOI") private var pointsOfInterest = true
     @AppStorage("mapTraffic") private var traffic = false
+    /// On by default: a map must not look complete where the timetable data is not.
+    @AppStorage("mapCoverage") private var showCoverage = true
 
     init(embedded: Bool = false, leadingInset: CGFloat = 0) {
         self.embedded = embedded
@@ -349,7 +351,7 @@ struct StationMapView: View {
     var body: some View {
         NavigationStack {
             TransitMapView(content: model.content, initialCenter: center ?? location.coordinate,
-                           look: look, focus: focus,
+                           look: look, coverage: showCoverage, focus: focus,
                            glide: TransitMapModel.tickSeconds,
                            onRegion: { model.regionChanged($0); region = $0 },
                            onSelect: { selection = $0 },
@@ -426,7 +428,8 @@ struct StationMapView: View {
                 }
                 .sheet(isPresented: $showLayers) {
                     MapLayersSheet(base: $storedBase, realistic3D: $realistic3D, pointsOfInterest: $pointsOfInterest, traffic: $traffic,
-                                   stations: $showStations, lines: $showLines, vehicles: $showVehicles, sharing: $showSharing)
+                                   stations: $showStations, lines: $showLines, vehicles: $showVehicles, sharing: $showSharing,
+                                   coverage: $showCoverage)
                         .presentationDetents([.medium, .large])
                 }
         }
@@ -477,7 +480,15 @@ struct StationMapView: View {
                     .matteSurface(in: Capsule())
                     .mapShadow()
             }
+            if let notice = mapCoverage { CoverageMapNote(notice: notice) }
         }
+    }
+
+    /// The area in the middle of the map has missing timetable data: said at once, over the map.
+    /// Not when the map shows a whole country or more (nothing is "here" then).
+    private var mapCoverage: CoverageNotice? {
+        guard let r = region, r.span.latitudeDelta < 8, CLLocationCoordinate2DIsValid(r.center) else { return nil }
+        return CoverageGuide.notice(at: LatLon(lat: r.center.latitude, lon: r.center.longitude))
     }
 
     /// The category on the map: how many, "Search this area" after moving, and ✕ to clear it.
@@ -740,6 +751,7 @@ struct MapLayersSheet: View {
     @Binding var lines: Bool
     @Binding var vehicles: Bool
     @Binding var sharing: Bool
+    @Binding var coverage: Bool
 
     private var current: MapBase { MapBase(storageValue: base) }
 
@@ -762,6 +774,8 @@ struct MapLayersSheet: View {
                     Toggle(isOn: $lines) { Label("Lines", systemImage: "point.topleft.down.to.point.bottomright.curvepath") }
                     Toggle(isOn: $vehicles) { Label("Vehicles", systemImage: "bus.doubledecker") }
                     Toggle(isOn: $sharing) { Label("Bikes and scooters", systemImage: "bicycle") }
+                    Toggle(isOn: $coverage) { Label("Data gaps", systemImage: "exclamationmark.triangle") }
+                        .accessibilityIdentifier("mapCoverageToggle")
                 } header: {
                     Text("On the map")
                 } footer: {

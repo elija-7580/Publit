@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.6.0 (build 63)
+
+### Missing data is now said out loud
+- **"Not reliable here"**: where open timetable data is missing, Publit now says so right where you look, and which data is missing (for example Carinthia: local and regional buses; Madrid: metro and city buses; Istanbul: metro, trams, ferries; places without any timetable data). It appears in Plan (start and destination), route details (start, changes, destination), Nearby, stop departures and the place lists, with a link to the coverage map of the website.
+- **Map**: new layer "Data gaps" (Map layers, on by default) draws these areas in orange; a card over the map names the area in the middle of the map and what is missing.
+- Works offline: the areas are bundled (generated from the website's coverage map by `tools/coverage/make_atlas.py`, see docs/COVERAGE.md); nothing about your position is sent anywhere.
+- New texts translated into all 15 app languages.
+
+### Apple Watch
+- The Watch app is a small Publit of its own: live trip with one screen per stage and a map button for exactly that stage, the trip overview, saved trips, stops and places, search for a destination and trip planning on the watch, and your tickets with their codes (can be turned off in Settings). See docs/watch.md.
+
+### Docs
+- docs/DATA-SOURCES.md: the note about a fallback to motis-project.de was outdated (removed in build 42); Publit only uses api.transitous.org.
+
 ## 0.6.0 (build 62)
 
 - Transfers: both vehicles with service identity, direction, arrival/departure station and platform, local times with live/timetable provenance, walking time and connection buffer. The shared overview is shown in route steps and ahead of the next change while riding, as well as on the connecting walk and boarding screen. Platform changes, cancellations and insufficient buffers are highlighted; unknown platforms are labelled.

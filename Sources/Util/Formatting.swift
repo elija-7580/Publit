@@ -94,3 +94,7 @@ extension Fmt {
     }
 }
 #endif
+
+extension String {
+    var nilIfEmpty: String? { isEmpty ? nil : self }
+}

@@ -51,12 +51,6 @@ struct PassStyle: Codable, Hashable, Sendable {
         return "rgb(\(Int((c.r * 255).rounded())), \(Int((c.g * 255).rounded())), \(Int((c.b * 255).rounded())))"
     }
 
-    /// Operator colour when the operator is known.
-    static func suggested(forOperator name: String?) -> PassStyle? {
-        guard let name, let known = KnownOperators.find(name) else { return nil }
-        return PassStyle(background: known.color)
-    }
-
     static func mix(_ a: LineColors.RGB, _ b: LineColors.RGB, _ amount: Double) -> LineColors.RGB {
         LineColors.RGB(hex: hex(LineColors.RGBValues(r: a.r + (b.r - a.r) * amount, g: a.g + (b.g - a.g) * amount, b: a.b + (b.b - a.b) * amount)))!
     }
