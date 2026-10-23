@@ -527,9 +527,12 @@ final class PublitUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Route"].waitForExistence(timeout: 10))
         sleep(3)
         snap("detail")
-        // In the steps, below the trip actions.
+        // In the steps: the reminder sits in the unfolded ride, like its stops.
+        let leg = app.buttons["transitLeg"].firstMatch
+        XCTAssertTrue(bringUp(leg, in: app), "no ride in the steps")
+        leg.tap()
         let remind = app.buttons["Remind me to get off"].firstMatch
-        XCTAssertTrue(bringUp(remind, in: app) || reveal(remind, in: app), "no get-off reminder in the steps")
+        XCTAssertTrue(bringUp(remind, in: app), "no get-off reminder in the unfolded ride")
     }
 
     /// F03 Search and Home: find a stop, set it as Home, plan there with one tap.
