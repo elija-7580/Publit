@@ -12,6 +12,11 @@ on:
 permissions:
   contents: write
 
+# A newer push replaces the run of the older one.
+concurrency:
+  group: watch-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   # The String Catalog is one line of 1 MB. New strings travel as a small file (tools/l10n/pending-strings.json)
   # and are added here, in a commit on the same branch.
@@ -191,36 +196,62 @@ jobs:
           echo "app: $APP" | tee ci/screenshots-info.txt
           ls "$APP/Watch" 2>&1 | tee -a ci/screenshots-info.txt
           if [ -z "$APP" ]; then echo 1 > ci/screenshots.status; exit 0; fi
+          # What has happened so far goes to the branch iphone-results after every step (a hanging simulator leaves a trace).
+          note() {
+            echo "$(date +%T) $*" >> ci/progress.txt
+            (cd ci && rm -rf .git && git init -q -b iphone-results && git config user.name github-actions \
+              && git config user.email "41898282+github-actions[bot]@users.noreply.github.com" \
+              && git add -A && git commit -qm "iPhone results (running) for ${{ github.sha }}" \
+              && git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" iphone-results) > /dev/null 2>&1
+          }
+          # limited <seconds> <command>...: stops a command that hangs.
+          limited() {
+            secs=$1; shift
+            "$@" &
+            pid=$!
+            i=0
+            while kill -0 $pid 2>/dev/null; do
+              if [ $i -ge $secs ]; then kill $pid 2>/dev/null; echo "TIMEOUT after ${secs}s: $*" >> ci/progress.txt; return 1; fi
+              sleep 1; i=$((i + 1))
+            done
+            return 0
+          }
+          boot() {
+            note "boot $1"
+            limited 420 xcrun simctl bootstatus "$1" -b > "ci/bootstatus-$1.log" 2>&1
+            note "booted $1"
+          }
           # shoot <udid> <name> <language> <locale> <environment of the app>...
           shoot() {
             udid=$1; name=$2; lang=$3; locale=$4; shift 4
-            xcrun simctl terminate "$udid" "$BUNDLE" 2>/dev/null
-            env "$@" xcrun simctl launch "$udid" "$BUNDLE" -onboardingDone YES -AppleLanguages "($lang)" -AppleLocale "$locale" 2>&1 | tee -a ci/launch.log
+            limited 30 xcrun simctl terminate "$udid" "$BUNDLE" > /dev/null 2>&1
+            limited 60 env "$@" xcrun simctl launch "$udid" "$BUNDLE" -onboardingDone YES -AppleLanguages "($lang)" -AppleLocale "$locale" >> ci/launch.log 2>&1
             sleep 16
-            xcrun simctl io "$udid" screenshot "ci/screenshots/$name.png" 2>&1 | tee -a ci/launch.log
+            limited 60 xcrun simctl io "$udid" screenshot "ci/screenshots/$name.png" >> ci/launch.log 2>&1
+            note "screenshot $name"
           }
           PHONE=$(cat ci/phone-udid.txt)
-          xcrun simctl boot "$PHONE" || true
-          xcrun simctl bootstatus "$PHONE" -b
-          xcrun simctl status_bar "$PHONE" override --time "9:41" --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3 || true
-          xcrun simctl install "$PHONE" "$APP" 2>&1 | tee ci/install.log
-          xcrun simctl privacy "$PHONE" grant location "$BUNDLE" || true
-          xcrun simctl location "$PHONE" set 46.6228,14.3053 || true
+          boot "$PHONE"
+          limited 30 xcrun simctl status_bar "$PHONE" override --time "9:41" --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3
+          limited 120 xcrun simctl install "$PHONE" "$APP" >> ci/install.log 2>&1
+          note "installed on the iPhone"
+          limited 30 xcrun simctl privacy "$PHONE" grant location "$BUNDLE"
+          limited 30 xcrun simctl location "$PHONE" set 46.6228,14.3053
           shoot "$PHONE" iphone-route-gap-en en en_US SIMCTL_CHILD_PUBLIT_UI_SAMPLE=route-gap SIMCTL_CHILD_PUBLIT_UI_DARK=0
           shoot "$PHONE" iphone-route-gap-de de de_AT SIMCTL_CHILD_PUBLIT_UI_SAMPLE=route-gap SIMCTL_CHILD_PUBLIT_UI_DARK=0
           shoot "$PHONE" iphone-route-munich-en en en_US SIMCTL_CHILD_PUBLIT_UI_SAMPLE=route SIMCTL_CHILD_PUBLIT_UI_DARK=0
           shoot "$PHONE" iphone-plan-gap-en en en_US SIMCTL_CHILD_PUBLIT_DEMO=carinthia SIMCTL_CHILD_PUBLIT_TAB=plan
           shoot "$PHONE" iphone-nearby-gap-en en en_US SIMCTL_CHILD_PUBLIT_TAB=nearby
           shoot "$PHONE" iphone-nearby-gap-de de de_AT SIMCTL_CHILD_PUBLIT_TAB=nearby
+          limited 60 xcrun simctl shutdown "$PHONE"
           # The iPad shows the map beside the departures: the areas with missing data are marked on it.
           PAD=$(xcrun simctl list devices available -j | python3 -c "import json,sys; d=json.load(sys.stdin)['devices']; p=[x for k in sorted(d, reverse=True) if 'iOS' in k for x in d[k] if x['name'].startswith('iPad Pro 13')]; print(p[0]['udid'] if p else '')")
           echo "pad: $PAD" | tee -a ci/screenshots-info.txt
           if [ -n "$PAD" ]; then
-            xcrun simctl boot "$PAD" || true
-            xcrun simctl bootstatus "$PAD" -b
-            xcrun simctl install "$PAD" "$APP"
-            xcrun simctl privacy "$PAD" grant location "$BUNDLE" || true
-            xcrun simctl location "$PAD" set 46.6228,14.3053 || true
+            boot "$PAD"
+            limited 120 xcrun simctl install "$PAD" "$APP" >> ci/install.log 2>&1
+            limited 30 xcrun simctl privacy "$PAD" grant location "$BUNDLE"
+            limited 30 xcrun simctl location "$PAD" set 46.6228,14.3053
             shoot "$PAD" ipad-map-gap-en en en_US SIMCTL_CHILD_PUBLIT_TAB=nearby
           fi
           ls -l ci/screenshots | tee -a ci/screenshots-info.txt

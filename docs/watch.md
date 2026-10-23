@@ -9,8 +9,8 @@ The watch app (target `PublitWatch`, watchOS 10) carries what you need to take a
 | Home | Tickets valid now (one tap opens the code), "Tickets", the live tile of the trip under way, Where to?, Nearby, Saved |
 | Tickets | Grouped as on the iPhone (valid now, upcoming, without dates, expired). A ticket shows its code on a white plate at full width, then the details (validity, route, passenger, reference) |
 | Trip | Vertical pages (Digital Crown): **Overview** first, then one page for every ride and longer walk. A trip under way opens on the leg you are on and follows the clock |
-| Trip, overview | Times, status, "Not reliable here" card where data is missing, **Tickets** button, **Map** button, Start/End trip, Save trip |
-| Trip, one leg | Line, direction, from and to with times, platform (and "Platform changed"), stops, alerts, and its own **Map** button that shows exactly this section; a button in the map switches to the whole trip |
+| Trip, overview | "Not reliable here" card first where data is missing, then times, status, **Tickets** button, **Map** button, Start/End trip, Save trip |
+| Trip, one leg | Line, direction, from and to with times, platform (and "Platform changed"), stops, alerts, and its own **Map** button that shows exactly this section (also in the top bar of every page); a button in the map switches to the whole trip |
 | Map | Apple Maps in muted style: lines in their colours, walks dotted, your position |
 | Where to? | From and To (current location, saved places, dictation), up to eight routes (walking joins when it is a real choice), later connections, coverage card. A route opens like a saved trip and can be saved |
 | Nearby | The nearest stops with their next departures (radius steps as on the iPhone), coverage card |
@@ -41,8 +41,8 @@ The same atlas and the same words as on the iPhone (`Sources/Models/Coverage.swi
 
 * `swift test` (Linux CI): `WatchSyncTests` (snapshot, trimming, requests, acks, sync policy, trip pages, map box, route lists) and `CoverageTests`.
 * `Tests/WatchCodeImageTests.swift` (iOS): the plate has the width the watch asks for and the code can be read back by the system's code detector.
-* CI workflow `watch.yml`: builds the `PublitWatch` scheme for the watchOS simulator and the iPhone app (which embeds the watch app), and takes screenshots of the demo screens.
-* Demo screens, debug builds only: start the watch app with `PUBLIT_WATCH_DEMO=<screen>` (`home`, `trip`, `leg`, `leg-s8`, `tripmap`, `legmap`, `tickets`, `ticket`, `saved`, `plan`, `nearby`, `gap`). They use made-up trips and a made-up ticket (`Watch/WatchDemo.swift`, `Sources/App/DesignSampleTrip.swift`); nothing is saved or sent.
+* CI workflow `watch.yml` (branches `feature/watch**` and `watch/**`, or by hand): type-checks the watch and iPhone targets, builds the `PublitWatch` target for the watchOS simulator and runs the demo screens there (screenshots on the branch `watch-results`), and builds the iPhone app (which embeds the watch app) and takes screenshots of the coverage warnings on iPhone and iPad (branch `iphone-results`).
+* Demo screens, debug builds only: start the watch app with `PUBLIT_WATCH_DEMO=<screen>` (`home`, `trip`, `leg`, `leg-s8`, `tripmap`, `legmap`, `tickets`, `ticket`, `saved`, `plan`, `plan-gap`, `nearby`, `gap`). They use made-up trips and a made-up ticket (`Watch/WatchDemo.swift`, `Sources/App/DesignSampleTrip.swift`); nothing is saved or sent.
 
 ## Not covered yet
 
