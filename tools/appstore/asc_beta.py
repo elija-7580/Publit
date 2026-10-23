@@ -12,7 +12,7 @@ def tok():
 def call(m, p, body=None, quiet=False):
     r = requests.request(m, p if p.startswith("http") else API + p, json=body, headers={"Authorization": "Bearer " + tok()}, timeout=60)
     if not r.ok:
-        if not quiet: log(f"!! {m} {p.split('?')[0]} -> {r.status_code}: {r.text[:500]}")
+        if not quiet: log(f"!! {m} {p.split('?')[0]} -> {r.status_code}: {r.text[:5000]}")
         return None
     return r.json() if r.content else {}
 def mask(e): return (e or "?")[:3] + "…@" + (e or "@?").split("@")[-1]
