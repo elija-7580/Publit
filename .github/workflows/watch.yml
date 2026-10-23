@@ -79,14 +79,10 @@ jobs:
           xcodebuild -list -project Publit.xcodeproj 2>&1 | tee ci/list.txt
       - name: Build the watch app
         run: |
+          # Only the watch target (the scheme of the same name would also pull in the iPhone app and Google Maps).
           set +e
-          if grep -q "^ *PublitWatch$" ci/list.txt; then
-            xcodebuild build -project Publit.xcodeproj -scheme PublitWatch -sdk watchsimulator -configuration Debug \
-              -derivedDataPath build CODE_SIGNING_ALLOWED=NO > ci/build-watch.log 2>&1
-          else
-            xcodebuild build -project Publit.xcodeproj -target PublitWatch -sdk watchsimulator -configuration Debug \
-              SYMROOT="$PWD/build/Products" CODE_SIGNING_ALLOWED=NO > ci/build-watch.log 2>&1
-          fi
+          xcodebuild build -project Publit.xcodeproj -target PublitWatch -sdk watchsimulator -configuration Debug \
+            SYMROOT="$PWD/build/Products" CODE_SIGNING_ALLOWED=NO > ci/build-watch.log 2>&1
           echo $? > ci/build-watch.status
           set -e
           grep -E ": error:" ci/build-watch.log | sed -E "s#${GITHUB_WORKSPACE}/##" | sort -u | head -60 | tee ci/build-watch-errors.txt || true
@@ -105,8 +101,9 @@ jobs:
           if [ -z "$UDID" ]; then echo 1 > ci/screenshots.status; exit 0; fi
           xcrun simctl boot "$UDID" || true
           xcrun simctl bootstatus "$UDID" -b
-          APP=$(find build -type d -name PublitWatch.app -path "*watchsimulator*" | head -1)
+          APP=$(find build -type d -name PublitWatch.app | head -1)
           echo "app: $APP" | tee -a ci/watch-simulator.txt
+          if [ -z "$APP" ]; then echo 1 > ci/screenshots.status; exit 0; fi
           BUNDLE=io.github.elija7580.publit.watchkitapp
           xcrun simctl install "$UDID" "$APP" 2>&1 | tee ci/install.log
           xcrun simctl location "$UDID" set 48.13715,11.57540 || true
