@@ -1,0 +1,42 @@
+build 64 VALID expired False
+beta detail {'autoNotifyEnabled': True, 'internalBuildState': 'IN_BETA_TESTING', 'externalBuildState': 'READY_FOR_BETA_SUBMISSION'}
+team user eli…@icloud.com ['ACCOUNT_HOLDER', 'ADMIN'] allApps True
+group TestFlight Publit internal True allBuilds True publicLink None testers 1
+   tester eli…@icloud.com INSTALLED EMAIL
+   build 64 already in group
+price free True
+review contact True
+review submission e5ab7187-ad86-496a-9469-1de860f209bd
+!! POST /v1/reviewSubmissionItems -> 409: {
+  "errors" : [ {
+    "id" : "95d6e770-b769-4376-9262-f3fa5d28c1be",
+    "status" : "409",
+    "code" : "STATE_ERROR.ENTITY_STATE_INVALID",
+    "title" : "appStoreVersions with id 'fca98759-93a4-4757-bb2a-620b6a02480c' is not in valid state.",
+    "detail" : "This resource cannot be reviewed, please check associated errors to see why.",
+    "meta" : {
+      "associatedErrors" : {
+        "/v1/appDataUsages/" : [ {
+          "id" : "919aca79-a305-4887-b99e-07aca1aead36",
+          "status" : "409",
+          "code" : "STATE_ERROR.APP_DATA_USAGES_REQUIRED",
+          "title" : "Answers to what data your app collects and how it's used are needed.",
+          "detail" : "You must have published answers to your app's data usages."
+        } ]
+      }
+    }
+  } ]
+}
+!! PATCH /v1/reviewSubmissions/e5ab7187-ad86-496a-9469-1de860f209bd -> 409: {
+  "errors" : [ {
+    "id" : "52c6f6ba-5b2d-48e6-b6b3-0a7830d75710",
+    "status" : "409",
+    "code" : "ENTITY_ERROR.RELATIONSHIP.REQUIRED",
+    "title" : "Relationship is required",
+    "detail" : "App 6824481988 must have an approved appStoreVersions for at least one of platforms [IOS], or an appStoreVersions must be included in this review submission.",
+    "source" : {
+      "pointer" : "/data/relationships/appStoreVersionForReview"
+    }
+  } ]
+}
+!! submit failed None
