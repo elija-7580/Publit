@@ -27,7 +27,7 @@ This README covers the code: architecture, build, tests and CI.
 
 ## Status
 
-`v0.6.0`, build 63. Distributed via TestFlight; not on the App Store yet. Changes per build: [CHANGELOG.md](CHANGELOG.md).
+`v0.1.0`, build 64 — first App Store release (earlier builds up to 0.6.0 / 63 were TestFlight only). Changes per build: [CHANGELOG.md](CHANGELOG.md).
 
 ## Architecture
 

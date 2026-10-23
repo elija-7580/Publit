@@ -1,6 +1,6 @@
 name: TestFlight
 
-# Every build tag (v0.6.0-N) is archived, signed in the cloud with the App Store Connect API key
+# Every build tag (v0.1.0-N) is archived, signed in the cloud with the App Store Connect API key
 # and uploaded to TestFlight. No Mac needed. Secrets: ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8 (Admin key).
 on:
   push:

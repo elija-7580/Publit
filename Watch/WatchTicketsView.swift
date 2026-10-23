@@ -88,18 +88,27 @@ enum WatchTicketText {
 struct WatchTicketView: View {
     let ticketId: String
     @Environment(WatchLibrary.self) private var library
+    @Environment(\.isLuminanceReduced) private var dimmed
 
     var body: some View {
         if let ticket = library.snapshot.ticket(ticketId) {
             ScrollView {
                 VStack(spacing: 8) {
+                    // Brightest pixels watchOS allows: the code sits on pure white, edge to edge.
                     WatchCodeView(ticket: ticket)
-                    TimelineView(.everyMinute) { context in
-                        WatchTicketDetails(pass: ticket.pass, now: context.date)
+                        .padding(4)
+                        .frame(maxWidth: .infinity)
+                        .background(Color.white, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    if !dimmed {
+                        TimelineView(.everyMinute) { context in
+                            WatchTicketDetails(pass: ticket.pass, now: context.date)
+                        }
                     }
                 }
             }
             .navigationTitle(Text("Tickets"))
+            .persistentSystemOverlays(.hidden)
+            .onAppear { WKInterfaceDevice.current().play(.click) }
         } else {
             WatchMessage(symbol: "ticket", text: "Ticket not found")
         }
