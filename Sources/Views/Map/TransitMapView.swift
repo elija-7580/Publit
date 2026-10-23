@@ -93,6 +93,7 @@ struct TransitMapView: UIViewRepresentable {
         // Long press drops a pin anywhere ("I want to go there"), like in Apple Maps.
         let press = UILongPressGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.longPressed(_:)))
         press.minimumPressDuration = 0.5
+        press.delegate = context.coordinator   // alongside MapKit's own gestures, which otherwise swallow it
         map.addGestureRecognizer(press)
         let tap = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.tapped(_:)))
         tap.cancelsTouchesInView = false
@@ -475,6 +476,7 @@ struct TransitMapView: UIViewRepresentable {
             let c = map.convert(gesture.location(in: map), toCoordinateFrom: map)
             let point = LatLon(lat: c.latitude, lon: c.longitude)
             guard point.isValidCoordinate else { return }
+            lastSelect = Date()   // not an empty-map tap that closes the sheet again
             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
             parent.onPick?(.picked(name: L10n.t("Dropped pin"), at: point), false)
             geocoder.cancelGeocode()

@@ -514,6 +514,7 @@ final class PublitUITests: XCTestCase {
     /// F02 Plan and compare: routes on one timeline, map overlay, route detail.
     func testF02PlanCompareAndDetail() {
         let app = launch(["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "plan"])
+        nudge(app)   // the location prompt can cover the routes
         XCTAssertTrue(app.navigationBars["Plan"].waitForExistence(timeout: 10))
         let routes = app.buttons.matching(identifier: "routeRow")
         XCTAssertTrue(routes.firstMatch.waitForExistence(timeout: timeout), "no routes found")
@@ -526,9 +527,9 @@ final class PublitUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Route"].waitForExistence(timeout: 10))
         sleep(3)
         snap("detail")
-        dump(app, "diag-f02")
         // In the steps, below the trip actions.
-        XCTAssertTrue(bringUp(app.buttons["Remind me to get off"].firstMatch, in: app), "no get-off reminder in the steps")
+        let remind = app.buttons["Remind me to get off"].firstMatch
+        XCTAssertTrue(bringUp(remind, in: app) || reveal(remind, in: app), "no get-off reminder in the steps")
     }
 
     /// F03 Search and Home: find a stop, set it as Home, plan there with one tap.
@@ -570,8 +571,9 @@ final class PublitUITests: XCTestCase {
         XCTAssertFalse(app.staticTexts["No matches."].waitForExistence(timeout: 2), "searched with 1 character")
         field.typeText("qzqzqzqzqzqz😀ä")
         XCTAssertTrue(app.staticTexts["No matches."].waitForExistence(timeout: timeout))
-        dump(app, "diag-f04")
-        app.buttons["Cancel"].tap()
+        // iOS 26 and later show a close (x) button instead of "Cancel" next to the search field.
+        let close = app.buttons["Close"].exists ? app.buttons["Close"] : app.buttons["Cancel"]
+        close.firstMatch.tap()
         XCTAssertTrue(app.navigationBars["Saved"].waitForExistence(timeout: 5))
     }
 
@@ -821,10 +823,7 @@ final class PublitUITests: XCTestCase {
         snap("ticket-field-mapper")
         app.buttons["Done"].firstMatch.tap()
         XCTAssertTrue(app.buttons["savePass"].exists)
-        dump(app, "diag-f17a")
         app.buttons["Cancel"].firstMatch.tap()
-        sleep(2)
-        dump(app, "diag-f17b")
         XCTAssertFalse(app.buttons["savePass"].exists)
     }
 
@@ -855,10 +854,7 @@ final class PublitUITests: XCTestCase {
         mapButton.tap()
         XCTAssertTrue(app.navigationBars["Stations"].waitForExistence(timeout: 10))
         sleep(3) // tiles
-        dump(app, "diag-f19a")
         app.windows.firstMatch.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.6)).press(forDuration: 1.0)
-        sleep(4)
-        dump(app, "diag-f19b")
         XCTAssertTrue(app.buttons["mapPlaceRoute"].waitForExistence(timeout: 10), "no place sheet after long press")
         XCTAssertTrue(app.buttons["mapPlaceRouteFrom"].exists)
         snap("map-dropped-pin")

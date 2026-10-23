@@ -1,0 +1,82 @@
+name: App Store mockups
+
+# Builds every App Store mockup inside Apple's real device bezels (tools/appstore/compose.py),
+# commits sources and results to docs/appstore/ on this branch, and with [upload] in the commit
+# message replaces the screenshots in App Store Connect (tools/appstore/upload.py).
+# Runs by hand or on a push whose message contains [mockups].
+on:
+  workflow_dispatch:
+  push:
+    branches: ["feature/watch**", "main"]
+
+permissions:
+  contents: write
+
+jobs:
+  mockups:
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[mockups]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apple's product bezels, 7-Zip, font
+        run: |
+          set -e
+          mkdir -p "$RUNNER_TEMP/bz" && cd "$RUNNER_TEMP/bz"
+          curl -sL https://www.7-zip.org/a/7z2301-linux-x64.tar.xz | tar xJ 7zz
+          for n in iPhone-18 iPhone-Duo "iPad-Pro-(M5)" Apple-Watch-Ultra-3-2025; do
+            curl -sfL -o b.dmg "https://devimages-cdn.apple.com/design/resources/download/Bezel-$n.dmg"
+            ./7zz x -y b.dmg -ir'!*PNG*' > /dev/null; rm b.dmg
+          done
+          find . -path "*PNG*" -name "*.png" | head -50
+          curl -sL -o "$RUNNER_TEMP/NotoSans-VF.ttf" "https://github.com/google/fonts/raw/main/ofl/notosans/NotoSans%5Bwdth%2Cwght%5D.ttf"
+          python3 -m pip install -q pillow pyjwt cryptography requests
+      - name: Raw screenshots into docs/appstore/raw
+        run: |
+          set -e
+          R=docs/appstore/raw
+          get() { git clone -q --depth 1 -b "$1" "https://github.com/$GITHUB_REPOSITORY" "$RUNNER_TEMP/src-$1" 2>/dev/null || return 0; }
+          if [ ! -d "$R/iphone" ]; then
+            for l in en de; do
+              get appstore-shots2-iphone-$l; get appstore-shots2-ipad-$l
+              mkdir -p $R/iphone/$l $R/ipad/$l $R/duo/$l
+              cp $RUNNER_TEMP/src-appstore-shots2-iphone-$l/*/$l/as-*.png $R/iphone/$l/
+              cp $RUNNER_TEMP/src-appstore-shots2-ipad-$l/*/$l/as-*.png $R/ipad/$l/
+            done
+            get shots-inner; get shots-outer
+            for l in en de; do cp $RUNNER_TEMP/src-shots-inner/$l/*.png $RUNNER_TEMP/src-shots-outer/$l/*.png $R/duo/$l/; done
+          fi
+          if [ ! -d "$R/watch" ]; then
+            get watch-results; mkdir -p $R/watch/en
+            for f in $RUNNER_TEMP/src-watch-results/screenshots/watch-*.png; do b=$(basename $f .png); cp $f $R/watch/en/${b#watch-}.png; done
+          fi
+          find $R -name "*.png" | wc -l
+      - name: Compose
+        run: |
+          set -e
+          rm -rf docs/appstore/mockups
+          FONT="$RUNNER_TEMP/NotoSans-VF.ttf" python3 tools/appstore/compose.py docs/appstore/raw "$RUNNER_TEMP/bz" docs/appstore/mockups
+          # The Europe coverage slide has no device and stays as it was.
+          if ls docs/appstore/part-* > /dev/null 2>&1; then
+            (cd docs/appstore && sh unpack.sh > /dev/null)
+            cp docs/appstore/png/assets/appstore/en-7-cov.png docs/appstore/mockups/iphone/en/08-europe.png
+            cp docs/appstore/png/assets/appstore/de-6-cov.png docs/appstore/mockups/iphone/de/08-europe.png
+            rm -rf docs/appstore/png; git rm -q docs/appstore/part-* docs/appstore/unpack.sh
+          fi
+          find docs/appstore/mockups -name "*.png" | sort
+      - name: Upload to App Store Connect
+        if: ${{ contains(github.event.head_commit.message, '[upload]') }}
+        env:
+          KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          P8: ${{ secrets.ASC_KEY_P8 }}
+        run: python3 tools/appstore/upload.py; mkdir -p docs/appstore && cp report.txt docs/appstore/upload-report.txt
+      - name: Commit mockups and sources
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A docs/appstore
+          git commit -qm "App Store mockups in Apple's device bezels" || exit 0
+          for i in 1 2 3; do git pull -q --rebase origin "${GITHUB_REF_NAME}" && git push -q origin "HEAD:${GITHUB_REF_NAME}" && exit 0; sleep 10; done
+          exit 1
