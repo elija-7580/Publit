@@ -25,3 +25,7 @@ with accessibility text sizes.
 
 English keys in model code go through `L10n`; SwiftUI literals are localized
 by the shared catalog. Dynamic route/stop names must stay verbatim.
+
+New strings: put the English text and the 14 translations in a JSON file and add them with
+`python3 tools/l10n/add_strings.py Sources/Shared/Localizable.xcstrings strings.json`. The script checks the
+languages and the placeholders and stores translations as `needs_review` (drafts, see above).

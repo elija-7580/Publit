@@ -55,6 +55,8 @@ struct TransitMapView: UIViewRepresentable {
     let content: TransitMapContent
     let initialCenter: LatLon?
     var look = MapLook()
+    /// Draws the areas with missing timetable data ("Data gaps" layer).
+    var coverage = false
     /// Search hit to show with a marker; nil removes the marker.
     var focus: MapFocus?
     /// Seconds a vehicle takes to glide to its next position (the refresh tick).
@@ -110,6 +112,7 @@ struct TransitMapView: UIViewRepresentable {
         context.coordinator.parent = self
         context.coordinator.apply(content, to: map)
         context.coordinator.applyLook(look, to: map, animated: true)
+        context.coordinator.applyCoverage(coverage, to: map)
         context.coordinator.applyFocus(focus, to: map)
         context.coordinator.applyPlaces(places, version: placesVersion, to: map)
         if recenter != context.coordinator.recentered {
@@ -145,6 +148,8 @@ struct TransitMapView: UIViewRepresentable {
         private var vehiclePins: [String: VehiclePin] = [:]
         private var rentalPins: [String: RentalPin] = [:]
         private var overlays: [MKOverlay] = []
+        private var coverageOverlays: [MKOverlay] = []
+        private var coverageShown = false
         private var reportedRegion = false
         private var appliedLook: MapLook?
         private var focusVersion = 0
@@ -172,6 +177,21 @@ struct TransitMapView: UIViewRepresentable {
                 let camera = map.camera.copy() as! MKMapCamera
                 camera.pitch = look.realistic3D ? 55 : 0
                 map.setCamera(camera, animated: true)
+            }
+        }
+
+        /// Shows or hides the areas with missing data. They go under the lines: the lines are put back on top.
+        func applyCoverage(_ on: Bool, to map: MKMapView) {
+            guard on != coverageShown else { return }
+            coverageShown = on
+            if on {
+                map.removeOverlays(overlays)
+                coverageOverlays = CoverageOverlays.make()
+                map.addOverlays(coverageOverlays, level: .aboveRoads)
+                map.addOverlays(overlays, level: .aboveRoads)
+            } else {
+                map.removeOverlays(coverageOverlays)
+                coverageOverlays = []
             }
         }
 
@@ -310,6 +330,16 @@ struct TransitMapView: UIViewRepresentable {
         }
 
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
+            if let polygon = overlay as? CoveragePolygon {
+                let r = MKPolygonRenderer(polygon: polygon)
+                CoverageOverlays.style(r, level: polygon.level)
+                return r
+            }
+            if let circle = overlay as? CoverageCircle {
+                let r = MKCircleRenderer(circle: circle)
+                CoverageOverlays.style(r, level: circle.level)
+                return r
+            }
             guard let line = overlay as? LineOverlay else { return MKOverlayRenderer(overlay: overlay) }
             let r = MKMultiPolylineRenderer(multiPolyline: line)
             // Near-black lines are lifted on dark maps (satellite maps are dark too), pale ones darkened on light maps.

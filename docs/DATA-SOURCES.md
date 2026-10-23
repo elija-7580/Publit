@@ -67,7 +67,7 @@ Not usable without an agreement or key: StadtRAD Hamburg (DB API Marketplace "Sh
 | Wiener Linien OGD `wienerlinien.at/ogd_realtime/monitor?stopId=` | Vienna | no | works | realtime departures, elevator outages |
 | SL Transport `transport.integration.sl.se/v1` | Stockholm | no | works | departures, deviations |
 | iRail `api.irail.be/v1/connections/` | Belgium (SNCB) | no | works | connections, liveboard |
-| Self-hosted MOTIS (`europe.motis-project.de` demo answers) | Europe | – | works (demo) | same engine and API as Transitous; a second instance with Transitous' config is a drop-in backup |
+| Self-hosted MOTIS (`europe.motis-project.de` demo answers) | Europe | – | works (demo) | same engine and API as Transitous; **not used by the app** (see "In the app" below); an own instance with Transitous' config would be a drop-in backup |
 | Digitransit | Finland | free key | – | |
 | Navitia / SNCF API | France / SNCF | free token | 401 without | |
 | Rejseplanen | Denmark | free key | – | |
@@ -80,13 +80,13 @@ Not usable without an agreement or key: StadtRAD Hamburg (DB API Marketplace "Sh
 | UK Bus Open Data (BODS) | England buses | free key | 401 without | timetables + SIRI-VM vehicle positions |
 | National Rail Darwin | Great Britain rail | free key | – | |
 | Transport for Ireland | Ireland | free key | – | GTFS-RT |
-| OASA telematics `telematics.oasa.gr/api/` | Athens buses | no | no answer from the test server | fills the Athens gap (see COVERAGE.md); test from a device |
+| OASA telematics `telematics.oasa.gr/api/` | Athens buses | no | no answer from the test server | Athens buses; Transitous now has Athens too (see COVERAGE.md), so only needed for extra live data; test from a device |
 | İBB open data `data.ibb.gov.tr` | Istanbul | no | works (catalogue) | GTFS and IETT data sets |
 | ViaggiaTreno | Italy (Trenitalia) | no | 403 from the test server | unofficial |
 | Transitland, Mobility Database API | worldwide feed catalogues | free key | – | for finding feeds, not routing |
 
-### In the app (build 29)
-`TransitousClient` fails over to `https://europe.motis-project.de` (MOTIS project, TU Darmstadt, separate hosting from Transitous). Checked 14 Oct 2026: plan, stoptimes, trip, geocode, map/stops, map/trips and rentals all answer with the same IDs and with live times. Used only on connection failures, HTTP 429 and 5xx; backup first for 3 minutes after a failure. **Before a public release, ask the MOTIS team whether an app may use this server as fallback** (it is their demo instance); the list of backup servers is one constant (`TransitousClient.backupServer`), so an own MOTIS instance can replace it.
+### In the app
+**Transitous only.** Build 29 briefly failed over to `https://europe.motis-project.de` (the MOTIS project's demo instance); that was removed again in build 42 (commit 939b386, `TransitousClient(backups: [])`), because the Transitous policy does not allow other MOTIS servers as a fallback. Publit talks to `api.transitous.org` and nothing else for routing, departures, map and search. The list of backup servers still exists in the client (empty, and `backupServer` for tests), so an own MOTIS instance could be added later.
 
 ### Recommendation
 - Keep Transitous as the only source for routing. Add a small **fallback layer** used only when Transitous fails or returns nothing: per country one adapter (Entur, opendata.ch, TfL, Wiener Linien, SL, VBB/BVG, iRail) for departures first, journeys later. Services that need a key must not ship the key in the app (proxy or user-supplied).

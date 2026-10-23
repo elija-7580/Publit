@@ -4,11 +4,47 @@ Publit plans with [Transitous](https://transitous.org), which merges open timeta
 
 These are samples. "No live data" may also mean the feed was down at that moment; check again before telling users.
 
+## Warnings in the app (build 63)
+
+Publit says **where timetable data is missing and what is missing**, instead of showing an incomplete result as if it were complete. The card reads "Not reliable here", then the area and what is missing ("Missing: local and regional buses", "No timetable data", "Very little timetable data"), and links to the [coverage map](https://publit.eu/abdeckung/) of the website.
+
+| Where | What the user sees |
+|---|---|
+| Plan | Orange card above the routes when the start or the destination lies in an area ("From · Carinthia", "To · Madrid") |
+| Route details | The same card for the start, the stops where you change, and the destination (not for walking, cycling and driving) |
+| Nearby, stop departures | Card for where you are, and for a stop in such an area |
+| Place search, saved places | Orange triangle at places in such an area, before one is picked |
+| Station map | Layer "Data gaps" in Map layers (on by default) draws the areas in orange: filled solid = no data at all, dashed edge = only a part missing. A card over the map names the area in the middle of the map and what is missing; a tap opens the explanation and the link |
+| Apple Watch | The same short card in Nearby and when planning a trip |
+
+All of this works offline: the areas are bundled in the app (`Sources/Models/CoverageAtlasData.swift`, about 30 KB, 124 areas), nothing about where someone is leaves the phone.
+
+### Where the areas come from
+
+The atlas is **generated** from the data of the website's coverage map (repository `publit-site`, folder `abdeckung/data`, refreshed monthly) and a short hand-checked list. Do not edit the Swift file by hand:
+
+```bash
+pip install numpy shapely
+python3 tools/coverage/make_atlas.py --site ../publit-site/abdeckung/data   # downloads Natural Earth places
+python3 tools/coverage/make_atlas.py --site ../publit-site/abdeckung/data --report   # list what was flagged
+swift test --filter CoverageTests
+```
+
+| Level | Rule (constants at the top of the script) |
+|---|---|
+| No timetable data | Region of the map without a single stop; a whole country with at most 5 stops |
+| Very little timetable data | A whole country with fewer than 100 stops; a region with fewer than 100 stops that contains a town of 20 000 people or more; a town of 30 000 or more with at most 15 stops within 3 km of its centre, in a country where at least 20 % of such towns look like that (mostly stations only: Verona, Sicily, parts of Italy and the Balkans) |
+| Part missing (hand-checked, checked against `api.transitous.org`, October 2026) | **Carinthia**: local and regional buses (Transitous skips the Carinthian feed). **Madrid**: metro and the EMT city buses (only Cercanías trains and interurban buses are loaded). **Istanbul**: metro, trams, ferries, suburban trains (only IETT buses). **Kyiv**: metro, trams, suburban trains. **Pristina**: city buses |
+
+Run it after every monthly update of the website data, review the `--report` list, and commit the result. To add a hand-checked area (a city where one kind of service is missing), add an entry to `CURATED` in the script after checking the stops with `/api/v1/map/stops` and `/api/v1/stoptimes`.
+
+Limits: the flag says "data is missing in this area", not "this trip does not work". Where Publit adds its own live data (Austria, Switzerland, parts of Germany, Vienna, Stockholm, London), that is not counted as missing timetable data. Border areas follow the simplified outlines of the website map (a few kilometres).
+
 ## No timetable data
 
 | Place | Finding |
 |---|---|
-| Athens | Feeds are listed (Athens-Bus, Athens-Rail), but no stop is loaded: no routes, no departures. Thessaloniki works. |
+| Athens | **Fixed upstream (checked October 2026):** the Athens feeds now load stops and departures, so the app no longer flags Athens. Until then: feeds listed (Athens-Bus, Athens-Rail), but no stop loaded. |
 | Malta | No feed. |
 | Belarus (Minsk) | No feed. |
 | Russia | No feed (not tested). |
@@ -20,6 +56,8 @@ These are samples. "No live data" may also mean the feed was down at that moment
 | Istanbul | IETT buses | Metro, Marmaray, trams, funiculars, ferries |
 | Kyiv | City buses (Kyivpastrans) | Metro, trams, suburban trains |
 | Pristina | Trains (Trainkos) | City buses |
+| Madrid | Cercanías trains, interurban buses (e.g. ALSA) | Metro de Madrid, EMT city buses |
+| Carinthia (Villach, Klagenfurt, Spittal, Wolfsberg) | Trains, FlixBus | Local and regional buses (feed skipped by Transitous) |
 
 ## Timetable only, no live data at the centre
 
@@ -31,7 +69,7 @@ Without live data the app shows "Timetable": no delays, cancellations or platfor
 
 ## Timetable and live data
 
-Berlin, Hamburg, Munich (and Germany as a whole through DELFI), Graz, Paris, Lyon, London, Dublin, Madrid (Cercanías), Rome, Amsterdam and Rotterdam (partly), Antwerp, Oslo, Helsinki, Riga, Vilnius, Warsaw, Kraków, Prague, Budapest, Ljubljana, Zagreb, Skopje, Sofia, Bucharest, Chișinău (partly), Tbilisi (partly), Reykjavík.
+Berlin, Hamburg, Munich (and Germany as a whole through DELFI), Graz, Paris, Lyon, London, Dublin, Madrid (Cercanías trains only), Rome, Amsterdam and Rotterdam (partly), Antwerp, Oslo, Helsinki, Riga, Vilnius, Warsaw, Kraków, Prague, Budapest, Ljubljana, Zagreb, Skopje, Sofia, Bucharest, Chișinău (partly), Tbilisi (partly), Reykjavík.
 
 ## Austria, Germany, Switzerland (checked 19 October 2026)
 

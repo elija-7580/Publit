@@ -28,11 +28,22 @@ struct WatchNearbyView: View {
             case .loading: ProgressView()
             case .denied: message("Location is off", symbol: "location.slash")
             case .noLocation, .failed: retry
-            case .loaded: message("No departures nearby", symbol: "tram")
+            case .loaded:
+                // Nothing found: where timetable data is missing, that is the likely reason.
+                ScrollView {
+                    VStack(spacing: 8) {
+                        message("No departures nearby", symbol: "tram")
+                        WatchCoverageNote(notices: CoverageGuide.notice(at: model.position).map { [$0] } ?? [])
+                    }
+                }
             }
         } else {
             TimelineView(.everyMinute) { context in
                 List {
+                    if let note = CoverageGuide.notice(at: model.position) {
+                        WatchCoverageNote(notices: [note])
+                            .listRowBackground(Color.clear)
+                    }
                     if let far = model.farDistance {
                         Label(Reach.farNote(meters: far), systemImage: "figure.walk")
                             .font(.footnote)

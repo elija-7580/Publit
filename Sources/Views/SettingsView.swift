@@ -18,6 +18,7 @@ struct SettingsView: View {
     @AppStorage(GooglePlaces.keyDefaultsKey) private var googleKey = ""
     @AppStorage(MapProvider.defaultsKey) private var mapProvider = MapProvider.apple.rawValue
     @AppStorage(StartTab.defaultsKey) private var startTab = StartTab.nearby.rawValue
+    @AppStorage(WatchSettings.ticketsKey) private var watchTickets = true
     @State private var exportURL: URL?
     @State private var summary: HangLog.Summary?
     @State private var reportURL: URL?
@@ -133,6 +134,17 @@ struct SettingsView: View {
                                 Label("Ticket apps per operator", systemImage: "arrow.up.forward.app")
                             }
                         }
+                    }
+                }
+                if Features.passes {
+                    Section {
+                        Toggle(L10n.t("Tickets on Apple Watch"), isOn: $watchTickets)
+                            .accessibilityIdentifier("watchTicketsToggle")
+                            .onChange(of: watchTickets) { WatchSyncHub.shared.settingsChanged() }
+                    } header: {
+                        Text(L10n.t("Apple Watch"))
+                    } footer: {
+                        Text(L10n.t("Your tickets go to your paired Apple Watch only, so you can show the code on your wrist. Turn this off to keep them on the iPhone."))
                     }
                 }
                 Section {

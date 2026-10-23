@@ -48,6 +48,10 @@ struct NearbyView: View {
             goSection
             activeTripSection
             OfflineNote()
+            // Where you are, data is missing: the board below may be only a part of what runs.
+            if !location.isDenied, let notice = CoverageGuide.notice(at: location.coordinate) {
+                CoverageBanner(notices: [notice]).coverageRow()
+            }
             if !location.isDenied, availableGroups.count > 1 || filter.isActive {
                 ModeFilterBar(available: availableGroups, filter: filterBinding).chipRow()
             }
@@ -430,6 +434,10 @@ struct StopDeparturesView: View {
 
     var body: some View {
         List {
+            // The board of a stop in an area with missing data can be only a part of what runs.
+            if let notice = CoverageGuide.notice(at: coordinate) {
+                CoverageBanner(notices: [notice]).coverageRow()
+            }
             if !alerts.isEmpty {
                 Section("Alerts") {
                     ServiceAlertsView(alerts: alerts)
