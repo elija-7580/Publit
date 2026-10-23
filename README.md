@@ -9,7 +9,7 @@
 ![Swift](https://img.shields.io/badge/Swift-SwiftUI-orange)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-**Features, coverage map and privacy policy live on the website:** [elija-7580.github.io/publit-site](https://elija-7580.github.io/publit-site/) · [Features](https://elija-7580.github.io/publit-site/features/) · [Coverage](https://elija-7580.github.io/publit-site/abdeckung/) · [Privacy](https://elija-7580.github.io/publit-site/privacy/)
+**Features, coverage map and privacy policy live on the website:** [publit.eu](https://publit.eu/) · [Features](https://publit.eu/features/) · [Coverage](https://publit.eu/abdeckung/) · [Privacy](https://publit.eu/privacy/)
 
 This README covers the code: architecture, build, tests and CI.
 
@@ -17,11 +17,11 @@ This README covers the code: architecture, build, tests and CI.
 
 | Nearby | Plan | Route | Steps |
 | --- | --- | --- | --- |
-| ![Nearby departures](https://elija-7580.github.io/publit-site/assets/app/web-nearby.webp) | ![Trip planning](https://elija-7580.github.io/publit-site/assets/app/web-plan.webp) | ![Route on the map](https://elija-7580.github.io/publit-site/assets/app/web-route.webp) | ![Route steps](https://elija-7580.github.io/publit-site/assets/app/web-route-steps.webp) |
+| ![Nearby departures](https://publit.eu/assets/app/web-nearby.webp) | ![Trip planning](https://publit.eu/assets/app/web-plan.webp) | ![Route on the map](https://publit.eu/assets/app/web-route.webp) | ![Route steps](https://publit.eu/assets/app/web-route-steps.webp) |
 | **Live trip** | **Map** | **Tickets** | **Widgets** |
-| ![Live trip](https://elija-7580.github.io/publit-site/assets/app/web-live-up.webp) | ![Map with places](https://elija-7580.github.io/publit-site/assets/app/web-map-cafes.webp) | ![Tickets and passes](https://elija-7580.github.io/publit-site/assets/app/web-passes.webp) | ![Home screen widgets](https://elija-7580.github.io/publit-site/assets/app/web-widgets.webp) |
+| ![Live trip](https://publit.eu/assets/app/web-live-up.webp) | ![Map with places](https://publit.eu/assets/app/web-map-cafes.webp) | ![Tickets and passes](https://publit.eu/assets/app/web-passes.webp) | ![Home screen widgets](https://publit.eu/assets/app/web-widgets.webp) |
 | **Dark** | | | |
-| ![Nearby, dark](https://elija-7580.github.io/publit-site/assets/app/web-nearby-dark.webp) | ![Route, dark](https://elija-7580.github.io/publit-site/assets/app/web-route-dark.webp) | ![Live trip, dark](https://elija-7580.github.io/publit-site/assets/app/web-live-up-dark.webp) | ![Map, dark](https://elija-7580.github.io/publit-site/assets/app/web-map-dark.webp) |
+| ![Nearby, dark](https://publit.eu/assets/app/web-nearby-dark.webp) | ![Route, dark](https://publit.eu/assets/app/web-route-dark.webp) | ![Live trip, dark](https://publit.eu/assets/app/web-live-up-dark.webp) | ![Map, dark](https://publit.eu/assets/app/web-map-dark.webp) |
 
 <sub>Images are served from the website (`publit-site/assets/app`). Real app screens from the UI test run in the iOS simulator, filled with live Transitous data. CI regenerates them on every run (artifact `screenshots`).</sub>
 
