@@ -38,6 +38,21 @@ try:
         log("build", BUILD, "attached" if r is not None else "NOT attached")
     else:
         log("!! build", BUILD, "not ready")
+    OLD = "https://elija-7580.github.io/publit-site/"
+    fix = lambda t: t.replace(OLD, "https://publit.eu/") if t else t
+    for loc in call("GET", f"/v1/appStoreVersions/{VER}/appStoreVersionLocalizations")["data"]:
+        la = loc["attributes"]; ch = {}
+        for k in ("marketingUrl", "description", "promotionalText", "supportUrl"):
+            if la.get(k) and OLD in la[k]: ch[k] = fix(la[k])
+        if ch:
+            r = call("PATCH", f"/v1/appStoreVersionLocalizations/{loc['id']}", {"data": {"type": "appStoreVersionLocalizations", "id": loc["id"], "attributes": ch}})
+            log("links", la["locale"], list(ch), "ok" if r is not None else "FAILED")
+    for info in call("GET", f"/v1/apps/{APP}/appInfos")["data"]:
+        for l in call("GET", f"/v1/appInfos/{info['id']}/appInfoLocalizations")["data"]:
+            ch = {k: fix(l["attributes"][k]) for k in ("privacyPolicyUrl", "privacyChoicesUrl") if l["attributes"].get(k) and OLD in l["attributes"][k]}
+            if ch:
+                r = call("PATCH", f"/v1/appInfoLocalizations/{l['id']}", {"data": {"type": "appInfoLocalizations", "id": l["id"], "attributes": ch}})
+                log("privacy", l["attributes"]["locale"], "ok" if r is not None else "FAILED")
     v = call("GET", f"/v1/appStoreVersions/{VER}?include=build,appStoreReviewDetail")
     a = v["data"]["attributes"]; log("now:", a["versionString"], a.get("appStoreState"), "copyright", a.get("copyright"))
     rels = v["data"]["relationships"]
