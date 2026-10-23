@@ -108,12 +108,18 @@ jobs:
           xcrun simctl install "$UDID" "$APP" 2>&1 | tee ci/install.log
           xcrun simctl location "$UDID" set 48.13715,11.57540 || true
           xcrun simctl privacy "$UDID" grant location "$BUNDLE" || true
-          for screen in home trip leg leg-s8 tripmap legmap tickets ticket saved plan nearby gap; do
+          for screen in home trip leg leg-s8 tripmap legmap tickets ticket saved plan plan-gap nearby gap; do
             xcrun simctl terminate "$UDID" "$BUNDLE" 2>/dev/null
             SIMCTL_CHILD_PUBLIT_WATCH_DEMO=$screen xcrun simctl launch "$UDID" "$BUNDLE" 2>&1 | tee -a ci/launch.log
             case "$screen" in *map) sleep 12 ;; *) sleep 7 ;; esac
             xcrun simctl io "$UDID" screenshot "ci/screenshots/watch-$screen.png" 2>&1 | tee -a ci/launch.log
           done
+          # In Carinthia (Klagenfurt) the Nearby screen says that data is missing.
+          xcrun simctl location "$UDID" set 46.6228,14.3053 || true
+          xcrun simctl terminate "$UDID" "$BUNDLE" 2>/dev/null
+          SIMCTL_CHILD_PUBLIT_WATCH_DEMO=nearby xcrun simctl launch "$UDID" "$BUNDLE" 2>&1 | tee -a ci/launch.log
+          sleep 14
+          xcrun simctl io "$UDID" screenshot "ci/screenshots/watch-nearby-gap.png" 2>&1 | tee -a ci/launch.log
           ls -l ci/screenshots | tee -a ci/watch-simulator.txt
           echo 0 > ci/screenshots.status
       - name: Result
@@ -143,6 +149,109 @@ jobs:
           git add -A && git commit -qm "Watch results for ${{ github.sha }}"
           for i in 1 2 3; do
             git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" watch-results && exit 0
+            sleep $((i * 10))
+          done
+          exit 1
+      - name: Fail when something failed
+        if: always()
+        run: |
+          grep -q success ci/RESULT
+
+  # The iPhone app (with the watch app inside it): builds, and shows the coverage warnings on the iPhone and the iPad.
+  iphone:
+    name: iPhone app
+    needs: strings
+    runs-on: xcode-27
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - name: Generate project
+        run: |
+          mkdir -p ci/screenshots
+          brew install xcodegen && xcodegen generate
+          xcrun simctl list devices available | tee ci/devices.txt
+      - name: Build
+        run: |
+          UDID=$(xcrun simctl list devices available -j | python3 -c "import json,sys; d=json.load(sys.stdin)['devices']; p=[x for k in sorted(d, reverse=True) if 'iOS' in k for x in d[k] if x['name'].startswith('iPhone') and 'Max' not in x['name']]; c=[x for w in ('iPhone 18 Pro','iPhone 17 Pro','iPhone 16 Pro') for x in p if x['name'].startswith(w)]+p; print(c[0]['udid'])")
+          echo "$UDID" > ci/phone-udid.txt
+          set +e
+          xcodebuild build -project Publit.xcodeproj -scheme Publit -destination "id=$UDID" -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO > ci/build-ios.log 2>&1
+          echo $? > ci/build-ios.status
+          set -e
+          grep -E ": error:" ci/build-ios.log | sed -E "s#${GITHUB_WORKSPACE}/##" | sort -u | head -60 | tee ci/build-ios-errors.txt || true
+          grep -E "BUILD (SUCCEEDED|FAILED)" ci/build-ios.log || true
+      - name: Screenshots
+        run: |
+          set +e
+          BUNDLE=io.github.elija7580.publit
+          APP=$(find build/Build/Products -maxdepth 2 -type d -name Publit.app | head -1)
+          echo "app: $APP" | tee ci/screenshots-info.txt
+          ls "$APP/Watch" 2>&1 | tee -a ci/screenshots-info.txt
+          if [ -z "$APP" ]; then echo 1 > ci/screenshots.status; exit 0; fi
+          # shoot <udid> <name> <language> <locale> <environment of the app>...
+          shoot() {
+            udid=$1; name=$2; lang=$3; locale=$4; shift 4
+            xcrun simctl terminate "$udid" "$BUNDLE" 2>/dev/null
+            env "$@" xcrun simctl launch "$udid" "$BUNDLE" -onboardingDone YES -AppleLanguages "($lang)" -AppleLocale "$locale" 2>&1 | tee -a ci/launch.log
+            sleep 16
+            xcrun simctl io "$udid" screenshot "ci/screenshots/$name.png" 2>&1 | tee -a ci/launch.log
+          }
+          PHONE=$(cat ci/phone-udid.txt)
+          xcrun simctl boot "$PHONE" || true
+          xcrun simctl bootstatus "$PHONE" -b
+          xcrun simctl status_bar "$PHONE" override --time "9:41" --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3 || true
+          xcrun simctl install "$PHONE" "$APP" 2>&1 | tee ci/install.log
+          xcrun simctl privacy "$PHONE" grant location "$BUNDLE" || true
+          xcrun simctl location "$PHONE" set 46.6228,14.3053 || true
+          shoot "$PHONE" iphone-route-gap-en en en_US SIMCTL_CHILD_PUBLIT_UI_SAMPLE=route-gap SIMCTL_CHILD_PUBLIT_UI_DARK=0
+          shoot "$PHONE" iphone-route-gap-de de de_AT SIMCTL_CHILD_PUBLIT_UI_SAMPLE=route-gap SIMCTL_CHILD_PUBLIT_UI_DARK=0
+          shoot "$PHONE" iphone-route-munich-en en en_US SIMCTL_CHILD_PUBLIT_UI_SAMPLE=route SIMCTL_CHILD_PUBLIT_UI_DARK=0
+          shoot "$PHONE" iphone-plan-gap-en en en_US SIMCTL_CHILD_PUBLIT_DEMO=carinthia SIMCTL_CHILD_PUBLIT_TAB=plan
+          shoot "$PHONE" iphone-nearby-gap-en en en_US SIMCTL_CHILD_PUBLIT_TAB=nearby
+          shoot "$PHONE" iphone-nearby-gap-de de de_AT SIMCTL_CHILD_PUBLIT_TAB=nearby
+          # The iPad shows the map beside the departures: the areas with missing data are marked on it.
+          PAD=$(xcrun simctl list devices available -j | python3 -c "import json,sys; d=json.load(sys.stdin)['devices']; p=[x for k in sorted(d, reverse=True) if 'iOS' in k for x in d[k] if x['name'].startswith('iPad Pro 13')]; print(p[0]['udid'] if p else '')")
+          echo "pad: $PAD" | tee -a ci/screenshots-info.txt
+          if [ -n "$PAD" ]; then
+            xcrun simctl boot "$PAD" || true
+            xcrun simctl bootstatus "$PAD" -b
+            xcrun simctl install "$PAD" "$APP"
+            xcrun simctl privacy "$PAD" grant location "$BUNDLE" || true
+            xcrun simctl location "$PAD" set 46.6228,14.3053 || true
+            shoot "$PAD" ipad-map-gap-en en en_US SIMCTL_CHILD_PUBLIT_TAB=nearby
+          fi
+          ls -l ci/screenshots | tee -a ci/screenshots-info.txt
+          echo 0 > ci/screenshots.status
+      - name: Result
+        if: always()
+        run: |
+          fail=0
+          for f in ci/*.status; do
+            if [ "$(cat "$f")" != "0" ]; then echo "failed: $f"; fail=1; fi
+          done
+          echo "${{ github.sha }} $([ $fail = 0 ] && echo success || echo failure)" > ci/RESULT
+          cat ci/RESULT
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iphone-screenshots
+          path: ci/screenshots
+          if-no-files-found: ignore
+      - name: Publish results to the iphone-results branch
+        if: always()
+        run: |
+          for f in ci/*.log; do [ -f "$f" ] && tail -n 300 "$f" > "$f.tail" && mv "$f.tail" "$f"; done
+          cd ci
+          git init -q -b iphone-results
+          git config user.name "github-actions"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -qm "iPhone results for ${{ github.sha }}"
+          for i in 1 2 3; do
+            git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" iphone-results && exit 0
             sleep $((i * 10))
           done
           exit 1

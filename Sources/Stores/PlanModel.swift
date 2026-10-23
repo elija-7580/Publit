@@ -466,13 +466,23 @@ final class AppState {
         tab = .plan
     }
 
-    /// Preset state for UI tests and store screenshots (`PUBLIT_DEMO=munich`).
+    /// Preset state for UI tests and store screenshots (`PUBLIT_DEMO=munich`, or `carinthia` for a trip where data is missing).
     func applyDemo(_ name: String?) {
-        guard name == "munich" else { return }
-        plan.from = .place(SavedPlace(id: "demo-marienplatz", name: "Marienplatz", subtitle: "München",
-                                      lat: 48.1372, lon: 11.5755, stopId: nil))
-        plan.to = .place(SavedPlace(id: "demo-muc", name: "Flughafen München", subtitle: nil,
-                                    lat: 48.3537, lon: 11.7861, stopId: nil))
+        switch name {
+        case "munich":
+            plan.from = .place(SavedPlace(id: "demo-marienplatz", name: "Marienplatz", subtitle: "München",
+                                          lat: 48.1372, lon: 11.5755, stopId: nil))
+            plan.to = .place(SavedPlace(id: "demo-muc", name: "Flughafen München", subtitle: nil,
+                                        lat: 48.3537, lon: 11.7861, stopId: nil))
+        case "carinthia":
+            // Where data is missing: the plan says so before the connections.
+            plan.from = .place(SavedPlace(id: "demo-klagenfurt", name: "Klagenfurt Hbf", subtitle: "Kärnten",
+                                          lat: 46.6177, lon: 14.3113, stopId: nil))
+            plan.to = .place(SavedPlace(id: "demo-villach", name: "Villach Hbf", subtitle: "Kärnten",
+                                        lat: 46.6167, lon: 13.8483, stopId: nil))
+        default:
+            return
+        }
         plan.searchStarted = true
     }
 }

@@ -7,9 +7,13 @@ enum DesignSamples {
     static let base = Date()
 
     static var itinerary: Itinerary { DesignSampleTrip.itinerary(DesignSampleTrip.munich, base: base) }
+
+    /// A trip through Carinthia, where data is missing (the warning on the route).
+    static var carinthia: Itinerary { DesignSampleTrip.itinerary(DesignSampleTrip.carinthia, base: base.addingTimeInterval(40 * 60)) }
 }
 
-/// The real trip screens on the sample trip: `PUBLIT_UI_SAMPLE=route` (preview) or `live` (started).
+/// The real trip screens on the sample trip: `PUBLIT_UI_SAMPLE=route` (preview) or `live` (started),
+/// `route-gap` for the trip through Carinthia.
 struct DesignSampleView: View {
     let kind: String
     @Environment(TripStore.self) private var trips
@@ -18,7 +22,9 @@ struct DesignSampleView: View {
 
     var body: some View {
         NavigationStack {
-            if kind.hasPrefix("route") {
+            if kind == "route-gap" {
+                ItineraryDetailView(itinerary: DesignSamples.carinthia, fromName: "Zuhause", toName: "Villach")
+            } else if kind.hasPrefix("route") {
                 ItineraryDetailView(itinerary: DesignSamples.itinerary, fromName: "Zuhause", toName: "Flughafen München")
             } else if let tripId {
                 SavedTripView(tripId: tripId)

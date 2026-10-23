@@ -37,6 +37,15 @@ struct WatchTripView: View {
         .tabViewStyle(.verticalPage)
         .navigationTitle(Text(verbatim: to))
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            // On every page: the map of exactly this page (the whole trip on the overview, else this leg).
+            ToolbarItem(placement: .topBarTrailing) {
+                NavigationLink(value: WatchRoute.map(OpenedRoute(itinerary: it), selection)) {
+                    Image(systemName: "map.fill")
+                }
+                .accessibilityLabel(Text("Map"))
+            }
+        }
         .task(id: it.routeKey) { await keepFresh() }
         .task(id: it.routeKey) { await followClock() }
         .onChange(of: pages) { _, new in
@@ -117,9 +126,10 @@ struct WatchTripOverview: View {
             let live = started || (now >= itinerary.startTime.addingTimeInterval(-3600) && now <= itinerary.endTime.addingTimeInterval(300))
             ScrollView {
                 VStack(alignment: .leading, spacing: 8) {
+                    // Missing data first: it decides how far the times below can be trusted.
+                    WatchCoverageNote(notices: CoverageGuide.notices(for: itinerary))
                     header
                     if live { status(now: now) }
-                    WatchCoverageNote(notices: CoverageGuide.notices(for: itinerary))
                     if let first = tickets.first {
                         NavigationLink(value: tickets.count == 1 ? WatchRoute.ticket(first.id) : WatchRoute.tickets) {
                             Label("Tickets", systemImage: "ticket.fill").frame(maxWidth: .infinity)

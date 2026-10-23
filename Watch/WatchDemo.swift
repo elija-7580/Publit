@@ -4,7 +4,8 @@ import Foundation
 /// Screens with made-up data, for screenshots and for checking the layout without an iPhone.
 /// Start the app with `PUBLIT_WATCH_DEMO=<screen>` in its environment:
 /// `home`, `trip` (a trip before it starts), `leg` (the U6 under way), `leg-s8` (the delayed S8 with a platform change),
-/// `tripmap`, `legmap`, `tickets`, `ticket`, `saved`, `plan`, `nearby`, `gap` (a trip through Carinthia, where data is missing).
+/// `tripmap`, `legmap`, `tickets`, `ticket`, `saved`, `plan`, `plan-gap` (the planner with a destination in Carinthia),
+/// `nearby`, `gap` (a trip through Carinthia, where data is missing).
 /// Nothing is saved and nothing is sent. Debug builds only.
 @MainActor
 struct WatchDemo {
@@ -79,6 +80,8 @@ struct WatchDemo {
         case "ticket": return [.ticket("demo-ticket")]
         case "saved": return [.saved]
         case "plan": return [.plan]
+        case "plan-gap":
+            return [.planTo(SavedPlace(id: "demo-villach", name: "Villach", subtitle: "Kärnten", lat: 46.6167, lon: 13.8483, stopId: nil))]
         case "nearby": return [.nearby]
         default: return []
         }
