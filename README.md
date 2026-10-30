@@ -11,7 +11,7 @@
 
 **Features, coverage map and privacy policy live on the website:** [publit.eu](https://publit.eu/) · [Features](https://publit.eu/features/) · [Coverage](https://publit.eu/abdeckung/) · [Privacy](https://publit.eu/privacy/)
 
-This README covers the code: architecture, build, tests and CI.
+This README covers the code: architecture, build, tests and CI. A complete description of every feature and screen (German) is in [docs/FUNKTIONEN.md](docs/FUNKTIONEN.md).
 
 ## Screenshots
 
