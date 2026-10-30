@@ -1,0 +1,46 @@
+name: Feature docs
+
+# Hält docs/FUNKTIONEN.md und docs/FUNKTIONEN-INVENTAR.md aktuell.
+on:
+  push:
+    branches: [main]
+    paths: ["Sources/**", "Watch/**", "Widgets/**", "Share/**", "scripts/feature_inventory.py"]
+  pull_request:
+    paths: ["Sources/**", "Watch/**", "Widgets/**", "Share/**", "docs/FUNKTIONEN.md"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Neue Views in FUNKTIONEN.md beschrieben?
+        run: python3 scripts/feature_inventory.py --check
+      - name: FUNKTIONEN.md mitgeändert?
+        run: |
+          changed=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          if echo "$changed" | grep -qE '^(Sources|Watch|Widgets|Share)/' && ! echo "$changed" | grep -qx 'docs/FUNKTIONEN.md'; then
+            echo "::warning::Code geändert, aber docs/FUNKTIONEN.md nicht. Bitte die Funktionsbeschreibung anpassen (oder bestätigen, dass sich nichts Sichtbares ändert)."
+          fi
+
+  inventory:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/feature_inventory.py
+      - run: python3 scripts/feature_inventory.py --check || true
+      - name: Inventar committen
+        run: |
+          if ! git diff --quiet docs/FUNKTIONEN-INVENTAR.md; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+            git add docs/FUNKTIONEN-INVENTAR.md
+            git commit -m "docs: Funktions-Inventar aktualisiert [skip ci]"
+            git push
+          fi
