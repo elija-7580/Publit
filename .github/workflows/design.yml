@@ -43,6 +43,7 @@ jobs:
             -only-testing:PublitUITests/PublitUITests/testF25WebsiteTripDark \
             -only-testing:PublitUITests/PublitUITests/testF26WebsiteStartLight \
             -only-testing:PublitUITests/PublitUITests/testF27WebsiteStartDark \
+            -only-testing:PublitUITests/PublitUITests/testF29WebsiteMissed \
             -only-testing:PublitUITests/PublitUITests/testF28WebsiteExtras 2>&1 | tee ci/ui.log | grep -E "Test Case|error:" || true
           cp ~/publit-shots/*.png ci/screenshots/ 2>/dev/null || true
       - name: Upload screenshots

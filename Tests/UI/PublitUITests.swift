@@ -367,6 +367,25 @@ final class PublitUITests: XCTestCase {
     func testF27WebsiteStartDark() { websiteStartShots(dark: true) }
 
     /// Ticket passes and the widgets, light.
+    /// "New route from here" for publit.eu: the live trip four minutes on, standing at the stop the
+    /// U6 has already left (`live-missed`), panel up so the missed-connection card shows.
+    func testF29WebsiteMissed() {
+        XCUIDevice.shared.location = XCUILocation(location: CLLocation(latitude: 48.1617, longitude: 11.5866))
+        for dark in [false, true] {
+            let app = english(["PUBLIT_UI_SAMPLE": "live-missed", "PUBLIT_UI_DARK": dark ? "1" : "0", "PUBLIT_UI_LARGE": "0"])
+            allowLocation()
+            sleep(6)
+            let window = app.windows.firstMatch
+            window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.74))
+                .press(forDuration: 0.05, thenDragTo: window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.12)))
+            // The card searches Transitous for the next connection from here.
+            _ = app.buttons["guideSwitchConnection"].waitForExistence(timeout: 25)
+            sleep(2)
+            snap(dark ? "web-live-missed-dark" : "web-live-missed")
+            app.terminate()
+        }
+    }
+
     func testF28WebsiteExtras() {
         var app = english(["PUBLIT_UI_SAMPLE": "passes", "PUBLIT_UI_DARK": "0", "PUBLIT_UI_LARGE": "0"])
         sleep(4)

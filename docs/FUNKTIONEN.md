@@ -314,7 +314,7 @@ Ab 680 pt Breite (regular): Karte bildschirmfüllend, Inhalte in einem schwebend
 
 ## 26. Nur für Entwicklung/Tests
 
-DEBUG-Demodaten (`DesignSamples`, `DesignSampleTrip`, `PresentationSampleView`, `PassSamples`, `WatchDemo`), Umgebungsvariablen `PUBLIT_UI_SAMPLE`, `PUBLIT_UI_DARK`, `PUBLIT_DEMO`, `PUBLIT_TAB`, `PUBLIT_IMPORT_SAMPLE`, `PUBLIT_WATCH_DEMO`; UI-Tests erzeugen die Screenshots. Nicht in Release-Builds.
+DEBUG-Demodaten (`DesignSamples`, `DesignSampleTrip`, `PresentationSampleView`, `PassSamples`, `WatchDemo`), Umgebungsvariablen `PUBLIT_UI_SAMPLE` (u. a. `route`, `live`, `route-gap`, `live-missed` für den verpassten Anschluss mit „Neue Verbindung ab hier“), `PUBLIT_UI_DARK`, `PUBLIT_DEMO`, `PUBLIT_TAB`, `PUBLIT_IMPORT_SAMPLE`, `PUBLIT_WATCH_DEMO`; UI-Tests erzeugen die Screenshots. Nicht in Release-Builds.
 
 ## Anhang: Zuordnung aller übrigen Views
 

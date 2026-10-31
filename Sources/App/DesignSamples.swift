@@ -13,7 +13,8 @@ enum DesignSamples {
 }
 
 /// The real trip screens on the sample trip: `PUBLIT_UI_SAMPLE=route` (preview) or `live` (started),
-/// `route-gap` for the trip through Carinthia.
+/// `route-gap` for the trip through Carinthia, `live-missed` for the live trip four minutes later
+/// (the U6 has left; standing at Münchner Freiheit shows "Missed it?" with a new route from here).
 struct DesignSampleView: View {
     let kind: String
     @Environment(TripStore.self) private var trips
@@ -34,8 +35,11 @@ struct DesignSampleView: View {
         }
         .task {
             guard kind.hasPrefix("live"), tripId == nil else { return }
-            let saved = trips.save(DesignSamples.itinerary, from: "Zuhause", to: "Flughafen München")
-            trips.update(saved.id, with: DesignSamples.itinerary)
+            let it = kind == "live-missed"
+                ? DesignSampleTrip.itinerary(DesignSampleTrip.munich, base: Date().addingTimeInterval(-240))
+                : DesignSamples.itinerary
+            let saved = trips.save(it, from: "Zuhause", to: "Flughafen München")
+            trips.update(saved.id, with: it)
             _ = trips.start(saved.id)
             if kind == "live-undated-ticket" {
                 for pass in passes.passes { passes.remove(pass.id) }
