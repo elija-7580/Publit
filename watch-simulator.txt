@@ -1,0 +1,24 @@
+watch simulator: CF758108-3646-4617-8F13-274523054C36
+app: build/Products/Debug-watchsimulator/PublitWatch.app
+total 3304
+-rw-r--r--@ 1 runner  staff  106825 Oct 31 09:25 watch-gap.png
+-rw-r--r--@ 1 runner  staff   40775 Oct 31 09:25 watch-home-de.png
+-rw-r--r--@ 1 runner  staff   40597 Oct 31 09:23 watch-home.png
+-rw-r--r--@ 1 runner  staff   81936 Oct 31 09:26 watch-leg-de.png
+-rw-r--r--@ 1 runner  staff   70796 Oct 31 09:24 watch-leg-s8.png
+-rw-r--r--@ 1 runner  staff   81743 Oct 31 09:24 watch-leg.png
+-rw-r--r--@ 1 runner  staff  187343 Oct 31 09:24 watch-legmap.png
+-rw-r--r--@ 1 runner  staff   50413 Oct 31 09:26 watch-nearby-de.png
+-rw-r--r--@ 1 runner  staff   51214 Oct 31 09:27 watch-nearby-gap.png
+-rw-r--r--@ 1 runner  staff   49414 Oct 31 09:25 watch-nearby.png
+-rw-r--r--@ 1 runner  staff  164756 Oct 31 09:26 watch-plan-de.png
+-rw-r--r--@ 1 runner  staff   41711 Oct 31 09:25 watch-plan-gap.png
+-rw-r--r--@ 1 runner  staff  160044 Oct 31 09:25 watch-plan.png
+-rw-r--r--@ 1 runner  staff   53027 Oct 31 09:25 watch-saved.png
+-rw-r--r--@ 1 runner  staff   16703 Oct 31 09:26 watch-ticket-de.png
+-rw-r--r--@ 1 runner  staff   16625 Oct 31 09:25 watch-ticket.png
+-rw-r--r--@ 1 runner  staff   45925 Oct 31 09:26 watch-tickets-de.png
+-rw-r--r--@ 1 runner  staff   45444 Oct 31 09:24 watch-tickets.png
+-rw-r--r--@ 1 runner  staff  105944 Oct 31 09:26 watch-trip-de.png
+-rw-r--r--@ 1 runner  staff  106464 Oct 31 09:24 watch-trip.png
+-rw-r--r--@ 1 runner  staff  126594 Oct 31 09:24 watch-tripmap.png
