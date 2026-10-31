@@ -120,6 +120,13 @@ jobs:
             case "$screen" in *map) sleep 12 ;; *) sleep 7 ;; esac
             xcrun simctl io "$UDID" screenshot "ci/screenshots/watch-$screen.png" 2>&1 | tee -a ci/launch.log
           done
+          # German versions of the screens on publit.eu (watch-<screen>-de.png).
+          for screen in home trip leg nearby ticket tickets plan; do
+            xcrun simctl terminate "$UDID" "$BUNDLE" 2>/dev/null
+            SIMCTL_CHILD_PUBLIT_WATCH_DEMO=$screen xcrun simctl launch "$UDID" "$BUNDLE" -AppleLanguages "(de)" -AppleLocale de_AT 2>&1 | tee -a ci/launch.log
+            sleep 7
+            xcrun simctl io "$UDID" screenshot "ci/screenshots/watch-$screen-de.png" 2>&1 | tee -a ci/launch.log
+          done
           # In Carinthia (Klagenfurt) the Nearby screen says that data is missing.
           xcrun simctl location "$UDID" set 46.6228,14.3053 || true
           xcrun simctl terminate "$UDID" "$BUNDLE" 2>/dev/null
@@ -376,3 +383,28 @@ jobs:
             sleep $((i * 10))
           done
           exit 1
+
+  # Framed watch images for publit.eu (tools/website/watch_frames.py), artifact "website-watch".
+  website:
+    name: Website watch images
+    needs: watch
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/download-artifact@v4
+        with: { name: watch-screenshots, path: shots }
+      - name: Apple Watch bezel, frames
+        run: |
+          set -e
+          mkdir -p "$RUNNER_TEMP/bz" && cd "$RUNNER_TEMP/bz"
+          curl -sL https://www.7-zip.org/a/7z2301-linux-x64.tar.xz | tar xJ 7zz
+          curl -sfL -o b.dmg "https://devimages-cdn.apple.com/design/resources/download/Bezel-Apple-Watch-Ultra-3-2025.dmg"
+          ./7zz x -y b.dmg -ir'!*PNG*' > /dev/null; rm b.dmg
+          cd "$GITHUB_WORKSPACE"
+          python3 -m pip install -q pillow
+          python3 tools/website/watch_frames.py shots "$RUNNER_TEMP/bz" website-watch
+      - uses: actions/upload-artifact@v4
+        with: { name: website-watch, path: website-watch }
