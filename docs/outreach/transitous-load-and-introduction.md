@@ -8,8 +8,8 @@ Draft message for the Transitous community. Numbers below are derived from the P
 
 Hello,
 
-I am building **Publit**, a free MIT-licensed iPhone app for public transport:
-https://github.com/elija-7580/Publit-
+I am building **Publit**, a free, open-source (AGPL-3.0) iPhone app for public transport:
+https://github.com/elija-7580/Publit
 
 It uses the Transitous API for geocoding, nearby departures, stop times, trip planning and itinerary refresh. The app identifies itself with a User-Agent that includes a contact URL, attributes Transitous and OSM, and is non-commercial.
 
@@ -38,4 +38,4 @@ I would like to agree on acceptable load and any contact channel you prefer if u
 Thank you for running Transitous.
 
 Elijá Friedrich-Ulrich  
-https://github.com/elija-7580/Publit-
+https://github.com/elija-7580/Publit
