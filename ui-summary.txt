@@ -1,0 +1,4 @@
+	 Executed 21 tests, with 1 failure (0 unexpected) in 1048.104 (1048.146) seconds
+	 Executed 21 tests, with 1 failure (0 unexpected) in 1048.104 (1048.157) seconds
+	 Executed 21 tests, with 1 failure (0 unexpected) in 1048.104 (1048.160) seconds
+	PublitUITests.testF19DropPinOnMap()
