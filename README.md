@@ -15,7 +15,7 @@ Android remains in development. APK availability does not imply completed device
 ![iOS 17+](https://img.shields.io/badge/iOS-17%2B-black)
 ![watchOS 10+](https://img.shields.io/badge/watchOS-10%2B-black)
 ![Swift](https://img.shields.io/badge/Swift-SwiftUI-orange)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
 
 **Features, coverage map and privacy policy live on the website:** [publit.eu](https://publit.eu/) · [Features](https://publit.eu/features/) · [Coverage](https://publit.eu/abdeckung/) · [Privacy](https://publit.eu/privacy/)
 
@@ -145,4 +145,4 @@ Routing and timetables: [Transitous and its data sources](https://transitous.org
 
 ## License
 
-MIT, see [LICENSE](LICENSE).
+AGPL-3.0-only, see [LICENSE](LICENSE). A commercial license is available from the author; details, earlier MIT versions and third-party terms in [LICENSING.md](LICENSING.md). The Publit name and logo are not licensed, see [TRADEMARKS.md](TRADEMARKS.md). Contributions require the [CLA](CLA.md).
