@@ -11,7 +11,7 @@ Italian first, English below. Do not send until you have reviewed the wording.
 
 Gentili signore e signori,
 
-mi chiamo Elijá Friedrich-Ulrich. Sto sviluppando **Publit**, un’app open source per iPhone (MIT) che mostra orari e partenze in tempo reale tramite [Transitous](https://transitous.org), un servizio comunitario che aggrega feed GTFS aperti.
+mi chiamo Elijá Friedrich-Ulrich. Sto sviluppando **Publit**, un’app open source per iPhone (AGPL-3.0) che mostra orari e partenze in tempo reale tramite [Transitous](https://transitous.org), un servizio comunitario che aggrega feed GTFS aperti.
 
 AMTAB pubblica già dati in tempo reale sulla pagina [OpenMobilityData](https://amtab.bari.it/it/openmobilitydata) (specifica tecnica: [Servizio_Export_GTFS.pdf](https://amtab.bari.it/images/Servizio_Export_GTFS.pdf)). Il GTFS statico di AMTAB è disponibile come open data del Comune di Bari (CC-BY). Per Transitous serve però il formato binario GTFS-Realtime (protobuf).
 
@@ -27,7 +27,7 @@ Resto a disposizione per qualsiasi dettaglio tecnico. Grazie per il vostro lavor
 
 Cordiali saluti,  
 Elijá Friedrich-Ulrich  
-https://github.com/elija-7580/Publit-
+https://github.com/elija-7580/Publit
 
 ---
 
@@ -37,7 +37,7 @@ https://github.com/elija-7580/Publit-
 
 Dear AMTAB team,
 
-my name is Elijá Friedrich-Ulrich. I am building **Publit**, a free open-source iPhone transit app (MIT) that uses [Transitous](https://transitous.org) for timetables and live departures.
+my name is Elijá Friedrich-Ulrich. I am building **Publit**, a free open-source iPhone transit app (AGPL-3.0) that uses [Transitous](https://transitous.org) for timetables and live departures.
 
 AMTAB already publishes real-time data on [OpenMobilityData](https://amtab.bari.it/it/openmobilitydata) ([technical spec](https://amtab.bari.it/images/Servizio_Export_GTFS.pdf)). The static AMTAB GTFS is available as Comune di Bari open data (CC-BY). Transitous needs binary GTFS-Realtime (protobuf).
 
@@ -53,4 +53,4 @@ I am happy to share technical details. Thank you for your open mobility data wor
 
 Kind regards,  
 Elijá Friedrich-Ulrich  
-https://github.com/elija-7580/Publit-
+https://github.com/elija-7580/Publit

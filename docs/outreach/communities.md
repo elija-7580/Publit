@@ -26,7 +26,7 @@ Before every post: read the subreddit rules, post openly as the developer ("I bu
 
 | Community | Note |
 | --- | --- |
-| [r/opensource](https://www.reddit.com/r/opensource) | MIT licence, upstream Transitous work (Bari converter) |
+| [r/opensource](https://www.reddit.com/r/opensource) | AGPL-3.0 licence, upstream Transitous work (Bari converter) |
 | [r/SideProject](https://www.reddit.com/r/SideProject) | Project posts welcome |
 | [r/privacy](https://www.reddit.com/r/privacy) | Self-promotion usually banned; mention only in fitting discussions |
 

@@ -37,7 +37,7 @@
 
 ## 1. Grundprinzipien
 
-- Kostenlos, Open Source (MIT), **kein Konto, keine Werbung, kein Tracking**. Alle gespeicherten Orte, Fahrten, Tickets bleiben auf dem Gerät (JSON-Dateien in Application Support, Tickets mit Dateischutz „complete“).
+- Kostenlos, Open Source (AGPL-3.0), **kein Konto, keine Werbung, kein Tracking**. Alle gespeicherten Orte, Fahrten, Tickets bleiben auf dem Gerät (JSON-Dateien in Application Support, Tickets mit Dateischutz „complete“).
 - Routing und Abfahrten über **Transitous** (MOTIS 2 API, GTFS + GTFS-RT/SIRI), mit identifizierendem User-Agent und sichtbarer Quellenangabe (`AttributionFooter`). Ausfallserver: MOTIS-Europa-Server (`ServerFailover`).
 - Zusätzliche Live-Quellen (optional): ÖBB, Wiener Linien, search.ch, deutsche HAFAS-Server, ACTV Venedig, SL Stockholm, TfL London (siehe §23).
 - Optional Google Places (Suche) und Google Maps SDK (Karte), nur mit API-Key.
