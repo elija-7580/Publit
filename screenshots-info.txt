@@ -1,0 +1,3 @@
+app: build/Build/Products/Debug-iphonesimulator/Publit.app
+PublitWatch.app
+pad: 3CE49892-DF52-49A7-9D5F-68E49A7DD048

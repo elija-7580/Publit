@@ -1,0 +1,14 @@
+09:19:58 boot B6BCFC3D-3ADD-42C8-BB29-33FF8FE7E0B0
+09:21:22 booted B6BCFC3D-3ADD-42C8-BB29-33FF8FE7E0B0
+TIMEOUT after 30s: xcrun simctl status_bar B6BCFC3D-3ADD-42C8-BB29-33FF8FE7E0B0 override --time 9:41 --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3
+09:25:49 installed on the iPhone
+09:27:06 screenshot iphone-route-gap-en
+09:27:29 screenshot iphone-route-gap-de
+09:27:53 screenshot iphone-route-munich-en
+09:28:16 screenshot iphone-plan-gap-en
+09:29:00 screenshot iphone-nearby-gap-en
+09:29:37 screenshot iphone-nearby-gap-de
+09:30:09 boot 3CE49892-DF52-49A7-9D5F-68E49A7DD048
+09:31:48 booted 3CE49892-DF52-49A7-9D5F-68E49A7DD048
+TIMEOUT after 60s: xcrun simctl io 3CE49892-DF52-49A7-9D5F-68E49A7DD048 screenshot ci/screenshots/ipad-map-gap-en.png
+09:36:53 screenshot ipad-map-gap-en
