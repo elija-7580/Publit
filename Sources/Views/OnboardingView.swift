@@ -44,6 +44,10 @@ struct OnboardingView: View {
             }
             .tabViewStyle(.page(indexDisplayMode: .always))
             .indexViewStyle(.page(backgroundDisplayMode: .always))
+            // Leaving the location step (button or swipe) always leads to the system permission request.
+            .onChange(of: step) { old, _ in
+                if old == 1 { location.start() }
+            }
 
             VStack(spacing: 10) {
                 Button { primary() } label: {
@@ -51,10 +55,6 @@ struct OnboardingView: View {
                 }
                 .buttonStyle(.ink)
                 .accessibilityIdentifier("onboardingNext")
-                if step == 1 {
-                    Button("Not now") { withAnimation { step = 2 } }
-                        .buttonStyle(.soft)
-                }
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 24)
@@ -69,7 +69,6 @@ struct OnboardingView: View {
 
     private var primaryTitle: String {
         switch step {
-        case 1: return L10n.t("Allow location")
         case 3: return L10n.t("Get started")
         default: return L10n.t("Continue")
         }
@@ -77,9 +76,6 @@ struct OnboardingView: View {
 
     private func primary() {
         switch step {
-        case 1:
-            location.start()
-            withAnimation { step = 2 }
         case 3: finish()
         default: withAnimation { step += 1 }
         }

@@ -146,8 +146,22 @@ struct SmartRoutingSettingsSection: View {
                     }
                 }
                 if WalkingPace.isAvailable {
-                    Toggle(L10n.t("Use my walking speed"), isOn: $ownSpeed)
-                        .onChange(of: ownSpeed) { _, on in if on { Task { await measure() } } }
+                    Toggle(isOn: $ownSpeed) {
+                        Label {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(L10n.t("Use my walking speed"))
+                                if WalkingPace.healthAvailable {
+                                    Text(L10n.t("From Apple Health"))
+                                        .font(.caption).foregroundStyle(.secondary)
+                                }
+                            }
+                        } icon: {
+                            Image(systemName: WalkingPace.healthAvailable ? "heart.fill" : "figure.walk")
+                                .foregroundStyle(WalkingPace.healthAvailable ? Color.pink : Color.ink)
+                        }
+                    }
+                    .accessibilityIdentifier("walkingSpeedHealth")
+                    .onChange(of: ownSpeed) { _, on in if on { Task { await measure() } } }
                     if ownSpeed {
                         if measuring {
                             ProgressView()

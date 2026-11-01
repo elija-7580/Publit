@@ -53,7 +53,7 @@ Animiertes Logo, mindestens 0,7 s, höchstens 2 s; endet früher, sobald die ers
 
 ### Onboarding (`OnboardingView`, nur beim ersten Start, Vollbild, Seiten mit Punkten, „Skip“)
 1. **„Public transport, without the noise.“** – Abfahrten in der Nähe, Routen durch Europa, Begleitung bis zum Aussteigen; kein Konto, keine Werbung, kein Tracking.
-2. **„Departures where you are“** – Erklärung der Standortnutzung (nur mit Suche gesendet, nie gespeichert). Buttons „Allow location“ / „Not now“.
+2. **„Departures where you are“** – Erklärung der Standortnutzung (nur mit Suche gesendet, nie gespeichert). Button „Continue“; beim Verlassen des Schritts (Button oder Wischen) kommt immer die Systemabfrage, kein „Not now“ (App Review 5.1.1(iv)).
 3. **„Home and Work“** – Zuhause und Arbeit festlegen (Felder „Not set“ → Ortssuche); später unter „Gespeichert“ änderbar.
 4. **„On the way“** – Erklärung Live-Fahrt, Umstiege, Aussteige-Hinweis, Sperrbildschirm, Widget. Button „Get started“.
 Ohne Onboarding startet die Standortabfrage sofort.
@@ -149,7 +149,7 @@ Ohne Onboarding startet die Standortabfrage sofort.
 
 - Einstellbar unter Einstellungen → „Smart routing“ (Schalter).
 - Routen nach **gefühlter Dauer** sortiert (Warten ×1,7, Gehen ×1,65, Umstieg ≈ 15 min Fahrt; einstellbar per Regler „Faster ↔ Fewer changes“, „A change counts like x extra minutes.“).
-- „Extra time for changes“ (None, +x min), „Use my walking speed“ (aus **Apple Health** oder Schrittzähler; „Not enough walking measured yet.“), „Avoid steep walks“, „Learn from my choices“, „Reset learned preferences“.
+- „Extra time for changes“ (None, +x min), „Use my walking speed“ (mit Herz-Symbol und Hinweis „From Apple Health“ direkt am Schalter; aus **Apple Health** oder Schrittzähler; „Not enough walking measured yet.“), „Avoid steep walks“, „Learn from my choices“, „Reset learned preferences“.
 - Im Routendetail: Abschnitt „Smart routing“ – „Feels like …“, pro Umstieg Wahrscheinlichkeit (Safe / Change should work / Risky / Very tight change, „x to spare“), **Backup** „If missed: Linie um HH:MM“ oder „No backup found if you miss it.“, „No change: nothing to miss“.
 - Umstiegs-Risiko: knapper/gebrochener Umstieg wird markiert (Zeit < Fußweg, oder < Schwelle bei Verspätung); `TransferCard`: „Very tight change“, „Change at … no longer works“, „Connection cancelled“, Gleiswechsel „Platform changed (was x)“, Zugteilung (`TrainDivisionNotice`).
 

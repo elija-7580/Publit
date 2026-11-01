@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.0 (build 65) – App Review fixes
+
+- Onboarding: the location step has a single "Continue" button that always leads to the system permission request (the "Not now" button is gone; swiping on also asks).
+- Settings → Smart routing: "Use my walking speed" shows "From Apple Health" with the Health icon right at the switch, so the Apple Health (HealthKit) use is visible before turning it on.
+
 ## 0.1.0 (build 64) – first App Store release
 
 - Version reset to 0.1.0 for the first public release (earlier 0.6.0 builds were TestFlight only).
