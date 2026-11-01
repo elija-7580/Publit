@@ -47,26 +47,20 @@ try:
     notes = (NOTES + ("\n\n" + old if old else ""))[:3990]
     r = call("PATCH", f"/v1/appStoreReviewDetails/{rd['id']}", {"data": {"type": "appStoreReviewDetails", "id": rd["id"], "attributes": {"notes": notes}}})
     log("review notes updated", r is not None)
-    subs = call("GET", f"/v1/reviewSubmissions?filter[app]={APP}&filter[platform]=IOS&limit=20")["data"]
-    for s in subs: log("submission", s["id"], s["attributes"].get("state"), s["attributes"].get("submittedDate"))
+    S = "e5ab7187-ad86-496a-9469-1de860f209bd"
+    for s in call("GET", f"/v1/reviewSubmissions?filter[app]={APP}&filter[platform]=IOS&limit=20")["data"]:
+        st = s["attributes"].get("state"); log("submission", s["id"], st)
+        if s["id"] != S and st == "READY_FOR_REVIEW":
+            items = (call("GET", f"/v1/reviewSubmissions/{s['id']}/items", quiet=True) or {}).get("data", [])
+            if not items:
+                r = call("PATCH", f"/v1/reviewSubmissions/{s['id']}", {"data": {"type": "reviewSubmissions", "id": s["id"], "attributes": {"canceled": True}}})
+                log("  empty submission canceled", r is not None)
     done = False
-    for s in subs:
-        if s["attributes"].get("state") in ("UNRESOLVED_ISSUES", "READY_FOR_REVIEW"):
-            S = s["id"]
-            items = call("GET", f"/v1/reviewSubmissions/{S}/items?include=appStoreVersion", quiet=True)
-            for it in (items or {}).get("data", []): log("  item", it["id"], it["attributes"].get("state"))
-            if not any(((it.get("relationships") or {}).get("appStoreVersion") or {}).get("data") for it in (items or {}).get("data", [])):
-                call("POST", "/v1/reviewSubmissionItems", {"data": {"type": "reviewSubmissionItems", "relationships": {"reviewSubmission": {"data": {"type": "reviewSubmissions", "id": S}}, "appStoreVersion": {"data": {"type": "appStoreVersions", "id": VER}}}}})
-            r = call("PATCH", f"/v1/reviewSubmissions/{S}", {"data": {"type": "reviewSubmissions", "id": S, "attributes": {"submitted": True}}})
-            log("resubmit", S, "->", r and r["data"]["attributes"].get("state"))
-            if r is not None: done = True; break
-    if not done:
-        s = call("POST", "/v1/reviewSubmissions", {"data": {"type": "reviewSubmissions", "attributes": {"platform": "IOS"}, "relationships": {"app": {"data": {"type": "apps", "id": APP}}}}})
-        if s:
-            S = s["data"]["id"]
-            call("POST", "/v1/reviewSubmissionItems", {"data": {"type": "reviewSubmissionItems", "relationships": {"reviewSubmission": {"data": {"type": "reviewSubmissions", "id": S}}, "appStoreVersion": {"data": {"type": "appStoreVersions", "id": VER}}}}})
-            r = call("PATCH", f"/v1/reviewSubmissions/{S}", {"data": {"type": "reviewSubmissions", "id": S, "attributes": {"submitted": True}}})
-            done = r is not None; log("new submission", S, "->", r and r["data"]["attributes"].get("state"))
+    for attempt in range(12):
+        r = call("PATCH", f"/v1/reviewSubmissions/{S}", {"data": {"type": "reviewSubmissions", "id": S, "attributes": {"submitted": True}}}, quiet=attempt < 11)
+        if r is not None:
+            done = True; log("resubmit", S, "->", r["data"]["attributes"].get("state")); break
+        log("attempt", attempt + 1, "not ready yet, waiting 3 min"); time.sleep(180)
     log("SUBMITTED for App Review" if done else "!! submit failed")
 except BaseException as e:
     log("!! exception", repr(e))
