@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
-"""Beta groups: report testers, add build 64 to every group, submit for beta review if external; then submit 0.1.0 for App Review."""
+"""0.1.0 resubmission: wait for build 65, attach it to version 0.1.0, add review notes, resubmit for App Review."""
 import os, time, jwt, requests
 KEY_ID, ISSUER, P8 = os.environ["KEY_ID"], os.environ["ISSUER_ID"], os.environ["P8"]
-API = "https://api.appstoreconnect.apple.com"; BUNDLE = "io.github.elija7580.publit"
+API = "https://api.appstoreconnect.apple.com"; BUNDLE = "io.github.elija7580.publit"; BUILD_NO = "65"
+NOTES = """Build 65 resolves the review of submission e5ab7187-ad86-496a-9469-1de860f209bd:
+
+Guideline 5.1.1(iv): The location explanation in onboarding now has a single "Continue" button that always leads to the system location permission request. The "Not now" button was removed; swiping on also leads to the request.
+
+Guideline 2.5.1: Publit reads only the Walking Speed type from Apple Health (read only, nothing is written), so routes plan walks at the user's pace. Where: Settings > Smart routing > "Use my walking speed". The switch shows the Apple Health heart icon and "From Apple Health". Turning it on shows the Apple Health permission sheet."""
 out = []
 def log(*a):
     s = " ".join(str(x) for x in a); print(s, flush=True); out.append(s)
@@ -12,61 +17,57 @@ def tok():
 def call(m, p, body=None, quiet=False):
     r = requests.request(m, p if p.startswith("http") else API + p, json=body, headers={"Authorization": "Bearer " + tok()}, timeout=60)
     if not r.ok:
-        if not quiet: log(f"!! {m} {p.split('?')[0]} -> {r.status_code}: {r.text[:5000]}")
+        if not quiet: log(f"!! {m} {p.split('?')[0]} -> {r.status_code}: {r.text[:3000]}")
         return None
     return r.json() if r.content else {}
-def mask(e): return (e or "?")[:3] + "…@" + (e or "@?").split("@")[-1]
 try:
     APP = call("GET", f"/v1/apps?filter[bundleId]={BUNDLE}")["data"][0]["id"]
-    b = call("GET", f"/v1/builds?filter[app]={APP}&filter[version]=64&include=buildBetaDetail")
-    BUILD = b["data"][0]["id"]; log("build 64", b["data"][0]["attributes"].get("processingState"), "expired", b["data"][0]["attributes"].get("expired"))
-    for inc in b.get("included", []): log("beta detail", inc["attributes"])
-    for u in call("GET", "/v1/users?limit=50")["data"]:
-        log("team user", mask(u["attributes"].get("username")), u["attributes"].get("roles"), "allApps", u["attributes"].get("allAppsVisible"))
+    BUILD = None
+    for i in range(80):
+        d = call("GET", f"/v1/builds?filter[app]={APP}&filter[version]={BUILD_NO}")
+        if d and d["data"]:
+            a = d["data"][0]["attributes"]
+            if a.get("processingState") == "VALID": BUILD = d["data"][0]["id"]; break
+            if i % 5 == 0: log("build", BUILD_NO, a.get("processingState"))
+        elif i % 5 == 0: log("build", BUILD_NO, "not visible yet")
+        time.sleep(30)
+    if not BUILD: raise SystemExit("build 65 not processed in time")
+    log("build", BUILD_NO, "VALID", BUILD)
+    call("PATCH", f"/v1/builds/{BUILD}", {"data": {"type": "builds", "id": BUILD, "attributes": {"usesNonExemptEncryption": False}}}, quiet=True)
     for g in call("GET", f"/v1/apps/{APP}/betaGroups?limit=50")["data"]:
-        a = g["attributes"]; G = g["id"]
-        testers = call("GET", f"/v1/betaGroups/{G}/betaTesters?limit=200")["data"]
-        log("group", a["name"], "internal", a.get("isInternalGroup"), "allBuilds", a.get("hasAccessToAllBuilds"), "publicLink", a.get("publicLinkEnabled"), "testers", len(testers))
-        for t in testers: log("   tester", mask(t["attributes"].get("email")), t["attributes"].get("state"), t["attributes"].get("inviteType"))
-        gb = [x["id"] for x in call("GET", f"/v1/betaGroups/{G}/builds?limit=200")["data"]]
-        if BUILD in gb: log("   build 64 already in group")
-        elif not a.get("hasAccessToAllBuilds"):
-            r = call("POST", f"/v1/betaGroups/{G}/relationships/builds", {"data": [{"type": "builds", "id": BUILD}]})
-            log("   build 64 added", r is not None)
-    if any(not g["attributes"].get("isInternalGroup") for g in call("GET", f"/v1/apps/{APP}/betaGroups")["data"]):
-        r = call("POST", "/v1/betaAppReviewSubmissions", {"data": {"type": "betaAppReviewSubmissions", "relationships": {"build": {"data": {"type": "builds", "id": BUILD}}}}}, quiet=True)
-        log("beta app review submitted", r is not None)
-    # Free price, base territory USA
-    if not call("GET", f"/v1/apps/{APP}/appPriceSchedule", quiet=True) or True:
-        pp = None; url = f"/v1/apps/{APP}/appPricePoints?filter[territory]=USA&limit=200"
-        while url and not pp:
-            d = call("GET", url)
-            pp = next((p["id"] for p in d["data"] if float(p["attributes"].get("customerPrice") or 1) == 0), None)
-            url = d.get("links", {}).get("next")
-        r = call("POST", "/v1/appPriceSchedules", {"data": {"type": "appPriceSchedules", "relationships": {
-            "app": {"data": {"type": "apps", "id": APP}}, "baseTerritory": {"data": {"type": "territories", "id": "USA"}},
-            "manualPrices": {"data": [{"type": "appPrices", "id": "${p1}"}]}}},
-            "included": [{"type": "appPrices", "id": "${p1}", "attributes": {"startDate": None},
-                          "relationships": {"appPricePoint": {"data": {"type": "appPricePoints", "id": pp}}}}]})
-        log("price free", r is not None)
-    VER0 = call("GET", f"/v1/apps/{APP}/appStoreVersions?filter[versionString]=0.1.0&filter[platform]=IOS")["data"][0]["id"]
-    rd = call("GET", f"/v1/appStoreVersions/{VER0}/appStoreReviewDetail")["data"]["id"]
-    r = call("PATCH", f"/v1/appStoreReviewDetails/{rd}", {"data": {"type": "appStoreReviewDetails", "id": rd, "attributes": {
-        "contactFirstName": "Elija Samuel", "contactLastName": "Friedrich-Ulrich",
-        "contactEmail": os.environ["REVIEW_EMAIL"], "contactPhone": os.environ["REVIEW_PHONE"]}}})
-    log("review contact", r is not None)
-    if os.environ.get("SUBMIT") == "1":
-        VER = call("GET", f"/v1/apps/{APP}/appStoreVersions?filter[versionString]=0.1.0&filter[platform]=IOS")["data"][0]["id"]
-        ex = call("GET", f"/v1/reviewSubmissions?filter[app]={APP}&filter[state]=READY_FOR_REVIEW")["data"]
-        s = {"data": ex[0]} if ex else call("POST", "/v1/reviewSubmissions", {"data": {"type": "reviewSubmissions", "attributes": {"platform": "IOS"}, "relationships": {"app": {"data": {"type": "apps", "id": APP}}}}})
-        if s is None:
-            ex = call("GET", f"/v1/reviewSubmissions?filter[app]={APP}&filter[state]=READY_FOR_REVIEW")["data"]
-            S = ex[0]["id"] if ex else None
-        else: S = s["data"]["id"]
-        log("review submission", S)
-        call("POST", "/v1/reviewSubmissionItems", {"data": {"type": "reviewSubmissionItems", "relationships": {"reviewSubmission": {"data": {"type": "reviewSubmissions", "id": S}}, "appStoreVersion": {"data": {"type": "appStoreVersions", "id": VER}}}}})
-        r = call("PATCH", f"/v1/reviewSubmissions/{S}", {"data": {"type": "reviewSubmissions", "id": S, "attributes": {"submitted": True}}})
-        log("SUBMITTED for App Review" if r is not None else "!! submit failed", r and r["data"]["attributes"].get("state"))
-except Exception as e:
+        if not g["attributes"].get("hasAccessToAllBuilds"):
+            r = call("POST", f"/v1/betaGroups/{g['id']}/relationships/builds", {"data": [{"type": "builds", "id": BUILD}]}, quiet=True)
+            log("beta group", g["attributes"]["name"], "build added", r is not None)
+    v = call("GET", f"/v1/apps/{APP}/appStoreVersions?filter[versionString]=0.1.0&filter[platform]=IOS")["data"][0]
+    VER = v["id"]; log("version 0.1.0", v["attributes"].get("appStoreState"), v["attributes"].get("appVersionState"))
+    r = call("PATCH", f"/v1/appStoreVersions/{VER}/relationships/build", {"data": {"type": "builds", "id": BUILD}})
+    log("build 65 attached to 0.1.0", r is not None)
+    rd = call("GET", f"/v1/appStoreVersions/{VER}/appStoreReviewDetail")["data"]
+    old = (rd["attributes"].get("notes") or "").split("Build 65 resolves")[0].strip()
+    notes = (NOTES + ("\n\n" + old if old else ""))[:3990]
+    r = call("PATCH", f"/v1/appStoreReviewDetails/{rd['id']}", {"data": {"type": "appStoreReviewDetails", "id": rd["id"], "attributes": {"notes": notes}}})
+    log("review notes updated", r is not None)
+    subs = call("GET", f"/v1/reviewSubmissions?filter[app]={APP}&filter[platform]=IOS&limit=20")["data"]
+    for s in subs: log("submission", s["id"], s["attributes"].get("state"), s["attributes"].get("submittedDate"))
+    done = False
+    for s in subs:
+        if s["attributes"].get("state") in ("UNRESOLVED_ISSUES", "READY_FOR_REVIEW"):
+            S = s["id"]
+            items = call("GET", f"/v1/reviewSubmissions/{S}/items?include=appStoreVersion", quiet=True)
+            for it in (items or {}).get("data", []): log("  item", it["id"], it["attributes"].get("state"))
+            if not any(((it.get("relationships") or {}).get("appStoreVersion") or {}).get("data") for it in (items or {}).get("data", [])):
+                call("POST", "/v1/reviewSubmissionItems", {"data": {"type": "reviewSubmissionItems", "relationships": {"reviewSubmission": {"data": {"type": "reviewSubmissions", "id": S}}, "appStoreVersion": {"data": {"type": "appStoreVersions", "id": VER}}}}})
+            r = call("PATCH", f"/v1/reviewSubmissions/{S}", {"data": {"type": "reviewSubmissions", "id": S, "attributes": {"submitted": True}}})
+            log("resubmit", S, "->", r and r["data"]["attributes"].get("state"))
+            if r is not None: done = True; break
+    if not done:
+        s = call("POST", "/v1/reviewSubmissions", {"data": {"type": "reviewSubmissions", "attributes": {"platform": "IOS"}, "relationships": {"app": {"data": {"type": "apps", "id": APP}}}}})
+        if s:
+            S = s["data"]["id"]
+            call("POST", "/v1/reviewSubmissionItems", {"data": {"type": "reviewSubmissionItems", "relationships": {"reviewSubmission": {"data": {"type": "reviewSubmissions", "id": S}}, "appStoreVersion": {"data": {"type": "appStoreVersions", "id": VER}}}}})
+            r = call("PATCH", f"/v1/reviewSubmissions/{S}", {"data": {"type": "reviewSubmissions", "id": S, "attributes": {"submitted": True}}})
+            done = r is not None; log("new submission", S, "->", r and r["data"]["attributes"].get("state"))
+    log("SUBMITTED for App Review" if done else "!! submit failed")
+except BaseException as e:
     log("!! exception", repr(e))
 open("asc-report.txt", "w").write("\n".join(out) + "\n")
