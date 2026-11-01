@@ -1,0 +1,2 @@
+Tests/UI/PublitUITests.swift:703: error: -[PublitUITests.PublitUITests testF13ModeFiltersLinesAndComparison] : XCTAssertTrue failed
+Tests/UI/PublitUITests.swift:880: error: -[PublitUITests.PublitUITests testF19DropPinOnMap] : XCTAssertTrue failed - no place sheet after long press
