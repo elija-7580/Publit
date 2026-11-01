@@ -156,7 +156,7 @@
 
 ## `Sources/Views/OnboardingView.swift`
 - Views: `OnboardingView`
-- Sichtbare Texte: Skip · Public transport, without the noise. · Departures near you, routes across Europe and a guide until you get off. No ads, no account, no tracking. · Departures where you are · On the way · Not now · Allow location · Get started · Continue · Home and Work · One tap to get home or to work, from anywhere. You can change them any time in Saved. · Not set
+- Sichtbare Texte: Skip · Public transport, without the noise. · Departures near you, routes across Europe and a guide until you get off. No ads, no account, no tracking. · Departures where you are · On the way · Get started · Continue · Home and Work · One tap to get home or to work, from anywhere. You can change them any time in Saved. · Not set
 
 ## `Sources/Views/PlaceSearchView.swift`
 - Views: `PlaceSearchView`, `PlaceLabel`, `CategoryIcon`
@@ -194,7 +194,7 @@
 
 ## `Sources/Views/SmartRoutingViews.swift`
 - Views: `SmartBadgesRow`, `SmartChangesSection`, `ChangeChanceRow`, `SmartRoutingSettingsSection`
-- Sichtbare Texte: No change: nothing to miss · Smart routing · Feels like %@: waiting, walking and changes count more than riding. · Safe change · Change should work · Risky change · %@ to spare · Very tight change · Change at %@ · Arrive %@ · still makes the next change · If missed: %@ at %@ · No backup found if you miss it. · Changes · Faster · Fewer changes · A change counts like %lld extra minutes. · Extra time for changes · None · +%lld min · Use my walking speed · Your walking speed · From Apple Health · From the step counter · Not enough walking measured yet. · Avoid steep walks · Learn from my choices · Reset learned preferences
+- Sichtbare Texte: No change: nothing to miss · Smart routing · Feels like %@: waiting, walking and changes count more than riding. · Safe change · Change should work · Risky change · %@ to spare · Very tight change · Change at %@ · Arrive %@ · still makes the next change · If missed: %@ at %@ · No backup found if you miss it. · Changes · Faster · Fewer changes · A change counts like %lld extra minutes. · Extra time for changes · None · +%lld min · Use my walking speed · From Apple Health · Your walking speed · From the step counter · Not enough walking measured yet. · Avoid steep walks · Learn from my choices · Reset learned preferences
 
 ## `Sources/Views/StationMapView.swift`
 - Views: `StationMapView`, `MapLayersSheet`, `MapPlaceView`, `MapSelectionView`, `RentalDetailView`, `VehicleTripView`
