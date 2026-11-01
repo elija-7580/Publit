@@ -1,0 +1,49 @@
+build 65 VALID fc1c0295-8fe1-4286-b55f-d49af48fcc9f
+version 0.1.0 PREPARE_FOR_SUBMISSION PREPARE_FOR_SUBMISSION
+build 65 attached to 0.1.0 True
+review notes updated True
+submission 55c370b8-7210-4be4-afb3-e135d23f96d7 READY_FOR_REVIEW
+!! PATCH /v1/reviewSubmissions/55c370b8-7210-4be4-afb3-e135d23f96d7 -> 409: {
+  "errors" : [ {
+    "id" : "fd3b840a-6ded-49c5-b483-c44fec695222",
+    "status" : "409",
+    "code" : "STATE_ERROR.ENTITY_STATE_INVALID",
+    "title" : "Resource state is invalid.",
+    "detail" : "Resource is not in cancellable state"
+  } ]
+}
+  empty submission canceled False
+submission e5ab7187-ad86-496a-9469-1de860f209bd UNRESOLVED_ISSUES
+attempt 1 not ready yet, waiting 3 min
+attempt 2 not ready yet, waiting 3 min
+attempt 3 not ready yet, waiting 3 min
+attempt 4 not ready yet, waiting 3 min
+attempt 5 not ready yet, waiting 3 min
+attempt 6 not ready yet, waiting 3 min
+attempt 7 not ready yet, waiting 3 min
+attempt 8 not ready yet, waiting 3 min
+attempt 9 not ready yet, waiting 3 min
+attempt 10 not ready yet, waiting 3 min
+attempt 11 not ready yet, waiting 3 min
+!! PATCH /v1/reviewSubmissions/e5ab7187-ad86-496a-9469-1de860f209bd -> 409: {
+  "errors" : [ {
+    "id" : "fbe01a4a-c9c9-40dc-8571-00a6244c2ca6",
+    "status" : "409",
+    "code" : "STATE_ERROR.ENTITY_STATE_INVALID",
+    "title" : "appStoreVersions with id 'fca98759-93a4-4757-bb2a-620b6a02480c' is not in valid state.",
+    "detail" : "This resource cannot be reviewed, please check associated errors to see why.",
+    "meta" : {
+      "associatedErrors" : {
+        "/v1/appStoreVersions/fca98759-93a4-4757-bb2a-620b6a02480c" : [ {
+          "id" : "f71b5a54-6076-4d81-bce1-a6b162349411",
+          "status" : "409",
+          "code" : "STATE_ERROR",
+          "title" : "The request cannot be fulfilled because of the state of another resource.",
+          "detail" : "Version is not ready to be submitted yet, please try again later."
+        } ]
+      }
+    }
+  } ]
+}
+attempt 12 not ready yet, waiting 3 min
+!! submit failed
