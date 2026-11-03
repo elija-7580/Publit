@@ -102,7 +102,7 @@ Ohne Onboarding startet die Standortabfrage sofort.
 
 ## 6. Fahrt eines Fahrzeugs (`TripView`, `LineDeparturesView`)
 
-- Alle Halte der Fahrt mit Plan-/Live-Zeit, Verspätung „+x“, Gleis „Pl. x“, bereits passierte Halte.
+- Alle Halte der Fahrt wie die Abfahrtszeilen am Startbildschirm: **Halt links, Zeit rechts** (davor Gleis „Pl. x“ und Verspätung „+x“), bereits passierte Halte grau.
 - Karte (`TripMap`) mit **geschätzter Fahrzeugposition** („Estimated vehicle position“), Status „Not departed yet“, „Between A and B“, „At …“, „Arrived at …“; ohne Live-Daten aus dem Fahrplan geschätzt.
 - Aktionen pro Halt: „Route here“, „Route from here“; „From … to here“; Linie speichern.
 - Liste weiterer Abfahrten derselben Linie.
@@ -122,9 +122,10 @@ Ohne Onboarding startet die Standortabfrage sofort.
 - **Von/Nach**-Felder (`WhereToField`, „Where to?“), Standard-Start = aktueller Standort; **„Swap“** tauscht.
 - **Schnellwahl Zuhause/Arbeit** (`PlaceKeyRow`) und letzte Suchen (`RecentSearchesSection`).
 - **Zeit** („When“): „Now“ / „Depart at“ / „Arrive by“. „Now“ folgt der Uhr: später wiederkommen zeigt Verbindungen ab dann; Ergebnisse werden live nachgeladen.
-- **„Search routes“** startet die Suche; danach sucht jede Änderung automatisch neu; Ziel leeren = Neustart.
+- **„Search routes“**: breite Such-Taste unter Von/Nach, Zeit und Routenoptionen (wie in der ÖBB-App), ohne Ziel deaktiviert; startet die Suche, danach sucht jede Änderung automatisch neu; Ziel leeren = Neustart.
 - **Ergebnisliste** (`ItineraryRow`): Ab–An, Dauer (`DurationFigure`), Linien-Badges, Umstiege, Live-Kennzeichen, „Cancelled“, „Service changes on this route“, Umstiegswahrscheinlichkeit („Change at X: y % chance“), Fahrpreis-Schätzung, Smart-Badges; optional **Verbindungs-Zeitleisten** (`TimelineBar`; Fahrt farbig, Fußweg grau, Warten gepunktet).
-- **Sortierung**: Recommended, Departure, Fastest, Fewest changes, Least walking („Recommended: …“).
+- **Sortierung**: immer nach Zeit, spätere Verbindungen weiter unten – bei „Depart“ nach Abfahrt, bei „Arrive“ nach Ankunft (Gleichstand: die jeweils andere Zeit). Recommended, Fastest, Fewest changes, Least walking werden nur markiert („Recommended: …“), nicht nach oben sortiert.
+- **Tageskennzeichnung**: Verbindungen an einem anderen Tag als dem gesuchten tragen „Tomorrow“ bzw. ein Datum (Systemwortlaut, z. B. „Morgen“); Ankunft nach Mitternacht zeigt „+1“ hinter der Ankunftszeit.
 - „Earlier connections“ / „Later connections“, „Updated HH:MM“, Abdeckungswarnung für Start/Ziel („From · Kärnten“).
 - **Routenoptionen-Knopf** (`RouteOptionsButton`) mit Kurz-Zusammenfassung („All modes“, „Direct only“, „Step-free“, „With sharing“ …).
 - **Go Now** (`GoNowView`, Schnellroute vom Standort): „Leave now“ / „Leave in x min“, „Walk all the way“, „Later connections“.

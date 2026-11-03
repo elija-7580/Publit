@@ -29,22 +29,8 @@ struct PlanView: View {
                         endpointButton(label: "From", endpoint: plan.from, target: .from)
                             .accessibilityIdentifier("endpoint-from")
                         Rectangle().fill(Color.inkFill).frame(height: 1)
-                        HStack(spacing: 8) {
-                            endpointButton(label: "To", endpoint: plan.to, target: .to)
-                                .accessibilityIdentifier("endpoint-to")
-                            // Search right next to the destination (it replaced the old "Clear destination" ✕).
-                            if plan.to != nil {
-                                Button { startSearch() } label: {
-                                    Image(systemName: "magnifyingglass")
-                                        .font(.subheadline.weight(.bold))
-                                        .foregroundStyle(Color.onInk)
-                                        .frame(width: 34, height: 34)
-                                        .background(Color.ink, in: Circle())
-                                }
-                                .accessibilityLabel(Text("Search routes"))
-                                .accessibilityIdentifier("searchRoutes")
-                            }
-                        }
+                        endpointButton(label: "To", endpoint: plan.to, target: .to)
+                            .accessibilityIdentifier("endpoint-to")
                     }
                     Button { app.plan.swap() } label: {
                         Image(systemName: "arrow.up.arrow.down")
@@ -88,6 +74,16 @@ struct PlanView: View {
                 .listRowSeparator(.hidden)
                 RouteOptionsButton(compact: true)
                     .listRowSeparator(.hidden)
+                // One wide search key under the whole form (as in the ÖBB app), instead of a small
+                // round icon squeezed next to the destination.
+                Button { startSearch() } label: {
+                    Label("Search routes", systemImage: "magnifyingglass")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.ink)
+                .disabled(plan.to == nil)
+                .accessibilityIdentifier("searchRoutes")
+                .listRowSeparator(.hidden)
             }
 
             // Data missing at the start or the destination: said before any route is trusted.
@@ -242,6 +238,9 @@ struct PlanView: View {
         let badges = pick.badges
         let recommendedKey = pick.key
         let reason = pick.reason
+        // Routes on another day than the one searched for are marked ("Tomorrow"), so a night
+        // search does not mix up tonight's and tomorrow morning's trains.
+        let reference = plan.isLive ? Date() : plan.date
 
         Section {
             OfflineNote()
@@ -260,7 +259,8 @@ struct PlanView: View {
                 Button { opened = OpenedRoute(itinerary: it) } label: {
                     HStack(spacing: 8) {
                         ItineraryRow(itinerary: it, windowStart: it.startTime, windowEnd: it.startTime.addingTimeInterval(span),
-                                     badges: badges[it.routeKey] ?? [], reason: it.routeKey == recommendedKey ? reason : nil)
+                                     badges: badges[it.routeKey] ?? [], reason: it.routeKey == recommendedKey ? reason : nil,
+                                     dayNote: Fmt.dayNote(it.startTime, reference: reference, tz: it.legs.first?.from.tz))
                         Image(systemName: "chevron.right")
                             .font(.footnote.weight(.semibold))
                             .foregroundStyle(.tertiary)
@@ -331,6 +331,8 @@ struct ItineraryRow: View {
     /// Smart routing labels ("Recommended", "Fastest", …) and why the route is suggested.
     var badges: [SmartRouting.Badge] = []
     var reason: String? = nil
+    /// "Tomorrow" or a date when the route leaves on another day than the one searched for.
+    var dayNote: String? = nil
 
     private var tz: String? { itinerary.legs.first?.from.tz }
 
@@ -339,12 +341,26 @@ struct ItineraryRow: View {
         // The weakest change, when it is not sure to work (the warnings above already cover broken ones).
         let shaky = smartRouting && warnings.isEmpty
             ? SmartRouting.changes(itinerary).filter { $0.chance < 0.8 }.min { $0.chance < $1.chance } : nil
+        let overnight = Fmt.dayOffset(from: itinerary.startTime, to: itinerary.endTime, tz: itinerary.legs.last?.to.tz)
         VStack(alignment: .leading, spacing: 6) {
             if !badges.isEmpty { SmartBadgesRow(badges: badges, reason: reason) }
 
+            if let dayNote {
+                Label(dayNote, systemImage: "calendar")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Color.delay)
+                    .accessibilityIdentifier("routeDayNote")
+            }
             HStack(alignment: .firstTextBaseline) {
                 Text("\(Fmt.time(itinerary.startTime, tz: tz)) – \(Fmt.time(itinerary.endTime, tz: itinerary.legs.last?.to.tz))")
                     .font(.headline.monospacedDigit())
+                // Arrives after midnight: "+1" after the arrival time.
+                if overnight > 0 {
+                    Text(verbatim: "+\(overnight)")
+                        .font(.caption.weight(.bold).monospacedDigit())
+                        .foregroundStyle(.secondary)
+                        .accessibilityLabel(dayNoteA11y(overnight))
+                }
                 if itinerary.hasRealtime {
                     Image(systemName: "dot.radiowaves.left.and.right")
                         .font(.caption).foregroundStyle(Color.live)
@@ -388,6 +404,13 @@ struct ItineraryRow: View {
                     .accessibilityHidden(true)
             }
         }
+    }
+}
+
+extension ItineraryRow {
+    /// Spoken form of "+1": the arrival day in words ("tomorrow").
+    fileprivate func dayNoteA11y(_ days: Int) -> String {
+        Fmt.dayNote(itinerary.endTime, reference: itinerary.startTime, tz: itinerary.legs.last?.to.tz) ?? "+\(days)"
     }
 }
 

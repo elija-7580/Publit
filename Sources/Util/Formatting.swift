@@ -61,6 +61,43 @@ enum Fmt {
         formatter(zoneID: tz).string(from: date)
     }
 
+    /// Whole calendar days from `start` to `end` in the stop's zone (0 = same day, 1 = after midnight).
+    static func dayOffset(from start: Date, to end: Date, tz: String? = nil) -> Int {
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = timeZone(tz)
+        return cal.dateComponents([.day], from: cal.startOfDay(for: start), to: cal.startOfDay(for: end)).day ?? 0
+    }
+
+    private static var dayFormatters: [String: DateFormatter] = [:]
+
+    /// "Tomorrow" / "Yesterday" (system wording in every language) or a short date such as "Thu 5 Nov"
+    /// when `date` falls on another calendar day than `reference`; nil on the same day.
+    static func dayNote(_ date: Date, reference: Date, tz: String? = nil) -> String? {
+        let days = dayOffset(from: reference, to: date, tz: tz)
+        guard days != 0 else { return nil }
+        let relative = abs(days) == 1
+        lock.lock(); defer { lock.unlock() }
+        let locale = Locale.current
+        let zone = timeZone(tz)
+        let key = "\(locale.identifier)|\(zone.identifier)|\(relative)"
+        let f: DateFormatter
+        if let cached = dayFormatters[key] { f = cached } else {
+            f = DateFormatter()
+            f.locale = locale
+            f.timeZone = zone
+            if relative {
+                f.dateStyle = .medium
+                f.timeStyle = .none
+                f.doesRelativeDateFormatting = true
+            } else {
+                f.setLocalizedDateFormatFromTemplate("EEEdMMM")
+            }
+            if dayFormatters.count >= 16 { dayFormatters.removeAll() }
+            dayFormatters[key] = f
+        }
+        return f.string(from: date)
+    }
+
     static func timeZone(_ id: String?) -> TimeZone {
         id.flatMap(TimeZone.init(identifier:)) ?? .current
     }

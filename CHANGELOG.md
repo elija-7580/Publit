@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased – everyday feedback
+
+- Line trip: each stop now reads like the departure rows on the start screen, stop on the left, time on the right (platform and delay before the time).
+- Plan: one wide "Search routes" button under From/To, time and route options (as in the ÖBB app) instead of the small round icon next to the destination; disabled until a destination is set.
+- Plan: routes are always in timetable order, later ones further down: by departure for "Depart", by arrival for "Arrive"; "Earlier/Later connections" keep that order.
+- Plan: routes on another day than the one searched for are marked ("Tomorrow" or a date, system wording in every language); arrivals after midnight show "+1".
+
 ## 0.1.0 (build 65) – App Review fixes
 
 - Onboarding: the location step has a single "Continue" button that always leads to the system permission request (the "Not now" button is gone; swiping on also asks).
