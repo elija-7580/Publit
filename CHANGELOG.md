@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased – everyday feedback
+## 0.1.0 (build 66) – everyday feedback (TestFlight)
 
 - Line trip: each stop now reads like the departure rows on the start screen, stop on the left, time on the right (platform and delay before the time).
 - Plan: one wide "Search routes" button under From/To, time and route options (as in the ÖBB app) instead of the small round icon next to the destination; disabled until a destination is set.
