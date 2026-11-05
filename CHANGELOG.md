@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.0 (build 67) – busy server, calmer route list
+
+- Transitous busy (HTTP 429): asked once more after two seconds; if it is still busy, a plain message ("Transitous is busy right now …") instead of a status code, and routes already on screen stay.
+- Plan: "Tomorrow" (or a date) only on the first route of each new day, not on every row.
+- Plan: the "Recommended: …" capsule no longer covers the last rows and notes; the list scrolls clear of it.
+- Plan: short ride blocks in the timeline show the mode icon instead of staying blank; "Walk to …" stays on one line; even spacing in "1 change · 704 → …".
+- Route detail for driving and cycling: no repeated "🚗 17 · Direct" chain and no empty gap under the time.
+
 ## 0.1.0 (build 66) – everyday feedback (TestFlight)
 
 - Line trip: each stop now reads like the departure rows on the start screen, stop on the left, time on the right (platform and delay before the time).

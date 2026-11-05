@@ -141,8 +141,11 @@ struct ItineraryDetailView: View {
                 Clocked(every: 30) { now in LeaveHero(itinerary: itinerary, now: now, framed: false) }
                     .listRowSeparator(.hidden)
                 // The chain of lines once; where to get on and off is in the steps below (each opens for its stops).
-                RouteSummary(itinerary: itinerary, showsTimes: false)
-                    .listRowSeparator(.hidden, edges: .top)
+                // Not for cycling or driving the whole way: one mode, no changes, the card above says it all.
+                if !isBikeOrCar {
+                    RouteSummary(itinerary: itinerary, showsTimes: false)
+                        .listRowSeparator(.hidden, edges: .top)
+                }
                 ForEach(TransitRegion.along(itinerary), id: \.network) { RegionTicketRow(region: $0) }
                 if let note = Fmt.foreignZoneNote(tz: itinerary.legs.first?.from.tz, at: itinerary.startTime) {
                     Label(note, systemImage: "clock").font(.footnote).foregroundStyle(.secondary)

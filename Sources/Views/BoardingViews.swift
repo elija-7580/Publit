@@ -11,8 +11,10 @@ struct BoardingLine: View {
                 Image(systemName: walk >= 60 ? "figure.walk" : "mappin.and.ellipse")
                     .foregroundStyle(.secondary)
                     .accessibilityHidden(true)
+                // One line in the list: a long stop name shrinks a little before it wraps the row.
                 Text(verbatim: Self.text(leg: leg, walkSeconds: walk))
-                    .lineLimit(2)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
             }
             .font(.footnote.weight(.medium))
             .foregroundStyle(.secondary)

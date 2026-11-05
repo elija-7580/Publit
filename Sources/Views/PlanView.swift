@@ -105,7 +105,8 @@ struct PlanView: View {
         .readableWidth()
         .inkList()
         // The suggested route out of sight (later in the list): a capsule jumps to it, the list stays put otherwise.
-        .overlay(alignment: .bottom) {
+        // An inset, not an overlay: the list scrolls clear of it, so it never covers the last rows or notes.
+        .safeAreaInset(edge: .bottom, spacing: 0) {
             if plan.searchStarted, plan.to != nil, let key = pick.key, !visibleRows.contains(key),
                let it = pick.list.first(where: { $0.routeKey == key }) {
                 Button {
@@ -196,6 +197,19 @@ struct PlanView: View {
         return Pick(list: its, badges: badges, key: key, reason: reason)
     }
 
+    /// "Tomorrow" (or a date) for the first route of each day other than the searched one; the
+    /// routes after it on the same day go without, the list reads like a timetable with day breaks.
+    nonisolated static func dayNotes(_ list: [Itinerary], reference: Date) -> [String: String] {
+        var notes: [String: String] = [:]
+        var previous: String?
+        for it in list {
+            let note = Fmt.dayNote(it.startTime, reference: reference, tz: it.legs.first?.from.tz)
+            if let note, note != previous { notes[it.routeKey] = note }
+            previous = note
+        }
+        return notes
+    }
+
     /// Same weekday and time, next time it comes round.
     static func nextOccurrence(of date: Date, after now: Date = .now) -> Date {
         var d = date
@@ -241,6 +255,8 @@ struct PlanView: View {
         // Routes on another day than the one searched for are marked ("Tomorrow"), so a night
         // search does not mix up tonight's and tomorrow morning's trains.
         let reference = plan.isLive ? Date() : plan.date
+        // Said once where the day changes, not on every row of tomorrow's trains.
+        let dayNotes = Self.dayNotes(its, reference: reference)
 
         Section {
             OfflineNote()
@@ -260,7 +276,7 @@ struct PlanView: View {
                     HStack(spacing: 8) {
                         ItineraryRow(itinerary: it, windowStart: it.startTime, windowEnd: it.startTime.addingTimeInterval(span),
                                      badges: badges[it.routeKey] ?? [], reason: it.routeKey == recommendedKey ? reason : nil,
-                                     dayNote: Fmt.dayNote(it.startTime, reference: reference, tz: it.legs.first?.from.tz))
+                                     dayNote: dayNotes[it.routeKey])
                         Image(systemName: "chevron.right")
                             .font(.footnote.weight(.semibold))
                             .foregroundStyle(.tertiary)
@@ -374,7 +390,7 @@ struct ItineraryRow: View {
             }
             // Where to go, at a glance: the stop and platform to get on at, without opening the route.
             BoardingLine(itinerary: itinerary)
-            HStack(spacing: 8) {
+            HStack(spacing: 4) {
                 Text(Fmt.changes(itinerary.transfers))
                 if let first = itinerary.firstTransitLeg, let dir = first.shownDirection {
                     Text(verbatim: "· \(first.lineName) → \(dir)").lineLimit(1)
@@ -440,12 +456,17 @@ struct TimelineBar: View {
                         RoundedRectangle(cornerRadius: 4, style: .continuous)
                             .fill(leg.lineStroke)
                             .overlay {
-                                if w > 36 {
+                                if w > 36, !leg.lineName.isEmpty {
                                     Text(leg.lineName)
                                         .font(.caption2.weight(.bold))
                                         .foregroundStyle(leg.lineTextColor)
                                         .lineLimit(1)
                                         .padding(.horizontal, 2)
+                                } else if w >= 16 {
+                                    // Too short for the name (or none given): the mode, so no block stays blank.
+                                    Image(systemName: ModeStyle.symbol(leg.mode))
+                                        .font(.system(size: 10, weight: .bold))
+                                        .foregroundStyle(leg.lineTextColor)
                                 }
                             }
                             .frame(width: w, height: height)

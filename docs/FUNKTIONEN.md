@@ -1,6 +1,6 @@
 # Publit iOS – Funktionen und Screens (vollständige Übersicht)
 
-> Stand: Version 0.1.0 (Build 66). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
+> Stand: Version 0.1.0 (Build 67). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
 > **Pflege:** Jede Änderung an `Sources/`, `Watch/`, `Widgets/` oder `Share/` muss diese Datei im selben Commit/PR mitändern (siehe Abschnitt „Aktualisierung“ ganz unten). Die maschinell erzeugte Liste aller Views steht in [`FUNKTIONEN-INVENTAR.md`](FUNKTIONEN-INVENTAR.md) und wird von der CI automatisch aktualisiert.
 
 ## Inhalt
@@ -125,7 +125,9 @@ Ohne Onboarding startet die Standortabfrage sofort.
 - **„Search routes“**: breite Such-Taste unter Von/Nach, Zeit und Routenoptionen (wie in der ÖBB-App), ohne Ziel deaktiviert; startet die Suche, danach sucht jede Änderung automatisch neu; Ziel leeren = Neustart.
 - **Ergebnisliste** (`ItineraryRow`): Ab–An, Dauer (`DurationFigure`), Linien-Badges, Umstiege, Live-Kennzeichen, „Cancelled“, „Service changes on this route“, Umstiegswahrscheinlichkeit („Change at X: y % chance“), Fahrpreis-Schätzung, Smart-Badges; optional **Verbindungs-Zeitleisten** (`TimelineBar`; Fahrt farbig, Fußweg grau, Warten gepunktet).
 - **Sortierung**: immer nach Zeit, spätere Verbindungen weiter unten – bei „Depart“ nach Abfahrt, bei „Arrive“ nach Ankunft (Gleichstand: die jeweils andere Zeit). Recommended, Fastest, Fewest changes, Least walking werden nur markiert („Recommended: …“), nicht nach oben sortiert.
-- **Tageskennzeichnung**: Verbindungen an einem anderen Tag als dem gesuchten tragen „Tomorrow“ bzw. ein Datum (Systemwortlaut, z. B. „Morgen“); Ankunft nach Mitternacht zeigt „+1“ hinter der Ankunftszeit.
+- **Tageskennzeichnung**: die erste Verbindung jedes anderen Tags als des gesuchten trägt „Tomorrow“ bzw. ein Datum (wie ein Tageswechsel im Fahrplan, nicht auf jeder Zeile) (Systemwortlaut, z. B. „Morgen“); Ankunft nach Mitternacht zeigt „+1“ hinter der Ankunftszeit.
+- **Sprung zur Empfehlung**: liegt die empfohlene Verbindung außerhalb der Sicht, springt eine Kapsel „Recommended: …“ am unteren Rand zu ihr; die Liste scrollt frei unter ihr, sie verdeckt keine Zeilen oder Hinweise.
+- **Server ausgelastet** (HTTP 429): eine Wiederholung nach 2 s; bleibt Transitous ausgelastet, erscheint „Transitous is busy right now. Try again in a moment.“, bereits angezeigte Verbindungen derselben Suche bleiben stehen.
 - „Earlier connections“ / „Later connections“, „Updated HH:MM“, Abdeckungswarnung für Start/Ziel („From · Kärnten“).
 - **Routenoptionen-Knopf** (`RouteOptionsButton`) mit Kurz-Zusammenfassung („All modes“, „Direct only“, „Step-free“, „With sharing“ …).
 - **Go Now** (`GoNowView`, Schnellroute vom Standort): „Leave now“ / „Leave in x min“, „Walk all the way“, „Later connections“.

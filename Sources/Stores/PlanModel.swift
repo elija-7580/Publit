@@ -222,8 +222,9 @@ final class PlanModel {
             }
         } catch {
             guard token == myToken, !Self.isCancellation(error) else { return }
-            // A failed background refresh keeps the routes already on screen.
-            if !silent || itineraries.isEmpty {
+            // A failed refresh of the same search keeps the routes already on screen (a busy server
+            // must not empty the list); only a new query or an empty list shows the error.
+            if itineraries.isEmpty || (!silent && resultsKey != queryKey) {
                 itineraries = []
                 comparisons = []
                 if options.isSlowSearch, (error as? URLError)?.code == .timedOut {
