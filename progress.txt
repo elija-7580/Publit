@@ -1,0 +1,13 @@
+22:21:54 boot A8CE73D2-F54C-4FB2-B688-BC6BD7612FA8
+22:23:38 booted A8CE73D2-F54C-4FB2-B688-BC6BD7612FA8
+TIMEOUT after 30s: xcrun simctl status_bar A8CE73D2-F54C-4FB2-B688-BC6BD7612FA8 override --time 9:41 --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3
+22:27:51 installed on the iPhone
+22:28:39 screenshot iphone-route-gap-en
+22:29:14 screenshot iphone-route-gap-de
+22:29:38 screenshot iphone-route-munich-en
+22:30:22 screenshot iphone-plan-gap-en
+22:30:50 screenshot iphone-nearby-gap-en
+22:31:22 screenshot iphone-nearby-gap-de
+22:31:45 boot D03256B1-4569-435F-8D92-E2BDD4ED7058
+22:33:02 booted D03256B1-4569-435F-8D92-E2BDD4ED7058
+22:41:02 screenshot ipad-map-gap-en
