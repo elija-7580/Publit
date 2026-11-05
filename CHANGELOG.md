@@ -6,7 +6,8 @@
 - Plan: "Tomorrow" (or a date) only on the first route of each new day, not on every row.
 - Plan: the "Recommended: …" capsule no longer covers the last rows and notes; the list scrolls clear of it.
 - Plan: short ride blocks in the timeline show the mode icon instead of staying blank; "Walk to …" stays on one line; even spacing in "1 change · 704 → …".
-- Route detail for driving and cycling: no repeated "🚗 17 · Direct" chain and no empty gap under the time.
+- Route detail for driving and cycling: no repeated "🚗 17 · Direct" chain and no empty gap under the time; the steps name the start, like the destination.
+- Route map: the whole route fits the map's shape, so a north–south route in the wide preview keeps both ends in view.
 
 ## 0.1.0 (build 66) – everyday feedback (TestFlight)
 

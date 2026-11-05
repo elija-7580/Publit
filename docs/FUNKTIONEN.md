@@ -160,7 +160,8 @@ Ohne Onboarding startet die Standortabfrage sofort.
 
 - **LeaveHero**: „Leave now“ / „Leave in x min“ und Ankunftszeit – die entscheidende Zahl.
 - Statusbanner (Live / Timetable, „This trip is cancelled.“, „Service changes on this route“), „Updated HH:MM“.
-- **Karte** der Route (`RouteMap`, Linien in Betreiberfarbe, Fußwege gepunktet); Vergleichskarte (`CompareMapView`).
+- **Karte** der Route (`RouteMap`, Linien in Betreiberfarbe, Fußwege gepunktet; Ausschnitt an das Seitenverhältnis der Karte angepasst, damit Start und Ziel immer sichtbar sind); Vergleichskarte (`CompareMapView`).
+- **Rad/Auto die ganze Strecke**: ohne Linienkette und „Direct“ unter der Zeitkarte; die Schritte nennen den Start (wie das Ziel), dazu „Driving times are without traffic and parking.“ und „Open in …“.
 - **„Trip overview“**/„Steps“: Zeitleiste (`TimelineLegRow`, `TimelineRail`): je Abschnitt „Board at …“, „Get off at …“, Linie, Richtung, Gleis („Platform x“, Gleiswechsel), Zwischenhalte, Verspätung, SEV, Fußweg mit Anweisungen (Treppen, Ebenen, Ausgang „Exit towards …“), Leihfahrzeug („Pick up at …“, „Return at …“, „Rent in the provider's app“), Umstiegskarten.
 - **„Remind me to get off“** (`GetOffButton`): „Reminder set – We'll notify you at …“, „This stop is less than two minutes away.“, Hinweis falls Mitteilungen aus.
 - Fahrpreis (`FareSection`): „Fare estimate“ nur bei vollständig abgedeckter Route und eindeutiger Tarifregel; sonst „Fare information“ und Ticket-Links des Betreibers / Verbunds (`RegionTicketRow`, z. B. „Venice · ACTV“).
