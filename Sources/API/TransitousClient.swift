@@ -319,6 +319,8 @@ final class TransitousClient: @unchecked Sendable {
         guard (200..<300).contains(status) else {
             HangLog.shared.error("request \(kind)", APIError(message: "HTTP \(status)"))
             if status >= 500, let value: T = await offlineCopy(key, url: url, policy: policy) { return value }
+            // Still too many requests after the retry: say so in words, not as a status code.
+            if status == 429 { throw APIError(message: L10n.t("Transitous is busy right now. Try again in a moment.")) }
             if let err = try? JSONDecoder().decode(ServerError.self, from: data) {
                 throw APIError(message: err.error)
             }
@@ -427,17 +429,24 @@ final class TransitousClient: @unchecked Sendable {
         }
     }
 
-    /// Tries once more after `delay` when the connection dropped or the server answered 502–504.
+    /// Tries once more after `delay` when the connection dropped or the server answered 502–504,
+    /// and after `busyDelay` when Transitous asked to slow down (429): a burst of searches passes
+    /// in a second or two, asking again at once would only extend it.
     /// Not for timeouts: the user has waited long enough by then.
-    static func withRetry(delay: Duration = .milliseconds(800),
+    static func withRetry(delay: Duration = .milliseconds(800), busyDelay: Duration = .seconds(2),
                           _ op: @Sendable () async throws -> (Data, Int)) async throws -> (Data, Int) {
+        var wait = delay
         do {
             let r = try await op()
-            guard [502, 503, 504].contains(r.1) else { return r }
+            if r.1 == 429 {
+                wait = busyDelay
+            } else {
+                guard [502, 503, 504].contains(r.1) else { return r }
+            }
         } catch let e as URLError where [.networkConnectionLost, .cannotConnectToHost, .cannotFindHost, .dnsLookupFailed].contains(e.code) {
             // Fall through to the second attempt.
         }
-        try await Task.sleep(for: delay)
+        try await Task.sleep(for: wait)
         return try await op()
     }
 

@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.1.0 (build 67) – busy server, calmer route list
+
+- Transitous busy (HTTP 429): asked once more after two seconds; if it is still busy, a plain message ("Transitous is busy right now …") instead of a status code, and routes already on screen stay.
+- Plan: "Tomorrow" (or a date) only on the first route of each new day, not on every row.
+- Plan: the "Recommended: …" capsule no longer covers the last rows and notes; the list scrolls clear of it.
+- Plan: short ride blocks in the timeline show the mode icon instead of staying blank; "Walk to …" stays on one line; even spacing in "1 change · 704 → …".
+- Route detail for driving and cycling: no repeated "🚗 17 · Direct" chain and no empty gap under the time; the steps name the start, like the destination.
+- Route map: the whole route fits the map's shape, so a north–south route in the wide preview keeps both ends in view.
+
+## 0.1.0 (build 66) – everyday feedback (TestFlight)
+
+- Line trip: each stop now reads like the departure rows on the start screen, stop on the left, time on the right (platform and delay before the time).
+- Plan: one wide "Search routes" button under From/To, time and route options (as in the ÖBB app) instead of the small round icon next to the destination; disabled until a destination is set.
+- Plan: routes are always in timetable order, later ones further down: by departure for "Depart", by arrival for "Arrive"; "Earlier/Later connections" keep that order.
+- Plan: routes on another day than the one searched for are marked ("Tomorrow" or a date, system wording in every language); arrivals after midnight show "+1".
+
 ## 0.1.0 (build 65) – App Review fixes
 
 - Onboarding: the location step has a single "Continue" button that always leads to the system permission request (the "Not now" button is gone; swiping on also asks).

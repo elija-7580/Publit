@@ -225,22 +225,26 @@ private struct StopTimeRow: View {
         let time = stop.departure ?? stop.arrival
         let scheduled = stop.scheduledDeparture ?? stop.scheduledArrival
         let delay = time.flatMap { t in scheduled.map { Int((t.timeIntervalSince($0) / 60).rounded()) } } ?? 0
+        // Same reading order as the departure rows on the start screen: the stop on the left,
+        // its time on the right.
         HStack(spacing: 10) {
-            Text(time.map { Fmt.time($0, tz: stop.tz) } ?? "–")
-                .font(.subheadline.weight(isFocus ? .bold : .regular).monospacedDigit())
-                .lineLimit(1).fixedSize()
-                .frame(minWidth: 52, alignment: .leading)
-            if realTime && delay > 0 {
-                Text("+\(delay)").font(.caption.monospacedDigit()).foregroundStyle(Color.delay)
-            }
             Text(stop.name)
                 .font(.subheadline.weight(isFocus ? .bold : .regular))
                 .lineLimit(1)
                 .strikethrough(stop.cancelled == true)
-            Spacer()
+                .frame(maxWidth: .infinity, alignment: .leading)
             if let track = stop.track, !track.isEmpty {
                 Text("Pl. \(track)").font(.caption).foregroundStyle(.secondary)
+                    .lineLimit(1).fixedSize()
             }
+            if realTime && delay > 0 {
+                Text("+\(delay)").font(.caption.monospacedDigit()).foregroundStyle(Color.delay)
+                    .lineLimit(1).fixedSize()
+            }
+            Text(time.map { Fmt.time($0, tz: stop.tz) } ?? "–")
+                .font(.subheadline.weight(isFocus ? .bold : .regular).monospacedDigit())
+                .lineLimit(1).fixedSize()
+                .frame(minWidth: 52, alignment: .trailing)
         }
         .foregroundStyle(isPast ? Color.secondary : Color.primary)
     }
