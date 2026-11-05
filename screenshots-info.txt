@@ -1,3 +1,11 @@
 app: build/Build/Products/Debug-iphonesimulator/Publit.app
 PublitWatch.app
 pad: D03256B1-4569-435F-8D92-E2BDD4ED7058
+total 5232
+-rw-r--r--@ 1 runner  staff  122812 Nov  5 22:40 ipad-map-gap-en.png
+-rw-r--r--@ 1 runner  staff  379612 Nov  5 22:31 iphone-nearby-gap-de.png
+-rw-r--r--@ 1 runner  staff  390658 Nov  5 22:30 iphone-nearby-gap-en.png
+-rw-r--r--@ 1 runner  staff  369338 Nov  5 22:30 iphone-plan-gap-en.png
+-rw-r--r--@ 1 runner  staff  621186 Nov  5 22:29 iphone-route-gap-de.png
+-rw-r--r--@ 1 runner  staff  232328 Nov  5 22:28 iphone-route-gap-en.png
+-rw-r--r--@ 1 runner  staff  552282 Nov  5 22:29 iphone-route-munich-en.png
