@@ -87,11 +87,36 @@ final class TransitousClient: @unchecked Sendable {
     /// Second attempt when nothing was found; further steps in `Reach.walkSteps`.
     static var widerWalkLimit: Int { Reach.walkSteps[1] }
 
+    /// - Parameters fromStopId/toStopId: when start or destination is a stop, route from/to the stop
+    ///   itself. With only its coordinates the server adds a walk from the point to the platform
+    ///   ("Walk 43 m" before the train, "Walk 5 m, 2 min" after arriving at the station itself).
+    ///   An ID the server no longer knows (e.g. saved before a yearly feed change) falls back to the coordinates.
     func plan(from: LatLon, to: LatLon, time: Date?, arriveBy: Bool, pageCursor: String? = nil,
-              maxWalk: Int = TransitousClient.walkLimits.prePost, options: RouteOptions = RouteOptions()) async throws -> PlanResponse {
+              maxWalk: Int = TransitousClient.walkLimits.prePost, options: RouteOptions = RouteOptions(),
+              fromStopId: String? = nil, toStopId: String? = nil) async throws -> PlanResponse {
+        if fromStopId != nil || toStopId != nil {
+            do {
+                let res = try await planRequest(from: from, to: to, time: time, arriveBy: arriveBy, pageCursor: pageCursor,
+                                                maxWalk: maxWalk, options: options, fromStopId: fromStopId, toStopId: toStopId)
+                if !res.itineraries.isEmpty || pageCursor != nil { return res }
+            } catch {
+                if error is CancellationError || (error as? URLError)?.code == .cancelled { throw error }
+            }
+            // The cursor belongs to the stop-ID query; the coordinate query starts on its own first page.
+            if pageCursor != nil { return try await planRequest(from: from, to: to, time: time, arriveBy: arriveBy,
+                                                                pageCursor: nil, maxWalk: maxWalk, options: options) }
+        }
+        return try await planRequest(from: from, to: to, time: time, arriveBy: arriveBy, pageCursor: pageCursor,
+                                     maxWalk: maxWalk, options: options)
+    }
+
+    private func planRequest(from: LatLon, to: LatLon, time: Date?, arriveBy: Bool, pageCursor: String?,
+                             maxWalk: Int, options: RouteOptions,
+                             fromStopId: String? = nil, toStopId: String? = nil) async throws -> PlanResponse {
         // "Now" searches change by the minute; planned ones can be reused a little longer.
         try await get("/api/v6/plan", Self.planQuery(from: from, to: to, time: time, arriveBy: arriveBy,
-                                                     pageCursor: pageCursor, maxWalk: maxWalk, options: options),
+                                                     pageCursor: pageCursor, maxWalk: maxWalk, options: options,
+                                                     fromStopId: fromStopId, toStopId: toStopId),
                       cache: CachePolicy(maxAge: time == nil ? 20 : 60, persist: true),
                       timeout: options.isSlowSearch ? 45 : nil)
     }
@@ -99,10 +124,11 @@ final class TransitousClient: @unchecked Sendable {
     static func planQuery(from: LatLon, to: LatLon, time: Date?, arriveBy: Bool,
                           pageCursor: String? = nil, maxWalk: Int = walkLimits.prePost,
                           options: RouteOptions = RouteOptions(),
-                          smart: SmartRouting.Request = .current) -> [URLQueryItem] {
+                          smart: SmartRouting.Request = .current,
+                          fromStopId: String? = nil, toStopId: String? = nil) -> [URLQueryItem] {
         var q = [
-            URLQueryItem(name: "fromPlace", value: from.apiValue),
-            URLQueryItem(name: "toPlace", value: to.apiValue),
+            URLQueryItem(name: "fromPlace", value: TransitLabels.clean(fromStopId) ?? from.apiValue),
+            URLQueryItem(name: "toPlace", value: TransitLabels.clean(toStopId) ?? to.apiValue),
             URLQueryItem(name: "arriveBy", value: arriveBy ? "true" : "false"),
             // Footpaths between platforms and stations routed on OpenStreetMap, not just feed transfers.
             URLQueryItem(name: "useRoutedTransfers", value: "true"),

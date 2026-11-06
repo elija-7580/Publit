@@ -1112,7 +1112,7 @@ private struct AlternativeRow: View {
         defer { searching = false }
         failed = false
         guard let res = try? await TransitousClient.shared.plan(from: from, to: dest.coordinate, time: time, arriveBy: false,
-                                                                 options: app.routeOptions) else { failed = true; return }
+                                                                 options: app.routeOptions, toStopId: dest.stopId) else { failed = true; return }
         let enriched = await LiveOverlay.apply(res.itineraries, budget: 3)
         choices = TripAlternative.choices(enriched, at: .now)
         failed = choices.isEmpty

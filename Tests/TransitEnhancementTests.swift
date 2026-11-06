@@ -8,6 +8,7 @@ private struct TestRoute: RouteStyled {
     var routeTextColor: String? = nil
     var routeShortName: String? = nil
     var displayName: String? = nil
+    var routeId: String? = nil
 }
 
 final class TransitEnhancementTests: XCTestCase {
@@ -38,6 +39,33 @@ final class TransitEnhancementTests: XCTestCase {
         XCTAssertEqual(route.lineName, "ICE")
         XCTAssertEqual(route.serviceDetail, "ICE 615")
         XCTAssertNil(TestRoute(routeShortName: "RE3", displayName: "RE 3").serviceDetail)
+    }
+    func testAustrianRegionalTrainsShowTheLineNotTheTrainNumber() {
+        // Krems → St. Pölten: the feed's short name is the train number, the line is in the route ID.
+        let r44 = TestRoute(mode: "REGIONAL_RAIL", routeShortName: "R 6046", displayName: "R 6046",
+                            routeId: "at-Railway-Current-Reference-Data-2026_3-R44-N-j26-1241.TA.3-R44-N-j26-1.51.H")
+        XCTAssertEqual(r44.lineName, "R 44")
+        XCTAssertEqual(r44.serviceDetail, "R 6046")
+        let rex3 = TestRoute(mode: "REGIONAL_RAIL", routeShortName: "REX 2248", displayName: "REX 2248",
+                             routeId: "at-Railway-Current-Reference-Data-2027_2-RX3-W-j26-1111.TA.2-RX3-W-j26-1.49.R")
+        XCTAssertEqual(rex3.lineName, "REX 3")
+        // S-Bahn already has its line as short name; long-distance codes (A13, WB1) are internal.
+        XCTAssertEqual(TestRoute(routeShortName: "S40", routeId: "at-Railway-Current-Reference-Data-2026_1-S40-W-j26-1").lineName, "S40")
+        XCTAssertEqual(TestRoute(routeShortName: "IC 744", routeId: "at-Railway-Current-Reference-Data-2026_13-A13-j26-175.TA.13-A13-j26-1.27.H").lineName, "IC 744")
+        XCTAssertEqual(TestRoute(routeShortName: "WB 922", routeId: "at-Railway-Current-Reference-Data-2026_9-WB1-W-j26-117.TA.9-WB1-W-j26-1.8.R").lineName, "WB 922")
+        // Other feeds are left alone.
+        XCTAssertEqual(TestRoute(routeShortName: "RE 3", routeId: "de-DELFI_3-R44-N").lineName, "RE 3")
+        XCTAssertNil(TransitLabels.line(fromRouteId: nil))
+    }
+    func testStopsAreRoutedByTheirIdNotTheirCoordinates() {
+        let q = TransitousClient.planQuery(from: LatLon(lat: 48.40908, lon: 15.60499), to: LatLon(lat: 48.20820, lon: 15.62404),
+                                           time: nil, arriveBy: false,
+                                           fromStopId: "at-PTA-Eastern-Region-Flex-2026_Pat:43:3993", toStopId: nil)
+        let d = Dictionary(uniqueKeysWithValues: q.map { ($0.name, $0.value ?? "") })
+        XCTAssertEqual(d["fromPlace"], "at-PTA-Eastern-Region-Flex-2026_Pat:43:3993")
+        XCTAssertEqual(d["toPlace"], "48.2082,15.62404")
+        XCTAssertEqual(Endpoint.place(SavedPlace(id: "s", name: "Krems", subtitle: nil, lat: 48.4, lon: 15.6, stopId: "x")).stopId, "x")
+        XCTAssertNil(Endpoint.currentLocation.stopId)
     }
     func testMissingColoursUseModeColourAndSmallTextHasAAContrast() {
         XCTAssertEqual(TestRoute(routeShortName: "U1").lineColors.background, ModeStyle.defaultHex("SUBWAY"))

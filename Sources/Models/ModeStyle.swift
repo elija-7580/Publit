@@ -7,12 +7,19 @@ protocol RouteStyled {
     var routeTextColor: String? { get }
     var routeShortName: String? { get }
     var displayName: String? { get }
+    /// GTFS route ID; some feeds encode the public line only there (see `TransitLabels.line(fromRouteId:)`).
+    var routeId: String? { get }
+}
+
+extension RouteStyled {
+    var routeId: String? { nil }
 }
 
 extension RouteStyled {
     /// The compact, operator-defined line identifier. Never use a destination as a line name.
     var lineName: String {
-        TransitLabels.clean(routeShortName) ?? TransitLabels.clean(displayName) ?? ModeStyle.label(mode)
+        TransitLabels.line(fromRouteId: routeId)
+            ?? TransitLabels.clean(routeShortName) ?? TransitLabels.clean(displayName) ?? ModeStyle.label(mode)
     }
 
     /// Additional service identity (e.g. ICE 615), retained separately from the line badge.
@@ -102,5 +109,23 @@ enum TransitLabels {
 
     static func identity(_ value: String) -> String {
         value.uppercased().filter { $0.isLetter || $0.isNumber }
+    }
+
+    /// The Austrian rail feed puts the train number in `route_short_name` ("R 6046", "REX 2248"),
+    /// while the public line ("R 44", "REX 3", as on station boards and in the ÖBB app) is only
+    /// part of the route ID: `at-Railway-…_3-R44-N-j26-1…`, `…_2-RX3-W-j26-1…`.
+    /// S-Bahn routes already have the line as short name; long-distance codes (A13, WB1) are internal.
+    static func line(fromRouteId routeId: String?) -> String? {
+        guard let routeId, routeId.hasPrefix("at-Railway-"),
+              let underscore = routeId.firstIndex(of: "_") else { return nil }
+        let parts = routeId[routeId.index(after: underscore)...].split(separator: "-", maxSplits: 2)
+        guard parts.count == 3, parts[0].allSatisfy(\.isNumber) else { return nil }
+        let token = parts[1]
+        for (code, label) in [("RX", "REX"), ("R", "R")] where token.hasPrefix(code) {
+            let number = token.dropFirst(code.count)
+            guard !number.isEmpty, number.count <= 3, number.allSatisfy(\.isNumber) else { return nil }
+            return "\(label) \(number)"
+        }
+        return nil
     }
 }
