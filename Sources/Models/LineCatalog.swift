@@ -19,6 +19,8 @@ struct LineRef: Codable, Hashable, Identifiable, Sendable, RouteStyled {
 
     var coordinate: LatLon { LatLon(lat: lat, lon: lon) }
     var group: ModeGroup { ModeGroup.of(mode) }
+    /// The key is the route ID when the feed has one.
+    var routeId: String? { key }
 
     init(key: String, mode: String, routeShortName: String?, displayName: String?, routeColor: String?,
          routeTextColor: String?, agencyName: String?, headsigns: [String], stopId: String, stopName: String,

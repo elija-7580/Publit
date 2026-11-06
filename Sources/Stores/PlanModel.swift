@@ -25,6 +25,14 @@ enum Endpoint: Hashable, Codable, Sendable {
         case .place(let p): return p.coordinate
         }
     }
+
+    /// A stop is routed by its ID, so the route starts/ends at the station, not with a walk to its platform.
+    var stopId: String? {
+        switch self {
+        case .currentLocation: return nil
+        case .place(let p): return p.stopId
+        }
+    }
 }
 
 enum TimeMode: String, Codable, CaseIterable, Identifiable, Sendable {
@@ -73,7 +81,7 @@ final class PlanModel {
     private(set) var walkNote: String?
 
     private var nextCursor: String?
-    @ObservationIgnored private var lastRequest: (from: LatLon, to: LatLon, time: Date?, arriveBy: Bool, maxWalk: Int)?
+    @ObservationIgnored private var lastRequest: (from: LatLon, to: LatLon, time: Date?, arriveBy: Bool, maxWalk: Int, fromStopId: String?, toStopId: String?)?
     @ObservationIgnored private var lastOptions = RouteOptions()
     @ObservationIgnored private var token = UUID()
     @ObservationIgnored private var resultsKey: String?
@@ -144,6 +152,8 @@ final class PlanModel {
         let time: Date? = isLive ? nil : date
         let arriveBy = timeMode == .arriveBy
         let options = options
+        let fromStop = from.stopId
+        let toStop = to.stopId
         do {
             var maxWalk = options.maxWalkMinutes * 60
             var res: PlanResponse
@@ -151,9 +161,11 @@ final class PlanModel {
                 // Ask for a comfortable walk and the usual one at once; a long walk wins only when
                 // it arrives clearly earlier (the server alone prefers walking 30 min to save one).
                 async let shortRes = TransitousClient.shared.plan(from: f, to: t, time: time, arriveBy: arriveBy,
-                                                                  maxWalk: Reach.shortWalkSeconds, options: options)
+                                                                  maxWalk: Reach.shortWalkSeconds, options: options,
+                                                                  fromStopId: fromStop, toStopId: toStop)
                 async let longRes = TransitousClient.shared.plan(from: f, to: t, time: time, arriveBy: arriveBy,
-                                                                 maxWalk: maxWalk, options: options)
+                                                                 maxWalk: maxWalk, options: options,
+                                                                 fromStopId: fromStop, toStopId: toStop)
                 let long = try await longRes
                 if let short = try? await shortRes, !short.itineraries.isEmpty {
                     res = long.replacingItineraries(Reach.preferShortWalks(short: short.itineraries, long: long.itineraries))
@@ -162,7 +174,8 @@ final class PlanModel {
                 }
             } else {
                 res = try await TransitousClient.shared.plan(from: f, to: t, time: time, arriveBy: arriveBy,
-                                                             maxWalk: maxWalk, options: options)
+                                                             maxWalk: maxWalk, options: options,
+                                                             fromStopId: fromStop, toStopId: toStop)
             }
             try Task.checkCancellation()
             // Nothing within 30 min walk of a stop: try again with a longer walk (45 min, then 2 h),
@@ -174,7 +187,8 @@ final class PlanModel {
                     guard token == myToken else { return }
                     maxWalk = wider
                     res = try await TransitousClient.shared.plan(from: f, to: t, time: time, arriveBy: arriveBy,
-                                                                 maxWalk: maxWalk, options: options)
+                                                                 maxWalk: maxWalk, options: options,
+                                                                 fromStopId: fromStop, toStopId: toStop)
                 }
             }
             try Task.checkCancellation()
@@ -189,7 +203,7 @@ final class PlanModel {
             completedAt = Date()
             updatedAt = completedAt
             nextCursor = arriveBy ? res.previousPageCursor : res.nextPageCursor
-            lastRequest = (f, t, time, arriveBy, maxWalk)
+            lastRequest = (f, t, time, arriveBy, maxWalk, fromStop, toStop)
             lastOptions = options
             if !silent { history.record(from: searchedFrom, to: to, mode: searchedMode, date: searchedDate, source: source) }
             if itineraries.isEmpty {
@@ -265,7 +279,7 @@ final class PlanModel {
         do {
             let res = try await TransitousClient.shared.plan(from: req.from, to: req.to, time: req.time,
                                                              arriveBy: req.arriveBy, pageCursor: cursor, maxWalk: req.maxWalk,
-                                                             options: lastOptions)
+                                                             options: lastOptions, fromStopId: req.fromStopId, toStopId: req.toStopId)
             // A new search started meanwhile: these results belong to the old query.
             guard token == myToken else { return }
             let known = Set(itineraries.map(\.id))

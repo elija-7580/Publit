@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Austrian regional trains show their line like the ÖBB app and station boards ("R 44", "REX 3") instead of the train number ("R 6046"); the train number stays as detail.
+- Routes from or to a stop are searched by stop ID: no more extra "Walk 43 m" before the train or "Walk 5 m · 2 min" after arriving at the station itself, and the arrival time is the train's arrival. Falls back to coordinates if the stop ID is unknown.
+
 ## 0.1.0 (build 65) – App Review fixes
 
 - Onboarding: the location step has a single "Continue" button that always leads to the system permission request (the "Not now" button is gone; swiping on also asks).
