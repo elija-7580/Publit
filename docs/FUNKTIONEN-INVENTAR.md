@@ -3,7 +3,7 @@
 > Nicht von Hand bearbeiten. Erzeugt von `scripts/feature_inventory.py` (CI: `features-doc.yml`).
 > Die ausführliche Beschreibung steht in [FUNKTIONEN.md](FUNKTIONEN.md).
 
-**172 Views, 5 App Intents, 3 Widgets in 69 Dateien.**
+**173 Views, 5 App Intents, 3 Widgets in 70 Dateien.**
 
 ## `Sources/App/DesignSamples.swift`
 - Views: `DesignSampleView`
@@ -261,7 +261,11 @@
 
 ## `Watch/WatchTripView.swift`
 - Views: `WatchTripView`, `WatchTripOverview`, `WatchLegPage`
-- Sichtbare Texte: Map · Tickets · Trip overview · End trip · Start trip · Remove · Save trip · Cancelled · Live · Walk %@ · +%lld min · Pl. %@ · Platform changed
+- Sichtbare Texte: Map · Tickets · Trip overview · End trip · Start trip · Remove · Save trip · Line %@: all stops and map · Cancelled · Live · Walk %@ · +%lld min · Pl. %@ · Platform changed
+
+## `Watch/WatchVehicleTripView.swift`
+- Views: `WatchVehicleTripView`
+- Sichtbare Texte: Try again · Stops · Map · Pl. %@ · Not departed yet · Arrived at %@ · At %@ · Between %@ and %@
 
 ## `Widgets/DeparturesWidget.swift`
 - Views: `DeparturesWidgetView`

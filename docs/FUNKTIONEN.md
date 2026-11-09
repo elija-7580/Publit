@@ -286,6 +286,7 @@ Beispielphrasen: „Nächste Abfahrten in Publit“, „Bring mich nach Hause mi
 | Home (`WatchHomeView`) | jetzt gültige Tickets (ein Tipp → Code), Tickets, Live-Kachel der laufenden Fahrt, Where to?, Nearby, Saved |
 | Tickets (`WatchTicketsView`) | gruppiert wie iPhone; Code auf weißer Fläche in voller Breite, danach Details |
 | Fahrt (`WatchTripView`) | Seiten per Digital Crown: Übersicht (Abdeckungshinweis, Zeiten, Status, Tickets, Map, Start/End trip, Save trip/Remove), dann je Fahrt/Fußweg eine Seite (Linie, Richtung, Zeiten, Gleis/„Platform changed“, Halte, Störungen, Map) |
+| Ganze Fahrt einer Linie (`WatchVehicleTripView`) | Aus einer Fahrt-Etappe (Linien-Symbol oder „Line …: all stops and map“): alle Halte des Fahrzeugs mit Zeiten, Verspätung, Gleis, auch vor dem Einstieg; Ein-/Ausstieg fett, passierte Halte grau, Status („At …“, „Between … and …“), Map |
 | Karte (`WatchTripMapView`) | Abschnitt oder ganze Fahrt, Linienfarben, Fußwege gepunktet, Standort |
 | Where to? (`WatchPlanView`) | Von/Nach (Standort, gespeichert, Diktat), bis 8 Routen, spätere Verbindungen |
 | Nearby (`WatchNearbyView`) | nächste Haltestellen mit Abfahrten |
@@ -351,6 +352,7 @@ Kleinere Bausteine, die in den Abschnitten oben nicht namentlich vorkommen:
 | `WatchSavedTripRow`, `WatchStopView` | Fahrtzeile und Haltestellen-Abfahrten in „Saved“ (§21) |
 | `WatchTicketRow`, `WatchTicketView`, `WatchCodeView`, `WatchTicketDetails` | Ticketliste, Ticket, Code-Fläche, Details (§21) |
 | `WatchTripOverview`, `WatchLegPage` | Übersichts- und Abschnittsseite einer Fahrt (§21) |
+| `WatchVehicleTripView` | Ganze Fahrt des Fahrzeugs einer Etappe (§21) |
 | `DeparturesWidgetView` | Darstellung des Abfahrten-Widgets (§18) |
 | `LineChip`, `PlatformChip`, `FamilyAdaptiveView`, `SmallActivityView`, `ActivityContent`, `LockScreenView` | Bausteine der Live Activity (Sperrbildschirm, Dynamic Island, Watch) (§18) |
 | `DesignSampleView`, `PassSampleView` | nur DEBUG-Demos (§26) |

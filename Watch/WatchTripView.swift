@@ -242,6 +242,14 @@ struct WatchLegPage: View {
                 between(leg)
                 stop(leg.to, time: leg.endTime, scheduled: leg.scheduledEndTime, fallback: to, departing: false)
                 note(leg)
+                if leg.isTransit, leg.tripId != nil {
+                    // The vehicle's whole trip: every stop, also before boarding (TripView on the iPhone).
+                    NavigationLink(value: WatchRoute.vehicle(OpenedRoute(itinerary: itinerary), index)) {
+                        Label(L10n.f("Line %@: all stops and map", leg.lineName), systemImage: "point.topleft.down.to.point.bottomright.curvepath")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                }
                 NavigationLink(value: WatchRoute.map(OpenedRoute(itinerary: itinerary), .leg(index))) {
                     Label("Map", systemImage: "map.fill").frame(maxWidth: .infinity)
                 }
@@ -255,7 +263,15 @@ struct WatchLegPage: View {
     private func rideHeader(_ leg: Leg) -> some View {
         VStack(alignment: .leading, spacing: 3) {
             HStack(spacing: 6) {
-                LineBadge(leg, compact: true)
+                if leg.tripId != nil {
+                    NavigationLink(value: WatchRoute.vehicle(OpenedRoute(itinerary: itinerary), index)) {
+                        LineBadge(leg, compact: true)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(Text(L10n.f("Line %@: all stops and map", leg.lineName)))
+                } else {
+                    LineBadge(leg, compact: true)
+                }
                 if leg.cancelled == true {
                     Text("Cancelled").font(.caption2.weight(.bold)).foregroundStyle(Color.danger)
                 } else if leg.realTime {
