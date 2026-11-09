@@ -68,6 +68,8 @@ struct ItineraryDetailView: View {
     var refreshedAt: Date? = nil
     @State private var showsMap = false
     @State private var mapReady = false
+    /// Ride whose vehicle trip is open (all stops, map, line), by its index in the trip.
+    @State private var openedLeg: Int?
     /// The screen opens with the top (time, lines) at once; changes, actions and steps follow a
     /// moment later, so a long trip never leaves the tap without an answer.
     @State private var showsAll = false
@@ -194,7 +196,7 @@ struct ItineraryDetailView: View {
                     if let transfer = TransferInfo(before: index, in: itinerary) {
                         TransferCard(info: transfer)
                     }
-                    TimelineLegRow(leg: leg)
+                    TimelineLegRow(leg: leg, onOpenTrip: leg.tripId == nil ? nil : { openedLeg = index })
                 }
                 TimelineEndRow(time: itinerary.endTime, tz: itinerary.legs.last?.to.tz, name: resolvedTo)
             }
@@ -220,6 +222,9 @@ struct ItineraryDetailView: View {
                         ToolbarItem(placement: .confirmationAction) { Button("Done") { showsMap = false } }
                     }
             }
+        }
+        .navigationDestination(item: $openedLeg) { i in
+            if let leg = itinerary.legs[safe: i], let trip = TripView(leg: leg) { trip }
         }
         .navigationTitle("Route")
         .wideMapScene(.route(itinerary))
@@ -644,6 +649,8 @@ struct StatusBanner: View {
 /// dotted blue on foot) and the leg itself.
 struct TimelineLegRow: View {
     let leg: Leg
+    /// Opens the vehicle's whole trip (every stop, map, line); nil where there is none.
+    var onOpenTrip: (() -> Void)? = nil
     /// Rides open to their stops, notes and the get-off alarm; closed they say where to get on and off.
     @State private var expanded = false
 
@@ -668,36 +675,59 @@ struct TimelineLegRow: View {
 
     private var ride: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Button {
-                withAnimation(.snappy(duration: 0.25)) { expanded.toggle() }
-            } label: {
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack(alignment: .firstTextBaseline, spacing: 8) {
-                        LineBadge(leg)
-                        if let detail = leg.serviceDetail {
-                            Text(verbatim: detail).font(.caption.weight(.semibold)).lineLimit(1)
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    // The line itself opens the vehicle's whole trip, like a departure on a board.
+                    if let onOpenTrip {
+                        Button(action: onOpenTrip) {
+                            HStack(spacing: 3) {
+                                LineBadge(leg)
+                                Image(systemName: "chevron.right")
+                                    .font(.caption2.weight(.bold)).foregroundStyle(.tertiary)
+                            }
+                            .contentShape(Rectangle())
                         }
-                        Spacer(minLength: 4)
-                        DurationFigure(seconds: leg.duration, size: 22)
-                        Image(systemName: "chevron.down")
-                            .font(.footnote.weight(.semibold)).foregroundStyle(.tertiary)
-                            .rotationEffect(.degrees(expanded ? 180 : 0))
-                            .accessibilityHidden(true)
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(Text(L10n.f("Line %@: all stops and map", leg.lineName)))
+                        .accessibilityIdentifier("openLegTrip")
+                    } else {
+                        LineBadge(leg)
                     }
-                    DirectionLabel(direction: leg.shownDirection, circular: leg.isCircular)
-                    stop(L10n.f("Board at %@", leg.from.name), track: leg.from.track, time: nil, delay: leg.delayMinutes)
-                    stop(L10n.f("Get off at %@", leg.to.name), track: leg.to.track, time: leg.endTime,
-                         delay: Int((leg.endTime.timeIntervalSince(leg.scheduledEndTime) / 60).rounded()))
-                    if !expanded, !leg.serviceAlerts.isEmpty || leg.isReplacementBus {
-                        Label("Service changes on this route", systemImage: "exclamationmark.triangle")
-                            .font(.caption.weight(.semibold)).foregroundStyle(Color.delay)
+                    Button(action: toggle) {
+                        HStack(alignment: .firstTextBaseline, spacing: 8) {
+                            if let detail = leg.serviceDetail {
+                                Text(verbatim: detail).font(.caption.weight(.semibold)).lineLimit(1)
+                            }
+                            Spacer(minLength: 4)
+                            DurationFigure(seconds: leg.duration, size: 22)
+                            Image(systemName: "chevron.down")
+                                .font(.footnote.weight(.semibold)).foregroundStyle(.tertiary)
+                                .rotationEffect(.degrees(expanded ? 180 : 0))
+                                .accessibilityHidden(true)
+                        }
+                        .contentShape(Rectangle())
                     }
+                    .buttonStyle(.plain)
+                    .accessibilityHint(Text(expanded ? "Hide stops" : "Show stops"))
                 }
-                .contentShape(Rectangle())
+                Button(action: toggle) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        DirectionLabel(direction: leg.shownDirection, circular: leg.isCircular)
+                        stop(L10n.f("Board at %@", leg.from.name), track: leg.from.track, time: nil, delay: leg.delayMinutes)
+                        stop(L10n.f("Get off at %@", leg.to.name), track: leg.to.track, time: leg.endTime,
+                             delay: Int((leg.endTime.timeIntervalSince(leg.scheduledEndTime) / 60).rounded()))
+                        if !expanded, !leg.serviceAlerts.isEmpty || leg.isReplacementBus {
+                            Label("Service changes on this route", systemImage: "exclamationmark.triangle")
+                                .font(.caption.weight(.semibold)).foregroundStyle(Color.delay)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityHint(Text(expanded ? "Hide stops" : "Show stops"))
+                .accessibilityIdentifier("transitLeg")
             }
-            .buttonStyle(.plain)
-            .accessibilityHint(Text(expanded ? "Hide stops" : "Show stops"))
-            .accessibilityIdentifier("transitLeg")
             if leg.cancelled == true {
                 Text("This trip is cancelled.").font(.caption.weight(.semibold)).foregroundStyle(Color.danger)
             }
@@ -723,10 +753,22 @@ struct TimelineLegRow: View {
                 Text(leg.realTime && !Connectivity.shared.isOffline ? [L10n.t("Live"), leg.liveSource].compactMap { $0 }.joined(separator: " · ") : L10n.t("Timetable"))
                     .font(.caption).foregroundStyle(.secondary)
                 ServiceAlertsView(alerts: leg.serviceAlerts)
+                if let onOpenTrip {
+                    Button(action: onOpenTrip) {
+                        Label(L10n.f("Line %@: all stops and map", leg.lineName), systemImage: "point.topleft.down.to.point.bottomright.curvepath")
+                            .font(.subheadline.weight(.semibold))
+                    }
+                    .buttonStyle(.borderless)
+                    .accessibilityIdentifier("openLegTripRow")
+                }
                 GetOffButton(leg: leg)
             }
         }
         .padding(.vertical, 6)
+    }
+
+    private func toggle() {
+        withAnimation(.snappy(duration: 0.25)) { expanded.toggle() }
     }
 
     private func stop(_ title: String, track: String?, time: Date?, delay: Int) -> some View {
