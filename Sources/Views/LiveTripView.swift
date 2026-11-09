@@ -458,6 +458,14 @@ struct LiveTripView: View {
                     .font(.caption).foregroundStyle(.secondary)
             }
             .padding(.vertical, 4)
+            // The vehicle's whole trip: also the stops before boarding, its map and the line.
+            if let tripView = TripView(leg: leg) {
+                NavigationLink { tripView } label: {
+                    Label(L10n.f("Line %@: all stops and map", leg.lineName),
+                          systemImage: "point.topleft.down.to.point.bottomright.curvepath")
+                }
+                .accessibilityIdentifier("openLegTrip")
+            }
             TrainDivisionNotice(leg: leg)
             if index + 1 < it.legs.count,
                let next = it.legs[(index + 1)...].firstIndex(where: \.isTransit),

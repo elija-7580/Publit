@@ -106,6 +106,8 @@ Ohne Onboarding startet die Standortabfrage sofort.
 - Karte (`TripMap`) mit **geschätzter Fahrzeugposition** („Estimated vehicle position“), Status „Not departed yet“, „Between A and B“, „At …“, „Arrived at …“; ohne Live-Daten aus dem Fahrplan geschätzt.
 - Aktionen pro Halt: „Route here“, „Route from here“; „From … to here“; Linie speichern.
 - Liste weiterer Abfahrten derselben Linie.
+- „Line …: route and timetable“ öffnet das Linien-Detail (Richtung, Verlauf, Fahrplan).
+- Auch aus einer geplanten oder laufenden Fahrt erreichbar (Linie einer Etappe antippen): dann mit allen Halten der Fahrt, auch denen vor dem Einstieg; Einstiegs- und Ausstiegshalt fett.
 
 ## 7. Stationskarte / Karte – `StationMapView`
 
@@ -158,7 +160,7 @@ Ohne Onboarding startet die Standortabfrage sofort.
 - **LeaveHero**: „Leave now“ / „Leave in x min“ und Ankunftszeit – die entscheidende Zahl.
 - Statusbanner (Live / Timetable, „This trip is cancelled.“, „Service changes on this route“), „Updated HH:MM“.
 - **Karte** der Route (`RouteMap`, Linien in Betreiberfarbe, Fußwege gepunktet); Vergleichskarte (`CompareMapView`).
-- **„Trip overview“**/„Steps“: Zeitleiste (`TimelineLegRow`, `TimelineRail`): je Abschnitt „Board at …“, „Get off at …“, Linie, Richtung, Gleis („Platform x“, Gleiswechsel), Zwischenhalte, Verspätung, SEV, Fußweg mit Anweisungen (Treppen, Ebenen, Ausgang „Exit towards …“), Leihfahrzeug („Pick up at …“, „Return at …“, „Rent in the provider's app“), Umstiegskarten.
+- **„Trip overview“**/„Steps“: Zeitleiste (`TimelineLegRow`, `TimelineRail`): je Abschnitt „Board at …“, „Get off at …“, Linie, Richtung, Gleis („Platform x“, Gleiswechsel), Zwischenhalte, Verspätung, SEV, Fußweg mit Anweisungen (Treppen, Ebenen, Ausgang „Exit towards …“), Leihfahrzeug („Pick up at …“, „Return at …“, „Rent in the provider's app“), Umstiegskarten. Tipp auf das Linien-Symbol einer Fahrt (oder aufgeklappt „Line …: all stops and map“) öffnet die ganze Fahrt des Fahrzeugs (`TripView`, §6).
 - **„Remind me to get off“** (`GetOffButton`): „Reminder set – We'll notify you at …“, „This stop is less than two minutes away.“, Hinweis falls Mitteilungen aus.
 - Fahrpreis (`FareSection`): „Fare estimate“ nur bei vollständig abgedeckter Route und eindeutiger Tarifregel; sonst „Fare information“ und Ticket-Links des Betreibers / Verbunds (`RegionTicketRow`, z. B. „Venice · ACTV“).
 - Smart-Routing-Abschnitt (§11), Abdeckungskarten für Start, Umstiegsorte, Ziel.
@@ -182,7 +184,7 @@ Erscheint für die gestartete Fahrt oder eine gespeicherte, die gerade läuft/ba
 - **Etappen** (`StagePager`, `StageStrip`, `StageRow`): Gehen → Warten → Fahren → Ankommen, bestimmt durch Live-Zeiten und GPS; „Back to now“ nach manuellem Blättern.
 - Gehen: „Walk to …“, Turn-by-turn-Anweisungen, **Kompasspfeil** (`HeadingRow`; ohne Kompass Norden oben), „Walk faster to make it.“, Karte drehen „Turn the map with you“ / „Stop turning the map“.
 - Warten/Einsteigen: „Departs in x min“, „Departs now“, „Departed …“, „Take Linie towards …“, Gleis „Pl. x“, „Platform changed (was x)“, Boarding-Hilfe (`BoardingLine`, `BoardingSteps`).
-- Fahren: „Now at …“, „Next stop … in …“, Haltliste (`GuideStopRow`), „Get off here“, „Get off at …“, Positionsquelle („Position from your location / estimated from live stop times / from the timetable“).
+- Fahren: „Now at …“, „Next stop … in …“, Haltliste (`GuideStopRow`), „Get off here“, „Get off at …“, Positionsquelle („Position from your location / estimated from live stop times / from the timetable“), „Line …: all stops and map“ (ganze Fahrt, §6) – auch für frühere und spätere Etappen über die Etappenliste.
 - Ankunft: „You have arrived“, „Arrive at …“, „Destination in …“.
 - **Karte** (`GuideMap`) mit zurückgelegter (hellblau) und kommender Strecke (`TripTrace`), Kartenstil, 3D.
 - **Sprachansagen** („Turn on/off spoken directions“; `GuideVoice`, andere Audioquellen werden leiser).

@@ -19,6 +19,8 @@ struct TripView: View {
     let stationId: String
     let stationName: String
     let stationCoordinate: LatLon
+    /// Where the user gets off, when opened from a ride of a planned trip: shown in bold too.
+    var exitName: String? = nil
 
     @Environment(FavoritesStore.self) private var favorites
     @Environment(AppState.self) private var app
@@ -83,6 +85,14 @@ struct TripView: View {
                         }
                         .tint(.primary)
                         .accessibilityIdentifier("tripStop")
+                    }
+                }
+                if let anchor = stops.indices.first(where: { focusStops.contains($0) }).map({ stops[$0] }) ?? stops.first {
+                    Section {
+                        NavigationLink { LineDetailView(line: LineRef(leg: leg, at: anchor)) } label: {
+                            Label(L10n.f("Line %@: route and timetable", stopTime.lineName),
+                                  systemImage: "point.topleft.down.to.point.bottomright.curvepath")
+                        }
                     }
                 }
             } else if let errorMessage {
@@ -154,7 +164,11 @@ struct TripView: View {
             let station = StopGrouping.normalizedName(stationName)
             let freshLeg = fresh.legs.first(where: \.isTransit)
             let all = freshLeg?.allStops ?? []
-            focusStops = Set(all.indices.filter { StopGrouping.normalizedName(all[$0].name) == station })
+            let exit = exitName.map(StopGrouping.normalizedName)
+            focusStops = Set(all.indices.filter {
+                let name = StopGrouping.normalizedName(all[$0].name)
+                return name == station || name == exit
+            })
             alerts = Alert.relevant(stopTime.serviceAlerts + (freshLeg?.serviceAlerts ?? []))
             let freshShape = freshLeg?.legGeometry.mapPoints ?? []
             // The map is rebuilt only when the route or its stops moved, not for new times.
@@ -247,6 +261,14 @@ private struct StopTimeRow: View {
 }
 
 extension TripView {
+    /// The whole trip of the vehicle behind one ride of a planned trip: every stop, also those before
+    /// boarding, with the boarding and exit stops in bold.
+    init?(leg: Leg) {
+        guard let st = StopTime(leg: leg) else { return nil }
+        self.init(stopTime: st, stationId: leg.from.stationId, stationName: leg.from.name,
+                  stationCoordinate: leg.from.coordinate, exitName: leg.to.name)
+    }
+
     /// The station this trip was opened from, as a start for "From … to here".
     var stationPlace: SavedPlace {
         SavedPlace(id: "stop|\(stationId)", name: stationName, subtitle: nil,
