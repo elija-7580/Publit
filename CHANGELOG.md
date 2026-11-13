@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.0 (build 66) – community feedback
+## 0.1.1 (build 66) – community feedback
 
 ### Suggest features and vote, in the app
 - **Settings → Suggest features and vote**: the wish list from publit.eu/wuensche right in the app. Suggest a feature, vote for others (tap again to take the vote back), sort by most votes or newest, see what is planned, in progress or done. No account: a random ID on the device marks your votes.
