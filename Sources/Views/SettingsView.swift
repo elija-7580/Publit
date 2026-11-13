@@ -113,7 +113,7 @@ struct SettingsView: View {
                 } footer: {
                     Text(L10n.t(searchProvider == SearchProvider.google.rawValue
                                 ? "Shops, restaurants and sights come from Google; stops still come from Transitous. What you type and your approximate location go to Google."
-                                : "Stops, addresses and places from OpenStreetMap, through Transitous."))
+                                : "Stops from Transitous. Addresses and places from OpenStreetMap and Apple Maps, so house numbers are found too. What you type and the area around you go to Apple, as for the map."))
                 }
                 if Features.tickets {
                     Section("Tickets") {

@@ -654,6 +654,37 @@ enum SearchBias {
         return extra + near
     }
 
+    /// The house number in the query ("Hauptstraße 12", "12a Main Street", "Via Roma 7/2"), lowercased.
+    static func houseNumber(in text: String) -> String? {
+        text.lowercased()
+            .components(separatedBy: CharacterSet(charactersIn: " ,;"))
+            .first { t in
+                t.first?.isNumber == true && t.count <= 6
+                    && t.allSatisfy { $0.isNumber || $0.isLetter || $0 == "/" || $0 == "-" }
+            }
+    }
+
+    /// 0: every word and the house number match, 1: every word matches, 2: the rest.
+    static func rank(_ m: GeocodeMatch, words: [String], number: String?) -> Int {
+        let hay = Self.words([m.name, m.street ?? "", m.subtitle].joined(separator: " ")).joined(separator: " ")
+        guard !words.isEmpty, words.allSatisfy({ hay.contains($0) }) else { return 2 }
+        guard let number else { return 0 }
+        let own = (m.houseNumber ?? "").lowercased()
+        let inName = m.name.lowercased().components(separatedBy: CharacterSet(charactersIn: " ,")).contains(number)
+        return own == number || inName ? 0 : 1
+    }
+
+    /// Transitous and Apple hits in one list. Transitous first (it knows the stops), same place
+    /// under the same name only once; then the hits that carry every word of the query, and
+    /// for an address with a house number the one with that number, move to the top.
+    static func combine(_ transit: [GeocodeMatch], _ apple: [GeocodeMatch], query: String, limit: Int = 20) -> [GeocodeMatch] {
+        let all = GeocodeMatch.merged(transit, apple, limit: 60)
+        let words = Self.words(query)
+        let number = houseNumber(in: query)
+        let ranked = all.enumerated().map { (rank($0.element, words: words, number: number), $0.offset, $0.element) }
+        return Array(ranked.sorted { ($0.0, $0.1) < ($1.0, $1.1) }.map(\.2).prefix(limit))
+    }
+
     static func words(_ s: String) -> [String] {
         s.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: nil)
             .components(separatedBy: CharacterSet.alphanumerics.inverted)

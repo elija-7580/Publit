@@ -136,8 +136,8 @@ Einmal nach dem Update (bzw. nach dem Onboarding, nie darüber, ca. 1,5 s nach d
 
 ## 9. Ortssuche – `PlaceSearchView`
 
-- Tippsuche über Transitous (Haltestellen, Adressen, Orte) oder optional **Google Places**; „Current location“; Abschnitt „Saved“; „Recently searched“ (max. 20 Start/Ziel-Paare, einzeln entfernbar, „Clear history“; alte Suchen werden mit aktuellen Abfahrten neu ausgeführt).
-- Suche nach Ort gewichtet nach Standort; steht ein Komma in der Suche („Corso Buenos Aires, Milano“), ohne Standort-Gewichtung. Trägt kein Treffer alle Suchwörter, wird zusätzlich ohne Standort gesucht und die passenden Treffer kommen nach oben (`SearchBias`), damit große Straßen in anderen Städten gefunden werden.
+- Tippsuche über Transitous (Haltestellen, Adressen, Orte) **und Apple Karten** (`AppleSearch`: Adressen und Orte, ca. 50 km um den Standort bevorzugt; nicht bei Bereich „Stops“) oder optional **Google Places** (dann ohne Apple); „Current location“; Abschnitt „Saved“; „Recently searched“ (max. 20 Start/Ziel-Paare, einzeln entfernbar, „Clear history“; alte Suchen werden mit aktuellen Abfahrten neu ausgeführt).
+- Suche nach Ort gewichtet nach Standort; steht ein Komma in der Suche („Corso Buenos Aires, Milano“), ohne Standort-Gewichtung. Trägt kein Treffer alle Suchwörter, wird zusätzlich ohne Standort gesucht. Reihung (`SearchBias.combine`): Transitous zuerst, gleicher Ort mit gleichem Namen nur einmal; dann nach oben, was alle Suchwörter trägt, und bei einer Hausnummer in der Suche („Hauptstraße 12“) die Adresse mit genau dieser Nummer. Fällt Transitous aus, kommen Apples Adressen und Orte trotzdem.
 - Kategorie-Symbole (`CategoryIcon`), orangefarbenes Warndreieck bei Orten in Gebieten mit Datenlücken, „Save“ eines Treffers, „No matches.“, „Place from the link“ (aus geteiltem Kartenlink).
 
 ## 10. Routenoptionen – `RouteOptionsView`
@@ -241,7 +241,7 @@ Screenshot-/Link-Tickets („My tickets“, „Add ticket“, Typ, „Expires“
 | Travel preferences | Routenoptionen-Zusammenfassung, „Show connection timelines“, „How to read connections“ (`ConnectionGuideView`: Ride/Walk/Wait/Time axis) |
 | Smart routing | siehe §11 |
 | Map | Map provider (Apple/Google), Map style, Points of interest, Lines, Vehicles, Bikes and scooters, „Open directions in“ (Apple Maps, Google Maps, Citymapper) |
-| Search | Place search (Transitous/Google), Google API key |
+| Search | Place search („OpenStreetMap and Apple Maps“ / Google), Google API key |
 | Tickets | My tickets, Ticket apps per operator (wenn alte Ticketfunktion aktiv) |
 | Apple Watch | „Tickets on Apple Watch“ (Standard an) |
 | Notifications | „Disruptions on saved lines“ |

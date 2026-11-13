@@ -9,6 +9,7 @@
 ### Fixes
 - **Home and Work**: setting Work no longer removes Home (and the other way round) when the search gives both addresses the same ID, as seen with addresses in different countries.
 - **Map lines**: a metro, tram or bus line that runs from A to B and back is no longer drawn with a straight line from one end to the other, as if it were a ring.
+- **Search finds addresses with house numbers**: the place search (Plan, Home and Work, Saved) now asks Apple Maps for addresses and places next to Transitous, because OpenStreetMap often lacks the house number or the street. With a number in the query the address with exactly that number comes first. Settings → Search reads "OpenStreetMap and Apple Maps"; with Google chosen, Apple is not asked.
 - **Search**: a big street in another city is found again from home. A town after a comma ("Corso Buenos Aires, Milano") turns off the pull towards your position; when no nearby result has all the words, Publit also searches without your position and puts those matches first.
 - **Countdowns**: the shared minute clock ticks right away when the app comes back from the background or the system time or time zone changes, so countdowns are never a minute behind.
 
