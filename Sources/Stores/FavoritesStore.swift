@@ -95,8 +95,26 @@ final class FavoritesStore {
         for i in items.indices where items[i].role == role { items[i].role = nil }
         var p = place
         p.role = role
-        if let i = items.firstIndex(where: { $0.id == place.id }) { items[i] = p } else { items.append(p) }
+        if let i = items.firstIndex(where: { $0.id == place.id }) {
+            if let other = items[i].role, other != role {
+                // The entry already holds the other role (same ID: same place, or an address ID the
+                // geocoder reuses in another country). Keep it and store this role separately,
+                // so setting Work never removes Home.
+                p.id = Self.slotID(role, for: place)
+                items.removeAll { $0.id == p.id }
+                items.append(p)
+            } else {
+                items[i] = p
+            }
+        } else {
+            items.append(p)
+        }
         persist()
+    }
+
+    /// A stable ID of its own for a place whose ID already holds the other role.
+    static func slotID(_ role: PlaceRole, for place: SavedPlace) -> String {
+        "\(role.rawValue)|\(place.id)|\(String(format: "%.5f,%.5f", place.lat, place.lon))"
     }
 
     func clear(_ role: PlaceRole) {

@@ -626,3 +626,37 @@ final class ServerFailover: @unchecked Sendable {
     /// Requests go to the backup server right now.
     var onBackup: Bool { !primaryFirst() }
 }
+
+/// How far a place search is pulled towards where you are. Reported from Milan: a major street in
+/// the centre could not be found from home, because the strong bias towards the phone's position
+/// filled the list with nearer, partly matching places.
+enum SearchBias {
+    /// "Via Dante, Milano": the town is named, so the position does not pull the results.
+    static func position(for text: String, location: LatLon?) -> LatLon? {
+        text.contains(",") ? nil : location
+    }
+
+    /// No result carries every word of the query: worth asking again without the position.
+    static func needsWiderSearch(_ text: String, results: [GeocodeMatch]) -> Bool {
+        let words = Self.words(text)
+        guard !words.isEmpty else { return false }
+        return !results.contains { m in
+            let hay = Self.words([m.name, m.street ?? ""].joined(separator: " ")).joined(separator: " ")
+            return words.allSatisfy { hay.contains($0) }
+        }
+    }
+
+    /// Wider results after the near ones, without repeating a place.
+    static func merge(_ near: [GeocodeMatch], _ wide: [GeocodeMatch]) -> [GeocodeMatch] {
+        var seen = Set(near.map(\.id))
+        let extra = wide.filter { seen.insert($0.id).inserted }
+        // The ones that carry every word of the query belong on top.
+        return extra + near
+    }
+
+    static func words(_ s: String) -> [String] {
+        s.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: nil)
+            .components(separatedBy: CharacterSet.alphanumerics.inverted)
+            .filter { $0.count >= 3 }
+    }
+}

@@ -211,7 +211,9 @@ struct PlaceSearchView: View {
 
     private func searchNames(_ text: String, token: UUID) async {
         let useGoogle = GooglePlaces.isActive && scope != .stops
-        async let transit = TransitousClient.shared.geocode(text, near: location.coordinate, type: useGoogle && scope == .all ? nil : scope.apiType)
+        let type = useGoogle && scope == .all ? nil : scope.apiType
+        let near = SearchBias.position(for: text, location: location.coordinate)
+        async let transit = TransitousClient.shared.geocode(text, near: near, type: type)
         var google: [GooglePlaces.Suggestion]?
         if useGoogle {
             google = try? await GooglePlaces.autocomplete(text, near: location.coordinate, session: googleSession)
@@ -219,6 +221,11 @@ struct PlaceSearchView: View {
         do {
             var r = try await transit
             guard !Task.isCancelled, searchToken == token else { return }
+            if near != nil, SearchBias.needsWiderSearch(text, results: r),
+               let wide = try? await TransitousClient.shared.geocode(text, near: nil, type: type) {
+                guard !Task.isCancelled, searchToken == token else { return }
+                r = SearchBias.merge(r, wide.filter { !SearchBias.needsWiderSearch(text, results: [$0]) })
+            }
             if let google {
                 // Google for places and addresses, Transitous for the stops (they route best).
                 r = scope == .all ? Array(r.filter(\.isStop).prefix(4)) : []

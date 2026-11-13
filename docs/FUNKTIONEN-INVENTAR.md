@@ -3,7 +3,7 @@
 > Nicht von Hand bearbeiten. Erzeugt von `scripts/feature_inventory.py` (CI: `features-doc.yml`).
 > Die ausführliche Beschreibung steht in [FUNKTIONEN.md](FUNKTIONEN.md).
 
-**172 Views, 5 App Intents, 3 Widgets in 69 Dateien.**
+**174 Views, 5 App Intents, 3 Widgets in 71 Dateien.**
 
 ## `Sources/App/DesignSamples.swift`
 - Views: `DesignSampleView`
@@ -89,6 +89,10 @@
 
 ## `Sources/Views/Components/DurationFigure.swift`
 - Views: `DurationFigure`
+
+## `Sources/Views/Components/ExitNumberLabel.swift`
+- Views: `ExitNumberLabel`
+- Sichtbare Texte: Use exit %@
 
 ## `Sources/Views/Components/LineBadge.swift`
 - Views: `LineBadge`, `DepartureTimeView`, `AttributionFooter`
@@ -186,7 +190,7 @@
 
 ## `Sources/Views/SettingsView.swift`
 - Views: `SettingsView`, `SettingsButton`
-- Sichtbare Texte: Public transport, without the noise. · Start screen · Nearby · Plan · Travel preferences · Show connection timelines · How to read connections · Map provider · Map style · Points of interest · Lines · Vehicles · Bikes and scooters · Open directions in · Map · Google Maps uses the Google API key under Search, with “Maps SDK for iOS” enabled. Without a key, Apple Maps is shown. · Place search · Google API key · Search · Tickets · My tickets · Ticket apps per operator · Tickets on Apple Watch · Apple Watch · Disruptions on saved lines · Notifications · Live data from more operators · Live data sources · Export my data · Data · Times marked live come from the operator's real-time feed; all others are timetable times. · Freezes · Failed requests · Crashes and unexpected exits · No problems recorded · Share diagnostics · Report a problem · Delete diagnostics · Diagnostics · Version · About · Publit is open source (MIT). No account, no ads, no tracking. Saved places, trips and tickets stay on this device. · Publit is open source (MIT). No account, no ads, no tracking. Saved places and trips stay on this device. · Settings · Done
+- Sichtbare Texte: Public transport, without the noise. · Start screen · Nearby · Plan · Travel preferences · Show connection timelines · How to read connections · Map provider · Map style · Points of interest · Lines · Vehicles · Bikes and scooters · Open directions in · Map · Google Maps uses the Google API key under Search, with “Maps SDK for iOS” enabled. Without a key, Apple Maps is shown. · Place search · Google API key · Search · Tickets · My tickets · Ticket apps per operator · Tickets on Apple Watch · Apple Watch · Disruptions on saved lines · Notifications · Live data from more operators · Exit numbers from OpenStreetMap · Live data sources · Export my data · Data · Times marked live come from the operator's real-time feed; all others are timetable times. · Freezes · Failed requests · Crashes and unexpected exits · No problems recorded · Share diagnostics · Report a problem · Delete diagnostics · Diagnostics · Suggest features and vote · Missing something? Suggest it, or vote for what others want. No account needed. · Version · About · Publit is open source (MIT). No account, no ads, no tracking. Saved places, trips and tickets stay on this device. · Publit is open source (MIT). No account, no ads, no tracking. Saved places and trips stay on this device. · Settings · Done
 
 ## `Sources/Views/SharedRouteView.swift`
 - Views: `SharedRouteView`
@@ -230,6 +234,10 @@
 
 ## `Sources/Views/Wide/WideLayout.swift`
 - Views: `WideMapCanvas`, `WideRoutesMap`
+
+## `Sources/Views/WishesView.swift`
+- Views: `WishesView`
+- Sichtbare Texte: What should Publit do? · Details (optional) · Send wish · Suggest a feature · Check the list first: if your idea is there, vote for it instead. · Sort · Most votes · Newest · Wishes not reachable · The wish list is not reachable right now. Please try again later. · Try again · No wishes yet · Be the first! · Wishes · No account and no tracking: a random ID on this device marks your votes. The wish list does not store addresses. · Also on publit.eu · Vote for %@ · Planned · In progress · Done · Thanks! Your wish is in. · Please describe the wish in at least 6 characters. · At most two links, please. · This wish already exists – just vote for it. · Too many requests. Please wait a moment. · New: suggest features and vote · Show the wishes · Later
 
 ## `Watch/WatchHomeView.swift`
 - Views: `WatchHomeView`, `WatchLiveTile`
