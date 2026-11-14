@@ -2,7 +2,7 @@ import XCTest
 @testable import Publit
 
 final class CoverageTests: XCTestCase {
-    private let atlas = CoverageAtlas.shared
+    private let atlas = CoverageAtlas.bundled
 
     private func area(_ lat: Double, _ lon: Double) -> CoverageArea? { atlas.area(at: LatLon(lat: lat, lon: lon)) }
 
@@ -53,7 +53,8 @@ final class CoverageTests: XCTestCase {
 
     func testNoDataAtAll() throws {
         XCTAssertEqual(try XCTUnwrap(area(35.8989, 14.5146)).level, .none, "Valletta (Malta has no feed)")
-        XCTAssertEqual(try XCTUnwrap(area(55.7558, 37.6173)).level, .none, "Moscow")
+        // Moscow had no feed until Transitous added Moscow Transport (November 2026): the atlas follows by itself.
+        XCTAssertNil(area(55.7558, 37.6173), "Moscow")
         XCTAssertEqual(try XCTUnwrap(area(43.9424, 12.4578)).level, .none, "San Marino")
         XCTAssertNotNil(area(53.9006, 27.5590), "Minsk")
     }
@@ -174,5 +175,35 @@ final class CoverageTests: XCTestCase {
         XCTAssertTrue(CoverageGuide.notices(for: trip([try leg("RAIL", from: vienna, to: graz, start: 0)])).isEmpty)
         // A walk in the area does not depend on timetable data.
         XCTAssertTrue(CoverageGuide.notices(for: trip([try leg("WALK", from: klagenfurt, to: klagenfurt, start: 0)])).isEmpty)
+    }
+
+    // MARK: Atlas from publit.eu
+
+    private func file(date: String, areas: Int) -> String {
+        "D|\(date)\n" + (0..<areas).map { "A|a\($0)|n||A\($0)|A\($0)|xx|c\(10000 + $0),20000,5000" }.joined(separator: "\n") + "\n"
+    }
+
+    func testDownloadedAtlasIsDecodedWithItsDate() throws {
+        let atlas = try XCTUnwrap(CoverageAtlasStore.accept(file(date: "2030-01-02", areas: 25)))
+        XCTAssertEqual(atlas.date, "2030-01-02")
+        XCTAssertEqual(atlas.areas.count, 25)
+    }
+
+    func testBrokenOrTinyDownloadIsRejected() {
+        XCTAssertNil(CoverageAtlasStore.accept("<html>error</html>"))
+        XCTAssertNil(CoverageAtlasStore.accept(file(date: "2030-01-02", areas: 3)))
+    }
+
+    func testStoreTakesOnlyNewerAtlasAndKeepsIt() throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let store = CoverageAtlasStore(cacheDirectory: dir)
+        XCTAssertEqual(store.atlas.date, CoverageAtlas.bundled.date)
+        XCTAssertFalse(store.install(file(date: "2000-01-01", areas: 30)), "older than the built-in atlas")
+        XCTAssertTrue(store.install(file(date: "2099-01-01", areas: 30)))
+        XCTAssertEqual(store.atlas.date, "2099-01-01")
+        XCTAssertEqual(store.version, 1)
+        // The next start uses the cached file.
+        XCTAssertEqual(CoverageAtlasStore(cacheDirectory: dir).atlas.date, "2099-01-01")
     }
 }

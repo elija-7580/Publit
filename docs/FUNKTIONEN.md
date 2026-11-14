@@ -1,6 +1,6 @@
 # Publit iOS – Funktionen und Screens (vollständige Übersicht)
 
-> Stand: Version 0.1.0 (Build 66). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
+> Stand: Version 0.1.0 (Build 67). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
 > **Pflege:** Jede Änderung an `Sources/`, `Watch/`, `Widgets/` oder `Share/` muss diese Datei im selben Commit/PR mitändern (siehe Abschnitt „Aktualisierung“ ganz unten). Die maschinell erzeugte Liste aller Views steht in [`FUNKTIONEN-INVENTAR.md`](FUNKTIONEN-INVENTAR.md) und wird von der CI automatisch aktualisiert.
 
 ## Inhalt
@@ -302,7 +302,7 @@ Ab 680 pt Breite (regular): Karte bildschirmfüllend, Inhalte in einem schwebend
 ## 23. Datenquellen, Abdeckung, Offline
 
 - **Live-Quellen** (`LiveSources`, `LiveSourceAdapters`, Schalter „Live data from more operators“): Europa (Transitous), Wien (Wiener Linien: Abfahrten, Störungen, Aufzüge), Österreich (ÖBB/HAFAS), Schweiz (search.ch), Deutschland (NRW, Berlin/Brandenburg, Hessen, Niedersachsen/Bremen, Schleswig-Holstein, Rheinland-Pfalz via HAFAS), Venedig (ACTV), Stockholm (SL), London (TfL). Es werden nur Haltestelle, Linie, Zeit gesendet.
-- **Abdeckungsatlas** (`Coverage`, 124 Gebiete, offline gebündelt, siehe [COVERAGE.md](COVERAGE.md)): Stufen „No timetable data“, „Very little timetable data“, „Missing: …“ (Lokalbusse, Stadtbusse, Metro, Tram, Fähren, S-Bahn). Anzeige in Plan, Routendetail, Nearby, Ortssuche, Karte, Watch; Link zur Abdeckungskarte publit.eu/abdeckung.
+- **Abdeckungsatlas** (`Coverage`, siehe [COVERAGE.md](COVERAGE.md)): weltweit aus allen Transitous-Quellen, von publit.eu jede Woche neu berechnet; App und Watch laden ihn höchstens einmal am Tag (`CoverageAtlasStore`, https://publit.eu/abdeckung/data/atlas.txt) und nutzen sonst die eingebaute Kopie. Neue Gebiete erscheinen so ohne App-Update; die Kartenebene „Data gaps“ zeichnet sich bei einem neuen Atlas neu. Stufen „No timetable data“, „Very little timetable data“, „Missing: …“ (Lokalbusse, Stadtbusse, Metro, Tram, Fähren, S-Bahn). Anzeige in Plan, Routendetail, Nearby, Ortssuche, Karte, Watch; Link zur Abdeckungskarte publit.eu/abdeckung.
 - **Offline** (`ResponseCache`): Speicher-Cache 15–60 s, Datei-Cache: Live-Antworten bis 24 h, Suche/Karte bis 7 Tage; Nearby-Fallback nur innerhalb 400 m; Anzeige mit Zeitstempel; keine Offline-Neuberechnung von Routen.
 - Fahrpreise aus MOTIS (`withFares`), streng geprüft (§12). Ticket-Links je Betreiber (`TicketLinks`: verknüpfte App → Feed-Link → Tarifseite → Website).
 - Darstellung: Linienfarben vom Betreiber (Kontrast 4,5:1), Ersatzfarbe je Verkehrsmittel, Richtung immer als „Towards“, Ringlinien-Sonderfall. Paris: Metro „3B“/„7B“ heißen „3bis“/„7bis“; RER-Missionscodes als Ziel („ZEMA“, „NEGE“) werden durch die Endstation der Fahrt ersetzt (`TransitLabels`). Zugnamen werden je Feed vereinheitlicht (`TransitLabels.trainName`): DB-interne Liniennummern („29“) weichen der Zuggattung („ICE“, daneben „ICE 1006“), MÁV-Namen wie „xpress 66“ werden mit der Gattung aus dem langen Routennamen zu „RJX 66“.

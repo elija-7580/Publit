@@ -17,16 +17,16 @@ Publit says **where timetable data is missing and what is missing**, instead of 
 | Station map | Layer "Data gaps" in Map layers (on by default) draws the areas in orange: filled solid = no data at all, dashed edge = only a part missing. A card over the map names the area in the middle of the map and what is missing; a tap opens the explanation and the link |
 | Apple Watch | The same short card in Nearby and when planning a trip |
 
-All of this works offline: the areas are bundled in the app (`Sources/Models/CoverageAtlasData.swift`, about 30 KB, 124 areas), nothing about where someone is leaves the phone.
+The check works offline and nothing about where someone is leaves the phone. The app (and the watch) download the newest atlas once a day at most from `https://publit.eu/abdeckung/data/atlas.txt` (`CoverageAtlasStore`, cached in Caches); until then, and whenever the download fails, the copy built into the app is used (`Sources/Models/CoverageAtlasData.swift`).
 
 ### Where the areas come from
 
-The atlas is **generated** from the data of the website's coverage map (repository `publit-site`, folder `abdeckung/data`, refreshed monthly) and a short hand-checked list. Do not edit the Swift file by hand:
+The atlas is **generated on the website**, worldwide and without anyone touching it: every week the workflow *Abdeckung aktualisieren* in `publit-site` reads the stops of every Transitous source (`tools/coverage/fetch_stops.py`), builds the coverage map (`build.py`) and from it `abdeckung/data/atlas.txt` (`make_atlas.py`), checks the result (`sanity.py`, website check), merges and deploys it. When Transitous adds a region, the map on publit.eu and the warnings in the apps follow within a week, with no app release.
+
+The only hand-kept list is `publit-site/tools/coverage/cities.json` (hand-checked partial areas, and the cities where Publit adds its own live times). The built-in copy in this repository is refreshed by the TestFlight workflow before every build:
 
 ```bash
-pip install numpy shapely
-python3 tools/coverage/make_atlas.py --site ../publit-site/abdeckung/data   # downloads Natural Earth places
-python3 tools/coverage/make_atlas.py --site ../publit-site/abdeckung/data --report   # list what was flagged
+python3 tools/coverage/make_atlas.py          # copies https://publit.eu/abdeckung/data/atlas.txt into the Swift file
 swift test --filter CoverageTests
 ```
 
@@ -36,7 +36,7 @@ swift test --filter CoverageTests
 | Very little timetable data | A whole country with fewer than 100 stops; a region with fewer than 100 stops that contains a town of 20 000 people or more; a town of 30 000 or more with at most 15 stops within 3 km of its centre, in a country where at least 20 % of such towns look like that (mostly stations only: Verona, Sicily, parts of Italy and the Balkans) |
 | Part missing (hand-checked, checked against `api.transitous.org`, October 2026) | **Carinthia**: local and regional buses (Transitous skips the Carinthian feed). **Madrid**: metro and the EMT city buses (only Cercanías trains and interurban buses are loaded). **Istanbul**: metro, trams, ferries, suburban trains (only IETT buses). **Kyiv**: metro, trams, suburban trains. **Pristina**: city buses |
 
-Run it after every monthly update of the website data, review the `--report` list, and commit the result. To add a hand-checked area (a city where one kind of service is missing), add an entry to `CURATED` in the script after checking the stops with `/api/v1/map/stops` and `/api/v1/stoptimes`.
+To add a hand-checked area (a city where one kind of service is missing), add an entry to `partial` in `publit-site/tools/coverage/cities.json` after checking the stops with `/api/v1/map/stops` and `/api/v1/stoptimes`.
 
 Limits: the flag says "data is missing in this area", not "this trip does not work". Where Publit adds its own live data (Austria, Switzerland, parts of Germany, Vienna, Stockholm, London), that is not counted as missing timetable data. Border areas follow the simplified outlines of the website map (a few kilometres).
 

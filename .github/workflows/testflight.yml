@@ -26,6 +26,9 @@ jobs:
           XC=$(ls -d /Applications/Xcode_*.app | grep -v -i beta | sort -V | tail -1)
           sudo xcode-select -s "$XC"
           xcodebuild -version
+      - name: Newest coverage atlas as built-in fallback
+        # The app also downloads it from publit.eu by itself; a failed download keeps the old copy.
+        run: python3 tools/coverage/make_atlas.py
       - name: Generate project
         run: brew install xcodegen && xcodegen generate
       - name: API key

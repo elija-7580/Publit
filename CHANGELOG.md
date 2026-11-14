@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.0 (build 67) – coverage map
+
+- The "Data gaps" map and the "Not reliable here" warnings now cover the real coverage of Transitous worldwide, not only Europe.
+- The coverage atlas updates itself: publit.eu rebuilds it every week from all Transitous sources, and the app (and the watch) load the newest one at most once a day. A region that Transitous adds shows up without an app update; the built-in copy is used until then or when offline.
+
 ## 0.1.0 (build 66) – tester feedback
 
 - Park & Ride drives to a station near the start, at most 15 minutes, then the train. Before, the router could drive most of the way (8 min into town, then a 2-minute bus to the destination station, or past the local station to the next town). Routes where the drive is longer than the rides are dropped; if none are left, the usual routes show and driving is in "Other ways".
