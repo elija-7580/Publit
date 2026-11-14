@@ -117,6 +117,7 @@ struct FavoritesView: View {
         Section {
             ForEach(upcoming) { t in
                 NavigationLink { SavedTripView(tripId: t.id) } label: { SavedTripRow(trip: t) }
+                    .linkIndicatorHidden()
             }
             .onDelete { idx in idx.map { upcoming[$0].id }.forEach { id in
                 LeaveReminder.cancel(id); Task { await LiveTripActivity.end(id) }; trips.remove(id)

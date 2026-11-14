@@ -8,7 +8,7 @@ struct BoardingLine: View {
         if let leg = itinerary.firstTransitLeg {
             let walk = itinerary.legs.prefix { !$0.isTransit }.reduce(0) { $0 + $1.duration }
             HStack(alignment: .firstTextBaseline, spacing: 6) {
-                Image(systemName: walk >= 60 ? "figure.walk" : "mappin.and.ellipse")
+                Image(systemName: walk >= Self.walkWorthSaying ? "figure.walk" : "mappin.and.ellipse")
                     .foregroundStyle(.secondary)
                     .accessibilityHidden(true)
                 Text(verbatim: Self.text(leg: leg, walkSeconds: walk))
@@ -20,11 +20,16 @@ struct BoardingLine: View {
         }
     }
 
+    /// From this walk on the line says "Walk to …"; a minute inside the station or across the
+    /// square is boarding there, not a walk worth a line.
+    static let walkWorthSaying = 120
+
     /// "Walk to Hauptbahnhof · Pl. 3 · 4 min" or "Board at Hauptbahnhof · Pl. 3".
     static func text(leg: Leg, walkSeconds: Int) -> String {
-        var parts = [walkSeconds >= 60 ? L10n.f("Walk to %@", leg.from.name) : L10n.f("Board at %@", leg.from.name)]
+        let walks = walkSeconds >= walkWorthSaying
+        var parts = [walks ? L10n.f("Walk to %@", leg.from.name) : L10n.f("Board at %@", leg.from.name)]
         if let track = TransitLabels.clean(leg.from.track) { parts.append(L10n.f("Pl. %@", track)) }
-        if walkSeconds >= 60 { parts.append(Fmt.duration(seconds: walkSeconds)) }
+        if walks { parts.append(Fmt.duration(seconds: walkSeconds)) }
         return parts.joined(separator: " · ")
     }
 }
@@ -76,7 +81,7 @@ struct BoardingSteps: View {
                     }
                 }
                 if let detail {
-                    Text(verbatim: detail).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                    Text(verbatim: detail).font(.footnote).foregroundStyle(.secondary).lineLimit(1)
                 }
             }
         }

@@ -49,61 +49,6 @@ struct LineBadge: View {
 }
 
 /// Clock time is primary; countdown, delay and provenance are always secondary.
-struct DepartureTimeView: View {
-    let actual: Date
-    let delayMinutes: Int
-    let realTime: Bool
-    let cancelled: Bool
-    var tz: String? = nil
-
-    var now: Date = .now
-
-    var body: some View {
-        let minutes = Int(ceil(actual.timeIntervalSince(now) / 60))
-        // Ink & Dot: the minutes are the figure; clock time, delay and live state small underneath.
-        VStack(alignment: .trailing, spacing: 3) {
-            if cancelled {
-                Text(Fmt.time(actual, tz: tz))
-                    .font(.title3.weight(.bold).monospacedDigit())
-                    .foregroundStyle(Color.danger)
-                    .strikethrough(true, color: Color.danger)
-                    .lineLimit(1)
-                Text("Cancelled").font(.caption.weight(.semibold)).foregroundStyle(Color.danger)
-            } else {
-                if minutes <= 0 {
-                    // Same size as the minute figures below it in the list, so "now" does not look smaller than "1 min".
-                    Text("now").font(.title.weight(.bold))
-                } else if minutes < 60 {
-                    HStack(alignment: .firstTextBaseline, spacing: 2) {
-                        Text(verbatim: "\(minutes)").font(.title.weight(.bold).monospacedDigit())
-                            .foregroundStyle(delayMinutes > 0 ? Color.delay : Color.primary)
-                        Text("min").font(.caption.weight(.medium)).foregroundStyle(.secondary)
-                    }
-                } else {
-                    Text(Fmt.time(actual, tz: tz)).font(.title3.weight(.bold).monospacedDigit()).lineLimit(1)
-                }
-                HStack(spacing: 4) {
-                    if delayMinutes > 0 {
-                        Text(L10n.f("+%lld min", delayMinutes))
-                            .font(.caption.weight(.semibold).monospacedDigit()).foregroundStyle(Color.delay)
-                    }
-                    if minutes < 60 || delayMinutes > 0 {
-                        Text(Fmt.time(actual, tz: tz)).font(.caption.weight(.medium).monospacedDigit())
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                HStack(spacing: 3) {
-                    Image(systemName: realTime ? "dot.radiowaves.left.and.right" : "calendar")
-                    Text(realTime ? L10n.t("Live") : L10n.t("Timetable"))
-                }
-                .font(.caption2.weight(.medium))
-                .foregroundStyle(realTime ? Color.live : Color.secondary)
-            }
-        }
-        .fixedSize(horizontal: true, vertical: true)
-    }
-}
-
 struct AttributionFooter: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {

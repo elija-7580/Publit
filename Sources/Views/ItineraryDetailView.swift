@@ -299,7 +299,7 @@ struct RouteSummary: View {
                         Image(systemName: ModeStyle.symbol(leg.mode))
                         Text(verbatim: "\(max(1, leg.duration / 60))")
                     }
-                    .font(.caption.weight(.semibold).monospacedDigit()).foregroundStyle(.secondary)
+                    .font(.footnote.weight(.semibold).monospacedDigit()).foregroundStyle(.secondary)
                     .padding(.horizontal, 6).frame(minHeight: 24)
                     .background(Color.inkFill, in: Capsule())
                 }
@@ -511,7 +511,7 @@ struct LegRow: View {
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
                     LineBadge(leg)
                     if let detail = leg.serviceDetail {
-                        Text(verbatim: detail).font(.caption.weight(.semibold))
+                        Text(verbatim: detail).font(.footnote.weight(.semibold))
                     }
                     Spacer(minLength: 4)
                     DurationFigure(seconds: leg.duration, size: 22)
@@ -525,12 +525,12 @@ struct LegRow: View {
                     if let stops = leg.intermediateStops { Text(Fmt.stops(stops.count)); Text(verbatim: "·") }
                     Text(leg.realTime && !Connectivity.shared.isOffline ? [L10n.t("Live"), leg.liveSource].compactMap { $0 }.joined(separator: " · ") : L10n.t("Timetable"))
                 }
-                .font(.caption).foregroundStyle(.secondary)
+                .font(.footnote).foregroundStyle(.secondary)
                 stopLine(label: "Get off here", time: leg.endTime,
                          delay: Int((leg.endTime.timeIntervalSince(leg.scheduledEndTime) / 60).rounded()),
                          name: leg.to.name, track: leg.to.track, tz: leg.to.tz)
                 if leg.cancelled == true {
-                    Text("This trip is cancelled.").font(.caption.weight(.semibold)).foregroundStyle(Color.danger)
+                    Text("This trip is cancelled.").font(.footnote.weight(.semibold)).foregroundStyle(Color.danger)
                 }
                 ServiceAlertsView(alerts: leg.serviceAlerts)
                 GetOffButton(leg: leg)
@@ -581,13 +581,13 @@ struct LegRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(Fmt.time(time, tz: tz)).font(.subheadline.weight(.semibold).monospacedDigit())
                     .lineLimit(1).fixedSize()
-                if delay > 0 { Text(L10n.f("+%lld min", delay)).font(.caption).foregroundStyle(Color.delay) }
+                if delay > 0 { Text(L10n.f("+%lld min", delay)).font(.footnote).foregroundStyle(Color.delay) }
             }
             VStack(alignment: .leading, spacing: 4) {
-                Text(label).font(.caption).foregroundStyle(.secondary)
+                Text(label).font(.footnote).foregroundStyle(.secondary)
                 Text(verbatim: name).font(.subheadline.weight(.semibold)).fixedSize(horizontal: false, vertical: true)
                 if let track = TransitLabels.clean(track) {
-                    Text(L10n.f("Platform %@", track)).font(.caption).foregroundStyle(.secondary)
+                    Text(L10n.f("Platform %@", track)).font(.footnote).foregroundStyle(.secondary)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -608,11 +608,11 @@ struct GetOffButton: View {
             } label: {
                 Label(scheduled ? L10n.t("Reminder set") : L10n.t("Remind me to get off"),
                       systemImage: scheduled ? "bell.fill" : "bell")
-                    .font(.caption.weight(.semibold))
+                    .font(.footnote.weight(.semibold))
             }
             .buttonStyle(.borderless)
             if let note {
-                Text(note).font(.caption2).foregroundStyle(.secondary)
+                Text(note).font(.footnote).foregroundStyle(.secondary)
             }
         }
         .task { scheduled = await GetOffReminder.isScheduled(leg) }
@@ -662,7 +662,7 @@ struct StatusBanner: View {
             Text(status.detail).font(.subheadline).foregroundStyle(status.phase == .cancelled ? Color.danger : .secondary)
             if let refreshedAt {
                 Text("Updated \(refreshedAt.formatted(date: .omitted, time: .shortened))")
-                    .font(.caption2).foregroundStyle(.secondary)
+                    .font(.footnote).foregroundStyle(.secondary)
             }
         }
         .accessibilityElement(children: .combine)
@@ -704,7 +704,7 @@ struct TimelineLegRow: View {
                     HStack(alignment: .firstTextBaseline, spacing: 8) {
                         LineBadge(leg)
                         if let detail = leg.serviceDetail {
-                            Text(verbatim: detail).font(.caption.weight(.semibold)).lineLimit(1)
+                            Text(verbatim: detail).font(.footnote.weight(.semibold)).lineLimit(1)
                         }
                         Spacer(minLength: 4)
                         DurationFigure(seconds: leg.duration, size: 22)
@@ -720,7 +720,7 @@ struct TimelineLegRow: View {
                          delay: Int((leg.endTime.timeIntervalSince(leg.scheduledEndTime) / 60).rounded()))
                     if !expanded, !leg.serviceAlerts.isEmpty || leg.isReplacementBus {
                         Label("Service changes on this route", systemImage: "exclamationmark.triangle")
-                            .font(.caption.weight(.semibold)).foregroundStyle(Color.delay)
+                            .font(.footnote.weight(.semibold)).foregroundStyle(Color.delay)
                     }
                 }
                 .contentShape(Rectangle())
@@ -729,7 +729,7 @@ struct TimelineLegRow: View {
             .accessibilityHint(Text(expanded ? "Hide stops" : "Show stops"))
             .accessibilityIdentifier("transitLeg")
             if leg.cancelled == true {
-                Text("This trip is cancelled.").font(.caption.weight(.semibold)).foregroundStyle(Color.danger)
+                Text("This trip is cancelled.").font(.footnote.weight(.semibold)).foregroundStyle(Color.danger)
             }
             TrainDivisionNotice(leg: leg)
             if expanded {
@@ -741,9 +741,9 @@ struct TimelineLegRow: View {
                         ForEach(Array(stops.enumerated()), id: \.offset) { _, p in
                             HStack(spacing: 8) {
                                 Text(verbatim: (p.departure ?? p.arrival).map { Fmt.time($0, tz: p.tz ?? leg.from.tz) } ?? "")
-                                    .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+                                    .font(.footnote.monospacedDigit()).foregroundStyle(.secondary)
                                     .frame(minWidth: 40, alignment: .leading)
-                                Text(verbatim: p.name).font(.caption).lineLimit(1)
+                                Text(verbatim: p.name).font(.footnote).lineLimit(1)
                                     .strikethrough(p.cancelled == true)
                             }
                         }
@@ -751,7 +751,7 @@ struct TimelineLegRow: View {
                     .padding(.leading, 2)
                 }
                 Text(leg.realTime && !Connectivity.shared.isOffline ? [L10n.t("Live"), leg.liveSource].compactMap { $0 }.joined(separator: " · ") : L10n.t("Timetable"))
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.footnote).foregroundStyle(.secondary)
                 ServiceAlertsView(alerts: leg.serviceAlerts)
                 GetOffButton(leg: leg)
             }
@@ -763,13 +763,13 @@ struct TimelineLegRow: View {
         HStack(alignment: .firstTextBaseline, spacing: 6) {
             Text(verbatim: title).font(.subheadline.weight(.semibold)).fixedSize(horizontal: false, vertical: true)
             if let t = TransitLabels.clean(track) {
-                Text(L10n.f("Platform %@", t)).font(.caption).foregroundStyle(.secondary)
+                Text(L10n.f("Platform %@", t)).font(.footnote).foregroundStyle(.secondary)
             }
             Spacer(minLength: 4)
             if let time {
-                Text(Fmt.time(time, tz: leg.to.tz)).font(.caption.weight(.semibold).monospacedDigit()).foregroundStyle(.secondary)
+                Text(Fmt.time(time, tz: leg.to.tz)).font(.footnote.weight(.semibold).monospacedDigit()).foregroundStyle(.secondary)
             }
-            if delay > 0 { Text(L10n.f("+%lld min", delay)).font(.caption).foregroundStyle(Color.delay) }
+            if delay > 0 { Text(L10n.f("+%lld min", delay)).font(.footnote).foregroundStyle(Color.delay) }
         }
     }
 }
@@ -854,7 +854,7 @@ struct LeaveHero: View {
                         if soon { Text(Fmt.time(itinerary.startTime, tz: tz)) }
                         else { Text(itinerary.startTime, format: .dateTime.weekday(.abbreviated).day().month(.abbreviated)) }
                     }
-                    .font(.caption.weight(.semibold).monospacedDigit()).foregroundStyle(.secondary)
+                    .font(.footnote.weight(.semibold).monospacedDigit()).foregroundStyle(.secondary)
                 }
                 Text(verbatim: big)
                     .font(.title2.weight(.bold).monospacedDigit())
@@ -864,7 +864,7 @@ struct LeaveHero: View {
             Spacer(minLength: 8)
             VStack(alignment: .trailing, spacing: 2) {
                 if soon {
-                    Text("Arrive").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+                    Text("Arrive").font(.footnote.weight(.semibold)).foregroundStyle(.secondary)
                     Text(Fmt.time(itinerary.endTime, tz: endTz))
                         .font(.title2.weight(.bold).monospacedDigit()).foregroundStyle(Color.ink)
                 } else {

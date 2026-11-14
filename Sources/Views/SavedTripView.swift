@@ -86,23 +86,35 @@ struct SavedTripView: View {
 struct SavedTripRow: View {
     let trip: SavedTrip
 
+    /// Where to and when to go first; lines and start in one row each underneath.
     var body: some View {
         let tz = trip.itinerary.legs.first?.from.tz
-        VStack(alignment: .leading, spacing: 4) {
-            HStack {
+        let leave = ItineraryRow.leave(trip.itinerary, now: Ticker.minute.now)
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(alignment: .firstTextBaseline) {
                 Text(trip.toName).font(.headline).lineLimit(1)
                 Spacer()
-                Text(trip.startTime.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated)))
-                    .font(.subheadline).foregroundStyle(.secondary)
-            }
-            Text("\(Fmt.time(trip.startTime, tz: tz)) – \(Fmt.time(trip.endTime, tz: trip.itinerary.legs.last?.to.tz))")
-                .font(.subheadline.monospacedDigit()).lineLimit(1)
-            HStack(spacing: 6) {
-                ForEach(Array(trip.itinerary.transitLegs.prefix(4).enumerated()), id: \.offset) { _, leg in
-                    LineBadge(leg)
+                if let leave {
+                    Text(verbatim: leave).font(.subheadline.weight(.semibold)).foregroundStyle(Color.ink)
+                } else {
+                    Text(trip.startTime.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated)))
+                        .font(.subheadline).foregroundStyle(.secondary)
                 }
             }
-            Text("from \(trip.fromName)").font(.caption).foregroundStyle(.secondary).lineLimit(1)
+            HStack(alignment: .center, spacing: 8) {
+                Text("\(Fmt.time(trip.startTime, tz: tz)) – \(Fmt.time(trip.endTime, tz: trip.itinerary.legs.last?.to.tz))")
+                    .font(.subheadline.weight(.semibold).monospacedDigit()).lineLimit(1)
+                Spacer(minLength: 4)
+                HStack(spacing: 4) {
+                    ForEach(Array(trip.itinerary.transitLegs.prefix(3).enumerated()), id: \.offset) { _, leg in
+                        LineBadge(leg, compact: true)
+                    }
+                    if trip.itinerary.transitLegs.count > 3 {
+                        Text(verbatim: "+\(trip.itinerary.transitLegs.count - 3)").font(.footnote.weight(.semibold)).foregroundStyle(.secondary)
+                    }
+                }
+            }
+            Text("from \(trip.fromName)").font(.footnote).foregroundStyle(.secondary).lineLimit(1)
         }
         .accessibilityElement(children: .combine)
     }

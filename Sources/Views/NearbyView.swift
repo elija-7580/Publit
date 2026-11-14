@@ -133,6 +133,7 @@ struct NearbyView: View {
                                                          coordinate: group.coordinate)) {
                             DepartureRow(stopTime: st)
                         }
+                        .linkIndicatorHidden()
                     }
                     NavigationLink {
                         StopDeparturesView(stopId: group.id, name: group.name, coordinate: group.coordinate, exact: group.isPole)
@@ -368,7 +369,9 @@ struct StopGroupHeader: View {
                 if let d = group.distance {
                     HStack(spacing: 5) {
                         if nearest { SignatureDot(size: 7) }
-                        Text(Fmt.distance(meters: d)).font(.subheadline.weight(.medium).monospacedDigit())
+                        // At the stop: "here", not "18 m".
+                        Text(verbatim: Reach.isAtStop(meters: d) ? L10n.t("Here") : Fmt.distance(meters: d))
+                            .font(.subheadline.weight(.medium).monospacedDigit())
                         if d >= Reach.walkHintDistance {
                             // Far stops say how long the walk is, not only how far.
                             Label(L10n.f("%lld min", Reach.walkMinutes(meters: d)), systemImage: "figure.walk")
@@ -381,7 +384,7 @@ struct StopGroupHeader: View {
             }
             if group.isPole, !group.directions.isEmpty {
                 Label(group.directions.joined(separator: " · "), systemImage: "arrow.right")
-                    .font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                    .font(.footnote).foregroundStyle(.secondary).lineLimit(1)
                     .labelStyle(CompactLabelStyle())
             }
         }
@@ -514,6 +517,7 @@ struct StopDeparturesView: View {
                         NavigationLink {
                             TripView(stopTime: st, stationId: stopId, stationName: name, stationCoordinate: coordinate)
                         } label: { DepartureRow(stopTime: st) }
+                        .linkIndicatorHidden()
                     }
                 case .lines:
                     ForEach(LineGrouping.lines(shown)) { line in
@@ -592,7 +596,7 @@ struct LineAtStopRow: View {
             HStack(spacing: 8) {
                 LineBadge(line.first)
                 if let detail = line.first.serviceDetail {
-                    Text(verbatim: detail).font(.caption.weight(.semibold)).foregroundStyle(.secondary).lineLimit(1)
+                    Text(verbatim: detail).font(.footnote.weight(.semibold)).foregroundStyle(.secondary).lineLimit(1)
                 }
             }
             ForEach(Array(line.byDirection(perDirection: 3).prefix(3).enumerated()), id: \.offset) { _, dir in

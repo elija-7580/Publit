@@ -67,15 +67,16 @@ struct GoNowView: View {
                         VStack(alignment: .leading, spacing: 4) {
                             if let dep = it.firstDeparture {
                                 Text(leaveText(it, firstDeparture: dep))
-                                    .font(.caption.weight(.semibold))
+                                    .font(.footnote.weight(.semibold))
                                     .foregroundStyle(it.startTime < .now.addingTimeInterval(120) ? Color.delay : .secondary)
                             } else {
-                                Text("Walk all the way").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+                                Text("Walk all the way").font(.footnote.weight(.semibold)).foregroundStyle(.secondary)
                             }
                             ItineraryRow(itinerary: it, windowStart: it.startTime, windowEnd: it.startTime.addingTimeInterval(span),
-                                         badges: badges[it.routeKey] ?? [])
+                                         badges: badges[it.routeKey] ?? [], showLeave: false)
                         }
                     }
+                    .linkIndicatorHidden()
                 }
                 if plan.canLoadMore {
                     Button("Later connections") { Task { await plan.loadMore() } }

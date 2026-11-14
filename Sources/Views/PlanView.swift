@@ -261,10 +261,6 @@ struct PlanView: View {
                     HStack(spacing: 8) {
                         ItineraryRow(itinerary: it, windowStart: it.startTime, windowEnd: it.startTime.addingTimeInterval(span),
                                      badges: badges[it.routeKey] ?? [], reason: it.routeKey == recommendedKey ? reason : nil)
-                        Image(systemName: "chevron.right")
-                            .font(.footnote.weight(.semibold))
-                            .foregroundStyle(.tertiary)
-                            .accessibilityHidden(true)
                     }
                     .contentShape(Rectangle())
                 }
@@ -331,8 +327,17 @@ struct ItineraryRow: View {
     /// Smart routing labels ("Recommended", "Fastest", …) and why the route is suggested.
     var badges: [SmartRouting.Badge] = []
     var reason: String? = nil
+    /// "Leave in 6 min" in the row; off where the list says it above each row (Go now).
+    var showLeave = true
 
     private var tz: String? { itinerary.legs.first?.from.tz }
+
+    /// "Leave in 6 min" / "Departs in 4 min" for routes that leave within the hour.
+    static func leave(_ it: Itinerary, now: Date) -> String? {
+        let minutes = Int(ceil(it.startTime.timeIntervalSince(now) / 60))
+        guard (0...60).contains(minutes) else { return nil }
+        return Reach.leaveText(it, minutes: minutes)
+    }
 
     var body: some View {
         let warnings = TransferRisk.warnings(for: itinerary)
@@ -356,19 +361,26 @@ struct ItineraryRow: View {
             if showTimeline {
                 TimelineBar(itinerary: itinerary, windowStart: windowStart, windowEnd: windowEnd).frame(height: 42)
             }
-            // Where to go, at a glance: the stop and platform to get on at, without opening the route.
-            BoardingLine(itinerary: itinerary)
-            HStack(spacing: 8) {
+            // What decides first: when to leave, then how often you change and which line takes you.
+            HStack(spacing: 0) {
+                if showLeave, !itinerary.isCancelled, let leave = Self.leave(itinerary, now: Ticker.minute.now) {
+                    Text(verbatim: leave).fontWeight(.semibold).foregroundStyle(Color.ink)
+                    Text(verbatim: " · ")
+                }
                 Text(Fmt.changes(itinerary.transfers))
                 if let first = itinerary.firstTransitLeg, let dir = first.shownDirection {
-                    Text(verbatim: "· \(first.lineName) → \(dir)").lineLimit(1)
+                    Text(verbatim: " · \(first.lineName) → \(dir)")
                 }
                 if itinerary.isCancelled {
-                    Text("Cancelled").foregroundStyle(Color.danger)
+                    Text(verbatim: " · ")
+                    Text("Cancelled").fontWeight(.semibold).foregroundStyle(Color.danger)
                 }
             }
-            .font(.caption)
+            .font(.footnote)
             .foregroundStyle(.secondary)
+            .lineLimit(1)
+            // Where to go, at a glance: the stop and platform to get on at, without opening the route.
+            BoardingLine(itinerary: itinerary)
             if itinerary.transitLegs.contains(where: { !$0.serviceAlerts.isEmpty || $0.isReplacementBus }) {
                 InlineNotice(text: L10n.t("Service changes on this route"))
             }
