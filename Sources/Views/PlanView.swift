@@ -77,8 +77,17 @@ struct PlanView: View {
                             plan.date = .now
                             if plan.timeMode == .arriveBy { plan.timeMode = .departAt }
                         } label: {
-                            Label("Now", systemImage: "clock.arrow.circlepath").font(.subheadline.weight(.semibold))
+                            // Never wrapped ("N / o / w" next to the long English date and time): the word on
+                            // one line when it fits, otherwise just the clock (narrow phones, large text).
+                            ViewThatFits(in: .horizontal) {
+                                Label("Now", systemImage: "clock.arrow.circlepath")
+                                    .lineLimit(1)
+                                    .fixedSize()
+                                Image(systemName: "clock.arrow.circlepath")
+                            }
+                            .font(.subheadline.weight(.semibold))
                         }
+                        .accessibilityLabel(Text("Now"))
                         .buttonStyle(.soft)
                         .disabled(plan.timeMode == .departAt && abs(plan.date.timeIntervalSinceNow) < 90)
                         .accessibilityIdentifier("planTimeNow")

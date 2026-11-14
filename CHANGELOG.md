@@ -15,6 +15,7 @@
   - **Change guide** (on): during a live trip, a map from the platform you arrive at to the one you leave from, with the walk, stairs, lifts, levels and exits, and whether it is step-free.
 - Map: a short long press (under about a second) dropped a pin and closed it again right away, because letting go also counted as a tap on the empty map. The pin now stays.
 - Platform map is compact: the map and a row of platform buttons; the tapped platform shows its lines and next stops. Not shown in the Lines view.
+- Plan: the "Now" button next to the date and time no longer wraps letter by letter ("N/o/w") in English; with too little room it shows just the clock.
 - New texts translated into all 15 app languages.
 
 ## 0.1.0 (build 65) – App Review fixes

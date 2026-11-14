@@ -553,6 +553,12 @@ final class PublitUITests: XCTestCase {
         XCTAssertTrue(routes.firstMatch.waitForExistence(timeout: timeout), "no routes found")
         sleep(1)
         snap("plan")
+        // "Now" beside the long English date and time: one line, not "N / o / w" (build 66).
+        let now = app.buttons["planTimeNow"]
+        if now.waitForExistence(timeout: 5) {
+            XCTAssertLessThan(now.frame.height, 60, "Now button wraps: \(now.frame)")
+            XCTAssertGreaterThan(now.frame.width, now.frame.height * 0.8, "Now button squeezed: \(now.frame)")
+        }
 
         // The routes list has no map toggle any more: open the first route directly.
         let details = routes.firstMatch

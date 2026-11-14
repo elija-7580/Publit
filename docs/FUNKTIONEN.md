@@ -123,7 +123,7 @@ Ohne Onboarding startet die Standortabfrage sofort.
 
 - **Von/Nach**-Felder (`WhereToField`, „Where to?“), Standard-Start = aktueller Standort; **„Swap“** tauscht.
 - **Schnellwahl Zuhause/Arbeit** (`PlaceKeyRow`) und letzte Suchen (`RecentSearchesSection`).
-- **Zeit** („When“): „Now“ / „Depart at“ / „Arrive by“. „Now“ folgt der Uhr: später wiederkommen zeigt Verbindungen ab dann; Ergebnisse werden live nachgeladen.
+- **Zeit** („When“): „Now“ / „Depart at“ / „Arrive by“. Der Knopf „Now“ neben Datum und Uhrzeit bleibt einzeilig; ist zu wenig Platz (schmale Geräte, große Schrift), zeigt er nur die Uhr (VoiceOver: „Now“). „Now“ folgt der Uhr: später wiederkommen zeigt Verbindungen ab dann; Ergebnisse werden live nachgeladen.
 - **„Search routes“** startet die Suche; danach sucht jede Änderung automatisch neu; Ziel leeren = Neustart.
 - **Ergebnisliste** (`ItineraryRow`): Ab–An, Dauer (`DurationFigure`), Linien-Badges, Umstiege, Live-Kennzeichen, „Cancelled“, „Service changes on this route“, Umstiegswahrscheinlichkeit („Change at X: y % chance“), Fahrpreis-Schätzung, Smart-Badges; optional **Verbindungs-Zeitleisten** (`TimelineBar`; Fahrt farbig, Fußweg grau, Warten gepunktet).
 - **Sortierung**: Recommended, Departure, Fastest, Fewest changes, Least walking („Recommended: …“).
