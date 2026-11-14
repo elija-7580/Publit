@@ -1,0 +1,300 @@
+2026-11-14 02:37:29.103716+0000 Publit[22336:70523] [Publit] CGImageSourceCreateThumbnailAtIndexEx:5571: *** ERROR: CGImageSourceCreateThumbnailAtIndex[0] - 'n/a ' - failed to create thumbnail [1] {alw:1, abs: -1 tra:1 max:3200}
+Test Case '-[PublitTests.TicketRecognitionTests testMalformedDataFailsWithoutSaving]' passed (0.006 seconds).
+Test Case '-[PublitTests.TicketRecognitionTests testSelectableTextBoxesMatchTheUprightPage]' started.
+Test Case '-[PublitTests.TicketRecognitionTests testSelectableTextBoxesMatchTheUprightPage]' passed (1.963 seconds).
+Test Case '-[PublitTests.TicketRecognitionTests testUniquePageAndMultipleTicketAmbiguity]' started.
+2026-11-14 02:37:31.292587+0000 Publit[22336:70523] [Context] [PREFLIGHTING] context 0x1151dd0e0: failed to preflight ANMDModel, error: Error Domain=MRCErrorDomain Code=-6001 "Unable to compile network." UserInfo={NSDescription=Unable to compile network., MRCErrorE5RTErrorCodeKey=11, MRCErrorE5RTErrorCodeStringKey=OPERATION ERROR}
+2026-11-14 02:37:31.529418+0000 Publit[22336:70535] [Context] [PREFLIGHTING] context 0x1151dd0e0: failed to preflight ANMDModel, error: Error Domain=MRCErrorDomain Code=-6001 "Unable to compile network." UserInfo={NSDescription=Unable to compile network., MRCErrorE5RTErrorCodeKey=11, MRCErrorE5RTErrorCodeStringKey=OPERATION ERROR}
+2026-11-14 02:37:31.779258+0000 Publit[22336:70518] [Context] [PREFLIGHTING] context 0x1151dd0e0: failed to preflight ANMDModel, error: Error Domain=MRCErrorDomain Code=-6001 "Unable to compile network." UserInfo={NSDescription=Unable to compile network., MRCErrorE5RTErrorCodeKey=11, MRCErrorE5RTErrorCodeStringKey=OPERATION ERROR}
+2026-11-14 02:37:32.078889+0000 Publit[22336:70523] [Context] [PREFLIGHTING] context 0x1151dd0e0: failed to preflight ANMDModel, error: Error Domain=MRCErrorDomain Code=-6001 "Unable to compile network." UserInfo={NSDescription=Unable to compile network., MRCErrorE5RTErrorCodeKey=11, MRCErrorE5RTErrorCodeStringKey=OPERATION ERROR}
+Test Case '-[PublitTests.TicketRecognitionTests testUniquePageAndMultipleTicketAmbiguity]' passed (1.276 seconds).
+Test Suite 'TicketRecognitionTests' passed at 2026-11-14 02:37:32.345.
+	 Executed 5 tests, with 0 failures (0 unexpected) in 7.384 (7.387) seconds
+Test Suite 'TicketStoreTests' started at 2026-11-14 02:37:32.345.
+Test Case '-[PublitTests.TicketStoreTests testPassesAndSingleTickets]' started.
+Test Case '-[PublitTests.TicketStoreTests testPassesAndSingleTickets]' passed (0.058 seconds).
+Test Suite 'TicketStoreTests' passed at 2026-11-14 02:37:32.405.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.058 (0.059) seconds
+Test Suite 'TicketTextParserTests' started at 2026-11-14 02:37:32.405.
+Test Case '-[PublitTests.TicketTextParserTests testClassesInMoreLanguages]' started.
+Test Case '-[PublitTests.TicketTextParserTests testClassesInMoreLanguages]' passed (0.021 seconds).
+Test Case '-[PublitTests.TicketTextParserTests testDBTicketWithTimetableRowsTravellersAndDiscount]' started.
+Test Case '-[PublitTests.TicketTextParserTests testDBTicketWithTimetableRowsTravellersAndDiscount]' passed (0.074 seconds).
+Test Case '-[PublitTests.TicketTextParserTests testEnglishArrowRouteAndTextualDate]' started.
+Test Case '-[PublitTests.TicketTextParserTests testEnglishArrowRouteAndTextualDate]' passed (0.012 seconds).
+Test Case '-[PublitTests.TicketTextParserTests testFrenchTicket]' started.
+Test Case '-[PublitTests.TicketTextParserTests testFrenchTicket]' passed (0.010 seconds).
+Test Case '-[PublitTests.TicketTextParserTests testGroupConditionsAreNotTravellers]' started.
+Test Case '-[PublitTests.TicketTextParserTests testGroupConditionsAreNotTravellers]' passed (0.012 seconds).
+Test Case '-[PublitTests.TicketTextParserTests testIssuerFromUICBarcode]' started.
+Test Case '-[PublitTests.TicketTextParserTests testIssuerFromUICBarcode]' passed (0.003 seconds).
+Test Case '-[PublitTests.TicketTextParserTests testItalianTicket]' started.
+Test Case '-[PublitTests.TicketTextParserTests testItalianTicket]' passed (0.011 seconds).
+Test Case '-[PublitTests.TicketTextParserTests testLabelsOnTheirOwnLine]' started.
+Test Case '-[PublitTests.TicketTextParserTests testLabelsOnTheirOwnLine]' passed (0.015 seconds).
+Test Case '-[PublitTests.TicketTextParserTests testMonthlyPassIgnoresBirthAndPurchaseDates]' started.
+Test Case '-[PublitTests.TicketTextParserTests testMonthlyPassIgnoresBirthAndPurchaseDates]' passed (0.013 seconds).
+Test Case '-[PublitTests.TicketTextParserTests testMoreDateFormatsAndRanges]' started.
+Test Case '-[PublitTests.TicketTextParserTests testMoreDateFormatsAndRanges]' passed (0.030 seconds).
+Test Case '-[PublitTests.TicketTextParserTests testOperatorNearestTheTopAndIssuerFirst]' started.
+Test Case '-[PublitTests.TicketTextParserTests testOperatorNearestTheTopAndIssuerFirst]' passed (0.024 seconds).
+Test Case '-[PublitTests.TicketTextParserTests testPrices]' started.
+Test Case '-[PublitTests.TicketTextParserTests testPrices]' passed (0.016 seconds).
+Test Case '-[PublitTests.TicketTextParserTests testRailTicketWithLabels]' started.
+Test Case '-[PublitTests.TicketTextParserTests testRailTicketWithLabels]' passed (0.008 seconds).
+Test Case '-[PublitTests.TicketTextParserTests testRangeWithTimes]' started.
+Test Case '-[PublitTests.TicketTextParserTests testRangeWithTimes]' passed (0.004 seconds).
+Test Case '-[PublitTests.TicketTextParserTests testReturnTicketAndLongValidityBecomesPeriod]' started.
+Test Case '-[PublitTests.TicketTextParserTests testReturnTicketAndLongValidityBecomesPeriod]' passed (0.007 seconds).
+Test Case '-[PublitTests.TicketTextParserTests testReturnTicketCoversBothDays]' started.
+Test Case '-[PublitTests.TicketTextParserTests testReturnTicketCoversBothDays]' passed (0.004 seconds).
+Test Case '-[PublitTests.TicketTextParserTests testShortOperatorNamesNeedWholeWords]' started.
+Test Case '-[PublitTests.TicketTextParserTests testShortOperatorNamesNeedWholeWords]' passed (0.021 seconds).
+Test Case '-[PublitTests.TicketTextParserTests testStationNamesAreNotMonths]' started.
+Test Case '-[PublitTests.TicketTextParserTests testStationNamesAreNotMonths]' passed (0.006 seconds).
+Test Case '-[PublitTests.TicketTextParserTests testValidityFromDuration]' started.
+Test Case '-[PublitTests.TicketTextParserTests testValidityFromDuration]' passed (0.021 seconds).
+Test Case '-[PublitTests.TicketTextParserTests testViaAndArrowChains]' started.
+Test Case '-[PublitTests.TicketTextParserTests testViaAndArrowChains]' passed (0.018 seconds).
+Test Case '-[PublitTests.TicketTextParserTests testWholeMonth]' started.
+Test Case '-[PublitTests.TicketTextParserTests testWholeMonth]' passed (0.008 seconds).
+Test Suite 'TicketTextParserTests' passed at 2026-11-14 02:37:32.755.
+	 Executed 21 tests, with 0 failures (0 unexpected) in 0.336 (0.350) seconds
+Test Suite 'TrainDivisionTests' started at 2026-11-14 02:37:32.755.
+Test Case '-[PublitTests.TrainDivisionTests testDoesNotInferDivisionFromDestinationsOrGenericDisruptions]' started.
+Test Case '-[PublitTests.TrainDivisionTests testDoesNotInferDivisionFromDestinationsOrGenericDisruptions]' passed (0.004 seconds).
+Test Case '-[PublitTests.TrainDivisionTests testExplicitOperatorWordingInGermanEnglishFrenchAndItalian]' started.
+Test Case '-[PublitTests.TrainDivisionTests testExplicitOperatorWordingInGermanEnglishFrenchAndItalian]' passed (0.007 seconds).
+Test Case '-[PublitTests.TrainDivisionTests testIntermediateStopNoticesAreIncludedButExpiredOnesAreNot]' started.
+Test Case '-[PublitTests.TrainDivisionTests testIntermediateStopNoticesAreIncludedButExpiredOnesAreNot]' passed (0.006 seconds).
+Test Case '-[PublitTests.TrainDivisionTests testOrdinaryBusDoesNotGainATrainDivisionNotice]' started.
+Test Case '-[PublitTests.TrainDivisionTests testOrdinaryBusDoesNotGainATrainDivisionNotice]' passed (0.024 seconds).
+Test Case '-[PublitTests.TrainDivisionTests testRetainsSourceTextAndURLWithoutInferringCarriageData]' started.
+Test Case '-[PublitTests.TrainDivisionTests testRetainsSourceTextAndURLWithoutInferringCarriageData]' passed (0.009 seconds).
+Test Suite 'TrainDivisionTests' passed at 2026-11-14 02:37:32.837.
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.050 (0.082) seconds
+Test Suite 'TransferOverviewTests' started at 2026-11-14 02:37:32.838.
+Test Case '-[PublitTests.TransferOverviewTests testEventLevelTimeSourceOverridesBroadLegFlag]' started.
+Test Case '-[PublitTests.TransferOverviewTests testEventLevelTimeSourceOverridesBroadLegFlag]' passed (0.016 seconds).
+Test Case '-[PublitTests.TransferOverviewTests testLiveDelayCanBreakConnectionWithoutClampingNegativeBuffer]' started.
+Test Case '-[PublitTests.TransferOverviewTests testLiveDelayCanBreakConnectionWithoutClampingNegativeBuffer]' passed (0.007 seconds).
+Test Case '-[PublitTests.TransferOverviewTests testMissingAndChangedPlatforms]' started.
+Test Case '-[PublitTests.TransferOverviewTests testMissingAndChangedPlatforms]' passed (0.044 seconds).
+Test Case '-[PublitTests.TransferOverviewTests testOnlyActualChangesHaveAnOverview]' started.
+Test Case '-[PublitTests.TransferOverviewTests testOnlyActualChangesHaveAnOverview]' passed (0.005 seconds).
+Test Case '-[PublitTests.TransferOverviewTests testStationChangeAndServiceCancellation]' started.
+Test Case '-[PublitTests.TransferOverviewTests testStationChangeAndServiceCancellation]' passed (0.004 seconds).
+Test Case '-[PublitTests.TransferOverviewTests testTransferContainsBothVehiclesAndEndpointTimes]' started.
+Test Case '-[PublitTests.TransferOverviewTests testTransferContainsBothVehiclesAndEndpointTimes]' passed (0.003 seconds).
+Test Suite 'TransferOverviewTests' passed at 2026-11-14 02:37:32.921.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.079 (0.083) seconds
+Test Suite 'TransferRiskTests' started at 2026-11-14 02:37:32.922.
+Test Case '-[PublitTests.TransferRiskTests testDirectTripHasNoWarnings]' started.
+Test Case '-[PublitTests.TransferRiskTests testDirectTripHasNoWarnings]' passed (0.002 seconds).
+Test Case '-[PublitTests.TransferRiskTests testLiveFixtureHasNoFalseAlarms]' started.
+Test Case '-[PublitTests.TransferRiskTests testLiveFixtureHasNoFalseAlarms]' passed (0.017 seconds).
+Test Case '-[PublitTests.TransferRiskTests testMissedWhenWalkLongerThanGap]' started.
+Test Case '-[PublitTests.TransferRiskTests testMissedWhenWalkLongerThanGap]' passed (0.002 seconds).
+Test Case '-[PublitTests.TransferRiskTests testNoWarningForComfortableChange]' started.
+Test Case '-[PublitTests.TransferRiskTests testNoWarningForComfortableChange]' passed (0.001 seconds).
+Test Case '-[PublitTests.TransferRiskTests testTightWhenIncomingIsLateAndBufferSmall]' started.
+Test Case '-[PublitTests.TransferRiskTests testTightWhenIncomingIsLateAndBufferSmall]' passed (0.006 seconds).
+Test Suite 'TransferRiskTests' passed at 2026-11-14 02:37:32.953.
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.028 (0.031) seconds
+Test Suite 'TransitEnhancementTests' started at 2026-11-14 02:37:32.954.
+Test Case '-[PublitTests.TransitEnhancementTests testAlertsDeduplicateAndRespectCommunicationAndImpactWindows]' started.
+Test Case '-[PublitTests.TransitEnhancementTests testAlertsDeduplicateAndRespectCommunicationAndImpactWindows]' passed (0.001 seconds).
+Test Case '-[PublitTests.TransitEnhancementTests testAsyncTicketImportPreservesExactImageBytes]' started.
+Test Case '-[PublitTests.TransitEnhancementTests testAsyncTicketImportPreservesExactImageBytes]' passed (0.011 seconds).
+Test Case '-[PublitTests.TransitEnhancementTests testConcurrentLiveRefreshesShareOneRequestAndFailuresCanRetry]' started.
+Test Case '-[PublitTests.TransitEnhancementTests testConcurrentLiveRefreshesShareOneRequestAndFailuresCanRetry]' passed (0.110 seconds).
+Test Case '-[PublitTests.TransitEnhancementTests testFareEstimateDoesNotDoubleCountCoveredTransferLegs]' started.
+Test Case '-[PublitTests.TransitEnhancementTests testFareEstimateDoesNotDoubleCountCoveredTransferLegs]' passed (0.053 seconds).
+Test Case '-[PublitTests.TransitEnhancementTests testFareEstimateRejectsChildOnlyAmbiguousAndUncoveredPrices]' started.
+Test Case '-[PublitTests.TransitEnhancementTests testFareEstimateRejectsChildOnlyAmbiguousAndUncoveredPrices]' passed (0.012 seconds).
+Test Case '-[PublitTests.TransitEnhancementTests testGroupingPerformanceAndResultParity]' started.
+PERF grouping records=1200 legacy_ms=22.396 indexed_ms=9.149 ratio=2.45
+Test Case '-[PublitTests.TransitEnhancementTests testGroupingPerformanceAndResultParity]' passed (0.202 seconds).
+Test Case '-[PublitTests.TransitEnhancementTests testHistoryIsBoundedDeduplicatedPersistedAndClearable]' started.
+Test Case '-[PublitTests.TransitEnhancementTests testHistoryIsBoundedDeduplicatedPersistedAndClearable]' passed (0.037 seconds).
+Test Case '-[PublitTests.TransitEnhancementTests testLineAndSpecificTrainIdentityAreSeparate]' started.
+Test Case '-[PublitTests.TransitEnhancementTests testLineAndSpecificTrainIdentityAreSeparate]' passed (0.001 seconds).
+Test Case '-[PublitTests.TransitEnhancementTests testLiveBarShowsStartedTripOtherwiseTheSavedTripUnderWay]' started.
+Test Case '-[PublitTests.TransitEnhancementTests testLiveBarShowsStartedTripOtherwiseTheSavedTripUnderWay]' passed (0.031 seconds).
+Test Case '-[PublitTests.TransitEnhancementTests testMissingColoursUseModeColourAndSmallTextHasAAContrast]' started.
+Test Case '-[PublitTests.TransitEnhancementTests testMissingColoursUseModeColourAndSmallTextHasAAContrast]' passed (0.001 seconds).
+Test Case '-[PublitTests.TransitEnhancementTests testMissingDirectionIsNotReplacedWithAlightingStop]' started.
+Test Case '-[PublitTests.TransitEnhancementTests testMissingDirectionIsNotReplacedWithAlightingStop]' passed (0.025 seconds).
+Test Case '-[PublitTests.TransitEnhancementTests testReplayingAnOldSearchGetsFreshDepartures]' started.
+Test Case '-[PublitTests.TransitEnhancementTests testReplayingAnOldSearchGetsFreshDepartures]' passed (0.001 seconds).
+Test Case '-[PublitTests.TransitEnhancementTests testStartedTripIsPersistentAndOnlyOneTripIsActive]' started.
+Test Case '-[PublitTests.TransitEnhancementTests testStartedTripIsPersistentAndOnlyOneTripIsActive]' passed (0.051 seconds).
+Test Case '-[PublitTests.TransitEnhancementTests testUnsavedTripStaysUntilTheScreenCloses]' started.
+Test Case '-[PublitTests.TransitEnhancementTests testUnsavedTripStaysUntilTheScreenCloses]' passed (0.208 seconds).
+Test Suite 'TransitEnhancementTests' passed at 2026-11-14 02:37:33.730.
+	 Executed 14 tests, with 0 failures (0 unexpected) in 0.744 (0.776) seconds
+Test Suite 'TripGuideTests' started at 2026-11-14 02:37:33.730.
+Test Case '-[PublitTests.TripGuideTests testLongWalkStaysOnlyWhenItSavesTime]' started.
+Test Case '-[PublitTests.TripGuideTests testLongWalkStaysOnlyWhenItSavesTime]' passed (0.002 seconds).
+Test Case '-[PublitTests.TripGuideTests testMissedWhenStillAtTheStopAfterDeparture]' started.
+Test Case '-[PublitTests.TripGuideTests testMissedWhenStillAtTheStopAfterDeparture]' passed (0.003 seconds).
+Test Case '-[PublitTests.TripGuideTests testOnlyCurrentNearbyWalkUsesGPSProgress]' started.
+Test Case '-[PublitTests.TripGuideTests testOnlyCurrentNearbyWalkUsesGPSProgress]' passed (0.002 seconds).
+Test Case '-[PublitTests.TripGuideTests testPositionMovesTheStage]' started.
+Test Case '-[PublitTests.TripGuideTests testPositionMovesTheStage]' passed (0.002 seconds).
+Test Case '-[PublitTests.TripGuideTests testPositionOnTheWalk]' started.
+Test Case '-[PublitTests.TripGuideTests testPositionOnTheWalk]' passed (0.007 seconds).
+Test Case '-[PublitTests.TripGuideTests testRidePositionFromGPSAndStopsLeft]' started.
+Test Case '-[PublitTests.TripGuideTests testRidePositionFromGPSAndStopsLeft]' passed (0.001 seconds).
+Test Case '-[PublitTests.TripGuideTests testRouteThatPassesTheDestinationIsADetour]' started.
+Test Case '-[PublitTests.TripGuideTests testRouteThatPassesTheDestinationIsADetour]' passed (0.001 seconds).
+Test Case '-[PublitTests.TripGuideTests testStageFollowsTheClock]' started.
+Test Case '-[PublitTests.TripGuideTests testStageFollowsTheClock]' passed (0.003 seconds).
+Test Case '-[PublitTests.TripGuideTests testStagesSkipTheShortChangeWalk]' started.
+Test Case '-[PublitTests.TripGuideTests testStagesSkipTheShortChangeWalk]' passed (0.007 seconds).
+Test Case '-[PublitTests.TripGuideTests testStairsFollowTheWalkingDirection]' started.
+Test Case '-[PublitTests.TripGuideTests testStairsFollowTheWalkingDirection]' passed (0.005 seconds).
+Test Case '-[PublitTests.TripGuideTests testStepsSurviveSavingATrip]' started.
+Test Case '-[PublitTests.TripGuideTests testStepsSurviveSavingATrip]' passed (0.005 seconds).
+Test Case '-[PublitTests.TripGuideTests testTripEndsAtTheDestinationOrLaterByItself]' started.
+Test Case '-[PublitTests.TripGuideTests testTripEndsAtTheDestinationOrLaterByItself]' passed (0.001 seconds).
+Test Case '-[PublitTests.TripGuideTests testTurnKinds]' started.
+Test Case '-[PublitTests.TripGuideTests testTurnKinds]' passed (0.001 seconds).
+Test Suite 'TripGuideTests' passed at 2026-11-14 02:37:33.786.
+	 Executed 13 tests, with 0 failures (0 unexpected) in 0.039 (0.055) seconds
+Test Suite 'TripProgressTests' started at 2026-11-14 02:37:33.786.
+Test Case '-[PublitTests.TripProgressTests testBeforeDuringAndAfter]' started.
+Test Case '-[PublitTests.TripProgressTests testBeforeDuringAndAfter]' passed (0.008 seconds).
+Test Case '-[PublitTests.TripProgressTests testEmptyTrip]' started.
+Test Case '-[PublitTests.TripProgressTests testEmptyTrip]' passed (0.002 seconds).
+Test Case '-[PublitTests.TripProgressTests testPositionLiesBetweenNeighbouringStops]' started.
+Test Case '-[PublitTests.TripProgressTests testPositionLiesBetweenNeighbouringStops]' passed (0.005 seconds).
+Test Suite 'TripProgressTests' passed at 2026-11-14 02:37:33.803.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.015 (0.017) seconds
+Test Suite 'TripStatusTests' started at 2026-11-14 02:37:33.804.
+Test Case '-[PublitTests.TripStatusTests testCalendarNotesLinkBackToTheApp]' started.
+Test Case '-[PublitTests.TripStatusTests testCalendarNotesLinkBackToTheApp]' passed (0.004 seconds).
+Test Case '-[PublitTests.TripStatusTests testPhasesAlongTheTrip]' started.
+Test Case '-[PublitTests.TripStatusTests testPhasesAlongTheTrip]' passed (0.008 seconds).
+Test Suite 'TripStatusTests' passed at 2026-11-14 02:37:33.817.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.012 (0.013) seconds
+Test Suite 'TripStoreTests' started at 2026-11-14 02:37:33.817.
+Test Case '-[PublitTests.TripStoreTests testSaveDedupeUpcomingPastAndPersist]' started.
+Test Case '-[PublitTests.TripStoreTests testSaveDedupeUpcomingPastAndPersist]' passed (0.049 seconds).
+Test Suite 'TripStoreTests' passed at 2026-11-14 02:37:33.872.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.049 (0.055) seconds
+Test Suite 'TripTraceTests' started at 2026-11-14 02:37:33.872.
+Test Case '-[PublitTests.TripTraceTests testAFixFarFromTheLineSaysNothing]' started.
+Test Case '-[PublitTests.TripTraceTests testAFixFarFromTheLineSaysNothing]' passed (0.001 seconds).
+Test Case '-[PublitTests.TripTraceTests testArrivedMeansEverythingIsBehindYou]' started.
+Test Case '-[PublitTests.TripTraceTests testArrivedMeansEverythingIsBehindYou]' passed (0.001 seconds).
+Test Case '-[PublitTests.TripTraceTests testLegsBeforeTheLiveOneAreBehindYou]' started.
+Test Case '-[PublitTests.TripTraceTests testLegsBeforeTheLiveOneAreBehindYou]' passed (0.006 seconds).
+Test Case '-[PublitTests.TripTraceTests testSplitsTheLiveLegWhereYouAre]' started.
+Test Case '-[PublitTests.TripTraceTests testSplitsTheLiveLegWhereYouAre]' passed (0.001 seconds).
+Test Case '-[PublitTests.TripTraceTests testWaitingMeansTheRideHasNotStarted]' started.
+Test Case '-[PublitTests.TripTraceTests testWaitingMeansTheRideHasNotStarted]' passed (0.001 seconds).
+Test Suite 'TripTraceTests' passed at 2026-11-14 02:37:33.883.
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.009 (0.011) seconds
+Test Suite 'WalletPassTests' started at 2026-11-14 02:37:33.883.
+Test Case '-[PublitTests.WalletPassTests testConfigRequiresHTTPSAndPassTypeIdentifier]' started.
+Test Case '-[PublitTests.WalletPassTests testConfigRequiresHTTPSAndPassTypeIdentifier]' passed (0.011 seconds).
+Test Case '-[PublitTests.WalletPassTests testPassJSONAndManifest]' started.
+Test Case '-[PublitTests.WalletPassTests testPassJSONAndManifest]' passed (0.029 seconds).
+Test Case '-[PublitTests.WalletPassTests testPassWithoutRouteUsesGenericStyle]' started.
+Test Case '-[PublitTests.WalletPassTests testPassWithoutRouteUsesGenericStyle]' passed (0.001 seconds).
+Test Case '-[PublitTests.WalletPassTests testSHA1AndCRC32]' started.
+Test Case '-[PublitTests.WalletPassTests testSHA1AndCRC32]' passed (0.001 seconds).
+Test Case '-[PublitTests.WalletPassTests testZipHasLocalHeadersAndCentralDirectory]' started.
+Test Case '-[PublitTests.WalletPassTests testZipHasLocalHeadersAndCentralDirectory]' passed (0.001 seconds).
+Test Suite 'WalletPassTests' passed at 2026-11-14 02:37:33.964.
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.041 (0.080) seconds
+Test Suite 'WatchCodeImageTests' started at 2026-11-14 02:37:34.065.
+Test Case '-[PublitTests.WatchCodeImageTests testACodeThatCannotBeDrawnAgainHasNoPictureWithoutTheOriginal]' started.
+Test Case '-[PublitTests.WatchCodeImageTests testACodeThatCannotBeDrawnAgainHasNoPictureWithoutTheOriginal]' passed (0.003 seconds).
+Test Case '-[PublitTests.WatchCodeImageTests testQRCodeComesOnAWhitePlateAsWideAsTheWatchAsksAndCanBeRead]' started.
+2026-11-14 02:37:34.238129+0000 Publit[22336:67877] The filter 'CIPortraitEffectSpillCorrection' is not implemented in the bundle at /private/var/run/com.apple.security.cryptexd/mnt/com.apple.iPhoneOS.SimulatorRuntime-v24.2.8117.0.1W1Zzb/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 27.2.simruntime/Contents/Resources/RuntimeRoot/System/Library/CoreImage/PortraitFilters.cifilter.
+Test Case '-[PublitTests.WatchCodeImageTests testQRCodeComesOnAWhitePlateAsWideAsTheWatchAsksAndCanBeRead]' passed (0.426 seconds).
+Test Case '-[PublitTests.WatchCodeImageTests testTheWidthStaysInTheRangeTheWatchCanShow]' started.
+Test Case '-[PublitTests.WatchCodeImageTests testTheWidthStaysInTheRangeTheWatchCanShow]' passed (0.020 seconds).
+Test Suite 'WatchCodeImageTests' passed at 2026-11-14 02:37:34.517.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.449 (0.452) seconds
+Test Suite 'WatchSyncTests' started at 2026-11-14 02:37:34.517.
+Test Case '-[PublitTests.WatchSyncTests testATripHasAnOverviewAndOnePagePerLegWorthIt]' started.
+Test Case '-[PublitTests.WatchSyncTests testATripHasAnOverviewAndOnePagePerLegWorthIt]' passed (0.009 seconds).
+Test Case '-[PublitTests.WatchSyncTests testCodeFileNamesAreSafeAndChangeWithTheTicketAndTheScreen]' started.
+Test Case '-[PublitTests.WatchSyncTests testCodeFileNamesAreSafeAndChangeWithTheTicketAndTheScreen]' passed (0.001 seconds).
+Test Case '-[PublitTests.WatchSyncTests testConfirmedRequestsLeaveTheListAndOldSnapshotsAreIgnored]' started.
+Test Case '-[PublitTests.WatchSyncTests testConfirmedRequestsLeaveTheListAndOldSnapshotsAreIgnored]' passed (0.009 seconds).
+Test Case '-[PublitTests.WatchSyncTests testCurrentTripFollowsTheLiveBarRule]' started.
+Test Case '-[PublitTests.WatchSyncTests testCurrentTripFollowsTheLiveBarRule]' passed (0.021 seconds).
+Test Case '-[PublitTests.WatchSyncTests testLegAlertsAreCutToTwoHeadlines]' started.
+Test Case '-[PublitTests.WatchSyncTests testLegAlertsAreCutToTwoHeadlines]' passed (0.005 seconds).
+Test Case '-[PublitTests.WatchSyncTests testMapBoxShowsTheLegAndNeverLessThanFourHundredMeters]' started.
+Test Case '-[PublitTests.WatchSyncTests testMapBoxShowsTheLegAndNeverLessThanFourHundredMeters]' passed (0.002 seconds).
+Test Case '-[PublitTests.WatchSyncTests testNoTicketLeavesThePhoneWhenTheyAreOff]' started.
+Test Case '-[PublitTests.WatchSyncTests testNoTicketLeavesThePhoneWhenTheyAreOff]' passed (0.006 seconds).
+Test Case '-[PublitTests.WatchSyncTests testOfferedTicketsAreOneRuleForPhoneAndWatch]' started.
+Test Case '-[PublitTests.WatchSyncTests testOfferedTicketsAreOneRuleForPhoneAndWatch]' passed (0.001 seconds).
+Test Case '-[PublitTests.WatchSyncTests testPassForWatchKeepsNothingPrivateThatTheWatchDoesNotNeed]' started.
+Test Case '-[PublitTests.WatchSyncTests testPassForWatchKeepsNothingPrivateThatTheWatchDoesNotNeed]' passed (0.001 seconds).
+Test Case '-[PublitTests.WatchSyncTests testRefreshOfATripSavedOnTheWatchUpdatesTheRequest]' started.
+Test Case '-[PublitTests.WatchSyncTests testRefreshOfATripSavedOnTheWatchUpdatesTheRequest]' passed (0.007 seconds).
+Test Case '-[PublitTests.WatchSyncTests testRequestsNobodyConfirmsAreDroppedAfterTwoWeeksAndLimited]' started.
+Test Case '-[PublitTests.WatchSyncTests testRequestsNobodyConfirmsAreDroppedAfterTwoWeeksAndLimited]' passed (0.003 seconds).
+Test Case '-[PublitTests.WatchSyncTests testRequestsShowAtOnceOnTheWatch]' started.
+Test Case '-[PublitTests.WatchSyncTests testRequestsShowAtOnceOnTheWatch]' passed (0.034 seconds).
+Test Case '-[PublitTests.WatchSyncTests testSnapshotDecodesWhenFieldsAreMissing]' started.
+Test Case '-[PublitTests.WatchSyncTests testSnapshotDecodesWhenFieldsAreMissing]' passed (0.002 seconds).
+Test Case '-[PublitTests.WatchSyncTests testSnapshotRoundTripsThroughTheTransferFormat]' started.
+Test Case '-[PublitTests.WatchSyncTests testSnapshotRoundTripsThroughTheTransferFormat]' passed (0.033 seconds).
+Test Case '-[PublitTests.WatchSyncTests testStateSurvivesTheFile]' started.
+Test Case '-[PublitTests.WatchSyncTests testStateSurvivesTheFile]' passed (0.045 seconds).
+Test Case '-[PublitTests.WatchSyncTests testSyncPolicySendsChangesAtOnceAndTimesRarely]' started.
+Test Case '-[PublitTests.WatchSyncTests testSyncPolicySendsChangesAtOnceAndTimesRarely]' passed (0.014 seconds).
+Test Case '-[PublitTests.WatchSyncTests testTheOpenPageFollowsTheJourney]' started.
+Test Case '-[PublitTests.WatchSyncTests testTheOpenPageFollowsTheJourney]' passed (0.003 seconds).
+Test Case '-[PublitTests.WatchSyncTests testTicketsAreLimitedAndOrderedLikeTheListOnThePhone]' started.
+Test Case '-[PublitTests.WatchSyncTests testTicketsAreLimitedAndOrderedLikeTheListOnThePhone]' passed (0.001 seconds).
+Test Case '-[PublitTests.WatchSyncTests testTicketsOfATripComeFirst]' started.
+Test Case '-[PublitTests.WatchSyncTests testTicketsOfATripComeFirst]' passed (0.001 seconds).
+Test Case '-[PublitTests.WatchSyncTests testTimesTheWatchRefreshedSurviveAnOlderSnapshotButNotANewerOne]' started.
+Test Case '-[PublitTests.WatchSyncTests testTimesTheWatchRefreshedSurviveAnOlderSnapshotButNotANewerOne]' passed (0.013 seconds).
+Test Case '-[PublitTests.WatchSyncTests testTripForWatchKeepsWhatIsShownAndDropsDirectionsAndAlternatives]' started.
+Test Case '-[PublitTests.WatchSyncTests testTripForWatchKeepsWhatIsShownAndDropsDirectionsAndAlternatives]' passed (0.006 seconds).
+Test Case '-[PublitTests.WatchSyncTests testTripSelectionKeepsTheStartedTripAndAtMostEight]' started.
+Test Case '-[PublitTests.WatchSyncTests testTripSelectionKeepsTheStartedTripAndAtMostEight]' passed (0.013 seconds).
+Test Case '-[PublitTests.WatchSyncTests testWatchRoutesAgreeWithThePlannerOnWalking]' started.
+Test Case '-[PublitTests.WatchSyncTests testWatchRoutesAgreeWithThePlannerOnWalking]' passed (0.010 seconds).
+Test Suite 'WatchSyncTests' passed at 2026-11-14 02:37:34.847.
+	 Executed 23 tests, with 0 failures (0 unexpected) in 0.240 (0.330) seconds
+Test Suite 'WishesTests' started at 2026-11-14 02:37:34.847.
+Test Case '-[PublitTests.WishesTests testDecodesTheServerList]' started.
+Test Case '-[PublitTests.WishesTests testDecodesTheServerList]' passed (0.006 seconds).
+Test Case '-[PublitTests.WishesTests testLanguage]' started.
+Test Case '-[PublitTests.WishesTests testLanguage]' passed (0.001 seconds).
+Test Case '-[PublitTests.WishesTests testServerAnswersBecomeMessages]' started.
+Test Case '-[PublitTests.WishesTests testServerAnswersBecomeMessages]' passed (0.025 seconds).
+Test Case '-[PublitTests.WishesTests testShortTitleIsRejectedBeforeSending]' started.
+Test Case '-[PublitTests.WishesTests testShortTitleIsRejectedBeforeSending]' passed (0.010 seconds).
+Test Case '-[PublitTests.WishesTests testVoterIdMatchesTheServerRule]' started.
+Test Case '-[PublitTests.WishesTests testVoterIdMatchesTheServerRule]' passed (0.006 seconds).
+Test Suite 'WishesTests' passed at 2026-11-14 02:37:34.896.
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.047 (0.049) seconds
+Test Suite 'PublitTests.xctest' passed at 2026-11-14 02:37:34.896.
+	 Executed 411 tests, with 0 failures (0 unexpected) in 17.995 (19.930) seconds
+Test Suite 'All tests' passed at 2026-11-14 02:37:34.897.
+	 Executed 411 tests, with 0 failures (0 unexpected) in 17.995 (19.934) seconds
+2026-11-14 02:37:36.227 xcodebuild[20222:60226] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-11-14 02:37:36.231 xcodebuild[20222:60226] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-11-14 02:37:36.241 xcodebuild[20222:60226] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-11-14 02:37:37.061 xcodebuild[20222:60226] [MT] IDETestOperationsObserverDebug: 91.585 elapsed -- Testing started completed.
+2026-11-14 02:37:37.069 xcodebuild[20222:60226] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-11-14 02:37:37.069 xcodebuild[20222:60226] [MT] IDETestOperationsObserverDebug: 91.585 sec, +91.585 sec -- end
+
+Test session results, code coverage, and logs:
+	/Users/runner/work/Publit/Publit/build/Logs/Test/Test-Publit-2026.11.14_02-36-05-+0000.xcresult
+
+** TEST EXECUTE SUCCEEDED **
+
+Testing started
