@@ -77,6 +77,7 @@ jobs:
           xcodebuild test-without-building -project Publit.xcodeproj -scheme Publit \
             -destination "id=${{ steps.sim.outputs.udid }}" -derivedDataPath build \
             -only-testing:PublitUITests \
+            -retry-tests-on-failure -test-iterations 2 \
             -skip-testing:PublitUITests/PublitUITests/testF21DesignScreens \
             -skip-testing:PublitUITests/PublitUITests/testF22StartScreens \
             -skip-testing:PublitUITests/PublitUITests/testF24WebsiteTripLight \

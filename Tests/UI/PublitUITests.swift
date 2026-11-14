@@ -53,12 +53,26 @@ final class PublitUITests: XCTestCase {
         print("TIMING: \(name) \(Int(Date().timeIntervalSince(startedAt))) s")
     }
 
-    private func launch(_ env: [String: String] = [:]) -> XCUIApplication {
+    private func launch(_ env: [String: String] = [:], defaults: [String: String] = [:]) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchEnvironment = env
+        // Settings for this launch only (argument domain, not saved): "-key value".
         app.launchArguments = ["-onboardingDone", "YES", "-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
+            + defaults.sorted { $0.key < $1.key }.flatMap { ["-\($0.key)", $0.value] }
         app.launch()
         return app
+    }
+
+    /// Taps a search field and waits until it really has the keyboard before typing. On a busy
+    /// runner the field can still be animating in; typing then fails with "Neither element nor any
+    /// descendant has keyboard focus" (F03 on CI, November 2026).
+    private func focus(_ field: XCUIElement, in app: XCUIApplication) {
+        for _ in 0..<3 {
+            field.tap()
+            if app.keyboards.firstMatch.waitForExistence(timeout: 5),
+               (field.value(forKey: "hasKeyboardFocus") as? Bool) ?? true { return }
+        }
+        XCTFail("search field never got the keyboard")
     }
 
     /// Touch the top edge (no controls there) so a pending permission alert is handled,
@@ -561,7 +575,7 @@ final class PublitUITests: XCTestCase {
         app.buttons["Set Home"].tap()
         let field = app.searchFields.firstMatch
         XCTAssertTrue(field.waitForExistence(timeout: 5))
-        field.tap()
+        focus(field, in: app)
         field.typeText("Sendlinger Tor")
         let hit = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Sendlinger Tor'")).firstMatch
         XCTAssertTrue(hit.waitForExistence(timeout: timeout), "no geocoding result")
@@ -588,7 +602,7 @@ final class PublitUITests: XCTestCase {
         app.navigationBars["Saved"].buttons["Add"].tap()
         let field = app.searchFields.firstMatch
         XCTAssertTrue(field.waitForExistence(timeout: 5))
-        field.tap()
+        focus(field, in: app)
         field.typeText("x")
         XCTAssertFalse(app.staticTexts["No matches."].waitForExistence(timeout: 2), "searched with 1 character")
         field.typeText("qzqzqzqzqzqz😀ä")
@@ -608,7 +622,7 @@ final class PublitUITests: XCTestCase {
         whereTo.tap()
         let field = app.searchFields.firstMatch
         XCTAssertTrue(field.waitForExistence(timeout: 5))
-        field.tap()
+        focus(field, in: app)
         field.typeText("Sendlinger Tor")
         let hit = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Sendlinger Tor'")).firstMatch
         XCTAssertTrue(hit.waitForExistence(timeout: timeout))
@@ -869,14 +883,19 @@ final class PublitUITests: XCTestCase {
 
     /// F19 Long press on the station map drops a pin with "Route here" and "Route from here", like Apple Maps.
     func testF19DropPinOnMap() {
-        let app = launch()
+        // Empty map under the finger: no station, vehicle or point-of-interest pins in central Munich
+        // (CI's simulator location), which would open their own sheet instead of a dropped pin.
+        let app = launch(defaults: ["mapStations": "NO", "mapVehicles": "NO", "mapPOI": "NO", "mapSharing": "NO"])
         nudge(app)
         let mapButton = app.buttons["Station map"]
         XCTAssertTrue(mapButton.waitForExistence(timeout: 10))
         mapButton.tap()
         XCTAssertTrue(app.navigationBars["Stations"].waitForExistence(timeout: 10))
         sleep(3) // tiles
-        app.windows.firstMatch.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.6)).press(forDuration: 1.0)
+        // In the upper half: the place sheet opens at half height while the finger is still down.
+        // Pressed lower (0.6), the lift landed on the sheet's "Route here" and planned a route at once,
+        // so the sheet was gone before the test looked for it (F19 failed in most runs until build 66).
+        app.windows.firstMatch.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.36)).press(forDuration: 0.8)
         XCTAssertTrue(app.buttons["mapPlaceRoute"].waitForExistence(timeout: 10), "no place sheet after long press")
         XCTAssertTrue(app.buttons["mapPlaceRouteFrom"].exists)
         snap("map-dropped-pin")
@@ -892,7 +911,7 @@ final class PublitUITests: XCTestCase {
         to.tap()
         let field = app.searchFields.firstMatch
         XCTAssertTrue(field.waitForExistence(timeout: 5))
-        field.tap()
+        focus(field, in: app)
         // In pieces: one long typeText on a busy runner can drop or reorder keys.
         for part in ["https://", "www.google.com", "/maps/search/", "48.1351,+11.5820"] {
             field.typeText(part)
