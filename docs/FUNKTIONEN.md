@@ -1,6 +1,6 @@
 # Publit iOS – Funktionen und Screens (vollständige Übersicht)
 
-> Stand: Version 0.1.0 (Build 68). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
+> Stand: Version 0.1.1 (Build 68). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
 > **Pflege:** Jede Änderung an `Sources/`, `Watch/`, `Widgets/` oder `Share/` muss diese Datei im selben Commit/PR mitändern (siehe Abschnitt „Aktualisierung“ ganz unten). Die maschinell erzeugte Liste aller Views steht in [`FUNKTIONEN-INVENTAR.md`](FUNKTIONEN-INVENTAR.md) und wird von der CI automatisch aktualisiert.
 
 ## Inhalt
