@@ -1,0 +1,400 @@
+    t =    17.16s         Find the Window at {{0.0, 0.0}, {402.0, 874.0}}
+    t =    18.21s     Wait for io.github.elija7580.publit to idle
+    t =    18.55s Waiting 6.0s for "mapPlaceRoute" Button to exist
+    t =    19.57s     Checking `Expect predicate `existsNoRetry == 1` for object "mapPlaceRoute" Button`
+    t =    19.58s         Checking existence of `"mapPlaceRoute" Button`
+    t =    19.76s Checking existence of `"mapPlaceRouteFrom" Button`
+    t =    20.14s Added attachment named 'map-dropped-pin'
+    t =    20.14s Tap "mapPlaceRoute" Button
+    t =    20.14s     Wait for io.github.elija7580.publit to idle
+    t =    20.14s     Find the "mapPlaceRoute" Button
+    t =    20.28s     Check for interrupting elements affecting "mapPlaceRoute" Button
+    t =    20.39s     Synthesize event
+    t =    20.70s     Wait for io.github.elija7580.publit to idle
+    t =    21.33s Waiting 10.0s for NavigationBar (Descendants matching type NavigationBar) to exist
+    t =    22.39s     Checking `Expect predicate `existsNoRetry == 1` for object NavigationBar (Descendants matching type NavigationBar)`
+    t =    22.39s         Checking existence of `NavigationBar (Descendants matching type NavigationBar)`
+    t =    22.50s Tear Down
+    t =    22.71s     Added attachment named 'failed-testF19DropPinOnMap'
+TIMING: -[PublitUITests testF19DropPinOnMap] 22 s
+Test Case '-[PublitUITests.PublitUITests testF19DropPinOnMap]' passed (23.044 seconds).
+Test Case '-[PublitUITests.PublitUITests testF20PastedMapLinkIsAPlace]' started (Iteration 1 of 2).
+    t =     0.00s Start Test at 2026-11-14 15:25:58.763
+    t =     0.03s Set Up
+    t =     0.03s Open io.github.elija7580.publit
+    t =     0.03s     Launch io.github.elija7580.publit
+    t =     0.03s         Terminate io.github.elija7580.publit:70533
+2026-11-14 15:25:58.846 xcodebuild[32584:90124] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-11-14 15:25:58.847 xcodebuild[32584:90124] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-11-14 15:25:58.848 xcodebuild[32584:90124] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-11-14 15:25:59.795 xcodebuild[32584:90124] [MT] IDELaunchParametersSnapshot: debugger version lookup failed for path '<nil>': noURL
+2026-11-14 15:25:59.796 xcodebuild[32584:90124] [MT] IDELaunchParametersSnapshot: no debugger version
+2026-11-14 15:25:59.851 xcodebuild[32584:90124] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+    t =     1.53s         Setting up automation session
+    t =     5.42s         Wait for io.github.elija7580.publit to idle
+    t =     8.10s Waiting 10.0s for "endpoint-to" Button to exist
+    t =     9.13s     Checking `Expect predicate `existsNoRetry == 1` for object "endpoint-to" Button`
+    t =     9.13s         Checking existence of `"endpoint-to" Button`
+    t =     9.66s Tap "endpoint-to" Button
+    t =     9.66s     Wait for io.github.elija7580.publit to idle
+    t =     9.66s     Find the "endpoint-to" Button
+    t =     9.75s     Check for interrupting elements affecting "endpoint-to" Button
+    t =     9.85s     Synthesize event
+    t =    10.16s     Wait for io.github.elija7580.publit to idle
+    t =    10.68s Waiting 5.0s for SearchField (First Match) to exist
+    t =    11.73s     Checking `Expect predicate `existsNoRetry == 1` for object SearchField (First Match)`
+    t =    11.73s         Checking existence of `SearchField (First Match)`
+    t =    11.81s Tap SearchField (First Match)
+    t =    11.81s     Wait for io.github.elija7580.publit to idle
+    t =    11.82s     Find the SearchField (First Match)
+    t =    11.87s     Check for interrupting elements affecting "Address, stop or place" SearchField
+    t =    11.99s     Synthesize event
+    t =    12.31s     Wait for io.github.elija7580.publit to idle
+    t =    14.18s Waiting 5.0s for Keyboard (First Match) to exist
+    t =    15.21s     Checking `Expect predicate `existsNoRetry == 1` for object Keyboard (First Match)`
+    t =    15.21s         Checking existence of `Keyboard (First Match)`
+    t =    15.31s Find the "Address, stop or place" SearchField
+    t =    15.40s Type 'https://' into "Address, stop or place" SearchField
+    t =    15.41s     Wait for io.github.elija7580.publit to idle
+    t =    15.41s     Find the "Address, stop or place" SearchField
+    t =    15.50s     Check for interrupting elements affecting "Address, stop or place" SearchField
+    t =    15.66s     Synthesize event
+    t =    16.00s     Wait for io.github.elija7580.publit to idle
+    t =    16.14s Type 'www.google.com' into "Address, stop or place" SearchField
+    t =    16.14s     Wait for io.github.elija7580.publit to idle
+    t =    16.14s     Find the "Address, stop or place" SearchField
+    t =    16.32s     Check for interrupting elements affecting "Address, stop or place" SearchField
+    t =    16.41s     Synthesize event
+    t =    16.85s     Wait for io.github.elija7580.publit to idle
+    t =    16.86s Type '/maps/search/' into "Address, stop or place" SearchField
+    t =    16.86s     Wait for io.github.elija7580.publit to idle
+    t =    16.86s     Find the "Address, stop or place" SearchField
+    t =    16.97s     Check for interrupting elements affecting "Address, stop or place" SearchField
+    t =    17.06s     Synthesize event
+    t =    17.48s     Wait for io.github.elija7580.publit to idle
+    t =    17.49s Type '48.1351,+11.5820' into "Address, stop or place" SearchField
+    t =    17.49s     Wait for io.github.elija7580.publit to idle
+    t =    17.49s     Find the "Address, stop or place" SearchField
+    t =    17.64s     Check for interrupting elements affecting "Address, stop or place" SearchField
+    t =    17.73s     Synthesize event
+    t =    18.21s     Wait for io.github.elija7580.publit to idle
+    t =    18.22s Waiting 15.0s for Button (First Match) to exist
+    t =    19.23s     Checking `Expect predicate `existsNoRetry == 1` for object Button (First Match)`
+    t =    19.23s         Checking existence of `Button (First Match)`
+    t =    19.59s Added attachment named 'search-map-link'
+    t =    19.59s Tear Down
+    t =    19.74s     Added attachment named 'failed-testF20PastedMapLinkIsAPlace'
+TIMING: -[PublitUITests testF20PastedMapLinkIsAPlace] 19 s
+Test Case '-[PublitUITests.PublitUITests testF20PastedMapLinkIsAPlace]' passed (19.990 seconds).
+Test Case '-[PublitUITests.PublitUITests testF23WideLayout]' started (Iteration 1 of 2).
+    t =     0.00s Start Test at 2026-11-14 15:26:18.754
+    t =     0.03s Set Up
+    t =     0.03s Setting device orientation to Portrait
+    t =     0.05s     Device orientation changed to Portrait
+    t =     0.07s     Wait for io.github.elija7580.publit to idle
+    t =     0.08s Open io.github.elija7580.publit
+    t =     0.08s     Launch io.github.elija7580.publit
+    t =     0.08s         Terminate io.github.elija7580.publit:72138
+2026-11-14 15:26:19.174 xcodebuild[32584:90124] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-11-14 15:26:19.176 xcodebuild[32584:90124] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-11-14 15:26:19.178 xcodebuild[32584:90124] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-11-14 15:26:19.864 xcodebuild[32584:90124] [MT] IDELaunchParametersSnapshot: debugger version lookup failed for path '<nil>': noURL
+2026-11-14 15:26:19.864 xcodebuild[32584:90124] [MT] IDELaunchParametersSnapshot: no debugger version
+2026-11-14 15:26:19.916 xcodebuild[32584:90124] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+    t =     1.40s         Setting up automation session
+    t =     4.66s         Wait for io.github.elija7580.publit to idle
+    t =     7.62s Waiting 3.0s for "Allow While Using App" Button to exist
+    t =     8.69s     Checking `Expect predicate `existsNoRetry == 1` for object "Allow While Using App" Button`
+    t =     8.69s         Checking existence of `"Allow While Using App" Button`
+    t =     8.84s         Capturing element debug description
+    t =     9.67s     Checking `Expect predicate `existsNoRetry == 1` for object "Allow While Using App" Button`
+    t =     9.67s         Checking existence of `"Allow While Using App" Button`
+    t =     9.70s         Capturing element debug description
+    t =    10.63s     Checking `Expect predicate `existsNoRetry == 1` for object "Allow While Using App" Button`
+    t =    10.63s         Checking existence of `"Allow While Using App" Button`
+    t =    10.65s         Capturing element debug description
+    t =    10.65s     Checking existence of `"Allow While Using App" Button`
+    t =    10.67s Collecting debug information to assist test failure triage
+    t =    10.68s     Requesting snapshot of accessibility hierarchy for app with pid 17494
+    t =    10.75s Waiting 3.0s for "Beim Verwenden der App erlauben" Button to exist
+    t =    11.80s     Checking `Expect predicate `existsNoRetry == 1` for object "Beim Verwenden der App erlauben" Button`
+    t =    11.80s         Checking existence of `"Beim Verwenden der App erlauben" Button`
+    t =    11.83s         Capturing element debug description
+    t =    12.75s     Checking `Expect predicate `existsNoRetry == 1` for object "Beim Verwenden der App erlauben" Button`
+    t =    12.76s         Checking existence of `"Beim Verwenden der App erlauben" Button`
+    t =    12.81s         Capturing element debug description
+    t =    13.75s     Checking `Expect predicate `existsNoRetry == 1` for object "Beim Verwenden der App erlauben" Button`
+    t =    13.75s         Checking existence of `"Beim Verwenden der App erlauben" Button`
+    t =    13.78s         Capturing element debug description
+    t =    13.78s     Checking existence of `"Beim Verwenden der App erlauben" Button`
+    t =    13.81s Collecting debug information to assist test failure triage
+    t =    13.81s     Requesting snapshot of accessibility hierarchy for app with pid 17494
+    t =    24.03s Added attachment named 'wide-nearby'
+    t =    24.04s Checking existence of `TabBar (First Match)`
+    t =    24.12s Tap Button (Element at index 1)
+    t =    24.12s     Wait for io.github.elija7580.publit to idle
+    t =    24.16s     Find the Button (Element at index 1)
+    t =    24.35s     Check for interrupting elements affecting "Planen" Button
+    t =    24.45s     Synthesize event
+    t =    24.83s     Wait for io.github.elija7580.publit to idle
+    t =    39.40s Added attachment named 'wide-plan'
+    t =    39.40s Waiting 5.0s for "routeRow" Any to exist
+    t =    40.44s     Checking `Expect predicate `existsNoRetry == 1` for object "routeRow" Any`
+    t =    40.44s         Checking existence of `"routeRow" Any`
+    t =    40.82s Tap "routeRow" Any
+    t =    40.82s     Wait for io.github.elija7580.publit to idle
+    t =    40.82s     Find the "routeRow" Any
+    t =    41.19s     Check for interrupting elements affecting "routeRow" Button
+    t =    41.37s     Synthesize event
+    t =    41.68s     Wait for io.github.elija7580.publit to idle
+    t =    46.03s Added attachment named 'wide-route'
+    t =    46.03s Checking existence of `TabBar (First Match)`
+    t =    46.06s Tap Button (Element at index 3)
+    t =    46.06s     Wait for io.github.elija7580.publit to idle
+    t =    46.07s     Find the Button (Element at index 3)
+    t =    46.16s     Check for interrupting elements affecting "Gespeichert" Button
+    t =    46.22s     Synthesize event
+    t =    46.52s     Wait for io.github.elija7580.publit to idle
+    t =    50.92s Added attachment named 'wide-saved'
+    t =    50.92s Terminate io.github.elija7580.publit:73589
+2026-11-14 15:27:09.712 xcodebuild[32584:90124] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-11-14 15:27:09.713 xcodebuild[32584:90124] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-11-14 15:27:09.714 xcodebuild[32584:90124] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+    t =    51.94s Setting device orientation to Landscape Left
+    t =    51.95s     Device orientation changed to Landscape Left
+    t =    51.96s     Wait for com.apple.springboard to idle
+    t =    51.97s Open io.github.elija7580.publit
+    t =    51.97s     Launch io.github.elija7580.publit
+2026-11-14 15:27:10.750 xcodebuild[32584:90124] [MT] IDELaunchParametersSnapshot: debugger version lookup failed for path '<nil>': noURL
+2026-11-14 15:27:10.750 xcodebuild[32584:90124] [MT] IDELaunchParametersSnapshot: no debugger version
+2026-11-14 15:27:10.797 xcodebuild[32584:90124] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+    t =    52.36s         Setting up automation session
+    t =    56.80s         Wait for io.github.elija7580.publit to idle
+    t =    59.61s Waiting 3.0s for "Allow While Using App" Button to exist
+    t =    60.67s     Checking `Expect predicate `existsNoRetry == 1` for object "Allow While Using App" Button`
+    t =    60.67s         Checking existence of `"Allow While Using App" Button`
+    t =    60.70s         Capturing element debug description
+    t =    61.65s     Checking `Expect predicate `existsNoRetry == 1` for object "Allow While Using App" Button`
+    t =    61.65s         Checking existence of `"Allow While Using App" Button`
+    t =    61.68s         Capturing element debug description
+    t =    62.62s     Checking `Expect predicate `existsNoRetry == 1` for object "Allow While Using App" Button`
+    t =    62.62s         Checking existence of `"Allow While Using App" Button`
+    t =    62.65s         Capturing element debug description
+    t =    62.65s     Checking existence of `"Allow While Using App" Button`
+    t =    62.67s Collecting debug information to assist test failure triage
+    t =    62.67s     Requesting snapshot of accessibility hierarchy for app with pid 17494
+    t =    62.72s Waiting 3.0s for "Beim Verwenden der App erlauben" Button to exist
+    t =    63.74s     Checking `Expect predicate `existsNoRetry == 1` for object "Beim Verwenden der App erlauben" Button`
+    t =    63.74s         Checking existence of `"Beim Verwenden der App erlauben" Button`
+    t =    63.78s         Capturing element debug description
+    t =    64.74s     Checking `Expect predicate `existsNoRetry == 1` for object "Beim Verwenden der App erlauben" Button`
+    t =    64.74s         Checking existence of `"Beim Verwenden der App erlauben" Button`
+    t =    64.78s         Capturing element debug description
+    t =    65.73s     Checking `Expect predicate `existsNoRetry == 1` for object "Beim Verwenden der App erlauben" Button`
+    t =    65.73s         Checking existence of `"Beim Verwenden der App erlauben" Button`
+    t =    65.77s         Capturing element debug description
+    t =    65.77s     Checking existence of `"Beim Verwenden der App erlauben" Button`
+    t =    65.79s Collecting debug information to assist test failure triage
+    t =    65.80s     Requesting snapshot of accessibility hierarchy for app with pid 17494
+    t =    75.99s Added attachment named 'wide-nearby-landscape'
+    t =    75.99s Checking existence of `TabBar (First Match)`
+    t =    76.08s Tap Button (Element at index 1)
+    t =    76.08s     Wait for io.github.elija7580.publit to idle
+    t =    76.11s     Find the Button (Element at index 1)
+    t =    76.25s     Check for interrupting elements affecting "Planen" Button
+    t =    76.32s     Synthesize event
+    t =    76.67s     Wait for io.github.elija7580.publit to idle
+    t =    91.13s Added attachment named 'wide-plan-landscape'
+    t =    91.13s Waiting 5.0s for "routeRow" Any to exist
+    t =    92.20s     Checking `Expect predicate `existsNoRetry == 1` for object "routeRow" Any`
+    t =    92.20s         Checking existence of `"routeRow" Any`
+    t =    92.52s Tap "routeRow" Any
+    t =    92.52s     Wait for io.github.elija7580.publit to idle
+    t =    92.53s     Find the "routeRow" Any
+    t =    92.83s     Check for interrupting elements affecting "routeRow" Button
+    t =    92.95s     Synthesize event
+    t =    93.26s     Wait for io.github.elija7580.publit to idle
+    t =    98.21s Added attachment named 'wide-route-landscape'
+    t =    98.21s Checking existence of `TabBar (First Match)`
+    t =    98.24s Tap Button (Element at index 3)
+    t =    98.24s     Wait for io.github.elija7580.publit to idle
+    t =    98.24s     Find the Button (Element at index 3)
+    t =    98.33s     Check for interrupting elements affecting "Gespeichert" Button
+    t =    98.40s     Synthesize event
+    t =    98.71s     Wait for io.github.elija7580.publit to idle
+    t =   103.02s Added attachment named 'wide-saved-landscape'
+    t =   103.03s Terminate io.github.elija7580.publit:76680
+2026-11-14 15:28:01.811 xcodebuild[32584:90124] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-11-14 15:28:01.812 xcodebuild[32584:90124] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-11-14 15:28:01.813 xcodebuild[32584:90124] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+    t =   104.04s Setting device orientation to Portrait
+    t =   104.04s     Device orientation changed to Portrait
+    t =   104.05s     Wait for com.apple.springboard to idle
+    t =   104.05s Tear Down
+    t =   104.26s     Added attachment named 'failed-testF23WideLayout'
+TIMING: -[PublitUITests testF23WideLayout] 104 s
+Test Case '-[PublitUITests.PublitUITests testF23WideLayout]' passed (104.329 seconds).
+Test Case '-[PublitUITests.PublitUITests testF29WebsiteMissed]' started (Iteration 1 of 2).
+    t =     0.00s Start Test at 2026-11-14 15:28:03.083
+    t =     0.02s Set Up
+    t =     0.03s Setting simulated location to <+48.16170000,+11.58660000> +/- 0.00m (speed -1.00 mps / course -1.00) @ 11/14/26, 3:28:03 PM Greenwich Mean Time
+    t =     0.03s Open io.github.elija7580.publit
+    t =     0.03s     Launch io.github.elija7580.publit
+2026-11-14 15:28:03.116 xcodebuild[32584:90124] [MT] IDELaunchParametersSnapshot: debugger version lookup failed for path '<nil>': noURL
+2026-11-14 15:28:03.116 xcodebuild[32584:90124] [MT] IDELaunchParametersSnapshot: no debugger version
+2026-11-14 15:28:03.177 xcodebuild[32584:90124] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+    t =     0.28s         Setting up automation session
+    t =     4.18s         Wait for io.github.elija7580.publit to idle
+    t =     7.71s Waiting 3.0s for "Allow While Using App" Button to exist
+    t =     8.74s     Checking `Expect predicate `existsNoRetry == 1` for object "Allow While Using App" Button`
+    t =     8.74s         Checking existence of `"Allow While Using App" Button`
+    t =     8.77s         Capturing element debug description
+    t =     9.71s     Checking `Expect predicate `existsNoRetry == 1` for object "Allow While Using App" Button`
+    t =     9.71s         Checking existence of `"Allow While Using App" Button`
+    t =     9.74s         Capturing element debug description
+    t =    10.72s     Checking `Expect predicate `existsNoRetry == 1` for object "Allow While Using App" Button`
+    t =    10.72s         Checking existence of `"Allow While Using App" Button`
+    t =    10.75s         Capturing element debug description
+    t =    10.75s     Checking existence of `"Allow While Using App" Button`
+    t =    10.77s Collecting debug information to assist test failure triage
+    t =    10.77s     Requesting snapshot of accessibility hierarchy for app with pid 17494
+    t =    10.82s Waiting 3.0s for "Beim Verwenden der App erlauben" Button to exist
+    t =    11.87s     Checking `Expect predicate `existsNoRetry == 1` for object "Beim Verwenden der App erlauben" Button`
+    t =    11.87s         Checking existence of `"Beim Verwenden der App erlauben" Button`
+    t =    11.90s         Capturing element debug description
+    t =    12.84s     Checking `Expect predicate `existsNoRetry == 1` for object "Beim Verwenden der App erlauben" Button`
+    t =    12.84s         Checking existence of `"Beim Verwenden der App erlauben" Button`
+    t =    12.87s         Capturing element debug description
+    t =    13.83s     Checking `Expect predicate `existsNoRetry == 1` for object "Beim Verwenden der App erlauben" Button`
+    t =    13.83s         Checking existence of `"Beim Verwenden der App erlauben" Button`
+    t =    13.87s         Capturing element debug description
+    t =    13.87s     Checking existence of `"Beim Verwenden der App erlauben" Button`
+    t =    13.89s Collecting debug information to assist test failure triage
+    t =    13.89s     Requesting snapshot of accessibility hierarchy for app with pid 17494
+    t =    19.95s Press Window (First Match)[0.50, 0.74] for 0.1 seconds, then drag to Window (First Match)[0.50, 0.12] with velocity of 500.00 pixels per second, and then hold for 0.0 seconds 
+    t =    19.95s     Wait for io.github.elija7580.publit to idle
+    t =    19.95s     Find the Window (First Match)
+    t =    19.98s     Check for interrupting elements affecting Window
+    t =    20.15s     Synthesize event
+    t =    20.15s         Find the Window at {{0.0, 0.0}, {402.0, 874.0}}
+    t =    20.22s         Find the Window at {{0.0, 0.0}, {402.0, 874.0}}
+    t =    20.27s         Find the Window at {{0.0, 0.0}, {402.0, 874.0}}
+    t =    20.29s         Find the Window at {{0.0, 0.0}, {402.0, 874.0}}
+    t =    20.31s         Find the Window at {{0.0, 0.0}, {402.0, 874.0}}
+    t =    21.73s     Wait for io.github.elija7580.publit to idle
+    t =    21.73s Waiting 25.0s for "guideSwitchConnection" Button to exist
+    t =    22.74s     Checking `Expect predicate `existsNoRetry == 1` for object "guideSwitchConnection" Button`
+    t =    22.74s         Checking existence of `"guideSwitchConnection" Button`
+    t =    25.03s Added attachment named 'web-live-missed'
+    t =    25.03s Terminate io.github.elija7580.publit:80356
+2026-11-14 15:28:28.161 xcodebuild[32584:90124] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-11-14 15:28:28.162 xcodebuild[32584:90124] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-11-14 15:28:28.164 xcodebuild[32584:90124] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+    t =    26.04s Open io.github.elija7580.publit
+    t =    26.05s     Launch io.github.elija7580.publit
+2026-11-14 15:28:29.135 xcodebuild[32584:90124] [MT] IDELaunchParametersSnapshot: debugger version lookup failed for path '<nil>': noURL
+2026-11-14 15:28:29.135 xcodebuild[32584:90124] [MT] IDELaunchParametersSnapshot: no debugger version
+2026-11-14 15:28:29.177 xcodebuild[32584:90124] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+    t =    26.43s         Setting up automation session
+    t =    29.66s         Wait for io.github.elija7580.publit to idle
+    t =    33.23s Waiting 3.0s for "Allow While Using App" Button to exist
+    t =    34.27s     Checking `Expect predicate `existsNoRetry == 1` for object "Allow While Using App" Button`
+    t =    34.28s         Checking existence of `"Allow While Using App" Button`
+    t =    34.33s         Capturing element debug description
+    t =    35.27s     Checking `Expect predicate `existsNoRetry == 1` for object "Allow While Using App" Button`
+    t =    35.27s         Checking existence of `"Allow While Using App" Button`
+    t =    35.30s         Capturing element debug description
+    t =    36.23s     Checking `Expect predicate `existsNoRetry == 1` for object "Allow While Using App" Button`
+    t =    36.24s         Checking existence of `"Allow While Using App" Button`
+    t =    36.26s         Capturing element debug description
+    t =    36.26s     Checking existence of `"Allow While Using App" Button`
+    t =    36.29s Collecting debug information to assist test failure triage
+    t =    36.29s     Requesting snapshot of accessibility hierarchy for app with pid 17494
+    t =    36.34s Waiting 3.0s for "Beim Verwenden der App erlauben" Button to exist
+    t =    37.36s     Checking `Expect predicate `existsNoRetry == 1` for object "Beim Verwenden der App erlauben" Button`
+    t =    37.36s         Checking existence of `"Beim Verwenden der App erlauben" Button`
+    t =    37.38s         Capturing element debug description
+    t =    38.42s     Checking `Expect predicate `existsNoRetry == 1` for object "Beim Verwenden der App erlauben" Button`
+    t =    38.42s         Checking existence of `"Beim Verwenden der App erlauben" Button`
+    t =    38.45s         Capturing element debug description
+    t =    39.34s     Checking `Expect predicate `existsNoRetry == 1` for object "Beim Verwenden der App erlauben" Button`
+    t =    39.35s         Checking existence of `"Beim Verwenden der App erlauben" Button`
+    t =    39.39s         Capturing element debug description
+    t =    39.39s     Checking existence of `"Beim Verwenden der App erlauben" Button`
+    t =    39.42s Collecting debug information to assist test failure triage
+    t =    39.42s     Requesting snapshot of accessibility hierarchy for app with pid 17494
+    t =    45.46s Press Window (First Match)[0.50, 0.74] for 0.1 seconds, then drag to Window (First Match)[0.50, 0.12] with velocity of 500.00 pixels per second, and then hold for 0.0 seconds 
+    t =    45.46s     Wait for io.github.elija7580.publit to idle
+    t =    45.47s     Find the Window (First Match)
+    t =    45.50s     Check for interrupting elements affecting Window
+    t =    45.70s     Synthesize event
+    t =    45.70s         Find the Window at {{0.0, 0.0}, {402.0, 874.0}}
+    t =    45.75s         Find the Window at {{0.0, 0.0}, {402.0, 874.0}}
+    t =    45.80s         Find the Window at {{0.0, 0.0}, {402.0, 874.0}}
+    t =    45.83s         Find the Window at {{0.0, 0.0}, {402.0, 874.0}}
+    t =    45.85s         Find the Window at {{0.0, 0.0}, {402.0, 874.0}}
+    t =    47.26s     Wait for io.github.elija7580.publit to idle
+    t =    47.27s Waiting 25.0s for "guideSwitchConnection" Button to exist
+    t =    48.32s     Checking `Expect predicate `existsNoRetry == 1` for object "guideSwitchConnection" Button`
+    t =    48.32s         Checking existence of `"guideSwitchConnection" Button`
+    t =    50.67s Added attachment named 'web-live-missed-dark'
+    t =    50.67s Terminate io.github.elija7580.publit:82449
+2026-11-14 15:28:53.878 xcodebuild[32584:90124] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-11-14 15:28:53.879 xcodebuild[32584:90124] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-11-14 15:28:53.880 xcodebuild[32584:90124] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+    t =    51.71s Tear Down
+    t =    51.91s     Added attachment named 'failed-testF29WebsiteMissed'
+TIMING: -[PublitUITests testF29WebsiteMissed] 51 s
+Test Case '-[PublitUITests.PublitUITests testF29WebsiteMissed]' passed (51.985 seconds).
+Test Case '-[PublitUITests.PublitUITests testLiveTripOpensSavedUndatedTicketInsteadOfImport]' started (Iteration 1 of 2).
+    t =     0.00s Start Test at 2026-11-14 15:28:55.068
+    t =     0.03s Set Up
+    t =     0.03s Open io.github.elija7580.publit
+    t =     0.03s     Launch io.github.elija7580.publit
+2026-11-14 15:28:55.104 xcodebuild[32584:90124] [MT] IDELaunchParametersSnapshot: debugger version lookup failed for path '<nil>': noURL
+2026-11-14 15:28:55.104 xcodebuild[32584:90124] [MT] IDELaunchParametersSnapshot: no debugger version
+2026-11-14 15:28:55.159 xcodebuild[32584:90124] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+    t =     0.38s         Setting up automation session
+    t =     4.12s         Wait for io.github.elija7580.publit to idle
+    t =     7.89s Waiting 15.0s for "quickTicket" Button to exist
+    t =     8.92s     Checking `Expect predicate `existsNoRetry == 1` for object "quickTicket" Button`
+    t =     8.92s         Checking existence of `"quickTicket" Button`
+    t =     9.43s Tap "quickTicket" Button
+    t =     9.43s     Wait for io.github.elija7580.publit to idle
+    t =     9.43s     Find the "quickTicket" Button
+    t =     9.56s     Check for interrupting elements affecting "quickTicket" Button
+    t =     9.65s     Synthesize event
+    t =     9.97s     Wait for io.github.elija7580.publit to idle
+    t =    10.77s Waiting 5.0s for "DEMO KlimaTicket — no dates" NavigationBar to exist
+    t =    11.82s     Checking `Expect predicate `existsNoRetry == 1` for object "DEMO KlimaTicket — no dates" NavigationBar`
+    t =    11.82s         Checking existence of `"DEMO KlimaTicket — no dates" NavigationBar`
+    t =    12.00s Checking existence of `"importFile" Button`
+    t =    12.14s Checking existence of `"passMenu" Button`
+    t =    12.38s Added attachment named 'live-undated-ticket'
+    t =    12.39s Terminate io.github.elija7580.publit:84250
+2026-11-14 15:29:07.603 xcodebuild[32584:90124] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-11-14 15:29:07.605 xcodebuild[32584:90124] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-11-14 15:29:07.618 xcodebuild[32584:90124] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+    t =    13.41s Tear Down
+    t =    13.61s     Added attachment named 'failed-testLiveTripOpensSavedUndatedTicketInsteadOfImport'
+TIMING: -[PublitUITests testLiveTripOpensSavedUndatedTicketInsteadOfImport] 13 s
+Test Case '-[PublitUITests.PublitUITests testLiveTripOpensSavedUndatedTicketInsteadOfImport]' passed (13.671 seconds).
+Test Suite 'PublitUITests' passed at 2026-11-14 15:29:08.739.
+	 Executed 22 tests, with 0 failures (0 unexpected) in 1043.530 (1043.551) seconds
+Test Suite 'PublitUITests.xctest' passed at 2026-11-14 15:29:08.744.
+	 Executed 22 tests, with 0 failures (0 unexpected) in 1043.530 (1043.556) seconds
+Test Suite 'Selected tests' passed at 2026-11-14 15:29:08.744.
+	 Executed 22 tests, with 0 failures (0 unexpected) in 1043.530 (1043.557) seconds
+2026-11-14 15:29:08.934 xcodebuild[32584:90124] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-11-14 15:29:08.934 xcodebuild[32584:90124] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-11-14 15:29:08.940 xcodebuild[32584:90124] [MT] IDESchemeActionSDKRecord: operatingSystemBuild = <DVTBuildVersion 24A94232>, error = invalidDigitCount(94232).
+2026-11-14 15:29:09.424 xcodebuild[32584:90124] [MT] IDETestOperationsObserverDebug: 1057.604 elapsed -- Testing started completed.
+2026-11-14 15:29:09.424 xcodebuild[32584:90124] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-11-14 15:29:09.424 xcodebuild[32584:90124] [MT] IDETestOperationsObserverDebug: 1057.604 sec, +1057.604 sec -- end
+
+Test session results, code coverage, and logs:
+	/Users/runner/work/Publit/Publit/build/Logs/Test/Test-Publit-2026.11.14_15-11-31-+0000.xcresult
+
+** TEST EXECUTE SUCCEEDED **
+
+Testing started
