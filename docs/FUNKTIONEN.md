@@ -1,6 +1,6 @@
 # Publit iOS – Funktionen und Screens (vollständige Übersicht)
 
-> Stand: Version 0.1.0 (Build 66). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
+> Stand: Version 0.1.1 (Build 70). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
 > **Pflege:** Jede Änderung an `Sources/`, `Watch/`, `Widgets/` oder `Share/` muss diese Datei im selben Commit/PR mitändern (siehe Abschnitt „Aktualisierung“ ganz unten). Die maschinell erzeugte Liste aller Views steht in [`FUNKTIONEN-INVENTAR.md`](FUNKTIONEN-INVENTAR.md) und wird von der CI automatisch aktualisiert.
 
 ## Inhalt
@@ -73,6 +73,7 @@ Ohne Onboarding startet die Standortabfrage sofort.
 
 ## 3. Tab „In der Nähe“ (Nearby) – `NearbyView`
 
+- **Karte zur Orientierung** (`NearbyMapSection`, über den Abfahrten): dein Standort und die ersten sechs Stationen der Liste (die nächste mit gelbem Punkt), so gerahmt, dass alle hineinpassen. Tipp auf eine Station öffnet ihre Abfahrten, Tipp auf die Karte oder „Station map“ die ganze Stationskarte. Abschaltbar unter Einstellungen → Nearby → „Map“ (an).
 - **Umschalter** „Departures“ / „Lines“ (Picker „View“).
 - **Abfahrten**: nächste Haltestellen/Stationen, gruppiert pro Station bzw. pro Straßen-Haltestelle (Seite der Straße), mit `StopGroupHeader` (Name, Entfernung, Hauptziele). Suchradius stufenweise **500 m → 1,5 km → 5 km**, bis Abfahrten gefunden werden; weit entfernte Stopps werden mit Distanz und Gehzeit angezeigt statt „keine Abfahrten“.
 - Pro Zeile (`DepartureRow`): Linien-Badge (Betreiberfarbe, Verkehrsmittel-Symbol), „Towards …“ (Fahrtrichtung, bei Ringlinien das Ausstiegsziel + „Circle line“), **nächster Halt** mit Gleis/Steig („Next: Karlovy lázně · Platform A“ – zeigt die Richtung auch, wenn man das Ziel nicht kennt; Abfrage mit `fetchStops=true`, nur die ersten 3 Halte werden behalten, `UpcomingStops`; ist der nächste Halt das Ziel, entfällt er), sonst Gleis/Steig allein, Uhrzeit + Countdown („now“, „x min“), Verspätung „+x min“, Live/Fahrplan-Kennzeichnung, „Cancelled“, „Rail replacement bus“ (SEV).
@@ -104,7 +105,7 @@ Ohne Onboarding startet die Standortabfrage sofort.
 
 ## 6. Fahrt eines Fahrzeugs (`TripView`, `LineDeparturesView`)
 
-- Alle Halte der Fahrt mit Plan-/Live-Zeit, Verspätung „+x“, Gleis „Pl. x“, bereits passierte Halte.
+- Alle Halte der Fahrt wie die Abfahrtszeilen am Startbildschirm: **Halt links, Zeit rechts** (davor Gleis „Pl. x“ und Verspätung „+x“), bereits passierte Halte grau.
 - Karte (`TripMap`) mit **geschätzter Fahrzeugposition** („Estimated vehicle position“), Status „Not departed yet“, „Between A and B“, „At …“, „Arrived at …“; ohne Live-Daten aus dem Fahrplan geschätzt.
 - Aktionen pro Halt: „Route here“, „Route from here“; „From … to here“; Linie speichern.
 - Liste weiterer Abfahrten derselben Linie.
@@ -124,9 +125,12 @@ Ohne Onboarding startet die Standortabfrage sofort.
 - **Von/Nach**-Felder (`WhereToField`, „Where to?“), Standard-Start = aktueller Standort; **„Swap“** tauscht.
 - **Schnellwahl Zuhause/Arbeit** (`PlaceKeyRow`) und letzte Suchen (`RecentSearchesSection`).
 - **Zeit** („When“): „Now“ / „Depart at“ / „Arrive by“. Der Knopf „Now“ neben Datum und Uhrzeit bleibt einzeilig; ist zu wenig Platz (schmale Geräte, große Schrift), zeigt er nur die Uhr (VoiceOver: „Now“). „Now“ folgt der Uhr: später wiederkommen zeigt Verbindungen ab dann; Ergebnisse werden live nachgeladen.
-- **„Search routes“** startet die Suche; danach sucht jede Änderung automatisch neu; Ziel leeren = Neustart.
+- **„Search routes“**: breite Such-Taste unter Von/Nach, Zeit und Routenoptionen (wie in der ÖBB-App), ohne Ziel deaktiviert; startet die Suche, danach sucht jede Änderung automatisch neu; Ziel leeren = Neustart.
 - **Ergebnisliste** (`ItineraryRow`): Ab–An, Dauer (`DurationFigure`), Linien-Badges, Umstiege, Live-Kennzeichen, „Cancelled“, „Service changes on this route“, Umstiegswahrscheinlichkeit („Change at X: y % chance“), Fahrpreis-Schätzung, Smart-Badges; optional **Verbindungs-Zeitleisten** (`TimelineBar`; Fahrt farbig, Fußweg grau, Warten gepunktet).
-- **Sortierung**: Recommended, Departure, Fastest, Fewest changes, Least walking („Recommended: …“).
+- **Sortierung**: immer nach Zeit, spätere Verbindungen weiter unten – bei „Depart“ nach Abfahrt, bei „Arrive“ nach Ankunft (Gleichstand: die jeweils andere Zeit). Recommended, Fastest, Fewest changes, Least walking werden nur markiert („Recommended: …“), nicht nach oben sortiert.
+- **Tageskennzeichnung**: die erste Verbindung jedes anderen Tags als des gesuchten trägt „Tomorrow“ bzw. ein Datum (wie ein Tageswechsel im Fahrplan, nicht auf jeder Zeile) (Systemwortlaut, z. B. „Morgen“); Ankunft nach Mitternacht zeigt „+1“ hinter der Ankunftszeit.
+- **Sprung zur Empfehlung**: liegt die empfohlene Verbindung außerhalb der Sicht, springt eine Kapsel „Recommended: …“ am unteren Rand zu ihr; die Liste scrollt frei unter ihr, sie verdeckt keine Zeilen oder Hinweise.
+- **Server ausgelastet** (HTTP 429): eine Wiederholung nach 2 s; bleibt Transitous ausgelastet, erscheint „Transitous is busy right now. Try again in a moment.“, bereits angezeigte Verbindungen derselben Suche bleiben stehen.
 - „Earlier connections“ / „Later connections“, „Updated HH:MM“, Abdeckungswarnung für Start/Ziel („From · Kärnten“).
 - **Routenoptionen-Knopf** (`RouteOptionsButton`) mit Kurz-Zusammenfassung („All modes“, „Direct only“, „Step-free“, „With sharing“ …).
 - **Go Now** (`GoNowView`, Schnellroute vom Standort): Zeile „From … Change“ – Start ist der Standort, lässt sich aber über die Ortssuche auf jeden anderen Ort ändern (Überschrift dann „from …“); „Leave now“ / „Leave in x min“, „Walk all the way“, „Later connections“.
@@ -160,7 +164,8 @@ Ohne Onboarding startet die Standortabfrage sofort.
 
 - **LeaveHero**: „Leave now“ / „Leave in x min“ und Ankunftszeit – die entscheidende Zahl.
 - Statusbanner (Live / Timetable, „This trip is cancelled.“, „Service changes on this route“), „Updated HH:MM“.
-- **Karte** der Route (`RouteMap`, Linien in Betreiberfarbe, Fußwege gepunktet); Vergleichskarte (`CompareMapView`).
+- **Karte** der Route (`RouteMap`, Linien in Betreiberfarbe, Fußwege gepunktet; Ausschnitt an das Seitenverhältnis der Karte angepasst, damit Start und Ziel immer sichtbar sind); Vergleichskarte (`CompareMapView`).
+- **Rad/Auto die ganze Strecke**: ohne Linienkette und „Direct“ unter der Zeitkarte; die Schritte nennen den Start (wie das Ziel), dazu „Driving times are without traffic and parking.“ und „Open in …“.
 - **„Trip overview“**/„Steps“: Zeitleiste (`TimelineLegRow`, `TimelineRail`): je Abschnitt „Board at …“, „Get off at …“, Linie, Richtung, **Zugart und Rollstuhl-Eignung des Fahrzeugs** (`VehicleKindLine`/`VehicleKind`: z. B. „Railjet Xpress · High-speed train · Wheelchair accessible“, „Regional train · Not wheelchair accessible“; Kategorie aus der Zugnummer, Eignung aus GTFS `wheelchair_accessible`, ohne Angabe nichts), Gleis („Platform x“, Gleiswechsel), Zwischenhalte, Verspätung, SEV, Fußweg mit Anweisungen (Treppen, Ebenen, Ausgang „Exit towards …“), Leihfahrzeug („Pick up at …“, „Return at …“, „Rent in the provider's app“), Umstiegskarten.
 - **„Remind me to get off“** (`GetOffButton`): „Reminder set – We'll notify you at …“, „This stop is less than two minutes away.“, Hinweis falls Mitteilungen aus.
 - Fahrpreis (`FareSection`): „Fare estimate“ nur bei vollständig abgedeckter Route und eindeutiger Tarifregel; sonst „Fare information“ und Ticket-Links des Betreibers / Verbunds (`RegionTicketRow`, z. B. „Venice · ACTV“).
@@ -238,6 +243,7 @@ Screenshot-/Link-Tickets („My tickets“, „Add ticket“, Typ, „Expires“
 | Kopf | Logo, „Public transport, without the noise.“ |
 | Start | Start screen: Nearby / Plan |
 | Travel preferences | Routenoptionen-Zusammenfassung, „Show connection timelines“, „How to read connections“ (`ConnectionGuideView`: Ride/Walk/Wait/Time axis) |
+| Nearby | „Map“ (Standard an): kleine Orientierungskarte über den Abfahrten, siehe §3 |
 | Stations | „Platform map“ (Standard an), „Departures by platform“ (Standard aus), „Change guide“ (Standard an), Erklärtext; siehe §4 und §13 |
 | Smart routing | siehe §11 |
 | Map | Map provider (Apple/Google), Map style, Points of interest, Lines, Vehicles, Bikes and scooters, „Open directions in“ (Apple Maps, Google Maps, Citymapper) |
@@ -302,7 +308,7 @@ Ab 680 pt Breite (regular): Karte bildschirmfüllend, Inhalte in einem schwebend
 ## 23. Datenquellen, Abdeckung, Offline
 
 - **Live-Quellen** (`LiveSources`, `LiveSourceAdapters`, Schalter „Live data from more operators“): Europa (Transitous), Wien (Wiener Linien: Abfahrten, Störungen, Aufzüge), Österreich (ÖBB/HAFAS), Schweiz (search.ch), Deutschland (NRW, Berlin/Brandenburg, Hessen, Niedersachsen/Bremen, Schleswig-Holstein, Rheinland-Pfalz via HAFAS), Venedig (ACTV), Stockholm (SL), London (TfL). Es werden nur Haltestelle, Linie, Zeit gesendet.
-- **Abdeckungsatlas** (`Coverage`, 124 Gebiete, offline gebündelt, siehe [COVERAGE.md](COVERAGE.md)): Stufen „No timetable data“, „Very little timetable data“, „Missing: …“ (Lokalbusse, Stadtbusse, Metro, Tram, Fähren, S-Bahn). Anzeige in Plan, Routendetail, Nearby, Ortssuche, Karte, Watch; Link zur Abdeckungskarte publit.eu/abdeckung.
+- **Abdeckungsatlas** (`Coverage`, siehe [COVERAGE.md](COVERAGE.md)): weltweit aus allen Transitous-Quellen, von publit.eu jede Woche neu berechnet; App und Watch laden ihn höchstens einmal am Tag (`CoverageAtlasStore`, https://publit.eu/abdeckung/data/atlas.txt) und nutzen sonst die eingebaute Kopie. Neue Gebiete erscheinen so ohne App-Update; die Kartenebene „Data gaps“ zeichnet sich bei einem neuen Atlas neu. Stufen „No timetable data“, „Very little timetable data“, „Missing: …“ (Lokalbusse, Stadtbusse, Metro, Tram, Fähren, S-Bahn). Anzeige in Plan, Routendetail, Nearby, Ortssuche, Karte, Watch; Link zur Abdeckungskarte publit.eu/abdeckung.
 - **Offline** (`ResponseCache`): Speicher-Cache 15–60 s, Datei-Cache: Live-Antworten bis 24 h, Suche/Karte bis 7 Tage; Nearby-Fallback nur innerhalb 400 m; Anzeige mit Zeitstempel; keine Offline-Neuberechnung von Routen.
 - Fahrpreise aus MOTIS (`withFares`), streng geprüft (§12). Ticket-Links je Betreiber (`TicketLinks`: verknüpfte App → Feed-Link → Tarifseite → Website).
 - Darstellung: Linienfarben vom Betreiber (Kontrast 4,5:1), Ersatzfarbe je Verkehrsmittel, Richtung immer als „Towards“, Ringlinien-Sonderfall. Paris: Metro „3B“/„7B“ heißen „3bis“/„7bis“; RER-Missionscodes als Ziel („ZEMA“, „NEGE“) werden durch die Endstation der Fahrt ersetzt (`TransitLabels`). Zugnamen werden je Feed vereinheitlicht (`TransitLabels.trainName`): DB-interne Liniennummern („29“) weichen der Zuggattung („ICE“, daneben „ICE 1006“), MÁV-Namen wie „xpress 66“ werden mit der Gattung aus dem langen Routennamen zu „RJX 66“.
@@ -335,6 +341,7 @@ Kleinere Bausteine, die in den Abschnitten oben nicht namentlich vorkommen:
 | `PassArchiveButton` | Zugang zum Ticket-Archiv im Wallet (§14) |
 | `TicketAttachmentView`, `TicketSummaryCard`, `AddTicketView`, `TicketDisplayView`, `ShowTicketButton` | ältere Screenshot/Link-Tickets (§14, abgeschaltet) |
 | `TicketSection`, `TicketCardButton` | Ticket-Bereich in den Fahrt-Aktionen (§12) |
+| `NearbyMapSection` | Kleine Orientierungskarte über den Abfahrten in Nearby (§3) |
 | `CoverageMapNote` | Abdeckungs-Hinweiskarte über der Stationskarte (§7, §23) |
 | `NoticeBackground` | Hintergrund der Hinweis-Karten (§25) |
 | `ConnectionSymbols`, `ConnectionLegendRow` | Legende in „How to read connections“ (§16) |

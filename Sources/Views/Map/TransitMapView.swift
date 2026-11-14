@@ -151,6 +151,7 @@ struct TransitMapView: UIViewRepresentable {
         private var overlays: [MKOverlay] = []
         private var coverageOverlays: [MKOverlay] = []
         private var coverageShown = false
+        private var coverageVersion = -1
         private var reportedRegion = false
         private var appliedLook: MapLook?
         private var focusVersion = 0
@@ -186,9 +187,12 @@ struct TransitMapView: UIViewRepresentable {
 
         /// Shows or hides the areas with missing data. They go under the lines: the lines are put back on top.
         func applyCoverage(_ on: Bool, to map: MKMapView) {
-            guard on != coverageShown else { return }
+            // A newer atlas (downloaded in the background) redraws the layer.
+            guard on != coverageShown || (on && CoverageAtlas.version != coverageVersion) else { return }
             coverageShown = on
             if on {
+                coverageVersion = CoverageAtlas.version
+                map.removeOverlays(coverageOverlays)
                 map.removeOverlays(overlays)
                 coverageOverlays = CoverageOverlays.make()
                 map.addOverlays(coverageOverlays, level: .aboveRoads)

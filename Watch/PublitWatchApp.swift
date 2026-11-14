@@ -29,6 +29,8 @@ struct PublitWatchApp: App {
                     }
             }
             .environment(library)
+            // Same weekly map of data gaps as on the iPhone (one small file a day at most).
+            .task { await CoverageAtlasStore.shared.refreshIfNeeded() }
         }
     }
 }

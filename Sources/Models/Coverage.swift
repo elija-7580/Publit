@@ -1,4 +1,7 @@
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 /// How badly the open timetable data falls short around a place. Ordered by severity.
 enum CoverageLevel: Int, Comparable, Sendable {
@@ -51,7 +54,8 @@ private extension String {
     }
 }
 
-/// A place or region where data is known to be missing. Comes from `CoverageAtlasData`.
+/// A place or region where data is known to be missing. Comes from the coverage atlas
+/// (downloaded from publit.eu, with `CoverageAtlasData` built in as the fallback).
 struct CoverageArea: Identifiable, Equatable, Sendable {
     enum Shape: Equatable, Sendable {
         case circle(center: LatLon, radius: Double)
@@ -68,6 +72,9 @@ struct CoverageArea: Identifiable, Equatable, Sendable {
     let link: String
     let shape: Shape
     let minLat: Double, maxLat: Double, minLon: Double, maxLon: Double
+    /// Bounds of each ring (minLat, maxLat, minLon, maxLon): the worldwide atlas has areas with rings
+    /// on several continents, so a point is tested only against rings that can hold it.
+    private let ringBounds: [[Double]]
 
     init(id: String, level: CoverageLevel, gaps: [CoverageGap], nameEN: String, nameDE: String, link: String = "", shape: Shape) {
         self.id = id; self.level = level; self.gaps = gaps; self.nameEN = nameEN; self.nameDE = nameDE; self.link = link; self.shape = shape
@@ -76,7 +83,9 @@ struct CoverageArea: Identifiable, Equatable, Sendable {
             let dLat = r / 111_200
             let dLon = r / (111_200 * max(0.05, cos(c.lat * .pi / 180)))
             (minLat, maxLat, minLon, maxLon) = (c.lat - dLat, c.lat + dLat, c.lon - dLon, c.lon + dLon)
+            ringBounds = []
         case .polygon(let rings):
+            ringBounds = rings.map { r in [r.map(\.lat).min() ?? 0, r.map(\.lat).max() ?? 0, r.map(\.lon).min() ?? 0, r.map(\.lon).max() ?? 0] }
             let pts = rings.flatMap { $0 }
             (minLat, maxLat) = (pts.map(\.lat).min() ?? 0, pts.map(\.lat).max() ?? 0)
             (minLon, maxLon) = (pts.map(\.lon).min() ?? 0, pts.map(\.lon).max() ?? 0)
@@ -110,7 +119,11 @@ struct CoverageArea: Identifiable, Equatable, Sendable {
             return dx * dx + dy * dy <= r * r
         case .polygon(let rings):
             var inside = false
-            for ring in rings where Self.ring(ring, contains: p) { inside.toggle() }
+            for (k, ring) in rings.enumerated() {
+                let b = ringBounds[k]
+                guard p.lat >= b[0], p.lat <= b[1], p.lon >= b[2], p.lon <= b[3] else { continue }
+                if Self.ring(ring, contains: p) { inside.toggle() }
+            }
             return inside
         }
     }
@@ -176,14 +189,24 @@ struct CoverageAtlas: Sendable {
     let date: String
     let areas: [CoverageArea]
 
-    static let shared = CoverageAtlas(payload: CoverageAtlasData.payload, date: CoverageAtlasData.date)
+    /// The newest atlas the app has: the one downloaded from publit.eu, else the one built into the app.
+    /// Transitous coverage changes every week; the website rebuilds the atlas by itself, and the app picks
+    /// it up without an update (see `CoverageAtlasStore`).
+    static var shared: CoverageAtlas { CoverageAtlasStore.shared.atlas }
+    /// Changes whenever `shared` is replaced, so a map can redraw its data-gap layer.
+    static var version: Int { CoverageAtlasStore.shared.version }
+
+    static let bundled = CoverageAtlas(payload: CoverageAtlasData.payload, date: CoverageAtlasData.date)
 
     init(areas: [CoverageArea], date: String = "") { self.areas = areas; self.date = date }
 
-    /// One area per line: `A|id|level|gaps|name en|name de|link|shape` (see tools/coverage/make_atlas.py).
+    /// One area per line: `A|id|level|gaps|name en|name de|link|shape`; a downloaded file starts with
+    /// `D|<date>` (see publit-site/tools/coverage/make_atlas.py).
     init(payload: String, date: String) {
         var list: [CoverageArea] = []
+        var date = date
         for line in payload.split(separator: "\n") {
+            if line.hasPrefix("D|") { date = String(line.dropFirst(2)).trimmingCharacters(in: .whitespaces); continue }
             let f = line.split(separator: "|", maxSplits: 7, omittingEmptySubsequences: false)
             guard f.count == 8, f[0] == "A" else { continue }
             let level: CoverageLevel
@@ -275,6 +298,73 @@ struct CoverageNotice: Identifiable, Equatable, Sendable {
         if roles == [.start] { return L10n.t("From") + " · " + area.name }
         if roles == [.destination] { return L10n.t("To") + " · " + area.name }
         return area.name
+    }
+}
+
+/// Keeps the coverage atlas current. publit.eu rebuilds `abdeckung/data/atlas.txt` every week from all
+/// Transitous sources; the app loads it at most once a day, keeps it in Caches and falls back to the
+/// copy built into the app. Only that one public file is fetched; nothing about the user is sent.
+final class CoverageAtlasStore: @unchecked Sendable {
+    static let shared = CoverageAtlasStore()
+    static let remoteURL = URL(string: "https://publit.eu/abdeckung/data/atlas.txt")!
+
+    private let lock = NSLock()
+    private var current: CoverageAtlas
+    private var counter = 0
+    private var lastCheck: Date?
+    private let file: URL?
+    private let defaultsKey = "coverageAtlasChecked"
+
+    init(cacheDirectory: URL? = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first) {
+        file = cacheDirectory?.appendingPathComponent("coverage-atlas.txt")
+        current = .bundled
+        if let file, let text = try? String(contentsOf: file, encoding: .utf8), let cached = Self.accept(text), cached.date >= current.date {
+            current = cached
+        }
+        lastCheck = UserDefaults.standard.object(forKey: defaultsKey) as? Date
+    }
+
+    var atlas: CoverageAtlas { lock.lock(); defer { lock.unlock() }; return current }
+    var version: Int { lock.lock(); defer { lock.unlock() }; return counter }
+
+    /// A downloaded atlas is used only if it looks whole: a date line and a reasonable number of areas.
+    static func accept(_ text: String) -> CoverageAtlas? {
+        guard text.hasPrefix("D|") else { return nil }
+        let atlas = CoverageAtlas(payload: text, date: "")
+        guard !atlas.date.isEmpty, atlas.areas.count >= 20 else { return nil }
+        return atlas
+    }
+
+    /// Takes a newer atlas (or the same date, rebuilt). Older ones are ignored.
+    @discardableResult
+    func install(_ text: String) -> Bool {
+        guard let new = Self.accept(text) else { return false }
+        lock.lock()
+        let newer = new.date >= current.date
+        if newer { current = new; counter += 1 }
+        lock.unlock()
+        if newer, let file { try? text.write(to: file, atomically: true, encoding: .utf8) }
+        return newer
+    }
+
+    /// True at most once in 20 hours (also across launches).
+    private func claimCheck(_ now: Date) -> Bool {
+        lock.lock(); defer { lock.unlock() }
+        guard lastCheck.map({ now.timeIntervalSince($0) > 20 * 3600 }) ?? true else { return false }
+        lastCheck = now
+        return true
+    }
+
+    /// Called when the app becomes active: at most one small download a day, failures are silent.
+    func refreshIfNeeded(session: URLSession = .shared, now: Date = Date()) async {
+        guard claimCheck(now) else { return }
+        UserDefaults.standard.set(now, forKey: defaultsKey)
+        var request = URLRequest(url: Self.remoteURL, cachePolicy: .reloadRevalidatingCacheData, timeoutInterval: 20)
+        request.setValue("text/plain", forHTTPHeaderField: "Accept")
+        guard let (data, response) = try? await session.data(for: request),
+              (response as? HTTPURLResponse)?.statusCode == 200,
+              let text = String(data: data, encoding: .utf8) else { return }
+        install(text)
     }
 }
 

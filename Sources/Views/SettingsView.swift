@@ -22,6 +22,7 @@ struct SettingsView: View {
     @AppStorage(StationViews.platformMapKey) private var platformMap = true
     @AppStorage(StationViews.byPlatformKey) private var byPlatform = false
     @AppStorage(StationViews.changeGuideKey) private var changeGuide = true
+    @AppStorage(NearbyMapSection.defaultsKey) private var nearbyMap = true
     @State private var exportURL: URL?
     @State private var summary: HangLog.Summary?
     @State private var reportURL: URL?
@@ -73,6 +74,14 @@ struct SettingsView: View {
                     RouteOptionsButton()
                     Toggle(L10n.t("Show connection timelines"), isOn: $routeTimelines)
                     NavigationLink { ConnectionGuideView() } label: { Label(L10n.t("How to read connections"), systemImage: "questionmark.circle") }
+                }
+                Section {
+                    Toggle(L10n.t("Map"), isOn: $nearbyMap)
+                        .accessibilityIdentifier("settingNearbyMap")
+                } header: {
+                    Text(L10n.t("Nearby"))
+                } footer: {
+                    Text(L10n.t("A small map above the departures shows where you are and where the stations are. Tap it for the full station map."))
                 }
                 Section {
                     Toggle(L10n.t("Platform map"), isOn: $platformMap)

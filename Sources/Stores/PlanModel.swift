@@ -83,13 +83,25 @@ final class PlanModel {
     @ObservationIgnored private var streetKey: String?
     @ObservationIgnored var history: SearchHistoryStore = .shared
 
-    /// The routes in time order, always: the list reads like a timetable. What fits best
-    /// (recommended, fastest, fewest changes, least walking) is marked, not sorted to the top.
-    /// Smart routing drops routes another one beats on everything.
+    /// The routes in time order, always: the list reads like a timetable, later routes further down.
+    /// What fits best (recommended, fastest, fewest changes, least walking) is marked, not sorted
+    /// to the top. Smart routing drops routes another one beats on everything.
     var sortedItineraries: [Itinerary] {
         let list = SmartRouting.isEnabled ? SmartRouting.pruned(itineraries) : itineraries
-        return list.enumerated().sorted { a, b in
-            a.element.startTime != b.element.startTime ? a.element.startTime < b.element.startTime : a.offset < b.offset
+        return Self.timetableOrder(list, arriveBy: timeMode == .arriveBy)
+    }
+
+    /// Departure order when searching by departure, arrival order when searching "Arrive by":
+    /// the time the user asked about is the one that always grows down the list. Ties fall back to
+    /// the other time, then to the server's order.
+    nonisolated static func timetableOrder(_ list: [Itinerary], arriveBy: Bool) -> [Itinerary] {
+        list.enumerated().sorted { a, b in
+            let (x, y) = (a.element, b.element)
+            let first = arriveBy ? (x.endTime, y.endTime) : (x.startTime, y.startTime)
+            if first.0 != first.1 { return first.0 < first.1 }
+            let second = arriveBy ? (x.startTime, y.startTime) : (x.endTime, y.endTime)
+            if second.0 != second.1 { return second.0 < second.1 }
+            return a.offset < b.offset
         }.map(\.element)
     }
 
@@ -236,8 +248,9 @@ final class PlanModel {
             }
         } catch {
             guard token == myToken, !Self.isCancellation(error) else { return }
-            // A failed background refresh keeps the routes already on screen.
-            if !silent || itineraries.isEmpty {
+            // A failed refresh of the same search keeps the routes already on screen (a busy server
+            // must not empty the list); only a new query or an empty list shows the error.
+            if itineraries.isEmpty || (!silent && resultsKey != queryKey) {
                 itineraries = []
                 comparisons = []
                 if options.isSlowSearch, (error as? URLError)?.code == .timedOut {
@@ -315,7 +328,7 @@ final class PlanModel {
             guard token == myToken else { return }
             let known = Set(itineraries.map(\.id))
             let fresh = res.itineraries.withoutDetours.filter { !known.contains($0.id) }
-            itineraries = (itineraries + fresh).sorted { $0.startTime < $1.startTime }
+            itineraries = Self.timetableOrder(itineraries + fresh, arriveBy: req.arriveBy)
             offerForLearning()
             nextCursor = req.arriveBy ? res.previousPageCursor : res.nextPageCursor
         } catch {

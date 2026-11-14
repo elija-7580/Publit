@@ -141,8 +141,11 @@ struct ItineraryDetailView: View {
                 Clocked(every: 30) { now in LeaveHero(itinerary: itinerary, now: now, framed: false) }
                     .listRowSeparator(.hidden)
                 // The chain of lines once; where to get on and off is in the steps below (each opens for its stops).
-                RouteSummary(itinerary: itinerary, showsTimes: false)
-                    .listRowSeparator(.hidden, edges: .top)
+                // Not for cycling or driving the whole way: one mode, no changes, the card above says it all.
+                if !isBikeOrCar {
+                    RouteSummary(itinerary: itinerary, showsTimes: false)
+                        .listRowSeparator(.hidden, edges: .top)
+                }
                 ForEach(TransitRegion.along(itinerary), id: \.network) { RegionTicketRow(region: $0) }
                 if let note = Fmt.foreignZoneNote(tz: itinerary.legs.first?.from.tz, at: itinerary.startTime) {
                     Label(note, systemImage: "clock").font(.footnote).foregroundStyle(.secondary)
@@ -194,7 +197,8 @@ struct ItineraryDetailView: View {
                     if let transfer = TransferInfo(before: index, in: itinerary) {
                         TransferCard(info: transfer)
                     }
-                    TimelineLegRow(leg: leg)
+                    // Cycling or driving the whole way: the start is named, like the destination below.
+                    TimelineLegRow(leg: leg, startName: index == 0 && isBikeOrCar ? resolvedFrom : nil)
                 }
                 TimelineEndRow(time: itinerary.endTime, tz: itinerary.legs.last?.to.tz, name: resolvedTo)
             }
@@ -392,7 +396,9 @@ struct RouteMap: View {
     }
 
     /// The route's bounding box with a margin, so the ends never sit under the map's edge or buttons.
-    static func frame(_ it: Itinerary, margin: Double = 0.18) -> MKMapRect? {
+    /// `aspect` (width / height of the map view) widens the short side, so the whole route fits
+    /// instead of being cropped: a north–south drive in the wide preview lost both ends.
+    static func frame(_ it: Itinerary, margin: Double = 0.18, aspect: Double? = nil) -> MKMapRect? {
         let points = framePoints(it).map { MKMapPoint($0.clCoordinate) }
         guard let first = points.first else { return nil }
         var minX = first.x, maxX = first.x, minY = first.y, maxY = first.y
@@ -401,7 +407,10 @@ struct RouteMap: View {
         let minSide = 400 * MKMapPointsPerMeterAtLatitude(first.coordinate.latitude)
         let w = max(maxX - minX, minSide), h = max(maxY - minY, minSide)
         let cx = (minX + maxX) / 2, cy = (minY + maxY) / 2
-        let pw = w * (1 + 2 * margin), ph = h * (1 + 2 * margin)
+        var pw = w * (1 + 2 * margin), ph = h * (1 + 2 * margin)
+        if let aspect, aspect.isFinite, aspect > 0 {
+            if pw / ph < aspect { pw = ph * aspect } else { ph = pw / aspect }
+        }
         return MKMapRect(x: cx - pw / 2, y: cy - ph / 2, width: pw, height: ph)
     }
 
@@ -425,7 +434,13 @@ struct RouteMap: View {
     }
 
     private var appleMap: some View {
-        let start: MapCameraPosition = Self.frame(itinerary).map { MapCameraPosition.rect($0) } ?? .automatic
+        GeometryReader { geo in
+            appleMap(aspect: geo.size.height > 0 ? Double(geo.size.width / geo.size.height) : nil)
+        }
+    }
+
+    private func appleMap(aspect: Double?) -> some View {
+        let start: MapCameraPosition = Self.frame(itinerary, aspect: aspect).map { MapCameraPosition.rect($0) } ?? .automatic
         return Map(initialPosition: start, interactionModes: isPreview ? [] : .all) {
             if !isPreview { UserAnnotation() }
             ForEach(Array(itinerary.legs.enumerated()), id: \.offset) { _, leg in
@@ -673,6 +688,8 @@ struct StatusBanner: View {
 /// dotted blue on foot) and the leg itself.
 struct TimelineLegRow: View {
     let leg: Leg
+    /// Named above the leg where the steps would otherwise not say where they start.
+    var startName: String? = nil
     /// Rides open to their stops, notes and the get-off alarm; closed they say where to get on and off.
     @State private var expanded = false
 
@@ -685,7 +702,10 @@ struct TimelineLegRow: View {
                 .frame(width: TimelineTime.width, alignment: .trailing)
                 .padding(.top, 10)
             TimelineRail(color: leg.isTransit ? leg.lineStroke : Color.secondary, dotted: !leg.isTransit)
-            Group {
+            VStack(alignment: .leading, spacing: 6) {
+                if let startName {
+                    Text(verbatim: startName).font(.headline).padding(.top, 6)
+                }
                 if leg.isTransit { ride } else { LegRow(leg: leg, bar: false) }
             }
             .padding(.vertical, 4)

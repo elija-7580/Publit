@@ -12,6 +12,7 @@ struct NearbyView: View {
     @State private var searching = false
     @State private var openedStop: StopTarget?
     @State private var showMap = false
+    @AppStorage(NearbyMapSection.defaultsKey) private var showNearbyMap = true
     @State private var groups: [StopGroup] = []
     @State private var isLoading = false
     @State private var errorMessage: String?
@@ -48,6 +49,11 @@ struct NearbyView: View {
             goSection
             activeTripSection
             OfflineNote()
+            // For orientation: where you are and where the stations below are (Settings → Nearby → Map).
+            if showNearbyMap, !location.isDenied, let here = location.coordinate, !groups.isEmpty {
+                NearbyMapSection(here: here, groups: groups, onOpenMap: { showMap = true },
+                                 onOpenStation: { openedStop = StopTarget($0) })
+            }
             // Where you are, data is missing: the board below may be only a part of what runs.
             if !location.isDenied, let notice = CoverageGuide.notice(at: location.coordinate) {
                 CoverageBanner(notices: [notice]).coverageRow()
