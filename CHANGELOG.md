@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1 (build 70) – map in Nearby
+
+- Nearby: a small map above the departures shows where you are and where the listed stations are, for orientation. Tap a station for its departures, tap the map for the full station map. Settings → Nearby → Map turns it off.
+
 ## 0.1.1 (build 69) – coverage map, all tester builds together
 
 - The "Data gaps" map and the "Not reliable here" warnings now cover the real coverage of Transitous worldwide, not only Europe.

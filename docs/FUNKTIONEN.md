@@ -1,6 +1,6 @@
 # Publit iOS – Funktionen und Screens (vollständige Übersicht)
 
-> Stand: Version 0.1.1 (Build 69). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
+> Stand: Version 0.1.1 (Build 70). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
 > **Pflege:** Jede Änderung an `Sources/`, `Watch/`, `Widgets/` oder `Share/` muss diese Datei im selben Commit/PR mitändern (siehe Abschnitt „Aktualisierung“ ganz unten). Die maschinell erzeugte Liste aller Views steht in [`FUNKTIONEN-INVENTAR.md`](FUNKTIONEN-INVENTAR.md) und wird von der CI automatisch aktualisiert.
 
 ## Inhalt
@@ -73,6 +73,7 @@ Ohne Onboarding startet die Standortabfrage sofort.
 
 ## 3. Tab „In der Nähe“ (Nearby) – `NearbyView`
 
+- **Karte zur Orientierung** (`NearbyMapSection`, über den Abfahrten): dein Standort und die ersten sechs Stationen der Liste (die nächste mit gelbem Punkt), so gerahmt, dass alle hineinpassen. Tipp auf eine Station öffnet ihre Abfahrten, Tipp auf die Karte oder „Station map“ die ganze Stationskarte. Abschaltbar unter Einstellungen → Nearby → „Map“ (an).
 - **Umschalter** „Departures“ / „Lines“ (Picker „View“).
 - **Abfahrten**: nächste Haltestellen/Stationen, gruppiert pro Station bzw. pro Straßen-Haltestelle (Seite der Straße), mit `StopGroupHeader` (Name, Entfernung, Hauptziele). Suchradius stufenweise **500 m → 1,5 km → 5 km**, bis Abfahrten gefunden werden; weit entfernte Stopps werden mit Distanz und Gehzeit angezeigt statt „keine Abfahrten“.
 - Pro Zeile (`DepartureRow`): Linien-Badge (Betreiberfarbe, Verkehrsmittel-Symbol), „Towards …“ (Fahrtrichtung, bei Ringlinien das Ausstiegsziel + „Circle line“), **nächster Halt** mit Gleis/Steig („Next: Karlovy lázně · Platform A“ – zeigt die Richtung auch, wenn man das Ziel nicht kennt; Abfrage mit `fetchStops=true`, nur die ersten 3 Halte werden behalten, `UpcomingStops`; ist der nächste Halt das Ziel, entfällt er), sonst Gleis/Steig allein, Uhrzeit + Countdown („now“, „x min“), Verspätung „+x min“, Live/Fahrplan-Kennzeichnung, „Cancelled“, „Rail replacement bus“ (SEV).
@@ -242,6 +243,7 @@ Screenshot-/Link-Tickets („My tickets“, „Add ticket“, Typ, „Expires“
 | Kopf | Logo, „Public transport, without the noise.“ |
 | Start | Start screen: Nearby / Plan |
 | Travel preferences | Routenoptionen-Zusammenfassung, „Show connection timelines“, „How to read connections“ (`ConnectionGuideView`: Ride/Walk/Wait/Time axis) |
+| Nearby | „Map“ (Standard an): kleine Orientierungskarte über den Abfahrten, siehe §3 |
 | Stations | „Platform map“ (Standard an), „Departures by platform“ (Standard aus), „Change guide“ (Standard an), Erklärtext; siehe §4 und §13 |
 | Smart routing | siehe §11 |
 | Map | Map provider (Apple/Google), Map style, Points of interest, Lines, Vehicles, Bikes and scooters, „Open directions in“ (Apple Maps, Google Maps, Citymapper) |
@@ -339,6 +341,7 @@ Kleinere Bausteine, die in den Abschnitten oben nicht namentlich vorkommen:
 | `PassArchiveButton` | Zugang zum Ticket-Archiv im Wallet (§14) |
 | `TicketAttachmentView`, `TicketSummaryCard`, `AddTicketView`, `TicketDisplayView`, `ShowTicketButton` | ältere Screenshot/Link-Tickets (§14, abgeschaltet) |
 | `TicketSection`, `TicketCardButton` | Ticket-Bereich in den Fahrt-Aktionen (§12) |
+| `NearbyMapSection` | Kleine Orientierungskarte über den Abfahrten in Nearby (§3) |
 | `CoverageMapNote` | Abdeckungs-Hinweiskarte über der Stationskarte (§7, §23) |
 | `NoticeBackground` | Hintergrund der Hinweis-Karten (§25) |
 | `ConnectionSymbols`, `ConnectionLegendRow` | Legende in „How to read connections“ (§16) |
