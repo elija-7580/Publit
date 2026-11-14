@@ -46,9 +46,9 @@ Secondary text is the system `.secondary`; tertiary only for chevrons and hints.
 | Times in a route row, leave card | `headline` / `title2` bold, tabular |
 | Durations | `DurationFigure` (number bold, unit caption) |
 | Stop and place names | `subheadline` semibold |
-| Secondary lines (platform, direction, "from …") | `caption` / `footnote`, secondary |
+| Secondary lines (platform, clock time, "from …") | `footnote`, secondary — never smaller in a row |
 | Section headers | system list header |
-| Minute labels on timelines | `caption2` semibold, tabular |
+| Minute labels on timelines | `caption2` semibold, tabular (the only place for `caption2`) |
 
 ### Spacing and shape
 - 8-pt rhythm: 4 · 8 · 12 · 16 · 20 · 24 · 32. Rows: 12 between lines of one block, 16 card padding.
@@ -83,6 +83,15 @@ No system `.bordered`, `.borderedProminent`, `.blue` or materials. Destructive a
 - Notices: `Notice` (coloured edge + symbol, ink text; only critical is tinted) and `InlineNotice` for one line in a row.
 - Leave card (`LeaveHero`): the one number that decides, each time once.
 - Region line (`RegionTicketRow`): "Venice · ACTV", a ticket symbol, one sentence on where to buy, a link to fares.
+
+### Rows: what you look for first (Nov 2026)
+Every list row answers its question in the first line; the second line is one grey `footnote` line with the rest.
+- **Departure row** (`DepartureRow`): line 1 = line badge + destination (body semibold, one line, "…" at the end; no "Towards"), the minutes on the right (title2 bold; orange when late; "now"; clock time from 60 min). Line 2 = "Pl. 51 · 11:24 · +2 min". Live or timetable is a small symbol in front of the minutes (green radio waves / grey calendar), never the word on every row. Notes (alerts, replacement bus) only when there is one.
+- **Route row** (`ItineraryRow`): times + duration; timeline; "Leave in 6 min · 1 change · U6 → Garching" (leave time in ink, within the hour); boarding line ("Board at …" unless the walk is 2 min or more).
+- **Saved trip** (`SavedTripRow`): destination and "Leave in 6 min" (else the date); times + line badges; "from …".
+- **Live trip**: the stage card says "Now" on the current stage only; no "3/8" counters (the strip above shows the stages).
+- No chevrons on rows that are links as a whole (`linkIndicatorHidden()`, iOS 26+). Three actions sit in one row, four as two by two.
+- At a stop (`Reach.atStopMeters`, 50 m) the distance reads "Here" and nothing says "1 min".
 
 ### Floating capsules
 `floatingCapsule()`: white capsule, hairline, map shadow, subheadline semibold ink label with a symbol.
@@ -144,6 +153,8 @@ route list. A floating capsule never covers the thing it points to: it hides onc
 
 ## 9. Review checklist (before shipping a screen)
 - [ ] 8-pt spacing; max two weights and four sizes per row; aligned columns in repeated rows.
+- [ ] The first line of a row says what matters most; secondary text is `footnote`, never `caption`/`caption2` (timeline minutes excepted).
+- [ ] No word repeated on every row ("Live", "Towards", counters); a symbol or nothing instead.
 - [ ] One yellow-dot detail at most; no colour without meaning; no system blue or materials.
 - [ ] Primary = ink, secondary = soft, map = white controls with map shadow.
 - [ ] Nothing said twice; nothing hidden behind the tab bar or live bar.

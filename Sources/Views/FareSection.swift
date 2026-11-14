@@ -32,16 +32,27 @@ struct RegionTicketRow: View {
             } icon: {
                 Image(systemName: "ticket").foregroundStyle(.secondary)
             }
-            Text(verbatim: region.ticketText).font(.caption).foregroundStyle(.secondary)
+            Text(verbatim: region.ticketText).font(.footnote).foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
             if let url = region.link {
                 Link(destination: url) {
-                    Text(L10n.f("Fares and tickets: %@", region.network)).font(.caption.weight(.semibold))
+                    // Looks like a link: ink, semibold, with the arrow that leaves the app.
+                    Label { Text(L10n.f("Fares and tickets: %@", region.network)) } icon: { Image(systemName: "arrow.up.right") }
+                        .labelStyle(TrailingIconLabelStyle())
+                        .font(.footnote.weight(.semibold)).foregroundStyle(Color.ink)
                 }
             }
         }
         .padding(.vertical, 2)
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("regionTicket")
+    }
+}
+
+
+/// Text first, then a small symbol (links that leave the app: "Fares and tickets ↗").
+struct TrailingIconLabelStyle: LabelStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        HStack(spacing: 4) { configuration.title; configuration.icon.imageScale(.small) }
     }
 }

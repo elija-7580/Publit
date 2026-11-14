@@ -76,7 +76,7 @@ Ohne Onboarding startet die Standortabfrage sofort.
 - **Karte zur Orientierung** (`NearbyMapSection`, über den Abfahrten): dein Standort und die ersten sechs Stationen der Liste (die nächste mit gelbem Punkt), so gerahmt, dass alle hineinpassen. Tipp auf eine Station öffnet ihre Abfahrten, Tipp auf die Karte oder „Station map“ die ganze Stationskarte. Abschaltbar unter Einstellungen → Nearby → „Map“ (an).
 - **Umschalter** „Departures“ / „Lines“ (Picker „View“).
 - **Abfahrten**: nächste Haltestellen/Stationen, gruppiert pro Station bzw. pro Straßen-Haltestelle (Seite der Straße), mit `StopGroupHeader` (Name, Entfernung, Hauptziele). Suchradius stufenweise **500 m → 1,5 km → 5 km**, bis Abfahrten gefunden werden; weit entfernte Stopps werden mit Distanz und Gehzeit angezeigt statt „keine Abfahrten“.
-- Pro Zeile (`DepartureRow`): Linien-Badge (Betreiberfarbe, Verkehrsmittel-Symbol), „Towards …“ (Fahrtrichtung, bei Ringlinien das Ausstiegsziel + „Circle line“), **nächster Halt** mit Gleis/Steig („Next: Karlovy lázně · Platform A“ – zeigt die Richtung auch, wenn man das Ziel nicht kennt; Abfrage mit `fetchStops=true`, nur die ersten 3 Halte werden behalten, `UpcomingStops`; ist der nächste Halt das Ziel, entfällt er), sonst Gleis/Steig allein, Uhrzeit + Countdown („now“, „x min“), Verspätung „+x min“, Live/Fahrplan-Kennzeichnung, „Cancelled“, „Rail replacement bus“ (SEV).
+- Pro Zeile (`DepartureRow`), zwei Zeilen: oben Linien-Badge (Betreiberfarbe, Verkehrsmittel-Symbol) und Ziel (einzeilig, ohne „Towards“; bei Ringlinien Ziel + „Circle line“), rechts die Minuten („now“, „x min“, ab 60 min die Uhrzeit; orange bei Verspätung) mit kleinem Symbol davor (grüne Funkwellen = Live, graues Kalender-Symbol = Fahrplan); darunter eine graue Zeile „Pl. x · Uhrzeit · +x min · Next: …“ bzw. „Cancelled“ – **nächster Halt** zuletzt, damit ein schmaler Bildschirm ihn kürzt und nicht die Uhrzeit (Abfrage mit `fetchStops=true`, nur die ersten 3 Halte werden behalten, `UpcomingStops`; ist der nächste Halt das Ziel, entfällt er); Hinweise („Rail replacement bus“, Störungen) nur wenn vorhanden. Kein Pfeil am Zeilenende (ab iOS 26). Steht man an der Haltestelle (≤ 50 m), zeigt der Stationskopf „Here“ statt der Entfernung.
 - **Linien-Gruppierung** (`LineAtStopRow`): pro Linie die nächsten Abfahrten je Richtung („U3 → Moosach: 3, 13, 23 min“), darunter je Richtung nächster Halt und Steig („Next: … · Platform …“).
 - **Verkehrsmittel-Filter** (`ModeFilterBar`): All, Train, S-Bahn, Metro, Tram, Bus, Ferry, Other. Leerer Filter = alle. Bei leerem Ergebnis: „No departures for these modes“ + „Show all modes“.
 - **„Where to now? Route from your location“** – Sprung in den Planer ab aktuellem Standort; **„Next trip: …“** wenn eine gespeicherte Fahrt ansteht; Abschnitt **„Active trip“** bei laufender Fahrt.
@@ -126,7 +126,7 @@ Ohne Onboarding startet die Standortabfrage sofort.
 - **Schnellwahl Zuhause/Arbeit** (`PlaceKeyRow`) und letzte Suchen (`RecentSearchesSection`).
 - **Zeit** („When“): „Now“ / „Depart at“ / „Arrive by“. Der Knopf „Now“ neben Datum und Uhrzeit bleibt einzeilig; ist zu wenig Platz (schmale Geräte, große Schrift), zeigt er nur die Uhr (VoiceOver: „Now“). „Now“ folgt der Uhr: später wiederkommen zeigt Verbindungen ab dann; Ergebnisse werden live nachgeladen.
 - **„Search routes“**: breite Such-Taste unter Von/Nach, Zeit und Routenoptionen (wie in der ÖBB-App), ohne Ziel deaktiviert; startet die Suche, danach sucht jede Änderung automatisch neu; Ziel leeren = Neustart.
-- **Ergebnisliste** (`ItineraryRow`): Ab–An, Dauer (`DurationFigure`), Linien-Badges, Umstiege, Live-Kennzeichen, „Cancelled“, „Service changes on this route“, Umstiegswahrscheinlichkeit („Change at X: y % chance“), Fahrpreis-Schätzung, Smart-Badges; optional **Verbindungs-Zeitleisten** (`TimelineBar`; Fahrt farbig, Fußweg grau, Warten gepunktet).
+- **Ergebnisliste** (`ItineraryRow`): Ab–An, Dauer (`DurationFigure`), „Leave in x min“ / „Departs in x min“ (innerhalb der nächsten Stunde) vor Umstiegen und erster Linie, Einstiegszeile („Board at …“; „Walk to …“ erst ab 2 min Fußweg), Linien-Badges, Umstiege, Live-Kennzeichen, „Cancelled“, „Service changes on this route“, Umstiegswahrscheinlichkeit („Change at X: y % chance“), Fahrpreis-Schätzung, Smart-Badges; optional **Verbindungs-Zeitleisten** (`TimelineBar`; Fahrt farbig, Fußweg grau, Warten gepunktet).
 - **Sortierung**: immer nach Zeit, spätere Verbindungen weiter unten – bei „Depart“ nach Abfahrt, bei „Arrive“ nach Ankunft (Gleichstand: die jeweils andere Zeit). Recommended, Fastest, Fewest changes, Least walking werden nur markiert („Recommended: …“), nicht nach oben sortiert.
 - **Tageskennzeichnung**: die erste Verbindung jedes anderen Tags als des gesuchten trägt „Tomorrow“ bzw. ein Datum (wie ein Tageswechsel im Fahrplan, nicht auf jeder Zeile) (Systemwortlaut, z. B. „Morgen“); Ankunft nach Mitternacht zeigt „+1“ hinter der Ankunftszeit.
 - **Sprung zur Empfehlung**: liegt die empfohlene Verbindung außerhalb der Sicht, springt eine Kapsel „Recommended: …“ am unteren Rand zu ihr; die Liste scrollt frei unter ihr, sie verdeckt keine Zeilen oder Hinweise.
@@ -172,7 +172,7 @@ Ohne Onboarding startet die Standortabfrage sofort.
 - **„Remind me to get off“** (`GetOffButton`): „Reminder set – We'll notify you at …“, „This stop is less than two minutes away.“, Hinweis falls Mitteilungen aus.
 - Fahrpreis (`FareSection`): „Fare estimate“ nur bei vollständig abgedeckter Route und eindeutiger Tarifregel; sonst „Fare information“ und Ticket-Links des Betreibers / Verbunds (`RegionTicketRow`, z. B. „Venice · ACTV“).
 - Smart-Routing-Abschnitt (§11), Abdeckungskarten für Start, Umstiegsorte, Ziel.
-- **Aktionen** (`TripActionsSection`): „Start trip“, „Save trip“/„Saved“, **„Leave reminder“** (5 min vor Losgehen), **„Add to Calendar“** (Eintrag verlinkt zurück auf die Fahrt), „Share trip“, „Share arrival“, Tickets (§14: „Show ticket“, „Add ticket for this trip“; Hinweis, wenn der Betreiber keinen Ticket-Link hat).
+- **Aktionen** (`TripActionsSection`): „Start trip“, „Save trip“/„Saved“, **„Leave reminder“** (5 min vor Losgehen), **„Add to Calendar“** (Eintrag verlinkt zurück auf die Fahrt), „Share trip“, „Share arrival“ (drei Aktionen in einer Reihe, vier als 2 × 2), Tickets (§14: „Show ticket“, „Add ticket for this trip“; Hinweis, wenn der Betreiber keinen Ticket-Link hat).
 - Haftungshinweis „All information without guarantee …“.
 
 ## 13. Gespeicherte Fahrt, Fahrt starten, Live-Fahrt (Guide)
@@ -189,7 +189,7 @@ Gespeicherte Verbindung mit aktuellem Live-Status (oder „Live status unavailab
 Erscheint für die gestartete Fahrt oder eine gespeicherte, die gerade läuft/bald startet; „Live trip“, Countdown in min, „Open trip“, „Start trip“, „Hide“; bis 5 min nach Ankunft „Arrived“.
 
 ### Live-Fahrt / Guide (`LiveTripView`)
-- **Etappen** (`StagePager`, `StageStrip`, `StageRow`): Gehen → Warten → Fahren → Ankommen, bestimmt durch Live-Zeiten und GPS; „Back to now“ nach manuellem Blättern.
+- **Etappen** (`StagePager`, `StageStrip`, `StageRow`): Gehen → Warten → Fahren → Ankommen, bestimmt durch Live-Zeiten und GPS; „Back to now“ nach manuellem Blättern. Die aktuelle Etappenkarte trägt „Now“; keine „3/8“-Zähler (die Leiste darüber zeigt die Etappen).
 - **Ausgangsnummer** (`StationExits`): kommt der Fußweg aus einer U-Bahn-Station (nach einer Metro-Fahrt oder unter Straßenniveau beginnend), steht beim Aufgang die beschilderte Ausgangsnummer aus OpenStreetMap („Take exit B2“, „Take exit B2 towards Ludwigstraße“; `railway=subway_entrance`/`train_station_entrance`/`public_transport=entrance` mit `ref` bis 6 Zeichen). Wahl: Eingang, durch den der Weg führt → nächster Eingang ≤ 40 m vom Aufgang → erster Eingang ≤ 20 m neben dem Weg. Abfrage über Overpass (overpass-api.de, Ausweich overpass.kumi.systems) einmal je Station beim Öffnen der Live-Fahrt, nur im Speicher; ohne Daten bleibt „Exit towards …“. Auch in Umstiegshilfe und Sprachansage.
 - Gehen: „Walk to …“ mit „Distanz · Minuten“ (an der Haltestelle, ≤ 50 m, stattdessen „Board here“), Turn-by-turn-Anweisungen, **Kompasspfeil** (`HeadingRow`; ohne Kompass Norden oben), „Walk faster to make it.“, Karte drehen „Turn the map with you“ / „Stop turning the map“.
 - Warten/Einsteigen: „Departs in x min“, „Departs now“, „Departed …“, „Take Linie towards …“, Gleis „Pl. x“, „Platform changed (was x)“, Boarding-Hilfe (`BoardingLine`, `BoardingSteps`).
@@ -234,7 +234,7 @@ Screenshot-/Link-Tickets („My tickets“, „Add ticket“, Typ, „Expires“
 ## 15. Tab „Gespeichert“ (Saved) – `FavoritesView`
 
 - **Home and Work**: festlegen („Set Home/Work“), „Change“, „Remove“; Ein-Tipp-Route.
-- **Upcoming trips** (`SavedTripRow`) mit Live-Status; leer: Hinweis „Save a route to see it here, add it to your calendar and get a reminder when to leave.“
+- **Upcoming trips** (`SavedTripRow`): Ziel und „Leave in x min“ (sonst Datum), Ab–An mit Linien-Badges (max. 3, dann „+n“), „from …“; leer: Hinweis „Save a route to see it here, add it to your calendar and get a reminder when to leave.“
 - **Lines** (gespeicherte Linie an Haltestelle, „At …“, nächste Abfahrten), **Stops**, **Places** („Add“ / „Save a place“ via Ortssuche).
 - **Past trips** (`PastTripsView`): „Plan again“, „Remove“.
 - Leer: „Nothing else saved yet“.
@@ -325,7 +325,7 @@ Ab 680 pt Breite (regular): Karte bildschirmfüllend, Inhalte in einem schwebend
 
 ## 25. Gemeinsame UI-Bausteine (`Views/Components`)
 
-`LineBadge`, `DepartureTimeView`, `DepartureRow`, `DurationFigure`, `ModeFilterBar`, `CoverageBanner`/`CoverageMark`, `OfflineNote`, `LiveTripBar`, `LogoLoader` („Loading…“), `Notice`/`InlineNotice`, `WhereToField`, `PlaceKeyRow`, `RaisedKey`, `BevelField`, `InkProgress`, `SignatureDot`, `ReadableWidth`, `Ticking`, `AttributionFooter`, `PublitLogo`/`PublitAppIcon`, Kartenstil `PublitMapStyle`, Karten `TransitMapView` (Apple) / `GoogleMapView`.
+`LineBadge`, `DepartureRow`, `DurationFigure`, `ModeFilterBar`, `CoverageBanner`/`CoverageMark`, `OfflineNote`, `LiveTripBar`, `LogoLoader` („Loading…“), `Notice`/`InlineNotice`, `WhereToField`, `PlaceKeyRow`, `RaisedKey`, `BevelField`, `InkProgress`, `SignatureDot`, `ReadableWidth`, `Ticking`, `AttributionFooter`, `PublitLogo`/`PublitAppIcon`, Kartenstil `PublitMapStyle`, Karten `TransitMapView` (Apple) / `GoogleMapView`.
 
 ## 26. Nur für Entwicklung/Tests
 
