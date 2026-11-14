@@ -19,6 +19,9 @@ struct SettingsView: View {
     @AppStorage(MapProvider.defaultsKey) private var mapProvider = MapProvider.apple.rawValue
     @AppStorage(StartTab.defaultsKey) private var startTab = StartTab.nearby.rawValue
     @AppStorage(WatchSettings.ticketsKey) private var watchTickets = true
+    @AppStorage(StationViews.platformMapKey) private var platformMap = true
+    @AppStorage(StationViews.byPlatformKey) private var byPlatform = false
+    @AppStorage(StationViews.changeGuideKey) private var changeGuide = true
     @State private var exportURL: URL?
     @State private var summary: HangLog.Summary?
     @State private var reportURL: URL?
@@ -70,6 +73,18 @@ struct SettingsView: View {
                     RouteOptionsButton()
                     Toggle(L10n.t("Show connection timelines"), isOn: $routeTimelines)
                     NavigationLink { ConnectionGuideView() } label: { Label(L10n.t("How to read connections"), systemImage: "questionmark.circle") }
+                }
+                Section {
+                    Toggle(L10n.t("Platform map"), isOn: $platformMap)
+                        .accessibilityIdentifier("settingPlatformMap")
+                    Toggle(L10n.t("Departures by platform"), isOn: $byPlatform)
+                        .accessibilityIdentifier("settingByPlatform")
+                    Toggle(L10n.t("Change guide"), isOn: $changeGuide)
+                        .accessibilityIdentifier("settingChangeGuide")
+                } header: {
+                    Text(L10n.t("Stations"))
+                } footer: {
+                    Text(L10n.t("Platform map: where each platform of a station is, with its lines and next stops. Departures by platform: the stop board grouped by platform, with where the vehicles go next. Change guide: during a trip, a map from platform to platform with stairs, lifts and exits."))
                 }
                 SmartRoutingSettingsSection()
                 Section {

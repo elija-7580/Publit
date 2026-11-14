@@ -10,6 +10,7 @@ struct LiveTripView: View {
     @Environment(LocationManager.self) private var location
     @Environment(AppState.self) private var app
     @Environment(PassStore.self) private var passes
+    @AppStorage(StationViews.changeGuideKey) private var changeGuide = true
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("guideVoice") private var voice = false
     @AppStorage("mapBase") private var mapBase = MapBase.defaultValue
@@ -329,6 +330,7 @@ struct LiveTripView: View {
                 .accessibilityElement(children: .combine)
             }
             if let nextIndex, let transfer = TransferInfo(before: nextIndex, in: it) { TransferCard(info: transfer) }
+            if changeGuide, let nextIndex, let guide = ChangeGuideCard(before: nextIndex, in: it) { guide }
             // A later walk starts where the trip will be then, not where you stand now.
             Button { Self.openInMaps(leg.to, name: target, from: isLive ? nil : leg.from) } label: {
                 Label(DirectionsApp.current.openLabel, systemImage: "map")
@@ -416,6 +418,7 @@ struct LiveTripView: View {
                     .foregroundStyle(w.level == .missed ? Color.danger : Color.delay)
             }
             if let transfer = TransferInfo(before: legIndex, in: it) { TransferCard(info: transfer) }
+            if changeGuide, let guide = ChangeGuideCard(before: legIndex, in: it) { guide }
             TrainDivisionNotice(leg: leg)
             ServiceAlertsView(alerts: leg.serviceAlerts)
             Label(rideSummary, systemImage: "arrow.right.circle")
@@ -463,6 +466,12 @@ struct LiveTripView: View {
                let next = it.legs[(index + 1)...].firstIndex(where: \.isTransit),
                let transfer = TransferInfo(before: next, in: it) {
                 TransferCard(info: transfer)
+            }
+            // Still on board: the way to the next vehicle, before the doors open.
+            if changeGuide, index + 1 < it.legs.count,
+               let next = it.legs[(index + 1)...].firstIndex(where: \.isTransit),
+               let guide = ChangeGuideCard(before: next, in: it) {
+                guide
             }
             ServiceAlertsView(alerts: leg.serviceAlerts)
             ticketRow

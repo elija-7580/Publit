@@ -9,6 +9,10 @@
 - Train names: German ICE/IC trains no longer show DB's internal line number ("29") but the category ("ICE", with "ICE 1006" beside it); Hungarian (MÁV) Railjets show as "RJX 66" instead of "xpress 66".
 - "Where to now?" can start somewhere other than the current location: tap "From … Change".
 - Departures show the next stop with the platform ("Next: Karlovy lázně · Platform A"), so you can tell which way a line goes even if you do not know its destination. Also in the per-line view of Nearby.
+- New in Settings → Stations, three switches:
+  - **Platform map** (on): a station's platforms on a map, each with its lines and next stops.
+  - **Departures by platform** (off): a "Platforms" view on the stop board, departures grouped by platform with where they go next.
+  - **Change guide** (on): during a live trip, a map from the platform you arrive at to the one you leave from, with the walk, stairs, lifts, levels and exits, and whether it is step-free.
 - New texts translated into all 15 app languages.
 
 ## 0.1.0 (build 65) – App Review fixes

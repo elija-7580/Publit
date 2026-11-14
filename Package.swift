@@ -26,6 +26,7 @@ let core = [
     "Models/PlaceCategories.swift",
     "Models/CityGuide.swift",
     "Models/Reach.swift",
+    "Models/StationGuide.swift",
     "Models/CircularLine.swift",
     "Models/MapLink.swift",
     "Models/SavedPlace.swift",

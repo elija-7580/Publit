@@ -417,7 +417,7 @@ struct StopDeparturesView: View {
     /// Only this street stop, not the platforms around it (the stop across the road goes the other way).
     var exact = false
 
-    enum Mode: String, CaseIterable, Identifiable { case departures, lines; var id: String { rawValue } }
+    enum Mode: String, CaseIterable, Identifiable { case departures, lines, platforms; var id: String { rawValue } }
 
     @Environment(FavoritesStore.self) private var favorites
     @Environment(AppState.self) private var app
@@ -432,6 +432,10 @@ struct StopDeparturesView: View {
     @State private var filter = ModeFilter()
     /// Modes that run here, from the last unfiltered answer.
     @State private var available: [ModeGroup] = []
+    @AppStorage(StationViews.platformMapKey) private var platformMap = true
+    @AppStorage(StationViews.byPlatformKey) private var byPlatform = false
+    /// "Departures by platform" opens first when it is switched on, once per visit.
+    @State private var modeChosen = false
 
     private var saved: SavedPlace {
         var p = SavedPlace(id: stopId, name: name, subtitle: nil, lat: coordinate.lat, lon: coordinate.lon, stopId: stopId)
@@ -441,6 +445,9 @@ struct StopDeparturesView: View {
 
     /// Filtered right away on a chip tap; the reload then brings more of the chosen modes.
     private var shown: [StopTime] { departures.filter { filter.allows($0.mode) } }
+
+    /// The station by platform, for the platform map and "Departures by platform".
+    private var platforms: [PlatformGroup] { PlatformGrouping.groups(shown) }
 
     var body: some View {
         List {
@@ -483,6 +490,7 @@ struct StopDeparturesView: View {
                 Picker("View", selection: $mode) {
                     Text("Departures").tag(Mode.departures)
                     Text("Lines").tag(Mode.lines)
+                    if byPlatform { Text("Platforms").tag(Mode.platforms) }
                 }
                 .pickerStyle(.segmented)
                 .accessibilityIdentifier("stopViewMode")
@@ -490,6 +498,11 @@ struct StopDeparturesView: View {
                     ModeFilterBar(available: available, filter: $filter)
                         .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
                 }
+            }
+            // Where the platforms are: only for a station with more than one, not for a single street stop.
+            let groups = platformMap || mode == .platforms ? platforms : []
+            if platformMap, !exact, groups.count > 1 {
+                PlatformMapSection(groups: groups)
             }
             Section {
                 OfflineNote()
@@ -514,6 +527,15 @@ struct StopDeparturesView: View {
                         NavigationLink {
                             TripView(stopTime: st, stationId: stopId, stationName: name, stationCoordinate: coordinate)
                         } label: { DepartureRow(stopTime: st) }
+                    }
+                case .platforms:
+                    ForEach(groups) { g in
+                        PlatformHeaderRow(group: g)
+                        ForEach(g.departures) { st in
+                            NavigationLink {
+                                TripView(stopTime: st, stationId: stopId, stationName: name, stationCoordinate: coordinate)
+                            } label: { DepartureRow(stopTime: st) }
+                        }
                     }
                 case .lines:
                     ForEach(LineGrouping.lines(shown)) { line in
@@ -547,7 +569,12 @@ struct StopDeparturesView: View {
             }
         }
         .refreshable { await load() }
-        .onAppear { isVisible = true }
+        .onAppear {
+            isVisible = true
+            if byPlatform, !exact, !modeChosen { mode = .platforms }
+            modeChosen = true
+        }
+        .onChange(of: byPlatform) { _, on in if !on, mode == .platforms { mode = .departures } }
         .onDisappear { isVisible = false }
         .task(id: "\(filter)|\(scenePhase)|\(app.tab)|\(isVisible)") {
             guard isVisible, scenePhase == .active else { return }

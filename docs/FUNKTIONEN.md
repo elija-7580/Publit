@@ -91,6 +91,8 @@ Ohne Onboarding startet die Standortabfrage sofort.
 - Alle Abfahrten der Station oder einer einzelnen Straßen-Haltestelle, mit Filter, Störungen, Abdeckungshinweis, „No upcoming departures.“
 - Aktionen: **„Route here“**, **„Route from here“**, **„Save“** (Haltestelle speichern), **„Share departures“**, Linie speichern („Save line“ / „Saved line“).
 - Tippen auf Abfahrt → Fahrt des Fahrzeugs (§6).
+- **Gleisplan** (`PlatformMapSection`, Einstellungen → Stations → „Platform map“, Standard an): bei Stationen mit mehr als einem Gleis/Steig eine Karte mit jedem Gleis als Marke (Name „A“, „3“, Rand in der Farbe der ersten Linie), darunter je Gleis `PlatformSummaryRow`: „Platform A“, Linien-Badges (max. 8, „+n“), „Next: Karlovy lázně → Národní divadlo → …“ (bis 2 Richtungen). Tippen zentriert die Karte auf das Gleis. Nicht bei einzelnen Straßen-Haltestellen.
+- **Ansicht „Platforms“** (Einstellungen → Stations → „Departures by platform“, Standard aus): dritter Reiter neben Departures/Lines, öffnet dann zuerst; Abfahrten je Gleis mit Kopfzeile (`PlatformHeaderRow`: „Platform A“ und die nächsten Halte). Gruppierung `PlatformGrouping`: gleicher Gleisname = ein Gleis, ohne Gleisnamen je Haltestellen-ID; natürliche Reihenfolge („2“ vor „10“).
 
 ## 5. Linien, Linien-Detail und Fahrplan – `LinesView`, `LineDetailView`, `LineTimetableView`
 
@@ -185,6 +187,7 @@ Erscheint für die gestartete Fahrt oder eine gespeicherte, die gerade läuft/ba
 - Warten/Einsteigen: „Departs in x min“, „Departs now“, „Departed …“, „Take Linie towards …“, Gleis „Pl. x“, „Platform changed (was x)“, Boarding-Hilfe (`BoardingLine`, `BoardingSteps`).
 - Fahren: „Now at …“, „Next stop … in …“, Haltliste (`GuideStopRow`), „Get off here“, „Get off at …“, Positionsquelle („Position from your location / estimated from live stop times / from the timetable“).
 - Ankunft: „You have arrived“, „Arrive at …“, „Destination in …“.
+- **Umstiegshilfe** (`ChangeGuideCard`/`ChangeGuide`, Einstellungen → Stations → „Change guide“, Standard an): beim Fahren (vor dem Aussteigen), beim Umstiegs-Fußweg und beim Warten auf das nächste Fahrzeug: „Platform 3 → Platform 7“, Karte mit Fußweg von Ausstieg („Get off here“, Linien-Badge + Gleis) zu Einstieg („Board here“), „x min walk · Step-free“ bzw. „With stairs“, „Same platform“ wenn nichts zu gehen ist; darunter nur das Wesentliche im Bahnhof: Treppen, Aufzüge („Take the lift“), Ebenenwechsel, Ausgänge.
 - **Karte** (`GuideMap`) mit zurückgelegter (hellblau) und kommender Strecke (`TripTrace`), Kartenstil, 3D.
 - **Sprachansagen** („Turn on/off spoken directions“; `GuideVoice`, andere Audioquellen werden leiser).
 - **Abweichungen**: „You seem to be off the route.“, „Missed it?“, „Connection cancelled“, Warnung „Your change at … may not work (x %)“ mit Backup.
@@ -235,6 +238,7 @@ Screenshot-/Link-Tickets („My tickets“, „Add ticket“, Typ, „Expires“
 | Kopf | Logo, „Public transport, without the noise.“ |
 | Start | Start screen: Nearby / Plan |
 | Travel preferences | Routenoptionen-Zusammenfassung, „Show connection timelines“, „How to read connections“ (`ConnectionGuideView`: Ride/Walk/Wait/Time axis) |
+| Stations | „Platform map“ (Standard an), „Departures by platform“ (Standard aus), „Change guide“ (Standard an), Erklärtext; siehe §4 und §13 |
 | Smart routing | siehe §11 |
 | Map | Map provider (Apple/Google), Map style, Points of interest, Lines, Vehicles, Bikes and scooters, „Open directions in“ (Apple Maps, Google Maps, Citymapper) |
 | Search | Place search (Transitous/Google), Google API key |
@@ -323,6 +327,8 @@ Kleinere Bausteine, die in den Abschnitten oben nicht namentlich vorkommen:
 
 | View | Wo / wofür |
 |---|---|
+| `PlatformMapSection`, `PlatformPin`, `PlatformSummaryRow`, `FlowLines`, `PlatformHeaderRow` | Gleisplan (Marke je Gleis, Linien-Badges) und Abfahrten nach Gleis auf der Abfahrtstafel (§4) |
+| `ChangeGuideCard` | Umstiegshilfe von Gleis zu Gleis in der Live-Fahrt (§13) |
 | `DirectionLabel` | gemeinsame „Towards …“-Richtungsanzeige (App, Widgets, Watch) |
 | `ValidityBadge`, `BarcodeView` | Gültigkeits-Badge und Code-Darstellung auf der Pass-Karte (§14) |
 | `PDFPageChoice` | Seitenauswahl beim PDF-Import (§14) |

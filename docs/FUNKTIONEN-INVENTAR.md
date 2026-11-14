@@ -3,7 +3,7 @@
 > Nicht von Hand bearbeiten. Erzeugt von `scripts/feature_inventory.py` (CI: `features-doc.yml`).
 > Die ausführliche Beschreibung steht in [FUNKTIONEN.md](FUNKTIONEN.md).
 
-**173 Views, 5 App Intents, 3 Widgets in 69 Dateien.**
+**179 Views, 5 App Intents, 3 Widgets in 70 Dateien.**
 
 ## `Sources/App/DesignSamples.swift`
 - Views: `DesignSampleView`
@@ -152,7 +152,7 @@
 
 ## `Sources/Views/NearbyView.swift`
 - Views: `NearbyView`, `StopGroupHeader`, `StopDeparturesView`, `LineAtStopRow`
-- Sichtbare Texte: Location is off · Allow location access in Settings to see departures near you. Trip planning works without it. · Departures unavailable · No departures for these modes · Show all modes · No departures nearby · No departures within 5 km. The station map shows stops further away. · Station map · Couldn't refresh. Times may be out of date. · Route here · All departures · Nearby · Active trip · Where to now? Route from your location · Next trip: %@ · %lld min · Alerts · Towards %@ · Route from here · Share departures · View · Departures · Lines · No upcoming departures. · Saved line · Save line · Save · Direction unavailable · Next: %@ · Platform %@ · now
+- Sichtbare Texte: Location is off · Allow location access in Settings to see departures near you. Trip planning works without it. · Departures unavailable · No departures for these modes · Show all modes · No departures nearby · No departures within 5 km. The station map shows stops further away. · Station map · Couldn't refresh. Times may be out of date. · Route here · All departures · Nearby · Active trip · Where to now? Route from your location · Next trip: %@ · %lld min · Alerts · Towards %@ · Route from here · Share departures · View · Departures · Lines · Platforms · No upcoming departures. · Saved line · Save line · Save · Direction unavailable · Next: %@ · Platform %@ · now
 
 ## `Sources/Views/OnboardingView.swift`
 - Views: `OnboardingView`
@@ -186,7 +186,7 @@
 
 ## `Sources/Views/SettingsView.swift`
 - Views: `SettingsView`, `SettingsButton`
-- Sichtbare Texte: Public transport, without the noise. · Start screen · Nearby · Plan · Travel preferences · Show connection timelines · How to read connections · Map provider · Map style · Points of interest · Lines · Vehicles · Bikes and scooters · Open directions in · Map · Google Maps uses the Google API key under Search, with “Maps SDK for iOS” enabled. Without a key, Apple Maps is shown. · Place search · Google API key · Search · Tickets · My tickets · Ticket apps per operator · Tickets on Apple Watch · Apple Watch · Disruptions on saved lines · Notifications · Live data from more operators · Live data sources · Export my data · Data · Times marked live come from the operator's real-time feed; all others are timetable times. · Freezes · Failed requests · Crashes and unexpected exits · No problems recorded · Share diagnostics · Report a problem · Delete diagnostics · Diagnostics · Version · About · Publit is open source (MIT). No account, no ads, no tracking. Saved places, trips and tickets stay on this device. · Publit is open source (MIT). No account, no ads, no tracking. Saved places and trips stay on this device. · Settings · Done
+- Sichtbare Texte: Public transport, without the noise. · Start screen · Nearby · Plan · Travel preferences · Show connection timelines · How to read connections · Platform map · Departures by platform · Change guide · Stations · Map provider · Map style · Points of interest · Lines · Vehicles · Bikes and scooters · Open directions in · Map · Google Maps uses the Google API key under Search, with “Maps SDK for iOS” enabled. Without a key, Apple Maps is shown. · Place search · Google API key · Search · Tickets · My tickets · Ticket apps per operator · Tickets on Apple Watch · Apple Watch · Disruptions on saved lines · Notifications · Live data from more operators · Live data sources · Export my data · Data · Times marked live come from the operator's real-time feed; all others are timetable times. · Freezes · Failed requests · Crashes and unexpected exits · No problems recorded · Share diagnostics · Report a problem · Delete diagnostics · Diagnostics · Version · About · Publit is open source (MIT). No account, no ads, no tracking. Saved places, trips and tickets stay on this device. · Publit is open source (MIT). No account, no ads, no tracking. Saved places and trips stay on this device. · Settings · Done
 
 ## `Sources/Views/SharedRouteView.swift`
 - Views: `SharedRouteView`
@@ -199,6 +199,10 @@
 ## `Sources/Views/StationMapView.swift`
 - Views: `StationMapView`, `MapLayersSheet`, `MapPlaceView`, `MapSelectionView`, `RentalDetailView`, `VehicleTripView`
 - Sichtbare Texte: Stations could not be loaded. · Live layer unavailable. Stations still work. · My location · Updating live layer… · Stations · Search places, sights and stops · Done · Close · Search this area · Zoom in to see stations · Zoom in to see lines and vehicles · Map layers · Find nearby · All %@ in this area · No places found · Map · 3D terrain and buildings · Places of interest · Traffic · Lines · Vehicles · Bikes and scooters · Data gaps · On the map · Satellite maps load more data. In 3D, tilt the map with two fingers. · Distance · On foot · %lld min · Route here · Route from here · Provider · Available now · Open in the provider's app · Renting needs the provider's app and an account there. · Towards %@ · Live position · Position from the timetable · %lld min late · Next stops · Line %@: route and timetable
+
+## `Sources/Views/StationViews.swift`
+- Views: `PlatformMapSection`, `PlatformPin`, `PlatformSummaryRow`, `FlowLines`, `PlatformHeaderRow`, `ChangeGuideCard`
+- Sichtbare Texte: Platform map · Next: %@ · Get off here · Board here · Same platform · %@ walk · Step-free · With stairs
 
 ## `Sources/Views/TicketAttachmentView.swift`
 - Views: `TicketAttachmentView`
