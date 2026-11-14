@@ -53,6 +53,15 @@ final class ReliabilityTests: XCTestCase {
         XCTAssertEqual(calls.value, 2)
     }
 
+    func testWaitsAndRetriesOnceWhenRateLimited() async throws {
+        let calls = Counter()
+        let r = try await TransitousClient.withRetry(delay: .milliseconds(10), busyDelay: .milliseconds(20)) {
+            calls.next() == 1 ? (Data(), 429) : (Data("ok".utf8), 200)
+        }
+        XCTAssertEqual(r.1, 200)
+        XCTAssertEqual(calls.value, 2)
+    }
+
     func testRetriesOnceWhenTheConnectionDrops() async throws {
         let calls = Counter()
         let r = try await TransitousClient.withRetry(delay: .milliseconds(10)) {

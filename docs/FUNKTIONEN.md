@@ -1,6 +1,6 @@
 # Publit iOS – Funktionen und Screens (vollständige Übersicht)
 
-> Stand: Version 0.1.1 (Build 68). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
+> Stand: Version 0.1.1 (Build 69). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
 > **Pflege:** Jede Änderung an `Sources/`, `Watch/`, `Widgets/` oder `Share/` muss diese Datei im selben Commit/PR mitändern (siehe Abschnitt „Aktualisierung“ ganz unten). Die maschinell erzeugte Liste aller Views steht in [`FUNKTIONEN-INVENTAR.md`](FUNKTIONEN-INVENTAR.md) und wird von der CI automatisch aktualisiert.
 
 ## Inhalt
@@ -104,7 +104,7 @@ Ohne Onboarding startet die Standortabfrage sofort.
 
 ## 6. Fahrt eines Fahrzeugs (`TripView`, `LineDeparturesView`)
 
-- Alle Halte der Fahrt mit Plan-/Live-Zeit, Verspätung „+x“, Gleis „Pl. x“, bereits passierte Halte.
+- Alle Halte der Fahrt wie die Abfahrtszeilen am Startbildschirm: **Halt links, Zeit rechts** (davor Gleis „Pl. x“ und Verspätung „+x“), bereits passierte Halte grau.
 - Karte (`TripMap`) mit **geschätzter Fahrzeugposition** („Estimated vehicle position“), Status „Not departed yet“, „Between A and B“, „At …“, „Arrived at …“; ohne Live-Daten aus dem Fahrplan geschätzt.
 - Aktionen pro Halt: „Route here“, „Route from here“; „From … to here“; Linie speichern.
 - Liste weiterer Abfahrten derselben Linie.
@@ -124,9 +124,12 @@ Ohne Onboarding startet die Standortabfrage sofort.
 - **Von/Nach**-Felder (`WhereToField`, „Where to?“), Standard-Start = aktueller Standort; **„Swap“** tauscht.
 - **Schnellwahl Zuhause/Arbeit** (`PlaceKeyRow`) und letzte Suchen (`RecentSearchesSection`).
 - **Zeit** („When“): „Now“ / „Depart at“ / „Arrive by“. Der Knopf „Now“ neben Datum und Uhrzeit bleibt einzeilig; ist zu wenig Platz (schmale Geräte, große Schrift), zeigt er nur die Uhr (VoiceOver: „Now“). „Now“ folgt der Uhr: später wiederkommen zeigt Verbindungen ab dann; Ergebnisse werden live nachgeladen.
-- **„Search routes“** startet die Suche; danach sucht jede Änderung automatisch neu; Ziel leeren = Neustart.
+- **„Search routes“**: breite Such-Taste unter Von/Nach, Zeit und Routenoptionen (wie in der ÖBB-App), ohne Ziel deaktiviert; startet die Suche, danach sucht jede Änderung automatisch neu; Ziel leeren = Neustart.
 - **Ergebnisliste** (`ItineraryRow`): Ab–An, Dauer (`DurationFigure`), Linien-Badges, Umstiege, Live-Kennzeichen, „Cancelled“, „Service changes on this route“, Umstiegswahrscheinlichkeit („Change at X: y % chance“), Fahrpreis-Schätzung, Smart-Badges; optional **Verbindungs-Zeitleisten** (`TimelineBar`; Fahrt farbig, Fußweg grau, Warten gepunktet).
-- **Sortierung**: Recommended, Departure, Fastest, Fewest changes, Least walking („Recommended: …“).
+- **Sortierung**: immer nach Zeit, spätere Verbindungen weiter unten – bei „Depart“ nach Abfahrt, bei „Arrive“ nach Ankunft (Gleichstand: die jeweils andere Zeit). Recommended, Fastest, Fewest changes, Least walking werden nur markiert („Recommended: …“), nicht nach oben sortiert.
+- **Tageskennzeichnung**: die erste Verbindung jedes anderen Tags als des gesuchten trägt „Tomorrow“ bzw. ein Datum (wie ein Tageswechsel im Fahrplan, nicht auf jeder Zeile) (Systemwortlaut, z. B. „Morgen“); Ankunft nach Mitternacht zeigt „+1“ hinter der Ankunftszeit.
+- **Sprung zur Empfehlung**: liegt die empfohlene Verbindung außerhalb der Sicht, springt eine Kapsel „Recommended: …“ am unteren Rand zu ihr; die Liste scrollt frei unter ihr, sie verdeckt keine Zeilen oder Hinweise.
+- **Server ausgelastet** (HTTP 429): eine Wiederholung nach 2 s; bleibt Transitous ausgelastet, erscheint „Transitous is busy right now. Try again in a moment.“, bereits angezeigte Verbindungen derselben Suche bleiben stehen.
 - „Earlier connections“ / „Later connections“, „Updated HH:MM“, Abdeckungswarnung für Start/Ziel („From · Kärnten“).
 - **Routenoptionen-Knopf** (`RouteOptionsButton`) mit Kurz-Zusammenfassung („All modes“, „Direct only“, „Step-free“, „With sharing“ …).
 - **Go Now** (`GoNowView`, Schnellroute vom Standort): Zeile „From … Change“ – Start ist der Standort, lässt sich aber über die Ortssuche auf jeden anderen Ort ändern (Überschrift dann „from …“); „Leave now“ / „Leave in x min“, „Walk all the way“, „Later connections“.
@@ -160,7 +163,8 @@ Ohne Onboarding startet die Standortabfrage sofort.
 
 - **LeaveHero**: „Leave now“ / „Leave in x min“ und Ankunftszeit – die entscheidende Zahl.
 - Statusbanner (Live / Timetable, „This trip is cancelled.“, „Service changes on this route“), „Updated HH:MM“.
-- **Karte** der Route (`RouteMap`, Linien in Betreiberfarbe, Fußwege gepunktet); Vergleichskarte (`CompareMapView`).
+- **Karte** der Route (`RouteMap`, Linien in Betreiberfarbe, Fußwege gepunktet; Ausschnitt an das Seitenverhältnis der Karte angepasst, damit Start und Ziel immer sichtbar sind); Vergleichskarte (`CompareMapView`).
+- **Rad/Auto die ganze Strecke**: ohne Linienkette und „Direct“ unter der Zeitkarte; die Schritte nennen den Start (wie das Ziel), dazu „Driving times are without traffic and parking.“ und „Open in …“.
 - **„Trip overview“**/„Steps“: Zeitleiste (`TimelineLegRow`, `TimelineRail`): je Abschnitt „Board at …“, „Get off at …“, Linie, Richtung, **Zugart und Rollstuhl-Eignung des Fahrzeugs** (`VehicleKindLine`/`VehicleKind`: z. B. „Railjet Xpress · High-speed train · Wheelchair accessible“, „Regional train · Not wheelchair accessible“; Kategorie aus der Zugnummer, Eignung aus GTFS `wheelchair_accessible`, ohne Angabe nichts), Gleis („Platform x“, Gleiswechsel), Zwischenhalte, Verspätung, SEV, Fußweg mit Anweisungen (Treppen, Ebenen, Ausgang „Exit towards …“), Leihfahrzeug („Pick up at …“, „Return at …“, „Rent in the provider's app“), Umstiegskarten.
 - **„Remind me to get off“** (`GetOffButton`): „Reminder set – We'll notify you at …“, „This stop is less than two minutes away.“, Hinweis falls Mitteilungen aus.
 - Fahrpreis (`FareSection`): „Fare estimate“ nur bei vollständig abgedeckter Route und eindeutiger Tarifregel; sonst „Fare information“ und Ticket-Links des Betreibers / Verbunds (`RegionTicketRow`, z. B. „Venice · ACTV“).

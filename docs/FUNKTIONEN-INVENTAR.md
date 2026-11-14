@@ -164,7 +164,7 @@
 
 ## `Sources/Views/PlanView.swift`
 - Views: `PlanView`, `EndpointConnector`, `ItineraryRow`, `TimelineBar`
-- Sichtbare Texte: Search routes · Swap · Depart · Arrive · When · Arrive by · Depart at · Now · Recommended: %@ · Plan · Where to? · not set · Earlier connections · Later connections · Updated %@ · Live data · Cancelled · Service changes on this route · Change at %@: %lld %% chance
+- Sichtbare Texte: Swap · Depart · Arrive · When · Arrive by · Depart at · Now · Search routes · Recommended: %@ · Plan · Where to? · not set · Earlier connections · Later connections · Updated %@ · Live data · Cancelled · Service changes on this route · Change at %@: %lld %% chance
 
 ## `Sources/Views/PublitLogo.swift`
 - Views: `PublitLogo`, `PublitAppIcon`

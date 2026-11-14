@@ -1,11 +1,27 @@
 # Changelog
 
-## 0.1.1 (build 68) – coverage map
+## 0.1.1 (build 69) – coverage map, all tester builds together
 
 - The "Data gaps" map and the "Not reliable here" warnings now cover the real coverage of Transitous worldwide, not only Europe.
 - The coverage atlas updates itself: publit.eu rebuilds it every week from all Transitous sources, and the app (and the watch) load the newest one at most once a day. A region that Transitous adds shows up without an app update; the built-in copy is used until then or when offline.
+- Contains everything from TestFlight builds 66 and 67 (wide "Search routes" button at the bottom, timetable order, busy-server handling …) together with the later work on main (platform map, train types, Park & Ride …). Build 68 had missed the 66/67 changes.
 
-## 0.1.0 (build 66) – tester feedback
+## 0.1.0 (build 67) – busy server, calmer route list
+
+- Transitous busy (HTTP 429): asked once more after two seconds; if it is still busy, a plain message ("Transitous is busy right now …") instead of a status code, and routes already on screen stay.
+- Plan: "Tomorrow" (or a date) only on the first route of each new day, not on every row.
+- Plan: the "Recommended: …" capsule no longer covers the last rows and notes; the list scrolls clear of it.
+- Plan: short ride blocks in the timeline show the mode icon instead of staying blank; "Walk to …" stays on one line; even spacing in "1 change · 704 → …".
+- Route detail for driving and cycling: no repeated "🚗 17 · Direct" chain and no empty gap under the time; the steps name the start, like the destination.
+- Route map: the whole route fits the map's shape, so a north–south route in the wide preview keeps both ends in view.
+
+## 0.1.0 (build 66) – everyday feedback (TestFlight)
+
+- Line trip: each stop now reads like the departure rows on the start screen, stop on the left, time on the right (platform and delay before the time).
+- Plan: one wide "Search routes" button under From/To, time and route options (as in the ÖBB app) instead of the small round icon next to the destination; disabled until a destination is set.
+- Plan: routes are always in timetable order, later ones further down: by departure for "Depart", by arrival for "Arrive"; "Earlier/Later connections" keep that order.
+- Plan: routes on another day than the one searched for are marked ("Tomorrow" or a date, system wording in every language); arrivals after midnight show "+1".
+## 0.1.0 (main, after build 65) – tester feedback
 
 - Park & Ride drives to a station near the start, at most 15 minutes, then the train. Before, the router could drive most of the way (8 min into town, then a 2-minute bus to the destination station, or past the local station to the next town). Routes where the drive is longer than the rides are dropped; if none are left, the usual routes show and driving is in "Other ways".
 - No stop within walking reach (30 and 45 min found nothing): Publit now tries driving to the nearest station before suggesting a two-hour walk, and says so above the routes.
