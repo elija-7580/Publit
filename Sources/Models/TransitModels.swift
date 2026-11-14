@@ -286,6 +286,8 @@ struct StopTime: Decodable, Identifiable, Sendable, RouteStyled {
     var directionId: String? = nil
     /// Last stop of the trip.
     var tripTo: SegmentStop? = nil
+    /// Some feeds keep the train category only here ("rjx 66"), see `TransitLabels.trainName`.
+    var routeLongName: String? = nil
     /// Extra real-time source that corrected this departure ("Wiener Linien"), see `LiveOverlay`.
     var liveSource: String? = nil
 

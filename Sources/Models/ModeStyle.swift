@@ -7,12 +7,20 @@ protocol RouteStyled {
     var routeTextColor: String? { get }
     var routeShortName: String? { get }
     var displayName: String? { get }
+    /// Long route name; some feeds keep the train category only there ("rjx 66").
+    var routeLongName: String? { get }
 }
 
 extension RouteStyled {
     /// The compact, operator-defined line identifier. Never use a destination as a line name.
+    var routeLongName: String? { nil }
+
     var lineName: String {
-        TransitLabels.lineName(TransitLabels.clean(routeShortName) ?? TransitLabels.clean(displayName), mode: mode)
+        if VehicleKind.railModes.contains(mode),
+           let train = TransitLabels.trainName(short: routeShortName, display: displayName, longName: routeLongName) {
+            return train
+        }
+        return TransitLabels.lineName(TransitLabels.clean(routeShortName) ?? TransitLabels.clean(displayName), mode: mode)
             ?? ModeStyle.label(mode)
     }
 
@@ -20,6 +28,8 @@ extension RouteStyled {
     var serviceDetail: String? {
         guard let display = TransitLabels.clean(displayName),
               TransitLabels.identity(display) != TransitLabels.identity(lineName) else { return nil }
+        // "xpress 66" under "RJX 66": the same train, written worse.
+        if let n = TransitLabels.trainNumber(display), n == TransitLabels.trainNumber(lineName) { return nil }
         return display
     }
 
@@ -116,6 +126,37 @@ enum TransitLabels {
         return raw
     }
 
+    /// A train's name as on the departure board, from feeds that each fill the fields differently:
+    /// - DB puts an internal line number in the short name ("29") and the train in the display name ("ICE 1006");
+    /// - MÁV leaves the short name empty and writes "xpress 66" with the category in the long name ("rjx 66").
+    /// Nil when the short name is already right ("RJX 161", "RE1", "S26").
+    static func trainName(short: String?, display: String?, longName: String?) -> String? {
+        let short = clean(short), display = clean(display)
+        guard let display else { return nil }
+        let number = trainNumber(display)
+        // The category from the long name when the display name's own word is not a category.
+        if let number, VehicleKind.categoryName(display) == nil,
+           let code = clean(longName)?.split(separator: " ").first.map({ String($0).uppercased() }),
+           VehicleKind.categories[code] != nil {
+            return "\(code) \(number)"
+        }
+        guard let short else { return display }
+        // "29" next to "ICE 1006": an internal number, not what is written on the train. The badge
+        // shows the category like other feeds ("ICE"), the train itself stays beside it.
+        if short.allSatisfy(\.isNumber), display.contains(where: \.isLetter), number != nil, short != number {
+            let code = String(display.prefix { $0.isLetter }).uppercased()
+            return VehicleKind.categories[code] != nil ? code : display
+        }
+        return nil
+    }
+
+    /// The train number at the end of a name ("ICE 1006" → "1006"); nil without one.
+    static func trainNumber(_ value: String) -> String? {
+        let last = value.split(separator: " ").last.map(String.init) ?? value
+        let digits = String(last.reversed().prefix { $0.isNumber }.reversed())
+        return digits.count >= 2 ? digits : nil
+    }
+
     /// The direction to show. Some feeds put an internal service code in the headsign instead of a
     /// destination (Paris RER: "ZEMA", "NEGE", "PEZZ"); then the trip's last stop says where it goes.
     static func direction(headsign: String?, tripEnd: String?) -> String? {
@@ -148,7 +189,7 @@ struct VehicleKind: Equatable, Sendable {
         "RE": "Regional-Express", "RB": "Regionalbahn", "WB": "Westbahn", "FLX": "Flixtrain", "TGV": "TGV",
         "OUIGO": "OUIGO", "IRE": "Interregio-Express", "IR": "InterRegio", "FR": "Frecciarossa", "FA": "Frecciargento",
         "FB": "Frecciabianca", "RV": "Regionale Veloce", "AVE": "AVE", "ALVIA": "Alvia", "EST": "Eurostar",
-        "TER": "TER", "TL": "Transilien", "SC": "SuperCity", "EX": "Express", "RR": "Rychlík", "OS": "Osobní vlak",
+        "TER": "TER", "INTERCITY": "Intercity", "INOUI": "TGV INOUI", "TL": "Transilien", "SC": "SuperCity", "EX": "Express", "RR": "Rychlík", "OS": "Osobní vlak",
     ]
 
     static let railModes: Set<String> = ["HIGHSPEED_RAIL", "LONG_DISTANCE", "REGIONAL_RAIL", "REGIONAL_FAST_RAIL",
@@ -162,7 +203,7 @@ struct VehicleKind: Equatable, Sendable {
         default: access = .unknown
         }
         let category = railModes.contains(leg.mode)
-            ? [leg.tripShortName, leg.displayName, leg.routeShortName].lazy.compactMap(categoryName).first
+            ? [leg.lineName, leg.tripShortName, leg.displayName, leg.routeShortName].lazy.compactMap(categoryName).first
             : nil
         return VehicleKind(category: category, modeLabel: label(leg.mode), access: access)
     }

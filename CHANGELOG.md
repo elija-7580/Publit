@@ -6,6 +6,7 @@
 - No stop within walking reach (30 and 45 min found nothing): Publit now tries driving to the nearest station before suggesting a two-hour walk, and says so above the routes.
 - Route details show the kind of train (Railjet Xpress, Intercity, Regional train …) and whether the vehicle is wheelchair accessible, where the timetable data says so.
 - Paris: metro lines 3bis and 7bis are named as on the platforms (not "3B"/"7B"); RER directions show the terminus instead of internal service codes ("ZEMA", "NEGE").
+- Train names: German ICE/IC trains no longer show DB's internal line number ("29") but the category ("ICE", with "ICE 1006" beside it); Hungarian (MÁV) Railjets show as "RJX 66" instead of "xpress 66".
 - "Where to now?" can start somewhere other than the current location: tap "From … Change".
 - New texts translated into all 15 app languages.
 

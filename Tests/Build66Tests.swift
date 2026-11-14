@@ -78,6 +78,52 @@ final class Build66Tests: XCTestCase {
         XCTAssertNil(VehicleKind.of(bus).category)
     }
 
+    // MARK: Train names (real field combinations from Transitous, 2026-11-14)
+
+    private func name(_ short: String?, _ display: String?, _ long: String? = nil) -> String? {
+        TransitLabels.trainName(short: short, display: display, longName: long)
+    }
+
+    func testTrainNamesFromEachFeedsHabits() {
+        // DB: internal line number in the short name; the badge shows the category, as for other feeds.
+        XCTAssertEqual(name("29", "ICE 1006"), "ICE")
+        // Trenitalia: the category is the badge, the train beside it (unchanged).
+        XCTAssertNil(name("FR", "FR 6649", "Frecciarossa"))
+        // MÁV: empty short name, category only in the long name.
+        XCTAssertEqual(name("", "xpress 66", "rjx 66"), "RJX 66")
+        XCTAssertEqual(name("", "xpress 63", "rjx 63/64/65"), "RJX 63")
+        XCTAssertEqual(name("", "InterCity 854", "IC TÓPART"), "InterCity 854")
+        XCTAssertEqual(name("", "TGV INOUI 6615"), "TGV INOUI 6615")
+        // Already right: left alone.
+        XCTAssertNil(name("RJX 161", "RJX 161", "Lindau - Bregenz - Wien"))
+        XCTAssertNil(name("RE1", "RE1 (4016)"))
+        XCTAssertNil(name("IR16", "IR16"))
+        XCTAssertNil(name("R19", "R19 (R 869)", "Praha – Česká Třebová – Brno"))
+        XCTAssertNil(name("A", "A"))
+        let ice = TestTrain(routeShortName: "29", displayName: "ICE 1006")
+        XCTAssertEqual(ice.lineName, "ICE")
+        XCTAssertEqual(ice.serviceDetail, "ICE 1006")
+    }
+
+    func testRailLegUsesTheTrainName() throws {
+        var data = try XCTUnwrap(JSONSerialization.jsonObject(with: Fixtures.data("plan_park_ride")) as? [String: Any])
+        var trips = try XCTUnwrap(data["itineraries"] as? [[String: Any]])
+        var legs = try XCTUnwrap(trips[0]["legs"] as? [[String: Any]])
+        let i = try XCTUnwrap(legs.firstIndex { ($0["mode"] as? String) == "LONG_DISTANCE" })
+        legs[i]["routeShortName"] = ""
+        legs[i]["displayName"] = "xpress 66"
+        legs[i]["routeLongName"] = "rjx 66"
+        trips[0]["legs"] = legs; data["itineraries"] = trips
+        let res = try TransitousClient.makeDecoder().decode(PlanResponse.self, from: JSONSerialization.data(withJSONObject: data))
+        let leg = try XCTUnwrap(res.itineraries[0].legs.first { $0.mode == "LONG_DISTANCE" })
+        XCTAssertEqual(leg.lineName, "RJX 66")
+        XCTAssertNil(leg.serviceDetail)
+        XCTAssertEqual(VehicleKind.of(leg).category, "Railjet Xpress")
+        // Buses keep their names untouched.
+        let bus = try XCTUnwrap(res.itineraries[0].legs.first { $0.mode == "BUS" })
+        XCTAssertEqual(bus.lineName, TransitLabels.clean(bus.routeShortName) ?? bus.lineName)
+    }
+
     // MARK: Paris
 
     func testParisBisLines() {
@@ -99,6 +145,14 @@ final class Build66Tests: XCTestCase {
         XCTAssertEqual(TransitLabels.direction(headsign: "NEGE", tripEnd: nil), "NEGE")
         XCTAssertNil(TransitLabels.direction(headsign: nil, tripEnd: "Nation"))
     }
+}
+
+private struct TestTrain: RouteStyled {
+    var mode = "HIGHSPEED_RAIL"
+    var routeColor: String? = nil
+    var routeTextColor: String? = nil
+    var routeShortName: String?
+    var displayName: String?
 }
 
 private extension JSONEncoder {
