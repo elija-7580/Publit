@@ -1,0 +1,300 @@
+
+SwiftCompile normal x86_64 /Users/runner/work/Publit/Publit/Watch/WatchTicketsView.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile WatchTicketsView.swift
+
+SwiftCompile normal x86_64 /Users/runner/work/Publit/Publit/Sources/Models/WatchTrip.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile WatchTrip.swift
+
+SwiftCompile normal x86_64 /Users/runner/work/Publit/Publit/Watch/WatchTripMapView.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile WatchTripMapView.swift
+
+SwiftCompile normal x86_64 /Users/runner/work/Publit/Publit/Watch/WatchTripView.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile WatchTripView.swift
+
+SwiftCompile normal x86_64 /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile GeneratedAssetSymbols.swift
+
+SwiftMergeGeneratedHeaders /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/DerivedSources/PublitWatch-Swift.h /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/arm64/PublitWatch-Swift.h /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/x86_64/PublitWatch-Swift.h (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-swiftHeaderTool -arch arm64 /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/arm64/PublitWatch-Swift.h -arch x86_64 /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/x86_64/PublitWatch-Swift.h -o /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/DerivedSources/PublitWatch-Swift.h
+
+SwiftDriverJobDiscovery normal arm64 Compiling MapStopCache.swift, ModeStyle.swift, Palette.swift, PassStyle.swift, PerformanceTrace.swift, PlaceRole.swift, Polyline.swift, PublitWatchApp.swift, Reach.swift, ResponseCache.swift, RouteStyle.swift, SavedPlace.swift, SavedTrip.swift, ServiceAlerts.swift, SmartRouting.swift, StopGrouping.swift, TicketPass.swift, TransitExtras.swift, TransitFilter.swift, TransitModels.swift, TransitousClient.swift (in target 'PublitWatch' from project 'Publit')
+
+Copy /Users/runner/work/Publit/Publit/build/Products/Debug-watchsimulator/PublitWatch.swiftmodule/x86_64-apple-watchos-simulator.swiftmodule /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/x86_64/PublitWatch.swiftmodule (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/x86_64/PublitWatch.swiftmodule /Users/runner/work/Publit/Publit/build/Products/Debug-watchsimulator/PublitWatch.swiftmodule/x86_64-apple-watchos-simulator.swiftmodule
+
+Copy /Users/runner/work/Publit/Publit/build/Products/Debug-watchsimulator/PublitWatch.swiftmodule/x86_64-apple-watchos-simulator.swiftdoc /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/x86_64/PublitWatch.swiftdoc (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/x86_64/PublitWatch.swiftdoc /Users/runner/work/Publit/Publit/build/Products/Debug-watchsimulator/PublitWatch.swiftmodule/x86_64-apple-watchos-simulator.swiftdoc
+
+Copy /Users/runner/work/Publit/Publit/build/Products/Debug-watchsimulator/PublitWatch.swiftmodule/x86_64-apple-watchos-simulator.abi.json /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/x86_64/PublitWatch.abi.json (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/x86_64/PublitWatch.abi.json /Users/runner/work/Publit/Publit/build/Products/Debug-watchsimulator/PublitWatch.swiftmodule/x86_64-apple-watchos-simulator.abi.json
+
+Copy /Users/runner/work/Publit/Publit/build/Products/Debug-watchsimulator/PublitWatch.swiftmodule/Project/x86_64-apple-watchos-simulator.swiftsourceinfo /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/x86_64/PublitWatch.swiftsourceinfo (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/x86_64/PublitWatch.swiftsourceinfo /Users/runner/work/Publit/Publit/build/Products/Debug-watchsimulator/PublitWatch.swiftmodule/Project/x86_64-apple-watchos-simulator.swiftsourceinfo
+
+SwiftCompile normal x86_64 Compiling\ AppInfo.swift,\ CircularLine.swift,\ CityGuide.swift,\ Coverage.swift,\ CoverageAtlasData.swift,\ DeepLink.swift,\ DesignSampleTrip.swift,\ DirectionLabel.swift,\ Fares.swift,\ Formatting.swift,\ Geo.swift,\ GooglePlaces.swift,\ HangLog.swift,\ JSONFileStore.swift,\ L10n.swift,\ LineBadge.swift,\ LineColors.swift,\ LiveSourceAdapters.swift,\ LiveSources.swift,\ MD5.swift,\ MainThreadSampler.swift /Users/runner/work/Publit/Publit/Sources/App/AppInfo.swift /Users/runner/work/Publit/Publit/Sources/Models/CircularLine.swift /Users/runner/work/Publit/Publit/Sources/Models/CityGuide.swift /Users/runner/work/Publit/Publit/Sources/Models/Coverage.swift /Users/runner/work/Publit/Publit/Sources/Models/CoverageAtlasData.swift /Users/runner/work/Publit/Publit/Sources/Models/DeepLink.swift /Users/runner/work/Publit/Publit/Sources/App/DesignSampleTrip.swift /Users/runner/work/Publit/Publit/Sources/Shared/DirectionLabel.swift /Users/runner/work/Publit/Publit/Sources/Models/Fares.swift /Users/runner/work/Publit/Publit/Sources/Util/Formatting.swift /Users/runner/work/Publit/Publit/Sources/Util/Geo.swift /Users/runner/work/Publit/Publit/Sources/API/GooglePlaces.swift /Users/runner/work/Publit/Publit/Sources/Util/HangLog.swift /Users/runner/work/Publit/Publit/Sources/Stores/JSONFileStore.swift /Users/runner/work/Publit/Publit/Sources/Util/L10n.swift /Users/runner/work/Publit/Publit/Sources/Views/Components/LineBadge.swift /Users/runner/work/Publit/Publit/Sources/Util/LineColors.swift /Users/runner/work/Publit/Publit/Sources/API/LiveSourceAdapters.swift /Users/runner/work/Publit/Publit/Sources/API/LiveSources.swift /Users/runner/work/Publit/Publit/Sources/API/MD5.swift /Users/runner/work/Publit/Publit/Sources/Util/MainThreadSampler.swift (in target 'PublitWatch' from project 'Publit')
+/Users/runner/work/Publit/Publit/Sources/API/LiveSourceAdapters.swift:162:49: warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+160 |                 guard J.str(m["type"]) == "HIM", let x = J.int(m["himX"]), hims.indices.contains(x) else { return nil }
+161 |                 // Summary headers ("SUM_GLB_…") are network-wide notes, not about this ride.
+162 |                 if J.list(m["tagL"]).compactMap { J.str($0) }.contains(where: { $0.contains("GLB") }) { return nil }
+    |                                                 `- warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+163 |                 let him = hims[x]
+164 |                 if let mask = J.int(him["prod"]), let cls, mask & cls == 0 { return nil }
+
+/Users/runner/work/Publit/Publit/Sources/API/LiveSourceAdapters.swift:259:80: warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+257 |                 guard let name = J.str(line["name"]) else { continue }
+258 |                 let alerts = infos.filter { $0.lines.contains(name) }.map { $0.alert }
+259 |                 for dep in J.list(J.dict(line["departures"])["departure"]).map { J.dict($0) } {
+    |                                                                                `- warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+260 |                     let t = J.dict(dep["departureTime"])
+261 |                     guard let planned = J.str(t["timePlanned"]).flatMap({ stamp.date(from: $0) }) else { continue }
+
+/Users/runner/work/Publit/Publit/Sources/API/LiveSourceAdapters.swift:256:54: warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+254 |         var out: [LiveDeparture] = []
+255 |         for monitor in J.list(data["monitors"]).map { J.dict($0) } {
+256 |             for line in J.list(monitor["lines"]).map { J.dict($0) } {
+    |                                                      `- warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+257 |                 guard let name = J.str(line["name"]) else { continue }
+258 |                 let alerts = infos.filter { $0.lines.contains(name) }.map { $0.alert }
+
+/Users/runner/work/Publit/Publit/Sources/API/LiveSourceAdapters.swift:255:53: warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+253 |         }
+254 |         var out: [LiveDeparture] = []
+255 |         for monitor in J.list(data["monitors"]).map { J.dict($0) } {
+    |                                                     `- warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+256 |             for line in J.list(monitor["lines"]).map { J.dict($0) } {
+257 |                 guard let name = J.str(line["name"]) else { continue }
+
+SwiftCompile normal x86_64 /Users/runner/work/Publit/Publit/Sources/App/AppInfo.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile AppInfo.swift
+
+SwiftCompile normal x86_64 /Users/runner/work/Publit/Publit/Sources/Models/CircularLine.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile CircularLine.swift
+
+SwiftCompile normal x86_64 /Users/runner/work/Publit/Publit/Sources/Models/CityGuide.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile CityGuide.swift
+
+SwiftCompile normal x86_64 /Users/runner/work/Publit/Publit/Sources/Models/Coverage.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile Coverage.swift
+
+SwiftCompile normal x86_64 /Users/runner/work/Publit/Publit/Sources/Models/CoverageAtlasData.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile CoverageAtlasData.swift
+
+SwiftCompile normal x86_64 /Users/runner/work/Publit/Publit/Sources/Models/DeepLink.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile DeepLink.swift
+
+SwiftCompile normal x86_64 /Users/runner/work/Publit/Publit/Sources/App/DesignSampleTrip.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile DesignSampleTrip.swift
+
+SwiftCompile normal x86_64 /Users/runner/work/Publit/Publit/Sources/Shared/DirectionLabel.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile DirectionLabel.swift
+
+SwiftCompile normal x86_64 /Users/runner/work/Publit/Publit/Sources/Models/Fares.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile Fares.swift
+
+SwiftCompile normal x86_64 /Users/runner/work/Publit/Publit/Sources/Util/Formatting.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile Formatting.swift
+
+SwiftCompile normal x86_64 /Users/runner/work/Publit/Publit/Sources/Util/Geo.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile Geo.swift
+
+SwiftCompile normal x86_64 /Users/runner/work/Publit/Publit/Sources/API/GooglePlaces.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile GooglePlaces.swift
+
+SwiftCompile normal x86_64 /Users/runner/work/Publit/Publit/Sources/Util/HangLog.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile HangLog.swift
+
+SwiftCompile normal x86_64 /Users/runner/work/Publit/Publit/Sources/Stores/JSONFileStore.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile JSONFileStore.swift
+
+SwiftCompile normal x86_64 /Users/runner/work/Publit/Publit/Sources/Util/L10n.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile L10n.swift
+
+SwiftCompile normal x86_64 /Users/runner/work/Publit/Publit/Sources/Views/Components/LineBadge.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile LineBadge.swift
+
+SwiftCompile normal x86_64 /Users/runner/work/Publit/Publit/Sources/Util/LineColors.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile LineColors.swift
+
+SwiftCompile normal x86_64 /Users/runner/work/Publit/Publit/Sources/API/LiveSourceAdapters.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile LiveSourceAdapters.swift
+
+SwiftCompile normal x86_64 /Users/runner/work/Publit/Publit/Sources/API/LiveSources.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile LiveSources.swift
+
+SwiftCompile normal x86_64 /Users/runner/work/Publit/Publit/Sources/API/MD5.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile MD5.swift
+
+SwiftCompile normal x86_64 /Users/runner/work/Publit/Publit/Sources/Util/MainThreadSampler.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile MainThreadSampler.swift
+
+SwiftDriverJobDiscovery normal x86_64 Compiling MapStopCache.swift, ModeStyle.swift, Palette.swift, PassStyle.swift, PerformanceTrace.swift, PlaceRole.swift, Polyline.swift, PublitWatchApp.swift, Reach.swift, ResponseCache.swift, RouteStyle.swift, SavedPlace.swift, SavedTrip.swift, ServiceAlerts.swift, SmartRouting.swift, StopGrouping.swift, TicketPass.swift, TransitExtras.swift, TransitFilter.swift, TransitModels.swift, TransitousClient.swift (in target 'PublitWatch' from project 'Publit')
+
+SwiftCompile normal arm64 Compiling\ TripGuide.swift,\ TripProgress.swift,\ TripRefreshCoordinator.swift,\ TripStatus.swift,\ WalkGuide.swift,\ WatchDemo.swift,\ WatchHomeView.swift,\ WatchLibrary.swift,\ WatchLocator.swift,\ WatchNearbyModel.swift,\ WatchNearbyView.swift,\ WatchPlanView.swift,\ WatchRoute.swift,\ WatchSavedView.swift,\ WatchSync.swift,\ WatchTicketsView.swift,\ WatchTrip.swift,\ WatchTripMapView.swift,\ WatchTripView.swift,\ GeneratedAssetSymbols.swift /Users/runner/work/Publit/Publit/Sources/Models/TripGuide.swift /Users/runner/work/Publit/Publit/Sources/Models/TripProgress.swift /Users/runner/work/Publit/Publit/Sources/API/TripRefreshCoordinator.swift /Users/runner/work/Publit/Publit/Sources/Models/TripStatus.swift /Users/runner/work/Publit/Publit/Sources/Models/WalkGuide.swift /Users/runner/work/Publit/Publit/Watch/WatchDemo.swift /Users/runner/work/Publit/Publit/Watch/WatchHomeView.swift /Users/runner/work/Publit/Publit/Watch/WatchLibrary.swift /Users/runner/work/Publit/Publit/Watch/WatchLocator.swift /Users/runner/work/Publit/Publit/Watch/WatchNearbyModel.swift /Users/runner/work/Publit/Publit/Watch/WatchNearbyView.swift /Users/runner/work/Publit/Publit/Watch/WatchPlanView.swift /Users/runner/work/Publit/Publit/Watch/WatchRoute.swift /Users/runner/work/Publit/Publit/Watch/WatchSavedView.swift /Users/runner/work/Publit/Publit/Sources/Models/WatchSync.swift /Users/runner/work/Publit/Publit/Watch/WatchTicketsView.swift /Users/runner/work/Publit/Publit/Sources/Models/WatchTrip.swift /Users/runner/work/Publit/Publit/Watch/WatchTripMapView.swift /Users/runner/work/Publit/Publit/Watch/WatchTripView.swift /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'PublitWatch' from project 'Publit')
+
+SwiftCompile normal arm64 /Users/runner/work/Publit/Publit/Sources/Models/TripGuide.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile TripGuide.swift
+
+SwiftCompile normal arm64 /Users/runner/work/Publit/Publit/Sources/Models/TripProgress.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile TripProgress.swift
+
+SwiftCompile normal arm64 /Users/runner/work/Publit/Publit/Sources/API/TripRefreshCoordinator.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile TripRefreshCoordinator.swift
+
+SwiftCompile normal arm64 /Users/runner/work/Publit/Publit/Sources/Models/TripStatus.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile TripStatus.swift
+
+SwiftCompile normal arm64 /Users/runner/work/Publit/Publit/Sources/Models/WalkGuide.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile WalkGuide.swift
+
+SwiftCompile normal arm64 /Users/runner/work/Publit/Publit/Watch/WatchDemo.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile WatchDemo.swift
+
+SwiftCompile normal arm64 /Users/runner/work/Publit/Publit/Watch/WatchHomeView.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile WatchHomeView.swift
+
+SwiftCompile normal arm64 /Users/runner/work/Publit/Publit/Watch/WatchLibrary.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile WatchLibrary.swift
+
+SwiftCompile normal arm64 /Users/runner/work/Publit/Publit/Watch/WatchLocator.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile WatchLocator.swift
+
+SwiftCompile normal arm64 /Users/runner/work/Publit/Publit/Watch/WatchNearbyModel.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile WatchNearbyModel.swift
+
+SwiftCompile normal arm64 /Users/runner/work/Publit/Publit/Watch/WatchNearbyView.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile WatchNearbyView.swift
+
+SwiftCompile normal arm64 /Users/runner/work/Publit/Publit/Watch/WatchPlanView.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile WatchPlanView.swift
+
+SwiftCompile normal arm64 /Users/runner/work/Publit/Publit/Watch/WatchRoute.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile WatchRoute.swift
+
+SwiftCompile normal arm64 /Users/runner/work/Publit/Publit/Watch/WatchSavedView.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile WatchSavedView.swift
+
+SwiftCompile normal arm64 /Users/runner/work/Publit/Publit/Sources/Models/WatchSync.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile WatchSync.swift
+
+SwiftCompile normal arm64 /Users/runner/work/Publit/Publit/Watch/WatchTicketsView.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile WatchTicketsView.swift
+
+SwiftCompile normal arm64 /Users/runner/work/Publit/Publit/Sources/Models/WatchTrip.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile WatchTrip.swift
+
+SwiftCompile normal arm64 /Users/runner/work/Publit/Publit/Watch/WatchTripMapView.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile WatchTripMapView.swift
+
+SwiftCompile normal arm64 /Users/runner/work/Publit/Publit/Watch/WatchTripView.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile WatchTripView.swift
+
+SwiftCompile normal arm64 /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-SwiftPerFileCompile GeneratedAssetSymbols.swift
+
+SwiftDriverJobDiscovery normal x86_64 Compiling AppInfo.swift, CircularLine.swift, CityGuide.swift, Coverage.swift, CoverageAtlasData.swift, DeepLink.swift, DesignSampleTrip.swift, DirectionLabel.swift, Fares.swift, Formatting.swift, Geo.swift, GooglePlaces.swift, HangLog.swift, JSONFileStore.swift, L10n.swift, LineBadge.swift, LineColors.swift, LiveSourceAdapters.swift, LiveSources.swift, MD5.swift, MainThreadSampler.swift (in target 'PublitWatch' from project 'Publit')
+
+SwiftDriverJobDiscovery normal x86_64 Compiling TripGuide.swift, TripProgress.swift, TripRefreshCoordinator.swift, TripStatus.swift, WalkGuide.swift, WatchDemo.swift, WatchHomeView.swift, WatchLibrary.swift, WatchLocator.swift, WatchNearbyModel.swift, WatchNearbyView.swift, WatchPlanView.swift, WatchRoute.swift, WatchSavedView.swift, WatchSync.swift, WatchTicketsView.swift, WatchTrip.swift, WatchTripMapView.swift, WatchTripView.swift, GeneratedAssetSymbols.swift (in target 'PublitWatch' from project 'Publit')
+
+SwiftDriver\ Compilation PublitWatch normal x86_64 com.apple.xcode.tools.swift.compiler (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-Swift-Compilation -- /Applications/Xcode_27.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name PublitWatch -Onone @/Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/x86_64/PublitWatch.SwiftFileList -DDEBUG -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode_27.1.app/Contents/Developer/Platforms/WatchSimulator.platform/Developer/SDKs/WatchSimulator27.0.sdk -target x86_64-apple-watchos10.0-simulator -g -Xfrontend -serialize-debugging-options -enable-testing -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/runner/work/Publit/Publit/build/Products/Debug-watchsimulator -F /Users/runner/work/Publit/Publit/build/Products/Debug-watchsimulator -c -j3 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /var/folders/5n/5t77mfb93jd7q8v9s6f0dn0m0000gn/C/com.apple.DeveloperTools/27.1-27A9275/Xcode/SDKStatCaches.noindex/watchsimulator27.0-24R360-e829b21a6f8c9b70876ba0858053c044f4aba21afb5fa68fd76bcd58b0ddb6ea.sdkstatcache -output-file-map /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/x86_64/PublitWatch-OutputFileMap.json -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/runner/work/Publit/Publit/build/Products/SwiftExplicitPrecompiledModules -emit-dependencies -emit-module -emit-module-path /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/x86_64/PublitWatch.swiftmodule -serialize-diagnostics -dependency-scan-serialize-diagnostics-path /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/x86_64/PublitWatch-dependency-scan.dia -validate-clang-modules-once -clang-build-session-file /var/folders/5n/5t77mfb93jd7q8v9s6f0dn0m0000gn/C/org.llvm.clang/ModuleCache.noindex/Session.modulevalidation -Xcc -fmodules-prune-interval\=86400 -Xcc -fmodules-prune-after\=345600 -emit-const-values -const-gather-protocols-list /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/x86_64/PublitWatch_const_extract_protocols.json -Xcc -iquote -Xcc /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/PublitWatch-generated-files.hmap -Xcc -I/Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/PublitWatch-own-target-headers.hmap -Xcc -I/Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/PublitWatch-all-target-headers.hmap -Xcc -iquote -Xcc /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/PublitWatch-project-headers.hmap -Xcc -I/Users/runner/work/Publit/Publit/build/Products/Debug-watchsimulator/include -Xcc -I/Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/DerivedSources-normal/x86_64 -Xcc -I/Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/DerivedSources/x86_64 -Xcc -I/Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/x86_64/PublitWatch-Swift.h -working-directory /Users/runner/work/Publit/Publit -experimental-emit-module-separately -disable-cmo
+
+Ld /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/x86_64/Binary/PublitWatch normal x86_64 (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    /Applications/Xcode_27.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target x86_64-apple-watchos10.0-simulator -isysroot /Applications/Xcode_27.1.app/Contents/Developer/Platforms/WatchSimulator.platform/Developer/SDKs/WatchSimulator27.0.sdk -O0 -Xlinker -no_warn_duplicate_libraries -L/Users/runner/work/Publit/Publit/build/Products/EagerLinkingTBDs/Debug-watchsimulator -L/Users/runner/work/Publit/Publit/build/Products/Debug-watchsimulator -F/Users/runner/work/Publit/Publit/build/Products/EagerLinkingTBDs/Debug-watchsimulator -F/Users/runner/work/Publit/Publit/build/Products/Debug-watchsimulator -filelist /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/x86_64/PublitWatch.LinkFileList -Xlinker -rpath -Xlinker /usr/lib/swift -Xlinker -dead_strip -Xlinker -object_path_lto -Xlinker /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/x86_64/PublitWatch_lto.o -rdynamic -Xlinker -no_deduplicate -Xlinker -objc_abi_version -Xlinker 2 -Xlinker -dependency_info -Xlinker /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/x86_64/PublitWatch_dependency_info.dat -fobjc-link-runtime -L/Applications/Xcode_27.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/watchsimulator -L/usr/lib/swift -Xlinker -add_ast_path -Xlinker /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/x86_64/PublitWatch.swiftmodule -o /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/x86_64/Binary/PublitWatch
+
+SwiftDriverJobDiscovery normal arm64 Compiling TripGuide.swift, TripProgress.swift, TripRefreshCoordinator.swift, TripStatus.swift, WalkGuide.swift, WatchDemo.swift, WatchHomeView.swift, WatchLibrary.swift, WatchLocator.swift, WatchNearbyModel.swift, WatchNearbyView.swift, WatchPlanView.swift, WatchRoute.swift, WatchSavedView.swift, WatchSync.swift, WatchTicketsView.swift, WatchTrip.swift, WatchTripMapView.swift, WatchTripView.swift, GeneratedAssetSymbols.swift (in target 'PublitWatch' from project 'Publit')
+
+SwiftDriver\ Compilation PublitWatch normal arm64 com.apple.xcode.tools.swift.compiler (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-Swift-Compilation -- /Applications/Xcode_27.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name PublitWatch -Onone @/Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/arm64/PublitWatch.SwiftFileList -DDEBUG -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode_27.1.app/Contents/Developer/Platforms/WatchSimulator.platform/Developer/SDKs/WatchSimulator27.0.sdk -target arm64-apple-watchos10.0-simulator -g -Xfrontend -serialize-debugging-options -enable-testing -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/runner/work/Publit/Publit/build/Products/Debug-watchsimulator -F /Users/runner/work/Publit/Publit/build/Products/Debug-watchsimulator -c -j3 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /var/folders/5n/5t77mfb93jd7q8v9s6f0dn0m0000gn/C/com.apple.DeveloperTools/27.1-27A9275/Xcode/SDKStatCaches.noindex/watchsimulator27.0-24R360-e829b21a6f8c9b70876ba0858053c044f4aba21afb5fa68fd76bcd58b0ddb6ea.sdkstatcache -output-file-map /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/arm64/PublitWatch-OutputFileMap.json -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/runner/work/Publit/Publit/build/Products/SwiftExplicitPrecompiledModules -emit-dependencies -emit-module -emit-module-path /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/arm64/PublitWatch.swiftmodule -serialize-diagnostics -dependency-scan-serialize-diagnostics-path /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/arm64/PublitWatch-dependency-scan.dia -validate-clang-modules-once -clang-build-session-file /var/folders/5n/5t77mfb93jd7q8v9s6f0dn0m0000gn/C/org.llvm.clang/ModuleCache.noindex/Session.modulevalidation -Xcc -fmodules-prune-interval\=86400 -Xcc -fmodules-prune-after\=345600 -emit-const-values -const-gather-protocols-list /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/arm64/PublitWatch_const_extract_protocols.json -Xcc -iquote -Xcc /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/PublitWatch-generated-files.hmap -Xcc -I/Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/PublitWatch-own-target-headers.hmap -Xcc -I/Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/PublitWatch-all-target-headers.hmap -Xcc -iquote -Xcc /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/PublitWatch-project-headers.hmap -Xcc -I/Users/runner/work/Publit/Publit/build/Products/Debug-watchsimulator/include -Xcc -I/Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/DerivedSources-normal/arm64 -Xcc -I/Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/DerivedSources/arm64 -Xcc -I/Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/arm64/PublitWatch-Swift.h -working-directory /Users/runner/work/Publit/Publit -experimental-emit-module-separately -disable-cmo
+
+Ld /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/arm64/Binary/PublitWatch normal arm64 (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    /Applications/Xcode_27.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-watchos10.0-simulator -isysroot /Applications/Xcode_27.1.app/Contents/Developer/Platforms/WatchSimulator.platform/Developer/SDKs/WatchSimulator27.0.sdk -O0 -Xlinker -no_warn_duplicate_libraries -L/Users/runner/work/Publit/Publit/build/Products/EagerLinkingTBDs/Debug-watchsimulator -L/Users/runner/work/Publit/Publit/build/Products/Debug-watchsimulator -F/Users/runner/work/Publit/Publit/build/Products/EagerLinkingTBDs/Debug-watchsimulator -F/Users/runner/work/Publit/Publit/build/Products/Debug-watchsimulator -filelist /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/arm64/PublitWatch.LinkFileList -Xlinker -rpath -Xlinker /usr/lib/swift -Xlinker -dead_strip -Xlinker -object_path_lto -Xlinker /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/arm64/PublitWatch_lto.o -rdynamic -Xlinker -no_deduplicate -Xlinker -objc_abi_version -Xlinker 2 -Xlinker -dependency_info -Xlinker /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/arm64/PublitWatch_dependency_info.dat -fobjc-link-runtime -L/Applications/Xcode_27.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/watchsimulator -L/usr/lib/swift -Xlinker -add_ast_path -Xlinker /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/arm64/PublitWatch.swiftmodule -o /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/arm64/Binary/PublitWatch
+
+CreateUniversalBinary /Users/runner/work/Publit/Publit/build/Products/Debug-watchsimulator/PublitWatch.app/PublitWatch normal arm64\ x86_64 (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    /Applications/Xcode_27.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo -create /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/arm64/Binary/PublitWatch /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/x86_64/Binary/PublitWatch -output /Users/runner/work/Publit/Publit/build/Products/Debug-watchsimulator/PublitWatch.app/PublitWatch
+
+ExtractAppIntentsMetadata (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    /Applications/Xcode_27.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsmetadataprocessor --toolchain-dir /var/run/com.apple.security.cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v27.1.266.1.6hMtWh/Metal.xctoolchain --module-name PublitWatch --sdk-root /Applications/Xcode_27.1.app/Contents/Developer/Platforms/WatchSimulator.platform/Developer/SDKs/WatchSimulator27.0.sdk --xcode-version 27A9275 --platform-family watchOS --deployment-target 10.0 --bundle-identifier io.github.elija7580.publit.watchkitapp --output /Users/runner/work/Publit/Publit/build/Products/Debug-watchsimulator/PublitWatch.app --target-triple arm64-apple-watchos10.0-simulator --target-triple x86_64-apple-watchos10.0-simulator --binary-file /Users/runner/work/Publit/Publit/build/Products/Debug-watchsimulator/PublitWatch.app/PublitWatch --dependency-file /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/arm64/PublitWatch_dependency_info.dat --dependency-file /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/x86_64/PublitWatch_dependency_info.dat --stringsdata-file /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata --stringsdata-file /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/x86_64/ExtractedAppShortcutsMetadata.stringsdata --source-file-list /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/arm64/PublitWatch.SwiftFileList --source-file-list /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/x86_64/PublitWatch.SwiftFileList --metadata-file-list /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/PublitWatch.DependencyMetadataFileList --static-metadata-file-list /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/PublitWatch.DependencyStaticMetadataFileList --swift-const-vals-list /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/arm64/PublitWatch.SwiftConstValuesFileList --swift-const-vals-list /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/Objects-normal/x86_64/PublitWatch.SwiftConstValuesFileList --compile-time-extraction --deployment-aware-processing --no-app-shortcuts-localization
+2026-11-14 02:26:49.119 appintentsmetadataprocessor[22806:61399] Starting appintentsmetadataprocessor export
+2026-11-14 02:26:49.133 appintentsmetadataprocessor[22806:61399] warning: Metadata extraction skipped, no AppIntents.framework dependency found
+
+CopySwiftLibs /Users/runner/work/Publit/Publit/build/Products/Debug-watchsimulator/PublitWatch.app (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-swiftStdLibTool --copy --verbose --scan-executable /Users/runner/work/Publit/Publit/build/Products/Debug-watchsimulator/PublitWatch.app/PublitWatch --scan-folder /Users/runner/work/Publit/Publit/build/Products/Debug-watchsimulator/PublitWatch.app/Frameworks --scan-folder /Users/runner/work/Publit/Publit/build/Products/Debug-watchsimulator/PublitWatch.app/PlugIns --scan-folder /Users/runner/work/Publit/Publit/build/Products/Debug-watchsimulator/PublitWatch.app/SystemExtensions --scan-folder /Users/runner/work/Publit/Publit/build/Products/Debug-watchsimulator/PublitWatch.app/Extensions --platform watchsimulator --toolchain /var/run/com.apple.security.cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v27.1.266.1.6hMtWh/Metal.xctoolchain --toolchain /Applications/Xcode_27.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --destination /Users/runner/work/Publit/Publit/build/Products/Debug-watchsimulator/PublitWatch.app/Frameworks --strip-bitcode --strip-bitcode-tool /Applications/Xcode_27.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bitcode_strip --emit-dependency-info /Users/runner/work/Publit/Publit/build/Products/Publit.build/Debug-watchsimulator/PublitWatch.build/SwiftStdLibToolInputDependencies.dep --filter-for-swift-os --back-deploy-swift-span
+Ignoring --strip-bitcode because --sign was not passed
+
+RegisterExecutionPolicyException /Users/runner/work/Publit/Publit/build/Products/Debug-watchsimulator/PublitWatch.app (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-RegisterExecutionPolicyException /Users/runner/work/Publit/Publit/build/Products/Debug-watchsimulator/PublitWatch.app
+
+Validate /Users/runner/work/Publit/Publit/build/Products/Debug-watchsimulator/PublitWatch.app (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    builtin-validationUtility /Users/runner/work/Publit/Publit/build/Products/Debug-watchsimulator/PublitWatch.app -shallow-bundle -infoplist-subpath Info.plist
+
+Touch /Users/runner/work/Publit/Publit/build/Products/Debug-watchsimulator/PublitWatch.app (in target 'PublitWatch' from project 'Publit')
+    cd /Users/runner/work/Publit/Publit
+    /usr/bin/touch -c /Users/runner/work/Publit/Publit/build/Products/Debug-watchsimulator/PublitWatch.app
+
+PruneExplicitPrecompiledModules /Users/runner/work/Publit/Publit/build/Products/ExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules /Users/runner/work/Publit/Publit/build/Products/SwiftExplicitPrecompiledModules
+
+warning: ONLY_ACTIVE_ARCH=YES requested with multiple ARCHS and no active architecture could be computed; building for all applicable architectures (in target 'PublitWatch' from project 'Publit')
+** BUILD SUCCEEDED **
+
