@@ -501,7 +501,8 @@ struct StopDeparturesView: View {
             }
             // Where the platforms are: only for a station with more than one, not for a single street stop.
             let groups = platformMap || mode == .platforms ? platforms : []
-            if platformMap, !exact, groups.count > 1 {
+            // Not over the line summary: there it only pushes the lines down.
+            if platformMap, !exact, mode != .lines, groups.count > 1 {
                 PlatformMapSection(groups: groups)
             }
             Section {

@@ -697,7 +697,8 @@ final class PublitUITests: XCTestCase {
         all.tap()
         XCTAssertTrue(app.buttons["Save"].waitForExistence(timeout: 10))
         app.segmentedControls.buttons["Lines"].tap()
-        XCTAssertTrue(app.descendants(matching: .any)["lineAtStop"].firstMatch.waitForExistence(timeout: timeout), "no lines at the station")
+        // Lazy list: the rows exist only once scrolled near (the board starts with actions and filters).
+        XCTAssertTrue(reveal(app.descendants(matching: .any)["lineAtStop"].firstMatch, in: app), "no lines at the station")
         sleep(1)
         snap("stop-lines")
         app.terminate()
@@ -895,8 +896,15 @@ final class PublitUITests: XCTestCase {
         // In the upper half: the place sheet opens at half height while the finger is still down.
         // Pressed lower (0.6), the lift landed on the sheet's "Route here" and planned a route at once,
         // so the sheet was gone before the test looked for it (F19 failed in most runs until build 66).
-        app.windows.firstMatch.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.36)).press(forDuration: 0.8)
-        XCTAssertTrue(app.buttons["mapPlaceRoute"].waitForExistence(timeout: 10), "no place sheet after long press")
+        // A few empty spots: one can sit on a map label or catch the map still settling.
+        var opened = false
+        for spot in [CGVector(dx: 0.3, dy: 0.36), CGVector(dx: 0.72, dy: 0.32), CGVector(dx: 0.5, dy: 0.42)] where !opened {
+            app.windows.firstMatch.coordinate(withNormalizedOffset: spot).press(forDuration: 0.8)
+            opened = app.buttons["mapPlaceRoute"].waitForExistence(timeout: 6)
+            if !opened, app.buttons["closeMapSelection"].exists { app.buttons["closeMapSelection"].tap(); sleep(1) }
+        }
+        if !opened { dump(app, "map-dropped-pin-fail") }
+        XCTAssertTrue(opened, "no place sheet after long press")
         XCTAssertTrue(app.buttons["mapPlaceRouteFrom"].exists)
         snap("map-dropped-pin")
         app.buttons["mapPlaceRoute"].tap()

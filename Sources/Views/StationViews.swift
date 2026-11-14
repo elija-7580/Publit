@@ -3,8 +3,8 @@ import MapKit
 
 // The three station views (Settings → Stations): platform map, departures by platform, change guide.
 
-/// Where each platform of a station is, with its lines and where they go next.
-/// Tapping a platform in the list centres the map on it.
+/// Where each platform of a station is. Compact on purpose (the departures come right after it):
+/// the map and one row of platform buttons; a tapped platform shows its lines and next stops.
 struct PlatformMapSection: View {
     let groups: [PlatformGroup]
     @State private var camera: MapCameraPosition = .automatic
@@ -24,9 +24,25 @@ struct PlatformMapSection: View {
             .frame(height: 220)
             .listRowInsets(EdgeInsets())
             .accessibilityHidden(true)
-            ForEach(groups) { g in
-                Button { select(g) } label: { PlatformSummaryRow(group: g, selected: selected == g.id) }
-                    .buttonStyle(.plain)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 6) {
+                    ForEach(groups) { g in
+                        Button { select(g) } label: {
+                            Text(verbatim: g.pinText)
+                                .font(.subheadline.weight(.semibold))
+                                .padding(.horizontal, 12).padding(.vertical, 7)
+                                .foregroundStyle(selected == g.id ? Color.onInk : Color.primary)
+                                .background(selected == g.id ? Color.ink : Color.inkFill, in: Capsule())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(Text(verbatim: g.title))
+                        .accessibilityAddTraits(selected == g.id ? AccessibilityTraits.isSelected : [])
+                        .accessibilityIdentifier("platformChip")
+                    }
+                }
+            }
+            if let g = groups.first(where: { $0.id == selected }) {
+                PlatformSummaryRow(group: g, selected: true)
             }
         } header: {
             Text("Platform map")
@@ -51,7 +67,7 @@ private struct PlatformPin: View {
     let selected: Bool
 
     var body: some View {
-        Text(verbatim: group.label ?? String(group.name.prefix(2)))
+        Text(verbatim: group.pinText)
             .font((selected ? Font.headline : .subheadline).weight(.bold))
             .foregroundStyle(Color.onInk)
             .padding(.horizontal, selected ? 10 : 7)
@@ -208,4 +224,10 @@ struct ChangeGuideCard: View {
         }
         .shadow(color: .black.opacity(0.25), radius: 2, y: 1)
     }
+}
+
+extension PlatformGroup {
+    /// On the map and the platform buttons: the platform's name, or its first line where the feed
+    /// names no platforms (not the first letters of the stop: "Ma", "Ma", "Ma" at Marienplatz).
+    var pinText: String { label ?? lines.first?.lineName ?? String(name.prefix(3)) }
 }
