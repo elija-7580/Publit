@@ -1,6 +1,6 @@
 # Publit iOS – Funktionen und Screens (vollständige Übersicht)
 
-> Stand: Version 0.1.1 (Build 70). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
+> Stand: Version 0.1.1 (Build 71). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
 > **Pflege:** Jede Änderung an `Sources/`, `Watch/`, `Widgets/` oder `Share/` muss diese Datei im selben Commit/PR mitändern (siehe Abschnitt „Aktualisierung“ ganz unten). Die maschinell erzeugte Liste aller Views steht in [`FUNKTIONEN-INVENTAR.md`](FUNKTIONEN-INVENTAR.md) und wird von der CI automatisch aktualisiert.
 
 ## Inhalt
@@ -188,6 +188,7 @@ Erscheint für die gestartete Fahrt oder eine gespeicherte, die gerade läuft/ba
 
 ### Live-Fahrt / Guide (`LiveTripView`)
 - **Etappen** (`StagePager`, `StageStrip`, `StageRow`): Gehen → Warten → Fahren → Ankommen, bestimmt durch Live-Zeiten und GPS; „Back to now“ nach manuellem Blättern.
+- **Ausgangsnummer** (`StationExits`): kommt der Fußweg aus einer U-Bahn-Station (nach einer Metro-Fahrt oder unter Straßenniveau beginnend), steht beim Aufgang die beschilderte Ausgangsnummer aus OpenStreetMap („Take exit B2“, „Take exit B2 towards Ludwigstraße“; `railway=subway_entrance`/`train_station_entrance`/`public_transport=entrance` mit `ref` bis 6 Zeichen). Wahl: Eingang, durch den der Weg führt → nächster Eingang ≤ 40 m vom Aufgang → erster Eingang ≤ 20 m neben dem Weg. Abfrage über Overpass (overpass-api.de, Ausweich overpass.kumi.systems) einmal je Station beim Öffnen der Live-Fahrt, nur im Speicher; ohne Daten bleibt „Exit towards …“. Auch in Umstiegshilfe und Sprachansage.
 - Gehen: „Walk to …“, Turn-by-turn-Anweisungen, **Kompasspfeil** (`HeadingRow`; ohne Kompass Norden oben), „Walk faster to make it.“, Karte drehen „Turn the map with you“ / „Stop turning the map“.
 - Warten/Einsteigen: „Departs in x min“, „Departs now“, „Departed …“, „Take Linie towards …“, Gleis „Pl. x“, „Platform changed (was x)“, Boarding-Hilfe (`BoardingLine`, `BoardingSteps`).
 - Fahren: „Now at …“, „Next stop … in …“, Haltliste (`GuideStopRow`), „Get off here“, „Get off at …“, Positionsquelle („Position from your location / estimated from live stop times / from the timetable“).
@@ -310,6 +311,7 @@ Ab 680 pt Breite (regular): Karte bildschirmfüllend, Inhalte in einem schwebend
 - **Live-Quellen** (`LiveSources`, `LiveSourceAdapters`, Schalter „Live data from more operators“): Europa (Transitous), Wien (Wiener Linien: Abfahrten, Störungen, Aufzüge), Österreich (ÖBB/HAFAS), Schweiz (search.ch), Deutschland (NRW, Berlin/Brandenburg, Hessen, Niedersachsen/Bremen, Schleswig-Holstein, Rheinland-Pfalz via HAFAS), Venedig (ACTV), Stockholm (SL), London (TfL). Es werden nur Haltestelle, Linie, Zeit gesendet.
 - **Abdeckungsatlas** (`Coverage`, siehe [COVERAGE.md](COVERAGE.md)): weltweit aus allen Transitous-Quellen, von publit.eu jede Woche neu berechnet; App und Watch laden ihn höchstens einmal am Tag (`CoverageAtlasStore`, https://publit.eu/abdeckung/data/atlas.txt) und nutzen sonst die eingebaute Kopie. Neue Gebiete erscheinen so ohne App-Update; die Kartenebene „Data gaps“ zeichnet sich bei einem neuen Atlas neu. Stufen „No timetable data“, „Very little timetable data“, „Missing: …“ (Lokalbusse, Stadtbusse, Metro, Tram, Fähren, S-Bahn). Anzeige in Plan, Routendetail, Nearby, Ortssuche, Karte, Watch; Link zur Abdeckungskarte publit.eu/abdeckung.
 - **Offline** (`ResponseCache`): Speicher-Cache 15–60 s, Datei-Cache: Live-Antworten bis 24 h, Suche/Karte bis 7 Tage; Nearby-Fallback nur innerhalb 400 m; Anzeige mit Zeitstempel; keine Offline-Neuberechnung von Routen.
+- **Ausgangsnummern** von U-Bahn-Stationen aus OpenStreetMap über Overpass (`StationExits`, §13); gesendet wird nur die Position der Station, aus der der Fußweg führt.
 - Fahrpreise aus MOTIS (`withFares`), streng geprüft (§12). Ticket-Links je Betreiber (`TicketLinks`: verknüpfte App → Feed-Link → Tarifseite → Website).
 - Darstellung: Linienfarben vom Betreiber (Kontrast 4,5:1), Ersatzfarbe je Verkehrsmittel, Richtung immer als „Towards“, Ringlinien-Sonderfall. Paris: Metro „3B“/„7B“ heißen „3bis“/„7bis“; RER-Missionscodes als Ziel („ZEMA“, „NEGE“) werden durch die Endstation der Fahrt ersetzt (`TransitLabels`). Zugnamen werden je Feed vereinheitlicht (`TransitLabels.trainName`): DB-interne Liniennummern („29“) weichen der Zuggattung („ICE“, daneben „ICE 1006“), MÁV-Namen wie „xpress 66“ werden mit der Gattung aus dem langen Routennamen zu „RJX 66“.
 

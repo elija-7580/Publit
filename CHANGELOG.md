@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1 (build 71) – station exit numbers
+
+- Coming up from an underground station, the walk shows the signed exit number from OpenStreetMap: "Take exit B2" (or "Take exit B2 towards Ludwigstraße"), also in the change guide and the spoken directions. Where OpenStreetMap has no number, it stays "Exit towards …".
+
 ## 0.1.1 (build 70) – map in Nearby
 
 - Nearby: a small map above the departures shows where you are and where the listed stations are, for orientation. Tap a station for its departures, tap the map for the full station map. Settings → Nearby → Map turns it off.

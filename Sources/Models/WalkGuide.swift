@@ -19,9 +19,15 @@ struct WalkManeuver: Equatable, Sendable {
     /// Coming up from underground: the first street after the exit, or the side of the station.
     var exitTowards: String? = nil
     var exitSide: Compass.Point? = nil
+    /// The station exit's number or letter as signed in the station ("B2"), from OpenStreetMap.
+    var exitRef: String? = nil
 
-    /// "Exit towards Ludwigstraße" / "Exit on the north-east side".
+    /// "Take exit B2 towards Ludwigstraße" / "Exit towards Ludwigstraße" / "Exit on the north-east side".
     var exitNote: String? {
+        if let exitRef {
+            if let exitTowards { return L10n.f("Take exit %1$@ towards %2$@", exitRef, exitTowards) }
+            return L10n.f("Take exit %@", exitRef)
+        }
         if let exitTowards { return L10n.f("Exit towards %@", exitTowards) }
         return exitSide.map(Compass.exit)
     }
@@ -100,7 +106,8 @@ struct WalkRoute: Sendable {
     /// A new instruction needs this much walking since the last one (no zigzag in passages).
     static let minSpacing = 10.0
 
-    init(leg: Leg) {
+    /// - Parameter exits: exit numbers of underground stations (see `StationExits`).
+    init(leg: Leg, exits: StationExits = .shared) {
         var path: [LatLon] = []
         var marks: [(along: Double, step: StepInstruction)] = []
         var walked = 0.0
@@ -179,14 +186,22 @@ struct WalkRoute: Sendable {
         let scale = leg.distance.map { walked > 0 ? $0 / walked : 1 }.flatMap { (0.7...1.6).contains($0) ? $0 : nil } ?? 1
         self.scale = scale
         for i in out.indices.dropLast() { out[i].distance = max(0, out[i + 1].along - out[i].along) * scale }
-        Self.markExit(&out, startLevel: marks.first?.step.fromLevel, start: leg.from.coordinate)
+        let exitAt = Self.markExit(&out, startLevel: marks.first?.step.fromLevel, start: leg.from.coordinate)
+        if let entrances = exits.entrances(for: leg) {
+            let nodes = Set((leg.steps ?? []).flatMap { [$0.fromOsmNode, $0.toOsmNode] }.compactMap { $0 })
+            if let e = StationExits.pick(entrances, path: path, exit: exitAt.map { (out[$0].coordinate, out[$0].along) }, nodes: nodes) {
+                out[exitAt ?? 0].exitRef = e.ref
+            }
+        }
         maneuvers = out
     }
 
     /// Signs in stations name the street an exit leads to; failing that, its side of the station.
     /// Only when the walk starts below street level (getting off an underground train).
-    private static func markExit(_ out: inout [WalkManeuver], startLevel: Double?, start: LatLon) {
-        guard var level = startLevel, level < 0 else { return }
+    /// Returns the instruction that reaches the street.
+    @discardableResult
+    private static func markExit(_ out: inout [WalkManeuver], startLevel: Double?, start: LatLon) -> Int? {
+        guard var level = startLevel, level < 0 else { return nil }
         for i in out.indices {
             guard let next = out[i].level else { continue }
             defer { level = next }
@@ -198,8 +213,9 @@ struct WalkRoute: Sendable {
             } else if start.distance(to: out[i].coordinate) >= 40 {
                 out[i].exitSide = Compass.point(PathGeometry.bearing(start, out[i].coordinate))
             }
-            return
+            return i
         }
+        return nil
     }
 
     /// Street name; stairs and lifts carry entrance codes ("MP09") instead, which are not on signs.
