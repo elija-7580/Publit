@@ -82,7 +82,7 @@
 
 ## `Sources/Views/Components/DepartureRow.swift`
 - Views: `DepartureRow`
-- Sichtbare Texte: Platform %@ · Rail replacement bus · Circle line · Towards %@ · Direction unavailable · at %@ · cancelled · live, %lld minutes late · live, on time · timetable time, no live data · platform %@
+- Sichtbare Texte: Next: %@ · Platform %@ · Rail replacement bus · Circle line · Towards %@ · Direction unavailable · at %@ · cancelled · live, %lld minutes late · live, on time · timetable time, no live data · platform %@
 
 ## `Sources/Views/Components/Design.swift`
 - Views: `SignatureDot`, `InkProgress`, `Notice`, `NoticeBackground`, `InlineNotice`, `PlaceKeyRow`, `WhereToField`
@@ -152,7 +152,7 @@
 
 ## `Sources/Views/NearbyView.swift`
 - Views: `NearbyView`, `StopGroupHeader`, `StopDeparturesView`, `LineAtStopRow`
-- Sichtbare Texte: Location is off · Allow location access in Settings to see departures near you. Trip planning works without it. · Departures unavailable · No departures for these modes · Show all modes · No departures nearby · No departures within 5 km. The station map shows stops further away. · Station map · Couldn't refresh. Times may be out of date. · Route here · All departures · Nearby · Active trip · Where to now? Route from your location · Next trip: %@ · %lld min · Alerts · Towards %@ · Route from here · Share departures · View · Departures · Lines · No upcoming departures. · Saved line · Save line · Save · Direction unavailable · now
+- Sichtbare Texte: Location is off · Allow location access in Settings to see departures near you. Trip planning works without it. · Departures unavailable · No departures for these modes · Show all modes · No departures nearby · No departures within 5 km. The station map shows stops further away. · Station map · Couldn't refresh. Times may be out of date. · Route here · All departures · Nearby · Active trip · Where to now? Route from your location · Next trip: %@ · %lld min · Alerts · Towards %@ · Route from here · Share departures · View · Departures · Lines · No upcoming departures. · Saved line · Save line · Save · Direction unavailable · Next: %@ · Platform %@ · now
 
 ## `Sources/Views/OnboardingView.swift`
 - Views: `OnboardingView`

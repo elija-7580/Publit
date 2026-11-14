@@ -75,8 +75,8 @@ Ohne Onboarding startet die Standortabfrage sofort.
 
 - **Umschalter** „Departures“ / „Lines“ (Picker „View“).
 - **Abfahrten**: nächste Haltestellen/Stationen, gruppiert pro Station bzw. pro Straßen-Haltestelle (Seite der Straße), mit `StopGroupHeader` (Name, Entfernung, Hauptziele). Suchradius stufenweise **500 m → 1,5 km → 5 km**, bis Abfahrten gefunden werden; weit entfernte Stopps werden mit Distanz und Gehzeit angezeigt statt „keine Abfahrten“.
-- Pro Zeile (`DepartureRow`): Linien-Badge (Betreiberfarbe, Verkehrsmittel-Symbol), „Towards …“ (Fahrtrichtung, bei Ringlinien das Ausstiegsziel + „Circle line“), Gleis/Steig, Uhrzeit + Countdown („now“, „x min“), Verspätung „+x min“, Live/Fahrplan-Kennzeichnung, „Cancelled“, „Rail replacement bus“ (SEV).
-- **Linien-Gruppierung** (`LineAtStopRow`): pro Linie die nächsten Abfahrten je Richtung („U3 → Moosach: 3, 13, 23 min“).
+- Pro Zeile (`DepartureRow`): Linien-Badge (Betreiberfarbe, Verkehrsmittel-Symbol), „Towards …“ (Fahrtrichtung, bei Ringlinien das Ausstiegsziel + „Circle line“), **nächster Halt** mit Gleis/Steig („Next: Karlovy lázně · Platform A“ – zeigt die Richtung auch, wenn man das Ziel nicht kennt; Abfrage mit `fetchStops=true`, nur die ersten 3 Halte werden behalten, `UpcomingStops`; ist der nächste Halt das Ziel, entfällt er), sonst Gleis/Steig allein, Uhrzeit + Countdown („now“, „x min“), Verspätung „+x min“, Live/Fahrplan-Kennzeichnung, „Cancelled“, „Rail replacement bus“ (SEV).
+- **Linien-Gruppierung** (`LineAtStopRow`): pro Linie die nächsten Abfahrten je Richtung („U3 → Moosach: 3, 13, 23 min“), darunter je Richtung nächster Halt und Steig („Next: … · Platform …“).
 - **Verkehrsmittel-Filter** (`ModeFilterBar`): All, Train, S-Bahn, Metro, Tram, Bus, Ferry, Other. Leerer Filter = alle. Bei leerem Ergebnis: „No departures for these modes“ + „Show all modes“.
 - **„Where to now? Route from your location“** – Sprung in den Planer ab aktuellem Standort; **„Next trip: …“** wenn eine gespeicherte Fahrt ansteht; Abschnitt **„Active trip“** bei laufender Fahrt.
 - **Störungen** (Abschnitt „Alerts“, `ServiceAlertsView`): nach Schwere sortiert, dedupliziert, aufklappbar.

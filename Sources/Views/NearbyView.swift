@@ -599,8 +599,18 @@ struct LineAtStopRow: View {
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Image(systemName: "arrow.right").font(.caption2).foregroundStyle(.secondary)
                         .accessibilityHidden(true)
-                    Text(verbatim: dir.direction ?? L10n.t("Direction unavailable"))
-                        .font(.subheadline).lineLimit(1)
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(verbatim: dir.direction ?? L10n.t("Direction unavailable"))
+                            .font(.subheadline).lineLimit(1)
+                        // Which way it goes: the next stop (and platform) under a destination you may not know.
+                        if let next = dir.departures.lazy.compactMap(\.nextStopName).first {
+                            Text(verbatim: [L10n.f("Next: %@", next),
+                                            dir.departures.first.flatMap { TransitLabels.clean($0.place.track) }
+                                                .map { L10n.f("Platform %@", $0) }]
+                                .compactMap { $0 }.joined(separator: " · "))
+                                .font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                        }
+                    }
                     Spacer(minLength: 8)
                     Text(verbatim: Self.times(dir.departures, now: now))
                         .font(.subheadline.monospacedDigit()).foregroundStyle(.secondary)

@@ -182,6 +182,8 @@ final class TransitousClient: @unchecked Sendable {
             URLQueryItem(name: "withAlerts", value: "true"),
             URLQueryItem(name: "radius", value: String(radius)),
             URLQueryItem(name: "n", value: String(count)),
+            // The next stops say which way a line goes better than a destination nobody knows.
+            URLQueryItem(name: "fetchStops", value: "true"),
         ]
         if let modes { q.append(URLQueryItem(name: "mode", value: modes)) }
         // A filtered board has its own slot: "only trams" must not come back as the full board offline.
@@ -196,6 +198,7 @@ final class TransitousClient: @unchecked Sendable {
             URLQueryItem(name: "stopId", value: stopId),
             URLQueryItem(name: "n", value: String(count)),
             URLQueryItem(name: "withAlerts", value: "true"),
+            URLQueryItem(name: "fetchStops", value: "true"),
         ]
         if let radius { q.append(URLQueryItem(name: "radius", value: String(radius))) }
         if let modes { q.append(URLQueryItem(name: "mode", value: modes)) }

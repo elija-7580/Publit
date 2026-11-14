@@ -288,6 +288,8 @@ struct StopTime: Decodable, Identifiable, Sendable, RouteStyled {
     var tripTo: SegmentStop? = nil
     /// Some feeds keep the train category only here ("rjx 66"), see `TransitLabels.trainName`.
     var routeLongName: String? = nil
+    /// The stops after this one (`fetchStops=true`), first few only.
+    var nextStops: UpcomingStops? = nil
     /// Extra real-time source that corrected this departure ("Wiener Linien"), see `LiveOverlay`.
     var liveSource: String? = nil
 
@@ -297,6 +299,16 @@ struct StopTime: Decodable, Identifiable, Sendable, RouteStyled {
         "\(tripId)|\(place.stopId ?? place.name)|\((scheduledDepartureTime ?? departureTime).timeIntervalSince1970)"
     }
     var directionName: String? { TransitLabels.direction(headsign: headsign, tripEnd: tripTo?.name) }
+    /// Where the vehicle stops next. A destination you have never heard of says little; the next stop
+    /// tells which way it goes (Prague: platform A or B, both "Staroměstská"). Nil when it is the
+    /// destination anyway, or unknown.
+    var nextStopName: String? {
+        guard let next = nextStops?.names.first(where: {
+            TransitLabels.identity($0) != TransitLabels.identity(place.name)
+        }) else { return nil }
+        if let d = directionName, TransitLabels.identity(d) == TransitLabels.identity(next) { return nil }
+        return next
+    }
     var departureTime: Date { place.departure ?? place.arrival ?? .distantPast }
     var scheduledDepartureTime: Date? { place.scheduledDeparture ?? place.scheduledArrival }
     var isCancelled: Bool { cancelled == true || tripCancelled == true || place.cancelled == true }
@@ -312,6 +324,32 @@ extension StopTime {
     static func upcoming(_ list: [StopTime], now: Date = Date()) -> [StopTime] {
         var seen = Set<String>()
         return list.filter { $0.departureTime > now.addingTimeInterval(-60) && seen.insert($0.id).inserted }
+    }
+}
+
+/// The first stops of a departure's remaining route. The server sends all of them to the end of the
+/// trip; only the first few are kept, so a busy board stays small in memory and in the offline copy.
+struct UpcomingStops: Codable, Hashable, Sendable {
+    static let kept = 3
+    let names: [String]
+
+    init(names: [String]) { self.names = Array(names.prefix(Self.kept)) }
+
+    private struct Stop: Codable { let name: String }
+
+    init(from decoder: Decoder) throws {
+        var c = try decoder.unkeyedContainer()
+        var names: [String] = []
+        while !c.isAtEnd {
+            let stop = try c.decode(Stop.self)
+            if names.count < Self.kept, let n = TransitLabels.clean(stop.name) { names.append(n) }
+        }
+        self.names = names
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.unkeyedContainer()
+        for n in names { try c.encode(Stop(name: n)) }
     }
 }
 

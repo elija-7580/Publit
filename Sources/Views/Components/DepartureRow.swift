@@ -17,6 +17,7 @@ struct DepartureRow: View {
                 VStack(alignment: .leading, spacing: 10) {
                     identity
                     DirectionLabel(direction: stopTime.shownDirection, circular: stopTime.isCircular)
+                    nextStop
                     platform
                     serviceNote
                     time(now: now)
@@ -26,6 +27,7 @@ struct DepartureRow: View {
                     VStack(alignment: .leading, spacing: 6) {
                         identity
                         DirectionLabel(direction: stopTime.shownDirection, circular: stopTime.isCircular)
+                        nextStop
                         platform
                         serviceNote
                     }
@@ -51,9 +53,27 @@ struct DepartureRow: View {
         }
     }
 
+    /// The next stop and the platform on one line: "Next: Karlovy lázně · Platform A".
+    @ViewBuilder
+    private var nextStop: some View {
+        if let next = stopTime.nextStopName {
+            Label {
+                Text(verbatim: [L10n.f("Next: %@", next),
+                                TransitLabels.clean(stopTime.place.track).map { L10n.f("Platform %@", $0) }]
+                    .compactMap { $0 }.joined(separator: " · "))
+            } icon: {
+                Image(systemName: "arrow.turn.down.right")
+            }
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
+            .accessibilityIdentifier("nextStop")
+        }
+    }
+
     @ViewBuilder
     private var platform: some View {
-        if let track = TransitLabels.clean(stopTime.place.track) {
+        if stopTime.nextStopName == nil, let track = TransitLabels.clean(stopTime.place.track) {
             Text(L10n.f("Platform %@", track)).font(.caption).foregroundStyle(.secondary)
         }
     }
@@ -80,6 +100,7 @@ struct DepartureRow: View {
         if stopTime.isCircular { parts.append(L10n.t("Circle line")) }
         else if let direction = stopTime.directionName { parts.append(L10n.f("Towards %@", direction)) }
         else { parts.append(L10n.t("Direction unavailable")) }
+        if let next = stopTime.nextStopName { parts.append(L10n.f("Next: %@", next)) }
         if stopTime.isReplacementBus { parts.append(L10n.t("Rail replacement bus")) }
         parts.append(contentsOf: stopTime.serviceAlerts.map(\.headerText))
         parts.append(L10n.f("at %@", Fmt.time(stopTime.departureTime, tz: stopTime.place.tz)))
