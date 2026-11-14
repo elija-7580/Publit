@@ -147,41 +147,67 @@ final class PlanModel {
         do {
             var maxWalk = options.maxWalkMinutes * 60
             var res: PlanResponse
-            if options.maxWalkMinutes == RouteOptions.defaultWalkMinutes {
-                // Ask for a comfortable walk and the usual one at once; a long walk wins only when
-                // it arrives clearly earlier (the server alone prefers walking 30 min to save one).
-                async let shortRes = TransitousClient.shared.plan(from: f, to: t, time: time, arriveBy: arriveBy,
-                                                                  maxWalk: Reach.shortWalkSeconds, options: options)
-                async let longRes = TransitousClient.shared.plan(from: f, to: t, time: time, arriveBy: arriveBy,
-                                                                 maxWalk: maxWalk, options: options)
-                let long = try await longRes
-                if let short = try? await shortRes, !short.itineraries.isEmpty {
-                    res = long.replacingItineraries(Reach.preferShortWalks(short: short.itineraries, long: long.itineraries))
+            /// The options the routes on screen were found with (Park & Ride may stand in for a long walk).
+            var used = options
+            var parkAndRide = false
+            if options.firstMile == .car {
+                // Park & Ride: drive to a station near home, then ride. When every route the server finds
+                // drives most of the way (the destination is a short drive off), the usual routes are shown
+                // instead; driving the whole way is in the comparison below.
+                let drive = min(maxWalk, ParkAndRide.maxDriveSeconds)
+                let car = try await TransitousClient.shared.plan(from: f, to: t, time: time, arriveBy: arriveBy,
+                                                                 maxWalk: drive, options: options)
+                let kept = ParkAndRide.sensible(car.itineraries)
+                if !kept.isEmpty {
+                    res = car.replacingItineraries(kept)
+                    maxWalk = drive
+                    parkAndRide = true
                 } else {
-                    res = long
+                    used.firstMile = .walk
+                    res = try await walkingSearch(from: f, to: t, time: time, arriveBy: arriveBy, maxWalk: maxWalk, options: used)
                 }
             } else {
-                res = try await TransitousClient.shared.plan(from: f, to: t, time: time, arriveBy: arriveBy,
-                                                             maxWalk: maxWalk, options: options)
+                res = try await walkingSearch(from: f, to: t, time: time, arriveBy: arriveBy, maxWalk: maxWalk, options: used)
             }
             try Task.checkCancellation()
             // Nothing within 30 min walk of a stop: try again with a longer walk (45 min, then 2 h),
             // so a stop beyond the usual limit shows up as a route with a long walk, not as "no connections".
+            // Before a two-hour walk: drive to the nearest station instead, when there is one (Park & Ride).
             // Not when the user chose a shorter walk: that limit is theirs.
-            if options.maxWalkMinutes == RouteOptions.defaultWalkMinutes {
+            if !parkAndRide, used.maxWalkMinutes == RouteOptions.defaultWalkMinutes {
+                var triedCar = false
                 while res.itineraries.isEmpty, let wider = Reach.nextWalkStep(after: maxWalk) {
                     try Task.checkCancellation()
                     guard token == myToken else { return }
+                    if !triedCar, wider > Reach.walkSteps[1] {
+                        triedCar = true
+                        var car = used
+                        car.firstMile = .car
+                        if let found = try? await TransitousClient.shared.plan(from: f, to: t, time: time, arriveBy: arriveBy,
+                                                                                maxWalk: ParkAndRide.maxDriveSeconds, options: car) {
+                            let kept = ParkAndRide.sensible(found.itineraries)
+                            if !kept.isEmpty {
+                                res = found.replacingItineraries(kept)
+                                used = car
+                                maxWalk = ParkAndRide.maxDriveSeconds
+                                parkAndRide = true
+                                break
+                            }
+                        }
+                        try Task.checkCancellation()
+                        guard token == myToken else { return }
+                    }
                     maxWalk = wider
                     res = try await TransitousClient.shared.plan(from: f, to: t, time: time, arriveBy: arriveBy,
-                                                                 maxWalk: maxWalk, options: options)
+                                                                 maxWalk: maxWalk, options: used)
                 }
             }
             try Task.checkCancellation()
             guard token == myToken else { return }
             itineraries = Self.merge(transit: res.itineraries.withoutDetours, direct: res.direct)
             offerForLearning()
-            walkNote = maxWalk > RouteOptions.defaultWalkMinutes * 60 ? Reach.longWalkNote(res.itineraries) : nil
+            walkNote = parkAndRide && options.firstMile != .car ? ParkAndRide.fallbackNote
+                : maxWalk > RouteOptions.defaultWalkMinutes * 60 ? Reach.longWalkNote(res.itineraries) : nil
             let key = queryKey
             if streetKey != key { streetRoutes = [] }
             comparisons = Self.comparisons(direct: res.direct + streetRoutes, listed: itineraries, enabled: options.compareStreetModes)
@@ -190,7 +216,7 @@ final class PlanModel {
             updatedAt = completedAt
             nextCursor = arriveBy ? res.previousPageCursor : res.nextPageCursor
             lastRequest = (f, t, time, arriveBy, maxWalk)
-            lastOptions = options
+            lastOptions = used
             if !silent { history.record(from: searchedFrom, to: to, mode: searchedMode, date: searchedDate, source: source) }
             if itineraries.isEmpty {
                 errorMessage = options.isDefault ? L10n.t("No connections found.")
@@ -221,6 +247,25 @@ final class PlanModel {
                 }
             }
         }
+    }
+
+    /// Walking to the first stop: a comfortable walk and the usual one asked at once; a long walk wins
+    /// only when it arrives clearly earlier (the server alone prefers walking 30 min to save one).
+    private func walkingSearch(from f: LatLon, to t: LatLon, time: Date?, arriveBy: Bool, maxWalk: Int,
+                               options: RouteOptions) async throws -> PlanResponse {
+        guard options.maxWalkMinutes == RouteOptions.defaultWalkMinutes else {
+            return try await TransitousClient.shared.plan(from: f, to: t, time: time, arriveBy: arriveBy,
+                                                          maxWalk: maxWalk, options: options)
+        }
+        async let shortRes = TransitousClient.shared.plan(from: f, to: t, time: time, arriveBy: arriveBy,
+                                                          maxWalk: Reach.shortWalkSeconds, options: options)
+        async let longRes = TransitousClient.shared.plan(from: f, to: t, time: time, arriveBy: arriveBy,
+                                                         maxWalk: maxWalk, options: options)
+        let long = try await longRes
+        if let short = try? await shortRes, !short.itineraries.isEmpty {
+            return long.replacingItineraries(Reach.preferShortWalks(short: short.itineraries, long: long.itineraries))
+        }
+        return long
     }
 
     /// Live times and disruptions from other operators (ÖBB, Wiener Linien, search.ch, VRR, ACTV, SL, TfL) where

@@ -472,6 +472,34 @@ struct RouteMark: View {
     }
 }
 
+/// The kind of train (Railjet, regional train …) and whether the vehicle takes a wheelchair.
+struct VehicleKindLine: View {
+    let leg: Leg
+
+    var body: some View {
+        let kind = VehicleKind.of(leg)
+        HStack(spacing: 6) {
+            Text(verbatim: kind.summary)
+            if let access = kind.accessText {
+                Text(verbatim: "·").accessibilityHidden(true)
+                Label {
+                    Text(verbatim: access)
+                } icon: {
+                    Image(systemName: "figure.roll")
+                }
+                .labelStyle(.titleAndIcon)
+                .foregroundStyle(kind.access == .accessible ? Color.secondary : Color.delay)
+            }
+        }
+        .font(.caption)
+        .foregroundStyle(.secondary)
+        .lineLimit(2)
+        .fixedSize(horizontal: false, vertical: true)
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("vehicleKind")
+    }
+}
+
 struct LegRow: View {
     let leg: Leg
     /// Its own coloured bar on the left; off inside the timeline, which draws the line itself.
@@ -489,6 +517,7 @@ struct LegRow: View {
                     DurationFigure(seconds: leg.duration, size: 22)
                 }
                 DirectionLabel(direction: leg.shownDirection, circular: leg.isCircular)
+                VehicleKindLine(leg: leg)
                 if leg.isReplacementBus { Label("Rail replacement bus", systemImage: "bus.fill").font(.subheadline.weight(.semibold)).foregroundStyle(Color.delay) }
                 stopLine(label: "Board here", time: leg.startTime, delay: leg.delayMinutes,
                          name: leg.from.name, track: leg.from.track, tz: leg.from.tz)
@@ -685,6 +714,7 @@ struct TimelineLegRow: View {
                             .accessibilityHidden(true)
                     }
                     DirectionLabel(direction: leg.shownDirection, circular: leg.isCircular)
+                    VehicleKindLine(leg: leg)
                     stop(L10n.f("Board at %@", leg.from.name), track: leg.from.track, time: nil, delay: leg.delayMinutes)
                     stop(L10n.f("Get off at %@", leg.to.name), track: leg.to.track, time: leg.endTime,
                          delay: Int((leg.endTime.timeIntervalSince(leg.scheduledEndTime) / 60).rounded()))

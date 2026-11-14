@@ -7,6 +7,8 @@ struct GoNowView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var isVisible = false
     @State private var selectedId: String?
+    /// Picking another start than the current location.
+    @State private var pickingStart = false
     /// iPad layout: the routes are on the big map, not in a small one at the top.
     @Environment(WideMapState.self) private var wideMap: WideMapState?
 
@@ -25,6 +27,22 @@ struct GoNowView: View {
                     .listRowInsets(EdgeInsets())
             }
             Section {
+                // Not always from here: a friend's place, the hotel, the station you will be at.
+                Button { pickingStart = true } label: {
+                    HStack(spacing: 8) {
+                        Text("From").font(.subheadline).foregroundStyle(.secondary)
+                            .frame(minWidth: 44, alignment: .leading)
+                        if case .currentLocation = plan.from { SignatureDot(size: 9) }
+                        Text(verbatim: plan.from.title).font(.body.weight(.semibold)).foregroundStyle(.primary).lineLimit(1)
+                        Spacer(minLength: 0)
+                        Text("Change").font(.subheadline.weight(.semibold)).foregroundStyle(Color.inkAction)
+                    }
+                    .frame(minHeight: 44)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityElement(children: .combine)
+                .accessibilityIdentifier("goNowFrom")
                 RouteOptionsButton()
             }
             Section {
@@ -44,7 +62,7 @@ struct GoNowView: View {
                 }
                 ForEach(its) { it in
                     NavigationLink {
-                        ItineraryDetailView(itinerary: it, fromName: L10n.t("Current location"), toName: plan.to?.title ?? "")
+                        ItineraryDetailView(itinerary: it, fromName: plan.from.title, toName: plan.to?.title ?? "")
                     } label: {
                         VStack(alignment: .leading, spacing: 4) {
                             if let dep = it.firstDeparture {
@@ -63,7 +81,11 @@ struct GoNowView: View {
                     Button("Later connections") { Task { await plan.loadMore() } }
                 }
             } header: {
-                Text("From your location")
+                if case .currentLocation = plan.from {
+                    Text("From your location")
+                } else {
+                    Text(verbatim: L10n.f("from %@", plan.from.title))
+                }
             } footer: {
                 if let note = its.first.flatMap({ Fmt.foreignZoneNote(tz: $0.legs.first?.from.tz, at: $0.startTime) }) {
                     Label(note, systemImage: "clock")
@@ -71,7 +93,7 @@ struct GoNowView: View {
             }
             StreetComparisonSection(comparisons: plan.comparisons,
                                     bestTransit: its.filter { !$0.isDirect }.map(\.duration).min(),
-                                    fromName: L10n.t("Current location"), toName: plan.to?.title ?? "")
+                                    fromName: plan.from.title, toName: plan.to?.title ?? "")
         }
         .readableWidth()
         .inkList()
@@ -79,6 +101,12 @@ struct GoNowView: View {
         .wideMapScene(its.isEmpty ? .explore : .routes(its, selected: selectedId ?? its.first?.routeKey))
         .screenTrail("Go now")
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $pickingStart) {
+            PlaceSearchView(title: "From", allowCurrentLocation: true) { endpoint in
+                if endpoint == plan.to { plan.to = plan.from }
+                plan.from = endpoint
+            }
+        }
         .refreshable { await plan.search(current: location.coordinate, locationDenied: location.isDenied, silent: true) }
         .onAppear { isVisible = true }
         .onDisappear { isVisible = false }

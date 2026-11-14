@@ -3,7 +3,7 @@
 > Nicht von Hand bearbeiten. Erzeugt von `scripts/feature_inventory.py` (CI: `features-doc.yml`).
 > Die ausführliche Beschreibung steht in [FUNKTIONEN.md](FUNKTIONEN.md).
 
-**172 Views, 5 App Intents, 3 Widgets in 69 Dateien.**
+**173 Views, 5 App Intents, 3 Widgets in 69 Dateien.**
 
 ## `Sources/App/DesignSamples.swift`
 - Views: `DesignSampleView`
@@ -123,10 +123,10 @@
 
 ## `Sources/Views/GoNowView.swift`
 - Views: `GoNowView`
-- Sichtbare Texte: Current location · Walk all the way · Later connections · From your location · Route · Leave now · Leave in %lld min
+- Sichtbare Texte: From · Change · Walk all the way · Later connections · From your location · from %@ · Route · Leave now · Leave in %lld min
 
 ## `Sources/Views/ItineraryDetailView.swift`
-- Views: `CompareMapView`, `ItineraryDetailView`, `RouteSummary`, `RouteMap`, `RouteMark`, `LegRow`, `GetOffButton`, `StatusBanner`, `TimelineLegRow`, `TimelineEndRow`, `TimelineRail`, `LeaveHero`
+- Views: `CompareMapView`, `ItineraryDetailView`, `RouteSummary`, `RouteMap`, `RouteMark`, `VehicleKindLine`, `LegRow`, `GetOffButton`, `StatusBanner`, `TimelineLegRow`, `TimelineEndRow`, `TimelineRail`, `LeaveHero`
 - Sichtbare Texte: Destination · Trip overview · Driving times are without traffic and parking. · Steps · Done · Route · Live · Cancelled · Rail replacement bus · Timetable · This trip is cancelled. · Pick up at %@ · Return at %@ · Rent in the provider's app · +%lld min · Platform %@ · Reminder set · Remind me to get off · We'll notify you at %@. · This stop is less than two minutes away. · Allow notifications for Publit in Settings. · On time · Board at %@ · Get off at %@ · Service changes on this route · Leave in %lld min · Leave now · Arrive
 
 ## `Sources/Views/LaunchSplash.swift`

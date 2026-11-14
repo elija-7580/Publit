@@ -12,7 +12,8 @@ protocol RouteStyled {
 extension RouteStyled {
     /// The compact, operator-defined line identifier. Never use a destination as a line name.
     var lineName: String {
-        TransitLabels.clean(routeShortName) ?? TransitLabels.clean(displayName) ?? ModeStyle.label(mode)
+        TransitLabels.lineName(TransitLabels.clean(routeShortName) ?? TransitLabels.clean(displayName), mode: mode)
+            ?? ModeStyle.label(mode)
     }
 
     /// Additional service identity (e.g. ICE 615), retained separately from the line badge.
@@ -102,5 +103,98 @@ enum TransitLabels {
 
     static func identity(_ value: String) -> String {
         value.uppercased().filter { $0.isLetter || $0.isNumber }
+    }
+
+    /// The line name as riders know it. Paris publishes its two short metro lines as "3B" and "7B";
+    /// on the platforms and maps they are "3bis" and "7bis".
+    static func lineName(_ raw: String?, mode: String) -> String? {
+        guard let raw else { return nil }
+        if mode == "SUBWAY" || mode == "METRO", raw.count >= 2, raw.hasSuffix("B"),
+           raw.dropLast().allSatisfy(\.isNumber) {
+            return raw.dropLast() + "bis"
+        }
+        return raw
+    }
+
+    /// The direction to show. Some feeds put an internal service code in the headsign instead of a
+    /// destination (Paris RER: "ZEMA", "NEGE", "PEZZ"); then the trip's last stop says where it goes.
+    static func direction(headsign: String?, tripEnd: String?) -> String? {
+        // No headsign stays no direction: guessing one has misled before (see TransitEnhancementTests).
+        guard let h = clean(headsign), let end = clean(tripEnd) else { return clean(headsign) }
+        return isServiceCode(h) && identity(h) != identity(end) ? end : h
+    }
+
+    /// Three to five capital letters and nothing else: a mission code, not a place name.
+    static func isServiceCode(_ value: String) -> Bool {
+        (3...5).contains(value.count) && value.allSatisfy { $0.isASCII && $0.isUppercase && $0.isLetter }
+    }
+}
+
+/// What kind of vehicle a ride is. For someone in a wheelchair a Railjet and an old regional train
+/// are different trips, so the category and the vehicle's own step-free flag are shown with the ride.
+struct VehicleKind: Equatable, Sendable {
+    enum Access: Equatable, Sendable { case accessible, notAccessible, unknown }
+
+    /// Train category as printed on timetables ("Railjet Xpress", "Intercity"), nil when not known.
+    let category: String?
+    /// The mode in words ("Regional train", "Metro").
+    let modeLabel: String
+    let access: Access
+
+    /// Category codes at the start of a train number ("RJX 161", "REX 9563", "ICE615").
+    static let categories: [String: String] = [
+        "RJX": "Railjet Xpress", "RJ": "Railjet", "ICE": "ICE", "ECE": "EuroCity-Express", "IC": "Intercity",
+        "EC": "EuroCity", "EN": "EuroNight", "NJ": "Nightjet", "CJX": "Cityjet Xpress", "REX": "Regionalexpress",
+        "RE": "Regional-Express", "RB": "Regionalbahn", "WB": "Westbahn", "FLX": "Flixtrain", "TGV": "TGV",
+        "OUIGO": "OUIGO", "IRE": "Interregio-Express", "IR": "InterRegio", "FR": "Frecciarossa", "FA": "Frecciargento",
+        "FB": "Frecciabianca", "RV": "Regionale Veloce", "AVE": "AVE", "ALVIA": "Alvia", "EST": "Eurostar",
+        "TER": "TER", "TL": "Transilien", "SC": "SuperCity", "EX": "Express", "RR": "Rychlík", "OS": "Osobní vlak",
+    ]
+
+    static let railModes: Set<String> = ["HIGHSPEED_RAIL", "LONG_DISTANCE", "REGIONAL_RAIL", "REGIONAL_FAST_RAIL",
+                                         "NIGHT_RAIL", "RAIL", "SUBURBAN"]
+
+    static func of(_ leg: Leg) -> VehicleKind {
+        let access: Access
+        switch leg.wheelchairAccessible {
+        case "ACCESSIBLE": access = .accessible
+        case "NOT_ACCESSIBLE": access = .notAccessible
+        default: access = .unknown
+        }
+        let category = railModes.contains(leg.mode)
+            ? [leg.tripShortName, leg.displayName, leg.routeShortName].lazy.compactMap(categoryName).first
+            : nil
+        return VehicleKind(category: category, modeLabel: label(leg.mode), access: access)
+    }
+
+    /// "RJX 161" → "Railjet Xpress"; nil for plain numbers, line names ("S7" stays a line) and unknown codes.
+    static func categoryName(_ value: String?) -> String? {
+        guard let value = TransitLabels.clean(value) else { return nil }
+        let code = String(value.prefix { $0.isLetter }).uppercased()
+        guard !code.isEmpty, code.count < value.count || categories[code] != nil else { return nil }
+        return categories[code]
+    }
+
+    static func label(_ mode: String) -> String {
+        switch mode {
+        case "HIGHSPEED_RAIL": return L10n.t("High-speed train")
+        case "LONG_DISTANCE": return L10n.t("Long-distance train")
+        case "REGIONAL_RAIL", "REGIONAL_FAST_RAIL": return L10n.t("Regional train")
+        default: return ModeStyle.label(mode)
+        }
+    }
+
+    /// "Railjet Xpress · High-speed train", or just the mode.
+    var summary: String {
+        guard let category, TransitLabels.identity(category) != TransitLabels.identity(modeLabel) else { return modeLabel }
+        return "\(category) · \(modeLabel)"
+    }
+
+    var accessText: String? {
+        switch access {
+        case .accessible: return L10n.t("Wheelchair accessible")
+        case .notAccessible: return L10n.t("Not wheelchair accessible")
+        case .unknown: return nil
+        }
     }
 }

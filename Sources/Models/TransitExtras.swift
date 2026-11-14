@@ -4,7 +4,7 @@ import Foundation
 // shows are decoded, so the larger map responses stay cheap to parse.
 
 /// A stop at either end of a map segment (`/api/v6/map/trips`).
-struct SegmentStop: Decodable, Hashable, Sendable {
+struct SegmentStop: Codable, Hashable, Sendable {
     let name: String
     let stopId: String?
     let lat: Double

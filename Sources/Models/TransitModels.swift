@@ -144,8 +144,16 @@ struct Leg: Codable, Sendable, RouteStyled {
     var alternatives: [[Leg]]? = nil
     /// Extra real-time source that corrected this ride ("ÖBB"), see `LiveOverlay`.
     var liveSource: String? = nil
+    /// Train number with its category ("RJX 161", "REX 9563") where the feed has one.
+    var tripShortName: String? = nil
+    var routeLongName: String? = nil
+    /// Whether the vehicle itself takes a wheelchair (GTFS `wheelchair_accessible`):
+    /// "ACCESSIBLE", "NOT_ACCESSIBLE" or "UNKNOWN".
+    var wheelchairAccessible: String? = nil
+    /// Last stop of the vehicle's trip.
+    var tripTo: SegmentStop? = nil
 
-    var directionName: String? { TransitLabels.clean(headsign) }
+    var directionName: String? { TransitLabels.direction(headsign: headsign, tripEnd: tripTo?.name) }
     var isTransit: Bool { ModeStyle.isTransit(mode) }
     var delayMinutes: Int { Int((startTime.timeIntervalSince(scheduledStartTime) / 60).rounded()) }
     /// Boarding stop, every stop in between, and the alighting stop.
@@ -286,7 +294,7 @@ struct StopTime: Decodable, Identifiable, Sendable, RouteStyled {
     var id: String {
         "\(tripId)|\(place.stopId ?? place.name)|\((scheduledDepartureTime ?? departureTime).timeIntervalSince1970)"
     }
-    var directionName: String? { TransitLabels.clean(headsign) }
+    var directionName: String? { TransitLabels.direction(headsign: headsign, tripEnd: tripTo?.name) }
     var departureTime: Date { place.departure ?? place.arrival ?? .distantPast }
     var scheduledDepartureTime: Date? { place.scheduledDeparture ?? place.scheduledArrival }
     var isCancelled: Bool { cancelled == true || tripCancelled == true || place.cancelled == true }

@@ -1,6 +1,6 @@
 # Publit iOS – Funktionen und Screens (vollständige Übersicht)
 
-> Stand: Version 0.1.0 (Build 64). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
+> Stand: Version 0.1.0 (Build 66). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
 > **Pflege:** Jede Änderung an `Sources/`, `Watch/`, `Widgets/` oder `Share/` muss diese Datei im selben Commit/PR mitändern (siehe Abschnitt „Aktualisierung“ ganz unten). Die maschinell erzeugte Liste aller Views steht in [`FUNKTIONEN-INVENTAR.md`](FUNKTIONEN-INVENTAR.md) und wird von der CI automatisch aktualisiert.
 
 ## Inhalt
@@ -127,7 +127,8 @@ Ohne Onboarding startet die Standortabfrage sofort.
 - **Sortierung**: Recommended, Departure, Fastest, Fewest changes, Least walking („Recommended: …“).
 - „Earlier connections“ / „Later connections“, „Updated HH:MM“, Abdeckungswarnung für Start/Ziel („From · Kärnten“).
 - **Routenoptionen-Knopf** (`RouteOptionsButton`) mit Kurz-Zusammenfassung („All modes“, „Direct only“, „Step-free“, „With sharing“ …).
-- **Go Now** (`GoNowView`, Schnellroute vom Standort): „Leave now“ / „Leave in x min“, „Walk all the way“, „Later connections“.
+- **Go Now** (`GoNowView`, Schnellroute vom Standort): Zeile „From … Change“ – Start ist der Standort, lässt sich aber über die Ortssuche auf jeden anderen Ort ändern (Überschrift dann „from …“); „Leave now“ / „Leave in x min“, „Walk all the way“, „Later connections“.
+- **Park & Ride statt zwei Stunden Fußweg**: findet die Suche mit 30 und 45 min Fußweg nichts, wird vor dem 2-h-Fußweg eine Autofahrt zum nächsten Bahnhof versucht (max. 15 min Fahrt); Hinweis „No stop within walking distance: these routes start with a drive to the station (Park & Ride).“
 - Treffer → Routendetail (§12).
 
 ## 9. Ortssuche – `PlaceSearchView`
@@ -138,7 +139,7 @@ Ohne Onboarding startet die Standortabfrage sofort.
 ## 10. Routenoptionen – `RouteOptionsView`
 
 - **Transport modes**: Verkehrsmittelgruppen ein/aus („Routes only use the modes that are switched on.“).
-- **To the first stop** (`FirstMilePicker`): Walk / Bike / Car (Park & Ride; „Park & Ride searches take longer.“).
+- **To the first stop** (`FirstMilePicker`): Walk / Bike / Car (Park & Ride; „Park & Ride searches take longer.“). Park & Ride fährt höchstens 15 min zu einem Bahnhof nahe dem Start (`ParkAndRide`); Verbindungen, bei denen die Autofahrt länger dauert als die Fahrten mit Öffis (z. B. 8 min in die Stadt und 2 min Bus), werden verworfen – bleibt keine übrig, kommen die normalen Verbindungen.
 - **Changes**: Any / Direct only / bis zu n Umstiege.
 - **Walk to and from stops**: maximale Gehzeit (Minuten).
 - **Step-free (wheelchair)**, **Shared bikes and e-scooters**.
@@ -158,7 +159,7 @@ Ohne Onboarding startet die Standortabfrage sofort.
 - **LeaveHero**: „Leave now“ / „Leave in x min“ und Ankunftszeit – die entscheidende Zahl.
 - Statusbanner (Live / Timetable, „This trip is cancelled.“, „Service changes on this route“), „Updated HH:MM“.
 - **Karte** der Route (`RouteMap`, Linien in Betreiberfarbe, Fußwege gepunktet); Vergleichskarte (`CompareMapView`).
-- **„Trip overview“**/„Steps“: Zeitleiste (`TimelineLegRow`, `TimelineRail`): je Abschnitt „Board at …“, „Get off at …“, Linie, Richtung, Gleis („Platform x“, Gleiswechsel), Zwischenhalte, Verspätung, SEV, Fußweg mit Anweisungen (Treppen, Ebenen, Ausgang „Exit towards …“), Leihfahrzeug („Pick up at …“, „Return at …“, „Rent in the provider's app“), Umstiegskarten.
+- **„Trip overview“**/„Steps“: Zeitleiste (`TimelineLegRow`, `TimelineRail`): je Abschnitt „Board at …“, „Get off at …“, Linie, Richtung, **Zugart und Rollstuhl-Eignung des Fahrzeugs** (`VehicleKindLine`/`VehicleKind`: z. B. „Railjet Xpress · High-speed train · Wheelchair accessible“, „Regional train · Not wheelchair accessible“; Kategorie aus der Zugnummer, Eignung aus GTFS `wheelchair_accessible`, ohne Angabe nichts), Gleis („Platform x“, Gleiswechsel), Zwischenhalte, Verspätung, SEV, Fußweg mit Anweisungen (Treppen, Ebenen, Ausgang „Exit towards …“), Leihfahrzeug („Pick up at …“, „Return at …“, „Rent in the provider's app“), Umstiegskarten.
 - **„Remind me to get off“** (`GetOffButton`): „Reminder set – We'll notify you at …“, „This stop is less than two minutes away.“, Hinweis falls Mitteilungen aus.
 - Fahrpreis (`FareSection`): „Fare estimate“ nur bei vollständig abgedeckter Route und eindeutiger Tarifregel; sonst „Fare information“ und Ticket-Links des Betreibers / Verbunds (`RegionTicketRow`, z. B. „Venice · ACTV“).
 - Smart-Routing-Abschnitt (§11), Abdeckungskarten für Start, Umstiegsorte, Ziel.
@@ -300,7 +301,7 @@ Ab 680 pt Breite (regular): Karte bildschirmfüllend, Inhalte in einem schwebend
 - **Abdeckungsatlas** (`Coverage`, 124 Gebiete, offline gebündelt, siehe [COVERAGE.md](COVERAGE.md)): Stufen „No timetable data“, „Very little timetable data“, „Missing: …“ (Lokalbusse, Stadtbusse, Metro, Tram, Fähren, S-Bahn). Anzeige in Plan, Routendetail, Nearby, Ortssuche, Karte, Watch; Link zur Abdeckungskarte publit.eu/abdeckung.
 - **Offline** (`ResponseCache`): Speicher-Cache 15–60 s, Datei-Cache: Live-Antworten bis 24 h, Suche/Karte bis 7 Tage; Nearby-Fallback nur innerhalb 400 m; Anzeige mit Zeitstempel; keine Offline-Neuberechnung von Routen.
 - Fahrpreise aus MOTIS (`withFares`), streng geprüft (§12). Ticket-Links je Betreiber (`TicketLinks`: verknüpfte App → Feed-Link → Tarifseite → Website).
-- Darstellung: Linienfarben vom Betreiber (Kontrast 4,5:1), Ersatzfarbe je Verkehrsmittel, Richtung immer als „Towards“, Ringlinien-Sonderfall.
+- Darstellung: Linienfarben vom Betreiber (Kontrast 4,5:1), Ersatzfarbe je Verkehrsmittel, Richtung immer als „Towards“, Ringlinien-Sonderfall. Paris: Metro „3B“/„7B“ heißen „3bis“/„7bis“; RER-Missionscodes als Ziel („ZEMA“, „NEGE“) werden durch die Endstation der Fahrt ersetzt (`TransitLabels`).
 
 ## 24. Datenschutz, Diagnose, Datenexport
 

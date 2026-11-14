@@ -112,3 +112,31 @@ extension GeocodeMatch {
         return Array(out.prefix(limit))
     }
 }
+
+/// Driving to the station (Park & Ride), on request or when no stop is within walking reach.
+enum ParkAndRide {
+    /// Longest drive to the first stop. With half an hour the server drives past the local station
+    /// to a car park in the next town and adds a two-minute bus (Gföhl → Wien Hbf: 25 min to St. Pölten
+    /// instead of 8 min to Krems, 2026-11-14). A quarter of an hour reaches the stations near home.
+    static let maxDriveSeconds = 900
+
+    /// Minutes in the car before the first ride.
+    static func driveSeconds(_ it: Itinerary) -> Int {
+        it.legs.prefix { !$0.isTransit }.filter { $0.mode == "CAR" }.reduce(0) { $0 + $1.duration }
+    }
+
+    static func rideSeconds(_ it: Itinerary) -> Int {
+        it.transitLegs.reduce(0) { $0 + $1.duration }
+    }
+
+    /// Routes where the car only brings you to public transport: the drive is shorter than the rides.
+    /// "Drive 8 min into town, then 2 min by bus to the station" is driving there, not a connection.
+    static func sensible(_ list: [Itinerary]) -> [Itinerary] {
+        list.filter { let d = driveSeconds($0); return d == 0 || d < rideSeconds($0) }
+    }
+
+    /// Above routes that start with a drive because no stop was within walking reach.
+    static var fallbackNote: String {
+        L10n.t("No stop within walking distance: these routes start with a drive to the station (Park & Ride).")
+    }
+}

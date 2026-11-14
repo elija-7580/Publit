@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.0 (build 66) – tester feedback
+
+- Park & Ride drives to a station near the start, at most 15 minutes, then the train. Before, the router could drive most of the way (8 min into town, then a 2-minute bus to the destination station, or past the local station to the next town). Routes where the drive is longer than the rides are dropped; if none are left, the usual routes show and driving is in "Other ways".
+- No stop within walking reach (30 and 45 min found nothing): Publit now tries driving to the nearest station before suggesting a two-hour walk, and says so above the routes.
+- Route details show the kind of train (Railjet Xpress, Intercity, Regional train …) and whether the vehicle is wheelchair accessible, where the timetable data says so.
+- Paris: metro lines 3bis and 7bis are named as on the platforms (not "3B"/"7B"); RER directions show the terminus instead of internal service codes ("ZEMA", "NEGE").
+- "Where to now?" can start somewhere other than the current location: tap "From … Change".
+- New texts translated into all 15 app languages.
+
 ## 0.1.0 (build 65) – App Review fixes
 
 - Onboarding: the location step has a single "Continue" button that always leads to the system permission request (the "Not now" button is gone; swiping on also asks).
