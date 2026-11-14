@@ -114,7 +114,7 @@ Ohne Onboarding startet die Standortabfrage sofort.
 - Vollbildkarte mit Stationen (gebündelte Bahnsteige; beim Hineinzoomen < ~1,5 km einzelne Straßen-Haltestellen; max. einige hundert Pins), „My location“, „Search this area“, „Zoom in to see stations / lines and vehicles“.
 - **Suche** „Search places, sights and stops“ und **„Find nearby“**-Kategorien wie Apple Maps (Restaurants, Apotheken, Ladestationen …, farbcodiert) → „All … in this area“ / „No places found“.
 - **Ebenen** (`MapLayersSheet`, „Map layers“): Kartenstil (Standard, Transit/gedämpft, Satellite, Satellite ohne Namen), 3D-Gelände und Gebäude, Places of interest, Traffic, Lines, Vehicles, Bikes and scooters, **Data gaps** (Abdeckungslücken orange; gefüllt = keine Daten, gestrichelt = teilweise).
-- **Auswahl** (`MapSelectionView`): Station → nächste Abfahrten, „Route here/from here“; Ort/Pin (`MapPlaceView`, auch „Dropped pin“ per langem Drücken) → Distanz, Gehzeit, Routen.
+- **Auswahl** (`MapSelectionView`): Station → nächste Abfahrten, „Route here/from here“; Ort/Pin (`MapPlaceView`, auch „Dropped pin“ per langem Drücken ab 0,5 s; das Loslassen schließt den Pin nicht wieder) → Distanz, Gehzeit, Routen.
 - **Fahrzeug** (`VehicleTripView`): Live-Position oder aus Fahrplan, „x min late“, „Next stops“, „Line …: route and timetable“.
 - **Leihräder/E-Scooter** (`RentalDetailView`, GBFS): Anbieter, „Available now“, Fahrzeuge, Distanz, „Open in the provider's app“ (Mieten nur in der Anbieter-App).
 - Kartenanbieter Apple Maps oder Google Maps (mit Key); Fehlerzustände „Stations could not be loaded.“, „Live layer unavailable. Stations still work.“

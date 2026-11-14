@@ -159,6 +159,9 @@ struct TransitMapView: UIViewRepresentable {
         private var placesVersion = 0
         /// When something on the map was last selected: a tap that selects is not a tap on empty map.
         private var lastSelect = Date.distantPast
+        /// When the last long press began. A short long press (about 0.5–0.8 s) also ends as a tap; that
+        /// tap closed the sheet of the pin it had just dropped, so the pin flashed and was gone.
+        private var lastLongPress = Date.distantPast
         var recentered = 0
 
         init(_ parent: TransitMapView) { self.parent = parent }
@@ -451,7 +454,8 @@ struct TransitMapView: UIViewRepresentable {
         }
 
         @objc func tapped(_ gesture: UITapGestureRecognizer) {
-            guard gesture.state == .ended, parent.onTapEmpty != nil else { return }
+            guard gesture.state == .ended, parent.onTapEmpty != nil,
+                  Date().timeIntervalSince(lastLongPress) > 1.5 else { return }
             // MapKit selects a tapped place a moment after the tap; wait for it before calling the map empty.
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { [weak self] in
                 guard let self, Date().timeIntervalSince(self.lastSelect) > 0.6 else { return }
@@ -473,6 +477,7 @@ struct TransitMapView: UIViewRepresentable {
 
         @objc func longPressed(_ gesture: UILongPressGestureRecognizer) {
             guard gesture.state == .began, let map = gesture.view as? MKMapView else { return }
+            lastLongPress = Date()
             let c = map.convert(gesture.location(in: map), toCoordinateFrom: map)
             let point = LatLon(lat: c.latitude, lon: c.longitude)
             guard point.isValidCoordinate else { return }
