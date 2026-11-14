@@ -94,7 +94,7 @@ Not usable without an agreement or key: StadtRAD Hamburg (DB API Marketplace "Sh
 
 ## 3. Other useful data
 
-- **Station entrances, exits, elevators, platforms (OpenStreetMap)** via Overpass (`overpass-api.de`, `overpass.kumi.systems`): `railway=subway_entrance`, `highway=elevator`, `public_transport=platform`. Free, no key; the main instance was overloaded (504) during the test, so cache results per station and use a fallback instance. Would improve the guide's "Exit towards …" hints.
+- **Station entrances, exits, elevators, platforms (OpenStreetMap)** via Overpass (`overpass-api.de`, `overpass.kumi.systems`): `railway=subway_entrance`, `highway=elevator`, `public_transport=platform`. Free, no key; the main instance was overloaded (504) during the test, so cache results per station and use a fallback instance. In use for exit numbers (`StationExits`: `railway=subway_entrance`/`train_station_entrance`/`public_transport=entrance` with `ref`, per station, in memory, with the fallback instance): "Take exit B2".
 - **Elevator status:** DB FaSta (key), Wiener Linien OGD, TfL lift disruptions.
 - **Occupancy:** Entur and some GTFS-RT feeds carry `occupancy_status`; Transitous passes it through where present.
 - **EU National Access Points** (official open data per country, mostly GTFS/NeTEx/GBFS): Mobilithek (DE), transport.data.gouv.fr (FR, API works without key), opentransportdata.swiss (CH), NDOV (NL), Entur (NO), Trafiklab (SE), Fintraffic (FI), nap.transportes.gob.es (ES), data.gov.gr (GR). Good places to find feeds for Transitous gaps.

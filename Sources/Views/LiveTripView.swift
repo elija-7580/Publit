@@ -159,6 +159,8 @@ struct LiveTripView: View {
             ToolbarItem(placement: .topBarTrailing) { tripMenu }
         }
         .task(id: detourKey) { await detour.update(from: here, to: detourTarget) }
+        // Exit numbers of the underground stations on the way ("Take exit B2"), from OpenStreetMap.
+        .task(id: it.id) { if await StationExits.shared.load(it) { now = Date() } }
         // At the destination the trip ends by itself.
         .onChange(of: finished) { _, done in
             if done { Task { await TripSession.stop(trip, in: trips) } }

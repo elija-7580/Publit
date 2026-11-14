@@ -199,6 +199,7 @@ targets:
       - Sources/Models/TripProgress.swift
       - Sources/Models/CityGuide.swift
       - Sources/Models/WalkGuide.swift
+      - Sources/Models/StationExits.swift
       - Sources/Models/TripGuide.swift
       - Sources/Models/Coverage.swift
       - Sources/Models/CoverageAtlasData.swift

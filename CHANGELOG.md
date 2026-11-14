@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Coming up from an underground station, the walk shows the signed exit number from OpenStreetMap: "Take exit B2" (or "Take exit B2 towards Ludwigstraße"), also in the change guide and the spoken directions. Where OpenStreetMap has no number, it stays "Exit towards …".
+
 ## 0.1.0 (build 66) – tester feedback
 
 - Park & Ride drives to a station near the start, at most 15 minutes, then the train. Before, the router could drive most of the way (8 min into town, then a 2-minute bus to the destination station, or past the local station to the next town). Routes where the drive is longer than the rides are dropped; if none are left, the usual routes show and driving is in "Other ways".

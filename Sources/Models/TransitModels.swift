@@ -186,6 +186,9 @@ struct StepInstruction: Codable, Sendable {
     var streetName: String? = nil
     var exit: String? = nil
     var area: Bool? = nil
+    /// OpenStreetMap nodes at the ends of this piece: a station entrance the walk passes through is one of them.
+    var fromOsmNode: Int64? = nil
+    var toOsmNode: Int64? = nil
 }
 
 struct Itinerary: Codable, Identifiable, Sendable {
