@@ -325,7 +325,7 @@ struct LiveTripView: View {
                     Image(systemName: nextMove.symbol).font(.title2.weight(.bold)).frame(width: 36)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(L10n.f("In %@", Fmt.distance(meters: position.toNext ?? 0)))
-                            .font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+                            .font(.footnote.weight(.semibold)).foregroundStyle(.secondary)
                         Text(nextMove.instruction(destination: target)).font(.headline)
                         if let note = nextMove.exitNote {
                             Text(note).font(.subheadline.weight(.semibold))
@@ -358,10 +358,10 @@ struct LiveTripView: View {
                         Text(m.instruction(destination: target))
                             .font(.subheadline.weight(isNow ? .bold : .regular))
                         if let note = m.exitNote {
-                            Text(note).font(.caption.weight(.semibold))
+                            Text(note).font(.footnote.weight(.semibold))
                         }
                         if m.kind != .arrive, m.distance >= 1 {
-                            Text(Fmt.distance(meters: m.distance)).font(.caption).foregroundStyle(.secondary)
+                            Text(Fmt.distance(meters: m.distance)).font(.footnote).foregroundStyle(.secondary)
                         }
                     }
                     Spacer(minLength: 0)
@@ -461,7 +461,7 @@ struct LiveTripView: View {
                 InkProgress(value: value, tint: leg.lineStroke).padding(.top, 2)
                 Text(fromGPS ? L10n.t("Position from your location.") : leg.realTime
                      ? L10n.t("Position estimated from live stop times.") : L10n.t("Position estimated from the timetable."))
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.footnote).foregroundStyle(.secondary)
             }
             .padding(.vertical, 4)
             TrainDivisionNotice(leg: leg)
@@ -716,7 +716,7 @@ struct GuideStopRow: View {
                 .font(.subheadline.monospacedDigit().weight(isLast ? .bold : .regular))
                 .lineLimit(1).fixedSize()
             if delay > 0 {
-                Text(verbatim: "+\(delay)").font(.caption.monospacedDigit()).foregroundStyle(Color.delay)
+                Text(verbatim: "+\(delay)").font(.footnote.monospacedDigit()).foregroundStyle(Color.delay)
             }
             Text(verbatim: stop.name)
                 .font(.subheadline.weight(isLast || state == .here || state == .next ? .bold : .regular))
@@ -725,7 +725,7 @@ struct GuideStopRow: View {
             Spacer(minLength: 4)
             if isLast { Image(systemName: "figure.walk.departure").foregroundStyle(.secondary).accessibilityLabel(Text("Get off here")) }
             else if let track = TransitLabels.clean(stop.track) {
-                Text(L10n.f("Pl. %@", track)).font(.caption).foregroundStyle(.secondary)
+                Text(L10n.f("Pl. %@", track)).font(.footnote).foregroundStyle(.secondary)
             }
         }
         .padding(.vertical, 10)
@@ -991,7 +991,7 @@ private struct HeadingRow: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title).font(.headline)
                 if heading == nil {
-                    Text("No compass: the arrow has north at the top.").font(.caption).foregroundStyle(.secondary)
+                    Text("No compass: the arrow has north at the top.").font(.footnote).foregroundStyle(.secondary)
                 }
             }
         }
@@ -1036,7 +1036,7 @@ private struct AlternativeRow: View {
             }
             .font(.subheadline.weight(.semibold))
             Text(verbatim: L10n.f("Your trip: arrive %@", Fmt.time(trip.itinerary.endTime, tz: trip.itinerary.legs.last?.to.tz)))
-                .font(.caption).foregroundStyle(.secondary)
+                .font(.footnote).foregroundStyle(.secondary)
             ForEach(Array((showAll ? choices : Array(choices.prefix(1))).enumerated()), id: \.element.routeKey) { i, option in
                 if i > 0 { Divider() }
                 choice(option, primary: i == 0)
@@ -1044,7 +1044,7 @@ private struct AlternativeRow: View {
             if searching {
                 LogoLoader(label: L10n.t("Looking for the next connection…"), size: 40)
             } else if choices.isEmpty, failed {
-                Text("No other connection found right now.").font(.caption).foregroundStyle(.secondary)
+                Text("No other connection found right now.").font(.footnote).foregroundStyle(.secondary)
             }
             if choices.count > 1 {
                 Button { withAnimation { showAll.toggle() } } label: {
@@ -1079,9 +1079,9 @@ private struct AlternativeRow: View {
                     .font(.subheadline.weight(.semibold))
                 Text(verbatim: [option.firstTransitLeg?.from.name, L10n.f("Arrive %@", Fmt.time(option.endTime, tz: option.legs.last?.to.tz)),
                                 Fmt.changes(option.transfers)].compactMap { $0 }.joined(separator: " · "))
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.footnote).foregroundStyle(.secondary)
                 Text(TripAlternative.comparison(option, than: trip.itinerary))
-                    .font(.caption.weight(.semibold))
+                    .font(.footnote.weight(.semibold))
                     .foregroundStyle(later > 2 ? Color.delay : later < 0 ? Color.live : Color.secondary)
             }
             Spacer(minLength: 4)
@@ -1325,9 +1325,10 @@ private struct StagePager: View {
         return frame(selected: shown == i) {
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 6) {
-                    Text(verbatim: (isNow ? L10n.t("now").uppercased() + " · " : "") + "\(i + 1)/\(steps.count)")
-                        .font(.caption2.weight(.bold)).tracking(0.6)
-                        .foregroundStyle(.secondary).monospacedDigit()
+                    // "Now" only on the stage you are on; the strip above already counts the stages.
+                    if isNow {
+                        Text(verbatim: L10n.t("now").localizedCapitalized).font(.footnote.weight(.semibold)).foregroundStyle(.secondary)
+                    }
                     if step.kind == .ride || step.kind == .wait {
                         LineBadge(leg, compact: true)
                     } else {
@@ -1346,7 +1347,7 @@ private struct StagePager: View {
             if isNow, step.kind != .arrive {
                 VStack(alignment: .trailing, spacing: 0) {
                     Text(verbatim: "\(left)").font(.system(size: 34, weight: .heavy).monospacedDigit())
-                    Text(verbatim: "min").font(.caption.weight(.bold)).foregroundStyle(.secondary)
+                    Text(verbatim: "min").font(.footnote.weight(.bold)).foregroundStyle(.secondary)
                 }
             }
         }
@@ -1402,11 +1403,10 @@ private struct StageRow: View {
                 Text(StageStrip.label(step, in: itinerary, destination: destination)).font(.subheadline.weight(.semibold)).lineLimit(2)
                 Text(verbatim: step.kind == .arrive ? Fmt.time(leg.endTime, tz: leg.to.tz)
                      : "\(Fmt.time(leg.startTime, tz: leg.from.tz)) – \(Fmt.time(leg.endTime, tz: leg.to.tz)) · \(Fmt.duration(seconds: leg.duration))")
-                    .font(.caption).foregroundStyle(.secondary).monospacedDigit()
+                    .font(.footnote).foregroundStyle(.secondary).monospacedDigit()
             }
             Spacer(minLength: 0)
             if live { SignatureDot(size: 9) }
-            Text(verbatim: "\(number)/\(count)").font(.caption2.weight(.semibold)).foregroundStyle(.tertiary).monospacedDigit()
         }
         .padding(.vertical, 2)
         .opacity(done ? 0.5 : 1)

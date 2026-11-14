@@ -51,7 +51,8 @@ struct TripActionsSection: View {
             }
             Divider().frame(maxWidth: .infinity)
             // Not a LazyVGrid: a lazy grid inside a self-sizing list row is measured again on every pass.
-            EqualColumns(columns: typeSize.isAccessibilitySize ? 1 : 2, spacing: 12) {
+            // Three actions in one row, four as two by two: no half-empty row.
+            EqualColumns(columns: typeSize.isAccessibilitySize ? 1 : (itinerary.startTime > .now ? 2 : 3), spacing: 12) {
                 secondaryButtons
             }
             .labelStyle(ActionLabelStyle())

@@ -284,6 +284,7 @@ struct LineDeparturesView: View {
                         TripView(stopTime: st, stationId: line.stopId, stationName: line.stopName,
                                  stationCoordinate: line.coordinate)
                     } label: { DepartureRow(stopTime: st) }
+                    .linkIndicatorHidden()
                 }
             } header: {
                 HStack { LineBadge(line); Text(L10n.f("At %@", line.stopName)).textCase(nil) }
