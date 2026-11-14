@@ -324,6 +324,9 @@ struct LiveTripView: View {
                         if let note = nextMove.exitNote {
                             Text(note).font(.subheadline.weight(.semibold))
                         }
+                        if nextMove.isStationExit {
+                            ExitNumberLabel(coordinate: nextMove.coordinate, font: .subheadline.weight(.semibold))
+                        }
                     }
                 }
                 .accessibilityElement(children: .combine)
@@ -354,6 +357,7 @@ struct LiveTripView: View {
                         if let note = m.exitNote {
                             Text(note).font(.caption.weight(.semibold))
                         }
+                        if m.isStationExit { ExitNumberLabel(coordinate: m.coordinate) }
                         if m.kind != .arrive, m.distance >= 1 {
                             Text(Fmt.distance(meters: m.distance)).font(.caption).foregroundStyle(.secondary)
                         }

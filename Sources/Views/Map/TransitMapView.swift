@@ -98,6 +98,9 @@ struct TransitMapView: UIViewRepresentable {
         let tap = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.tapped(_:)))
         tap.cancelsTouchesInView = false
         tap.delegate = context.coordinator
+        // Lifting the finger after a long press must not count as a tap on the empty map: that closed
+        // the sheet of the pin just dropped (UI test F19). The tap waits until the press has failed.
+        tap.require(toFail: press)
         map.addGestureRecognizer(tap)
         if let c = initialCenter {
             map.setRegion(MKCoordinateRegion(center: c.clCoordinate, latitudinalMeters: 1600, longitudinalMeters: 1600), animated: false)
@@ -472,6 +475,8 @@ struct TransitMapView: UIViewRepresentable {
         }
 
         @objc func longPressed(_ gesture: UILongPressGestureRecognizer) {
+            // Lifting the finger is still part of the press, not an empty-map tap.
+            if gesture.state == .ended || gesture.state == .cancelled { lastSelect = Date() }
             guard gesture.state == .began, let map = gesture.view as? MKMapView else { return }
             let c = map.convert(gesture.location(in: map), toCoordinateFrom: map)
             let point = LatLon(lat: c.latitude, lon: c.longitude)

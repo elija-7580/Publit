@@ -19,6 +19,8 @@ struct WalkManeuver: Equatable, Sendable {
     /// Coming up from underground: the first street after the exit, or the side of the station.
     var exitTowards: String? = nil
     var exitSide: Compass.Point? = nil
+    /// Where the walk comes up from underground to the street: the station exit it uses.
+    var isStationExit = false
 
     /// "Exit towards Ludwigstraße" / "Exit on the north-east side".
     var exitNote: String? {
@@ -191,6 +193,7 @@ struct WalkRoute: Sendable {
             guard let next = out[i].level else { continue }
             defer { level = next }
             guard level < 0, next >= 0 else { continue }
+            out[i].isStationExit = true
             let at = out[i].along
             let street = out[(i + 1)...].first { $0.street != nil && $0.along - at <= 150 }?.street
             if let street {

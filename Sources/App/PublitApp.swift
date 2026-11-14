@@ -114,6 +114,8 @@ struct RootView: View {
             .task { await endSplash() }
             .fullScreenCover(isPresented: $onboarding) { OnboardingView() }
             .onChange(of: onboardingDone) { _, done in if done { onboarding = false } }
+            // Once: where to suggest features and vote (after onboarding, never over it).
+            .wishesHint(ready: onboardingDone && !onboarding && !splash)
     }
 
     /// At least 0.7 s (the animation), at most 2 s, ended earlier by the first board.

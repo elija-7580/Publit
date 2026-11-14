@@ -210,6 +210,20 @@ final class FavoritesTests: XCTestCase {
         XCTAssertTrue(s.places.contains { $0.id == "a" }, "previous Home stays as a normal saved place")
     }
 
+    /// Reddit report: Home and Work in different countries, setting one removed the other.
+    /// The geocoder can hand out the same ID for both addresses.
+    func testWorkDoesNotReplaceHomeWithSameId() async {
+        let s = store()
+        let home = SavedPlace(id: "adr-1", name: "Via Roma 1", subtitle: "Milano, IT", lat: 45.46, lon: 9.19, stopId: nil)
+        let work = SavedPlace(id: "adr-1", name: "Hauptstraße 1", subtitle: "Lugano, CH", lat: 46.00, lon: 8.95, stopId: nil)
+        s.set(home, as: .home)
+        s.set(work, as: .work)
+        XCTAssertEqual(s.place(for: .home)?.name, "Via Roma 1")
+        XCTAssertEqual(s.place(for: .work)?.name, "Hauptstraße 1")
+        s.clear(.work)
+        XCTAssertEqual(s.place(for: .home)?.name, "Via Roma 1")
+    }
+
     func testPinnedPlacesAreNotListedTwice() async {
         let s = store()
         s.set(a, as: .work)

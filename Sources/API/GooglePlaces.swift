@@ -113,7 +113,8 @@ enum GooglePlaces {
 
 /// Who answers the place search.
 enum SearchProvider: String, CaseIterable, Identifiable {
-    /// Transitous (OpenStreetMap): stops, addresses and places, nothing leaves for anyone else.
+    /// Transitous (OpenStreetMap) for stops, addresses and places, with Apple Maps for addresses and
+    /// places OpenStreetMap lacks (house numbers). Raw value kept for stored settings.
     case transitous
     /// Google Places: shops, restaurants and sights as in Google Maps; stops still come from Transitous.
     case google
@@ -126,7 +127,7 @@ enum SearchProvider: String, CaseIterable, Identifiable {
     var id: String { rawValue }
     var title: String {
         switch self {
-        case .transitous: return L10n.t("OpenStreetMap (Transitous)")
+        case .transitous: return L10n.t("OpenStreetMap and Apple Maps")
         case .google: return "Google"
         }
     }

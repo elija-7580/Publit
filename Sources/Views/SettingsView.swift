@@ -11,6 +11,7 @@ struct SettingsView: View {
     @AppStorage("routeTimelines") private var routeTimelines = true
     @AppStorage(LineAlertMonitor.enabledKey) private var lineAlerts = false
     @AppStorage(LiveOverlay.defaultsKey) private var extraLive = true
+    @AppStorage(StationExits.enabledKey) private var exitNumbers = true
     @AppStorage("mapBase") private var mapBase = MapBase.defaultValue
     @AppStorage("mapPOI") private var mapPOI = true
     @AppStorage(DirectionsApp.defaultsKey) private var directionsApp = DirectionsApp.apple.rawValue
@@ -112,7 +113,7 @@ struct SettingsView: View {
                 } footer: {
                     Text(L10n.t(searchProvider == SearchProvider.google.rawValue
                                 ? "Shops, restaurants and sights come from Google; stops still come from Transitous. What you type and your approximate location go to Google."
-                                : "Stops, addresses and places from OpenStreetMap, through Transitous."))
+                                : "Stops from Transitous. Addresses and places from OpenStreetMap and Apple Maps, so house numbers are found too. What you type and the area around you go to Apple, as for the map."))
                 }
                 if Features.tickets {
                     Section("Tickets") {
@@ -167,6 +168,10 @@ struct SettingsView: View {
                         Label("Live data from more operators", systemImage: "dot.radiowaves.left.and.right")
                     }
                     .accessibilityIdentifier("extraLiveToggle")
+                    Toggle(isOn: $exitNumbers) {
+                        Label("Exit numbers from OpenStreetMap", systemImage: "door.right.hand.open")
+                    }
+                    .accessibilityIdentifier("exitNumbersToggle")
                     NavigationLink { LiveSourcesView() } label: {
                         Label("Live data sources", systemImage: "antenna.radiowaves.left.and.right")
                     }
@@ -183,6 +188,7 @@ struct SettingsView: View {
                     VStack(alignment: .leading, spacing: 6) {
                         Text("Times marked live come from the operator's real-time feed; all others are timetable times.")
                         Text("Where Transitous has no live times, Publit also asks ÖBB, Wiener Linien, search.ch (Switzerland), regional networks in Germany (VRR, VBB, RMV, VBN, NAH.SH, VRN), ACTV (Venice), SL (Stockholm) and TfL (London, Powered by TfL Open Data) about delays, cancellations and disruptions. They only get the stop, line and time of a ride.")
+                        Text("For walks out of a station, Publit asks OpenStreetMap (Overpass) for the number of the exit. It only gets the exit's location.")
                         Text("All information without guarantee. Times, platforms and prices come from the operators' open data and can change at short notice.")
                             .accessibilityIdentifier("noGuaranteeSettings")
                     }
@@ -218,6 +224,14 @@ struct SettingsView: View {
                     Text("Diagnostics")
                 } footer: {
                     Text("Publit notes freezes of 2 seconds or more, crashes, unexpected exits and failed requests (only their kind), each with the screens opened just before. Places, stops and tickets are not recorded, and nothing leaves this device unless you share it.")
+                }
+                Section {
+                    NavigationLink { WishesView() } label: {
+                        Label("Suggest features and vote", systemImage: "lightbulb")
+                    }
+                    .accessibilityIdentifier("wishes")
+                } footer: {
+                    Text("Missing something? Suggest it, or vote for what others want. No account needed.")
                 }
                 Section {
                     Link("Source code and feedback", destination: AppInfo.repositoryURL)

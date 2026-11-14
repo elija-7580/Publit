@@ -59,6 +59,8 @@ let core = [
     "Stores/LineGrouping.swift",
     "Models/TransitExtras.swift",
     "Models/LiveMap.swift",
+    "Models/StationExits.swift",
+    "Models/Wishes.swift",
     "Models/LineCatalog.swift",
     "Models/LineDisruptions.swift",
     "Tickets/TicketPass.swift",
