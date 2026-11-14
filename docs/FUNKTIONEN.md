@@ -135,6 +135,7 @@ Ohne Onboarding startet die Standortabfrage sofort.
 - **Routenoptionen-Knopf** (`RouteOptionsButton`) mit Kurz-Zusammenfassung („All modes“, „Direct only“, „Step-free“, „With sharing“ …).
 - **Go Now** (`GoNowView`, Schnellroute vom Standort): Zeile „From … Change“ – Start ist der Standort, lässt sich aber über die Ortssuche auf jeden anderen Ort ändern (Überschrift dann „from …“); „Leave now“ / „Leave in x min“, „Walk all the way“, „Later connections“.
 - **Park & Ride statt zwei Stunden Fußweg**: findet die Suche mit 30 und 45 min Fußweg nichts, wird vor dem 2-h-Fußweg eine Autofahrt zum nächsten Bahnhof versucht (max. 15 min Fahrt); Hinweis „No stop within walking distance: these routes start with a drive to the station (Park & Ride).“
+- **An der Haltestelle** (`Reach.boardingHere`, `Reach.atStopMeters` = 50 m): Wer vom Standort aus plant und höchstens 50 m von der ersten Haltestelle steht (und dessen Fußweg dorthin laut Server ebenfalls höchstens 50 m lang ist), bekommt keinen „1 min“-Fußweg vorneweg: Die Route beginnt mit der Fahrt, statt „Leave in x min“ steht „Departs in x min“ (bei 0 „Board here“). Die Haltestelle gegenüber (Weg über die Straße) behält ihren Fußweg.
 - Treffer → Routendetail (§12).
 
 ## 9. Ortssuche – `PlaceSearchView`
@@ -163,7 +164,7 @@ Ohne Onboarding startet die Standortabfrage sofort.
 
 ## 12. Routendetail (Itinerary) – `ItineraryDetailView`
 
-- **LeaveHero**: „Leave now“ / „Leave in x min“ und Ankunftszeit – die entscheidende Zahl.
+- **LeaveHero**: „Leave now“ / „Leave in x min“ und Ankunftszeit – die entscheidende Zahl; beginnt die Route mit der Fahrt (man steht an der Haltestelle), „Departs in x min“ / „Board here“.
 - Statusbanner (Live / Timetable, „This trip is cancelled.“, „Service changes on this route“), „Updated HH:MM“.
 - **Karte** der Route (`RouteMap`, Linien in Betreiberfarbe, Fußwege gepunktet; Ausschnitt an das Seitenverhältnis der Karte angepasst, damit Start und Ziel immer sichtbar sind); Vergleichskarte (`CompareMapView`).
 - **Rad/Auto die ganze Strecke**: ohne Linienkette und „Direct“ unter der Zeitkarte; die Schritte nennen den Start (wie das Ziel), dazu „Driving times are without traffic and parking.“ und „Open in …“.
@@ -190,7 +191,7 @@ Erscheint für die gestartete Fahrt oder eine gespeicherte, die gerade läuft/ba
 ### Live-Fahrt / Guide (`LiveTripView`)
 - **Etappen** (`StagePager`, `StageStrip`, `StageRow`): Gehen → Warten → Fahren → Ankommen, bestimmt durch Live-Zeiten und GPS; „Back to now“ nach manuellem Blättern.
 - **Ausgangsnummer** (`StationExits`): kommt der Fußweg aus einer U-Bahn-Station (nach einer Metro-Fahrt oder unter Straßenniveau beginnend), steht beim Aufgang die beschilderte Ausgangsnummer aus OpenStreetMap („Take exit B2“, „Take exit B2 towards Ludwigstraße“; `railway=subway_entrance`/`train_station_entrance`/`public_transport=entrance` mit `ref` bis 6 Zeichen). Wahl: Eingang, durch den der Weg führt → nächster Eingang ≤ 40 m vom Aufgang → erster Eingang ≤ 20 m neben dem Weg. Abfrage über Overpass (overpass-api.de, Ausweich overpass.kumi.systems) einmal je Station beim Öffnen der Live-Fahrt, nur im Speicher; ohne Daten bleibt „Exit towards …“. Auch in Umstiegshilfe und Sprachansage.
-- Gehen: „Walk to …“, Turn-by-turn-Anweisungen, **Kompasspfeil** (`HeadingRow`; ohne Kompass Norden oben), „Walk faster to make it.“, Karte drehen „Turn the map with you“ / „Stop turning the map“.
+- Gehen: „Walk to …“ mit „Distanz · Minuten“ (an der Haltestelle, ≤ 50 m, stattdessen „Board here“), Turn-by-turn-Anweisungen, **Kompasspfeil** (`HeadingRow`; ohne Kompass Norden oben), „Walk faster to make it.“, Karte drehen „Turn the map with you“ / „Stop turning the map“.
 - Warten/Einsteigen: „Departs in x min“, „Departs now“, „Departed …“, „Take Linie towards …“, Gleis „Pl. x“, „Platform changed (was x)“, Boarding-Hilfe (`BoardingLine`, `BoardingSteps`).
 - Fahren: „Now at …“, „Next stop … in …“, Haltliste (`GuideStopRow`), „Get off here“, „Get off at …“, Positionsquelle („Position from your location / estimated from live stop times / from the timetable“).
 - Ankunft: „You have arrived“, „Arrive at …“, „Destination in …“.
@@ -357,7 +358,7 @@ Kleinere Bausteine, die in den Abschnitten oben nicht namentlich vorkommen:
 | `SettingsButton` | Zahnrad, öffnet Einstellungen (§16) |
 | `SmartBadgesRow`, `SmartChangesSection`, `ChangeChanceRow`, `SmartRoutingSettingsSection` | Smart-Routing-Badges, Umstiegsbewertung, Einstellungen (§11) |
 | `StopTimeRow` | Haltzeile einer Fahrzeug-Fahrt (§6) |
-| `WalkThereRow` | „6 min walk · 450 m“ zu genau dieser Haltestelle (richtige Straßenseite), öffnet die Karten-App zu Fuß (§3, §4) |
+| `WalkThereRow` | „6 min walk · 450 m“ zu genau dieser Haltestelle (richtige Straßenseite), öffnet die Karten-App zu Fuß; ausgeblendet, solange man an der Haltestelle steht (≤ 50 m) (§3, §4) |
 | `WideMapCanvas`, `WideRoutesMap` | große Karte und Routenkarte im iPad-Layout (§22) |
 | `WatchLiveTile` | Live-Kachel auf dem Watch-Home (§21) |
 | `WatchDepartureRow` | Abfahrtszeile auf der Watch (§21) |

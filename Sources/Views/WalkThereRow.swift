@@ -2,6 +2,7 @@ import SwiftUI
 import MapKit
 
 /// "6 min walk · 450 m" to exactly this stop (the right side of the road), opening Apple Maps on foot.
+/// Hidden while you are at the stop (`Reach.atStopMeters`).
 struct WalkThereRow: View {
     let name: String
     let coordinate: LatLon
@@ -14,7 +15,7 @@ struct WalkThereRow: View {
     var body: some View {
         if let here = location.coordinate {
             let meters = here.distance(to: coordinate)
-            if meters <= Self.maxDistance, meters > 25 {
+            if meters <= Self.maxDistance, !Reach.isAtStop(meters: meters) {
                 Button { open() } label: {
                     HStack {
                         Label { Text(verbatim: text(meters)) } icon: { Image(systemName: "figure.walk") }
