@@ -126,6 +126,6 @@ struct GoNowView: View {
 
     private func leaveText(_ it: Itinerary, firstDeparture: Date) -> String {
         let mins = Int(ceil(it.startTime.timeIntervalSinceNow / 60))
-        return mins <= 0 ? L10n.t("Leave now") : L10n.f("Leave in %lld min", mins)
+        return Reach.leaveText(it, minutes: mins)
     }
 }

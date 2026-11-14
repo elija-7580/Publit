@@ -204,7 +204,10 @@ final class PlanModel {
             }
             try Task.checkCancellation()
             guard token == myToken else { return }
-            itineraries = Self.merge(transit: res.itineraries.withoutDetours, direct: res.direct)
+            var transit = res.itineraries.withoutDetours
+            // Standing at the first stop: board there, no "walk 1 min" first.
+            if case .currentLocation = searchedFrom { transit = Reach.boardingHere(transit, here: f) }
+            itineraries = Self.merge(transit: transit, direct: res.direct)
             offerForLearning()
             walkNote = parkAndRide && options.firstMile != .car ? ParkAndRide.fallbackNote
                 : maxWalk > RouteOptions.defaultWalkMinutes * 60 ? Reach.longWalkNote(res.itineraries) : nil

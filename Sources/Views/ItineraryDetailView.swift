@@ -844,7 +844,7 @@ struct LeaveHero: View {
         let minutes = Int((itinerary.startTime.timeIntervalSince(now) / 60).rounded(.up))
         let soon = minutes <= 90 && minutes >= -1
         let big: String = soon
-            ? (minutes >= 1 ? L10n.f("Leave in %lld min", minutes) : L10n.t("Leave now"))
+            ? Reach.leaveText(itinerary, minutes: minutes)
             : "\(Fmt.time(itinerary.startTime, tz: tz)) – \(Fmt.time(itinerary.endTime, tz: endTz))"
         HStack(alignment: .center, spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {

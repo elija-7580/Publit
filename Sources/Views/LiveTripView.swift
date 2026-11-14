@@ -277,7 +277,9 @@ struct LiveTripView: View {
         let away = position == nil ? detour : nil
         let remaining = position?.remaining ?? away?.distance ?? leg.distance ?? route.length * route.scale
         let pace = (leg.distance ?? 0) > 0 ? Double(leg.duration) / (leg.distance ?? 1) : 1 / 1.3
-        let walkSeconds = away.map { Int($0.seconds) } ?? Int(remaining * pace)
+        // At the stop already: nothing left to walk, so no "40 m · 1 min".
+        let atStop = next != nil && (position != nil || away != nil) && Reach.isAtStop(meters: remaining)
+        let walkSeconds = atStop ? 0 : away.map { Int($0.seconds) } ?? Int(remaining * pace)
         let nextIndex = it.legs[(index + 1)...].firstIndex(where: \.isTransit)
         Section {
             VStack(alignment: .leading, spacing: 8) {
@@ -287,8 +289,12 @@ struct LiveTripView: View {
                     Text(L10n.f("Walk to %@", target)).font(.title3.weight(.bold))
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                Text(verbatim: "\(Fmt.distance(meters: remaining)) · \(Fmt.duration(seconds: max(60, walkSeconds)))")
-                    .font(.headline.monospacedDigit()).foregroundStyle(.secondary)
+                if atStop {
+                    Text("Board here").font(.headline).foregroundStyle(.secondary)
+                } else {
+                    Text(verbatim: "\(Fmt.distance(meters: remaining)) · \(Fmt.duration(seconds: max(60, walkSeconds)))")
+                        .font(.headline.monospacedDigit()).foregroundStyle(.secondary)
+                }
                 if now < leg.startTime {
                     Text(TripStatus.at(now, it).headline).font(.subheadline.weight(.semibold)).foregroundStyle(Color.live)
                 }
