@@ -43,6 +43,7 @@
 - Optional Google Places (Suche) und Google Maps SDK (Karte), nur mit API-Key.
 - Standort wird nur bei einer Suche mitgeschickt und auf ~1 m (Routing) bzw. ~1 km (Such-Bias) gerundet.
 - Unterstützt: iOS 17+, watchOS 10+, Hell/Dunkel, Dynamic Type inkl. Accessibility-Größen (gestapeltes Layout), VoiceOver-Texte („live, 3 minutes late“, „timetable time, no live data“ …), iPad-Layout.
+- **Liniennamen**: Badges zeigen die Linie, nicht die Zugnummer. Im österreichischen Bahn-Feed steht in `route_short_name` die Zugnummer („R 6046“); die Linie („R 44“, „REX 3“) wird dann aus der Route-ID gelesen, die Zugnummer bleibt als Zusatz (`serviceDetail`).
 - Sprachen über String Catalogs (`Localizable.xcstrings`, `InfoPlist.xcstrings`, `AppShortcuts.xcstrings`, `Transfers.xcstrings`).
 - Akku-Schonung (`Energy`): im Stromsparmodus oder bei Hitze aktualisieren Live-Screens halb so oft.
 

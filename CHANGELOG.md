@@ -4,6 +4,9 @@
 
 Merged in: community feedback (wish list, Apple Maps addresses, fixes), tapping a line in a trip, Austrian line names, at the stop without a walk, rows that lead with what matters.
 
+- **Austrian regional trains** show their line like the ÖBB app and station boards ("R 44", "REX 3") instead of the train number ("R 6046"); the train number stays as detail.
+- **Tap a line in a trip** (route details, live trip, Apple Watch) to open the vehicle's whole trip: every stop, map, line.
+
 ### Suggest features and vote, in the app
 - **Settings → Suggest features and vote**: the wish list from publit.eu/wuensche right in the app. Suggest a feature, vote for others (tap again to take the vote back), sort by most votes or newest, see what is planned, in progress or done. No account: a random ID on the device marks your votes.
 - Once after the update a short note points to it ("Show the wishes" / "Later").

@@ -16,6 +16,8 @@ struct SavedLine: Codable, Hashable, Identifiable, RouteStyled {
     var lon: Double
 
     var coordinate: LatLon { LatLon(lat: lat, lon: lon) }
+    /// The key is the route ID when the feed has one.
+    var routeId: String? { routeKey }
 
     init(stopTime st: StopTime, stopId: String, stopName: String, at coordinate: LatLon) {
         routeKey = SavedLine.key(st)

@@ -9,13 +9,17 @@ protocol RouteStyled {
     var displayName: String? { get }
     /// Long route name; some feeds keep the train category only there ("rjx 66").
     var routeLongName: String? { get }
+    /// GTFS route ID; some feeds encode the public line only there (see `TransitLabels.line(fromRouteId:)`).
+    var routeId: String? { get }
 }
 
 extension RouteStyled {
     /// The compact, operator-defined line identifier. Never use a destination as a line name.
     var routeLongName: String? { nil }
+    var routeId: String? { nil }
 
     var lineName: String {
+        if let line = TransitLabels.line(fromRouteId: routeId) { return line }
         if VehicleKind.railModes.contains(mode),
            let train = TransitLabels.trainName(short: routeShortName, display: displayName, longName: routeLongName) {
             return train
@@ -105,6 +109,24 @@ enum ModeStyle {
 
 /// A headsign describes the vehicle's actual advertised direction, not the passenger's alighting stop.
 enum TransitLabels {
+    /// The Austrian rail feed puts the train number in `route_short_name` ("R 6046", "REX 2248"),
+    /// while the public line ("R 44", "REX 3", as on station boards and in the ÖBB app) is only
+    /// part of the route ID: `at-Railway-…_3-R44-N-j26-1…`, `…_2-RX3-W-j26-1…`.
+    /// S-Bahn routes already have the line as short name; long-distance codes (A13, WB1) are internal.
+    static func line(fromRouteId routeId: String?) -> String? {
+        guard let routeId, routeId.hasPrefix("at-Railway-"),
+              let underscore = routeId.firstIndex(of: "_") else { return nil }
+        let parts = routeId[routeId.index(after: underscore)...].split(separator: "-", maxSplits: 2)
+        guard parts.count == 3, parts[0].allSatisfy(\.isNumber) else { return nil }
+        let token = parts[1]
+        for (code, label) in [("RX", "REX"), ("R", "R")] where token.hasPrefix(code) {
+            let number = token.dropFirst(code.count)
+            guard !number.isEmpty, number.count <= 3, number.allSatisfy(\.isNumber) else { return nil }
+            return "\(label) \(number)"
+        }
+        return nil
+    }
+
     static func clean(_ value: String?) -> String? {
         guard let value else { return nil }
         let clean = value.trimmingCharacters(in: .whitespacesAndNewlines)
