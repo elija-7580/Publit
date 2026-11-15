@@ -65,6 +65,16 @@ enum PathGeometry {
         return deg < 0 ? deg + 360 : deg
     }
 
+    /// Where to put an arrow that shows which way a walk starts: a little way in from the start
+    /// (clear of your position dot), pointing along the path there. Nil for paths too short to matter.
+    static func arrow(on path: [LatLon]) -> (point: LatLon, bearing: Double)? {
+        let total = length(path)
+        guard total >= 40 else { return nil }
+        let at = min(max(total * 0.35, 25), 90)
+        guard let p = point(at: at, on: path), let q = point(at: min(at + 12, total), on: path), p != q else { return nil }
+        return (p, bearing(p, q))
+    }
+
     /// -180…180: positive is a turn to the right.
     static func turn(from a: Double, to b: Double) -> Double {
         var d = (b - a).truncatingRemainder(dividingBy: 360)

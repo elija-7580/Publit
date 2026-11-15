@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1 (build 77) – the way to the nearest station
+
+- **Nearby map**: the walk to the nearest station is drawn on the map (Apple Maps' walking route, not a straight line), with an arrow showing which way to go. It follows you as you move.
+
 ## 0.1.1 (build 76) – map at the top, search like Apple Maps
 
 - **Nearby**: the map is the picture at the top and the list scrolls over it, like a workout's route in a fitness app. No more panel to drag: pulling it opened the search by mistake and moved the map along. Tap the map or the expand key for the full station map.
