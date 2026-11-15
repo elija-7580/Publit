@@ -41,7 +41,8 @@ struct SharedRouteView: View {
                 do {
                     let fresh = try await TransitousClient.shared.refresh(itineraryId: itinerary?.id ?? id)
                     guard !Task.isCancelled else { return }
-                    itinerary = fresh
+                    // Walks keep their path when the refresh comes without it (see `TripStore.keepingSteps`).
+                    itinerary = itinerary.map { TripStore.keepingSteps(of: $0, in: fresh) } ?? fresh
                 } catch is CancellationError { return } catch {
                     if itinerary == nil { failed = true; return }
                 }

@@ -3,17 +3,23 @@ import Foundation
 import FoundationNetworking
 #endif
 
-/// A numbered or lettered way out of a station ("A", "B2", "12"), from OpenStreetMap:
-/// `railway=subway_entrance` (or `train_station_entrance`) with the number in `ref`.
+/// A way out of a station, from OpenStreetMap: `railway=subway_entrance`, `train_station_entrance`
+/// or `public_transport=entrance`. Signed with a number or letter ("A", "B2", "12") in `ref`, or with
+/// a name ("Nord", "Bahnhofplatz"); some have neither and only say where the door is.
 struct StationEntrance: Equatable, Sendable {
     let id: Int64
-    let ref: String
+    let ref: String?
+    var name: String? = nil
     let coordinate: LatLon
+
+    /// What the sign says: the number, else the name.
+    var label: String? { ref ?? name }
 }
 
-/// The best exit number for walks that come up from an underground station, so you do not have
-/// to look for a station map: "Take exit B2". Many metro systems sign their exits; OpenStreetMap
-/// has the number on the entrance. Asked from Overpass once per station, kept for the session.
+/// The best exit for walks out of a station, so you do not have to look for a station map:
+/// "Take exit B2", and the door on the live map. Metro stations and railway stations alike;
+/// OpenStreetMap has the entrances with their number or name. Asked from Overpass once per station,
+/// kept for the session.
 final class StationExits: @unchecked Sendable {
     static let shared = StationExits()
     /// Settings → Data → "Exit numbers from OpenStreetMap" (on). Off: no Overpass lookups at all.
@@ -52,18 +58,23 @@ final class StationExits: @unchecked Sendable {
 
     // MARK: Which walks
 
-    /// The walk after a ride that ends underground (metro, or any ride whose walk starts below
-    /// street level), unless it only changes to another underground platform.
-    static func leavesUnderground(_ legs: [Leg], at i: Int) -> Bool {
+    /// Rides that end in a station building or underground: metro and trains (not trams and buses,
+    /// which stop in the street).
+    static let stationModes: Set<String> = ["SUBWAY", "METRO", "HIGHSPEED_RAIL", "LONG_DISTANCE", "REGIONAL_RAIL",
+                                            "REGIONAL_FAST_RAIL", "NIGHT_RAIL", "RAIL", "SUBURBAN"]
+
+    /// The walk after a ride that ends in a station (metro, train, or any ride whose walk starts
+    /// below street level), unless it only changes to another platform of that station.
+    static func leavesStation(_ legs: [Leg], at i: Int) -> Bool {
         guard legs.indices.contains(i), i > 0, !legs[i].isTransit else { return false }
         let walk = legs[i], before = legs[i - 1]
         guard before.isTransit else { return false }
         let levels = (walk.steps ?? []).flatMap { [$0.fromLevel, $0.toLevel] }.compactMap { $0 }
         let startsBelow = (levels.first ?? 0) < 0
-        guard startsBelow || before.mode == "SUBWAY" else { return false }
-        // Known levels: it has to come up to the street. Unknown: a short walk to another metro is a change.
+        guard startsBelow || stationModes.contains(before.mode) else { return false }
+        // Known levels: it has to come up to the street. Unknown: a short walk to another train is a change.
         if !levels.isEmpty, startsBelow { return levels.contains { $0 >= 0 } }
-        if let next = legs[safe: i + 1], next.mode == "SUBWAY", (walk.distance ?? .infinity) < 250 { return false }
+        if let next = legs[safe: i + 1], stationModes.contains(next.mode), (walk.distance ?? .infinity) < 250 { return false }
         return true
     }
 
@@ -84,7 +95,7 @@ final class StationExits: @unchecked Sendable {
     @discardableResult
     func load(_ it: Itinerary) async -> Bool {
         var wanted: [(walk: String, area: String, at: LatLon)] = []
-        for i in it.legs.indices where Self.leavesUnderground(it.legs, at: i) {
+        for i in it.legs.indices where Self.leavesStation(it.legs, at: i) {
             let leg = it.legs[i]
             wanted.append((Self.walkKey(leg), Self.areaKey(leg.from.coordinate), leg.from.coordinate))
         }
@@ -139,8 +150,8 @@ final class StationExits: @unchecked Sendable {
     static func query(around p: LatLon) -> String {
         let at = "\(Int(radius)),\(p.lat),\(p.lon)"
         return "[out:json][timeout:10];"
-            + "(node(around:\(at))[\"railway\"~\"^(subway_entrance|train_station_entrance)$\"][\"ref\"];"
-            + "node(around:\(at))[\"public_transport\"=\"entrance\"][\"ref\"];);out;"
+            + "(node(around:\(at))[\"railway\"~\"^(subway_entrance|train_station_entrance)$\"];"
+            + "node(around:\(at))[\"public_transport\"=\"entrance\"];);out;"
     }
 
     private func request(around p: LatLon) async throws -> [StationEntrance] {
@@ -177,9 +188,28 @@ final class StationExits: @unchecked Sendable {
     static func parse(_ data: Data) throws -> [StationEntrance] {
         let r = try JSONDecoder().decode(Response.self, from: data)
         return r.elements.compactMap { e in
-            guard let lat = e.lat, let lon = e.lon, let ref = e.tags?["ref"].flatMap(Self.clean) else { return nil }
-            return StationEntrance(id: e.id, ref: ref, coordinate: LatLon(lat: lat, lon: lon))
+            guard let lat = e.lat, let lon = e.lon else { return nil }
+            let point = LatLon(lat: lat, lon: lon)
+            guard point.isValidCoordinate else { return nil }
+            let tags = e.tags ?? [:]
+            // A closed or staff-only door is no way out.
+            if tags["access"] == "private" || tags["access"] == "no" || tags["entrance"] == "emergency" { return nil }
+            return StationEntrance(id: e.id, ref: tags["ref"].flatMap(Self.clean),
+                                   name: tags["name"].flatMap(Self.cleanName), coordinate: point)
         }
+    }
+
+    /// Names of exits as on the sign, without the word "exit" ("Ausgang Nord" → "Nord"), so they
+    /// read in "Take exit …". Long names are descriptions, not signs.
+    static func cleanName(_ name: String) -> String? {
+        var s = name.trimmingCharacters(in: .whitespaces)
+        for word in ["Ausgang", "Eingang", "Zugang", "Exit", "Entrance", "Uscita", "Sortie", "Salida", "Wyjście", "Výstup"] {
+            if s.count > word.count + 1, s.lowercased().hasPrefix(word.lowercased() + " ") {
+                s = String(s.dropFirst(word.count + 1)).trimmingCharacters(in: .whitespaces)
+            }
+        }
+        guard !s.isEmpty, s.count <= 24, !s.contains(";") else { return nil }
+        return s
     }
 
     /// Exit numbers are short ("A", "B2", "12", "A1-A2"); longer refs are internal codes, not signs.
@@ -193,9 +223,12 @@ final class StationExits: @unchecked Sendable {
 
     /// The entrance the walk goes out by: one the route passes through, else the nearest to where it
     /// reaches the street, else the first one along the way. `exit` is where the walk reaches the street.
+    /// Among equally good doors a signed one (number or name) wins.
     static func pick(_ entrances: [StationEntrance], path: [LatLon], exit: (point: LatLon, along: Double)?,
                      nodes: Set<Int64>) -> StationEntrance? {
         guard !entrances.isEmpty else { return nil }
+        // Signed doors first: `min` keeps the first of equals.
+        let entrances = entrances.filter { $0.label != nil } + entrances.filter { $0.label == nil }
         func along(_ e: StationEntrance) -> (along: Double, offset: Double)? { PathGeometry.locate(e.coordinate, on: path) }
         let limit = exit.map { $0.along + nearExit } ?? .infinity
         let passed = entrances.filter { nodes.contains($0.id) }

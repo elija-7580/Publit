@@ -19,8 +19,10 @@ struct WalkManeuver: Equatable, Sendable {
     /// Coming up from underground: the first street after the exit, or the side of the station.
     var exitTowards: String? = nil
     var exitSide: Compass.Point? = nil
-    /// The station exit's number or letter as signed in the station ("B2"), from OpenStreetMap.
+    /// The station exit's number, letter or name as signed in the station ("B2", "Nord"), from OpenStreetMap.
     var exitRef: String? = nil
+    /// Where that exit is, for the live map.
+    var exitPoint: LatLon? = nil
 
     /// "Take exit B2 towards Ludwigstraße" / "Exit towards Ludwigstraße" / "Exit on the north-east side".
     var exitNote: String? {
@@ -190,7 +192,8 @@ struct WalkRoute: Sendable {
         if let entrances = exits.entrances(for: leg) {
             let nodes = Set((leg.steps ?? []).flatMap { [$0.fromOsmNode, $0.toOsmNode] }.compactMap { $0 })
             if let e = StationExits.pick(entrances, path: path, exit: exitAt.map { (out[$0].coordinate, out[$0].along) }, nodes: nodes) {
-                out[exitAt ?? 0].exitRef = e.ref
+                out[exitAt ?? 0].exitRef = e.label
+                out[exitAt ?? 0].exitPoint = e.coordinate
             }
         }
         maneuvers = out

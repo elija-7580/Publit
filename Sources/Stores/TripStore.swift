@@ -170,12 +170,18 @@ final class TripStore {
         return fresh
     }
 
-    /// Walking directions stay when a refresh comes without them.
+    /// Walking directions and the walk's path stay when a refresh comes without them. Live refreshes
+    /// often bring walks without their shape: the map then drew a straight line from start to end,
+    /// right across rivers and blocks.
     nonisolated static func keepingSteps(of old: Itinerary, in new: Itinerary) -> Itinerary {
         guard old.legs.count == new.legs.count else { return new }
         var fresh = new
-        for j in fresh.legs.indices where fresh.legs[j].steps == nil && !fresh.legs[j].isTransit {
-            fresh.legs[j].steps = old.legs[j].steps
+        for j in fresh.legs.indices where !fresh.legs[j].isTransit {
+            if fresh.legs[j].steps == nil { fresh.legs[j].steps = old.legs[j].steps }
+            if fresh.legs[j].legGeometry.mapPoints.count < 2, old.legs[j].legGeometry.mapPoints.count >= 2,
+               !old.legs[j].isTransit {
+                fresh.legs[j].legGeometry = old.legs[j].legGeometry
+            }
         }
         return fresh
     }
