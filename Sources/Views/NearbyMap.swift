@@ -15,6 +15,8 @@ struct NearbyMap: View {
     let here: LatLon?
     let groups: [StopGroup]
     var onOpenStation: (StopGroup) -> Void
+    /// The picture at the top of Nearby: nothing to tap or steer, no controls.
+    var preview = false
 
     @State private var camera: MapCameraPosition = .userLocation(fallback: .automatic)
     /// Framed on you and the stations once; after that the map is yours to move.
@@ -45,6 +47,7 @@ struct NearbyMap: View {
         }
         .mapStyle(.standard(pointsOfInterest: .excludingAll))
         .mapControls { MapUserLocationButton(); MapCompass() }
+        .mapControlVisibility(preview ? .hidden : .automatic)
         .onChange(of: groups.first?.id, initial: true) { frame() }
         .accessibilityIdentifier("nearbyMap")
     }

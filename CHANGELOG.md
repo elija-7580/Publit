@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.1 (build 76) – map at the top, search like Apple Maps
+
+- **Nearby**: the map is the picture at the top and the list scrolls over it, like a workout's route in a fitness app. No more panel to drag: pulling it opened the search by mistake and moved the map along. Tap the map or the expand key for the full station map.
+- **Routes** ("Where to now?", Home and Work from Nearby) and **route details**: the same map at the top with the routes on it; tap it or the expand key for the full map.
+- **"Where to now?"** opens the search as a page of its own instead of a window over the list; after picking a place the routes open directly.
+- **Search like Apple Maps** in Plan (From/To), "Where to now?", Home/Work, saved places and the station map: addresses and places come from Apple Maps' autocomplete as you type, so every street and house number is found; stops still come from Transitous and lead when they match. The search field is active as soon as the search opens.
+
 ## 0.1.1 (build 75) – routes start and end at the station
 
 - Routes from or to a stop are searched by its stop ID: no more extra "Walk 43 m" before the train or "Walk 5 m · 2 min" after arriving at the station itself, and the arrival time is the train's arrival. Falls back to coordinates if the stop ID is unknown or finds nothing. Cycling or driving to the first stop still starts at the coordinates.

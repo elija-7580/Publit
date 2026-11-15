@@ -9,6 +9,8 @@ struct GoNowView: View {
     @State private var selectedId: String?
     /// Picking another start than the current location.
     @State private var pickingStart = false
+    /// The routes on the full map, from the picture at the top.
+    @State private var showsMap = false
     /// iPad layout: the routes are on the big map, not in a small one at the top.
     @Environment(WideMapState.self) private var wideMap: WideMapState?
 
@@ -18,14 +20,8 @@ struct GoNowView: View {
         let span = TimeInterval(its.map(\.duration).max() ?? 0)
         let badges = SmartRouting.isEnabled ? SmartRouting.badges(its, arriveBy: false) : [:]
         List {
-            if !its.isEmpty && wideMap == nil {
-                // Redrawn only when the routes change, not on every refresh of this list (long routes
-                // with many points made opening one wait for the map).
-                CompareMapView(itineraries: its, selectedId: selectedId ?? its.first?.routeKey)
-                    .equatable()
-                    .frame(height: 220)
-                    .listRowInsets(EdgeInsets())
-            }
+            // The routes as the picture at the top (iPad: on the big map next to this panel).
+            if wideMap == nil { MapHeroSpace { showsMap = true } }
             Section {
                 // Not always from here: a friend's place, the hotel, the station you will be at.
                 Button { pickingStart = true } label: {
@@ -97,7 +93,23 @@ struct GoNowView: View {
                                     fromName: plan.from.title, toName: plan.to?.title ?? "")
         }
         .readableWidth()
-        .inkList()
+        .inkList(hero: wideMap == nil) { insets in
+            // Redrawn only when the routes change, not on every refresh of this list (long routes
+            // with many points made opening one wait for the map).
+            CompareMapView(itineraries: its, selectedId: selectedId ?? its.first?.routeKey, previewInsets: insets)
+                .equatable()
+        }
+        .fullScreenCover(isPresented: $showsMap) {
+            NavigationStack {
+                CompareMapView(itineraries: its, selectedId: selectedId ?? its.first?.routeKey)
+                    .ignoresSafeArea(edges: .bottom)
+                    .navigationTitle(Text(verbatim: plan.to?.title ?? L10n.t("Route")))
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) { Button("Done") { showsMap = false } }
+                    }
+            }
+        }
         .navigationTitle(plan.to?.title ?? L10n.t("Route"))
         .wideMapScene(its.isEmpty ? .explore : .routes(its, selected: selectedId ?? its.first?.routeKey))
         .screenTrail("Go now")
