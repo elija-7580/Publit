@@ -67,6 +67,28 @@ final class LiveMapTests: XCTestCase {
         for t in snap.tracks { XCTAssertEqual(t.pieces.map(\.departure), t.pieces.map(\.departure).sorted()) }
     }
 
+    /// Reddit report: a metro line running A to B and back was drawn with a straight line from one
+    /// end to the other, as if it were a loop. A long unshaped hop on a shaped trip is not drawn.
+    func testTerminusJumpIsNotDrawn() throws {
+        var list = try XCTUnwrap(JSONSerialization.jsonObject(with: Fixtures.data("map_trips")) as? [[String: Any]])
+        var jump = list[0]
+        // From a far end (about 5 km north) straight back to the first stop.
+        var far = try XCTUnwrap(list[2]["to"] as? [String: Any])
+        far["lat"] = 48.19344
+        far["stopId"] = "far-end"
+        jump["from"] = far
+        jump["to"] = list[0]["from"]!
+        // Two points only: a straight line between the two ends.
+        jump["polyline"] = "_xceHwareA`nGeyA"
+        list.append(jump)
+        let data = try JSONSerialization.data(withJSONObject: list)
+        let segs = try decoder.decode([TripSegment].self, from: data)
+        let snap = LiveMap.build(segs, filter: .all, precision: 5, tolerance: 2)
+        XCTAssertEqual(snap.shapes.count, 15, "the straight hop back adds no line")
+        XCTAssertTrue(LiveMap.isTerminusJump(segs.last!, raw: 2, shaped: true))
+        XCTAssertFalse(LiveMap.isTerminusJump(segs.last!, raw: 2, shaped: false), "feeds without shapes keep their straight lines")
+    }
+
     func testBuildHonoursModeFilter() throws {
         let snap = LiveMap.build(try segments(), filter: ModeFilter(included: [.tram]), precision: 5, tolerance: 2)
         XCTAssertFalse(snap.tracks.isEmpty)

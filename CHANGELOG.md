@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.1.1 (build 73) – everything from the open branches
+
+Merged in: community feedback (wish list, Apple Maps addresses, fixes), tapping a line in a trip, Austrian line names, at the stop without a walk, rows that lead with what matters.
+
+### Suggest features and vote, in the app
+- **Settings → Suggest features and vote**: the wish list from publit.eu/wuensche right in the app. Suggest a feature, vote for others (tap again to take the vote back), sort by most votes or newest, see what is planned, in progress or done. No account: a random ID on the device marks your votes.
+- Once after the update a short note points to it ("Show the wishes" / "Later").
+
+### Fixes
+- **Home and Work**: setting Work no longer removes Home (and the other way round) when the search gives both addresses the same ID, as seen with addresses in different countries.
+- **Map lines**: a metro, tram or bus line that runs from A to B and back is no longer drawn with a straight line from one end to the other, as if it were a ring.
+- **Search finds addresses with house numbers**: the place search (Plan, Home and Work, Saved) now asks Apple Maps for addresses and places next to Transitous, because OpenStreetMap often lacks the house number or the street. With a number in the query the address with exactly that number comes first. Settings → Search reads "OpenStreetMap and Apple Maps"; with Google chosen, Apple is not asked.
+- **Search**: a big street in another city is found again from home. A town after a comma ("Corso Buenos Aires, Milano") turns off the pull towards your position; when no nearby result has all the words, Publit also searches without your position and puts those matches first.
+- **Dropping a pin on the map**: letting go after the long press counted as a tap on the empty map and closed the pin's sheet right away. Now the sheet stays.
+- **Countdowns**: the shared minute clock ticks right away when the app comes back from the background or the system time or time zone changes, so countdowns are never a minute behind.
+
+
 ## 0.1.1 (build 72) – Deutschlandticket routes, start with your stop
 
 - Route options: "Deutschlandticket" shows only routes with local and regional transport (no ICE, IC, EC, FlixTrain, night trains or long-distance coaches). If a Deutschlandticket is saved in Tickets, the options say so.

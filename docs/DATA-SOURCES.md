@@ -88,6 +88,8 @@ Not usable without an agreement or key: StadtRAD Hamburg (DB API Marketplace "Sh
 ### In the app
 **Transitous only.** Build 29 briefly failed over to `https://europe.motis-project.de` (the MOTIS project's demo instance); that was removed again in build 42 (commit 939b386, `TransitousClient(backups: [])`), because the Transitous policy does not allow other MOTIS servers as a fallback. Publit talks to `api.transitous.org` and nothing else for routing, departures, map and search. The list of backup servers still exists in the client (empty, and `backupServer` for tests), so an own MOTIS instance could be added later.
 
+Since build 66 two more hosts, both outside routing: **Overpass** (`overpass-api.de`, fallback `overpass.kumi.systems`) for numbered station exits (only the exit's coordinate, `StationExits`, can be turned off in Settings), and **publit.eu/api/wishes** for the in-app wish list (only when that screen is opened).
+
 ### Recommendation
 - Keep Transitous as the only source for routing. Add a small **fallback layer** used only when Transitous fails or returns nothing: per country one adapter (Entur, opendata.ch, TfL, Wiener Linien, SL, VBB/BVG, iRail) for departures first, journeys later. Services that need a key must not ship the key in the app (proxy or user-supplied).
 - Longer term the most robust backup is a second MOTIS instance with the Transitous configuration.

@@ -16,6 +16,9 @@ struct StationEntrance: Equatable, Sendable {
 /// has the number on the entrance. Asked from Overpass once per station, kept for the session.
 final class StationExits: @unchecked Sendable {
     static let shared = StationExits()
+    /// Settings → Data → "Exit numbers from OpenStreetMap" (on). Off: no Overpass lookups at all.
+    static let enabledKey = "stationExitNumbers"
+    static var enabled: Bool { UserDefaults.standard.object(forKey: enabledKey) as? Bool ?? true }
 
     /// Entrances further than this from where you get off are another station's.
     static let radius = 250.0
@@ -85,7 +88,7 @@ final class StationExits: @unchecked Sendable {
             let leg = it.legs[i]
             wanted.append((Self.walkKey(leg), Self.areaKey(leg.from.coordinate), leg.from.coordinate))
         }
-        guard !wanted.isEmpty else { return false }
+        guard Self.enabled, !wanted.isEmpty else { return false }
         let fetch = claim(wanted)
         var found = false
         for f in fetch {
