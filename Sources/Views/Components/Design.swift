@@ -393,3 +393,16 @@ struct WhereToField: View {
         .contentShape(Rectangle())
     }
 }
+
+extension View {
+    /// Rows that are links as a whole need no chevron (Ink & Dot: no repeated marks). iOS 26 and later;
+    /// earlier systems keep their chevron.
+    @ViewBuilder
+    func linkIndicatorHidden() -> some View {
+        if #available(iOS 26.0, *) {
+            navigationLinkIndicatorVisibility(.hidden)
+        } else {
+            self
+        }
+    }
+}
