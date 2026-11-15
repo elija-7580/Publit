@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1 (build 78) – which way you face
+
+- **Nearby map**: your position shows the direction you are holding the iPhone (the beam from the live trip), so you see which way to turn to the stations. The compass runs only while the Nearby map is on screen.
+
 ## 0.1.1 (build 77) – the way to the nearest station
 
 - **Nearby map**: the walk to the nearest station is drawn on the map (Apple Maps' walking route, not a straight line), with an arrow showing which way to go. It follows you as you move.
