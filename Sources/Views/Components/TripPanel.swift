@@ -27,16 +27,20 @@ struct TripPanel<Header: View, Content: View>: View {
     let topGap: CGFloat
     /// Where its top edge is, from the top of its area: for screens that frame their map above it.
     var onTop: ((CGFloat) -> Void)?
+    /// Down and half way, pulling the panel wins over the taps of its rows (Nearby: the rows are
+    /// buttons and move along under the finger). Off for the live trip, whose stage cards swipe sideways.
+    let dragWins: Bool
     @State private var detent: Detent
     @GestureState(resetTransaction: Transaction(animation: .spring(response: 0.34, dampingFraction: 0.88)))
     private var drag = Drag()
 
     init(peek: CGFloat = TripPanelMetrics.peek, topGap: CGFloat = 0, start: Detent = .peek,
-         onTop: ((CGFloat) -> Void)? = nil,
+         onTop: ((CGFloat) -> Void)? = nil, dragWins: Bool = false,
          @ViewBuilder header: () -> Header, @ViewBuilder content: () -> Content) {
         self.peek = peek
         self.topGap = topGap
         self.onTop = onTop
+        self.dragWins = dragWins
         _detent = State(initialValue: start)
         self.header = header()
         self.content = content()
@@ -59,16 +63,12 @@ struct TripPanel<Header: View, Content: View>: View {
                         .onTapGesture { move(to: detent == .full ? .half : .full) }
                         .accessibilityHidden(true)
                     header
-                        .allowsHitTesting(drag.vertical != true)
                 }
                 .padding(.bottom, 10)
                 .contentShape(Rectangle())
                 content
                     .frame(maxHeight: .infinity, alignment: .top)
                     .scrollDisabled(detent != .full)
-                    // A row under the finger moves along with the panel: without this, letting go
-                    // after pulling the panel by a row would also open that row.
-                    .allowsHitTesting(drag.vertical != true)
             }
             .frame(width: geo.size.width, height: max(height - topGap, 0), alignment: .top)
             .background {
@@ -82,7 +82,8 @@ struct TripPanel<Header: View, Content: View>: View {
             .onChange(of: y, initial: true) { _, top in onTop?(top) }
             // Measured on the screen, not on the panel: the panel moves under the finger, and
             // a translation in its own space would feed back into itself (the jitter).
-            .simultaneousGesture(dragGesture(height: height), including: detent == .full ? .subviews : .all)
+            .simultaneousGesture(dragGesture(height: height), including: detent == .full || dragWins ? .subviews : .all)
+            .highPriorityGesture(dragGesture(height: height), including: detent != .full && dragWins ? .all : .subviews)
             .overlay(alignment: .top) {
                 // Up, the list scrolls: the top strip (handle and stage cards) still pulls the panel down.
                 if detent == .full {

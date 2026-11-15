@@ -63,7 +63,7 @@ struct NearbyView: View {
                             .safeAreaPadding(.bottom, max(geo.size.height - panelTop, 0) + 8)
                             .ignoresSafeArea(edges: .bottom)
                         TripPanel(peek: NearbyMap.peek, topGap: NearbyMap.topGap, start: .half,
-                                  onTop: { top in withAnimation(.easeInOut(duration: 0.25)) { panelTop = top } }) {
+                                  onTop: { top in withAnimation(.easeInOut(duration: 0.25)) { panelTop = top } }, dragWins: true) {
                             whereToButton.padding(.horizontal, 16)
                         } content: {
                             board(search: false)
