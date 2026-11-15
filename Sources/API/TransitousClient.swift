@@ -87,11 +87,34 @@ final class TransitousClient: @unchecked Sendable {
     /// Second attempt when nothing was found; further steps in `Reach.walkSteps`.
     static var widerWalkLimit: Int { Reach.walkSteps[1] }
 
+    /// - Parameter stops: when start or destination is a stop, route from/to the stop itself. With only its
+    ///   coordinates the server adds a walk from the point to the platform ("Walk 43 m" before the train,
+    ///   "Walk 5 m, 2 min" after arriving at the station itself). An ID the server does not know (any more,
+    ///   e.g. saved before a yearly feed change) or one that finds nothing falls back to the coordinates.
     func plan(from: LatLon, to: LatLon, time: Date?, arriveBy: Bool, pageCursor: String? = nil,
-              maxWalk: Int = TransitousClient.walkLimits.prePost, options: RouteOptions = RouteOptions()) async throws -> PlanResponse {
+              maxWalk: Int = TransitousClient.walkLimits.prePost, options: RouteOptions = RouteOptions(),
+              stops: PlanStops = .none) async throws -> PlanResponse {
+        if !stops.isEmpty {
+            do {
+                let res = try await planRequest(from: from, to: to, time: time, arriveBy: arriveBy, pageCursor: pageCursor,
+                                                maxWalk: maxWalk, options: options, stops: stops)
+                if !res.itineraries.isEmpty || pageCursor != nil { return res }
+            } catch {
+                if error is CancellationError || (error as? URLError)?.code == .cancelled { throw error }
+            }
+            // A cursor belongs to the stop-ID query; the coordinate query starts on its own first page.
+            return try await planRequest(from: from, to: to, time: time, arriveBy: arriveBy, pageCursor: nil,
+                                         maxWalk: maxWalk, options: options, stops: .none)
+        }
+        return try await planRequest(from: from, to: to, time: time, arriveBy: arriveBy, pageCursor: pageCursor,
+                                     maxWalk: maxWalk, options: options, stops: .none)
+    }
+
+    private func planRequest(from: LatLon, to: LatLon, time: Date?, arriveBy: Bool, pageCursor: String?,
+                             maxWalk: Int, options: RouteOptions, stops: PlanStops) async throws -> PlanResponse {
         // "Now" searches change by the minute; planned ones can be reused a little longer.
         let res: PlanResponse = try await get("/api/v6/plan", Self.planQuery(from: from, to: to, time: time, arriveBy: arriveBy,
-                                                     pageCursor: pageCursor, maxWalk: maxWalk, options: options),
+                                                     pageCursor: pageCursor, maxWalk: maxWalk, options: options, stops: stops),
                       cache: CachePolicy(maxAge: time == nil ? 20 : 60, persist: true),
                       timeout: options.isSlowSearch ? 45 : nil)
         // Deutschlandticket: long-distance trains some feeds file as plain RAIL come out here.
@@ -101,10 +124,10 @@ final class TransitousClient: @unchecked Sendable {
     static func planQuery(from: LatLon, to: LatLon, time: Date?, arriveBy: Bool,
                           pageCursor: String? = nil, maxWalk: Int = walkLimits.prePost,
                           options: RouteOptions = RouteOptions(),
-                          smart: SmartRouting.Request = .current) -> [URLQueryItem] {
+                          smart: SmartRouting.Request = .current, stops: PlanStops = .none) -> [URLQueryItem] {
         var q = [
-            URLQueryItem(name: "fromPlace", value: from.apiValue),
-            URLQueryItem(name: "toPlace", value: to.apiValue),
+            URLQueryItem(name: "fromPlace", value: TransitLabels.clean(stops.from) ?? from.apiValue),
+            URLQueryItem(name: "toPlace", value: TransitLabels.clean(stops.to) ?? to.apiValue),
             URLQueryItem(name: "arriveBy", value: arriveBy ? "true" : "false"),
             // Footpaths between platforms and stations routed on OpenStreetMap, not just feed transfers.
             URLQueryItem(name: "useRoutedTransfers", value: "true"),
@@ -705,3 +728,14 @@ enum SearchBias {
             .filter { $0.count >= 3 }
     }
 }
+
+/// Stop IDs for the start and destination of a route search, where they are stops (see `TransitousClient.plan`).
+struct PlanStops: Hashable, Sendable {
+    var from: String?
+    var to: String?
+    static let none = PlanStops(from: nil, to: nil)
+    var isEmpty: Bool { from == nil && to == nil }
+    /// Cycling or driving to the first stop starts at a front door, not at a platform: no start stop then.
+    func forFirstMile(_ mode: FirstMile) -> PlanStops { mode == .walk ? self : PlanStops(from: nil, to: to) }
+}
+
