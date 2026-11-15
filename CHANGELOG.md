@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1 (build 79) – arrow on your position
+
+- **Nearby map**: your position is a blue dot with an arrow that points the way you hold the iPhone. The walk drawn to the nearest station (build 77) is gone again.
+
 ## 0.1.1 (build 78) – which way you face
 
 - **Nearby map**: your position shows the direction you are holding the iPhone (the beam from the live trip), so you see which way to turn to the stations. The compass runs only while the Nearby map is on screen.

@@ -3,7 +3,7 @@
 > Nicht von Hand bearbeiten. Erzeugt von `scripts/feature_inventory.py` (CI: `features-doc.yml`).
 > Die ausführliche Beschreibung steht in [FUNKTIONEN.md](FUNKTIONEN.md).
 
-**184 Views, 5 App Intents, 3 Widgets in 74 Dateien.**
+**185 Views, 5 App Intents, 3 Widgets in 74 Dateien.**
 
 ## `Sources/App/DesignSamples.swift`
 - Views: `DesignSampleView`
@@ -154,7 +154,7 @@
 - Sichtbare Texte: Dropped pin · Available now: %lld · Available now · Show rental details
 
 ## `Sources/Views/NearbyMap.swift`
-- Views: `NearbyMap`
+- Views: `NearbyMap`, `HeadingDot`
 
 ## `Sources/Views/NearbyView.swift`
 - Views: `NearbyView`, `StopGroupHeader`, `StopDeparturesView`, `LineAtStopRow`

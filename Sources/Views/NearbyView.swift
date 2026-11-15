@@ -214,7 +214,8 @@ struct NearbyView: View {
         }
         .readableWidth()
         .inkList(hero: hero) { insets in
-            NearbyMap(here: location.coordinate, groups: groups, onOpenStation: { _ in }, preview: true)
+            NearbyMap(here: location.coordinate, groups: groups, onOpenStation: { _ in }, preview: true,
+                      heading: location.heading)
                 .safeAreaPadding(insets)
         }
         .tint(Color.ink)
