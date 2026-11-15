@@ -71,7 +71,6 @@ struct CompareMapView: View, Equatable {
                                 style: .leg(leg.isTransit, width: isSelected ? 5 : 3))
                 }
             }
-        }
             // You, on top; not in the picture at the top (it would redraw with every step you take).
             if interactive {
                 YouAreHere(here: location.coordinate, heading: location.heading, mapHeading: mapHeading)
