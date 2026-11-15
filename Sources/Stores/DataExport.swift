@@ -40,9 +40,18 @@ enum DataExport {
     }
 }
 
-/// The tab Publit opens with (Settings → Start screen).
+/// The tab Publit opens with (Settings → Start screen): Nearby, Plan, or the departures of one saved stop.
 enum StartTab: String, CaseIterable, Identifiable {
-    case nearby, plan
+    case nearby, plan, stop
     static let defaultsKey = "startTab"
+    /// Id of the saved stop (`SavedPlace.id`) for `.stop`.
+    static let stopKey = "startStop"
     var id: String { rawValue }
+
+    /// The saved stop to open with, if that is the start screen and the stop is still saved.
+    @MainActor static func startStop(in favorites: FavoritesStore, defaults: UserDefaults = .standard) -> SavedPlace? {
+        guard defaults.string(forKey: defaultsKey) == StartTab.stop.rawValue,
+              let id = defaults.string(forKey: stopKey) else { return nil }
+        return favorites.items.first { $0.id == id && $0.isStop }
+    }
 }

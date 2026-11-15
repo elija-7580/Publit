@@ -5,8 +5,15 @@ import SwiftUI
 struct RouteOptionsView: View {
     @Environment(AppState.self) private var app
     @Environment(\.dismiss) private var dismiss
+    @Environment(TicketStore.self) private var tickets
+    @Environment(PassStore.self) private var passes
     @State private var draft = RouteOptions()
     @State private var loaded = false
+
+    private var hasDeutschlandticket: Bool {
+        tickets.tickets.contains { LocalTicket.isDeutschlandticket($0.name) }
+            || passes.passes.contains { LocalTicket.isDeutschlandticket($0.title) }
+    }
 
     var body: some View {
         NavigationStack {
@@ -25,6 +32,20 @@ struct RouteOptionsView: View {
                     Text("Transport modes")
                 } footer: {
                     Text("Routes only use the modes that are switched on.")
+                }
+
+                Section {
+                    Toggle(isOn: $draft.localTicket) {
+                        Label("Deutschlandticket", systemImage: "ticket")
+                    }
+                    .accessibilityIdentifier("routeLocalTicket")
+                } footer: {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Only local and regional transport: buses, trams, metro, S-Bahn, RE and RB. No ICE, IC, EC, FlixTrain, night trains or long-distance coaches.")
+                        if hasDeutschlandticket && !draft.localTicket {
+                            Text("Your Deutschlandticket is saved in Tickets.")
+                        }
+                    }
                 }
 
                 Section {

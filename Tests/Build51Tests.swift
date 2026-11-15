@@ -22,7 +22,8 @@ final class Build51Tests: XCTestCase {
     }
 
     func testStartTabRawValues() {
-        XCTAssertEqual(StartTab.allCases.map(\.rawValue), ["nearby", "plan"])
+        XCTAssertEqual(StartTab.allCases.map(\.rawValue), ["nearby", "plan", "stop"])
+        XCTAssertEqual(StartTab.stopKey, "startStop")
         XCTAssertEqual(StartTab.defaultsKey, "startTab")
     }
 }

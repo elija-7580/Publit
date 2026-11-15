@@ -58,6 +58,12 @@ struct PublitApp: App {
                        UserDefaults.standard.string(forKey: StartTab.defaultsKey) == StartTab.plan.rawValue {
                         app.tab = .plan
                     }
+                    // Start screen "a saved stop": its departures over Nearby, every launch.
+                    if ProcessInfo.processInfo.environment["PUBLIT_TAB"] == nil, app.deepLink == nil,
+                       let stop = StartTab.startStop(in: favorites), let id = stop.stopId {
+                        app.tab = .nearby
+                        app.deepLink = .stop(id: id, name: stop.name, lat: stop.lat, lon: stop.lon)
+                    }
                     if let tab = ProcessInfo.processInfo.environment["PUBLIT_TAB"] {
                         app.tab = tab == "plan" ? .plan : tab == "saved" ? .favorites : tab == "lines" ? .favorites
                             : tab == "tickets" ? .tickets : .nearby

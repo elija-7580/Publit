@@ -1,6 +1,6 @@
 # Publit iOS – Funktionen und Screens (vollständige Übersicht)
 
-> Stand: Version 0.1.1 (Build 71). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
+> Stand: Version 0.1.1 (Build 72). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
 > **Pflege:** Jede Änderung an `Sources/`, `Watch/`, `Widgets/` oder `Share/` muss diese Datei im selben Commit/PR mitändern (siehe Abschnitt „Aktualisierung“ ganz unten). Die maschinell erzeugte Liste aller Views steht in [`FUNKTIONEN-INVENTAR.md`](FUNKTIONEN-INVENTAR.md) und wird von der CI automatisch aktualisiert.
 
 ## Inhalt
@@ -66,7 +66,7 @@ Ohne Onboarding startet die Standortabfrage sofort.
 | Tickets | ticket | Ticket-Wallet |
 | Saved | star | Gespeicherte Orte, Linien, Fahrten |
 
-- Start-Tab einstellbar (Einstellungen → „Start screen“: Nearby oder Plan).
+- Start-Tab einstellbar (Einstellungen → „Start screen“: Nearby, Plan oder **„A saved stop“**). Mit „A saved stop“ wählt man eine gespeicherte Haltestelle (auch Home/Work, wenn sie Haltestellen sind); Publit öffnet bei jedem Start deren Abfahrten (`StopDeparturesView` als Blatt über Nearby, „Done“ → Nearby). Ohne gespeicherte Haltestelle: Hinweis „Save a stop with the star on its departures first.“; wird die Haltestelle gelöscht, startet Publit mit Nearby (`StartTab.startStop`).
 - **Live-Leiste** (`LiveTripBar`) über der Tab-Leiste, sobald eine Fahrt läuft oder bald startet (siehe §13).
 - Globale Overlays: geteiltes Ticket-Dokument → Import-Sheet; Deep Link Fahrt → Vollbild (bei laufender Fahrt nur mit „Minimize“ schließbar, kein Wegwischen); Ticket-Links → Ticket-Sheet; geteilte Route → `SharedRouteView`; Haltestellen-Link → Abfahrtstafel.
 - Beim Start: alte Offline-Kopien (> 7 Tage) gelöscht; Tickets der ersten Ticket-Version werden einmalig zu Passes migriert; Watch-Sync startet; Siri-Kurzbefehl-Parameter (gespeicherte Haltestellen) aktualisiert; Hintergrundaufgabe für Linienstörungen registriert.
@@ -149,6 +149,7 @@ Ohne Onboarding startet die Standortabfrage sofort.
 - **Changes**: Any / Direct only / bis zu n Umstiege.
 - **Walk to and from stops**: maximale Gehzeit (Minuten).
 - **Step-free (wheelchair)**, **Shared bikes and e-scooters**.
+- **Deutschlandticket** (`RouteOptions.localTicket`, `LocalTicket`): nur Nah- und Regionalverkehr. Die Suche lässt HIGHSPEED_RAIL, LONG_DISTANCE, NIGHT_RAIL, COACH und AIRPLANE weg; Routen mit Fernzügen, die ein Feed als RAIL führt (Liniennamen ICE, IC, EC, ECE, FLX, NJ, EN, TGV, RJ, RJX, ES, WB oder Betreiber „Flix“), werden aussortiert. Fußzeile erklärt das; liegt ein Deutschlandticket in Tickets (Titel „Deutschlandticket“/„Deutschland-Ticket“/„D-Ticket“) und der Schalter ist aus: „Your Deutschlandticket is saved in Tickets.“ In der Zusammenfassung „Deutschlandticket“, zählt im Abzeichen mit. Ausnahmen mit D-Ticket-Freigabe einzelner IC-Strecken sind nicht abgebildet.
 - **Compare with walking, cycling and driving** – Abschnitt „Other ways“ (`StreetComparisonSection`): „About as fast“, „x faster/slower“, Hinweis „Driving times are without traffic and parking.“
 - „Reset“, „Done“.
 
@@ -242,7 +243,7 @@ Screenshot-/Link-Tickets („My tickets“, „Add ticket“, Typ, „Expires“
 | Bereich | Einstellungen |
 |---|---|
 | Kopf | Logo, „Public transport, without the noise.“ |
-| Start | Start screen: Nearby / Plan |
+| Start | Start screen: Nearby / Plan / A saved stop (+ Stop-Auswahl) |
 | Travel preferences | Routenoptionen-Zusammenfassung, „Show connection timelines“, „How to read connections“ (`ConnectionGuideView`: Ride/Walk/Wait/Time axis) |
 | Nearby | „Map“ (Standard an): kleine Orientierungskarte über den Abfahrten, siehe §3 |
 | Stations | „Platform map“ (Standard an), „Departures by platform“ (Standard aus), „Change guide“ (Standard an), Erklärtext; siehe §4 und §13 |

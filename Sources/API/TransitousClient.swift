@@ -90,10 +90,12 @@ final class TransitousClient: @unchecked Sendable {
     func plan(from: LatLon, to: LatLon, time: Date?, arriveBy: Bool, pageCursor: String? = nil,
               maxWalk: Int = TransitousClient.walkLimits.prePost, options: RouteOptions = RouteOptions()) async throws -> PlanResponse {
         // "Now" searches change by the minute; planned ones can be reused a little longer.
-        try await get("/api/v6/plan", Self.planQuery(from: from, to: to, time: time, arriveBy: arriveBy,
+        let res: PlanResponse = try await get("/api/v6/plan", Self.planQuery(from: from, to: to, time: time, arriveBy: arriveBy,
                                                      pageCursor: pageCursor, maxWalk: maxWalk, options: options),
                       cache: CachePolicy(maxAge: time == nil ? 20 : 60, persist: true),
                       timeout: options.isSlowSearch ? 45 : nil)
+        // Deutschlandticket: long-distance trains some feeds file as plain RAIL come out here.
+        return options.localTicket ? res.replacingItineraries(res.itineraries.filter(options.allows)) : res
     }
 
     static func planQuery(from: LatLon, to: LatLon, time: Date?, arriveBy: Bool,
@@ -121,7 +123,7 @@ final class TransitousClient: @unchecked Sendable {
         if options.postTransitModes != ["WALK"] {
             q.append(URLQueryItem(name: "postTransitModes", value: options.postTransitModes.joined(separator: ",")))
         }
-        if let modes = options.modes.apiValue { q.append(URLQueryItem(name: "transitModes", value: modes)) }
+        if let modes = options.transitModesValue { q.append(URLQueryItem(name: "transitModes", value: modes)) }
         if let n = options.maxTransfers { q.append(URLQueryItem(name: "maxTransfers", value: String(n))) }
         if options.wheelchair { q.append(URLQueryItem(name: "pedestrianProfile", value: "WHEELCHAIR")) }
         if let time { q.append(URLQueryItem(name: "time", value: DateParsing.format(time))) }

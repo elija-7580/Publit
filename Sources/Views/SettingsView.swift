@@ -18,6 +18,8 @@ struct SettingsView: View {
     @AppStorage(GooglePlaces.keyDefaultsKey) private var googleKey = ""
     @AppStorage(MapProvider.defaultsKey) private var mapProvider = MapProvider.apple.rawValue
     @AppStorage(StartTab.defaultsKey) private var startTab = StartTab.nearby.rawValue
+    @AppStorage(StartTab.stopKey) private var startStop = ""
+    @Environment(FavoritesStore.self) private var favorites
     @AppStorage(WatchSettings.ticketsKey) private var watchTickets = true
     @AppStorage(StationViews.platformMapKey) private var platformMap = true
     @AppStorage(StationViews.byPlatformKey) private var byPlatform = false
@@ -47,6 +49,9 @@ struct SettingsView: View {
         return c?.url ?? AppInfo.repositoryURL
     }
 
+    /// Saved stops for the start screen (Home and Work too, when they are stops).
+    private var savedStops: [SavedPlace] { favorites.items.filter(\.isStop) }
+
     var body: some View {
         NavigationStack {
             List {
@@ -67,8 +72,29 @@ struct SettingsView: View {
                     Picker(L10n.t("Start screen"), selection: $startTab) {
                         Text("Nearby").tag(StartTab.nearby.rawValue)
                         Text("Plan").tag(StartTab.plan.rawValue)
+                        Text("A saved stop").tag(StartTab.stop.rawValue)
                     }
                     .accessibilityIdentifier("startTab")
+                    if startTab == StartTab.stop.rawValue, !savedStops.isEmpty {
+                        Picker(L10n.t("Stop"), selection: $startStop) {
+                            ForEach(savedStops) { Text(verbatim: $0.name).tag($0.id) }
+                        }
+                        .accessibilityIdentifier("startStop")
+                    }
+                } footer: {
+                    if startTab == StartTab.stop.rawValue {
+                        if savedStops.isEmpty {
+                            Text("Save a stop with the star on its departures first.")
+                        } else {
+                            Text("Publit opens with this stop's departures; Done goes on to Nearby.")
+                        }
+                    }
+                }
+                .onChange(of: startTab) { _, tab in
+                    // Picking "A saved stop" chooses the first one; the picker above changes it.
+                    if tab == StartTab.stop.rawValue, !savedStops.contains(where: { $0.id == startStop }) {
+                        startStop = savedStops.first?.id ?? ""
+                    }
                 }
                 Section(L10n.t("Travel preferences")) {
                     RouteOptionsButton()

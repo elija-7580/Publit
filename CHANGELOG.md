@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1 (build 72) – Deutschlandticket routes, start with your stop
+
+- Route options: "Deutschlandticket" shows only routes with local and regional transport (no ICE, IC, EC, FlixTrain, night trains or long-distance coaches). If a Deutschlandticket is saved in Tickets, the options say so.
+- Settings → Start screen: "A saved stop" opens Publit with the departures of the stop you pick, every time.
+
 ## 0.1.1 (build 71) – station exit numbers
 
 - Coming up from an underground station, the walk shows the signed exit number from OpenStreetMap: "Take exit B2" (or "Take exit B2 towards Ludwigstraße"), also in the change guide and the spoken directions. Where OpenStreetMap has no number, it stays "Exit towards …".
