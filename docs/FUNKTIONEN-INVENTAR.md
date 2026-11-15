@@ -3,7 +3,7 @@
 > Nicht von Hand bearbeiten. Erzeugt von `scripts/feature_inventory.py` (CI: `features-doc.yml`).
 > Die ausführliche Beschreibung steht in [FUNKTIONEN.md](FUNKTIONEN.md).
 
-**186 Views, 5 App Intents, 3 Widgets in 75 Dateien.**
+**187 Views, 5 App Intents, 3 Widgets in 76 Dateien.**
 
 ## `Sources/App/DesignSamples.swift`
 - Views: `DesignSampleView`
@@ -213,6 +213,10 @@
 - Views: `PlatformMapSection`, `PlatformPin`, `PlatformSummaryRow`, `FlowLines`, `PlatformHeaderRow`, `ChangeGuideCard`
 - Sichtbare Texte: Platform map · Next: %@ · Get off here · Board here · Same platform · %@ walk · Step-free · With stairs
 
+## `Sources/Views/SupportView.swift`
+- Views: `SupportView`
+- Sichtbare Texte: Support Publit · Publit has no ads and no tracking. Your support pays for servers and keeps development going. · Thank you! You support Publit with %@ a month. · Thank you for supporting Publit! · Manage subscription · Support is not available right now. · Try again · Monthly · Monthly support renews every month until you cancel it. Cancel it any time in your App Store account. · One-time · Restore purchases · Support unlocks nothing: every feature stays free for everyone. · Active · per month · %@ per month
+
 ## `Sources/Views/TicketAttachmentView.swift`
 - Views: `TicketAttachmentView`
 - Sichtbare Texte: Ticket image unavailable
@@ -246,7 +250,7 @@
 
 ## `Sources/Views/WishesView.swift`
 - Views: `WishesView`, `CommunityCard`
-- Sichtbare Texte: What should Publit do? · Details (optional) · Send wish · Suggest a feature · Check the list first: if your idea is there, vote for it instead. · Sort · Most votes · Newest · Wishes not reachable · The wish list is not reachable right now. Please try again later. · Try again · No wishes yet · Be the first! · Wishes · No account and no tracking: a random ID on this device marks your votes. The wish list does not store addresses. · Also on publit.eu · Vote for %@ · Planned · In progress · Done · Thanks! Your wish is in. · Please describe the wish in at least 6 characters. · At most two links, please. · This wish already exists – just vote for it. · Too many requests. Please wait a moment. · What's new in Publit · Continue · Publit is a community project · Vote for what comes next, or suggest your own idea. No account needed. · Suggest features and vote
+- Sichtbare Texte: What should Publit do? · Details (optional) · Send wish · Suggest a feature · Check the list first: if your idea is there, vote for it instead. · Sort · Most votes · Newest · Wishes not reachable · The wish list is not reachable right now. Please try again later. · Try again · No wishes yet · Be the first! · Wishes · No account and no tracking: a random ID on this device marks your votes. The wish list does not store addresses. · Also on publit.eu · Vote for %@ · Planned · In progress · Done · Thanks! Your wish is in. · Please describe the wish in at least 6 characters. · At most two links, please. · This wish already exists – just vote for it. · Too many requests. Please wait a moment. · What's new in Publit · Continue · Publit is a community project · Vote for what comes next, or suggest your own idea. No account needed. · Suggest features and vote · Support Publit
 
 ## `Watch/WatchHomeView.swift`
 - Views: `WatchHomeView`, `WatchLiveTile`

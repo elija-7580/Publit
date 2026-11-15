@@ -65,6 +65,7 @@ let core = [
     "Models/StationExits.swift",
     "Models/Wishes.swift",
     "Models/WhatsNew.swift",
+    "Models/Support.swift",
     "Models/LineCatalog.swift",
     "Models/LineDisruptions.swift",
     "Tickets/TicketPass.swift",

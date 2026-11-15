@@ -25,5 +25,7 @@ enum AppInfo {
     static let sourcesURL = URL(string: "https://transitous.org/sources/")!
     static let websiteURL = URL(string: "https://publit.eu/")!
     static let privacyURL = URL(string: "https://publit.eu/privacy/")!
+    /// Apple's standard licence agreement, which covers monthly support.
+    static let termsURL = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
     static let osmCopyrightURL = URL(string: "https://www.openstreetmap.org/copyright")!
 }

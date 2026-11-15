@@ -185,6 +185,7 @@ struct WhatsNewSheet: ViewModifier {
     @State private var items: [WhatsNewItem] = []
     @State private var presented = false
     @State private var openList = false
+    @State private var openSupport = false
 
     func body(content: Content) -> some View {
         content
@@ -209,14 +210,14 @@ struct WhatsNewSheet: ViewModifier {
             }
             .sheet(isPresented: $presented, onDismiss: markSeen) {
                 NavigationStack {
-                    if openList {
-                        WishesView()
+                    if openList || openSupport {
+                        Group { if openSupport { SupportView() } else { WishesView() } }
                             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { presented = false } } }
                     } else {
                         note
                     }
                 }
-                .presentationDetents(openList ? [.large] : [.medium, .large])
+                .presentationDetents(openList || openSupport ? [.large] : [.medium, .large])
             }
     }
 
@@ -239,7 +240,7 @@ struct WhatsNewSheet: ViewModifier {
                     }
                     .accessibilityElement(children: .combine)
                 }
-                CommunityCard { markSeen(); openList = true }
+                CommunityCard(open: { markSeen(); openList = true }, support: { markSeen(); openSupport = true })
                 Button { presented = false } label: { Text("Continue").frame(maxWidth: .infinity) }
                     .buttonStyle(.soft)
                     .accessibilityIdentifier("whatsNewContinue")
@@ -259,6 +260,8 @@ struct WhatsNewSheet: ViewModifier {
 /// in the What's new note.
 struct CommunityCard: View {
     let open: () -> Void
+    /// Support Publit (monthly or one-time); nil hides the button.
+    var support: (() -> Void)? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -272,6 +275,13 @@ struct CommunityCard: View {
             }
             .buttonStyle(.ink)
             .accessibilityIdentifier("wishesOpen")
+            if let support {
+                Button(action: support) {
+                    Label("Support Publit", systemImage: "heart").frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.soft)
+                .accessibilityIdentifier("supportOpen")
+            }
         }
         .padding(16)
         .background(Color.inkFill, in: RoundedRectangle(cornerRadius: 16, style: .continuous))

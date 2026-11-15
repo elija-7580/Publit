@@ -30,6 +30,7 @@ struct SettingsView: View {
     @State private var summary: HangLog.Summary?
     @State private var reportURL: URL?
     @State private var showWishes = false
+    @State private var showSupport = false
 
     /// A new GitHub issue with version, device and counts filled in; the diagnostics file is attached by hand.
     private var issueURL: URL {
@@ -72,7 +73,7 @@ struct SettingsView: View {
                 }
                 // Publit is a community project: what comes next is voted on, so this comes first.
                 Section {
-                    CommunityCard { showWishes = true }
+                    CommunityCard(open: { showWishes = true }, support: { showSupport = true })
                         .listRowInsets(EdgeInsets())
                         .listRowBackground(Color.clear)
                 } header: {
@@ -320,6 +321,7 @@ struct SettingsView: View {
                 }
             }
             .navigationDestination(isPresented: $showWishes) { WishesView() }
+            .navigationDestination(isPresented: $showSupport) { SupportView() }
             .navigationTitle("Settings")
             .screenTrail("Settings")
             .navigationBarTitleDisplayMode(.inline)

@@ -23,10 +23,10 @@ enum WhatsNew {
         WhatsNewEntry(build: 81, items: [
             WhatsNewItem(symbol: "arrow.triangle.swap", title: "Clearer changes",
                          text: "Each change shows times, platforms and your buffer in one glance."),
-            WhatsNewItem(symbol: "sparkles", title: "Calmer route list",
-                         text: "Labels like “Recommended” no longer break across lines."),
             WhatsNewItem(symbol: "person.3", title: "Community first",
-                         text: "Wishes and voting are now at the top of Settings."),
+                         text: "Wishes, voting and support are now at the top of Settings."),
+            WhatsNewItem(symbol: "heart", title: "Support Publit",
+                         text: "Monthly or once – every feature stays free for everyone."),
         ]),
     ]
 

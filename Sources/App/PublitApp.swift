@@ -15,6 +15,8 @@ struct PublitApp: App {
         UNUserNotificationCenter.current().delegate = NotificationRouter.shared
         HangLog.shared.start()
         CrashReports.shared.start()
+        // Renewals of monthly support and purchases from other devices are finished here.
+        Task { @MainActor in SupportStore.shared.start() }
         // Offline copies older than a week are no use for departures or routes.
         DispatchQueue.global(qos: .utility).async { TransitousClient.shared.cache.prune(olderThan: 7 * 24 * 3600) }
     }

@@ -61,7 +61,7 @@ Animiertes Logo, mindestens 0,7 s, höchstens 2 s; endet früher, sobald die ers
 Ohne Onboarding startet die Standortabfrage sofort.
 
 ### „What's new“ nach jedem Update (`WhatsNewSheet`, `WhatsNew`)
-Nach jedem Update (nie bei Neuinstallation – dort kommt das Onboarding –, nie darüber, ca. 1,2 s nach dem Splash) ein Blatt **„What's new in Publit“** mit den Punkten aller Builds seit dem zuletzt gesehenen (`whatsNewBuild`), neueste zuerst, höchstens 4 Punkte (je Symbol, Titel, ein Satz). Darunter die **Community-Karte** (`CommunityCard`: „Publit is a community project“, „Vote for what comes next, or suggest your own idea. No account needed.“, Knopf „Suggest features and vote“ → Wunschliste, §16a) und „Continue“. Builds ohne Eintrag zeigen nichts. Ersetzt den einmaligen Wünsche-Hinweis (`wishesHintShown` wird mitgesetzt). Inhalte in `Sources/Models/WhatsNew.swift` (Build 81: „Clearer changes“, „Calmer route list“, „Community first“).
+Nach jedem Update (nie bei Neuinstallation – dort kommt das Onboarding –, nie darüber, ca. 1,2 s nach dem Splash) ein Blatt **„What's new in Publit“** mit den Punkten aller Builds seit dem zuletzt gesehenen (`whatsNewBuild`), neueste zuerst, höchstens 4 Punkte (je Symbol, Titel, ein Satz). Darunter die **Community-Karte** (`CommunityCard`: „Publit is a community project“, „Vote for what comes next, or suggest your own idea. No account needed.“, Knopf „Suggest features and vote“ → Wunschliste, §16a, und „Support Publit“ → §16b) und „Continue“. Builds ohne Eintrag zeigen nichts. Ersetzt den einmaligen Wünsche-Hinweis (`wishesHintShown` wird mitgesetzt). Inhalte in `Sources/Models/WhatsNew.swift` (Build 81: „Clearer changes“, „Community first“, „Support Publit“).
 
 ### Tab-Leiste (`RootView`, `AdaptiveTabs` ab iOS 18)
 | Tab | Symbol | Inhalt |
@@ -253,7 +253,7 @@ Screenshot-/Link-Tickets („My tickets“, „Add ticket“, Typ, „Expires“
 | Bereich | Einstellungen |
 |---|---|
 | Kopf | Logo, „Public transport, without the noise.“ |
-| Community | `CommunityCard` ganz oben: „Publit is a community project“, Erklärtext, Knopf „Suggest features and vote“ → Wunschliste (§16a) |
+| Community | `CommunityCard` ganz oben: „Publit is a community project“, Erklärtext, Knopf „Suggest features and vote“ → Wunschliste (§16a), Knopf „Support Publit“ → Unterstützen (§16b) |
 | General | Start screen: Nearby / Plan / A saved stop (+ Stop-Auswahl) |
 | Travel preferences | Routenoptionen-Zusammenfassung, „Show connection timelines“, „How to read connections“ (`ConnectionGuideView`: Ride/Walk/Wait/Time axis) |
 | Nearby | „Map“ (Standard an): Karte als Bild oben, Liste scrollt darüber (iPhone), siehe §3 |
@@ -273,6 +273,14 @@ Screenshot-/Link-Tickets („My tickets“, „Add ticket“, Typ, „Expires“
 - **Suggest a feature**: „What should Publit do?“ (mind. 6 Zeichen), „Details (optional)“, „Send wish“; Meldungen „Thanks! Your wish is in.“, „This wish already exists – just vote for it.“, „At most two links, please.“, „Too many requests. Please wait a moment.“. Ein neuer Wunsch startet mit der eigenen Stimme.
 - **Wishes**: Sortierung „Most votes“ / „Newest“, Pfeil mit Stimmenzahl (antippen = abstimmen / Stimme zurücknehmen), Status „Planned“, „In progress“, „Done“; Ziehen zum Aktualisieren; nicht erreichbar → „Try again“.
 - Kein Konto: eine zufällige ID (`publit.wishes.voter`) auf dem Gerät markiert die Stimmen; der Server speichert keine Adressen. Link „Also on publit.eu“.
+
+### 16b. Unterstützen – `SupportView`, `SupportStore`, `Support`
+- Kopf: Herz, „Support Publit“, „Publit has no ads and no tracking. Your support pays for servers and keeps development going.“
+- **Monthly** (zuerst, am prominentesten): automatisch verlängerte Abos (eine Abo-Gruppe, Wechsel zwischen Stufen über StoreKit) zu 1,50 / 3 / 5 / 10 / 20 / 50 € im Monat (Preis aus dem Store, `displayPrice`); 3 € als Startvorschlag dunkel hervorgehoben, ein laufendes Abo als „Active“. Fußzeile: Verlängerung monatlich, Kündigung im App-Store-Konto.
+- **One-time**: Trinkgelder (Verbrauchsartikel) zu 3 / 5 / 10 / 20 / 50 €.
+- Nach dem Kauf / mit laufendem Abo: „Thank you! You support Publit with x a month.“ bzw. „Thank you for supporting Publit!“, „Manage subscription“ (System-Blatt).
+- „Restore purchases“ (`AppStore.sync`), „Terms of use“ (Apple-Standard-EULA), „Privacy policy“; Hinweis „Support unlocks nothing: every feature stays free for everyone.“ Keine Produkte → „Support is not available right now.“ + „Try again“.
+- Produkt-IDs (gleich auf Android): `io.github.elija7580.publit.support.monthly.<Cent>` (150, 300, 500, 1000, 2000, 5000) und `io.github.elija7580.publit.support.tip.<Cent>` (300, 500, 1000, 2000, 5000). `SupportStore.start()` beim App-Start schließt Verlängerungen und Käufe von anderen Geräten ab.
 
 ## 17. Benachrichtigungen (alle lokal, kein Push-Server)
 
@@ -380,6 +388,8 @@ Kleinere Bausteine, die in den Abschnitten oben nicht namentlich vorkommen:
 | `EndpointConnector` | Verbindungslinie zwischen Von/Nach im Planer (§8) |
 | `ServiceAlertRow` | eine aufklappbare Störungsmeldung (§3, §12) |
 | `SettingsButton` | Zahnrad, öffnet Einstellungen (§16) |
+| `SupportView` | Publit unterstützen: monatlich und einmalig (§16b) |
+| `CommunityCard`, `WhatsNewSheet` | Community-Karte (Wünsche, Unterstützen) und „What's new“ nach Updates (§2, §16) |
 | `SmartBadgesRow`, `SmartChangesSection`, `ChangeChanceRow`, `SmartRoutingSettingsSection` | Smart-Routing-Badges (einzeilig, nie umbrochen; Begründung rückt bei Platzmangel in eine eigene Zeile darunter), Umstiegsbewertung, Einstellungen (§11) |
 | `StopTimeRow` | Haltzeile einer Fahrzeug-Fahrt (§6) |
 | `WalkThereRow` | „6 min walk · 450 m“ zu genau dieser Haltestelle (richtige Straßenseite), öffnet die Karten-App zu Fuß; ausgeblendet, solange man an der Haltestelle steht (≤ 50 m) (§3, §4) |
