@@ -64,6 +64,7 @@ let core = [
     "Models/LiveMap.swift",
     "Models/StationExits.swift",
     "Models/Wishes.swift",
+    "Models/WhatsNew.swift",
     "Models/LineCatalog.swift",
     "Models/LineDisruptions.swift",
     "Tickets/TicketPass.swift",

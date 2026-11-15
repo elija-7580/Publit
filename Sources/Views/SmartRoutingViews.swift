@@ -6,22 +6,40 @@ struct SmartBadgesRow: View {
     var reason: String? = nil
 
     var body: some View {
-        HStack(spacing: 6) {
-            ForEach(badges, id: \.self) { badge in
-                Label(badge.title, systemImage: badge.symbol)
-                    .labelStyle(.titleAndIcon)
-                    .font(.caption2.weight(.bold))
-                    // The suggestion is a solid ink chip (readable in light and dark), the rest stay quiet.
-                    .foregroundStyle(badge == .recommended ? Color.onInk : Color.secondary)
-                    .padding(.horizontal, 8).padding(.vertical, 3)
-                    .background(badge == .recommended ? Color.ink : Color.inkFill, in: Capsule())
-            }
-            if let reason {
-                Text(verbatim: reason).font(.caption2).foregroundStyle(.secondary).lineLimit(1)
+        // Chips never wrap or hyphenate ("Recommend-ed"); when the reason does not fit beside
+        // them it goes on its own line below.
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 6) { chips; reasonText(fixed: true) }
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 6) { chips }
+                reasonText(fixed: false)
             }
         }
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("smartBadges")
+    }
+
+    private var chips: some View {
+        ForEach(badges, id: \.self) { badge in
+            Label(badge.title, systemImage: badge.symbol)
+                .labelStyle(.titleAndIcon)
+                .font(.caption2.weight(.bold))
+                .lineLimit(1)
+                .fixedSize()
+                // The suggestion is a solid ink chip (readable in light and dark), the rest stay quiet.
+                .foregroundStyle(badge == .recommended ? Color.onInk : Color.secondary)
+                .padding(.horizontal, 8).padding(.vertical, 3)
+                .background(badge == .recommended ? Color.ink : Color.inkFill, in: Capsule())
+        }
+    }
+
+    /// Fixed beside the chips (so ViewThatFits can tell it does not fit), truncated on its own line.
+    @ViewBuilder
+    private func reasonText(fixed: Bool) -> some View {
+        if let reason {
+            Text(verbatim: reason).font(.caption2).foregroundStyle(.secondary)
+                .lineLimit(1).fixedSize(horizontal: fixed, vertical: false)
+        }
     }
 }
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.1 (build 81) – clearer at a glance, community first
+
+- **Changes in a route**: the change block no longer repeats stop, line and direction from the steps around it. One line says where (“Change at Krems Bahnhof”) with your buffer as a badge, one line both times and platforms (“5:43 · Platform E2 → 5:52 · Platform 2”), a small line the lines and the walk. Warnings stay.
+- **Route list**: “Recommended”, “Least walking” and the other labels stay on one line; when the reason beside them does not fit, it moves below instead of squeezing the labels.
+- **What's new**: after each update a short note with what changed, and right below it the wish list – Publit is a community project.
+- **Settings**: the wish list is a card at the very top (“Publit is a community project”); the start screen is under “General”.
+
 ## 0.1.1 (build 80) – the same on every map
 
 - **Your position with the arrow on every map**: the blue dot with the arrow the way you hold the iPhone is now the same in Nearby, the station map, the live trip, route and line maps and on the iPad. When the map is turned, the arrow still points the real way. The compass runs only while a map is on screen.

@@ -173,55 +173,114 @@ struct WishesView: View {
     }
 }
 
-/// Shown once after the update that brought the wish list: where to suggest and vote.
-struct WishesHint: ViewModifier {
-    static let shownKey = "wishesHintShown"
-    @AppStorage(WishesHint.shownKey) private var shown = false
-    /// Not over the first-run onboarding: there the app is new anyway.
+/// After every update: a short "What's new" (WhatsNew.entries) with the wish list right below,
+/// because Publit is a community project and what comes next is voted on there.
+/// Not on a fresh install (the onboarding introduces the app) and never over the onboarding.
+struct WhatsNewSheet: ViewModifier {
+    /// Old one-time hint about the wish list; still set so it never comes back.
+    static let wishesHintKey = "wishesHintShown"
+    /// Captured at launch: true when this start shows the onboarding (fresh install).
+    let freshInstall: Bool
     let ready: Bool
+    @State private var items: [WhatsNewItem] = []
     @State private var presented = false
     @State private var openList = false
 
     func body(content: Content) -> some View {
         content
             .task(id: ready) {
-                guard ready, !shown else { return }
-                try? await Task.sleep(for: .seconds(1.5))
-                guard !Task.isCancelled, !shown else { return }
+                guard ready else { return }
+                let defaults = UserDefaults.standard
+                let current = Int(AppInfo.build) ?? 0
+                if freshInstall {
+                    defaults.set(current, forKey: WhatsNew.seenKey)
+                    return
+                }
+                let seen = defaults.integer(forKey: WhatsNew.seenKey)
+                let new = WhatsNew.items(seen: seen, current: current)
+                guard !new.isEmpty else {
+                    if current > seen { defaults.set(current, forKey: WhatsNew.seenKey) }
+                    return
+                }
+                try? await Task.sleep(for: .seconds(1.2))
+                guard !Task.isCancelled else { return }
+                items = new
                 presented = true
             }
-            .sheet(isPresented: $presented, onDismiss: { shown = true }) {
+            .sheet(isPresented: $presented, onDismiss: markSeen) {
                 NavigationStack {
                     if openList {
                         WishesView()
                             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { presented = false } } }
                     } else {
-                        VStack(spacing: 18) {
-                            Spacer(minLength: 0)
-                            Image(systemName: "lightbulb.max")
-                                .font(.system(size: 44)).foregroundStyle(Color.inkAction)
-                                .accessibilityHidden(true)
-                            Text("New: suggest features and vote").font(.title2.weight(.bold)).multilineTextAlignment(.center)
-                            Text("Missing something in Publit? Suggest it or vote for other ideas. The most wanted ones come first. You find the list any time in Settings.")
-                                .multilineTextAlignment(.center).foregroundStyle(.secondary)
-                            Spacer(minLength: 0)
-                            Button { shown = true; openList = true } label: {
-                                Text("Show the wishes").frame(maxWidth: .infinity)
-                            }
-                            .buttonStyle(.ink)
-                            .accessibilityIdentifier("wishesHintOpen")
-                            Button("Later") { shown = true; presented = false }
-                                .accessibilityIdentifier("wishesHintLater")
-                        }
-                        .padding(24)
+                        note
                     }
                 }
                 .presentationDetents(openList ? [.large] : [.medium, .large])
             }
     }
+
+    private var note: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 18) {
+                Text("What's new in Publit").font(.title2.weight(.bold))
+                    .accessibilityAddTraits(.isHeader)
+                ForEach(items, id: \.self) { item in
+                    HStack(alignment: .top, spacing: 14) {
+                        Image(systemName: item.symbol)
+                            .font(.title3).foregroundStyle(Color.inkAction)
+                            .frame(width: 30)
+                            .accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(L10n.t(item.title)).font(.headline)
+                            Text(L10n.t(item.text)).font(.subheadline).foregroundStyle(.secondary)
+                        }
+                        .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .accessibilityElement(children: .combine)
+                }
+                CommunityCard { markSeen(); openList = true }
+                Button { presented = false } label: { Text("Continue").frame(maxWidth: .infinity) }
+                    .buttonStyle(.soft)
+                    .accessibilityIdentifier("whatsNewContinue")
+            }
+            .padding(24)
+        }
+        .accessibilityIdentifier("whatsNew")
+    }
+
+    private func markSeen() {
+        UserDefaults.standard.set(Int(AppInfo.build) ?? 0, forKey: WhatsNew.seenKey)
+        UserDefaults.standard.set(true, forKey: Self.wishesHintKey)
+    }
+}
+
+/// "Publit is a community project": the way to the wish list, used at the top of Settings and
+/// in the What's new note.
+struct CommunityCard: View {
+    let open: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Label("Publit is a community project", systemImage: "person.3.fill")
+                .font(.headline)
+            Text("Vote for what comes next, or suggest your own idea. No account needed.")
+                .font(.subheadline).foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            Button(action: open) {
+                Label("Suggest features and vote", systemImage: "lightbulb").frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.ink)
+            .accessibilityIdentifier("wishesOpen")
+        }
+        .padding(16)
+        .background(Color.inkFill, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+    }
 }
 
 extension View {
-    /// The one-time note about the wish list, once `ready` (onboarding done).
-    func wishesHint(ready: Bool) -> some View { modifier(WishesHint(ready: ready)) }
+    /// The note after an update, once `ready` (onboarding done, splash gone).
+    func whatsNew(freshInstall: Bool, ready: Bool) -> some View {
+        modifier(WhatsNewSheet(freshInstall: freshInstall, ready: ready))
+    }
 }
