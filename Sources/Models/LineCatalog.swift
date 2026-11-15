@@ -249,3 +249,25 @@ enum LineVehicles {
         return (now.addingTimeInterval(-after - 60), Int(before + after + 120))
     }
 }
+
+extension LineRef {
+    /// The line of a ride, anchored at one of its stops (for "route and timetable").
+    init(leg: Leg, at anchor: Place) {
+        self.init(key: leg.routeId ?? "\(leg.agencyName ?? "")|\(leg.lineName)", mode: leg.mode,
+                  routeShortName: leg.routeShortName, displayName: leg.displayName, routeColor: leg.routeColor,
+                  routeTextColor: leg.routeTextColor, agencyName: leg.agencyName,
+                  headsigns: leg.directionName.map { [$0] } ?? [], stopId: anchor.stopId ?? anchor.stationId,
+                  stopName: anchor.name, lat: anchor.lat, lon: anchor.lon)
+    }
+}
+
+extension StopTime {
+    /// A ride of a trip as a departure at its boarding stop, to open the vehicle's whole trip.
+    init?(leg: Leg) {
+        guard leg.isTransit, let tripId = leg.tripId else { return nil }
+        self.init(place: leg.from, mode: leg.mode, realTime: leg.realTime, headsign: leg.headsign ?? "",
+                  agencyName: leg.agencyName, routeId: leg.routeId, tripId: tripId,
+                  routeShortName: leg.routeShortName, displayName: leg.displayName, routeColor: leg.routeColor,
+                  routeTextColor: leg.routeTextColor, cancelled: leg.cancelled, tripCancelled: nil)
+    }
+}

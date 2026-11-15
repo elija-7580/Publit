@@ -10,6 +10,8 @@ enum WatchRoute: Hashable {
     case route(OpenedRoute, from: String, to: String)
     /// The map of a whole trip (overview) or of one leg.
     case map(OpenedRoute, WatchTripPage)
+    /// The vehicle's whole trip behind one ride (index of the leg in the trip).
+    case vehicle(OpenedRoute, Int)
     case nearby
     case plan
     /// The planner with the destination already set.
@@ -40,6 +42,12 @@ struct WatchRouteView: View {
             WatchTripView(itinerary: opened.itinerary, from: from, to: to)
         case .map(let opened, let page):
             WatchTripMapView(itinerary: library.snapshot.trip(for: opened.itinerary)?.itinerary ?? opened.itinerary, page: page)
+        case .vehicle(let opened, let index):
+            if let leg = opened.itinerary.legs[safe: index] {
+                WatchVehicleTripView(leg: leg)
+            } else {
+                WatchMessage(symbol: "tram", text: "Trip not found")
+            }
         case .nearby:
             WatchNearbyView(model: nearby)
         case .plan:

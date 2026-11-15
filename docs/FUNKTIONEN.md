@@ -112,6 +112,8 @@ Einmal nach dem Update (bzw. nach dem Onboarding, nie darüber, ca. 1,5 s nach d
 - Karte (`TripMap`) mit **geschätzter Fahrzeugposition** („Estimated vehicle position“), Status „Not departed yet“, „Between A and B“, „At …“, „Arrived at …“; ohne Live-Daten aus dem Fahrplan geschätzt.
 - Aktionen pro Halt: „Route here“, „Route from here“; „From … to here“; Linie speichern.
 - Liste weiterer Abfahrten derselben Linie.
+- „Line …: route and timetable“ öffnet das Linien-Detail (Richtung, Verlauf, Fahrplan).
+- Auch aus einer geplanten oder laufenden Fahrt erreichbar (Linie einer Etappe antippen): dann mit allen Halten der Fahrt, auch denen vor dem Einstieg; Einstiegs- und Ausstiegshalt fett.
 
 ## 7. Stationskarte / Karte – `StationMapView`
 
@@ -173,7 +175,7 @@ Einmal nach dem Update (bzw. nach dem Onboarding, nie darüber, ca. 1,5 s nach d
 - Statusbanner (Live / Timetable, „This trip is cancelled.“, „Service changes on this route“), „Updated HH:MM“.
 - **Karte** der Route (`RouteMap`, Linien in Betreiberfarbe, Fußwege gepunktet; Ausschnitt an das Seitenverhältnis der Karte angepasst, damit Start und Ziel immer sichtbar sind); Vergleichskarte (`CompareMapView`).
 - **Rad/Auto die ganze Strecke**: ohne Linienkette und „Direct“ unter der Zeitkarte; die Schritte nennen den Start (wie das Ziel), dazu „Driving times are without traffic and parking.“ und „Open in …“.
-- **„Trip overview“**/„Steps“: Zeitleiste (`TimelineLegRow`, `TimelineRail`): je Abschnitt „Board at …“, „Get off at …“, Linie, Richtung, **Zugart und Rollstuhl-Eignung des Fahrzeugs** (`VehicleKindLine`/`VehicleKind`: z. B. „Railjet Xpress · High-speed train · Wheelchair accessible“, „Regional train · Not wheelchair accessible“; Kategorie aus der Zugnummer, Eignung aus GTFS `wheelchair_accessible`, ohne Angabe nichts), Gleis („Platform x“, Gleiswechsel), Zwischenhalte, Verspätung, SEV, Fußweg mit Anweisungen (Treppen, Ebenen, Ausgang „Exit towards …“), Leihfahrzeug („Pick up at …“, „Return at …“, „Rent in the provider's app“), Umstiegskarten.
+- **„Trip overview“**/„Steps“: Zeitleiste (`TimelineLegRow`, `TimelineRail`): je Abschnitt „Board at …“, „Get off at …“, Linie, Richtung, **Zugart und Rollstuhl-Eignung des Fahrzeugs** (`VehicleKindLine`/`VehicleKind`: z. B. „Railjet Xpress · High-speed train · Wheelchair accessible“, „Regional train · Not wheelchair accessible“; Kategorie aus der Zugnummer, Eignung aus GTFS `wheelchair_accessible`, ohne Angabe nichts), Gleis („Platform x“, Gleiswechsel), Zwischenhalte, Verspätung, SEV, Fußweg mit Anweisungen (Treppen, Ebenen, Ausgang „Exit towards …“), Leihfahrzeug („Pick up at …“, „Return at …“, „Rent in the provider's app“), Umstiegskarten. Tipp auf das Linien-Symbol einer Fahrt (oder aufgeklappt „Line …: all stops and map“) öffnet die ganze Fahrt des Fahrzeugs (`TripView`, §6).
 - **„Remind me to get off“** (`GetOffButton`): „Reminder set – We'll notify you at …“, „This stop is less than two minutes away.“, Hinweis falls Mitteilungen aus.
 - Fahrpreis (`FareSection`): „Fare estimate“ nur bei vollständig abgedeckter Route und eindeutiger Tarifregel; sonst „Fare information“ und Ticket-Links des Betreibers / Verbunds (`RegionTicketRow`, z. B. „Venice · ACTV“).
 - Smart-Routing-Abschnitt (§11), Abdeckungskarten für Start, Umstiegsorte, Ziel.
@@ -198,7 +200,7 @@ Erscheint für die gestartete Fahrt oder eine gespeicherte, die gerade läuft/ba
 - **Ausgangsnummer** (`StationExits`): kommt der Fußweg aus einer U-Bahn-Station (nach einer Metro-Fahrt oder unter Straßenniveau beginnend), steht beim Aufgang die beschilderte Ausgangsnummer aus OpenStreetMap („Take exit B2“, „Take exit B2 towards Ludwigstraße“; `railway=subway_entrance`/`train_station_entrance`/`public_transport=entrance` mit `ref` bis 6 Zeichen). Wahl: Eingang, durch den der Weg führt → nächster Eingang ≤ 40 m vom Aufgang → erster Eingang ≤ 20 m neben dem Weg. Abfrage über Overpass (overpass-api.de, Ausweich overpass.kumi.systems) einmal je Station beim Öffnen der Live-Fahrt, nur im Speicher; ohne Daten bleibt „Exit towards …“. Auch in Umstiegshilfe und Sprachansage. Abschaltbar: Einstellungen → „Exit numbers from OpenStreetMap“ (an).
 - Gehen: „Walk to …“ mit „Distanz · Minuten“ (an der Haltestelle, ≤ 50 m, stattdessen „Board here“), Turn-by-turn-Anweisungen, **Kompasspfeil** (`HeadingRow`; ohne Kompass Norden oben), „Walk faster to make it.“, Karte drehen „Turn the map with you“ / „Stop turning the map“.
 - Warten/Einsteigen: „Departs in x min“, „Departs now“, „Departed …“, „Take Linie towards …“, Gleis „Pl. x“, „Platform changed (was x)“, Boarding-Hilfe (`BoardingLine`, `BoardingSteps`).
-- Fahren: „Now at …“, „Next stop … in …“, Haltliste (`GuideStopRow`), „Get off here“, „Get off at …“, Positionsquelle („Position from your location / estimated from live stop times / from the timetable“).
+- Fahren: „Now at …“, „Next stop … in …“, Haltliste (`GuideStopRow`), „Get off here“, „Get off at …“, Positionsquelle („Position from your location / estimated from live stop times / from the timetable“), „Line …: all stops and map“ (ganze Fahrt, §6) – auch für frühere und spätere Etappen über die Etappenliste.
 - Ankunft: „You have arrived“, „Arrive at …“, „Destination in …“.
 - **Umstiegshilfe** (`ChangeGuideCard`/`ChangeGuide`, Einstellungen → Stations → „Change guide“, Standard an): beim Fahren (vor dem Aussteigen), beim Umstiegs-Fußweg und beim Warten auf das nächste Fahrzeug: „Platform 3 → Platform 7“, Karte mit Fußweg von Ausstieg („Get off here“, Linien-Badge + Gleis) zu Einstieg („Board here“), „x min walk · Step-free“ bzw. „With stairs“, „Same platform“ wenn nichts zu gehen ist; darunter nur das Wesentliche im Bahnhof: Treppen, Aufzüge („Take the lift“), Ebenenwechsel, Ausgänge.
 - **Karte** (`GuideMap`) mit zurückgelegter (hellblau) und kommender Strecke (`TripTrace`), Kartenstil, 3D.
@@ -310,6 +312,7 @@ Beispielphrasen: „Nächste Abfahrten in Publit“, „Bring mich nach Hause mi
 | Home (`WatchHomeView`) | jetzt gültige Tickets (ein Tipp → Code), Tickets, Live-Kachel der laufenden Fahrt, Where to?, Nearby, Saved |
 | Tickets (`WatchTicketsView`) | gruppiert wie iPhone; Code auf weißer Fläche in voller Breite, danach Details |
 | Fahrt (`WatchTripView`) | Seiten per Digital Crown: Übersicht (Abdeckungshinweis, Zeiten, Status, Tickets, Map, Start/End trip, Save trip/Remove), dann je Fahrt/Fußweg eine Seite (Linie, Richtung, Zeiten, Gleis/„Platform changed“, Halte, Störungen, Map) |
+| Ganze Fahrt einer Linie (`WatchVehicleTripView`) | Aus einer Fahrt-Etappe (Linien-Symbol oder „Line …: all stops and map“): alle Halte des Fahrzeugs mit Zeiten, Verspätung, Gleis, auch vor dem Einstieg; Ein-/Ausstieg fett, passierte Halte grau, Status („At …“, „Between … and …“), Map |
 | Karte (`WatchTripMapView`) | Abschnitt oder ganze Fahrt, Linienfarben, Fußwege gepunktet, Standort |
 | Where to? (`WatchPlanView`) | Von/Nach (Standort, gespeichert, Diktat), bis 8 Routen, spätere Verbindungen |
 | Nearby (`WatchNearbyView`) | nächste Haltestellen mit Abfahrten |
@@ -381,6 +384,7 @@ Kleinere Bausteine, die in den Abschnitten oben nicht namentlich vorkommen:
 | `WatchSavedTripRow`, `WatchStopView` | Fahrtzeile und Haltestellen-Abfahrten in „Saved“ (§21) |
 | `WatchTicketRow`, `WatchTicketView`, `WatchCodeView`, `WatchTicketDetails` | Ticketliste, Ticket, Code-Fläche, Details (§21) |
 | `WatchTripOverview`, `WatchLegPage` | Übersichts- und Abschnittsseite einer Fahrt (§21) |
+| `WatchVehicleTripView` | Ganze Fahrt des Fahrzeugs einer Etappe (§21) |
 | `DeparturesWidgetView` | Darstellung des Abfahrten-Widgets (§18) |
 | `LineChip`, `PlatformChip`, `FamilyAdaptiveView`, `SmallActivityView`, `ActivityContent`, `LockScreenView` | Bausteine der Live Activity (Sperrbildschirm, Dynamic Island, Watch) (§18) |
 | `DesignSampleView`, `PassSampleView` | nur DEBUG-Demos (§26) |
