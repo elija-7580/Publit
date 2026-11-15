@@ -72,9 +72,15 @@ final class LocationManager: NSObject, CLLocationManagerDelegate {
         manager.distanceFilter = precise ? 5 : 50
     }
 
-    /// The compass, for "which way now" in the trip guide. Off elsewhere (it costs battery).
-    func setHeading(_ on: Bool) {
-        if on, CLLocationManager.headingAvailable() {
+    /// Screens that want the compass right now ("guide", "nearby"). One screen turning it off
+    /// does not take it from another that opened over or under it.
+    @ObservationIgnored private var headingUsers: Set<String> = []
+
+    /// The compass, for "which way now" in the trip guide and the direction you face on the
+    /// Nearby map (the map draws it as a beam on your position). Off elsewhere (it costs battery).
+    func setHeading(_ on: Bool, for user: String = "guide") {
+        if on { headingUsers.insert(user) } else { headingUsers.remove(user) }
+        if !headingUsers.isEmpty, CLLocationManager.headingAvailable() {
             manager.headingFilter = 8
             manager.startUpdatingHeading()
         } else {

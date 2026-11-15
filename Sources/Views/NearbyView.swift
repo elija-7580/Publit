@@ -92,6 +92,7 @@ struct NearbyView: View {
         }
         .onAppear { isVisible = true }
         .onDisappear { isVisible = false }
+        .onChange(of: wantsHeading, initial: true) { _, on in location.setHeading(on, for: "nearby") }
         .task(id: "\(refreshEnabled)|\(storedModes)") {
             guard refreshEnabled else { return }
             if location.isDenied { app.firstBoardReady = true }
@@ -220,6 +221,9 @@ struct NearbyView: View {
     }
 
     private var refreshEnabled: Bool { isVisible && scenePhase == .active && app.tab == .nearby && !showMap && !app.showGoNow }
+
+    /// The compass while the map is on screen: your position shows the way you face, as in the live trip.
+    private var wantsHeading: Bool { refreshEnabled && mapLayout }
 
     @ViewBuilder
     private var activeTripSection: some View {
