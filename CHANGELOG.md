@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.1.1 (build 74) – Nearby as a map
+
+- Nearby on the iPhone works like the live trip: the map fills the screen and the whole Nearby list is a panel over it (pull it down, half or up; it starts half). "Where to now?" heads the panel, so the search is there at every height. The map shows you and up to eight stations of the list with names; tap one for its departures. Settings and "Station map" stay at the top. Settings → Nearby → Map off, no location permission, or iPad: the list as before.
+
+## 0.1.1 (build 73) – everything from the open branches
+
+Merged in: community feedback (wish list, Apple Maps addresses, fixes), tapping a line in a trip, Austrian line names, at the stop without a walk, rows that lead with what matters.
+
+- **Austrian regional trains** show their line like the ÖBB app and station boards ("R 44", "REX 3") instead of the train number ("R 6046"); the train number stays as detail.
+- **Tap a line in a trip** (route details, live trip, Apple Watch) to open the vehicle's whole trip: every stop, map, line.
+
+### Suggest features and vote, in the app
+- **Settings → Suggest features and vote**: the wish list from publit.eu/wuensche right in the app. Suggest a feature, vote for others (tap again to take the vote back), sort by most votes or newest, see what is planned, in progress or done. No account: a random ID on the device marks your votes.
+- Once after the update a short note points to it ("Show the wishes" / "Later").
+
+### Fixes
+- **Home and Work**: setting Work no longer removes Home (and the other way round) when the search gives both addresses the same ID, as seen with addresses in different countries.
+- **Map lines**: a metro, tram or bus line that runs from A to B and back is no longer drawn with a straight line from one end to the other, as if it were a ring.
+- **Search finds addresses with house numbers**: the place search (Plan, Home and Work, Saved) now asks Apple Maps for addresses and places next to Transitous, because OpenStreetMap often lacks the house number or the street. With a number in the query the address with exactly that number comes first. Settings → Search reads "OpenStreetMap and Apple Maps"; with Google chosen, Apple is not asked.
+- **Search**: a big street in another city is found again from home. A town after a comma ("Corso Buenos Aires, Milano") turns off the pull towards your position; when no nearby result has all the words, Publit also searches without your position and puts those matches first.
+- **Dropping a pin on the map**: letting go after the long press counted as a tap on the empty map and closed the pin's sheet right away. Now the sheet stays.
+- **Countdowns**: the shared minute clock ticks right away when the app comes back from the background or the system time or time zone changes, so countdowns are never a minute behind.
+
+
 ## 0.1.1 (build 72) – Deutschlandticket routes, start with your stop
 
 - Route options: "Deutschlandticket" shows only routes with local and regional transport (no ICE, IC, EC, FlixTrain, night trains or long-distance coaches). If a Deutschlandticket is saved in Tickets, the options say so.

@@ -12,7 +12,11 @@ struct NearbyView: View {
     @State private var searching = false
     @State private var openedStop: StopTarget?
     @State private var showMap = false
-    @AppStorage(NearbyMapSection.defaultsKey) private var showNearbyMap = true
+    @AppStorage(NearbyMap.defaultsKey) private var showNearbyMap = true
+    /// The iPad layout has its own big map behind the panel: there the board stays a plain list.
+    @Environment(WideMapState.self) private var wideMap: WideMapState?
+    /// Top edge of the board's panel over the map, to frame the map in the part above it.
+    @State private var panelTop: CGFloat = 0
     @State private var groups: [StopGroup] = []
     @State private var isLoading = false
     @State private var errorMessage: String?
@@ -44,16 +48,84 @@ struct NearbyView: View {
     static let reloadDistance = 150.0
     static var refreshInterval: TimeInterval { Energy.interval(30) }
 
+    /// iPhone with the map on: the map is the screen and the board a panel over it, like the live trip.
+    /// The search stays on top of the panel, so it is there at every height.
+    private var mapLayout: Bool { showNearbyMap && wideMap == nil && !location.isDenied }
+
     var body: some View {
+        Group {
+            if mapLayout {
+                GeometryReader { geo in
+                    ZStack(alignment: .bottom) {
+                        NearbyMap(here: location.coordinate, groups: groups,
+                                  onOpenStation: { openedStop = StopTarget($0) })
+                            // Frame you and the stations in the part of the map the panel leaves free.
+                            .safeAreaPadding(.bottom, max(geo.size.height - panelTop, 0) + 8)
+                            .ignoresSafeArea(edges: .bottom)
+                        TripPanel(peek: NearbyMap.peek, topGap: NearbyMap.topGap, start: .half,
+                                  onTop: { top in withAnimation(.easeInOut(duration: 0.25)) { panelTop = top } }) {
+                            whereToButton.padding(.horizontal, 16)
+                        } content: {
+                            board(search: false)
+                        }
+                    }
+                }
+            } else {
+                board(search: true)
+            }
+        }
+        .navigationTitle("Nearby")
+        .navigationBarTitleDisplayMode(mapLayout ? .inline : .automatic)
+        .screenTrail("Nearby")
+        .withSettingsButton()
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button { showMap = true } label: { Label("Station map", systemImage: "map") }
+            }
+        }
+        .sheet(isPresented: $searching) {
+            PlaceSearchView(title: "Where to?", allowCurrentLocation: false) { endpoint in go(endpoint) }
+        }
+        .navigationDestination(isPresented: Bindable(app).showGoNow) { GoNowView() }
+        .navigationDestination(item: $openedStop) { s in
+            StopDeparturesView(stopId: s.id, name: s.name, coordinate: s.coordinate, exact: s.exact)
+        }
+        .navigationDestination(for: TripTarget.self) { t in
+            TripView(stopTime: t.stopTime, stationId: t.stationId, stationName: t.stationName, stationCoordinate: t.coordinate)
+        }
+        .fullScreenCover(isPresented: $showMap) { StationMapView() }
+        // "Route here/from here" on a map stop switches to Plan: the map closes so Plan is visible.
+        .onChange(of: app.tab) { if app.tab != .nearby { showMap = false } }
+        .refreshable { await load(force: true) }
+        .onChange(of: storedModes) {
+            // Show the matching part of the current board at once, then ask the server for more.
+            if let c = lastCenter { regroup(lastStopTimes, around: c) }
+        }
+        .onAppear { isVisible = true }
+        .onDisappear { isVisible = false }
+        .task(id: "\(refreshEnabled)|\(storedModes)") {
+            guard refreshEnabled else { return }
+            if location.isDenied { app.firstBoardReady = true }
+            await showLastBoard()
+            // One loop for the screen. Before, every ~100 m change of the first, still improving GPS
+            // fixes cancelled the running request and started over, so the board took many seconds.
+            while !Task.isCancelled {
+                await load()
+                // Once GPS is available, one wake-up every five seconds is enough to notice
+                // movement; server requests remain capped at once per 30 seconds.
+                try? await Task.sleep(for: location.hasFix ? .seconds(5) : .milliseconds(500))
+            }
+        }
+    }
+
+    /// The board: where to, your next trip, notes, mode chips and the stations with their departures.
+    /// With the map the search is on top of the panel instead (`search: false`).
+    private func board(search: Bool) -> some View {
         List {
-            goSection
+            // With the map the search heads the panel; the card stays for Home, Work and the next trip.
+            if search || !favorites.pinned.isEmpty || nextTrip != nil { goSection(search: search) }
             activeTripSection
             OfflineNote()
-            // For orientation: where you are and where the stations below are (Settings → Nearby → Map).
-            if showNearbyMap, !location.isDenied, let here = location.coordinate, !groups.isEmpty {
-                NearbyMapSection(here: here, groups: groups, onOpenMap: { showMap = true },
-                                 onOpenStation: { openedStop = StopTarget($0) })
-            }
             // Where you are, data is missing: the board below may be only a part of what runs.
             if !location.isDenied, let notice = CoverageGuide.notice(at: location.coordinate) {
                 CoverageBanner(notices: [notice]).coverageRow()
@@ -149,52 +221,11 @@ struct NearbyView: View {
                 }
                 .inkCard()
             }
-
         }
         .readableWidth()
         .inkList()
         .tint(Color.ink)
-        .navigationTitle("Nearby")
-        .screenTrail("Nearby")
-        .withSettingsButton()
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button { showMap = true } label: { Label("Station map", systemImage: "map") }
-            }
-        }
-        .sheet(isPresented: $searching) {
-            PlaceSearchView(title: "Where to?", allowCurrentLocation: false) { endpoint in go(endpoint) }
-        }
-        .navigationDestination(isPresented: Bindable(app).showGoNow) { GoNowView() }
-        .navigationDestination(item: $openedStop) { s in
-            StopDeparturesView(stopId: s.id, name: s.name, coordinate: s.coordinate, exact: s.exact)
-        }
-        .navigationDestination(for: TripTarget.self) { t in
-            TripView(stopTime: t.stopTime, stationId: t.stationId, stationName: t.stationName, stationCoordinate: t.coordinate)
-        }
-        .fullScreenCover(isPresented: $showMap) { StationMapView() }
-        // "Route here/from here" on a map stop switches to Plan: the map closes so Plan is visible.
-        .onChange(of: app.tab) { if app.tab != .nearby { showMap = false } }
-        .refreshable { await load(force: true) }
-        .onChange(of: storedModes) {
-            // Show the matching part of the current board at once, then ask the server for more.
-            if let c = lastCenter { regroup(lastStopTimes, around: c) }
-        }
-        .onAppear { isVisible = true }
-        .onDisappear { isVisible = false }
-        .task(id: "\(refreshEnabled)|\(storedModes)") {
-            guard refreshEnabled else { return }
-            if location.isDenied { app.firstBoardReady = true }
-            await showLastBoard()
-            // One loop for the screen. Before, every ~100 m change of the first, still improving GPS
-            // fixes cancelled the running request and started over, so the board took many seconds.
-            while !Task.isCancelled {
-                await load()
-                // Once GPS is available, one wake-up every five seconds is enough to notice
-                // movement; server requests remain capped at once per 30 seconds.
-                try? await Task.sleep(for: location.hasFix ? .seconds(5) : .milliseconds(500))
-            }
-        }
+        .contentMargins(.top, search ? nil : 4, for: .scrollContent)
     }
 
     private var refreshEnabled: Bool { isVisible && scenePhase == .active && app.tab == .nearby && !showMap && !app.showGoNow }
@@ -224,24 +255,35 @@ struct NearbyView: View {
         app.showGoNow = true
     }
 
+    /// Your next saved trip if it starts within three hours (and is not the one running).
+    private var nextTrip: SavedTrip? {
+        guard let next = trips.upcoming().first, next.id != trips.activeTrip?.id,
+              next.startTime.timeIntervalSinceNow < 3 * 3600 else { return nil }
+        return next
+    }
+
+    /// "Where to now?": the search for a route from here, leaving now.
+    private var whereToButton: some View {
+        Button { searching = true } label: {
+            // Plan's look: same label column, same semibold text, same round ink search key.
+            WhereToField(label: "To", prompt: "Where to now?")
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Where to now? Route from your location")
+        .accessibilityIdentifier("whereToNow")
+    }
+
     @ViewBuilder
-    private var goSection: some View {
+    private func goSection(search: Bool) -> some View {
         Section {
-            Button { searching = true } label: {
-                // Plan's look: same label column, same semibold text, same round ink search key.
-                WhereToField(label: "To", prompt: "Where to now?")
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("Where to now? Route from your location")
-            .accessibilityIdentifier("whereToNow")
+            if search { whereToButton }
             ForEach(favorites.pinned) { p in
                 Button { go(.place(p)) } label: {
                     PlaceKeyRow(symbol: p.role?.symbol ?? "mappin", title: p.role?.title ?? p.name, detail: p.name, routes: true)
                 }
                 .buttonStyle(.plain)
             }
-            if let next = trips.upcoming().first, next.id != trips.activeTrip?.id,
-               next.startTime.timeIntervalSinceNow < 3 * 3600 {
+            if let next = nextTrip {
                 NavigationLink { SavedTripView(tripId: next.id) } label: {
                     // Same weight as the other rows of this card ("Where to now?", Home, Work).
                     PlaceKeyRow(symbol: "calendar", title: L10n.f("Next trip: %@", next.toName),

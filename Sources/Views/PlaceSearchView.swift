@@ -211,7 +211,15 @@ struct PlaceSearchView: View {
 
     private func searchNames(_ text: String, token: UUID) async {
         let useGoogle = GooglePlaces.isActive && scope != .stops
-        async let transit = TransitousClient.shared.geocode(text, near: location.coordinate, type: useGoogle && scope == .all ? nil : scope.apiType)
+        let type = useGoogle && scope == .all ? nil : scope.apiType
+        let near = SearchBias.position(for: text, location: location.coordinate)
+        async let transit = TransitousClient.shared.geocode(text, near: near, type: type)
+        // Apple Maps for addresses and places next to Transitous: OpenStreetMap often has the street
+        // but not the house number (or not the street). Not with Google, which covers the same.
+        let askApple = !useGoogle && scope != .stops
+        async let apple: [GeocodeMatch] = askApple
+            ? AppleSearch.places(text, near: near, addresses: scope != .places, places: scope != .addresses)
+            : []
         var google: [GooglePlaces.Suggestion]?
         if useGoogle {
             google = try? await GooglePlaces.autocomplete(text, near: location.coordinate, session: googleSession)
@@ -219,6 +227,13 @@ struct PlaceSearchView: View {
         do {
             var r = try await transit
             guard !Task.isCancelled, searchToken == token else { return }
+            let fromApple = await apple
+            guard !Task.isCancelled, searchToken == token else { return }
+            if near != nil, SearchBias.needsWiderSearch(text, results: r + fromApple),
+               let wide = try? await TransitousClient.shared.geocode(text, near: nil, type: type) {
+                guard !Task.isCancelled, searchToken == token else { return }
+                r = SearchBias.merge(r, wide.filter { !SearchBias.needsWiderSearch(text, results: [$0]) })
+            }
             if let google {
                 // Google for places and addresses, Transitous for the stops (they route best).
                 r = scope == .all ? Array(r.filter(\.isStop).prefix(4)) : []
@@ -227,13 +242,22 @@ struct PlaceSearchView: View {
                 }
             } else {
                 googleResults = []
+                r = SearchBias.combine(r, fromApple, query: text)
             }
             results = r
             errorMessage = nil
             searched = text + "|" + scope.rawValue
         } catch {
             guard !Task.isCancelled, searchToken == token else { return }
-            if let google, !google.isEmpty {
+            // Transitous failed: Apple's addresses and places still help (not the stops).
+            let fromApple = await apple
+            guard !Task.isCancelled, searchToken == token else { return }
+            if google == nil, !fromApple.isEmpty {
+                results = SearchBias.combine([], fromApple, query: text)
+                googleResults = []
+                errorMessage = nil
+                searched = text + "|" + scope.rawValue
+            } else if let google, !google.isEmpty {
                 results = []
                 googleResults = google.filter { !$0.isStop }
                 errorMessage = nil

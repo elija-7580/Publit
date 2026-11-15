@@ -161,14 +161,23 @@ enum LiveMap {
         var shapes: [String: LineShape] = [:]
         var pieces: [String: [VehicleTrack.Piece]] = [:]
         var info: [String: (name: String, mode: String, color: String, realTime: Bool)] = [:]
+        // Trips whose feed has real shapes: there a long straight hop is a gap, not the route.
+        let shapedTrips = Set(segments.compactMap { s -> String? in
+            guard let id = s.trips.first?.tripId, Polyline.decode(s.polyline, precision: precision).count > 2 else { return nil }
+            return id
+        })
         for s in segments where !excludedModes.contains(s.mode) && s.distance <= maxSegmentMeters && filter.allows(s.mode) {
             guard s.distance.isFinite, s.distance >= 0, s.from.coordinate.isValidCoordinate,
                   s.to.coordinate.isValidCoordinate, s.arrival >= s.departure,
                   let trip = s.trips.first else { continue }
             let color = colorHex(s.routeColor, mode: s.mode)
-            let points = Polyline.simplify(Polyline.decode(s.polyline, precision: precision), toleranceMeters: tolerance)
+            let raw = Polyline.decode(s.polyline, precision: precision)
+            let points = Polyline.simplify(raw, toleranceMeters: tolerance)
             guard points.count > 1 else { continue }
             let shapeKey = "\(s.from.stopId ?? s.from.name)>\(s.to.stopId ?? s.to.name)|\(color)"
+            let drawn = !isTerminusJump(s, raw: raw.count, shaped: shapedTrips.contains(trip.tripId))
+            // No vehicle gliding across the city along that straight line either.
+            guard drawn else { continue }
             if shapes[shapeKey] == nil { shapes[shapeKey] = LineShape(id: shapeKey, mode: s.mode, colorHex: color, points: points) }
             let delayValue = (s.departure.timeIntervalSince(s.scheduledDeparture) / 60).rounded()
             guard delayValue.isFinite else { continue }
@@ -187,6 +196,18 @@ enum LiveMap {
         }
         let orderedShapes = shapes.values.sorted { rank($0.mode) != rank($1.mode) ? rank($0.mode) < rank($1.mode) : $0.id < $1.id }
         return Snapshot(shapes: Array(orderedShapes.prefix(maxShapes)), tracks: tracks)
+    }
+
+    /// A line that runs A to B and back (not a circle) can come with one stop-to-stop hop from one
+    /// end straight to the other: the turn at the terminus, or a trip that continues as the next one.
+    /// Drawn, it looked like the line were a closed loop. Such a hop is straight (no shape), long,
+    /// and on a trip whose other hops do follow the tracks; it is left out of the line drawing.
+    static func isTerminusJump(_ s: TripSegment, raw points: Int, shaped: Bool) -> Bool {
+        guard points <= 2, shaped else { return false }
+        switch ModeGroup.of(s.mode) {
+        case .subway, .tram, .bus: return s.from.coordinate.distance(to: s.to.coordinate) > 2_500
+        default: return false
+        }
     }
 
     /// Vehicles inside `min`…`max` at `t`, rail first when there are too many to draw.

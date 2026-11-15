@@ -993,11 +993,6 @@ struct VehicleTripView: View {
     private func lineRef(_ leg: Leg, next: Int) -> LineRef? {
         let stops = leg.allStops
         guard !stops.isEmpty else { return nil }
-        let anchor = stops[min(next, stops.count - 1)]
-        let key = leg.routeId ?? "\(leg.agencyName ?? "")|\(leg.lineName)"
-        return LineRef(key: key, mode: leg.mode, routeShortName: leg.routeShortName, displayName: leg.displayName,
-                       routeColor: leg.routeColor, routeTextColor: leg.routeTextColor, agencyName: leg.agencyName,
-                       headsigns: leg.directionName.map { [$0] } ?? [], stopId: anchor.stopId ?? anchor.stationId,
-                       stopName: anchor.name, lat: anchor.lat, lon: anchor.lon)
+        return LineRef(leg: leg, at: stops[min(next, stops.count - 1)])
     }
 }

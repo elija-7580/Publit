@@ -227,7 +227,7 @@ jobs:
           shoot() {
             udid=$1; name=$2; lang=$3; locale=$4; shift 4
             limited 30 xcrun simctl terminate "$udid" "$BUNDLE" > /dev/null 2>&1
-            limited 60 env "$@" xcrun simctl launch "$udid" "$BUNDLE" -onboardingDone YES -AppleLanguages "($lang)" -AppleLocale "$locale" >> ci/launch.log 2>&1
+            limited 60 env "$@" xcrun simctl launch "$udid" "$BUNDLE" -onboardingDone YES -wishesHintShown YES -AppleLanguages "($lang)" -AppleLocale "$locale" >> ci/launch.log 2>&1
             sleep 16
             limited 60 xcrun simctl io "$udid" screenshot "ci/screenshots/$name.png" >> ci/launch.log 2>&1
             note "screenshot $name"

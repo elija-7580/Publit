@@ -10,7 +10,8 @@ The watch app (target `PublitWatch`, watchOS 10) carries what you need to take a
 | Tickets | Grouped as on the iPhone (valid now, upcoming, without dates, expired). A ticket shows its code on a white plate at full width, then the details (validity, route, passenger, reference) |
 | Trip | Vertical pages (Digital Crown): **Overview** first, then one page for every ride and longer walk. A trip under way opens on the leg you are on and follows the clock |
 | Trip, overview | "Not reliable here" card first where data is missing, then times, status, **Tickets** button, **Map** button, Start/End trip, Save trip |
-| Trip, one leg | Line, direction, from and to with times, platform (and "Platform changed"), stops, alerts, and its own **Map** button that shows exactly this section (also in the top bar of every page); a button in the map switches to the whole trip |
+| Trip, one leg | Line, direction, from and to with times, platform (and "Platform changed"), stops, alerts, and its own **Map** button that shows exactly this section (also in the top bar of every page); a button in the map switches to the whole trip. The line (or "Line …: all stops and map") opens the vehicle's whole trip |
+| Vehicle trip | Every stop of the vehicle with times, delay and platform, also before boarding; boarding and exit in bold, passed stops grey, where it is now, Map |
 | Map | Apple Maps in muted style: lines in their colours, walks dotted, your position |
 | Where to? | From and To (current location, saved places, dictation), up to eight routes (walking joins when it is a real choice), later connections, coverage card. A route opens like a saved trip and can be saved |
 | Nearby | The nearest stops with their next departures (radius steps as on the iPhone), coverage card |
