@@ -30,6 +30,16 @@ struct MapStation: Identifiable, Hashable {
     static let maxStations = 250
     /// Street stops get their own pins below this map span (degrees latitude, about 1.5 km).
     static let poleSpan = 0.014
+    /// Close up (about 450 m) every stop gets its own pin, whatever runs there: each side of the
+    /// street and each platform, as Nearby lists them.
+    static let platformSpan = 0.004
+
+    /// How far stops are kept apart at a map span.
+    enum Separation: Sendable { case none, poles, all }
+
+    static func separation(span: Double) -> Separation {
+        span <= platformSpan ? .all : span <= poleSpan ? .poles : .none
+    }
 
     /// A stop where only buses or trams call.
     static func isPole(_ s: MapStop) -> Bool {
@@ -38,11 +48,17 @@ struct MapStation: Identifiable, Hashable {
     }
 
     /// - Parameter separatePoles: street stops stay single pins at their own position.
+    static func group(_ stops: [MapStop], separatePoles: Bool = false) -> [MapStation] {
+        group(stops, separation: separatePoles ? .poles : .none)
+    }
+
+    /// - Parameter separation: `.poles`: street stops stay single pins at their own position;
+    ///   `.all`: every stop does (the same stop twice in two feeds still makes one pin).
     ///
     /// The result does not depend on the order of `stops`, and a pin sits on its most important
     /// platform (not on the average of what happens to be loaded), so pins do not jump while
     /// zooming or panning loads more or fewer platforms.
-    static func group(_ stops: [MapStop], separatePoles: Bool = false) -> [MapStation] {
+    static func group(_ stops: [MapStop], separation: Separation) -> [MapStation] {
         // Name folding is the expensive part: do it once per distinct name.
         var keys: [String: String] = [:]
         for s in stops where keys[s.name] == nil { keys[s.name] = StopGrouping.normalizedName(s.name) }
@@ -61,7 +77,7 @@ struct MapStation: Identifiable, Hashable {
         var members: [[MapStop]] = []
         var usedIds = Set<String>()
         for s in sorted {
-            let pole = separatePoles && isPole(s)
+            let pole = separation == .all || (separation == .poles && isPole(s))
             let k = key(s.name)
             let radius = pole ? StopGrouping.duplicateRadius : StopGrouping.mergeRadius
             if let a = anchors[k]?.first(where: { $0.pole == pole && $0.at.distance(to: s.coordinate) < radius }) {

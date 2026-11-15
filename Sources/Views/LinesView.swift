@@ -317,10 +317,12 @@ private struct LineMap: View {
     let shape: [LatLon]
     let stops: [Place]
     let vehicles: [LineVehicles.Vehicle]
+    @Environment(LocationManager.self) private var location
+    /// The map's own turn, so the arrow on your position keeps pointing the real way.
+    @State private var mapHeading = 0.0
 
     var body: some View {
         Map(initialPosition: .automatic) {
-            UserAnnotation()
             MapPolyline(coordinates: shape.map(\.clCoordinate))
                 .stroke(line.lineStroke, style: StrokeStyle(lineWidth: 5, lineCap: .round, lineJoin: .round))
             ForEach(Array(stops.enumerated()), id: \.offset) { _, s in
@@ -337,9 +339,12 @@ private struct LineMap: View {
                 }
                 .annotationTitles(.hidden)
             }
+            YouAreHere(here: location.coordinate, heading: location.heading, mapHeading: mapHeading)
         }
         .publitMapStyle()
         .mapControls { MapCompass() }
+        .onMapCameraChange(frequency: .onEnd) { mapHeading = $0.camera.heading }
+        .compassWhileShown("lineMap")
     }
 }
 

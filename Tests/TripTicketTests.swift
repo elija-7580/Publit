@@ -195,6 +195,18 @@ final class MapStationTests: XCTestCase {
         XCTAssertEqual(near.filter { $0.name == "Marienplatz" && !$0.isPole }.count, 1, "rail platforms stay one station")
         XCTAssertEqual(Set(near.map(\.id)).count, near.count)
     }
+
+    /// Close up every stop is its own pin, rail platforms too, as Nearby lists them.
+    func testCloseUpEveryStopIsItsOwnPin() throws {
+        let stops = try JSONDecoder().decode([MapStop].self, from: Fixtures.data("mapstops_marienplatz"))
+        let close = MapStation.group(stops, separation: .all)
+        XCTAssertGreaterThan(close.filter { $0.name == "Marienplatz" }.count, 1, "each platform of Marienplatz")
+        XCTAssertEqual(close.filter { $0.name == "Maximiliansplatz" }.count, 2)
+        XCTAssertEqual(Set(close.map(\.id)).count, close.count, "unique IDs for map selection")
+        XCTAssertEqual(MapStation.separation(span: 0.003), .all)
+        XCTAssertEqual(MapStation.separation(span: 0.01), .poles)
+        XCTAssertEqual(MapStation.separation(span: 0.05), .none)
+    }
 }
 
 final class KnownShopTests: XCTestCase {

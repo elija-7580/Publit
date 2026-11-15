@@ -157,9 +157,11 @@ struct WideRoutesMap: View {
         return all
     }
 
+    @Environment(LocationManager.self) private var location
+    @State private var mapHeading = 0.0
+
     var body: some View {
         Map(initialPosition: frame.map { MapCameraPosition.rect($0) } ?? .automatic) {
-            UserAnnotation()
             ForEach(ordered, id: \.routeKey) { it in
                 let isSelected = it.routeKey == selected?.routeKey
                 ForEach(Array(it.legs.enumerated()), id: \.offset) { _, leg in
@@ -190,9 +192,12 @@ struct WideRoutesMap: View {
                     }
                 }
             }
+            YouAreHere(here: location.coordinate, heading: location.heading, mapHeading: mapHeading)
         }
         .publitMapStyle()
         .mapControls { MapUserLocationButton(); MapCompass(); MapScaleView() }
+        .onMapCameraChange(frequency: .onEnd) { mapHeading = $0.camera.heading }
+        .compassWhileShown("wideRoutes")
         // Frame the routes beside the panel, not under it.
         .safeAreaPadding(.leading, leadingInset)
         .safeAreaPadding(.vertical, 16)

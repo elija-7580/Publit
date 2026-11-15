@@ -19,6 +19,8 @@ struct CompareMapView: View, Equatable {
     }
 
     @AppStorage(MapProvider.defaultsKey) private var mapProvider = MapProvider.apple.rawValue
+    @Environment(LocationManager.self) private var location
+    @State private var mapHeading = 0.0
 
     var body: some View {
         #if canImport(GoogleMaps)
@@ -61,7 +63,6 @@ struct CompareMapView: View, Equatable {
 
     private func routesMap(start: MapCameraPosition, interactive: Bool) -> some View {
         Map(initialPosition: start, interactionModes: interactive ? .all : []) {
-            UserAnnotation()
             ForEach(ordered, id: \.routeKey) { it in
                 let isSelected = it.routeKey == selectedId
                 ForEach(Array(it.legs.enumerated()), id: \.offset) { _, leg in
@@ -70,9 +71,14 @@ struct CompareMapView: View, Equatable {
                                 style: .leg(leg.isTransit, width: isSelected ? 5 : 3))
                 }
             }
+            // You, on top; not in the picture at the top (it would redraw with every step you take).
+            if interactive {
+                YouAreHere(here: location.coordinate, heading: location.heading, mapHeading: mapHeading)
+            }
         }
         .publitMapStyle()
         .mapControlVisibility(interactive ? .automatic : .hidden)
+        .onMapCameraChange(frequency: .onEnd) { mapHeading = $0.camera.heading }
     }
 }
 
@@ -383,6 +389,8 @@ struct RouteMap: View {
     /// route fills the part that shows.
     var previewInsets: EdgeInsets? = nil
     @AppStorage(MapProvider.defaultsKey) private var mapProvider = MapProvider.apple.rawValue
+    @Environment(LocationManager.self) private var location
+    @State private var mapHeading = 0.0
 
     /// Where the route changes vehicle: a small mark, so the stops read at a glance.
     private var changePoints: [LatLon] {
@@ -482,7 +490,6 @@ struct RouteMap: View {
 
     private func appleMap(start: MapCameraPosition) -> some View {
         return Map(initialPosition: start, interactionModes: isPreview ? [] : .all) {
-            if !isPreview { UserAnnotation() }
             ForEach(Array(itinerary.legs.enumerated()), id: \.offset) { _, leg in
                 MapPolyline(coordinates: leg.overviewPath.map(\.clCoordinate))
                     .stroke(leg.isTransit ? leg.lineStroke : Color.routeAhead, style: .leg(leg.isTransit, width: isPreview ? 4 : 5))
@@ -497,10 +504,15 @@ struct RouteMap: View {
                 Annotation(isPreview ? "" : ItineraryDetailView.placeName(last.to),
                            coordinate: last.to.coordinate.clCoordinate, anchor: .center) { RouteMark(kind: .destination) }
             }
+            // You, on top; not in the small picture at the top.
+            if !isPreview {
+                YouAreHere(here: location.coordinate, heading: location.heading, mapHeading: mapHeading)
+            }
         }
         .publitMapStyle()
         .mapControlVisibility(isPreview ? .hidden : .automatic)
         .mapControls { MapUserLocationButton(); MapCompass(); MapScaleView() }
+        .onMapCameraChange(frequency: .onEnd) { mapHeading = $0.camera.heading }
     }
 }
 
