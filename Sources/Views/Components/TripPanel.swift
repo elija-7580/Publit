@@ -59,12 +59,16 @@ struct TripPanel<Header: View, Content: View>: View {
                         .onTapGesture { move(to: detent == .full ? .half : .full) }
                         .accessibilityHidden(true)
                     header
+                        .allowsHitTesting(drag.vertical != true)
                 }
                 .padding(.bottom, 10)
                 .contentShape(Rectangle())
                 content
                     .frame(maxHeight: .infinity, alignment: .top)
                     .scrollDisabled(detent != .full)
+                    // A row under the finger moves along with the panel: without this, letting go
+                    // after pulling the panel by a row would also open that row.
+                    .allowsHitTesting(drag.vertical != true)
             }
             .frame(width: geo.size.width, height: height - topGap, alignment: .top)
             .background {

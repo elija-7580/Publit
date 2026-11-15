@@ -122,7 +122,8 @@ struct NearbyView: View {
     /// With the map the search is on top of the panel instead (`search: false`).
     private func board(search: Bool) -> some View {
         List {
-            goSection(search: search)
+            // With the map the search heads the panel; the card stays for Home, Work and the next trip.
+            if search || !favorites.pinned.isEmpty || nextTrip != nil { goSection(search: search) }
             activeTripSection
             OfflineNote()
             // Where you are, data is missing: the board below may be only a part of what runs.
@@ -223,6 +224,7 @@ struct NearbyView: View {
         .readableWidth()
         .inkList()
         .tint(Color.ink)
+        .contentMargins(.top, search ? nil : 4, for: .scrollContent)
     }
 
     private var refreshEnabled: Bool { isVisible && scenePhase == .active && app.tab == .nearby && !showMap && !app.showGoNow }
@@ -252,6 +254,13 @@ struct NearbyView: View {
         app.showGoNow = true
     }
 
+    /// Your next saved trip if it starts within three hours (and is not the one running).
+    private var nextTrip: SavedTrip? {
+        guard let next = trips.upcoming().first, next.id != trips.activeTrip?.id,
+              next.startTime.timeIntervalSinceNow < 3 * 3600 else { return nil }
+        return next
+    }
+
     /// "Where to now?": the search for a route from here, leaving now.
     private var whereToButton: some View {
         Button { searching = true } label: {
@@ -273,8 +282,7 @@ struct NearbyView: View {
                 }
                 .buttonStyle(.plain)
             }
-            if let next = trips.upcoming().first, next.id != trips.activeTrip?.id,
-               next.startTime.timeIntervalSinceNow < 3 * 3600 {
+            if let next = nextTrip {
                 NavigationLink { SavedTripView(tripId: next.id) } label: {
                     // Same weight as the other rows of this card ("Where to now?", Home, Work).
                     PlaceKeyRow(symbol: "calendar", title: L10n.f("Next trip: %@", next.toName),
