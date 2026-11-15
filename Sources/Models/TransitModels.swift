@@ -132,7 +132,7 @@ struct Leg: Codable, Sendable, RouteStyled {
     var cancelled: Bool?
     var intermediateStops: [Place]?
     var alerts: [Alert]?
-    let legGeometry: EncodedPolyline
+    var legGeometry: EncodedPolyline
     /// Bike or scooter sharing for `RENTAL` legs.
     var rental: LegRental? = nil
     var fareTransferIndex: Int? = nil

@@ -119,6 +119,23 @@ final class ReliabilityTests: XCTestCase {
         // A refresh that brings fares of its own wins.
         XCTAssertEqual(TripStore.keepingFares(of: it, in: old).fareTransfers?.count, 1)
     }
+
+    /// Reported with a screenshot: after a live refresh a 28-minute walk was a straight line across
+    /// the river. Refreshes bring walks without their path; the saved path stays.
+    func testLiveRefreshKeepsTheWalkPath() throws {
+        let old = try TransitousClient.makeDecoder().decode(PlanResponse.self, from: Fixtures.data("plan_walk_steps")).itineraries[0]
+        var fresh = old
+        let walks = fresh.legs.indices.filter { !fresh.legs[$0].isTransit }
+        XCTAssertFalse(walks.isEmpty)
+        let empty = try JSONDecoder().decode(EncodedPolyline.self, from: Data(#"{"points":"","precision":6}"#.utf8))
+        for i in walks { fresh.legs[i].legGeometry = empty; fresh.legs[i].steps = nil }
+        XCTAssertEqual(fresh.legs[walks[0]].mapPath.count, 2, "without the path: a straight line")
+        let merged = TripStore.keepingSteps(of: old, in: fresh)
+        for i in walks {
+            XCTAssertEqual(merged.legs[i].mapPath, old.legs[i].mapPath)
+            XCTAssertNotNil(merged.legs[i].steps)
+        }
+    }
 }
 
 final class ServerFailoverTests: XCTestCase {

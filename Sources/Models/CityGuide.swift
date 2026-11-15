@@ -74,7 +74,11 @@ extension WalkRoute {
     }
 
     /// The instruction that brings you up to the street, when the walk starts underground.
-    var exitIndex: Int? { maneuvers.firstIndex { $0.exitTowards != nil || $0.exitSide != nil || $0.exitRef != nil } }
+    var exitIndex: Int? { maneuvers.firstIndex { $0.exitTowards != nil || $0.exitSide != nil || $0.exitRef != nil || $0.exitPoint != nil } }
+    /// The station door this walk goes out by and its sign ("B2", "Nord"), for the map.
+    var exitDoor: (point: LatLon, label: String?)? {
+        maneuvers.first { $0.exitPoint != nil }.flatMap { m in m.exitPoint.map { ($0, m.exitRef) } }
+    }
 }
 
 /// The change from one vehicle to the next: platforms, levels, walk and time to spare.

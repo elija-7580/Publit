@@ -313,8 +313,8 @@ struct StationMapView: View {
     @State private var showLayers = false
     @State private var query = ""
     @State private var searching = false
-    @State private var results: [GeocodeMatch] = []
-    @State private var searchedFor: String?
+    /// Stops from Transitous, addresses and places from Apple Maps' autocomplete (as in Plan).
+    @State private var placeSearch = PlaceSearchModel()
     @State private var focus: MapFocus?
     @State private var recenter = 0
     /// Stops, places or addresses only (the scope bar under the search field).
@@ -398,9 +398,12 @@ struct StationMapView: View {
                 }
                 .searchSuggestions { suggestions }
                 .onSubmit(of: .search) {
-                    if let c = PlaceCategory.matching(query) { browse(c) } else if let first = results.first { show(first) }
+                    if let c = PlaceCategory.matching(query) { browse(c) } else if let first = placeSearch.hits.first { show(first) }
                 }
-                .task(id: "\(query)|\(scope.rawValue)") { await search() }
+                .task(id: "\(query)|\(scope.rawValue)") {
+                    await placeSearch.search(query, scope: PlaceSearchScope(rawValue: scope.rawValue) ?? .all,
+                                             near: model.center ?? location.coordinate)
+                }
                 .toolbar {
                     if !embedded {
                         ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } }
@@ -583,13 +586,24 @@ struct StationMapView: View {
                 }
                 .accessibilityIdentifier("categoryFromQuery")
             }
-            ForEach(results) { m in
-                Button { show(m) } label: {
-                    PlaceLabel(name: m.name, subtitle: subtitle(m), isStop: m.isStop, category: m.category)
+            ForEach(placeSearch.hits) { hit in
+                Button { show(hit) } label: {
+                    switch hit {
+                    case .match(let m):
+                        PlaceLabel(name: m.name, subtitle: subtitle(m), isStop: m.isStop, category: m.category)
+                    case .suggestion(let s):
+                        HStack {
+                            PlaceLabel(name: s.title, subtitle: s.subtitle, isStop: s.isStop)
+                            Spacer(minLength: 0)
+                            if placeSearch.resolving == s.id { ProgressView() }
+                        }
+                    }
                 }
+                .disabled(placeSearch.resolving != nil)
                 .accessibilityIdentifier("mapSearchResult")
             }
-            if results.isEmpty, let searchedFor, searchedFor == MapSearch.query(query) {
+            if placeSearch.hits.isEmpty, !placeSearch.isSearching,
+               placeSearch.searched == PlaceSearchModel.key(query, PlaceSearchScope(rawValue: scope.rawValue) ?? .all) {
                 Text("No places found").foregroundStyle(.secondary)
             }
         }
@@ -659,50 +673,6 @@ struct StationMapView: View {
         }
     }
 
-    private func search() async {
-        guard let text = MapSearch.query(query) else { results = []; searchedFor = nil; return }
-        // Debounce: the task is cancelled when the text changes again.
-        try? await Task.sleep(for: .milliseconds(300))
-        guard !Task.isCancelled else { return }
-        let near = model.center ?? location.coordinate
-        let scope = scope
-        // Stops and towns from the transit geocoder, sights and shops from Apple Maps ("Museum", "Lidl"), side by side.
-        // The scope bar narrows it down: stops only, places only or addresses only.
-        async let apple = Self.applePlaces(scope.usesApple ? text : nil, near: near, addresses: scope != .places)
-        do {
-            var found: [GeocodeMatch] = []
-            if scope.usesTransit { found = try await TransitousClient.shared.geocode(text, near: near) }
-            let extra = await apple
-            guard !Task.isCancelled else { return }
-            results = scope.filter(GeocodeMatch.merged(found, extra, limit: 25))
-            searchedFor = text
-        } catch {
-            // Typing on: the next text searches again. A failure of the transit geocoder still shows Apple's places.
-            let extra = scope.filter(await apple)
-            guard !Task.isCancelled, !extra.isEmpty else { return }
-            results = extra
-            searchedFor = text
-        }
-    }
-
-    /// Points of interest and addresses from Apple Maps around the visible map; none when Apple has no answer.
-    private static func applePlaces(_ text: String?, near: LatLon?, addresses: Bool = true) async -> [GeocodeMatch] {
-        guard let text else { return [] }
-        let request = MKLocalSearch.Request()
-        request.naturalLanguageQuery = text
-        request.resultTypes = addresses ? [.pointOfInterest, .address] : [.pointOfInterest]
-        if let near {
-            request.region = MKCoordinateRegion(center: near.clCoordinate, latitudinalMeters: 20_000, longitudinalMeters: 20_000)
-        }
-        guard let response = try? await MKLocalSearch(request: request).start() else { return [] }
-        return response.mapItems.prefix(12).compactMap { item in
-            let c = item.placemark.coordinate
-            let point = LatLon(lat: c.latitude, lon: c.longitude)
-            guard point.isValidCoordinate else { return nil }
-            return TransitMapView.Coordinator.match(item, name: item.name ?? text, at: point)
-        }
-    }
-
     /// A place picked on the map: marked where it is (the map does not move) and opened in the place sheet.
     /// The refined version (with address) only updates what is still open.
     private func pick(_ place: GeocodeMatch, refined: Bool) {
@@ -719,6 +689,15 @@ struct StationMapView: View {
 
     /// Flies there and marks it. Stops, addresses and single places open their sheet;
     /// towns and districts are for looking around, so the map stays free.
+    private func show(_ hit: PlaceHit) {
+        switch hit {
+        case .match(let m): show(m)
+        case .suggestion(let s):
+            guard placeSearch.resolving == nil else { return }
+            Task { if let m = await placeSearch.resolve(s) { show(m) } }
+        }
+    }
+
     private func show(_ m: GeocodeMatch) {
         searching = false
         focus = MapFocus(version: (focus?.version ?? 0) + 1, match: m)

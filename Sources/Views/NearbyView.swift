@@ -15,8 +15,6 @@ struct NearbyView: View {
     @AppStorage(NearbyMap.defaultsKey) private var showNearbyMap = true
     /// The iPad layout has its own big map behind the panel: there the board stays a plain list.
     @Environment(WideMapState.self) private var wideMap: WideMapState?
-    /// Top edge of the board's panel over the map, to frame the map in the part above it.
-    @State private var panelTop: CGFloat = 0
     @State private var groups: [StopGroup] = []
     @State private var isLoading = false
     @State private var errorMessage: String?
@@ -48,32 +46,13 @@ struct NearbyView: View {
     static let reloadDistance = 150.0
     static var refreshInterval: TimeInterval { Energy.interval(30) }
 
-    /// iPhone with the map on: the map is the screen and the board a panel over it, like the live trip.
-    /// The search stays on top of the panel, so it is there at every height.
+    /// iPhone with the map on: the map is the picture at the top and the board scrolls over it
+    /// (`MapHero`). A tap on it or the expand key opens the station map. Before, the board was a
+    /// panel to drag over the map; dragging it opened the search by mistake and moved the map along.
     private var mapLayout: Bool { showNearbyMap && wideMap == nil && !location.isDenied }
 
     var body: some View {
-        Group {
-            if mapLayout {
-                GeometryReader { geo in
-                    ZStack(alignment: .bottom) {
-                        NearbyMap(here: location.coordinate, groups: groups,
-                                  onOpenStation: { openedStop = StopTarget($0) })
-                            // Frame you and the stations in the part of the map the panel leaves free.
-                            .safeAreaPadding(.bottom, max(geo.size.height - panelTop, 0) + 8)
-                            .ignoresSafeArea(edges: .bottom)
-                        TripPanel(peek: NearbyMap.peek, topGap: NearbyMap.topGap, start: .half,
-                                  onTop: { top in withAnimation(.easeInOut(duration: 0.25)) { panelTop = top } }) {
-                            whereToButton.padding(.horizontal, 16)
-                        } content: {
-                            board(search: false)
-                        }
-                    }
-                }
-            } else {
-                board(search: true)
-            }
-        }
+        board(hero: mapLayout)
         .navigationTitle("Nearby")
         .navigationBarTitleDisplayMode(mapLayout ? .inline : .automatic)
         .screenTrail("Nearby")
@@ -83,8 +62,18 @@ struct NearbyView: View {
                 Button { showMap = true } label: { Label("Station map", systemImage: "map") }
             }
         }
-        .sheet(isPresented: $searching) {
-            PlaceSearchView(title: "Where to?", allowCurrentLocation: false) { endpoint in go(endpoint) }
+        // The search opens as a page of its own, not as a window over the board.
+        .navigationDestination(isPresented: $searching) {
+            PlaceSearchView(title: "Where to?", allowCurrentLocation: false, embedded: true) { endpoint in
+                // Back from the search without a second slide, then on to the routes.
+                var t = Transaction()
+                t.disablesAnimations = true
+                withTransaction(t) { searching = false }
+                Task {
+                    try? await Task.sleep(for: .milliseconds(120))
+                    go(endpoint)
+                }
+            }
         }
         .navigationDestination(isPresented: Bindable(app).showGoNow) { GoNowView() }
         .navigationDestination(item: $openedStop) { s in
@@ -119,11 +108,11 @@ struct NearbyView: View {
     }
 
     /// The board: where to, your next trip, notes, mode chips and the stations with their departures.
-    /// With the map the search is on top of the panel instead (`search: false`).
-    private func board(search: Bool) -> some View {
+    /// With `hero` the map is the picture at its top.
+    private func board(hero: Bool) -> some View {
         List {
-            // With the map the search heads the panel; the card stays for Home, Work and the next trip.
-            if search || !favorites.pinned.isEmpty || nextTrip != nil { goSection(search: search) }
+            if hero { MapHeroSpace { showMap = true } }
+            goSection(search: true)
             activeTripSection
             OfflineNote()
             // Where you are, data is missing: the board below may be only a part of what runs.
@@ -223,9 +212,11 @@ struct NearbyView: View {
             }
         }
         .readableWidth()
-        .inkList()
+        .inkList(hero: hero) { insets in
+            NearbyMap(here: location.coordinate, groups: groups, onOpenStation: { _ in }, preview: true)
+                .safeAreaPadding(insets)
+        }
         .tint(Color.ink)
-        .contentMargins(.top, search ? nil : 4, for: .scrollContent)
     }
 
     private var refreshEnabled: Bool { isVisible && scenePhase == .active && app.tab == .nearby && !showMap && !app.showGoNow }

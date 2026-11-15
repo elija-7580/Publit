@@ -3,6 +3,9 @@ import SwiftUI
 struct PlaceSearchView: View {
     let title: LocalizedStringKey
     let allowCurrentLocation: Bool
+    /// Pushed onto the caller's navigation stack (Nearby) instead of shown as its own sheet:
+    /// no second window over the screen. The caller goes back itself after a pick.
+    var embedded = false
     let onSelect: (Endpoint) -> Void
 
     @Environment(\.dismiss) private var dismiss
@@ -11,129 +14,90 @@ struct PlaceSearchView: View {
     @Environment(SearchHistoryStore.self) private var history
     @State private var confirmClear = false
     @State private var query = ""
-    @State private var results: [GeocodeMatch] = []
-    @State private var errorMessage: String?
-    @State private var isSearching = false
-    /// Query the current results belong to; "No matches." only after a real search.
-    @State private var searchToken = UUID()
-    @State private var searched: String?
-    @State private var scope: SearchScope = .all
-    /// Google's suggestions (Settings → Search), listed like the other hits; looked up when picked.
-    @State private var googleResults: [GooglePlaces.Suggestion] = []
-    @State private var googleSession = UUID().uuidString
-    @State private var resolving: String?
+    @State private var scope: PlaceSearchScope = .all
+    @State private var search = PlaceSearchModel()
+    @State private var fieldActive = false
+    /// One pick at a time: a second tap while a suggestion is looked up does nothing.
+    @State private var picked = false
 
-    /// Search everything, or only stops, addresses or places (shops, sights, airports…).
-    enum SearchScope: String, CaseIterable, Identifiable {
-        case all, stops, addresses, places
-        var id: String { rawValue }
-        var apiType: String? {
-            switch self {
-            case .all: return nil
-            case .stops: return "STOP"
-            case .addresses: return "ADDRESS"
-            case .places: return "PLACE"
-            }
-        }
-        var title: LocalizedStringKey {
-            switch self {
-            case .all: return "All"
-            case .stops: return "Stops"
-            case .addresses: return "Addresses"
-            case .places: return "Places"
+    var body: some View {
+        if embedded {
+            content
+        } else {
+            NavigationStack {
+                content
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                    }
             }
         }
     }
 
-    var body: some View {
-        NavigationStack {
-            List {
-                if query.trimmingCharacters(in: .whitespaces).isEmpty {
-                    // Home and Work first, then the current location, other saved places, recent ones.
-                    Section {
-                        ForEach(PlaceRole.allCases, id: \.self) { role in
-                            if let p = favorites.place(for: role) {
-                                Button { select(.place(p)) } label: {
-                                    Label {
-                                        VStack(alignment: .leading, spacing: 1) {
-                                            Text(role.title).foregroundStyle(.primary)
-                                            Text(verbatim: p.name).font(.caption).foregroundStyle(.secondary).lineLimit(1)
-                                        }
-                                    } icon: { Image(systemName: role.symbol) }
-                                }
-                                .accessibilityIdentifier("pick-\(role.rawValue)")
+    private var content: some View {
+        List {
+            if query.trimmingCharacters(in: .whitespaces).isEmpty {
+                // Home and Work first, then the current location, other saved places, recent ones.
+                Section {
+                    ForEach(PlaceRole.allCases, id: \.self) { role in
+                        if let p = favorites.place(for: role) {
+                            Button { select(.place(p)) } label: {
+                                Label {
+                                    VStack(alignment: .leading, spacing: 1) {
+                                        Text(role.title).foregroundStyle(.primary)
+                                        Text(verbatim: p.name).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                                    }
+                                } icon: { Image(systemName: role.symbol) }
                             }
-                        }
-                        if allowCurrentLocation && !location.isDenied {
-                            Button { select(.currentLocation) } label: {
-                                Label("Current location", systemImage: "location.fill")
-                            }
+                            .accessibilityIdentifier("pick-\(role.rawValue)")
                         }
                     }
-                    let others = favorites.items.filter { $0.role == nil }
-                    if !others.isEmpty {
-                        Section("Saved") {
-                            ForEach(others) { f in
-                                Button { select(.place(f)) } label: {
-                                    PlaceLabel(name: f.name, subtitle: f.subtitle, isStop: f.isStop)
-                                }
-                            }
-                        }
-                    }
-                    recentSection
-                } else {
-                    if let errorMessage {
-                        Text(errorMessage).foregroundStyle(.secondary)
-                    } else if results.isEmpty && googleResults.isEmpty && !isSearching && searched == query.trimmingCharacters(in: .whitespaces) + "|" + scope.rawValue {
-                        Text("No matches.").foregroundStyle(.secondary)
-                    }
-                    ForEach(results) { m in
-                        let saved = SavedPlace(match: m)
-                        Button { select(.place(saved)) } label: {
-                            HStack(spacing: 8) {
-                                PlaceLabel(name: m.name, subtitle: m.subtitle, isStop: m.isStop)
-                                Spacer(minLength: 0)
-                                // Data is missing around this place: said before it is picked.
-                                CoverageMark(point: saved.coordinate)
-                            }
-                        }
-                        .swipeActions {
-                            Button { favorites.toggle(saved) } label: {
-                                Label("Save", systemImage: favorites.contains(saved) ? "star.slash" : "star")
-                            }
-                            .tint(Color.inkAction)
-                        }
-                    }
-                    ForEach(googleResults) { g in
-                        Button { pick(g, save: false) } label: {
-                            HStack {
-                                PlaceLabel(name: g.name, subtitle: g.subtitle, isStop: false)
-                                if resolving == g.id { Spacer(); ProgressView() }
-                            }
-                        }
-                        .disabled(resolving != nil)
-                        .swipeActions {
-                            Button { pick(g, save: true) } label: { Label("Save", systemImage: "star") }
-                                .tint(Color.inkAction)
+                    if allowCurrentLocation && !location.isDenied {
+                        Button { select(.currentLocation) } label: {
+                            Label("Current location", systemImage: "location.fill")
                         }
                     }
                 }
+                let others = favorites.items.filter { $0.role == nil }
+                if !others.isEmpty {
+                    Section("Saved") {
+                        ForEach(others) { f in
+                            Button { select(.place(f)) } label: {
+                                PlaceLabel(name: f.name, subtitle: f.subtitle, isStop: f.isStop)
+                            }
+                        }
+                    }
+                }
+                recentSection
+            } else {
+                if let message = search.errorMessage {
+                    Text(verbatim: message).foregroundStyle(.secondary)
+                } else if search.hits.isEmpty && !search.isSearching && search.searched == PlaceSearchModel.key(query, scope) {
+                    Text("No matches.").foregroundStyle(.secondary)
+                }
+                ForEach(search.hits) { hit in
+                    PlaceHitRow(hit: hit, resolving: search.resolving) { save in pick(hit, save: save) }
+                }
             }
-            .inkList()
-            .environment(\.liveBarInset, 0)
-            .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always),
-                        prompt: "Address, stop or place")
-            .searchScopes($scope, activation: .onTextEntry) {
-                ForEach(SearchScope.allCases) { Text($0.title).tag($0) }
-            }
-            .autocorrectionDisabled()
-            .navigationTitle(title)
-            .screenTrail("Place search")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
-            }
-            .task(id: "\(scope.rawValue)|\(query)") { await search() }
+        }
+        .inkList()
+        .environment(\.liveBarInset, 0)
+        .searchable(text: $query, isPresented: $fieldActive, placement: .navigationBarDrawer(displayMode: .always),
+                    prompt: "Address, stop or place")
+        .searchScopes($scope, activation: .onTextEntry) {
+            ForEach(PlaceSearchScope.allCases) { Text(verbatim: $0.title).tag($0) }
+        }
+        .autocorrectionDisabled()
+        .onSubmit(of: .search) { if let first = search.hits.first { pick(first, save: false) } }
+        .navigationTitle(title)
+        .screenTrail("Place search")
+        .navigationBarTitleDisplayMode(.inline)
+        // Opened to type: the keyboard is up right away, as in Apple Maps.
+        .task {
+            try? await Task.sleep(for: .milliseconds(embedded ? 450 : 350))
+            fieldActive = true
+        }
+        .task(id: "\(scope.rawValue)|\(query)") {
+            await search.search(query, scope: scope, near: location.coordinate)
         }
     }
 
@@ -176,113 +140,66 @@ struct PlaceSearchView: View {
     }
 
     private func select(_ endpoint: Endpoint) {
+        guard !picked else { return }
+        picked = true
         onSelect(endpoint)
-        dismiss()
+        if !embedded { dismiss() }
     }
 
-    private func search() async {
-        let token = UUID()
-        searchToken = token
-        let text = query.trimmingCharacters(in: .whitespaces)
-        guard text.count >= 2 else { results = []; googleResults = []; errorMessage = nil; searched = nil; isSearching = false; return }
-        // Debounce: the task is cancelled when the query changes again.
-        try? await Task.sleep(for: .milliseconds(300))
-        guard !Task.isCancelled else { return }
-        isSearching = true
-        defer { if searchToken == token { isSearching = false } }
-        // A pasted link from Google Maps, Apple Maps or OpenStreetMap: the place it points to.
-        if let link = MapLink.parse(text: text) {
-            let place = await MapLink.resolve(link)
-            guard !Task.isCancelled, searchToken == token else { return }
-            if let place, let lat = place.lat, let lon = place.lon {
-                results = [GeocodeMatch.picked(name: place.name ?? L10n.t("Place from the link"), at: LatLon(lat: lat, lon: lon))]
-                googleResults = []
-                errorMessage = nil
-                searched = text + "|" + scope.rawValue
-                return
-            }
-            if let name = place?.name ?? link.name, name != text {
-                await searchNames(name, token: token)
-                return
+    /// A hit is used as it is; a suggestion is looked up first (it has no coordinates yet).
+    private func pick(_ hit: PlaceHit, save: Bool) {
+        switch hit {
+        case .match(let m):
+            let place = SavedPlace(match: m)
+            if save { favorites.toggle(place) } else { select(.place(place)) }
+        case .suggestion(let s):
+            guard search.resolving == nil, !picked else { return }
+            Task {
+                guard let m = await search.resolve(s) else { return }
+                let place = SavedPlace(match: m)
+                if save { favorites.toggle(place) } else { select(.place(place)) }
             }
         }
-        await searchNames(text, token: token)
     }
+}
 
-    private func searchNames(_ text: String, token: UUID) async {
-        let useGoogle = GooglePlaces.isActive && scope != .stops
-        let type = useGoogle && scope == .all ? nil : scope.apiType
-        let near = SearchBias.position(for: text, location: location.coordinate)
-        async let transit = TransitousClient.shared.geocode(text, near: near, type: type)
-        // Apple Maps for addresses and places next to Transitous: OpenStreetMap often has the street
-        // but not the house number (or not the street). Not with Google, which covers the same.
-        let askApple = !useGoogle && scope != .stops
-        async let apple: [GeocodeMatch] = askApple
-            ? AppleSearch.places(text, near: near, addresses: scope != .places, places: scope != .addresses)
-            : []
-        var google: [GooglePlaces.Suggestion]?
-        if useGoogle {
-            google = try? await GooglePlaces.autocomplete(text, near: location.coordinate, session: googleSession)
-        }
-        do {
-            var r = try await transit
-            guard !Task.isCancelled, searchToken == token else { return }
-            let fromApple = await apple
-            guard !Task.isCancelled, searchToken == token else { return }
-            if near != nil, SearchBias.needsWiderSearch(text, results: r + fromApple),
-               let wide = try? await TransitousClient.shared.geocode(text, near: nil, type: type) {
-                guard !Task.isCancelled, searchToken == token else { return }
-                r = SearchBias.merge(r, wide.filter { !SearchBias.needsWiderSearch(text, results: [$0]) })
-            }
-            if let google {
-                // Google for places and addresses, Transitous for the stops (they route best).
-                r = scope == .all ? Array(r.filter(\.isStop).prefix(4)) : []
-                googleResults = google.filter { g in
-                    !g.isStop && (scope == .addresses ? g.isAddress : scope == .places ? !g.isAddress : true)
+/// One line of the place search: a stop, an address or a place, with "Save" on a swipe.
+struct PlaceHitRow: View {
+    let hit: PlaceHit
+    let resolving: String?
+    let onPick: (_ save: Bool) -> Void
+    @Environment(FavoritesStore.self) private var favorites
+
+    var body: some View {
+        Button { onPick(false) } label: {
+            HStack(spacing: 8) {
+                switch hit {
+                case .match(let m):
+                    PlaceLabel(name: m.name, subtitle: m.subtitle, isStop: m.isStop, category: m.category)
+                    Spacer(minLength: 0)
+                    // Data is missing around this place: said before it is picked.
+                    CoverageMark(point: LatLon(lat: m.lat, lon: m.lon))
+                case .suggestion(let s):
+                    PlaceLabel(name: s.title, subtitle: s.subtitle, isStop: s.isStop)
+                    Spacer(minLength: 0)
+                    if resolving == s.id { ProgressView() }
                 }
-            } else {
-                googleResults = []
-                r = SearchBias.combine(r, fromApple, query: text)
             }
-            results = r
-            errorMessage = nil
-            searched = text + "|" + scope.rawValue
-        } catch {
-            guard !Task.isCancelled, searchToken == token else { return }
-            // Transitous failed: Apple's addresses and places still help (not the stops).
-            let fromApple = await apple
-            guard !Task.isCancelled, searchToken == token else { return }
-            if google == nil, !fromApple.isEmpty {
-                results = SearchBias.combine([], fromApple, query: text)
-                googleResults = []
-                errorMessage = nil
-                searched = text + "|" + scope.rawValue
-            } else if let google, !google.isEmpty {
-                results = []
-                googleResults = google.filter { !$0.isStop }
-                errorMessage = nil
-                searched = text + "|" + scope.rawValue
-            } else if !(error is CancellationError) && (error as? URLError)?.code != .cancelled {
-                errorMessage = error.localizedDescription
-            }
+            .contentShape(Rectangle())
         }
+        .disabled(resolving != nil)
+        .swipeActions {
+            Button { onPick(true) } label: {
+                Label("Save", systemImage: isSaved ? "star.slash" : "star")
+            }
+            .tint(Color.inkAction)
+        }
+        .accessibilityIdentifier("placeSearchResult")
     }
 
-    /// A Google suggestion has no coordinates yet: look the place up, then use or save it.
-    private func pick(_ g: GooglePlaces.Suggestion, save: Bool) {
-        resolving = g.id
-        Task {
-            defer { resolving = nil }
-            do {
-                let m = try await GooglePlaces.place(g, session: googleSession)
-                // The session ends with the pick; the next typing starts a new one.
-                googleSession = UUID().uuidString
-                let saved = SavedPlace(match: m)
-                if save { favorites.toggle(saved) } else { select(.place(saved)) }
-            } catch {
-                errorMessage = error.localizedDescription
-            }
-        }
+    private var isSaved: Bool {
+        guard let m = hit.match else { return false }
+        return favorites.contains(SavedPlace(match: m))
     }
 }
 

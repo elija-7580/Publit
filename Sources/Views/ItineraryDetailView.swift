@@ -4,9 +4,13 @@ import MapKit
 struct CompareMapView: View, Equatable {
     let itineraries: [Itinerary]
     let selectedId: String?
+    /// The picture at the top of the route list (`MapHero`): the part of the map that is covered
+    /// (under the bar, faded at the bottom). Nothing to steer; the routes fill the part that shows.
+    var previewInsets: EdgeInsets? = nil
 
     static func == (a: CompareMapView, b: CompareMapView) -> Bool {
         a.selectedId == b.selectedId && a.itineraries.map(\.routeKey) == b.itineraries.map(\.routeKey)
+            && a.previewInsets == b.previewInsets
     }
 
     /// Selected route is drawn last so it sits on top.
@@ -39,8 +43,24 @@ struct CompareMapView: View, Equatable {
         })
     }
 
+    @ViewBuilder
     private var appleMap: some View {
-        Map(initialPosition: .automatic) {
+        if let previewInsets {
+            GeometryReader { geo in
+                let points = itineraries.flatMap(RouteMap.framePoints)
+                let start: MapCameraPosition = RouteMap.fit(points, size: geo.size, insets: previewInsets)
+                    .map { MapCameraPosition.rect($0) } ?? .userLocation(fallback: .automatic)
+                routesMap(start: start, interactive: false)
+                    // New routes, new framing (the start position is only read once).
+                    .id(itineraries.map(\.routeKey).joined(separator: ","))
+            }
+        } else {
+            routesMap(start: .automatic, interactive: true)
+        }
+    }
+
+    private func routesMap(start: MapCameraPosition, interactive: Bool) -> some View {
+        Map(initialPosition: start, interactionModes: interactive ? .all : []) {
             UserAnnotation()
             ForEach(ordered, id: \.routeKey) { it in
                 let isSelected = it.routeKey == selectedId
@@ -52,6 +72,7 @@ struct CompareMapView: View, Equatable {
             }
         }
         .publitMapStyle()
+        .mapControlVisibility(interactive ? .automatic : .hidden)
     }
 }
 
@@ -93,40 +114,9 @@ struct ItineraryDetailView: View {
         let warnings = TransferRisk.warnings(for: itinerary)
         List {
             // 1. What matters first: the way at a glance, when, how long, which lines, live state and warnings.
-            Section {
-                // iPad layout: the route is on the big map next to this panel already.
-                if wideMap == nil {
-                Button { showsMap = true } label: {
-                    ZStack {
-                        Color.surface
-                        // Drawn a moment after the screen opens: building a map with a long route
-                        // made the push wait.
-                        if mapReady { RouteMap(itinerary: itinerary, isPreview: true).transition(.opacity) }
-                    }
-                    .frame(height: 200)
-                    .allowsHitTesting(false)
-                    .overlay(alignment: .bottomTrailing) {
-                        Image(systemName: "arrow.up.left.and.arrow.down.right")
-                            .font(.body.weight(.semibold))
-                            .frame(width: 40, height: 40)
-                            .matteSurface(in: Circle())
-                            .mapShadow()
-                            .padding(10)
-                    }
-                }
-                .buttonStyle(.plain)
-                .listRowInsets(EdgeInsets())
-                .listRowSeparator(.hidden)
-                .accessibilityLabel(Text("Trip overview"))
-                .accessibilityIdentifier("routePreviewMap")
-                }
-            }
-            .task {
-                guard !mapReady || !showsAll else { return }
-                try? await Task.sleep(for: .milliseconds(60))
-                showsAll = true
-                try? await Task.sleep(for: .milliseconds(300))
-                withAnimation(.easeOut(duration: 0.2)) { mapReady = true }
+            // The route as the picture at the top (iPad: it is on the big map next to this panel already).
+            if wideMap == nil {
+                MapHeroSpace { showsMap = true }
             }
 
             Section {
@@ -216,8 +206,21 @@ struct ItineraryDetailView: View {
             }
         }
         .readableWidth()
-        .inkList()
-        .sheet(isPresented: $showsMap) {
+        .inkList(hero: wideMap == nil) { insets in
+            ZStack {
+                Color.surface
+                // Drawn a moment after the screen opens: building a map with a long route made the push wait.
+                if mapReady { RouteMap(itinerary: itinerary, isPreview: true, previewInsets: insets).transition(.opacity) }
+            }
+        }
+        .task {
+            guard !mapReady || !showsAll else { return }
+            try? await Task.sleep(for: .milliseconds(60))
+            showsAll = true
+            try? await Task.sleep(for: .milliseconds(300))
+            withAnimation(.easeOut(duration: 0.2)) { mapReady = true }
+        }
+        .fullScreenCover(isPresented: $showsMap) {
             NavigationStack {
                 RouteMap(itinerary: itinerary)
                     .ignoresSafeArea(edges: .bottom)
@@ -376,6 +379,9 @@ struct RouteMap: View {
     let itinerary: Itinerary
     /// The small preview at the top of a route: no location dot, nothing to steer.
     var isPreview = false
+    /// As the picture at the top of the route (`MapHero`): the covered edges of the map, so the
+    /// route fills the part that shows.
+    var previewInsets: EdgeInsets? = nil
     @AppStorage(MapProvider.defaultsKey) private var mapProvider = MapProvider.apple.rawValue
 
     /// Where the route changes vehicle: a small mark, so the stops read at a glance.
@@ -420,6 +426,29 @@ struct RouteMap: View {
         return MKMapRect(x: cx - pw / 2, y: cy - ph / 2, width: pw, height: ph)
     }
 
+    /// The rectangle to show so that `points` (with a margin) fill the part of a map of `size`
+    /// that `insets` leave visible.
+    static func fit(_ points: [LatLon], size: CGSize, insets: EdgeInsets, margin: Double = 0.15) -> MKMapRect? {
+        let mapPoints = points.filter(\.isValidCoordinate).map { MKMapPoint($0.clCoordinate) }
+        guard let first = mapPoints.first else { return nil }
+        let vw = Double(size.width - insets.leading - insets.trailing)
+        let vh = Double(size.height - insets.top - insets.bottom)
+        guard vw > 20, vh > 20 else { return nil }
+        var minX = first.x, maxX = first.x, minY = first.y, maxY = first.y
+        for p in mapPoints { minX = min(minX, p.x); maxX = max(maxX, p.x); minY = min(minY, p.y); maxY = max(maxY, p.y) }
+        let minSide = 400 * MKMapPointsPerMeterAtLatitude(first.coordinate.latitude)
+        var pw = max(maxX - minX, minSide) * (1 + 2 * margin)
+        var ph = max(maxY - minY, minSide) * (1 + 2 * margin)
+        // The visible part's shape: widen the short side so nothing is cut off.
+        if pw / ph < vw / vh { pw = ph * vw / vh } else { ph = pw * vh / vw }
+        let perPoint = pw / vw
+        let cx = (minX + maxX) / 2, cy = (minY + maxY) / 2
+        return MKMapRect(x: cx - pw / 2 - Double(insets.leading) * perPoint,
+                         y: cy - ph / 2 - Double(insets.top) * perPoint,
+                         width: Double(size.width) * perPoint,
+                         height: Double(size.height) * perPoint)
+    }
+
     private var googleContent: GoogleMapContent {
         var content = GoogleMapContent(lines: itinerary.legs.map {
             GoogleMapContent.Line(points: $0.overviewPath, color: $0.isTransit ? $0.lineStroke : Color.routeAhead,
@@ -441,12 +470,17 @@ struct RouteMap: View {
 
     private var appleMap: some View {
         GeometryReader { geo in
-            appleMap(aspect: geo.size.height > 0 ? Double(geo.size.width / geo.size.height) : nil)
+            if let previewInsets {
+                appleMap(start: Self.fit(Self.framePoints(itinerary), size: geo.size, insets: previewInsets)
+                    .map { MapCameraPosition.rect($0) } ?? .automatic)
+            } else {
+                appleMap(start: Self.frame(itinerary, aspect: geo.size.height > 0 ? Double(geo.size.width / geo.size.height) : nil)
+                    .map { MapCameraPosition.rect($0) } ?? .automatic)
+            }
         }
     }
 
-    private func appleMap(aspect: Double?) -> some View {
-        let start: MapCameraPosition = Self.frame(itinerary, aspect: aspect).map { MapCameraPosition.rect($0) } ?? .automatic
+    private func appleMap(start: MapCameraPosition) -> some View {
         return Map(initialPosition: start, interactionModes: isPreview ? [] : .all) {
             if !isPreview { UserAnnotation() }
             ForEach(Array(itinerary.legs.enumerated()), id: \.offset) { _, leg in

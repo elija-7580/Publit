@@ -80,6 +80,7 @@ struct LiveTripView: View {
              trace: TripTrace.Progress(legIndex: steps[live].legIndex, kind: steps[live].kind,
                                        point: index == live && step.kind == .ride ? (vehicle ?? here) : here),
              detour: detourRoute.map { (legIndex: step.legIndex, points: $0.points) },
+             exit: walk?.exitDoor,
              isLive: index == live,
              overview: $overview,
              away: away,
@@ -774,6 +775,20 @@ struct GuideStopRow: View {
     }
 }
 
+/// The station door a walk goes out by, on the live map.
+private struct ExitMark: View {
+    var body: some View {
+        Image(systemName: "door.left.hand.open")
+            .font(.system(size: 12, weight: .bold))
+            .foregroundStyle(Color.onInk)
+            .frame(width: 26, height: 26)
+            .background(Color.ink, in: Circle())
+            .overlay(Circle().strokeBorder(.white, lineWidth: 2))
+            .shadow(color: .black.opacity(0.3), radius: 2, y: 1)
+            .accessibilityHidden(true)
+    }
+}
+
 /// The map of the stage: its leg in full colour, the rest faded; you, the vehicle and the next turn.
 private struct GuideMap: View {
     let itinerary: Itinerary
@@ -784,6 +799,8 @@ private struct GuideMap: View {
     let trace: TripTrace.Progress
     /// The walk from where you are, replacing the planned one of that leg.
     let detour: (legIndex: Int, points: [LatLon])?
+    /// The station door the walk goes out by, with its number or name.
+    var exit: (point: LatLon, label: String?)? = nil
     /// The stage shown is the one you are on: only then does a walk follow your position.
     var isLive = true
     @State private var camera: MapCameraPosition = .automatic
@@ -891,6 +908,11 @@ private struct GuideMap: View {
                         .overlay(Circle().strokeBorder(.white, lineWidth: 3))
                 }
             }
+            if let exit {
+                Annotation(exit.label.map { L10n.f("Take exit %@", $0) } ?? "", coordinate: exit.point.clCoordinate, anchor: .center) {
+                    ExitMark()
+                }
+            }
             if let focus {
                 Annotation("", coordinate: focus.clCoordinate) {
                     Circle().fill(Color.signature).frame(width: 14, height: 14)
@@ -943,6 +965,10 @@ private struct GuideMap: View {
         }
         if let focus {
             content.pins.append(.init(coordinate: focus, kind: .dot(color: Color.signature, border: .black.opacity(0.6), size: 14, borderWidth: 2)))
+        }
+        if let exit {
+            content.pins.append(.init(coordinate: exit.point,
+                                      kind: .marker(title: exit.label.map { L10n.f("Take exit %@", $0) } ?? "", color: Color.ink)))
         }
         return content
     }

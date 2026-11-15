@@ -3,7 +3,7 @@
 > Nicht von Hand bearbeiten. Erzeugt von `scripts/feature_inventory.py` (CI: `features-doc.yml`).
 > Die ausführliche Beschreibung steht in [FUNKTIONEN.md](FUNKTIONEN.md).
 
-**181 Views, 5 App Intents, 3 Widgets in 73 Dateien.**
+**184 Views, 5 App Intents, 3 Widgets in 74 Dateien.**
 
 ## `Sources/App/DesignSamples.swift`
 - Views: `DesignSampleView`
@@ -101,6 +101,10 @@
 - Views: `LogoLoader`
 - Sichtbare Texte: Loading…
 
+## `Sources/Views/Components/MapHero.swift`
+- Views: `MapHeroSpace`
+- Sichtbare Texte: Map
+
 ## `Sources/Views/Components/ModeFilterBar.swift`
 - Views: `ModeFilterBar`
 - Sichtbare Texte: All · Filter by mode
@@ -122,11 +126,11 @@
 
 ## `Sources/Views/GoNowView.swift`
 - Views: `GoNowView`
-- Sichtbare Texte: From · Change · Walk all the way · Later connections · From your location · from %@ · Route
+- Sichtbare Texte: From · Change · Walk all the way · Later connections · From your location · from %@ · Route · Done
 
 ## `Sources/Views/ItineraryDetailView.swift`
 - Views: `CompareMapView`, `ItineraryDetailView`, `RouteSummary`, `RouteMap`, `RouteMark`, `VehicleKindLine`, `LegRow`, `GetOffButton`, `StatusBanner`, `TimelineLegRow`, `TimelineEndRow`, `TimelineRail`, `LeaveHero`
-- Sichtbare Texte: Destination · Trip overview · Driving times are without traffic and parking. · Steps · Done · Route · Live · Cancelled · Rail replacement bus · Timetable · This trip is cancelled. · Pick up at %@ · Return at %@ · Rent in the provider's app · +%lld min · Platform %@ · Reminder set · Remind me to get off · We'll notify you at %@. · This stop is less than two minutes away. · Allow notifications for Publit in Settings. · On time · Line %@: all stops and map · Board at %@ · Get off at %@ · Service changes on this route · Arrive
+- Sichtbare Texte: Destination · Driving times are without traffic and parking. · Steps · Trip overview · Done · Route · Live · Cancelled · Rail replacement bus · Timetable · This trip is cancelled. · Pick up at %@ · Return at %@ · Rent in the provider's app · +%lld min · Platform %@ · Reminder set · Remind me to get off · We'll notify you at %@. · This stop is less than two minutes away. · Allow notifications for Publit in Settings. · On time · Line %@: all stops and map · Board at %@ · Get off at %@ · Service changes on this route · Arrive
 
 ## `Sources/Views/LaunchSplash.swift`
 - Views: `LaunchSplash`
@@ -140,8 +144,8 @@
 - Sichtbare Texte: Europe and beyond · Routes, timetables and live times where operators publish them · Vienna · Live departures, disruptions, lifts out of service · Austria · Trains, and buses and trams where reported: delays, cancellations, construction work · Switzerland · Delays, cancellations and track changes of trains, trams, buses and boats · North Rhine-Westphalia · Live times of buses, trams and trains where Transitous has none · Berlin and Brandenburg · Hesse · Lower Saxony and Bremen · Schleswig-Holstein · Rhineland-Palatinate · Venice · Live times of waterbuses and buses · Stockholm · Live departures and disruptions · London · Line status and disruptions (Powered by TfL Open Data) · The extra operators only get the stop, line and time of a ride, never your location or account. · Live data sources
 
 ## `Sources/Views/LiveTripView.swift`
-- Views: `LiveTripView`, `StageStrip`, `GuideStopRow`, `GuideMap`, `HeadingRow`, `PlatformChangeLabel`, `AlternativeRow`, `StagePager`, `StageRow`
-- Sichtbare Texte: You seem to be off the route. · Missed it? · Connection cancelled · Done · Back to now · Trip overview · Route details · Walk to %@ · Board here · Platform %@ · Walk faster to make it. · In %@ · Directions · Get off at %@ · +%lld min · On time · Rail replacement bus · This trip is cancelled. · Next stop · in %@ · Position from your location. · Position estimated from live stop times. · Position estimated from the timetable. · Line %@: all stops and map · Stops · You have arrived · Arrive at %@ · Destination in %@ · End trip · Show ticket · Map style · 3D terrain and buildings · More · Turn off spoken directions · Turn on spoken directions · Backup: %@ at %@ · Your change at %@ may not work (%lld %%). · Departs in %lld min · Departs now · Departed %@ · Board at %@ · Now at %@ · Next: %@ · Take %@ towards %@ · Take %@ · Get off here · Pl. %@ · Stop turning the map · Turn the map with you · No compass: the arrow has north at the top. · Platform changed (was %@) · Your trip: arrive %@ · Looking for the next connection… · No other connection found right now. · Fewer connections · Other connections · New route from here · Walk · Arrive %@ · Switch · Switch to this connection · now
+- Views: `LiveTripView`, `StageStrip`, `GuideStopRow`, `ExitMark`, `GuideMap`, `HeadingRow`, `PlatformChangeLabel`, `AlternativeRow`, `StagePager`, `StageRow`
+- Sichtbare Texte: You seem to be off the route. · Missed it? · Connection cancelled · Done · Back to now · Trip overview · Route details · Walk to %@ · Board here · Platform %@ · Walk faster to make it. · In %@ · Directions · Get off at %@ · +%lld min · On time · Rail replacement bus · This trip is cancelled. · Next stop · in %@ · Position from your location. · Position estimated from live stop times. · Position estimated from the timetable. · Line %@: all stops and map · Stops · You have arrived · Arrive at %@ · Destination in %@ · End trip · Show ticket · Map style · 3D terrain and buildings · More · Turn off spoken directions · Turn on spoken directions · Backup: %@ at %@ · Your change at %@ may not work (%lld %%). · Departs in %lld min · Departs now · Departed %@ · Board at %@ · Now at %@ · Next: %@ · Take %@ towards %@ · Take %@ · Get off here · Pl. %@ · Stop turning the map · Turn the map with you · Take exit %@ · No compass: the arrow has north at the top. · Platform changed (was %@) · Your trip: arrive %@ · Looking for the next connection… · No other connection found right now. · Fewer connections · Other connections · New route from here · Walk · Arrive %@ · Switch · Switch to this connection · now
 
 ## `Sources/Views/Map/GoogleMapView.swift`
 - Sichtbare Texte: Apple Maps
@@ -161,8 +165,8 @@
 - Sichtbare Texte: Skip · Public transport, without the noise. · Departures near you, routes across Europe and a guide until you get off. No ads, no account, no tracking. · Departures where you are · On the way · Get started · Continue · Home and Work · One tap to get home or to work, from anywhere. You can change them any time in Saved. · Not set
 
 ## `Sources/Views/PlaceSearchView.swift`
-- Views: `PlaceSearchView`, `PlaceLabel`, `CategoryIcon`
-- Sichtbare Texte: Current location · Saved · No matches. · Save · Cancel · from %@ · Remove · Clear history · Recently searched · Place from the link
+- Views: `PlaceSearchView`, `PlaceHitRow`, `PlaceLabel`, `CategoryIcon`
+- Sichtbare Texte: Cancel · Current location · Saved · No matches. · from %@ · Remove · Clear history · Recently searched · Save
 
 ## `Sources/Views/PlanView.swift`
 - Views: `PlanView`, `EndpointConnector`, `ItineraryRow`, `TimelineBar`
