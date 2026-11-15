@@ -70,7 +70,7 @@ struct TripPanel<Header: View, Content: View>: View {
                     // after pulling the panel by a row would also open that row.
                     .allowsHitTesting(drag.vertical != true)
             }
-            .frame(width: geo.size.width, height: height - topGap, alignment: .top)
+            .frame(width: geo.size.width, height: max(height - topGap, 0), alignment: .top)
             .background {
                 UnevenRoundedRectangle(topLeadingRadius: 22, topTrailingRadius: 22, style: .continuous)
                     .fill(Color.ground)
