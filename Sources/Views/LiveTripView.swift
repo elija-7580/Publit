@@ -812,6 +812,9 @@ private struct GuideMap: View {
     var away = false
     var toggleOverview: () -> Void = {}
     @AppStorage(MapProvider.defaultsKey) private var mapProvider = MapProvider.apple.rawValue
+    @Environment(LocationManager.self) private var location
+    /// The map's own turn when it last stopped moving, for the arrow on your position.
+    @State private var mapHeading = 0.0
 
     var body: some View {
         mapLayer
@@ -875,7 +878,6 @@ private struct GuideMap: View {
     private var appleMap: some View {
         let current = itinerary.legs[step.legIndex]
         return Map(position: $camera) {
-            UserAnnotation()
             ForEach(Array(itinerary.legs.enumerated()), id: \.offset) { i, leg in
                 let active = overview || i == step.legIndex
                 let width: CGFloat = active ? 6 : 4
@@ -929,9 +931,13 @@ private struct GuideMap: View {
                        coordinate: (step.kind == .wait ? current.from : current.to).coordinate.clCoordinate)
                     .tint(step.kind == .arrive ? Color.danger : Color.ink)
             }
+            // You, on top. Turning with you, the map points where you face: the arrow then points up.
+            YouAreHere(here: location.coordinate, heading: location.heading,
+                       mapHeading: followHeading ? (location.heading ?? 0) : mapHeading)
         }
         .publitMapStyle()
         .mapControls { MapUserLocationButton(); MapCompass() }
+        .onMapCameraChange(frequency: .onEnd) { mapHeading = $0.camera.heading }
     }
 
     /// The same drawing as the Apple map, for Google's.

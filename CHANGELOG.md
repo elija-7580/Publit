@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1 (build 80) – the same on every map
+
+- **Your position with the arrow on every map**: the blue dot with the arrow the way you hold the iPhone is now the same in Nearby, the station map, the live trip, route and line maps and on the iPad. When the map is turned, the arrow still points the real way. The compass runs only while a map is on screen.
+- **Station map close up**: zoomed in close (about 450 m), every stop gets its own pin, whatever runs there: each side of the street and each platform, as Nearby lists them. Further out, street stops are split by side as before, and from about 1.5 km stations are one pin.
+
 ## 0.1.1 (build 79) – arrow on your position
 
 - **Nearby map**: your position is a blue dot with an arrow that points the way you hold the iPhone. The walk drawn to the nearest station (build 77) is gone again.

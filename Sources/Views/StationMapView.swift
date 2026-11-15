@@ -45,7 +45,7 @@ final class TransitMapModel {
     @ObservationIgnored private var active = true
     @ObservationIgnored private var stationCoverage: MapStopCache.Coverage?
     @ObservationIgnored private var rawStops: [MapStop] = []
-    @ObservationIgnored private var separatePoles = false
+    @ObservationIgnored private var separation = MapStation.Separation.none
     @ObservationIgnored private var buildGeneration = UUID()
 
     /// Spans (degrees latitude) above which a layer is not loaded: too much to show or download.
@@ -142,12 +142,12 @@ final class TransitMapModel {
         // A margin around the screen: stations at the edge have all their platforms, so their pins stay put.
         let (viewLo, viewHi) = Self.box(r, grow: 0)
         let zoom = max(14, min(16, Self.zoom(r)))
-        let separate = r.span.latitudeDelta <= MapStation.poleSpan
-        if (separate != separatePoles || allStations.isEmpty), !rawStops.isEmpty {
+        let separate = MapStation.separation(span: r.span.latitudeDelta)
+        if (separate != separation || allStations.isEmpty), !rawStops.isEmpty {
             let cached = rawStops
-            let grouped = await Task.detached(priority: .userInitiated) { MapStation.group(cached, separatePoles: separate) }.value
+            let grouped = await Task.detached(priority: .userInitiated) { MapStation.group(cached, separation: separate) }.value
             guard !Task.isCancelled else { return }
-            separatePoles = separate; allStations = grouped; bumpStations()
+            separation = separate; allStations = grouped; bumpStations()
         }
         if let stationCoverage, stationCoverage.contains(min: viewLo, max: viewHi, zoom: zoom) { return }
         let (lo, hi) = Self.box(r, grow: 0.3)
@@ -164,10 +164,10 @@ final class TransitMapModel {
         guard !Task.isCancelled else { return }
         stationsError = nil
         rawStops = stops
-        let currentSeparate = (region?.span.latitudeDelta ?? r.span.latitudeDelta) <= MapStation.poleSpan
-        let grouped = await Task.detached(priority: .userInitiated) { MapStation.group(stops, separatePoles: currentSeparate) }.value
+        let currentSeparate = MapStation.separation(span: region?.span.latitudeDelta ?? r.span.latitudeDelta)
+        let grouped = await Task.detached(priority: .userInitiated) { MapStation.group(stops, separation: currentSeparate) }.value
         guard !Task.isCancelled else { return }
-        separatePoles = currentSeparate
+        separation = currentSeparate
         allStations = grouped
         // Marked as covered only once its pins are on the map: a download or grouping cut off
         // halfway (map closed, app in the background) used to leave the area "covered" but empty.
@@ -358,7 +358,8 @@ struct StationMapView: View {
                            onPick: { place, refined in pick(place, refined: refined) },
                            onTapEmpty: { if selection != nil { selection = nil; focus = nil } },
                            recenter: recenter,
-                           places: categoryHits, placesVersion: categoryVersion)
+                           places: categoryHits, placesVersion: categoryVersion,
+                           heading: location.heading)
                 .ignoresSafeArea(edges: .bottom)
                 // Floating over the map, no bar behind it. The map does not reach under the
                 // navigation bar at the top, so the chips always stay visible below it.
@@ -437,6 +438,7 @@ struct StationMapView: View {
                 }
         }
         .environment(\.liveBarInset, 0)
+        .compassWhileShown("stationMap")
         .onAppear {
             model.resume()
             if center == nil { center = location.coordinate }

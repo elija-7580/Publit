@@ -73,6 +73,8 @@ struct TransitMapView: UIViewRepresentable {
     /// "Find nearby" hits (all restaurants, pharmacies … in view), as coloured Apple Maps style markers.
     var places: [GeocodeMatch] = []
     var placesVersion = 0
+    /// Which way the iPhone points (compass), for the arrow on your position.
+    var heading: Double? = nil
 
     func makeCoordinator() -> Coordinator { Coordinator(self) }
 
@@ -90,6 +92,7 @@ struct TransitMapView: UIViewRepresentable {
         map.register(MKMarkerAnnotationView.self, forAnnotationViewWithReuseIdentifier: SearchPin.reuseId)
         map.register(MKMarkerAnnotationView.self, forAnnotationViewWithReuseIdentifier: PlacePin.reuseId)
         map.register(MKMarkerAnnotationView.self, forAnnotationViewWithReuseIdentifier: MKMapViewDefaultClusterAnnotationViewReuseIdentifier)
+        map.register(UserHeadingView.self, forAnnotationViewWithReuseIdentifier: UserHeadingView.reuseId)
         // Long press drops a pin anywhere ("I want to go there"), like in Apple Maps.
         let press = UILongPressGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.longPressed(_:)))
         press.minimumPressDuration = 0.5
@@ -119,6 +122,7 @@ struct TransitMapView: UIViewRepresentable {
         context.coordinator.applyCoverage(coverage, to: map)
         context.coordinator.applyFocus(focus, to: map)
         context.coordinator.applyPlaces(places, version: placesVersion, to: map)
+        context.coordinator.showHeading(on: map)
         if recenter != context.coordinator.recentered {
             context.coordinator.recentered = recenter
             map.setUserTrackingMode(.follow, animated: true)
@@ -330,6 +334,17 @@ struct TransitMapView: UIViewRepresentable {
         func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
             reportedRegion = true
             parent.onRegion(mapView.region)
+            showHeading(on: mapView)
+        }
+
+        /// Turning the map turns the arrow back, so it keeps pointing the real way.
+        func mapViewDidChangeVisibleRegion(_ mapView: MKMapView) {
+            showHeading(on: mapView)
+        }
+
+        /// Your position: the arrow the way you hold the iPhone, against the map's own rotation.
+        func showHeading(on map: MKMapView) {
+            (map.view(for: map.userLocation) as? UserHeadingView)?.show(heading: parent.heading, mapHeading: map.camera.heading)
         }
 
         /// The first region also when MapKit sends no region change for the start position
@@ -369,6 +384,10 @@ struct TransitMapView: UIViewRepresentable {
 
         func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
             switch annotation {
+            case let you as MKUserLocation:
+                let v = mapView.dequeueReusableAnnotationView(withIdentifier: UserHeadingView.reuseId, for: you) as! UserHeadingView
+                v.show(heading: parent.heading, mapHeading: mapView.camera.heading)
+                return v
             case let pin as StationPin:
                 let v = mapView.dequeueReusableAnnotationView(withIdentifier: StationPinView.reuseId, for: pin) as! StationPinView
                 v.show(pin.station)

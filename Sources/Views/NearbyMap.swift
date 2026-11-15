@@ -43,15 +43,9 @@ struct NearbyMap: View {
                     .accessibilityIdentifier("nearbyMapStation")
                 }
             }
-            // On top of the stations. Your position with an arrow the way you hold the iPhone (the picture is north up and
-            // does not turn, so the compass heading is the arrow's angle). Without a compass: the dot.
-            if let here {
-                Annotation("", coordinate: here.clCoordinate, anchor: .center) {
-                    HeadingDot(heading: heading)
-                }
-            } else {
-                UserAnnotation()
-            }
+            // On top of the stations: you, with the arrow the way you hold the iPhone (the picture is
+            // north up and does not turn).
+            YouAreHere(here: here, heading: heading)
         }
         .mapStyle(.standard(pointsOfInterest: .excludingAll))
         .mapControls { MapUserLocationButton(); MapCompass() }
@@ -73,26 +67,5 @@ struct NearbyMap: View {
         let far = stations.map { here.distance(to: $0) }.max() ?? 0
         let radius = max(250, far * 1.25)
         return MKCoordinateRegion(center: here.clCoordinate, latitudinalMeters: radius * 2, longitudinalMeters: radius * 2)
-    }
-}
-
-/// Your position on the Nearby map: the blue dot, with an arrow the way you face when the compass runs.
-struct HeadingDot: View {
-    let heading: Double?
-
-    var body: some View {
-        ZStack {
-            Circle().fill(Color.blue.opacity(0.18)).frame(width: 44, height: 44)
-            Circle().fill(Color.blue).frame(width: 26, height: 26)
-                .overlay(Circle().strokeBorder(.white, lineWidth: 3))
-            if let heading {
-                Image(systemName: "location.north.fill")
-                    .font(.system(size: 11, weight: .bold))
-                    .foregroundStyle(.white)
-                    .rotationEffect(.degrees(heading))
-            }
-        }
-        .shadow(color: .black.opacity(0.25), radius: 2, y: 1)
-        .accessibilityHidden(true)
     }
 }
