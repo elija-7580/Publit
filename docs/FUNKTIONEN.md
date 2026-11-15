@@ -1,6 +1,6 @@
 # Publit iOS – Funktionen und Screens (vollständige Übersicht)
 
-> Stand: Version 0.1.1 (Build 73). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
+> Stand: Version 0.1.1 (Build 74). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
 > **Pflege:** Jede Änderung an `Sources/`, `Watch/`, `Widgets/` oder `Share/` muss diese Datei im selben Commit/PR mitändern (siehe Abschnitt „Aktualisierung“ ganz unten). Die maschinell erzeugte Liste aller Views steht in [`FUNKTIONEN-INVENTAR.md`](FUNKTIONEN-INVENTAR.md) und wird von der CI automatisch aktualisiert.
 
 ## Inhalt
@@ -77,7 +77,7 @@ Einmal nach dem Update (bzw. nach dem Onboarding, nie darüber, ca. 1,5 s nach d
 
 ## 3. Tab „In der Nähe“ (Nearby) – `NearbyView`
 
-- **Karte zur Orientierung** (`NearbyMapSection`, über den Abfahrten): dein Standort und die ersten sechs Stationen der Liste (die nächste mit gelbem Punkt), so gerahmt, dass alle hineinpassen. Tipp auf eine Station öffnet ihre Abfahrten, Tipp auf die Karte oder „Station map“ die ganze Stationskarte. Abschaltbar unter Einstellungen → Nearby → „Map“ (an).
+- **Karte als Bildschirm** (`NearbyMap`, nur iPhone, Einstellungen → Nearby → „Map“, an): wie bei der Live-Fahrt füllt die Karte den Bildschirm, die ganze Nearby-Liste liegt in einem Panel darüber (`TripPanel`: unten / halb / oben; startet **halb**). Kopf des Panels ist „Where to now?“, so ist die Suche in jeder Höhe da. Unten bleibt nur die Suche, oben die ganze Liste mit einem Kartenstreifen darüber; nur oben scrollt die Liste. Die Karte zeigt deinen Standort und bis zu acht Stationen der Liste mit Namen (die nächste mit gelbem Punkt), rahmt dich und die nächsten sechs einmal ein und ist dann frei beweglich (Standort-Knopf und Kompass oben rechts); sie rahmt immer den freien Teil über dem Panel. Tipp auf eine Station öffnet ihre Abfahrten. Einstellungen (links) und „Station map“ (rechts, die ganze Stationskarte mit Suche nach Orten, Sehenswürdigkeiten und Haltestellen) bleiben in der Leiste oben. Ohne Standort-Erlaubnis oder mit „Map“ aus: reine Liste wie bisher; auf dem iPad bleibt die Liste im Panel neben der großen Karte.
 - **Umschalter** „Departures“ / „Lines“ (Picker „View“).
 - **Abfahrten**: nächste Haltestellen/Stationen, gruppiert pro Station bzw. pro Straßen-Haltestelle (Seite der Straße), mit `StopGroupHeader` (Name, Entfernung, Hauptziele). Suchradius stufenweise **500 m → 1,5 km → 5 km**, bis Abfahrten gefunden werden; weit entfernte Stopps werden mit Distanz und Gehzeit angezeigt statt „keine Abfahrten“.
 - Pro Zeile (`DepartureRow`), zwei Zeilen: oben Linien-Badge (Betreiberfarbe, Verkehrsmittel-Symbol) und Ziel (einzeilig, ohne „Towards“; bei Ringlinien Ziel + „Circle line“), rechts die Minuten („now“, „x min“, ab 60 min die Uhrzeit; orange bei Verspätung) mit kleinem Symbol davor (grüne Funkwellen = Live, graues Kalender-Symbol = Fahrplan); darunter eine graue Zeile „Pl. x · Uhrzeit · +x min · Next: …“ bzw. „Cancelled“ – **nächster Halt** zuletzt, damit ein schmaler Bildschirm ihn kürzt und nicht die Uhrzeit (Abfrage mit `fetchStops=true`, nur die ersten 3 Halte werden behalten, `UpcomingStops`; ist der nächste Halt das Ziel, entfällt er); Hinweise („Rail replacement bus“, Störungen) nur wenn vorhanden. Kein Pfeil am Zeilenende (ab iOS 26). Steht man an der Haltestelle (≤ 50 m), zeigt der Stationskopf „Here“ statt der Entfernung.
@@ -254,7 +254,7 @@ Screenshot-/Link-Tickets („My tickets“, „Add ticket“, Typ, „Expires“
 | Kopf | Logo, „Public transport, without the noise.“ |
 | Start | Start screen: Nearby / Plan / A saved stop (+ Stop-Auswahl) |
 | Travel preferences | Routenoptionen-Zusammenfassung, „Show connection timelines“, „How to read connections“ (`ConnectionGuideView`: Ride/Walk/Wait/Time axis) |
-| Nearby | „Map“ (Standard an): kleine Orientierungskarte über den Abfahrten, siehe §3 |
+| Nearby | „Map“ (Standard an): Karte als Bildschirm, Liste als Panel darüber (iPhone), siehe §3 |
 | Stations | „Platform map“ (Standard an), „Departures by platform“ (Standard aus), „Change guide“ (Standard an), Erklärtext; siehe §4 und §13 |
 | Smart routing | siehe §11 |
 | Map | Map provider (Apple/Google), Map style, Points of interest, Lines, Vehicles, Bikes and scooters, „Open directions in“ (Apple Maps, Google Maps, Citymapper) |
@@ -363,7 +363,8 @@ Kleinere Bausteine, die in den Abschnitten oben nicht namentlich vorkommen:
 | `PassArchiveButton` | Zugang zum Ticket-Archiv im Wallet (§14) |
 | `TicketAttachmentView`, `TicketSummaryCard`, `AddTicketView`, `TicketDisplayView`, `ShowTicketButton` | ältere Screenshot/Link-Tickets (§14, abgeschaltet) |
 | `TicketSection`, `TicketCardButton` | Ticket-Bereich in den Fahrt-Aktionen (§12) |
-| `NearbyMapSection` | Kleine Orientierungskarte über den Abfahrten in Nearby (§3) |
+| `NearbyMap` | Karte hinter dem Nearby-Panel auf dem iPhone (§3) |
+| `TripPanel` | Panel zum Hochziehen über einer Karte: Live-Fahrt (§13) und Nearby (§3) |
 | `CoverageMapNote` | Abdeckungs-Hinweiskarte über der Stationskarte (§7, §23) |
 | `NoticeBackground` | Hintergrund der Hinweis-Karten (§25) |
 | `ConnectionSymbols`, `ConnectionLegendRow` | Legende in „How to read connections“ (§16) |

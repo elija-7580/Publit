@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1 (build 74) – Nearby as a map
+
+- Nearby on the iPhone works like the live trip: the map fills the screen and the whole Nearby list is a panel over it (pull it down, half or up; it starts half). "Where to now?" heads the panel, so the search is there at every height. The map shows you and up to eight stations of the list with names; tap one for its departures. Settings and "Station map" stay at the top. Settings → Nearby → Map off, no location permission, or iPad: the list as before.
+
 ## 0.1.1 (build 73) – everything from the open branches
 
 Merged in: community feedback (wish list, Apple Maps addresses, fixes), tapping a line in a trip, Austrian line names, at the stop without a walk, rows that lead with what matters.
