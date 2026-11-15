@@ -34,18 +34,22 @@ jobs:
             -destination "id=${{ steps.sim.outputs.udid }}" -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO 2>&1 | tee ci/build.log | grep -E ": error:|BUILD" || true
           grep -q "TEST BUILD SUCCEEDED" ci/build.log
-          xcodebuild test-without-building -project Publit.xcodeproj -scheme Publit \
-            -destination "id=${{ steps.sim.outputs.udid }}" -derivedDataPath build \
-            -only-testing:PublitUITests/PublitUITests/testF21DesignScreens \
-            -only-testing:PublitUITests/PublitUITests/testF22StartScreens \
-            -only-testing:PublitUITests/PublitUITests/testF20PastedMapLinkIsAPlace \
-            -only-testing:PublitUITests/PublitUITests/testF24WebsiteTripLight \
-            -only-testing:PublitUITests/PublitUITests/testF25WebsiteTripDark \
-            -only-testing:PublitUITests/PublitUITests/testF26WebsiteStartLight \
-            -only-testing:PublitUITests/PublitUITests/testF27WebsiteStartDark \
-            -only-testing:PublitUITests/PublitUITests/testF29WebsiteMissed \
-            -only-testing:PublitUITests/PublitUITests/testF28WebsiteExtras 2>&1 | tee ci/ui.log | grep -E "Test Case|error:" || true
-          cp ~/publit-shots/*.png ci/screenshots/ 2>/dev/null || true
+          for LANG_ in en de; do
+            rm -rf ~/publit-shots
+            TEST_RUNNER_PUBLIT_SHOT_LANG=$LANG_ \
+            xcodebuild test-without-building -project Publit.xcodeproj -scheme Publit \
+              -destination "id=${{ steps.sim.outputs.udid }}" -derivedDataPath build \
+              -only-testing:PublitUITests/PublitUITests/testF21DesignScreens \
+              -only-testing:PublitUITests/PublitUITests/testF22StartScreens \
+              -only-testing:PublitUITests/PublitUITests/testF20PastedMapLinkIsAPlace \
+              -only-testing:PublitUITests/PublitUITests/testF24WebsiteTripLight \
+              -only-testing:PublitUITests/PublitUITests/testF25WebsiteTripDark \
+              -only-testing:PublitUITests/PublitUITests/testF26WebsiteStartLight \
+              -only-testing:PublitUITests/PublitUITests/testF27WebsiteStartDark \
+              -only-testing:PublitUITests/PublitUITests/testF29WebsiteMissed \
+              -only-testing:PublitUITests/PublitUITests/testF28WebsiteExtras 2>&1 | tee ci/ui-$LANG_.log | grep -E "Test Case|error:" || true
+            mkdir -p ci/screenshots/$LANG_ && cp ~/publit-shots/*.png ci/screenshots/$LANG_/ 2>/dev/null || true
+          done
       - name: Upload screenshots
         if: always()
         uses: actions/upload-artifact@v4

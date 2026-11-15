@@ -298,7 +298,10 @@ final class PublitUITests: XCTestCase {
 
     private func english(_ env: [String: String]) -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = ["-onboardingDone", "YES", "-wishesHintShown", "YES", "-AppleLanguages", "(en)", "-AppleLocale", "en_GB"]
+        // Website and store shots: English by default, German with TEST_RUNNER_PUBLIT_SHOT_LANG=de.
+        let german = ProcessInfo.processInfo.environment["PUBLIT_SHOT_LANG"] == "de"
+        app.launchArguments = ["-onboardingDone", "YES", "-wishesHintShown", "YES",
+                               "-AppleLanguages", german ? "(de)" : "(en)", "-AppleLocale", german ? "de_AT" : "en_GB"]
         app.launchEnvironment = env
         app.launch()
         return app
@@ -354,7 +357,7 @@ final class PublitUITests: XCTestCase {
         snap("web-saved\(suffix)")
         app.tab(0).tap()
         sleep(1)
-        let map = app.buttons["Station map"]
+        let map = app.buttons["Station map"].exists ? app.buttons["Station map"] : app.buttons["Haltestellenkarte"]
         if map.waitForExistence(timeout: 5) {
             map.tap()
             sleep(6)

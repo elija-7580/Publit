@@ -56,6 +56,8 @@ struct SavedTripView: View {
     }
 
     private func refresh(_ t: SavedTrip) async {
+        // The design samples run offline: keep their screenshots free of the "unavailable" note.
+        if ProcessInfo.processInfo.environment["PUBLIT_UI_SAMPLE"] != nil { errorMessage = nil; return }
         errorMessage = await Self.refresh(t, in: trips) ? nil : L10n.t("Live status unavailable. Showing saved times.")
     }
 
