@@ -227,7 +227,7 @@
 
 ## `Sources/Views/TransferCard.swift`
 - Views: `TransferCard`, `TrainDivisionNotice`
-- Sichtbare Texte: Arrive · Departure · Connection cancelled · Change at %@ no longer works · %@ walk · %@ to spare · Very tight change · Towards %@ · Platform %@ · Platform changed (was %@)
+- Sichtbare Texte: Change at %@ · Connection cancelled · Change at %@ no longer works · %@ to spare · Very tight change · Platform %@ · %@ walk · Live · Platform changed (was %@)
 
 ## `Sources/Views/TripActions.swift`
 - Views: `TripActionsSection`, `TicketSection`, `TicketCardButton`

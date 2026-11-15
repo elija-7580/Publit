@@ -2,40 +2,40 @@ import SwiftUI
 
 /// The same connection information before travelling, while riding and during the change.
 /// Times are the itinerary's last refresh, not a promise that the connection is held.
+///
+/// Kept short on purpose: line, direction and stop names are already in the legs around it,
+/// so the card only answers "where, which platform, how much time".
+///   ⇄ Change at Krems Bahnhof          [6 min to spare]
+///   5:43 · Platform E2  →  5:52 · Platform 2
+///   700 → REX 2807 · 3 min walk
 struct TransferCard: View {
     let info: TransferInfo
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Label(L10n.transfer("Change: %@ → %@", info.fromLine, info.toLine), systemImage: "arrow.triangle.swap")
-                .font(.subheadline.weight(.semibold))
-            endpoint(stop: info.arrivalStop, time: info.arrivalTime, live: info.arrivalIsLive,
-                     line: info.fromLine, service: info.fromService, direction: info.fromDirection,
-                     label: L10n.t("Arrive"))
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Label(L10n.f("Change at %@", info.arrivalStop.name), systemImage: "arrow.triangle.swap")
+                    .font(.subheadline.weight(.semibold))
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 4)
+                if !info.isCancelled && !info.isMissed { spareBadge }
+            }
             if info.changesStation {
-                Label(L10n.transfer("Station change"), systemImage: "figure.walk")
+                Label(L10n.transfer("Station change") + " · " + info.departureStop.name, systemImage: "figure.walk")
                     .font(.caption.weight(.semibold)).foregroundStyle(Color.delay)
             }
-            endpoint(stop: info.departureStop, time: info.departureTime, live: info.departureIsLive,
-                     line: info.toLine, service: info.toService, direction: info.toDirection,
-                     label: L10n.t("Departure"))
-            if let levels = info.levels { Text(verbatim: levels).font(.caption).foregroundStyle(.secondary) }
+            Text(verbatim: "\(endpoint(info.arrivalTime, stop: info.arrivalStop))  →  \(endpoint(info.departureTime, stop: info.departureStop))")
+                .font(.subheadline.weight(.medium).monospacedDigit())
+                .fixedSize(horizontal: false, vertical: true)
+            platformChange(info.arrivalStop)
+            platformChange(info.departureStop)
+            Text(verbatim: details).font(.caption).foregroundStyle(.secondary)
             if info.isCancelled {
                 Label("Connection cancelled", systemImage: "xmark.circle.fill")
                     .font(.subheadline.weight(.semibold)).foregroundStyle(Color.danger)
             } else if info.isMissed {
                 Label(L10n.f("Change at %@ no longer works", info.arrivalStop.name), systemImage: "exclamationmark.triangle.fill")
                     .font(.subheadline.weight(.semibold)).foregroundStyle(Color.danger)
-            } else {
-                Text(L10n.transfer("Connection time: %@", Fmt.duration(seconds: max(0, info.connectionSeconds))))
-                    .font(.caption.weight(.semibold))
-                Text(verbatim: [
-                    info.walkSeconds > 0 ? L10n.f("%@ walk", Fmt.duration(seconds: max(60, info.walkSeconds))) : nil,
-                    info.spareSeconds >= 60 ? L10n.f("%@ to spare", Fmt.duration(seconds: info.spareSeconds))
-                        : L10n.t("Very tight change")
-                ].compactMap { $0 }.joined(separator: " · "))
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(info.isTight ? Color.delay : Color.secondary)
             }
         }
         .padding(.vertical, 6)
@@ -43,27 +43,44 @@ struct TransferCard: View {
         .accessibilityIdentifier("transferCard")
     }
 
-    private func endpoint(stop: Place, time: Date, live: Bool, line: String, service: String?,
-                          direction: String?, label: String) -> some View {
-        VStack(alignment: .leading, spacing: 3) {
-            // No fixed widths: long station names and larger accessibility text can wrap.
-            Text(verbatim: "\(label) · \(Fmt.time(time, tz: stop.tz)) · \(L10n.t(live ? "Live" : "Timetable"))")
-                .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
-            Text(verbatim: stop.name).font(.subheadline.weight(.medium))
-            Text(verbatim: [line, service, direction.map { L10n.f("Towards %@", $0) }]
-                .compactMap { $0 }.joined(separator: " · "))
-                .font(.caption).foregroundStyle(.secondary)
-            if let track = TransitLabels.clean(stop.track) {
-                Text(L10n.f("Platform %@", track)).font(.subheadline.weight(.semibold))
-                if let change = stop.platformChange {
-                    Label(L10n.f("Platform changed (was %@)", change.scheduled), systemImage: "exclamationmark.triangle.fill")
-                        .font(.caption.weight(.semibold)).foregroundStyle(Color.delay)
-                }
-            } else {
-                Text(verbatim: L10n.transfer("Platform not available")).font(.caption).foregroundStyle(.secondary)
-            }
+    /// The one number that matters at a glance: time left after walking.
+    private var spareBadge: some View {
+        let text = info.spareSeconds >= 60
+            ? L10n.f("%@ to spare", Fmt.duration(seconds: info.spareSeconds))
+            : L10n.t("Very tight change")
+        let tint = info.isTight ? Color.delay : Color.secondary
+        return Text(verbatim: text)
+            .font(.caption.weight(.semibold).monospacedDigit())
+            .foregroundStyle(tint)
+            .padding(.horizontal, 8).padding(.vertical, 3)
+            .background(tint.opacity(0.15), in: Capsule())
+            .lineLimit(1)
+            .layoutPriority(1)
+    }
+
+    /// "5:43 · Platform E2"; only the time when the platform is unknown.
+    private func endpoint(_ time: Date, stop: Place) -> String {
+        let t = Fmt.time(time, tz: stop.tz)
+        guard let track = TransitLabels.clean(stop.track) else { return t }
+        return "\(t) · \(L10n.f("Platform %@", track))"
+    }
+
+    /// "700 → REX 2807 · 3 min walk · Live" (Live only when both ends are live).
+    private var details: String {
+        [
+            "\(info.fromLine) → \(info.toLine)",
+            info.walkSeconds > 0 ? L10n.f("%@ walk", Fmt.duration(seconds: max(60, info.walkSeconds))) : nil,
+            info.levels,
+            info.arrivalIsLive && info.departureIsLive ? L10n.t("Live") : nil,
+        ].compactMap { $0 }.joined(separator: " · ")
+    }
+
+    @ViewBuilder
+    private func platformChange(_ stop: Place) -> some View {
+        if TransitLabels.clean(stop.track) != nil, let change = stop.platformChange {
+            Label(L10n.f("Platform changed (was %@)", change.scheduled), systemImage: "exclamationmark.triangle.fill")
+                .font(.caption.weight(.semibold)).foregroundStyle(Color.delay)
         }
-        .fixedSize(horizontal: false, vertical: true)
     }
 }
 
