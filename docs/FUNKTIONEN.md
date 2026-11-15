@@ -1,6 +1,6 @@
 # Publit iOS – Funktionen und Screens (vollständige Übersicht)
 
-> Stand: Version 0.1.1 (Build 80). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
+> Stand: Version 0.1.1 (Build 81). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
 > **Pflege:** Jede Änderung an `Sources/`, `Watch/`, `Widgets/` oder `Share/` muss diese Datei im selben Commit/PR mitändern (siehe Abschnitt „Aktualisierung“ ganz unten). Die maschinell erzeugte Liste aller Views steht in [`FUNKTIONEN-INVENTAR.md`](FUNKTIONEN-INVENTAR.md) und wird von der CI automatisch aktualisiert.
 
 ## Inhalt
@@ -60,8 +60,8 @@ Animiertes Logo, mindestens 0,7 s, höchstens 2 s; endet früher, sobald die ers
 4. **„On the way“** – Erklärung Live-Fahrt, Umstiege, Aussteige-Hinweis, Sperrbildschirm, Widget. Button „Get started“.
 Ohne Onboarding startet die Standortabfrage sofort.
 
-### Hinweis auf die Wunschliste (`WishesHint`, einmalig)
-Einmal nach dem Update (bzw. nach dem Onboarding, nie darüber, ca. 1,5 s nach dem Splash) ein Blatt **„New: suggest features and vote“** mit „Show the wishes“ (öffnet die Wunschliste, §16a) und „Later“. Wird danach nicht mehr gezeigt (`wishesHintShown`).
+### „What's new“ nach jedem Update (`WhatsNewSheet`, `WhatsNew`)
+Nach jedem Update (nie bei Neuinstallation – dort kommt das Onboarding –, nie darüber, ca. 1,2 s nach dem Splash) ein Blatt **„What's new in Publit“** mit den Punkten aller Builds seit dem zuletzt gesehenen (`whatsNewBuild`), neueste zuerst, höchstens 4 Punkte (je Symbol, Titel, ein Satz). Darunter die **Community-Karte** (`CommunityCard`: „Publit is a community project“, „Vote for what comes next, or suggest your own idea. No account needed.“, Knopf „Suggest features and vote“ → Wunschliste, §16a, und „Support Publit“ → §16b) und „Continue“. Builds ohne Eintrag zeigen nichts. Ersetzt den einmaligen Wünsche-Hinweis (`wishesHintShown` wird mitgesetzt). Inhalte in `Sources/Models/WhatsNew.swift` (Build 81: „Clearer changes“, „Community first“, „Support Publit“).
 
 ### Tab-Leiste (`RootView`, `AdaptiveTabs` ab iOS 18)
 | Tab | Symbol | Inhalt |
@@ -169,7 +169,7 @@ Einmal nach dem Update (bzw. nach dem Onboarding, nie darüber, ca. 1,5 s nach d
 - Routen nach **gefühlter Dauer** sortiert (Warten ×1,7, Gehen ×1,65, Umstieg ≈ 15 min Fahrt; einstellbar per Regler „Faster ↔ Fewer changes“, „A change counts like x extra minutes.“).
 - „Extra time for changes“ (None, +x min), „Use my walking speed“ (mit Herz-Symbol und Hinweis „From Apple Health“ direkt am Schalter; aus **Apple Health** oder Schrittzähler; „Not enough walking measured yet.“), „Avoid steep walks“, „Learn from my choices“, „Reset learned preferences“.
 - Im Routendetail: Abschnitt „Smart routing“ – „Feels like …“, pro Umstieg Wahrscheinlichkeit (Safe / Change should work / Risky / Very tight change, „x to spare“), **Backup** „If missed: Linie um HH:MM“ oder „No backup found if you miss it.“, „No change: nothing to miss“.
-- Umstiegs-Risiko: knapper/gebrochener Umstieg wird markiert (Zeit < Fußweg, oder < Schwelle bei Verspätung); `TransferCard`: „Very tight change“, „Change at … no longer works“, „Connection cancelled“, Gleiswechsel „Platform changed (was x)“, Zugteilung (`TrainDivisionNotice`).
+- Umstiegs-Risiko: knapper/gebrochener Umstieg wird markiert (Zeit < Fußweg, oder < Schwelle bei Verspätung); `TransferCard` (kompakt, ohne Wiederholung von Richtung/Linie aus den Abschnitten): Kopfzeile „Change at <Station>“ mit Puffer-Kapsel rechts („x to spare“ bzw. „Very tight change“, bei knapp orange), darunter eine Zeile „HH:MM · Platform A  →  HH:MM · Platform B“ und klein „Linie → Linie · x walk · Ebene · Live“ (Live nur wenn beide Enden live); bei Bahnhofswechsel „Station change · <Zielhalt>“; Warnungen „Change at … no longer works“, „Connection cancelled“, Gleiswechsel „Platform changed (was x)“, Zugteilung (`TrainDivisionNotice`).
 
 ## 12. Routendetail (Itinerary) – `ItineraryDetailView`
 
@@ -253,7 +253,8 @@ Screenshot-/Link-Tickets („My tickets“, „Add ticket“, Typ, „Expires“
 | Bereich | Einstellungen |
 |---|---|
 | Kopf | Logo, „Public transport, without the noise.“ |
-| Start | Start screen: Nearby / Plan / A saved stop (+ Stop-Auswahl) |
+| Community | `CommunityCard` ganz oben: „Publit is a community project“, Erklärtext, Knopf „Suggest features and vote“ → Wunschliste (§16a), Knopf „Support Publit“ → Unterstützen (§16b) |
+| General | Start screen: Nearby / Plan / A saved stop (+ Stop-Auswahl) |
 | Travel preferences | Routenoptionen-Zusammenfassung, „Show connection timelines“, „How to read connections“ (`ConnectionGuideView`: Ride/Walk/Wait/Time axis) |
 | Nearby | „Map“ (Standard an): Karte als Bild oben, Liste scrollt darüber (iPhone), siehe §3 |
 | Stations | „Platform map“ (Standard an), „Departures by platform“ (Standard aus), „Change guide“ (Standard an), Erklärtext; siehe §4 und §13 |
@@ -265,7 +266,6 @@ Screenshot-/Link-Tickets („My tickets“, „Add ticket“, Typ, „Expires“
 | Notifications | „Disruptions on saved lines“ |
 | Data | „Live data from more operators“, „Exit numbers from OpenStreetMap“ (Standard an), „Live data sources“ (`LiveSourcesView`, Liste der Quellen pro Region), „Export my data“, Hinweise zu Live-/Fahrplanzeiten und Haftung |
 | Diagnostics | Zähler Freezes / Failed requests / Crashes, „Share diagnostics“, „Report a problem“, „Delete diagnostics“ |
-| Wishes | „Suggest features and vote“ → Wunschliste (§16a) |
 | About | Version, Open-Source-/Datenschutz-Text |
 
 ### 16a. Wunschliste – `WishesView`
@@ -273,6 +273,14 @@ Screenshot-/Link-Tickets („My tickets“, „Add ticket“, Typ, „Expires“
 - **Suggest a feature**: „What should Publit do?“ (mind. 6 Zeichen), „Details (optional)“, „Send wish“; Meldungen „Thanks! Your wish is in.“, „This wish already exists – just vote for it.“, „At most two links, please.“, „Too many requests. Please wait a moment.“. Ein neuer Wunsch startet mit der eigenen Stimme.
 - **Wishes**: Sortierung „Most votes“ / „Newest“, Pfeil mit Stimmenzahl (antippen = abstimmen / Stimme zurücknehmen), Status „Planned“, „In progress“, „Done“; Ziehen zum Aktualisieren; nicht erreichbar → „Try again“.
 - Kein Konto: eine zufällige ID (`publit.wishes.voter`) auf dem Gerät markiert die Stimmen; der Server speichert keine Adressen. Link „Also on publit.eu“.
+
+### 16b. Unterstützen – `SupportView`, `SupportStore`, `Support`
+- Kopf: Herz, „Support Publit“, „Publit has no ads and no tracking. Your support pays for servers and keeps development going.“
+- **Monthly** (zuerst, am prominentesten): automatisch verlängerte Abos (eine Abo-Gruppe, Wechsel zwischen Stufen über StoreKit) zu 1,50 / 3 / 5 / 10 / 20 / 50 € im Monat (Preis aus dem Store, `displayPrice`); 3 € als Startvorschlag dunkel hervorgehoben, ein laufendes Abo als „Active“. Fußzeile: Verlängerung monatlich, Kündigung im App-Store-Konto.
+- **One-time**: Trinkgelder (Verbrauchsartikel) zu 3 / 5 / 10 / 20 / 50 €.
+- Nach dem Kauf / mit laufendem Abo: „Thank you! You support Publit with x a month.“ bzw. „Thank you for supporting Publit!“, „Manage subscription“ (System-Blatt).
+- „Restore purchases“ (`AppStore.sync`), „Terms of use“ (Apple-Standard-EULA), „Privacy policy“; Hinweis „Support unlocks nothing: every feature stays free for everyone.“ Keine Produkte → „Support is not available right now.“ + „Try again“.
+- Produkt-IDs (gleich auf Android): `io.github.elija7580.publit.support.monthly.<Cent>` (150, 300, 500, 1000, 2000, 5000) und `io.github.elija7580.publit.support.tip.<Cent>` (300, 500, 1000, 2000, 5000). `SupportStore.start()` beim App-Start schließt Verlängerungen und Käufe von anderen Geräten ab.
 
 ## 17. Benachrichtigungen (alle lokal, kein Push-Server)
 
@@ -380,7 +388,9 @@ Kleinere Bausteine, die in den Abschnitten oben nicht namentlich vorkommen:
 | `EndpointConnector` | Verbindungslinie zwischen Von/Nach im Planer (§8) |
 | `ServiceAlertRow` | eine aufklappbare Störungsmeldung (§3, §12) |
 | `SettingsButton` | Zahnrad, öffnet Einstellungen (§16) |
-| `SmartBadgesRow`, `SmartChangesSection`, `ChangeChanceRow`, `SmartRoutingSettingsSection` | Smart-Routing-Badges, Umstiegsbewertung, Einstellungen (§11) |
+| `SupportView` | Publit unterstützen: monatlich und einmalig (§16b) |
+| `CommunityCard`, `WhatsNewSheet` | Community-Karte (Wünsche, Unterstützen) und „What's new“ nach Updates (§2, §16) |
+| `SmartBadgesRow`, `SmartChangesSection`, `ChangeChanceRow`, `SmartRoutingSettingsSection` | Smart-Routing-Badges (einzeilig, nie umbrochen; Begründung rückt bei Platzmangel in eine eigene Zeile darunter), Umstiegsbewertung, Einstellungen (§11) |
 | `StopTimeRow` | Haltzeile einer Fahrzeug-Fahrt (§6) |
 | `WalkThereRow` | „6 min walk · 450 m“ zu genau dieser Haltestelle (richtige Straßenseite), öffnet die Karten-App zu Fuß; ausgeblendet, solange man an der Haltestelle steht (≤ 50 m) (§3, §4) |
 | `WideMapCanvas`, `WideRoutesMap` | große Karte und Routenkarte im iPad-Layout (§22) |

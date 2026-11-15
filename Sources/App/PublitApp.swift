@@ -15,6 +15,8 @@ struct PublitApp: App {
         UNUserNotificationCenter.current().delegate = NotificationRouter.shared
         HangLog.shared.start()
         CrashReports.shared.start()
+        // Renewals of monthly support and purchases from other devices are finished here.
+        Task { @MainActor in SupportStore.shared.start() }
         // Offline copies older than a week are no use for departures or routes.
         DispatchQueue.global(qos: .utility).async { TransitousClient.shared.cache.prune(olderThan: 7 * 24 * 3600) }
     }
@@ -106,6 +108,8 @@ struct RootView: View {
     /// Width of the window: the iPad layout needs room for the panel and the map.
     @State private var rootWidth: CGFloat = 0
     @State private var onboarding = OnboardingView.needed
+    /// A fresh install gets the onboarding, not the "What's new" note.
+    @State private var freshInstall = OnboardingView.needed
     @AppStorage(OnboardingView.doneKey) private var onboardingDone = false
 
     var body: some View {
@@ -120,8 +124,8 @@ struct RootView: View {
             .task { await endSplash() }
             .fullScreenCover(isPresented: $onboarding) { OnboardingView() }
             .onChange(of: onboardingDone) { _, done in if done { onboarding = false } }
-            // Once: where to suggest features and vote (after onboarding, never over it).
-            .wishesHint(ready: onboardingDone && !onboarding && !splash)
+            // After each update: what's new and the wish list (after onboarding, never over it).
+            .whatsNew(freshInstall: freshInstall, ready: onboardingDone && !onboarding && !splash)
     }
 
     /// At least 0.7 s (the animation), at most 2 s, ended earlier by the first board.

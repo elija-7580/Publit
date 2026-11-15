@@ -29,6 +29,8 @@ struct SettingsView: View {
     @State private var exportURL: URL?
     @State private var summary: HangLog.Summary?
     @State private var reportURL: URL?
+    @State private var showWishes = false
+    @State private var showSupport = false
 
     /// A new GitHub issue with version, device and counts filled in; the diagnostics file is attached by hand.
     private var issueURL: URL {
@@ -69,6 +71,14 @@ struct SettingsView: View {
                     .padding(.vertical, 4)
                     .accessibilityElement(children: .combine)
                 }
+                // Publit is a community project: what comes next is voted on, so this comes first.
+                Section {
+                    CommunityCard(open: { showWishes = true }, support: { showSupport = true })
+                        .listRowInsets(EdgeInsets())
+                        .listRowBackground(Color.clear)
+                } header: {
+                    Text(L10n.t("Community"))
+                }
                 Section {
                     Picker(L10n.t("Start screen"), selection: $startTab) {
                         Text("Nearby").tag(StartTab.nearby.rawValue)
@@ -82,6 +92,8 @@ struct SettingsView: View {
                         }
                         .accessibilityIdentifier("startStop")
                     }
+                } header: {
+                    Text(L10n.t("General"))
                 } footer: {
                     if startTab == StartTab.stop.rawValue {
                         if savedStops.isEmpty {
@@ -276,14 +288,6 @@ struct SettingsView: View {
                     Text("Publit notes freezes of 2 seconds or more, crashes, unexpected exits and failed requests (only their kind), each with the screens opened just before. Places, stops and tickets are not recorded, and nothing leaves this device unless you share it.")
                 }
                 Section {
-                    NavigationLink { WishesView() } label: {
-                        Label("Suggest features and vote", systemImage: "lightbulb")
-                    }
-                    .accessibilityIdentifier("wishes")
-                } footer: {
-                    Text("Missing something? Suggest it, or vote for what others want. No account needed.")
-                }
-                Section {
                     Link("Source code and feedback", destination: AppInfo.repositoryURL)
                     Link("Privacy policy", destination: AppInfo.privacyURL)
                     LabeledContent("Version", value: "\(AppInfo.version) (\(AppInfo.build))").accessibilityIdentifier("installedBuild")
@@ -316,6 +320,8 @@ struct SettingsView: View {
                     exportURL = loaded.2
                 }
             }
+            .navigationDestination(isPresented: $showWishes) { WishesView() }
+            .navigationDestination(isPresented: $showSupport) { SupportView() }
             .navigationTitle("Settings")
             .screenTrail("Settings")
             .navigationBarTitleDisplayMode(.inline)
