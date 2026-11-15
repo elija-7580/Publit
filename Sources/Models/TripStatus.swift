@@ -59,7 +59,7 @@ struct TripStatus: Equatable, Sendable {
         }
         if now < it.startTime {
             let mins = Int(ceil(it.startTime.timeIntervalSince(now) / 60))
-            let head = mins <= 0 ? L10n.t("Leave now") : (mins < 60 && countdown) ? L10n.f("Leave in %lld min", mins)
+            let head = (mins <= 0 || (mins < 60 && countdown)) ? Reach.leaveText(it, minutes: mins)
                 : L10n.f("Leave at %@", Fmt.time(it.startTime, tz: tz))
             let det = transit.first.map(describe) ?? L10n.f("Walk %@", Fmt.duration(seconds: it.duration))
             return TripStatus(phase: .beforeLeaving, nextEvent: it.startTime, headline: head, detail: det, delayMinutes: delay)

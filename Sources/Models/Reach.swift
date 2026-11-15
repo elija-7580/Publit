@@ -11,6 +11,38 @@ enum Reach {
     static let farDistance = 1500.0
     /// Below this the header shows only the distance; above it also the walking time.
     static let walkHintDistance = 400.0
+    /// Within this distance you are at the stop: no walk to it, no "1 min" before boarding.
+    /// Small enough that the pole across the road (the other direction) still gets its walk.
+    static let atStopMeters = 50.0
+
+    static func isAtStop(meters: Double) -> Bool { meters.isFinite && meters <= atStopMeters }
+
+    /// "Leave in 6 min", or "Departs in 4 min" when the route starts with the ride (you are at the stop).
+    static func leaveText(_ it: Itinerary, minutes: Int) -> String {
+        if it.legs.first?.isTransit == true {
+            return minutes >= 1 ? L10n.f("Departs in %lld min", minutes) : L10n.t("Board here")
+        }
+        return minutes >= 1 ? L10n.f("Leave in %lld min", minutes) : L10n.t("Leave now")
+    }
+
+    /// Routes planned from your position while you stand at the first stop start with boarding,
+    /// not with a one-minute walk: the leading walk goes and the route starts when the vehicle leaves.
+    /// Only when the walk itself is that short (the server's path, so crossing the road counts) and
+    /// you are that close to the stop.
+    static func boardingHere(_ itineraries: [Itinerary], here: LatLon) -> [Itinerary] {
+        itineraries.map { it in
+            let lead = it.legs.prefix { !$0.isTransit }
+            guard !lead.isEmpty, lead.count < it.legs.count, lead.allSatisfy({ $0.mode == "WALK" }),
+                  let first = it.firstTransitLeg,
+                  isAtStop(meters: here.distance(to: first.from.coordinate)),
+                  isAtStop(meters: lead.reduce(0) { $0 + ($1.distance ?? 0) }) else { return it }
+            var out = it
+            out.legs.removeFirst(lead.count)
+            out.startTime = first.startTime
+            out.duration = max(0, Int(out.endTime.timeIntervalSince(out.startTime)))
+            return out
+        }
+    }
 
     /// Walking limits (seconds) to the first and from the last stop for route search, tried in order
     /// while nothing is found. The last step is "show it anyway": routes behind a long walk, marked as such.
