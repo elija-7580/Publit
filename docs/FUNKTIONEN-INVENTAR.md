@@ -3,7 +3,7 @@
 > Nicht von Hand bearbeiten. Erzeugt von `scripts/feature_inventory.py` (CI: `features-doc.yml`).
 > Die ausführliche Beschreibung steht in [FUNKTIONEN.md](FUNKTIONEN.md).
 
-**181 Views, 5 App Intents, 3 Widgets in 73 Dateien.**
+**183 Views, 5 App Intents, 3 Widgets in 74 Dateien.**
 
 ## `Sources/App/DesignSamples.swift`
 - Views: `DesignSampleView`
@@ -101,6 +101,10 @@
 - Views: `LogoLoader`
 - Sichtbare Texte: Loading…
 
+## `Sources/Views/Components/MapHero.swift`
+- Views: `MapHeroSpace`
+- Sichtbare Texte: Map
+
 ## `Sources/Views/Components/ModeFilterBar.swift`
 - Views: `ModeFilterBar`
 - Sichtbare Texte: All · Filter by mode
@@ -122,11 +126,11 @@
 
 ## `Sources/Views/GoNowView.swift`
 - Views: `GoNowView`
-- Sichtbare Texte: From · Change · Walk all the way · Later connections · From your location · from %@ · Route
+- Sichtbare Texte: From · Change · Walk all the way · Later connections · From your location · from %@ · Route · Done
 
 ## `Sources/Views/ItineraryDetailView.swift`
 - Views: `CompareMapView`, `ItineraryDetailView`, `RouteSummary`, `RouteMap`, `RouteMark`, `VehicleKindLine`, `LegRow`, `GetOffButton`, `StatusBanner`, `TimelineLegRow`, `TimelineEndRow`, `TimelineRail`, `LeaveHero`
-- Sichtbare Texte: Destination · Trip overview · Driving times are without traffic and parking. · Steps · Done · Route · Live · Cancelled · Rail replacement bus · Timetable · This trip is cancelled. · Pick up at %@ · Return at %@ · Rent in the provider's app · +%lld min · Platform %@ · Reminder set · Remind me to get off · We'll notify you at %@. · This stop is less than two minutes away. · Allow notifications for Publit in Settings. · On time · Line %@: all stops and map · Board at %@ · Get off at %@ · Service changes on this route · Arrive
+- Sichtbare Texte: Destination · Driving times are without traffic and parking. · Steps · Trip overview · Done · Route · Live · Cancelled · Rail replacement bus · Timetable · This trip is cancelled. · Pick up at %@ · Return at %@ · Rent in the provider's app · +%lld min · Platform %@ · Reminder set · Remind me to get off · We'll notify you at %@. · This stop is less than two minutes away. · Allow notifications for Publit in Settings. · On time · Line %@: all stops and map · Board at %@ · Get off at %@ · Service changes on this route · Arrive
 
 ## `Sources/Views/LaunchSplash.swift`
 - Views: `LaunchSplash`
@@ -161,8 +165,8 @@
 - Sichtbare Texte: Skip · Public transport, without the noise. · Departures near you, routes across Europe and a guide until you get off. No ads, no account, no tracking. · Departures where you are · On the way · Get started · Continue · Home and Work · One tap to get home or to work, from anywhere. You can change them any time in Saved. · Not set
 
 ## `Sources/Views/PlaceSearchView.swift`
-- Views: `PlaceSearchView`, `PlaceLabel`, `CategoryIcon`
-- Sichtbare Texte: Current location · Saved · No matches. · Save · Cancel · from %@ · Remove · Clear history · Recently searched · Place from the link
+- Views: `PlaceSearchView`, `PlaceHitRow`, `PlaceLabel`, `CategoryIcon`
+- Sichtbare Texte: Cancel · Current location · Saved · No matches. · from %@ · Remove · Clear history · Recently searched · Save
 
 ## `Sources/Views/PlanView.swift`
 - Views: `PlanView`, `EndpointConnector`, `ItineraryRow`, `TimelineBar`

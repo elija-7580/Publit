@@ -1,6 +1,6 @@
 # Publit iOS – Funktionen und Screens (vollständige Übersicht)
 
-> Stand: Version 0.1.1 (Build 75). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
+> Stand: Version 0.1.1 (Build 76). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
 > **Pflege:** Jede Änderung an `Sources/`, `Watch/`, `Widgets/` oder `Share/` muss diese Datei im selben Commit/PR mitändern (siehe Abschnitt „Aktualisierung“ ganz unten). Die maschinell erzeugte Liste aller Views steht in [`FUNKTIONEN-INVENTAR.md`](FUNKTIONEN-INVENTAR.md) und wird von der CI automatisch aktualisiert.
 
 ## Inhalt
@@ -373,6 +373,8 @@ Kleinere Bausteine, die in den Abschnitten oben nicht namentlich vorkommen:
 | `LineRefRow`, `LineStopRow` | Linienzeile in der Linienliste, Haltzeile im Linien-Detail (§5) |
 | `PlatformChangeLabel` | Gleiswechsel-Anzeige im Guide (§13) |
 | `PlaceLabel` | Ortszeile in der Ortssuche (§9) |
+| `PlaceHitRow` | Treffer der Ortssuche: Haltestelle, Adresse oder Ort, Apple-Vorschläge werden beim Antippen nachgeschlagen; „Save“ per Wischen (§9) |
+| `MapHeroSpace` | Karte als Bild oben (Nearby, Go Now, Routendetail): freier Platz über der Karte mit Vergrößern-Taste, öffnet die volle Karte (§3) |
 | `EndpointConnector` | Verbindungslinie zwischen Von/Nach im Planer (§8) |
 | `ServiceAlertRow` | eine aufklappbare Störungsmeldung (§3, §12) |
 | `SettingsButton` | Zahnrad, öffnet Einstellungen (§16) |
