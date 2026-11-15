@@ -1,6 +1,6 @@
 # Publit iOS – Funktionen und Screens (vollständige Übersicht)
 
-> Stand: Version 0.1.1 (Build 74). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
+> Stand: Version 0.1.1 (Build 75). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
 > **Pflege:** Jede Änderung an `Sources/`, `Watch/`, `Widgets/` oder `Share/` muss diese Datei im selben Commit/PR mitändern (siehe Abschnitt „Aktualisierung“ ganz unten). Die maschinell erzeugte Liste aller Views steht in [`FUNKTIONEN-INVENTAR.md`](FUNKTIONEN-INVENTAR.md) und wird von der CI automatisch aktualisiert.
 
 ## Inhalt
@@ -44,6 +44,7 @@
 - Standort wird nur bei einer Suche mitgeschickt und auf ~1 m (Routing) bzw. ~1 km (Such-Bias) gerundet.
 - Unterstützt: iOS 17+, watchOS 10+, Hell/Dunkel, Dynamic Type inkl. Accessibility-Größen (gestapeltes Layout), VoiceOver-Texte („live, 3 minutes late“, „timetable time, no live data“ …), iPad-Layout.
 - **Liniennamen**: Badges zeigen die Linie, nicht die Zugnummer. Im österreichischen Bahn-Feed steht in `route_short_name` die Zugnummer („R 6046“); die Linie („R 44“, „REX 3“) wird dann aus der Route-ID gelesen, die Zugnummer bleibt als Zusatz (`serviceDetail`).
+- Ist Start oder Ziel eine **Haltestelle**, wird mit ihrer Haltestellen-ID gesucht (nicht mit ihren Koordinaten): die Route beginnt/endet direkt am Bahnhof, ohne künstlichen Fußweg zum Bahnsteig („Walk 5 m, 2 min“). Kennt der Server die ID nicht (mehr) oder findet nichts, wird automatisch mit den Koordinaten gesucht. Mit Rad oder Auto zur ersten Haltestelle (Park & Ride) beginnt die Suche an den Koordinaten; auch die Alternativen in der Live-Fahrt suchen zur Ziel-Haltestelle per ID.
 - Sprachen über String Catalogs (`Localizable.xcstrings`, `InfoPlist.xcstrings`, `AppShortcuts.xcstrings`, `Transfers.xcstrings`).
 - Akku-Schonung (`Energy`): im Stromsparmodus oder bei Hitze aktualisieren Live-Screens halb so oft.
 

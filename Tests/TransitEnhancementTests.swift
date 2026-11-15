@@ -12,6 +12,19 @@ private struct TestRoute: RouteStyled {
 }
 
 final class TransitEnhancementTests: XCTestCase {
+    func testStopsAreRoutedByTheirIdNotTheirCoordinates() {
+        let q = TransitousClient.planQuery(from: LatLon(lat: 48.40908, lon: 15.60499), to: LatLon(lat: 48.20820, lon: 15.62404),
+                                           time: nil, arriveBy: false,
+                                           stops: PlanStops(from: "at-PTA-Eastern-Region-Flex-2026_Pat:43:3993", to: nil))
+        let d = Dictionary(q.map { ($0.name, $0.value ?? "") }, uniquingKeysWith: { a, _ in a })
+        XCTAssertEqual(d["fromPlace"], "at-PTA-Eastern-Region-Flex-2026_Pat:43:3993")
+        XCTAssertEqual(d["toPlace"], "48.2082,15.62404")
+        XCTAssertEqual(Endpoint.place(SavedPlace(id: "s", name: "Krems", subtitle: nil, lat: 48.4, lon: 15.6, stopId: "x")).stopId, "x")
+        XCTAssertNil(Endpoint.currentLocation.stopId)
+        // Park & Ride drives from a front door: no start stop, the destination stop stays.
+        XCTAssertEqual(PlanStops(from: "a", to: "b").forFirstMile(.car), PlanStops(from: nil, to: "b"))
+        XCTAssertEqual(PlanStops(from: "a", to: "b").forFirstMile(.walk), PlanStops(from: "a", to: "b"))
+    }
     func testAustrianRegionalTrainsShowTheLineNotTheTrainNumber() {
         // Krems → St. Pölten: the feed's short name is the train number, the line is in the route ID.
         let r44 = TestRoute(mode: "REGIONAL_RAIL", routeShortName: "R 6046", displayName: "R 6046",

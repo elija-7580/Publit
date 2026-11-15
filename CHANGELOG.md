@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1 (build 75) – routes start and end at the station
+
+- Routes from or to a stop are searched by its stop ID: no more extra "Walk 43 m" before the train or "Walk 5 m · 2 min" after arriving at the station itself, and the arrival time is the train's arrival. Falls back to coordinates if the stop ID is unknown or finds nothing. Cycling or driving to the first stop still starts at the coordinates.
+
 ## 0.1.1 (build 74) – Nearby as a map
 
 - Nearby on the iPhone works like the live trip: the map fills the screen and the whole Nearby list is a panel over it (pull it down, half or up; it starts half). "Where to now?" heads the panel, so the search is there at every height. The map shows you and up to eight stations of the list with names; tap one for its departures. Settings and "Station map" stay at the top. Settings → Nearby → Map off, no location permission, or iPad: the list as before.
