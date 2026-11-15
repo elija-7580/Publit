@@ -374,6 +374,7 @@ Kleinere Bausteine, die in den Abschnitten oben nicht namentlich vorkommen:
 | `PlatformChangeLabel` | Gleiswechsel-Anzeige im Guide (§13) |
 | `PlaceLabel` | Ortszeile in der Ortssuche (§9) |
 | `PlaceHitRow` | Treffer der Ortssuche: Haltestelle, Adresse oder Ort, Apple-Vorschläge werden beim Antippen nachgeschlagen; „Save“ per Wischen (§9) |
+| `ExitMark` | Tür-Markierung des gewählten Stationsausgangs auf der Karte der Live-Fahrt (§13) |
 | `MapHeroSpace` | Karte als Bild oben (Nearby, Go Now, Routendetail): freier Platz über der Karte mit Vergrößern-Taste, öffnet die volle Karte (§3) |
 | `EndpointConnector` | Verbindungslinie zwischen Von/Nach im Planer (§8) |
 | `ServiceAlertRow` | eine aufklappbare Störungsmeldung (§3, §12) |
