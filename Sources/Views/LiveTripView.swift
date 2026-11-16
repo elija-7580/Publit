@@ -65,7 +65,10 @@ struct LiveTripView: View {
         // Searched from the stop of the shaky change at the time you get there, not from where you are now.
         let searchFrom: (point: LatLon, time: Date)? = risk.map { ($0.incoming.to.coordinate, $0.incoming.endTime) }
         let riskKey = risk.map { "\($0.stopName)|\($0.outgoing.tripId ?? $0.outgoing.lineName)" } ?? ""
-        let vehicle = step.kind == .ride ? ride.flatMap { TripProgress.position($0.progress, stops: leg.allStops) } : nil
+        // On board (your fix lies on the line): your own dot is the vehicle. A second, estimated
+        // marker beside it (straight between stops, or from the timetable) only looks like another bus.
+        let vehicle = step.kind == .ride && ride?.fromGPS != true
+            ? ride.flatMap { TripProgress.position($0.progress, stops: leg.allStops) } : nil
         // Away from the planned walk (it started where the trip was planned): walk from where you are now.
         let detourTarget: LatLon? = index == live && step.kind == .walk && walkPos == nil && here != nil ? leg.to.coordinate : nil
         let detourRoute = detourTarget.flatMap { t in detour.route?.to == t ? detour.route : nil }
