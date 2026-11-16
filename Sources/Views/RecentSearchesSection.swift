@@ -37,7 +37,7 @@ struct RecentSearchesSection: View {
                         .padding(.vertical, 3)
                     }
                     .accessibilityIdentifier("recentSearch")
-                    .swipeActions { Button("Remove", role: .destructive) { history.remove(search.id) } }
+                    .swipeActions { Button("Remove", role: .destructive) { history.remove(search.id) }.tint(Color.danger) }
                 }
                 Button("Clear history", role: .destructive) { confirmClear = true }
                     .font(.subheadline)
