@@ -138,6 +138,8 @@ targets:
       - Sources/Models/TransitFilter.swift
       - Sources/Models/OwnTicket.swift
       - Sources/Models/SmartRouting.swift
+      - Sources/Models/DelayHistory.swift
+      - Sources/Models/TransferWalk.swift
       - Sources/Models/TransitExtras.swift
       - Sources/Models/Reach.swift
       - Sources/Models/CircularLine.swift
@@ -188,6 +190,8 @@ targets:
       - Sources/Models/TransitFilter.swift
       - Sources/Models/OwnTicket.swift
       - Sources/Models/SmartRouting.swift
+      - Sources/Models/DelayHistory.swift
+      - Sources/Models/TransferWalk.swift
       - Sources/Models/TransitExtras.swift
       - Sources/Models/Reach.swift
       - Sources/Models/CircularLine.swift
