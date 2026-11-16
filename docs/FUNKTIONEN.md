@@ -208,6 +208,7 @@ Erscheint für die gestartete Fahrt oder eine gespeicherte, die gerade läuft/ba
 - Fahren: „Now at …“, „Next stop … in …“, Haltliste (`GuideStopRow`), „Get off here“, „Get off at …“, Positionsquelle („Position from your location / estimated from live stop times / from the timetable“), „Line …: all stops and map“ (ganze Fahrt, §6) – auch für frühere und spätere Etappen über die Etappenliste.
 - Ankunft: „You have arrived“, „Arrive at …“, „Destination in …“.
 - **Umstiegshilfe** (`ChangeGuideCard`/`ChangeGuide`, Einstellungen → Stations → „Change guide“, Standard an): beim Fahren (vor dem Aussteigen), beim Umstiegs-Fußweg und beim Warten auf das nächste Fahrzeug: „Platform 3 → Platform 7“, Karte mit Fußweg von Ausstieg („Get off here“, Linien-Badge + Gleis) zu Einstieg („Board here“), „x min walk · Step-free“ bzw. „With stairs“, „Same platform“ wenn nichts zu gehen ist; darunter nur das Wesentliche im Bahnhof: Treppen, Aufzüge („Take the lift“), Ebenenwechsel, Ausgänge.
+- Live Activity während der Fahrt mit Standort im Fahrzeug: Zeile „Next stop: … · n stops to go“ bzw. „Next stop: … Get off there.“
 - **Karte** (`GuideMap`) mit zurückgelegter (hellblau) und kommender Strecke (`TripTrace`), Kartenstil, 3D. Fahrzeugpunkt nur, solange die Position nicht aus deinem Standort kommt: Sitzt du im Fahrzeug (Standort auf der Linie), ist dein eigener Punkt das Fahrzeug, ohne zweiten geschätzten Punkt daneben. Beim aktuellen Fußweg (zum ersten Halt, beim Umstieg, zum Ziel): oben auf der Karte die **nächste Abbiegung** mit Pfeil, Metern und Anweisung (`TurnCard`); die Karte folgt dir, nach Verschieben bringt „Follow my location“ (Standort-Taste oben rechts) sie zurück. In der Tastenspalte links zusätzlich **gesprochene Anweisungen** an/aus (derselbe Schalter wie im Menü).
 - **Sprachansagen** („Turn on/off spoken directions“; `GuideVoice`, andere Audioquellen werden leiser).
 - **Abweichungen**: „You seem to be off the route.“, „Missed it?“, „Connection cancelled“, Warnung „Your change at … may not work (x %)“ mit Backup.
@@ -258,6 +259,7 @@ Screenshot-/Link-Tickets („My tickets“, „Add ticket“, Typ, „Expires“
 | Kopf | Logo, „Public transport, without the noise.“ |
 | Community | `CommunityCard` ganz oben: „Publit is a community project“, Erklärtext, Knopf „Suggest features and vote“ → Wunschliste (§16a), Knopf „Support Publit“ → Unterstützen (§16b) |
 | General | Start screen: Nearby / Plan / A saved stop (+ Stop-Auswahl) |
+| Started trips | „Get-off alert“: wann der Aussteige-Hinweis kommt (eine/zwei Stationen vorher, kurz vor der Station, nur nach Uhrzeit), Fußnote zum Standort |
 | Travel preferences | Routenoptionen-Zusammenfassung, „Show connection timelines“, „How to read connections“ (`ConnectionGuideView`: Ride/Walk/Wait/Time axis) |
 | Nearby | „Map“ (Standard an): Karte als Bild oben, Liste scrollt darüber (iPhone), siehe §3 |
 | Stations | „Platform map“ (Standard an), „Departures by platform“ (Standard aus), „Change guide“ (Standard an), Erklärtext; siehe §4 und §13 |
@@ -290,7 +292,7 @@ Screenshot-/Link-Tickets („My tickets“, „Add ticket“, Typ, „Expires“
 | Funktion | Datei | Auslöser |
 |---|---|---|
 | Losgehen-Erinnerung | `LeaveReminder` | 5 min bevor der Fußweg beginnt; verschiebt sich mit Live-Zeiten; Tippen öffnet die Fahrt |
-| Aussteige-Hinweis | `GetOffReminder` | kurz vor Ankunft an der Ausstiegshaltestelle; folgt Live-Zeit |
+| Aussteige-Hinweis | `GetOffReminder`, `GetOffAlerts`, `GetOffWatch` | nach Wahl in Einstellungen → Started trips → „Get-off alert“: „One stop before“ (Standard), „Two stops before“, „Shortly before the stop“ (ca. 400 m entlang der Linie) oder „By the clock only“. Mit Standort: während einer gestarteten Fahrt im Fahrzeug wird jeder Fix (Genauigkeit ≤ 100 m) auf die Linie gelegt; die Reihenfolge der Halte zählt, nicht nur die Nähe. Fällig → sofort „Get off soon“ („Next stop: … Get off there.“ / „Get off at … in n stops.“), ersetzt den Zeit-Hinweis; je Fahrtabschnitt nur einer. Ohne verlässlichen Standort der Zeit-Hinweis (~2 min vor Ankunft, folgt Live-Zeit). Standort im Hintergrund (blauer Hinweis) nur während der Fahrabschnitte der gestarteten Fahrt; bleibt auf dem Gerät. |
 | Umstieg gefährdet | `ChangeRiskNotifier` | Umstieg wird unwahrscheinlich → Mitteilung mit Backup |
 | Gleiswechsel / Ausfall | `TripChangeAlert` | Live-Refresh bringt neues Gleis oder gestrichene Fahrt |
 | Störungen auf gespeicherten Linien | `LineAlertMonitor` | beim Öffnen und im Hintergrund (iOS entscheidet, max. ca. alle 30 min); jede Störung nur einmal |

@@ -248,6 +248,8 @@ struct RootView: View {
             }
             if scenePhase == .background {
                 LineAlertMonitor.scheduleBackgroundCheck()
+                // On board with the location-based get-off alert: the location keeps running.
+                location.setTripTracking(GetOffAlerts.wantsTracking(trips.activeTrip))
                 location.pause()
                 // Nothing updates a Live Activity without the app: it goes by itself after the arrival.
                 await LiveTripActivity.handOver { trips.trip($0) }
@@ -255,6 +257,14 @@ struct RootView: View {
             // Keep running Live Activities current while the app is open.
             guard scenePhase == .active else { return }
             location.start()
+            // Each fix on board: the get-off alert by location (#69); off again after the ride.
+            location.onFix = { [trips, location] fix in
+                guard let trip = trips.activeTrip, GetOffAlerts.wantsTracking(trip) else {
+                    location.setTripTracking(false)
+                    return
+                }
+                Task { await GetOffAlerts.handle(fix, trip: trip) }
+            }
             // Where open timetable data is missing changes every week; get the newest map of it.
             Task.detached(priority: .utility) { await CoverageAtlasStore.shared.refreshIfNeeded() }
             for trip in await LiveTripActivity.resume({ trips.trip($0) }) {
@@ -329,6 +339,7 @@ struct RootView: View {
                 LiveTripActivity.start(trip, hasTicket: !passes.passes(forTrip: trip.id, at: trip.startTime).isEmpty)
             }
         }
+        location.setTripTracking(GetOffAlerts.wantsTracking(trips.activeTrip))
         let live = trips.upcoming(now: Date().addingTimeInterval(-15 * 60)).filter { LiveTripActivity.isRunning($0.id) || trips.activeTripId == $0.id }
         return LiveRefresh.interval(live.map(\.itinerary))
     }
