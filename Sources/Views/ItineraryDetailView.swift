@@ -77,6 +77,7 @@ struct CompareMapView: View, Equatable {
             }
         }
         .publitMapStyle()
+        .mapControls { MapUserLocationButton(); MapCompass() }
         .mapControlVisibility(interactive ? .automatic : .hidden)
         .onMapCameraChange(frequency: .onEnd) { mapHeading = $0.camera.heading }
     }

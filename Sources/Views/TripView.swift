@@ -53,6 +53,7 @@ struct TripView: View {
                 Section {
                     OfflineNote()
                     TripMap(generation: generation, shape: shape, stops: stops.map(\.coordinate),
+                            stopNames: stops.map(\.name),
                             color: leg.lineStroke, textColor: leg.lineTextColor, mode: leg.mode,
                             vehicle: TripProgress.position(progress, stops: stops))
                         .equatable()
@@ -194,16 +195,21 @@ struct TripView: View {
     }
 }
 
-/// The trip on a map. Redrawn only for a new load or a moved vehicle, not on every list update.
-/// Stop dots and the vehicle have no titles, so MapKit lays out no labels for them.
+/// The trip on a map, like the Nearby map: the line with its stops (named where there is room),
+/// the vehicle, you with the arrow the way you face, the location button and the compass.
+/// Redrawn only for a new load or a moved vehicle, not on every list update.
 private struct TripMap: View, Equatable {
     let generation: Int
     let shape: [LatLon]
     let stops: [LatLon]
+    let stopNames: [String]
     let color: Color
     let textColor: Color
     let mode: String
     let vehicle: LatLon?
+    @Environment(LocationManager.self) private var location
+    /// The map's own turn, so the arrow on your position keeps pointing the real way.
+    @State private var mapHeading = 0.0
 
     static func == (a: TripMap, b: TripMap) -> Bool {
         a.generation == b.generation && a.vehicle?.lat == b.vehicle?.lat && a.vehicle?.lon == b.vehicle?.lon
@@ -213,11 +219,10 @@ private struct TripMap: View, Equatable {
         Map(initialPosition: .automatic) {
             MapPolyline(coordinates: shape.map(\.clCoordinate))
                 .stroke(color, style: StrokeStyle(lineWidth: 5, lineCap: .round, lineJoin: .round))
-            ForEach(Array(stops.enumerated()), id: \.offset) { _, s in
-                Annotation("", coordinate: s.clCoordinate, anchor: .center) {
-                    Circle().fill(.white).stroke(color, lineWidth: 2).frame(width: 8, height: 8)
+            ForEach(Array(stops.enumerated()), id: \.offset) { i, s in
+                Annotation(i < stopNames.count ? stopNames[i] : "", coordinate: s.clCoordinate, anchor: .center) {
+                    Circle().fill(.white).stroke(color, lineWidth: 2).frame(width: 9, height: 9)
                 }
-                .annotationTitles(.hidden)
             }
             if let vehicle {
                 Annotation("", coordinate: vehicle.clCoordinate, anchor: .center) {
@@ -230,8 +235,12 @@ private struct TripMap: View, Equatable {
                 }
                 .annotationTitles(.hidden)
             }
+            YouAreHere(here: location.coordinate, heading: location.heading, mapHeading: mapHeading)
         }
         .publitMapStyle()
+        .mapControls { MapUserLocationButton(); MapCompass() }
+        .onMapCameraChange(frequency: .onEnd) { mapHeading = $0.camera.heading }
+        .compassWhileShown("tripMap")
     }
 }
 

@@ -7,8 +7,10 @@ import MapKit
 /// the map and one row of platform buttons; a tapped platform shows its lines and next stops.
 struct PlatformMapSection: View {
     let groups: [PlatformGroup]
+    @Environment(LocationManager.self) private var location
     @State private var camera: MapCameraPosition = .automatic
     @State private var selected: String?
+    @State private var mapHeading = 0.0
 
     var body: some View {
         Section {
@@ -19,8 +21,12 @@ struct PlatformMapSection: View {
                             .onTapGesture { select(g) }
                     }
                 }
+                YouAreHere(here: location.coordinate, heading: location.heading, mapHeading: mapHeading)
             }
             .mapStyle(.standard(pointsOfInterest: .excludingAll))
+            .mapControls { MapUserLocationButton(); MapCompass() }
+            .onMapCameraChange(frequency: .onEnd) { mapHeading = $0.camera.heading }
+            .compassWhileShown("platformMap")
             .frame(height: 220)
             .listRowInsets(EdgeInsets())
             .accessibilityHidden(true)
@@ -148,7 +154,9 @@ struct PlatformHeaderRow: View {
 /// levels and exits on the way.
 struct ChangeGuideCard: View {
     let guide: ChangeGuide
+    @Environment(LocationManager.self) private var location
     @State private var camera: MapCameraPosition = .automatic
+    @State private var mapHeading = 0.0
 
     init?(before legIndex: Int, in it: Itinerary) {
         guard let g = ChangeGuide(before: legIndex, in: it) else { return nil }
@@ -171,8 +179,12 @@ struct ChangeGuideCard: View {
                 Annotation(L10n.t("Board here"), coordinate: guide.departing.from.coordinate.clCoordinate, anchor: .center) {
                     end(guide.departing, track: guide.departing.from.track)
                 }
+                YouAreHere(here: location.coordinate, heading: location.heading, mapHeading: mapHeading)
             }
             .mapStyle(.standard(pointsOfInterest: .excludingAll))
+            .mapControls { MapUserLocationButton(); MapCompass() }
+            .onMapCameraChange(frequency: .onEnd) { mapHeading = $0.camera.heading }
+            .compassWhileShown("changeGuide")
             .frame(height: 200)
             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             .accessibilityHidden(true)

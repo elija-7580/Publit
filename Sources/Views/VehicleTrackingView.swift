@@ -10,6 +10,9 @@ struct VehicleTrackingView: View {
     let stationName: String
 
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(LocationManager.self) private var location
+    /// The map's own turn, so the arrow on your position keeps pointing the real way.
+    @State private var mapHeading = 0.0
     @State private var isVisible = false
     @State private var leg: Leg?
     @State private var stops: [Place] = []
@@ -53,10 +56,9 @@ struct VehicleTrackingView: View {
                     .stroke(color, style: StrokeStyle(lineWidth: 5, lineCap: .round, lineJoin: .round))
             }
             ForEach(Array(stops.enumerated()), id: \.offset) { _, s in
-                Annotation("", coordinate: s.coordinate.clCoordinate, anchor: .center) {
+                Annotation(s.name, coordinate: s.coordinate.clCoordinate, anchor: .center) {
                     Circle().fill(.white).stroke(color, lineWidth: 2).frame(width: 9, height: 9)
                 }
-                .annotationTitles(.hidden)
             }
             if let vehicle, let leg {
                 Annotation("", coordinate: vehicle.clCoordinate, anchor: .center) {
@@ -71,12 +73,14 @@ struct VehicleTrackingView: View {
                 }
                 .annotationTitles(.hidden)
             }
-            UserAnnotation()
+            YouAreHere(here: location.coordinate, heading: location.heading, mapHeading: mapHeading)
         }
         .publitMapStyle()
         .mapControls { MapUserLocationButton(); MapCompass() }
+        .compassWhileShown("vehicleTracking")
         // Moving the map by hand ends following.
-        .onMapCameraChange(frequency: .onEnd) { _ in
+        .onMapCameraChange(frequency: .onEnd) { ctx in
+            mapHeading = ctx.camera.heading
             if camera.positionedByUser { follow = false }
         }
     }

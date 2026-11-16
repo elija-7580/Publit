@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1 (build 86) – the Nearby map everywhere
+
+- The maps on a departure (trip view), "Track vehicle", a line, the platform map and the change guide now work like the Nearby map: you with the arrow the way you face, the stops by name where there is room (MapKit hides names that would overlap), the location button and the compass, movable and zoomable. Route maps get the location button too.
+- What's new: "Nearby is a map" shows the real Nearby map (your position, the stations around you, tap one for its departures).
+
 ## 0.1.1 (build 85) – What's new you can try
 
 - **What's new** after the update is now a short story instead of a list: an intro, one card per new feature with a small live demo (the search types itself, drag between the old and the new Plan, turn the beam on the map, tap a pass and watch the ICE disappear, a bus that rings one stop early, place names changing while the app stays the same), "Try it" to jump right there, the fixes, and the wish list and support last. Swipe or use the buttons; nothing moves on by itself, and Reduce Motion shows each demo still.
