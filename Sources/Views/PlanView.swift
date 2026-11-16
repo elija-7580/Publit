@@ -139,7 +139,22 @@ struct PlanView: View {
         // Pull down: fetch the routes again (delays, a train just gone).
         .refreshable {
             guard app.plan.searchStarted, app.plan.to != nil else { return }
-            await app.plan.search(current: location.coordinate, locationDenied: location.isDenied, silent: true)
+            // The pull ends as soon as the routes are new. Awaiting the whole search also waited for
+            // the live sources and the cycling/driving comparison (up to ten seconds), and the list kept
+            // jumping under the held-down spinner while those arrived.
+            let plan = app.plan
+            let before = plan.updatedAt
+            let done = RefreshFlag()
+            let here = location.coordinate, denied = location.isDenied
+            Task { @MainActor in
+                await plan.search(current: here, locationDenied: denied, silent: true)
+                done.value = true
+            }
+            var waited = 0
+            while !done.value, plan.updatedAt == before, waited < 150, !Task.isCancelled {
+                try? await Task.sleep(for: .milliseconds(100))
+                waited += 1
+            }
         }
         .navigationDestination(item: $opened) { route in detail(route.itinerary) }
         .navigationTitle("Plan")
@@ -327,6 +342,9 @@ struct PlanView: View {
         }
     }
 }
+
+/// Set when a pulled refresh has finished its search.
+@MainActor private final class RefreshFlag { var value = false }
 
 /// The line between From and To: an open ring at the start, a full dot at the end, joined by a
 /// round-capped stroke (the logo's line).

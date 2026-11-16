@@ -10,8 +10,10 @@ struct SmartBadgesRow: View {
         // them it goes on its own line below.
         ViewThatFits(in: .horizontal) {
             HStack(spacing: 6) { chips; reasonText(fixed: true) }
+            // Three chips can be wider than a phone: they wrap instead of pushing the whole route row
+            // sideways (its times and bar were cut off at both edges).
             VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 6) { chips }
+                FlowRow(spacing: 6) { chips }
                 reasonText(fixed: false)
             }
         }
