@@ -17,7 +17,7 @@ struct FavoritesView: View {
                         }
                         .buttonStyle(.plain)
                         .swipeActions {
-                            Button(role: .destructive) { favorites.clear(role) } label: { Label("Remove", systemImage: "trash") }
+                            Button(role: .destructive) { favorites.clear(role) } label: { Label("Remove", systemImage: "trash") }.tint(Color.danger)
                             Button { settingRole = role } label: { Label("Change", systemImage: "pencil") }
                         }
                         .accessibilityHint("Plans a route to \(role.title)")

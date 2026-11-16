@@ -205,7 +205,7 @@ struct StreetComparisonSection: View {
                     } label: { row(c) }
                     .accessibilityIdentifier("compare-\(c.mode)")
                     .contextMenu { openButton(c) }
-                    .swipeActions(edge: .trailing) { openButton(c).tint(Color.ink) }
+                    .swipeActions(edge: .trailing) { openButton(c).tint(Color.inkAction) }
                 }
             } header: {
                 Text("Other ways")
