@@ -141,3 +141,31 @@ Transitous stays the router. Where its feed has no live time for a ride, `LiveOv
 | London | TfL Unified API `Line/Mode/…/Status` | Line status (delays, closures, part suspensions) for Underground, Overground, DLR, Elizabeth line, trams | Open data, "Powered by TfL Open Data" |
 
 Checked but not used (build 58): bahn.de's web API (blocks non-browser clients, "OPS_BLOCKED"); VRR EFA outside NRW (adds no live times there, e.g. Berlin, Dresden, Chemnitz, Kiel: 0 of 40); Bavarian (bahnland-bayern.de), BW (efa-bw.de), VVO, KVV, VVS, DING and MVV EFA servers and INSA (Saxony-Anhalt) HAFAS (no more live times than Transitous already has there, e.g. Kempten 2/15 vs 1/15, Pforzheim 25/40 vs 22/44, Magdeburg 12/14 vs 9/13); NAH.SH's old `nah.sh.hafas.de` (moved). Checked but not used: ViaggiaTreno (Trenitalia; blocks server requests, may work from devices – to test), Deutsche Bahn (Germany is already live through DELFI), iRail disturbances (redirects). Next candidates: Milan ATM, Copenhagen (Rejseplanen, needs key), Lisbon Carris, Brussels STIB (key), Prague is already live.
+
+## 6. Delay history for change chances (checked 17 Nov 2026)
+
+Smart Routing's change chances use measured delays (`services/delay-history`). What can be used, and under which licence:
+
+### Live feeds the service records itself
+
+| Region | Feed (Transitous name) | Key | Licence | Used |
+|---|---|---|---|---|
+| Germany | DELFI GTFS-RT (`germany.motis-project.org/gtfsrt`) | no | CC BY-SA 4.0 | yes |
+| Lower Saxony/Bremen | VBN (`gtfsr.vbn.de`) | no | CC BY-SA 4.0 | yes (fills gaps of DELFI) |
+| Berlin/Brandenburg | VBB | registered user agent | CC BY 4.0 | no – Transitous' agent string is private; register our own with VBB first |
+| Baden-Württemberg | amarillo-bw | key | – | no (ride sharing, not scheduled transit) |
+| Switzerland | opentransportdata.swiss GTFS-RT | free key | opentransportdata.swiss terms (attribution) | yes, once `CH_OTD_KEY` is set on the server |
+| Austria | only on-demand (Styria flex) in Transitous | – | – | **no open TripUpdates for scheduled transit** – keeps the old estimate |
+| Northern Italy | BusOne proxy (STA Bolzano, Trentino, Verona, Venice, GTT Turin, …) | Transitous' private keys | – | **no** – needs our own agreement with BusOne or the operators |
+
+The published tables are a derived database of CC BY-SA data: they are released under CC BY-SA 4.0 with attribution to DELFI e.V., VBN and opentransportdata.swiss (Settings → Data sources, and the header of the file page on publit.eu).
+
+### Ready-made archives
+
+| Archive | What | Licence | Can Publit use it? |
+|---|---|---|---|
+| [piebro/deutsche-bahn-data](https://github.com/piebro/deutsche-bahn-data) (Hugging Face) | DB trains at all stations, from DB's Timetables API, monthly Parquet since 2024-07 | data CC BY 4.0 (Deutsche Bahn), code MIT | **Yes**, with attribution. Useful to seed DB long-distance and regional trains, whose IDs must first be matched to DELFI route IDs (by train number and station EVA → DELFI stop); not done yet. |
+| [Bahn-Vorhersage dataset](https://opus.bibliothek.uni-augsburg.de/opus4/files/127213/paper_doellmann.pdf) | DB delays since Sep 2021 | ODbL | Yes, but tables built from it would have to be ODbL too (share-alike for databases). Not used for now to keep one licence. |
+| [Trafiklab KoDa](https://www.trafiklab.se/api/trafiklab-apis/koda/) | Historical GTFS-RT for Swedish regional operators since 2020 | Trafiklab's GTFS datasets are CC0; KoDa's own licence page was not found – ask Trafiklab before use. Needs a free API key. | Not yet: Sweden is not in the first regions, and the licence of KoDa itself must be confirmed. |
+
+Nothing of this has been imported yet; the service starts from its own observations. Without enough observations the app keeps the old formula and says "Estimate".
