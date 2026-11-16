@@ -158,7 +158,8 @@ struct LiveTripView: View {
             guard !key.isEmpty, let r = SmartRouting.changeAtRisk(trip.itinerary, at: .now) else { return }
             feedbackKind = .platform
             feedback += 1
-            ChangeRiskNotifier.notify(r, message: wrongMessage)
+            _ = r
+            Task { await ChangeRiskNotifier.follow(trip) }
         }
         .ticking(every: 15, now: $now)
         .navigationTitle(trip.toName)

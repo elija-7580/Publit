@@ -146,10 +146,13 @@ struct SmartRoutingSettingsSection: View {
     @AppStorage(SmartRouting.measuredSpeedKey) private var measuredSpeed = 0.0
     @AppStorage(SmartRouting.flatWalksKey) private var flatWalks = false
     @AppStorage(SmartRouting.learnKey) private var learn = true
+    @AppStorage(SmartRouting.learnTripsKey) private var learnTrips = false
+    @AppStorage(ChangeWatch.enabledKey) private var changeAlerts = true
     @State private var measuring = false
+    @State private var learnedChanges = TripLearning.observations.count
 
     private var learnedSomething: Bool {
-        transferMinutes != SmartRouting.defaultTransferMinutes || walkWeight != SmartRouting.defaultWalkWeight
+        transferMinutes != SmartRouting.defaultTransferMinutes || walkWeight != SmartRouting.defaultWalkWeight || learnedChanges > 0
     }
 
     var body: some View {
@@ -211,11 +214,23 @@ struct SmartRoutingSettingsSection: View {
                 }
                 Toggle(L10n.t("Avoid steep walks"), isOn: $flatWalks)
                 Toggle(L10n.t("Learn from my choices"), isOn: $learn)
+                Toggle(isOn: $learnTrips) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(L10n.t("Learn from my trips"))
+                        Text(learnedChanges > 0 ? L10n.f("Learned from %lld changes. Stays on this iPhone.", learnedChanges)
+                             : L10n.t("How long your changes take, from your started trips. Stays on this iPhone."))
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+                .accessibilityIdentifier("learnFromTrips")
+                Toggle(L10n.t("Change alerts"), isOn: $changeAlerts)
+                    .accessibilityIdentifier("changeAlerts")
                 if learnedSomething {
                     Button(L10n.t("Reset learned preferences")) {
                         SmartRouting.resetLearning()
                         transferMinutes = SmartRouting.defaultTransferMinutes
                         walkWeight = SmartRouting.defaultWalkWeight
+                        learnedChanges = 0
                     }
                 }
             }

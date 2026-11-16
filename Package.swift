@@ -20,6 +20,8 @@ let core = [
     "Models/SmartRouting.swift",
     "Models/DelayHistory.swift",
     "Models/TransferWalk.swift",
+    "Models/TripLearning.swift",
+    "Models/ChangeWatch.swift",
     "Models/TripProgress.swift",
     "Models/WalkGuide.swift",
     "Models/StationExits.swift",

@@ -19,6 +19,9 @@ enum DeepLink: Hashable, Identifiable {
     /// Routes from here to a place shared from another map app: `publit://place?name=…&lat=…&lon=…`
     /// (from the share extension, see `MapLink`). Without coordinates the name is searched.
     case place(name: String, lat: Double?, lon: Double?)
+    /// Other routes when a change is at risk: `publit://alternatives?tn=…&tlat=…&tlon=…[&fn=…&flat=…&flon=…&fs=…]`,
+    /// from the change stop (or from here without `fn`) to the destination, leaving now.
+    case alternatives(from: SavedPlace?, to: SavedPlace)
 
     static let scheme = "publit"
 
@@ -61,6 +64,21 @@ enum DeepLink: Hashable, Identifiable {
                 guard let name = value("name") else { return nil }
                 self = .place(name: name, lat: nil, lon: nil)
             }
+        case "alternatives":
+            let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []
+            func value(_ n: String) -> String? { items.first { $0.name == n }?.value.flatMap { $0.isEmpty ? nil : $0 } }
+            func coord(_ a: String, _ b: String) -> (Double, Double)? {
+                guard let lat = value(a).flatMap(Double.init), let lon = value(b).flatMap(Double.init),
+                      lat.isFinite, lon.isFinite, abs(lat) <= 90, abs(lon) <= 180 else { return nil }
+                return (lat, lon)
+            }
+            guard let tn = value("tn"), let t = coord("tlat", "tlon") else { return nil }
+            let to = SavedPlace(id: "dest|\(t.0),\(t.1)", name: tn, subtitle: nil, lat: t.0, lon: t.1, stopId: value("ts"))
+            var from: SavedPlace?
+            if let fn = value("fn"), let f = coord("flat", "flon") {
+                from = SavedPlace(id: "stop|\(f.0),\(f.1)", name: fn, subtitle: nil, lat: f.0, lon: f.1, stopId: value("fs"))
+            }
+            self = .alternatives(from: from, to: to)
         default:
             return nil
         }
@@ -84,6 +102,17 @@ enum DeepLink: Hashable, Identifiable {
             var items = [URLQueryItem(name: "name", value: name)]
             if let lat, let lon {
                 items += [URLQueryItem(name: "lat", value: String(lat)), URLQueryItem(name: "lon", value: String(lon))]
+            }
+            c.queryItems = items
+        case .alternatives(let from, let to):
+            c.host = "alternatives"
+            var items = [URLQueryItem(name: "tn", value: to.name), URLQueryItem(name: "tlat", value: String(to.lat)),
+                         URLQueryItem(name: "tlon", value: String(to.lon))]
+            if let s = to.stopId { items.append(URLQueryItem(name: "ts", value: s)) }
+            if let from {
+                items += [URLQueryItem(name: "fn", value: from.name), URLQueryItem(name: "flat", value: String(from.lat)),
+                          URLQueryItem(name: "flon", value: String(from.lon))]
+                if let s = from.stopId { items.append(URLQueryItem(name: "fs", value: s)) }
             }
             c.queryItems = items
         }

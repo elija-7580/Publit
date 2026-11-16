@@ -65,11 +65,12 @@ enum LineAlertMonitor {
     }
 
     /// Asks iOS for the next background check.
-    static func scheduleBackgroundCheck() {
+    /// `forTrips`: a started or remembered trip is running, so its changes are checked too (sooner).
+    static func scheduleBackgroundCheck(forTrips: Bool = false) {
         #if canImport(BackgroundTasks) && os(iOS)
-        guard isEnabled, !savedLines().isEmpty else { return }
+        guard forTrips || (isEnabled && !savedLines().isEmpty) else { return }
         let request = BGAppRefreshTaskRequest(identifier: taskId)
-        request.earliestBeginDate = Date().addingTimeInterval(30 * 60)
+        request.earliestBeginDate = Date().addingTimeInterval(forTrips ? 15 * 60 : 30 * 60)
         try? BGTaskScheduler.shared.submit(request)
         #endif
     }

@@ -198,7 +198,8 @@ enum SmartRouting {
     }
 
     static func changes(_ it: Itinerary, at now: Date = .now, history: (String?) -> DelayHistory.Table? = { DelayHistoryStore.shared.table(country: $0) },
-                        walkModel: WalkModel = .current, extraSeconds: Double = Double(Request.current.extraTransferMinutes) * 60) -> [Change] {
+                        walkModel: WalkModel = .current, extraSeconds: Double = Double(Request.current.extraTransferMinutes) * 60,
+                        learned: [TripLearning.Observation]? = TripLearning.isEnabled ? TripLearning.observations : nil) -> [Change] {
         var out: [Change] = []
         let legs = it.legs
         var i = 0
@@ -212,8 +213,14 @@ enum SmartRouting {
             let tw = TransferWalk(incoming: legs[i], walks: Array(legs[(i + 1)..<j]), outgoing: legs[j])
             let est = chance(incoming: legs[i], outgoing: legs[j], walk: tw, at: now, history: history,
                              walkModel: walkModel, extraSeconds: extraSeconds)
-            out.append(Change(stopName: legs[i].to.name, incoming: legs[i], outgoing: legs[j], outgoingIndex: j, walkSeconds: walk,
-                              spareMinutes: spare, chance: est.chance, source: est.source, walk: tw))
+            var c = Change(stopName: legs[i].to.name, incoming: legs[i], outgoing: legs[j], outgoingIndex: j, walkSeconds: walk,
+                           spareMinutes: spare, chance: est.chance, source: est.source, walk: tw)
+            // Made this change several times before: the own success rate counts too.
+            if let learned, est.source != .throughRun {
+                c = Change(stopName: c.stopName, incoming: c.incoming, outgoing: c.outgoing, outgoingIndex: j, walkSeconds: walk, spareMinutes: spare,
+                           chance: TripLearning.adjusted(est.chance, key: TripLearning.key(c), observations: learned), source: est.source, walk: tw)
+            }
+            out.append(c)
             i = j
         }
         return out
@@ -237,18 +244,7 @@ enum SmartRouting {
         let table = history(DelayHistory.country(ofId: incoming.routeId ?? outgoing.routeId))
         let tz = incoming.to.tz.flatMap(TimeZone.init(identifier:)) ?? .current
         func side(_ leg: Leg, arrival: Bool) -> (dist: DelayHistory.Dist, cancel: Double, n: Int)? {
-            let time = arrival ? leg.endTime : leg.startTime
-            let sched = arrival ? leg.scheduledEndTime : leg.scheduledStartTime
-            let minutesAhead = time.timeIntervalSince(now) / 60
-            let row = table?.row(routeId: leg.routeId, stopId: arrival ? leg.to.stopId : leg.from.stopId,
-                                 agency: leg.agencyName, mode: leg.mode, window: DelayHistory.window(sched, timeZone: tz))
-            // Live forecasts rarely miss a cancellation close to departure.
-            let cancel = (row?.cancelled ?? 0) * (leg.realTime ? min(1, max(0, minutesAhead) / 60) : 1)
-            if leg.realTime, let (err, n) = table?.forecastError(mode: leg.mode, minutesAhead: minutesAhead) {
-                return (err.shifted(by: time.timeIntervalSince(sched)), cancel, n)
-            }
-            guard let row, let d = arrival ? row.arrival : row.departure else { return nil }
-            return (d, cancel, row.observations)
+            delay(leg, arrival: arrival, at: now, table: table, timeZone: tz)
         }
         let gap = outgoing.scheduledStartTime.timeIntervalSince(incoming.scheduledEndTime)
         guard let a = side(incoming, arrival: true) else {
@@ -263,6 +259,24 @@ enum SmartRouting {
         let n = min(a.n, d?.n ?? a.n)
         let value = cap((1 - a.cancel) * (1 - (d?.cancel ?? 0)) * p, observations: n)
         return (value, d == nil ? .estimate : .history(observations: n))
+    }
+
+    /// The delay of a leg at its end (arrival) or start (departure): with live data the current forecast
+    /// plus how far such forecasts are usually off at that distance; else the measured history.
+    static func delay(_ leg: Leg, arrival: Bool, at now: Date, table: DelayHistory.Table?, timeZone tz: TimeZone)
+        -> (dist: DelayHistory.Dist, cancel: Double, n: Int)? {
+        let time = arrival ? leg.endTime : leg.startTime
+        let sched = arrival ? leg.scheduledEndTime : leg.scheduledStartTime
+        let minutesAhead = time.timeIntervalSince(now) / 60
+        let row = table?.row(routeId: leg.routeId, stopId: arrival ? leg.to.stopId : leg.from.stopId,
+                             agency: leg.agencyName, mode: leg.mode, window: DelayHistory.window(sched, timeZone: tz))
+        // Live forecasts rarely miss a cancellation close to departure.
+        let cancel = (row?.cancelled ?? 0) * (leg.realTime ? min(1, max(0, minutesAhead) / 60) : 1)
+        if leg.realTime, let (err, n) = table?.forecastError(mode: leg.mode, minutesAhead: minutesAhead) {
+            return (err.shifted(by: time.timeIntervalSince(sched)), cancel, n)
+        }
+        guard let row, let d = arrival ? row.arrival : row.departure else { return nil }
+        return (d, cancel, row.observations)
     }
 
     /// P(a + w ≤ gap + d) over equally likely samples of feeder delay, walk and connection delay.
@@ -401,6 +415,7 @@ enum SmartRouting {
     static func resetLearning() {
         defaults.removeObject(forKey: transferMinutesKey)
         defaults.removeObject(forKey: walkWeightKey)
+        TripLearning.reset()
     }
 }
 

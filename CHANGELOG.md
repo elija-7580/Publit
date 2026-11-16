@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1 (build 88) – change alerts, learning from your trips
+
+- **Change alerts**: for a started trip (and trips with a running Live Activity) every coming change is recomputed when live data changes and, on foot between two rides, from how far you still are from the departure and how fast you walk. Below "likely" or when the connection is cancelled: a notification "Your connection at … is unlikely – n alternatives"; tapping it opens routes from the change stop (or from where you are) to your destination, leaving now. One alert per change, another only if it gets clearly worse; none for through-runs. Settings → Smart routing → "Change alerts".
+- **Learn from my trips** (off by default, on the iPhone only): during started trips Publit measures how long each change really took and whether you made it, keeps only those values (no location track), and learns your own walking model – pace, stairs, lifts, platform and station changes, your own overhead – which also applies to changes you have never made. Changes made often also use your own success rate. "Reset learned preferences" deletes it.
+- Background limits: iOS runs background refreshes when it chooses (often not every 15 minutes); during a started trip with learning or the location-based get-off alert, location fixes keep the checks going.
+
 ## 0.1.1 (build 87) – change chances from measured delays
 
 - **Smart routing**: the chance of a change now comes from measured delays where Publit has them (new table per country on publit.eu, built by `services/delay-history` from open real-time feeds): the feeder's arrival delay and the connection's departure delay at that stop, line and time of day, combined (a connection that often leaves late helps). With live data: the current forecast and how far such forecasts are usually off at that distance. The walk adds lifts, levels, a platform that changed after planning, a station change and big stations; "Extra time for changes" comes on top. Cancellation rates count. Through-runs (same vehicle continues) are always safe.
