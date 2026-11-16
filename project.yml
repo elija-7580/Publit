@@ -140,6 +140,8 @@ targets:
       - Sources/Models/SmartRouting.swift
       - Sources/Models/DelayHistory.swift
       - Sources/Models/TransferWalk.swift
+      - Sources/Models/TripLearning.swift
+      - Sources/Models/ChangeWatch.swift
       - Sources/Models/TransitExtras.swift
       - Sources/Models/Reach.swift
       - Sources/Models/CircularLine.swift
@@ -192,6 +194,8 @@ targets:
       - Sources/Models/SmartRouting.swift
       - Sources/Models/DelayHistory.swift
       - Sources/Models/TransferWalk.swift
+      - Sources/Models/TripLearning.swift
+      - Sources/Models/ChangeWatch.swift
       - Sources/Models/TransitExtras.swift
       - Sources/Models/Reach.swift
       - Sources/Models/CircularLine.swift
