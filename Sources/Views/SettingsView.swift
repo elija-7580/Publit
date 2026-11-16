@@ -32,6 +32,8 @@ struct SettingsView: View {
     @State private var reportURL: URL?
     @State private var showWishes = false
     @State private var showSupport = false
+    /// The latest "What's new" story, again on request.
+    @State private var showStory = false
 
     /// A new GitHub issue with version, device and counts filled in; the diagnostics file is attached by hand.
     private var issueURL: URL {
@@ -77,6 +79,12 @@ struct SettingsView: View {
                     CommunityCard(open: { showWishes = true }, support: { showSupport = true })
                         .listRowInsets(EdgeInsets())
                         .listRowBackground(Color.clear)
+                    if ReleaseStory.all.first != nil {
+                        Button { showStory = true } label: {
+                            Label(L10n.t("What's new in Publit"), systemImage: "sparkles")
+                        }
+                        .accessibilityIdentifier("settingsWhatsNew")
+                    }
                 } header: {
                     Text(L10n.t("Community"))
                 }
@@ -333,6 +341,11 @@ struct SettingsView: View {
             }
             .navigationDestination(isPresented: $showWishes) { WishesView() }
             .navigationDestination(isPresented: $showSupport) { SupportView() }
+            .fullScreenCover(isPresented: $showStory) {
+                if let story = ReleaseStory.all.first {
+                    ReleaseStoryView(story: story, onClose: { showStory = false })
+                }
+            }
             .navigationTitle("Settings")
             .screenTrail("Settings")
             .navigationBarTitleDisplayMode(.inline)

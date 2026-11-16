@@ -380,6 +380,37 @@ final class PublitUITests: XCTestCase {
     func testF26WebsiteStartLight() { websiteStartShots(dark: false) }
     func testF27WebsiteStartDark() { websiteStartShots(dark: true) }
 
+    /// The interactive "What's new" after updating from the App Store version (build 65): every
+    /// page once, then "Continue" closes it and it does not come back on the next start.
+    func testF30WhatsNewStory() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-onboardingDone", "YES", "-wishesHintShown", "YES", "-whatsNewBuild", "65",
+                               "-AppleLanguages", "(en)", "-AppleLocale", "en_GB"]
+        app.launch()
+        XCTAssertTrue(app.otherElements["releaseStory"].waitForExistence(timeout: 20)
+                      || app.buttons["storyNext"].waitForExistence(timeout: 5), "story after the update")
+        sleep(1)
+        snap("story-0-intro")
+        var page = 1
+        while app.buttons["storyNext"].exists, page < 12 {
+            app.buttons["storyNext"].tap()
+            sleep(3) // let the demo play (typing, the moving bus)
+            snap("story-\(page)")
+            page += 1
+        }
+        XCTAssertGreaterThanOrEqual(page, 8, "intro, six cards, fixes and community")
+        XCTAssertTrue(app.buttons["storyDone"].waitForExistence(timeout: 5))
+        app.buttons["storyDone"].tap()
+        sleep(2)
+        XCTAssertFalse(app.buttons["storyDone"].exists, "Continue closes the story")
+        app.terminate()
+        app.launchArguments = ["-onboardingDone", "YES", "-wishesHintShown", "YES",
+                               "-AppleLanguages", "(en)", "-AppleLocale", "en_GB"]
+        app.launch()
+        sleep(4)
+        XCTAssertFalse(app.buttons["storyNext"].exists, "shown once only")
+    }
+
     /// Ticket passes and the widgets, light.
     /// "New route from here" for publit.eu: the live trip four minutes on, standing at the stop the
     /// U6 has already left (`live-missed`), panel up so the missed-connection card shows.
