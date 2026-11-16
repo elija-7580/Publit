@@ -247,6 +247,7 @@ final class PlanModel {
             if !silent { history.record(from: searchedFrom, to: to, mode: searchedMode, date: searchedDate, source: source) }
             if itineraries.isEmpty {
                 errorMessage = options.isDefault ? L10n.t("No connections found.")
+                    : !options.tickets.isEmpty ? L10n.t("No connection is fully covered by your tickets. Change them in Route options to see all.")
                     : options.maxWalkMinutes < RouteOptions.defaultWalkMinutes ? Reach.ownLimitNote(minutes: options.maxWalkMinutes)
                     : L10n.t("No connections found with these filters.")
                 // Say so when the area has no timetable at all (Athens, Malta, Minsk …), not just no route.
