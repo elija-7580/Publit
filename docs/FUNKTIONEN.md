@@ -408,7 +408,7 @@ Kleinere Bausteine, die in den Abschnitten oben nicht namentlich vorkommen:
 | `SettingsButton` | Zahnrad, öffnet Einstellungen (§16) |
 | `SupportView` | Publit unterstützen: monatlich und einmalig (§16b) |
 | `CommunityCard`, `WhatsNewSheet` | Community-Karte (Wünsche, Unterstützen) und „What's new“ nach Updates (§2, §16) |
-| `ReleaseStoryView`, `StoryChip`, `StoryStat`, `StoryDemo`, `TypingDemo`, `BeforeAfterDemo`, `TrailingClip`, `Beam`, `CompassDemo`, `TicketsDemo`, `FlowChips`, `GetOffDemo`, `PlacesDemo` | Interaktive „What's new“-Story mit Live-Demos (§2) |
+| `ReleaseStoryView`, `StoryChip`, `StoryStat`, `StoryDemo`, `TypingDemo`, `BeforeAfterDemo`, `TrailingClip`, `Beam`, `CompassDemo`, `NearbyMapDemo`, `TicketsDemo`, `FlowChips`, `GetOffDemo`, `PlacesDemo` | Interaktive „What's new“-Story mit Live-Demos (§2) |
 | `SmartBadgesRow`, `SmartChangesSection`, `ChangeChanceRow`, `SmartRoutingSettingsSection` | Smart-Routing-Badges (einzeilig, nie umbrochen; Begründung rückt bei Platzmangel in eine eigene Zeile darunter), Umstiegsbewertung, Einstellungen (§11) |
 | `StopTimeRow` | Haltzeile einer Fahrzeug-Fahrt (§6) |
 | `WalkThereRow` | „6 min walk · 450 m“ zu genau dieser Haltestelle (richtige Straßenseite), öffnet die Karten-App zu Fuß; ausgeblendet, solange man an der Haltestelle steht (≤ 50 m) (§3, §4) |
