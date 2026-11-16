@@ -622,11 +622,18 @@ private struct PlacesDemo: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(verbatim: names.isEmpty ? "" : names[index % names.count])
-                .font(.system(size: 40, weight: .heavy))
-                .contentTransition(.opacity)
-                .animation(.easeInOut(duration: 0.4), value: index)
-                .accessibilityHidden(true)
+            // One name at a time: the old one slides up and out, the new one comes in from below.
+            ZStack(alignment: .leading) {
+                Text(verbatim: names.isEmpty ? "" : names[index % names.count])
+                    .font(.system(size: 40, weight: .heavy))
+                    .id(index)
+                    .transition(.asymmetric(insertion: .move(edge: .bottom).combined(with: .opacity),
+                                            removal: .move(edge: .top).combined(with: .opacity)))
+            }
+            .frame(maxWidth: .infinity, minHeight: 52, alignment: .leading)
+            .clipped()
+            .animation(.easeInOut(duration: 0.45), value: index)
+            .accessibilityHidden(true)
             HStack(spacing: 6) {
                 tile("location.fill", L10n.t("Nearby"))
                 tile("magnifyingglass", L10n.t("Search"))
