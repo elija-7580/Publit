@@ -74,8 +74,16 @@ struct LiveTripView: View {
         let finished = steps[live].kind == .arrive && TripGuide.isFinished(it, at: now, location: here)
         // The whole trip or where you are now: a round key in the map's own column at the top left.
         let away = overview || picked != nil
+        // The next turn of the walk you are on, over the map: what to do and in how many metres.
+        let nextTurn: GuideMap.Turn? = walkPos.flatMap { p in
+            guard let walk, let next = walk.maneuvers[safe: p.index + 1] else { return nil }
+            return GuideMap.Turn(symbol: next.symbol, text: next.instruction(destination: ItineraryDetailView.placeName(leg.to)),
+                                 meters: p.toNext)
+        }
         let map = GuideMap(itinerary: it, step: step,
              vehicle: vehicle,
+             nextTurn: nextTurn,
+             voice: $voice,
              focus: walkPos.flatMap { p in walk?.maneuvers[safe: p.index + 1]?.coordinate },
              trace: TripTrace.Progress(legIndex: steps[live].legIndex, kind: steps[live].kind,
                                        point: index == live && step.kind == .ride ? (vehicle ?? here) : here),
@@ -794,6 +802,15 @@ private struct GuideMap: View {
     let itinerary: Itinerary
     let step: GuideStep
     let vehicle: LatLon?
+    /// The next instruction of the walk you are on (shown over the map).
+    struct Turn: Equatable {
+        let symbol: String
+        let text: String
+        let meters: Double?
+    }
+    var nextTurn: Turn? = nil
+    /// Spoken directions, the same switch as in the guide's menu.
+    @Binding var voice: Bool
     let focus: LatLon?
     /// Where the trip is now: what lies behind is drawn light blue.
     let trace: TripTrace.Progress
@@ -844,9 +861,45 @@ private struct GuideMap: View {
                 }
                 .accessibilityLabel(Text(away ? L10n.t("Back to now") : L10n.t("Trip overview")))
                 .accessibilityIdentifier("liveOverviewToggle")
+                Button {
+                    voice.toggle()
+                    if !voice { GuideVoice.shared.stop() }
+                } label: {
+                    Image(systemName: voice ? "speaker.wave.2.fill" : "speaker.slash")
+                        .font(.body.weight(.semibold))
+                        .frame(width: 44, height: 44)
+                        .matteSurface(in: Circle())
+                }
+                .accessibilityLabel(Text(voice ? L10n.t("Turn off spoken directions") : L10n.t("Turn on spoken directions")))
+                .accessibilityIdentifier("guideMapVoice")
             }
             .buttonStyle(.plain)
             .padding(8)
+        }
+        .overlay(alignment: .top) {
+            if isLive, !overview, step.kind == .walk, let nextTurn {
+                TurnCard(turn: nextTurn)
+                    .padding(.top, 8)
+                    .padding(.horizontal, 64)
+                    .transition(.opacity)
+            }
+        }
+        .overlay(alignment: .topTrailing) {
+            // Moved the map by hand while walking: one tap follows you again.
+            if isLive, !overview, !followHeading, step.kind == .walk, camera.positionedByUser {
+                Button {
+                    withAnimation { camera = Self.camera(step, itinerary, live: true) }
+                } label: {
+                    Image(systemName: "location.fill")
+                        .font(.body.weight(.semibold))
+                        .frame(width: 44, height: 44)
+                        .matteSurface(in: Circle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(Text("Follow my location"))
+                .accessibilityIdentifier("guideFollowMe")
+                .padding(8)
+            }
         }
         .onAppear { camera = overview ? Self.overviewCamera(itinerary) : Self.camera(step, itinerary, live: isLive) }
         .onChange(of: step) { _, s in
@@ -1018,6 +1071,30 @@ private struct GuideMap: View {
         let r = points.reduce(MKMapRect.null) { $0.union(MKMapRect(origin: MKMapPoint($1.clCoordinate), size: MKMapSize(width: 1, height: 1))) }
         let pad = max(max(r.width, r.height) * 0.15, 400)
         return r.insetBy(dx: -pad, dy: -pad)
+    }
+}
+
+/// The next turn over the walking map: arrow, metres to go and the instruction.
+private struct TurnCard: View {
+    let turn: GuideMap.Turn
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: turn.symbol)
+                .font(.title2.weight(.bold))
+                .frame(width: 32)
+            VStack(alignment: .leading, spacing: 1) {
+                if let meters = turn.meters {
+                    Text(verbatim: Fmt.distance(meters: meters)).font(.headline.monospacedDigit())
+                }
+                Text(verbatim: turn.text).font(.subheadline).lineLimit(2)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 12).padding(.vertical, 8)
+        .matteSurface(in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("guideMapTurn")
     }
 }
 

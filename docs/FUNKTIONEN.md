@@ -190,6 +190,7 @@ Nach jedem Update (nie bei Neuinstallation – dort kommt das Onboarding –, ni
 Gespeicherte Verbindung mit aktuellem Live-Status (oder „Live status unavailable. Showing saved times.“), „Trip not found“ wenn gelöscht. Abschnitt im Tab Gespeichert.
 
 ### Fahrt starten (`TripSession`)
+- Beginnt die Fahrt mit einem Fußweg, der in der nächsten Stunde ansteht oder schon läuft, heißt die Taste **„Start walking navigation“** (Gehsymbol) und öffnet den Guide direkt auf diesem Fußweg (`TripStatus.startsOnFoot`).
 - „Start trip“ speichert und aktiviert die Fahrt; es gibt nur **eine** manuell gestartete Fahrt (eine neue beendet die alte).
 - Startet die **Live Activity** (Hinweise: „Follow it on the lock screen.“, „Live updates on the lock screen start 8 hours before.“, oder Live Activities in Einstellungen einschalten), setzt pro Fahrtabschnitt einen **Aussteige-Hinweis** (wenn Mitteilungen erlaubt).
 - „End trip“ beendet Tracking, Live Activity und Erinnerungen; Fahrt bleibt unter „Past trips“.
@@ -205,7 +206,7 @@ Erscheint für die gestartete Fahrt oder eine gespeicherte, die gerade läuft/ba
 - Fahren: „Now at …“, „Next stop … in …“, Haltliste (`GuideStopRow`), „Get off here“, „Get off at …“, Positionsquelle („Position from your location / estimated from live stop times / from the timetable“), „Line …: all stops and map“ (ganze Fahrt, §6) – auch für frühere und spätere Etappen über die Etappenliste.
 - Ankunft: „You have arrived“, „Arrive at …“, „Destination in …“.
 - **Umstiegshilfe** (`ChangeGuideCard`/`ChangeGuide`, Einstellungen → Stations → „Change guide“, Standard an): beim Fahren (vor dem Aussteigen), beim Umstiegs-Fußweg und beim Warten auf das nächste Fahrzeug: „Platform 3 → Platform 7“, Karte mit Fußweg von Ausstieg („Get off here“, Linien-Badge + Gleis) zu Einstieg („Board here“), „x min walk · Step-free“ bzw. „With stairs“, „Same platform“ wenn nichts zu gehen ist; darunter nur das Wesentliche im Bahnhof: Treppen, Aufzüge („Take the lift“), Ebenenwechsel, Ausgänge.
-- **Karte** (`GuideMap`) mit zurückgelegter (hellblau) und kommender Strecke (`TripTrace`), Kartenstil, 3D.
+- **Karte** (`GuideMap`) mit zurückgelegter (hellblau) und kommender Strecke (`TripTrace`), Kartenstil, 3D. Beim aktuellen Fußweg (zum ersten Halt, beim Umstieg, zum Ziel): oben auf der Karte die **nächste Abbiegung** mit Pfeil, Metern und Anweisung (`TurnCard`); die Karte folgt dir, nach Verschieben bringt „Follow my location“ (Standort-Taste oben rechts) sie zurück. In der Tastenspalte links zusätzlich **gesprochene Anweisungen** an/aus (derselbe Schalter wie im Menü).
 - **Sprachansagen** („Turn on/off spoken directions“; `GuideVoice`, andere Audioquellen werden leiser).
 - **Abweichungen**: „You seem to be off the route.“, „Missed it?“, „Connection cancelled“, Warnung „Your change at … may not work (x %)“ mit Backup.
 - **Alternativen** (`AlternativeRow`): „Looking for the next connection…“, „Other connections“, „Switch to this connection“ (Live Activity und Erinnerungen ziehen mit), „New route from here“, „No other connection found right now.“
@@ -381,6 +382,7 @@ Kleinere Bausteine, die in den Abschnitten oben nicht namentlich vorkommen:
 | `LineRefRow`, `LineStopRow` | Linienzeile in der Linienliste, Haltzeile im Linien-Detail (§5) |
 | `PlatformChangeLabel` | Gleiswechsel-Anzeige im Guide (§13) |
 | `PlaceLabel` | Ortszeile in der Ortssuche (§9) |
+| `TurnCard` | Nächste Abbiegung über der Karte des Fußwegs in der Live-Fahrt (§13) |
 | `PlaceHitRow` | Treffer der Ortssuche: Haltestelle, Adresse oder Ort, Apple-Vorschläge werden beim Antippen nachgeschlagen; „Save“ per Wischen (§9) |
 | `HeadingDot` | Dein Standort mit Pfeil in Blickrichtung auf allen Karten (SwiftUI über `YouAreHere`, Stationskarte über `UserHeadingView`) (§3) |
 | `ExitMark` | Tür-Markierung des gewählten Stationsausgangs auf der Karte der Live-Fahrt (§13) |
