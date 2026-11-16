@@ -177,6 +177,20 @@ enum SmartRouting {
         /// Minutes left after the walk (negative: already broken).
         let spareMinutes: Double
         let chance: Double
+        var walk = TransferWalk()
+        var basis: Basis = .estimate
+
+        /// Where the chance comes from, shown small under the change.
+        enum Basis: Equatable, Sendable {
+            /// Typical delays of this kind of vehicle and your walk model: an estimate.
+            case estimate
+            /// This change, made on your own trips this many times.
+            case ownTrips(Int)
+            /// Same vehicle: you stay on.
+            case throughRun
+        }
+
+        var isThroughRun: Bool { basis == .throughRun }
 
         enum Level: Sendable { case safe, likely, risky }
         var level: Level { chance >= 0.9 ? .safe : chance >= 0.7 ? .likely : .risky }
@@ -184,7 +198,7 @@ enum SmartRouting {
         var percent: Int { min(99, max(1, Int((chance * 100).rounded()))) }
     }
 
-    static func changes(_ it: Itinerary) -> [Change] {
+    static func changes(_ it: Itinerary, at now: Date = .now) -> [Change] {
         var out: [Change] = []
         let legs = it.legs
         var i = 0
@@ -195,14 +209,17 @@ enum SmartRouting {
             while j < legs.count, !legs[j].isTransit { walk += legs[j].duration; j += 1 }
             guard j < legs.count else { break }
             let spare = (legs[j].startTime.timeIntervalSince(legs[i].endTime) - Double(walk)) / 60
+            let shape = TransferWalk.of(incoming: legs[i], outgoing: legs[j], walks: Array(legs[(i + 1)..<j]))
+            let estimate = assess(spareMinutes: spare, walk: shape, incoming: legs[i], outgoing: legs[j], at: now)
             out.append(Change(stopName: legs[i].to.name, incoming: legs[i], outgoing: legs[j], outgoingIndex: j, walkSeconds: walk,
-                              spareMinutes: spare, chance: chance(spareMinutes: spare, walkSeconds: walk, incoming: legs[i])))
+                              spareMinutes: spare, chance: estimate.chance, walk: shape, basis: estimate.basis))
             i = j
         }
         return out
     }
 
-    /// How spread out arrivals of this kind of vehicle are, in minutes.
+    /// How spread out arrivals of this kind of vehicle are, in minutes. Rough values: there is no
+    /// delay history behind them yet, which is why such chances are marked "Estimate".
     static func spread(_ mode: String) -> Double {
         switch mode {
         case "HIGHSPEED_RAIL", "LONG_DISTANCE", "NIGHT_RAIL", "AIRPLANE": return 4
@@ -214,16 +231,54 @@ enum SmartRouting {
         }
     }
 
-    /// Chance the change works: a logistic curve over the minutes left, wider for vehicles that
-    /// run late more often, narrower when the incoming one reports live times.
+    /// A live forecast an hour ahead is less sure than one five minutes ahead.
+    static func liveFactor(minutesAhead: Double) -> Double { (0.3 + max(0, minutesAhead) / 45).clamped(to: 0.3...1) }
+
+    /// Estimates never claim more than this; own trips may (still never 100 %).
+    static let estimateCap = 0.97
+
+    /// Chance the change works when only the incoming ride is known (older callers, tests).
     static func chance(spareMinutes: Double, walkSeconds: Int, incoming: Leg) -> Double {
-        var s = spread(incoming.mode)
-        if incoming.realTime { s *= 0.6 }
-        // Walks take a little longer than planned now and then.
-        let margin = spareMinutes - Double(walkSeconds) / 60 * 0.1
-        let x = (margin + 0.5 - s / 2) / (s * 0.6)
-        return (1 / (1 + exp(-x))).clamped(to: 0.01...0.995)
+        assess(spareMinutes: spareMinutes, walk: TransferWalk(plannedSeconds: Double(walkSeconds)), incoming: incoming, outgoing: nil, at: .now).chance
     }
+
+    /// P(arrival of the incoming ride + your walk ≤ departure of the next one).
+    /// Arrival: late more often than early, unless a live forecast says where it is (then the
+    /// forecast is the middle and its doubt grows with how far ahead it looks). Departure: only
+    /// a live forecast counts; without one the ride is taken as on time, give or take a little.
+    /// Walk: your own model (`TransferLearning`), else the planner's walk plus 10 %.
+    /// A cancelled ride breaks the change; the same vehicle going on makes it certain.
+    static func assess(spareMinutes: Double, walk: TransferWalk, incoming: Leg, outgoing: Leg?, at now: Date)
+        -> (chance: Double, basis: Change.Basis) {
+        if let outgoing, let a = incoming.tripId, !a.isEmpty, a == outgoing.tripId { return (0.995, .throughRun) }
+        if incoming.cancelled == true || outgoing?.cancelled == true { return (0.01, .estimate) }
+        let sIn = spread(incoming.mode)
+        let inMean: Double, inSD: Double
+        if incoming.realTime {
+            inMean = 0
+            inSD = sIn * liveFactor(minutesAhead: incoming.endTime.timeIntervalSince(now) / 60)
+        } else {
+            inMean = max(0, sIn / 2 - 0.5)
+            inSD = sIn
+        }
+        let sOut = outgoing.map { spread($0.mode) } ?? sIn
+        let outSD = outgoing.map { $0.realTime ? sOut * liveFactor(minutesAhead: $0.startTime.timeIntervalSince(now) / 60) : sOut * 0.4 } ?? sOut * 0.4
+        let predicted = TransferLearning.model.predict(walk)
+        // The planner's walk is already in the spare minutes; only the difference to yours counts.
+        let slack = spareMinutes - (predicted.mean - walk.plannedSeconds) / 60
+        let sd = (inSD * inSD + outSD * outSD + pow(predicted.sd / 60, 2)).squareRoot()
+        var p = normalCDF((slack - inMean) / max(sd, 0.1))
+        var basis: Change.Basis = .estimate
+        if let outgoing, TransferLearning.isEnabled {
+            let record = TransferLearning.history[TransferLearning.key(incoming: incoming, outgoing: outgoing)]
+            p = TransferLearning.adjusted(p, by: record)
+            if let r = record, r.total >= 3 { basis = .ownTrips(r.total) }
+        }
+        let cap = basis == .estimate ? estimateCap : 0.99
+        return (p.clamped(to: 0.01...cap), basis)
+    }
+
+    static func normalCDF(_ z: Double) -> Double { 0.5 * erfc(-z / 2.0.squareRoot()) }
 
     /// Chance the whole route works as planned.
     static func reliability(_ it: Itinerary) -> Double { changes(it).reduce(1) { $0 * $1.chance } }
@@ -247,8 +302,22 @@ enum SmartRouting {
     // MARK: Live trip
 
     /// A change still ahead that has become unlikely (or broken): time to look for another way.
-    static func changeAtRisk(_ it: Itinerary, at now: Date) -> Change? {
-        changes(it).first { $0.outgoing.startTime > now && $0.incoming.endTime > now.addingTimeInterval(-120) && $0.chance < 0.5 }
+    /// With your position during the change, the walk still ahead at your pace counts instead.
+    static func changeAtRisk(_ it: Itinerary, at now: Date, position: LatLon? = nil, speed: Double? = nil) -> Change? {
+        changes(it, at: now).first { c in
+            guard c.outgoing.startTime > now, c.incoming.endTime > now.addingTimeInterval(-120), !c.isThroughRun else { return false }
+            return onTheWay(c, at: now, position: position, speed: speed) ?? (c.chance < 0.5)
+        }
+    }
+
+    /// During the change itself: will you make it from where you are? Nil before you got off.
+    static func onTheWay(_ c: Change, at now: Date, position: LatLon?, speed: Double?) -> Bool? {
+        guard let position, now >= c.incoming.endTime, c.walk.plannedSeconds >= 30 else { return nil }
+        let metres = position.distance(to: c.outgoing.from.coordinate) * 1.3
+        guard metres > TransferLearning.atStopMeters else { return false }
+        let pace = (speed ?? UserDefaults.standard.object(forKey: measuredSpeedKey) as? Double ?? 1.3).clamped(to: 0.6...2.2)
+        let needed = metres / pace + c.walk.levels * 10 + Double(c.walk.elevators) * 45
+        return now.addingTimeInterval(needed) > c.outgoing.startTime.addingTimeInterval(30)
     }
 
     // MARK: Request
@@ -317,6 +386,7 @@ enum SmartRouting {
     static func resetLearning() {
         defaults.removeObject(forKey: transferMinutesKey)
         defaults.removeObject(forKey: walkWeightKey)
+        TransferLearning.reset()
     }
 }
 

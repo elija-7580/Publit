@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.1 (build 88) – changes at your pace
+
+- **Smart routing → "Learn from my trips"** (off by default): on trips you start, Publit notes per change when the ride arrived, when you reached the next stop and whether you caught it. From that it learns a personal walk model – your pace against the plan, extra time per floor (stairs, escalators), per lift, for a changed platform, another station or a station with many levels – and uses it for every change, also ones you never made. Bayesian: a few own changes move the starting values only a little. Changes you make again and again (same stop, lines, time of day) also count their own success rate (worth 8 changes against the model). Only sums and counts are kept on the iPhone; positions are dropped right away. "Reset learned preferences" deletes it.
+- **New change chance**: P(arrival + your walk ≤ departure). Arrival: late more often than early; with a live forecast that forecast is the middle and its doubt grows with how far ahead it looks. Departure: only a live forecast counts. A cancelled ride breaks the change; the same vehicle going on (same trip) makes it safe. There is no delay history yet, so these chances are marked "Estimate" (shown as "~80 %", never above 97 %); with three or more own trips on that change: "Based on N of your trips".
+- **"Warn me if a change won't work"** (on): during a started or followed trip the chance is recomputed on every live refresh and, during the change, from where you are at your pace. Below 50 % (or cancelled) a notification "Change at risk" with the backup; tapping it opens the trip with other connections. Once per change, again only when it gets 20 points worse.
+- The app does not load measured delay tables yet (services/delay-history); until it does, chances stay marked "Estimate".
+
 ## Unreleased – fixes, maps you can touch
 
 - **Maps everywhere work in their small size**: the map at the top of Nearby, Go now and a route moves and zooms right where it is, and on Nearby a tap on a station opens its departures. The expand key still opens the full map.

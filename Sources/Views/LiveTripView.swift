@@ -56,7 +56,7 @@ struct LiveTripView: View {
         let cue = index == live ? GuideCues.current(step, it, at: now, walk: walk, position: walkPos, progress: ride?.progress) : nil
         let needed = index == live && TripAlternative.needed(check, it, at: now)
         // Smart routing: a change ahead that is unlikely to work is a reason to look for another way now.
-        let risk = index == live && !needed && SmartRouting.isEnabled ? SmartRouting.changeAtRisk(it, at: now) : nil
+        let risk = index == live && !needed && SmartRouting.isEnabled ? SmartRouting.changeAtRisk(it, at: now, position: here) : nil
         let wrong = needed || risk != nil
         let riskMessage: String? = risk.map { r -> String in Self.riskMessage(r) }
         let wrongMessage: String = check == .offRoute ? L10n.t("You seem to be off the route.")
@@ -158,10 +158,10 @@ struct LiveTripView: View {
         }
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { screenWidth = $0 }
         .onChange(of: riskKey) { _, key in
-            guard !key.isEmpty, let r = SmartRouting.changeAtRisk(trip.itinerary, at: .now) else { return }
+            guard !key.isEmpty, let r = SmartRouting.changeAtRisk(trip.itinerary, at: .now, position: fix) else { return }
             feedbackKind = .platform
             feedback += 1
-            ChangeRiskNotifier.notify(r, message: wrongMessage)
+            ChangeRiskNotifier.notify(r, tripId: trip.id, message: wrongMessage)
         }
         .ticking(every: 15, now: $now)
         .navigationTitle(trip.toName)
@@ -622,12 +622,7 @@ struct LiveTripView: View {
     }
 
     /// "Your change at Ostbahnhof may not work (40 %). Backup: S7 at 13:27"
-    static func riskMessage(_ r: SmartRouting.Change) -> String {
-        let backup = SmartRouting.backup(for: r.outgoing).map { b -> String in
-            " " + L10n.f("Backup: %@ at %@", b.leg.lineName, Fmt.time(b.leg.startTime, tz: b.leg.from.tz))
-        } ?? ""
-        return L10n.f("Your change at %@ may not work (%lld %%).", r.stopName, r.percent) + backup
-    }
+    static func riskMessage(_ r: SmartRouting.Change) -> String { ChangeRiskNotifier.riskMessage(r) }
 
     static func departure(_ leg: Leg, now: Date) -> String {
         let secs = leg.startTime.timeIntervalSince(now)
