@@ -83,7 +83,17 @@ struct ChangeChanceRow: View {
         }
     }
 
+    /// Where the chance comes from, in small print under the change.
+    static func sourceText(_ source: SmartRouting.Change.Source) -> String {
+        switch source {
+        case .history(let n): return L10n.f("Based on %lld past trips", n)
+        case .estimate: return L10n.t("Estimate")
+        case .throughRun: return L10n.t("Same vehicle continues")
+        }
+    }
+
     private var verdict: String {
+        if change.source == .throughRun { return L10n.t("Stay on board") }
         switch change.level {
         case .safe: return L10n.t("Safe change")
         case .likely: return L10n.t("Change should work")
@@ -100,12 +110,16 @@ struct ChangeChanceRow: View {
                     .foregroundStyle(tint)
                 Text(L10n.f("Change at %@", change.stopName)).font(.subheadline.weight(.semibold))
                 Spacer(minLength: 8)
-                Text(verbatim: "\(change.percent) %")
-                    .font(.subheadline.weight(.bold).monospacedDigit())
-                    .foregroundStyle(tint)
+                if !change.isEstimate {
+                    Text(verbatim: "\(change.percent) %")
+                        .font(.subheadline.weight(.bold).monospacedDigit())
+                        .foregroundStyle(tint)
+                }
             }
             Text(verbatim: "\(verdict) · \(spare)")
                 .font(.caption).foregroundStyle(.secondary)
+            Text(Self.sourceText(change.source))
+                .font(.caption2).foregroundStyle(.tertiary)
             if let backup = SmartRouting.backup(for: change.outgoing) {
                 let then = isLastRide ? L10n.f("Arrive %@", Fmt.time(backup.arrival, tz: change.outgoing.to.tz))
                     : L10n.t("still makes the next change")

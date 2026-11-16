@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1 (build 87) – change chances from measured delays
+
+- **Smart routing**: the chance of a change now comes from measured delays where Publit has them (new table per country on publit.eu, built by `services/delay-history` from open real-time feeds): the feeder's arrival delay and the connection's departure delay at that stop, line and time of day, combined (a connection that often leaves late helps). With live data: the current forecast and how far such forecasts are usually off at that distance. The walk adds lifts, levels, a platform that changed after planning, a station change and big stations; "Extra time for changes" comes on top. Cancellation rates count. Through-runs (same vehicle continues) are always safe.
+- Under each change: "Based on N past trips" or "Estimate". Without measured data the old rule of thumb stays, shown without a percentage. Few observations never give 99 %.
+- Thresholds (Safe 90 %, likely 70 %) stay until the new chances are calibrated against real outcomes (docs/calibration.md).
+
 ## 0.1.1 (build 86) – the Nearby map everywhere
 
 - The maps on a departure (trip view), "Track vehicle", a line, the platform map and the change guide now work like the Nearby map: you with the arrow the way you face, the stops by name where there is room (MapKit hides names that would overlap), the location button and the compass, movable and zoomable. Route maps get the location button too.

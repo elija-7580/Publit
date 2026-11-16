@@ -1,6 +1,5 @@
 {
  "about": "Shared test cases for the change chance (Python reference, iOS SmartRoutingTests, Android). Times in seconds; arr/dep are 5/20/50/80/95 % delay quantiles.",
- "walkMedianFactor": 1.05,
  "cases": [
   {
    "name": "roomy subway",
@@ -23,7 +22,7 @@
    "cin": 0,
    "cout": 0,
    "n": null,
-   "expected": 0.996786
+   "expected": 0.991429
   },
   {
    "name": "tight regional train",
@@ -46,7 +45,7 @@
    "cin": 0,
    "cout": 0,
    "n": null,
-   "expected": 0.485
+   "expected": 0.475357
   },
   {
    "name": "connection often late helps",
@@ -69,7 +68,7 @@
    "cin": 0,
    "cout": 0,
    "n": null,
-   "expected": 0.72
+   "expected": 0.714643
   },
   {
    "name": "cancellations",
@@ -140,5 +139,11 @@
    "n": null,
    "expected": 0.0
   }
- ]
+ ],
+ "walk": {
+  "medianFactor": 1.05,
+  "sigma": 0.1,
+  "factorSD": 0.2,
+  "overheadSD": 15
+ }
 }

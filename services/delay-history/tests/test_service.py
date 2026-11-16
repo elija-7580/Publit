@@ -184,5 +184,13 @@ class Calibrate(unittest.TestCase):
         self.assertAlmostEqual(sum(o for _, o in res['modes']['BUS']['new']) / 40, 0.8)
 
 
+
+class SharedVectors(unittest.TestCase):
+    def test_ios_copy_is_identical(self):
+        here = os.path.dirname(os.path.abspath(__file__))
+        ios = os.path.join(here, '..', '..', '..', 'Tests', 'Fixtures', 'change-chance-vectors.json')
+        self.assertEqual(json.load(open(ios)), json.load(open(os.path.join(here, 'vectors.json'))))
+
+
 if __name__ == '__main__':
     unittest.main()

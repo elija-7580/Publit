@@ -429,7 +429,8 @@ struct ItineraryRow: View {
                 InlineNotice(text: w.message, tint: w.level == .missed ? Color.danger : Color.delay)
             }
             if let shaky {
-                InlineNotice(text: L10n.f("Change at %@: %lld %% chance", shaky.stopName, shaky.percent),
+                InlineNotice(text: shaky.isEstimate ? L10n.f("Change at %@ may be tight", shaky.stopName)
+                                : L10n.f("Change at %@: %lld %% chance", shaky.stopName, shaky.percent),
                              tint: shaky.level == .risky ? Color.danger : Color.delay)
             }
         }

@@ -10,8 +10,13 @@ import math
 
 P = (0.05, 0.20, 0.50, 0.80, 0.95)
 SAMPLES = 20                               # per delay distribution
-WALK_SPREAD = 0.15                         # log-normal sigma of the walk time
 WALK_Z = (-1.465, -0.792, -0.366, 0.0, 0.366, 0.792, 1.465)   # 7 equally likely normal points
+# General walk model (WalkModel.prior in the apps): median = 1.05 × planned + overhead 0. Spread =
+# residual sigma plus the uncertainty of the model itself (factor ± 0.20, overhead ± 15 s); learning on
+# the device shrinks the second part.
+WALK_SIGMA = 0.10
+WALK_FACTOR_SD = 0.20
+WALK_OVERHEAD_SD = 15.0
 
 
 def quantile(q, p):
@@ -31,8 +36,13 @@ def samples(q, n=SAMPLES):
     return [quantile(q, (i + 0.5) / n) for i in range(n)]
 
 
-def walk_samples(seconds, median_factor=1.05, sigma=WALK_SPREAD):
-    return [seconds * median_factor * math.exp(sigma * z) for z in WALK_Z]
+def walk_samples(seconds, median_factor=1.05):
+    mid = seconds * median_factor
+    if mid <= 0:
+        return [0.0] * len(WALK_Z)
+    param_var = (WALK_FACTOR_SD * seconds) ** 2 + WALK_OVERHEAD_SD ** 2
+    sigma = math.sqrt(WALK_SIGMA ** 2 + param_var / mid ** 2)
+    return [mid * math.exp(sigma * z) for z in WALK_Z]
 
 
 def p_on_time(gap, arr_q, dep_q, walk):

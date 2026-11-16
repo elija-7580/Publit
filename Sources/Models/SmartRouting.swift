@@ -20,6 +20,8 @@ enum SmartRouting {
     static let measuredSpeedKey = "smartMeasuredSpeed"
     static let flatWalksKey = "smartFlatWalks"
     static let learnKey = "smartLearn"
+    /// "Learn from my trips": walking times and changes from the user's own trips, on the device only (off by default).
+    static let learnTripsKey = "smartLearnTrips"
 
     static let defaultTransferMinutes = 15.0
     static let transferMinutesRange = 3.0...30.0
@@ -177,14 +179,26 @@ enum SmartRouting {
         /// Minutes left after the walk (negative: already broken).
         let spareMinutes: Double
         let chance: Double
+        var source: Source = .estimate
+        var walk: TransferWalk? = nil
 
         enum Level: Sendable { case safe, likely, risky }
+        /// Where the number comes from: measured delays (with how many observations), the old rule of
+        /// thumb, or a through-run (the vehicle continues: nothing to miss).
+        enum Source: Equatable, Sendable {
+            case history(observations: Int)
+            case estimate
+            case throughRun
+        }
         var level: Level { chance >= 0.9 ? .safe : chance >= 0.7 ? .likely : .risky }
         /// Whole percent, never 100 (nothing is certain) and at least 1.
         var percent: Int { min(99, max(1, Int((chance * 100).rounded()))) }
+        /// Only measured chances are shown as a percentage; estimates show their level only.
+        var isEstimate: Bool { source == .estimate }
     }
 
-    static func changes(_ it: Itinerary) -> [Change] {
+    static func changes(_ it: Itinerary, at now: Date = .now, history: (String?) -> DelayHistory.Table? = { DelayHistoryStore.shared.table(country: $0) },
+                        walkModel: WalkModel = .current, extraSeconds: Double = Double(Request.current.extraTransferMinutes) * 60) -> [Change] {
         var out: [Change] = []
         let legs = it.legs
         var i = 0
@@ -195,14 +209,84 @@ enum SmartRouting {
             while j < legs.count, !legs[j].isTransit { walk += legs[j].duration; j += 1 }
             guard j < legs.count else { break }
             let spare = (legs[j].startTime.timeIntervalSince(legs[i].endTime) - Double(walk)) / 60
+            let tw = TransferWalk(incoming: legs[i], walks: Array(legs[(i + 1)..<j]), outgoing: legs[j])
+            let est = chance(incoming: legs[i], outgoing: legs[j], walk: tw, at: now, history: history,
+                             walkModel: walkModel, extraSeconds: extraSeconds)
             out.append(Change(stopName: legs[i].to.name, incoming: legs[i], outgoing: legs[j], outgoingIndex: j, walkSeconds: walk,
-                              spareMinutes: spare, chance: chance(spareMinutes: spare, walkSeconds: walk, incoming: legs[i])))
+                              spareMinutes: spare, chance: est.chance, source: est.source, walk: tw))
             i = j
         }
         return out
     }
 
-    /// How spread out arrivals of this kind of vehicle are, in minutes.
+    /// The vehicle goes on as the next leg: same trip, or the planner marks a stay-seated through-run.
+    static func isThroughRun(_ incoming: Leg, _ outgoing: Leg) -> Bool {
+        if outgoing.interlineWithPreviousLeg == true { return true }
+        guard let a = incoming.tripId, let b = outgoing.tripId else { return false }
+        return a == b
+    }
+
+    /// Chance a change works: P(feeder arrival + walk ≤ connection departure), with both delays from
+    /// measured history (or the live forecast and how far such forecasts are usually off), the walk
+    /// from `WalkModel`, and cancellations. Without history: the old rule of thumb, marked as estimate.
+    static func chance(incoming: Leg, outgoing: Leg, walk: TransferWalk, at now: Date,
+                       history: (String?) -> DelayHistory.Table?, walkModel: WalkModel = .prior,
+                       extraSeconds: Double = 0) -> (chance: Double, source: Change.Source) {
+        if isThroughRun(incoming, outgoing) { return (1, .throughRun) }
+        if incoming.cancelled == true || outgoing.cancelled == true || outgoing.from.cancelled == true { return (0.01, .estimate) }
+        let table = history(DelayHistory.country(ofId: incoming.routeId ?? outgoing.routeId))
+        let tz = incoming.to.tz.flatMap(TimeZone.init(identifier:)) ?? .current
+        func side(_ leg: Leg, arrival: Bool) -> (dist: DelayHistory.Dist, cancel: Double, n: Int)? {
+            let time = arrival ? leg.endTime : leg.startTime
+            let sched = arrival ? leg.scheduledEndTime : leg.scheduledStartTime
+            let minutesAhead = time.timeIntervalSince(now) / 60
+            let row = table?.row(routeId: leg.routeId, stopId: arrival ? leg.to.stopId : leg.from.stopId,
+                                 agency: leg.agencyName, mode: leg.mode, window: DelayHistory.window(sched, timeZone: tz))
+            // Live forecasts rarely miss a cancellation close to departure.
+            let cancel = (row?.cancelled ?? 0) * (leg.realTime ? min(1, max(0, minutesAhead) / 60) : 1)
+            if leg.realTime, let (err, n) = table?.forecastError(mode: leg.mode, minutesAhead: minutesAhead) {
+                return (err.shifted(by: time.timeIntervalSince(sched)), cancel, n)
+            }
+            guard let row, let d = arrival ? row.arrival : row.departure else { return nil }
+            return (d, cancel, row.observations)
+        }
+        let gap = outgoing.scheduledStartTime.timeIntervalSince(incoming.scheduledEndTime)
+        guard let a = side(incoming, arrival: true) else {
+            // What the model adds beyond the router's walk (lifts, platform change, …) and the user's extra time.
+            let extras = walkModel.expectedSeconds(walk) - walkModel.factor * walk.plannedSeconds
+            let spare = (outgoing.startTime.timeIntervalSince(incoming.endTime) - walk.plannedSeconds - extras - extraSeconds) / 60
+            return (chance(spareMinutes: spare, walkSeconds: Int(walk.plannedSeconds), incoming: incoming), .estimate)
+        }
+        let d = side(outgoing, arrival: false)
+        let p = onTime(gap: gap, arrival: a.dist, departure: d?.dist ?? .punctual,
+                       walk: walkModel.samples(walk, extraSeconds: extraSeconds))
+        let n = min(a.n, d?.n ?? a.n)
+        let value = cap((1 - a.cancel) * (1 - (d?.cancel ?? 0)) * p, observations: n)
+        return (value, d == nil ? .estimate : .history(observations: n))
+    }
+
+    /// P(a + w ≤ gap + d) over equally likely samples of feeder delay, walk and connection delay.
+    static func onTime(gap: Double, arrival: DelayHistory.Dist, departure: DelayHistory.Dist, walk: [Double]) -> Double {
+        let a = arrival.samples(), d = departure.samples().sorted()
+        var hit = 0
+        for x in a {
+            for w in walk {
+                let need = x + w - gap
+                var lo = 0, hi = d.count
+                while lo < hi { let mid = (lo + hi) / 2; if d[mid] < need { lo = mid + 1 } else { hi = mid } }
+                hit += d.count - lo
+            }
+        }
+        return Double(hit) / Double(a.count * walk.count * d.count)
+    }
+
+    /// No near-certainty from few observations: between 1/(n+2) and 1 − 1/(n+2).
+    static func cap(_ p: Double, observations n: Int) -> Double {
+        let lo = 1 / Double(n + 2)
+        return min(1 - lo, max(lo, p))
+    }
+
+    /// How spread out arrivals of this kind of vehicle are, in minutes (rule of thumb, used without history).
     static func spread(_ mode: String) -> Double {
         switch mode {
         case "HIGHSPEED_RAIL", "LONG_DISTANCE", "NIGHT_RAIL", "AIRPLANE": return 4
@@ -214,8 +298,8 @@ enum SmartRouting {
         }
     }
 
-    /// Chance the change works: a logistic curve over the minutes left, wider for vehicles that
-    /// run late more often, narrower when the incoming one reports live times.
+    /// The rule of thumb used before measured delays (and still without them): a logistic curve over
+    /// the minutes left, wider for vehicles that run late more often, narrower with live times.
     static func chance(spareMinutes: Double, walkSeconds: Int, incoming: Leg) -> Double {
         var s = spread(incoming.mode)
         if incoming.realTime { s *= 0.6 }
@@ -248,7 +332,7 @@ enum SmartRouting {
 
     /// A change still ahead that has become unlikely (or broken): time to look for another way.
     static func changeAtRisk(_ it: Itinerary, at now: Date) -> Change? {
-        changes(it).first { $0.outgoing.startTime > now && $0.incoming.endTime > now.addingTimeInterval(-120) && $0.chance < 0.5 }
+        changes(it, at: now).first { $0.outgoing.startTime > now && $0.incoming.endTime > now.addingTimeInterval(-120) && $0.chance < 0.5 }
     }
 
     // MARK: Request

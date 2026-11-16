@@ -18,6 +18,8 @@ let core = [
     "Models/ModeStyle.swift",
     "Models/TransferRisk.swift",
     "Models/SmartRouting.swift",
+    "Models/DelayHistory.swift",
+    "Models/TransferWalk.swift",
     "Models/TripProgress.swift",
     "Models/WalkGuide.swift",
     "Models/StationExits.swift",

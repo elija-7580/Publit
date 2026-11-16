@@ -613,7 +613,9 @@ struct LiveTripView: View {
         let backup = SmartRouting.backup(for: r.outgoing).map { b -> String in
             " " + L10n.f("Backup: %@ at %@", b.leg.lineName, Fmt.time(b.leg.startTime, tz: b.leg.from.tz))
         } ?? ""
-        return L10n.f("Your change at %@ may not work (%lld %%).", r.stopName, r.percent) + backup
+        let text = r.isEstimate ? L10n.f("Your change at %@ may not work.", r.stopName)
+            : L10n.f("Your change at %@ may not work (%lld %%).", r.stopName, r.percent)
+        return text + backup
     }
 
     static func departure(_ leg: Leg, now: Date) -> String {
