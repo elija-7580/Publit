@@ -1,6 +1,6 @@
 # Publit iOS – Funktionen und Screens (vollständige Übersicht)
 
-> Stand: Version 0.1.1 (Build 85). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
+> Stand: Version 0.1.1 (Build 86). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
 > **Pflege:** Jede Änderung an `Sources/`, `Watch/`, `Widgets/` oder `Share/` muss diese Datei im selben Commit/PR mitändern (siehe Abschnitt „Aktualisierung“ ganz unten). Die maschinell erzeugte Liste aller Views steht in [`FUNKTIONEN-INVENTAR.md`](FUNKTIONEN-INVENTAR.md) und wird von der CI automatisch aktualisiert.
 
 ## Inhalt
@@ -260,6 +260,8 @@ Screenshot-/Link-Tickets („My tickets“, „Add ticket“, Typ, „Expires“
 - **Lines** (gespeicherte Linie an Haltestelle, „At …“, nächste Abfahrten), **Stops**, **Places** („Add“ / „Save a place“ via Ortssuche).
 - **Past trips** (`PastTripsView`): „Plan again“, „Remove“.
 - Leer: „Nothing else saved yet“.
+
+**Karten wie Nearby (Build 86):** Die eingebetteten Karten bei einer Abfahrt (`TripView`/`TripMap`), „Track vehicle“ (`VehicleTrackingView`), einer Linie (`LineMap`), der Bahnsteigkarte (`PlatformMapSection`) und der Umstiegshilfe (`ChangeGuideCard`) zeigen wie die Nearby-Karte deine Position mit Pfeil in Blickrichtung (`YouAreHere`, Kompass läuft nur solange die Karte sichtbar ist), die Halte mit Namen, soweit Platz ist, den Standort-Knopf und den Kompass; verschieb- und zoombar. Die Routenkarte im Routendetail hat ebenfalls den Standort-Knopf.
 
 ## 16. Einstellungen – `SettingsView` (Zahnrad in den Tabs)
 

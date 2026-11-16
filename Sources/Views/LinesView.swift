@@ -326,8 +326,8 @@ private struct LineMap: View {
             MapPolyline(coordinates: shape.map(\.clCoordinate))
                 .stroke(line.lineStroke, style: StrokeStyle(lineWidth: 5, lineCap: .round, lineJoin: .round))
             ForEach(Array(stops.enumerated()), id: \.offset) { _, s in
-                Annotation("", coordinate: s.coordinate.clCoordinate, anchor: .center) {
-                    Circle().fill(.white).frame(width: 8, height: 8)
+                Annotation(s.name, coordinate: s.coordinate.clCoordinate, anchor: .center) {
+                    Circle().fill(.white).frame(width: 9, height: 9)
                         .overlay(Circle().stroke(line.lineStroke, lineWidth: 2))
                 }
             }
@@ -342,7 +342,7 @@ private struct LineMap: View {
             YouAreHere(here: location.coordinate, heading: location.heading, mapHeading: mapHeading)
         }
         .publitMapStyle()
-        .mapControls { MapCompass() }
+        .mapControls { MapUserLocationButton(); MapCompass() }
         .onMapCameraChange(frequency: .onEnd) { mapHeading = $0.camera.heading }
         .compassWhileShown("lineMap")
     }
