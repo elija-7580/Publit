@@ -59,6 +59,12 @@ struct TripView: View {
                         .frame(height: 240)
                         .listRowInsets(EdgeInsets())
                     statusLine(progress: progress, stops: stops, leg: leg)
+                    NavigationLink {
+                        VehicleTrackingView(stopTime: stopTime, stationName: stationName)
+                    } label: {
+                        Label("Track vehicle", systemImage: "scope")
+                    }
+                    .accessibilityIdentifier("trackVehicle")
                 }
                 if !leg.trainDivisionAlerts.isEmpty {
                     Section { TrainDivisionNotice(leg: leg) }

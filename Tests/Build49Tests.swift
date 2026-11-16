@@ -74,4 +74,11 @@ final class Build49Tests: XCTestCase {
         history.entries.first?.apply(to: plan)
         XCTAssertEqual(plan.source, .map)
     }
+
+    func testVehiclePositionSourceIsNeverCalledGPS() {
+        XCTAssertEqual(VehiclePositionSource.of(.between(index: 1, fraction: 0.5), realTime: true), .liveTimes)
+        XCTAssertEqual(VehiclePositionSource.of(.atStop(index: 2), realTime: false), .timetable)
+        XCTAssertEqual(VehiclePositionSource.of(.notStarted, realTime: true), .unavailable)
+        XCTAssertEqual(VehiclePositionSource.of(.finished, realTime: true), .unavailable)
+    }
 }

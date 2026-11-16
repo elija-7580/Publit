@@ -3,7 +3,7 @@
 > Nicht von Hand bearbeiten. Erzeugt von `scripts/feature_inventory.py` (CI: `features-doc.yml`).
 > Die ausführliche Beschreibung steht in [FUNKTIONEN.md](FUNKTIONEN.md).
 
-**187 Views, 5 App Intents, 3 Widgets in 76 Dateien.**
+**188 Views, 5 App Intents, 3 Widgets in 77 Dateien.**
 
 ## `Sources/App/DesignSamples.swift`
 - Views: `DesignSampleView`
@@ -239,7 +239,11 @@
 
 ## `Sources/Views/TripView.swift`
 - Views: `TripView`, `TripMap`, `StopTimeRow`, `LineDeparturesView`
-- Sichtbare Texte: Stops · From %@ to here · Route here · Route from here · Line %@: route and timetable · Saved line · Save line · Not departed yet · Arrived at %@ · At %@ · Between %@ and %@ · No live data for this trip. Position estimated from the timetable. · Position estimated from live stop times. · Estimated vehicle position
+- Sichtbare Texte: Track vehicle · Stops · From %@ to here · Route here · Route from here · Line %@: route and timetable · Saved line · Save line · Not departed yet · Arrived at %@ · At %@ · Between %@ and %@ · No live data for this trip. Position estimated from the timetable. · Position estimated from live stop times. · Estimated vehicle position
+
+## `Sources/Views/VehicleTrackingView.swift`
+- Views: `VehicleTrackingView`
+- Sichtbare Texte: Estimated vehicle position · Following vehicle · Follow vehicle · Arrived at %@ · Next stops
 
 ## `Sources/Views/WalkThereRow.swift`
 - Views: `WalkThereRow`
