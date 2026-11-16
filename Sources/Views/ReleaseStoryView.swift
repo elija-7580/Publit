@@ -1,3 +1,4 @@
+import MapKit
 import SwiftUI
 
 /// The interactive "What's new" (`ReleaseStory`): an intro, one card per feature with a small live
@@ -433,43 +434,58 @@ private struct Beam: Shape {
     }
 }
 
+/// A real map (Apple Maps, around Marienplatz in Munich) with the stations nearby and your position;
+/// the beam turns with Left / Ahead / Right. Not interactive, so swiping still turns the page.
 private struct CompassDemo: View {
+    private struct Station: Identifiable {
+        let id: String
+        let coordinate: CLLocationCoordinate2D
+    }
+
     @State private var heading: Double = 0
-    private let stations: [CGPoint] = [CGPoint(x: 0.22, y: 0.2), CGPoint(x: 0.72, y: 0.24),
-                                       CGPoint(x: 0.3, y: 0.8), CGPoint(x: 0.8, y: 0.7)]
+    private let me = CLLocationCoordinate2D(latitude: 48.13695, longitude: 11.57290)
+    private let stations = [
+        Station(id: "Marienplatz", coordinate: CLLocationCoordinate2D(latitude: 48.13718, longitude: 11.57555)),
+        Station(id: "Karlsplatz (Stachus)", coordinate: CLLocationCoordinate2D(latitude: 48.13915, longitude: 11.56540)),
+        Station(id: "Odeonsplatz", coordinate: CLLocationCoordinate2D(latitude: 48.14260, longitude: 11.57700)),
+        Station(id: "Sendlinger Tor", coordinate: CLLocationCoordinate2D(latitude: 48.13405, longitude: 11.56700)),
+        Station(id: "Isartor", coordinate: CLLocationCoordinate2D(latitude: 48.13395, longitude: 11.58260)),
+    ]
 
     var body: some View {
         VStack(spacing: 10) {
-            GeometryReader { geo in
-                let w = geo.size.width, h = geo.size.height
-                ZStack {
-                    Color(red: 0.92, green: 0.9, blue: 0.85)
-                    Path { p in
-                        p.move(to: CGPoint(x: w * 0.5, y: 0)); p.addLine(to: CGPoint(x: w * 0.5, y: h))
-                        p.move(to: CGPoint(x: 0, y: h * 0.62)); p.addLine(to: CGPoint(x: w, y: h * 0.62))
-                        p.move(to: CGPoint(x: 0, y: h * 0.15)); p.addLine(to: CGPoint(x: w, y: h * 0.45))
-                    }
-                    .stroke(Color.white, lineWidth: 9)
-                    ForEach(stations.indices, id: \.self) { i in
+            Map(initialPosition: .region(MKCoordinateRegion(
+                    center: CLLocationCoordinate2D(latitude: 48.13800, longitude: 11.57350),
+                    span: MKCoordinateSpan(latitudeDelta: 0.0125, longitudeDelta: 0.0125))),
+                interactionModes: []) {
+                ForEach(stations) { station in
+                    Annotation(station.id, coordinate: station.coordinate, anchor: .center) {
                         Circle().fill(Color(white: 0.07))
                             .overlay(Circle().stroke(Color.white, lineWidth: 2))
                             .frame(width: 13, height: 13)
-                            .position(x: w * stations[i].x, y: h * stations[i].y)
                     }
-                    Beam()
-                        .fill(Color.routeAhead.opacity(0.22))
-                        .frame(width: 56, height: 64)
-                        .rotationEffect(.degrees(heading), anchor: .bottom)
-                        .position(x: w * 0.5, y: h * 0.55 - 32)
-                        .animation(.spring(duration: 0.5), value: heading)
-                    Circle().fill(Color.routeAhead)
-                        .overlay(Circle().stroke(Color.white, lineWidth: 3))
-                        .frame(width: 22, height: 22)
-                        .position(x: w * 0.5, y: h * 0.55)
                 }
+                Annotation("", coordinate: me, anchor: .center) {
+                    ZStack {
+                        Beam()
+                            .fill(Color.routeAhead.opacity(0.25))
+                            .frame(width: 60, height: 70)
+                            .offset(y: -35)
+                            .frame(width: 150, height: 150)
+                            .rotationEffect(.degrees(heading))
+                            .animation(.spring(duration: 0.5), value: heading)
+                        Circle().fill(Color.routeAhead)
+                            .overlay(Circle().stroke(Color.white, lineWidth: 3))
+                            .frame(width: 22, height: 22)
+                            .shadow(color: .black.opacity(0.2), radius: 3)
+                    }
+                }
+                .annotationTitles(.hidden)
             }
-            .frame(height: 210)
+            .mapStyle(.standard(pointsOfInterest: .excludingAll))
+            .frame(height: 240)
             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .allowsHitTesting(false)
             .accessibilityHidden(true)
             Picker(L10n.t("Direction"), selection: $heading) {
                 Text("Left").tag(-60.0)
