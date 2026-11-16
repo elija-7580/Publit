@@ -10,9 +10,9 @@ struct RouteOptionsView: View {
     @State private var draft = RouteOptions()
     @State private var loaded = false
 
-    private var hasDeutschlandticket: Bool {
-        tickets.tickets.contains { LocalTicket.isDeutschlandticket($0.name) }
-            || passes.passes.contains { LocalTicket.isDeutschlandticket($0.title) }
+    /// Area tickets saved in Tickets (by their titles), offered first.
+    private var savedTickets: Set<OwnTicket> {
+        Set(tickets.tickets.compactMap { OwnTicket.recognise($0.name) } + passes.passes.compactMap { OwnTicket.recognise($0.title) })
     }
 
     var body: some View {
@@ -35,15 +35,21 @@ struct RouteOptionsView: View {
                 }
 
                 Section {
-                    Toggle(isOn: $draft.localTicket) {
-                        Label("Deutschlandticket", systemImage: "ticket")
+                    NavigationLink {
+                        OwnTicketsView(selection: $draft.tickets, saved: savedTickets)
+                    } label: {
+                        LabeledContent {
+                            Text(verbatim: draft.tickets.isEmpty ? L10n.t("None") : OwnTicket.summary(draft.tickets))
+                        } label: {
+                            Label("My tickets", systemImage: "ticket")
+                        }
                     }
-                    .accessibilityIdentifier("routeLocalTicket")
+                    .accessibilityIdentifier("routeOwnTickets")
                 } footer: {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Only local and regional transport: buses, trams, metro, S-Bahn, RE and RB. No ICE, IC, EC, FlixTrain, night trains or long-distance coaches.")
-                        if hasDeutschlandticket && !draft.localTicket {
-                            Text("Your Deutschlandticket is saved in Tickets.")
+                        Text("Routes only use rides your tickets cover, e.g. no ICE with the Deutschlandticket.")
+                        if draft.tickets.isEmpty, let saved = OwnTicket.allCases.first(where: savedTickets.contains) {
+                            Text(verbatim: L10n.f("Your %@ is saved in Tickets.", saved.title))
                         }
                     }
                 }
@@ -304,5 +310,57 @@ struct FirstMilePicker: View {
             }
         }
         .padding(.vertical, 4)
+    }
+}
+
+/// Tickets that cover a whole country or region (Deutschlandticket, KlimaTicket, GA …), by country.
+struct OwnTicketsView: View {
+    @Binding var selection: Set<OwnTicket>
+    /// Recognised among the saved tickets.
+    let saved: Set<OwnTicket>
+
+    var body: some View {
+        List {
+            ForEach(OwnTicket.Country.allCases) { country in
+                Section(country.title) {
+                    ForEach(OwnTicket.tickets(in: country)) { ticket in
+                        Button {
+                            if selection.contains(ticket) { selection.remove(ticket) } else { selection.insert(ticket) }
+                        } label: {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(verbatim: ticket.title).foregroundStyle(.primary)
+                                    Text(verbatim: saved.contains(ticket) ? L10n.f("%@ · %@", ticket.detail, L10n.t("Saved in Tickets")) : ticket.detail)
+                                        .font(.caption).foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                if selection.contains(ticket) {
+                                    Image(systemName: "checkmark").fontWeight(.semibold).foregroundStyle(Color.ink)
+                                }
+                            }
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityAddTraits(selection.contains(ticket) ? .isSelected : [])
+                        .accessibilityIdentifier("ownTicket-\(ticket.rawValue)")
+                    }
+                }
+            }
+            Section {
+                EmptyView()
+            } footer: {
+                Text("Publit checks the kind of train and where each ride starts and ends. Tourist and mountain railways, supplements and single exceptions are not included; ask the operator when in doubt.")
+            }
+        }
+        .inkList()
+        .navigationTitle("My tickets")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if !selection.isEmpty {
+                ToolbarItem(placement: .primaryAction) {
+                    Button("None") { selection = [] }
+                }
+            }
+        }
     }
 }

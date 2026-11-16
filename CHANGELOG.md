@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.1 (build 82) – routes for your ticket
+
+- Route options → My tickets: Deutschlandticket, BahnCard 100, KlimaTicket Ö, the VOR KlimaTickets (MetropolRegion, Region), Jahreskarte Wien, the KlimaTickets of Upper Austria, Salzburg, Tyrol, Styria, Carinthia and Vorarlberg (VMOBIL), and the Swiss GA. Several at once.
+- Routes then only use rides the tickets cover, checked by train type and by the country or Austrian state where each ride starts and ends (from the stop IDs). No ICE with the Deutschlandticket, no train into Vienna with KlimaTicket Region, no CAT with any KlimaTicket.
+- Tickets saved in Tickets are recognised and marked in the list. When no route is fully covered, Publit says so.
+- The Deutschlandticket switch of builds 72–81 carries over. Fixed: its search asked for "RAIL", which in MOTIS means every train, so ICEs came back and were only dropped afterwards, leaving few or no routes.
+
 ## 0.1.1 (build 81) – clearer at a glance, community first, support Publit
 
 - **Changes in a route**: the change block no longer repeats stop, line and direction from the steps around it. One line says where (“Change at Krems Bahnhof”) with your buffer as a badge, one line both times and platforms (“5:43 · Platform E2 → 5:52 · Platform 2”), a small line the lines and the walk. Warnings stay.

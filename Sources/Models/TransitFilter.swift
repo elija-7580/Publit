@@ -118,34 +118,6 @@ struct ModeFilter: Codable, Hashable, Sendable {
     init(included: Set<ModeGroup> = []) { self.included = included }
 }
 
-/// Rides a Deutschlandticket covers: local and regional transport (buses, trams, metro, S-Bahn,
-/// RE/RB). Not ICE, IC, EC, FlixTrain, night trains, long-distance coaches or planes.
-enum LocalTicket {
-    /// MOTIS modes the ticket never covers; left out of the search.
-    static let excludedModes: Set<String> = ["HIGHSPEED_RAIL", "LONG_DISTANCE", "NIGHT_RAIL", "COACH", "AIRPLANE"]
-    /// Long-distance trains by line name, for feeds that file them as plain RAIL.
-    static let longDistanceLines: Set<String> = ["ICE", "IC", "EC", "ECE", "FLX", "NJ", "EN", "TGV", "RJ", "RJX", "ES", "EST", "WB"]
-
-    static func covers(_ leg: Leg) -> Bool {
-        guard leg.isTransit else { return true }
-        if excludedModes.contains(leg.mode) { return false }
-        guard ModeGroup.of(leg.mode) == .train else { return true }
-        if let agency = leg.agencyName?.lowercased(), agency.contains("flix") { return false }
-        for name in [leg.routeShortName, leg.displayName].compactMap({ $0?.uppercased() }) {
-            if longDistanceLines.contains(String(name.prefix { $0.isLetter })) { return false }
-        }
-        return true
-    }
-
-    static func covers(_ it: Itinerary) -> Bool { it.legs.allSatisfy(covers) }
-
-    /// A saved ticket that is a Deutschlandticket ("Deutschland-Ticket", "D-Ticket", "Deutschlandticket Job").
-    static func isDeutschlandticket(_ title: String) -> Bool {
-        let t = title.lowercased()
-        return t.contains("deutschlandticket") || t.contains("deutschland-ticket") || t.contains("d-ticket")
-    }
-}
-
 /// Route search options, kept between launches.
 struct RouteOptions: Codable, Hashable, Sendable {
     var modes = ModeFilter()
@@ -163,13 +135,13 @@ struct RouteOptions: Codable, Hashable, Sendable {
     var firstMile = FirstMile.walk
     /// Order of the listed routes (sorting only, the same routes).
     var sort = RouteSort.recommended
-    /// Only rides a Deutschlandticket covers (no ICE, IC, FlixTrain, long-distance coaches).
-    var localTicket = false
+    /// Tickets the traveller has (Deutschlandticket, KlimaTicket, GA …): routes only use rides they cover.
+    var tickets: Set<OwnTicket> = []
 
     init() {}
 
     private enum CodingKeys: String, CodingKey {
-        case modes, maxTransfers, maxWalkMinutes, wheelchair, compareStreetModes, sharing, firstMile, localTicket
+        case modes, maxTransfers, maxWalkMinutes, wheelchair, compareStreetModes, sharing, firstMile, tickets
         // Stored as "order" since smart routing: the old "sort" (departure by default) gives way to "Recommended".
         case sort = "order"
     }
@@ -185,8 +157,14 @@ struct RouteOptions: Codable, Hashable, Sendable {
         sharing = try c.decodeIfPresent(Bool.self, forKey: .sharing) ?? false
         firstMile = (try? c.decodeIfPresent(FirstMile.self, forKey: .firstMile)) ?? .walk
         sort = (try? c.decodeIfPresent(RouteSort.self, forKey: .sort)) ?? .recommended
-        localTicket = try c.decodeIfPresent(Bool.self, forKey: .localTicket) ?? false
+        tickets = (try? c.decodeIfPresent(Set<OwnTicket>.self, forKey: .tickets)) ?? []
+        // Builds 72–81 stored a single Deutschlandticket switch.
+        if try decoder.container(keyedBy: LegacyKeys.self).decodeIfPresent(Bool.self, forKey: .localTicket) == true {
+            tickets.insert(.deutschlandticket)
+        }
     }
+
+    private enum LegacyKeys: String, CodingKey { case localTicket }
 
     static let defaultWalkMinutes = 30
     static let walkChoices = [5, 10, 15, 20, 30]
@@ -194,25 +172,27 @@ struct RouteOptions: Codable, Hashable, Sendable {
 
     var isDefault: Bool {
         !modes.isActive && maxTransfers == nil && maxWalkMinutes == Self.defaultWalkMinutes && !wheelchair && !sharing
-            && firstMile == .walk && !localTicket
+            && firstMile == .walk && tickets.isEmpty
     }
 
     /// How many options differ from the default (badge on the filter button).
     var activeCount: Int {
         [modes.isActive, maxTransfers != nil, maxWalkMinutes != Self.defaultWalkMinutes, wheelchair, sharing,
-         firstMile != .walk, localTicket].filter { $0 }.count
+         firstMile != .walk, !tickets.isEmpty].filter { $0 }.count
     }
 
-    /// `transitModes` for the search: the chosen modes, without long-distance ones with the
-    /// Deutschlandticket. nil = all modes.
+    /// `transitModes` for the search: the chosen modes, without the ones none of the tickets covers
+    /// (long-distance trains with only a Deutschlandticket). nil = all modes.
     var transitModesValue: String? {
-        guard localTicket else { return modes.apiValue }
+        guard !tickets.isEmpty else { return modes.apiValue }
+        // "RAIL" stands for every train in MOTIS (ICE included); the train classes are listed one by one.
+        let excluded = OwnTicket.excludedModes(tickets).union(["RAIL"])
         return ModeGroup.allCases.filter(modes.allows).flatMap(\.apiModes)
-            .filter { !LocalTicket.excludedModes.contains($0) }.joined(separator: ",")
+            .filter { !excluded.contains($0) }.joined(separator: ",")
     }
 
-    /// Drops routes with rides the ticket does not cover (long-distance trains filed as plain RAIL).
-    func allows(_ it: Itinerary) -> Bool { !localTicket || LocalTicket.covers(it) }
+    /// Drops routes with a ride none of the tickets covers (an IC filed as plain RAIL, a train abroad).
+    func allows(_ it: Itinerary) -> Bool { OwnTicket.covers(it, with: tickets) }
 
     /// Walking the whole way comes with the routes (it joins the list when it is about as fast).
     var directModes: [String] { ["WALK"] }
@@ -238,7 +218,7 @@ struct RouteOptions: Codable, Hashable, Sendable {
 
     /// Part of the query key: other options mean other routes.
     var key: String {
-        "\(modes.storageValue)\(localTicket ? "+dt" : "")|\(maxTransfers.map(String.init) ?? "-")|\(maxWalkMinutes)|\(wheelchair)|\(compareStreetModes)|\(sharing)|\(firstMile.rawValue)|\(SmartRouting.Request.current.key)"
+        "\(modes.storageValue)\(tickets.isEmpty ? "" : "+" + tickets.map(\.rawValue).sorted().joined(separator: "+"))|\(maxTransfers.map(String.init) ?? "-")|\(maxWalkMinutes)|\(wheelchair)|\(compareStreetModes)|\(sharing)|\(firstMile.rawValue)|\(SmartRouting.Request.current.key)"
     }
 
     static func transferTitle(_ n: Int?) -> String {
@@ -253,7 +233,7 @@ struct RouteOptions: Codable, Hashable, Sendable {
     var summary: String? {
         var parts: [String] = []
         if let m = modes.summary { parts.append(m) }
-        if localTicket { parts.append(L10n.t("Deutschlandticket")) }
+        if !tickets.isEmpty { parts.append(OwnTicket.summary(tickets)) }
         if let t = maxTransfers { parts.append(t == 0 ? L10n.t("Direct only") : L10n.f("Changes: up to %lld", t)) }
         if maxWalkMinutes != Self.defaultWalkMinutes { parts.append(L10n.f("Walk up to %lld min", maxWalkMinutes)) }
         if wheelchair { parts.append(L10n.t("Step-free")) }

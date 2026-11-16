@@ -3,7 +3,7 @@
 > Nicht von Hand bearbeiten. Erzeugt von `scripts/feature_inventory.py` (CI: `features-doc.yml`).
 > Die ausführliche Beschreibung steht in [FUNKTIONEN.md](FUNKTIONEN.md).
 
-**191 Views, 5 App Intents, 3 Widgets in 78 Dateien.**
+**192 Views, 5 App Intents, 3 Widgets in 78 Dateien.**
 
 ## `Sources/App/DesignSamples.swift`
 - Views: `DesignSampleView`
@@ -187,8 +187,8 @@
 - Sichtbare Texte: from %@ · Remove · Clear history · Recently searched · Cancel
 
 ## `Sources/Views/RouteOptionsView.swift`
-- Views: `RouteOptionsView`, `RouteOptionsButton`, `StreetComparisonSection`, `FirstMilePicker`
-- Sichtbare Texte: Transport modes · Routes only use the modes that are switched on. · Deutschlandticket · Your Deutschlandticket is saved in Tickets. · To the first stop · Changes · Walk to and from stops · %lld min · Step-free (wheelchair) · Shared bikes and e-scooters · Compare with walking, cycling and driving · Driving times are without traffic and parking. · Route options · Reset · Done · All modes · Other ways · About as fast · %@ faster · %@ slower · Park & Ride searches take longer.
+- Views: `RouteOptionsView`, `RouteOptionsButton`, `StreetComparisonSection`, `FirstMilePicker`, `OwnTicketsView`
+- Sichtbare Texte: Transport modes · Routes only use the modes that are switched on. · None · My tickets · Routes only use rides your tickets cover, e.g. no ICE with the Deutschlandticket. · Your %@ is saved in Tickets. · To the first stop · Changes · Walk to and from stops · %lld min · Step-free (wheelchair) · Shared bikes and e-scooters · Compare with walking, cycling and driving · Driving times are without traffic and parking. · Route options · Reset · Done · All modes · Other ways · About as fast · %@ faster · %@ slower · Park & Ride searches take longer. · %@ · %@ · Saved in Tickets
 
 ## `Sources/Views/SavedTripView.swift`
 - Views: `SavedTripView`, `SavedTripRow`
