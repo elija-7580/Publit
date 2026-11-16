@@ -167,6 +167,37 @@ enum ParkAndRide {
         list.filter { let d = driveSeconds($0); return d == 0 || d < rideSeconds($0) }
     }
 
+    /// On top of the nearest station: a second station on another line, a few minutes further the
+    /// other way, still competes (two stations 10 km from home, both towards Milan, 2026-11-16).
+    /// The station in the next town past the local one does not (Gföhl: 8 min to Krems, not 25 to St. Pölten).
+    static let extraDriveSeconds = 600
+
+    /// Longest drive for the second search.
+    static let maxWiderDriveSeconds = 1500
+
+    /// Shortest drive to a station among these routes (nil when none starts with a drive).
+    static func nearestDrive(_ list: [Itinerary]) -> Int? {
+        list.map(driveSeconds).filter { $0 > 0 }.min()
+    }
+
+    /// Drive limit for a second, wider search, or nil when the first one (up to 15 min) already covers it.
+    /// Nearest station + 10 min, at most 25 min. No car route at all in the first search (every station
+    /// is more than 15 min away): try 25 min. Car routes that were all dropped as "driving most of the way"
+    /// mean the destination is close by car; driving further will not help.
+    static func widerLimit(firstSearch all: [Itinerary], kept: [Itinerary]) -> Int? {
+        guard let nearest = nearestDrive(kept) else {
+            return nearestDrive(all) == nil ? maxWiderDriveSeconds : nil
+        }
+        let limit = min(nearest + extraDriveSeconds, maxWiderDriveSeconds)
+        return limit > maxDriveSeconds ? limit : nil
+    }
+
+    /// Routes that drive at most 10 min longer than to the nearest station.
+    static func nearStations(_ list: [Itinerary], nearest: Int?) -> [Itinerary] {
+        guard let nearest = nearest ?? nearestDrive(list) else { return list }
+        return list.filter { driveSeconds($0) <= nearest + extraDriveSeconds }
+    }
+
     /// Above routes that start with a drive because no stop was within walking reach.
     static var fallbackNote: String {
         L10n.t("No stop within walking distance: these routes start with a drive to the station (Park & Ride).")

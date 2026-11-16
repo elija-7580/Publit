@@ -83,6 +83,8 @@ final class PlanModel {
     private var nextCursor: String?
     @ObservationIgnored private var lastRequest: (from: LatLon, to: LatLon, time: Date?, arriveBy: Bool, maxWalk: Int, stops: PlanStops)?
     @ObservationIgnored private var lastOptions = RouteOptions()
+    /// Drive to the nearest station in the last Park & Ride search: later pages keep to the same stations.
+    @ObservationIgnored private var parkAndRideNearest: Int?
     @ObservationIgnored private var token = UUID()
     @ObservationIgnored private var resultsKey: String?
     @ObservationIgnored private var completedAt: Date?
@@ -176,12 +178,10 @@ final class PlanModel {
                 // drives most of the way (the destination is a short drive off), the usual routes are shown
                 // instead; driving the whole way is in the comparison below.
                 let drive = min(maxWalk, ParkAndRide.maxDriveSeconds)
-                let car = try await TransitousClient.shared.plan(from: f, to: t, time: time, arriveBy: arriveBy,
-                                                                 maxWalk: drive, options: options, stops: stops.forFirstMile(.car))
-                let kept = ParkAndRide.sensible(car.itineraries)
-                if !kept.isEmpty {
-                    res = car.replacingItineraries(kept)
-                    maxWalk = drive
+                if let car = try await parkAndRideSearch(from: f, to: t, time: time, arriveBy: arriveBy, limit: drive,
+                                                         options: options, stops: stops.forFirstMile(.car)) {
+                    res = car.res
+                    maxWalk = car.drive
                     parkAndRide = true
                 } else {
                     used.firstMile = .walk
@@ -206,17 +206,14 @@ final class PlanModel {
                         triedCar = true
                         var car = used
                         car.firstMile = .car
-                        if let found = try? await TransitousClient.shared.plan(from: f, to: t, time: time, arriveBy: arriveBy,
-                                                                                maxWalk: ParkAndRide.maxDriveSeconds, options: car,
-                                                                                stops: stops.forFirstMile(.car)) {
-                            let kept = ParkAndRide.sensible(found.itineraries)
-                            if !kept.isEmpty {
-                                res = found.replacingItineraries(kept)
-                                used = car
-                                maxWalk = ParkAndRide.maxDriveSeconds
-                                parkAndRide = true
-                                break
-                            }
+                        if let found = try? await parkAndRideSearch(from: f, to: t, time: time, arriveBy: arriveBy,
+                                                                    limit: ParkAndRide.maxDriveSeconds, options: car,
+                                                                    stops: stops.forFirstMile(.car)) {
+                            res = found.res
+                            used = car
+                            maxWalk = found.drive
+                            parkAndRide = true
+                            break
                         }
                         try Task.checkCancellation()
                         guard token == myToken else { return }
@@ -280,6 +277,33 @@ final class PlanModel {
 
     /// Walking to the first stop: a comfortable walk and the usual one asked at once; a long walk wins
     /// only when it arrives clearly earlier (the server alone prefers walking 30 min to save one).
+    /// Park & Ride: drive to a station near the start, then ride. First up to 15 min; then, when the
+    /// nearest station is more than 5 min away, once more up to that drive + 10 min, so a second station
+    /// on another line competes too. Routes that drive most of the way are dropped; nil when none is left.
+    private func parkAndRideSearch(from f: LatLon, to t: LatLon, time: Date?, arriveBy: Bool, limit: Int,
+                                   options: RouteOptions, stops: PlanStops) async throws -> (res: PlanResponse, drive: Int)? {
+        let first = try await TransitousClient.shared.plan(from: f, to: t, time: time, arriveBy: arriveBy,
+                                                           maxWalk: limit, options: options, stops: stops)
+        var res = first
+        var kept = ParkAndRide.sensible(first.itineraries)
+        var drive = limit
+        var nearest = ParkAndRide.nearestDrive(kept)
+        // Not when the user chose a shorter walk (the drive limit follows it): that limit is theirs.
+        if limit == ParkAndRide.maxDriveSeconds,
+           let wider = ParkAndRide.widerLimit(firstSearch: first.itineraries, kept: kept) {
+            try Task.checkCancellation()
+            if let second = try? await TransitousClient.shared.plan(from: f, to: t, time: time, arriveBy: arriveBy,
+                                                                    maxWalk: wider, options: options, stops: stops) {
+                let sensible = ParkAndRide.sensible(second.itineraries)
+                let near = nearest ?? ParkAndRide.nearestDrive(sensible)
+                let more = ParkAndRide.nearStations(sensible, nearest: near)
+                if !more.isEmpty { res = second; kept = more; drive = wider; nearest = near }
+            }
+        }
+        parkAndRideNearest = nearest
+        return kept.isEmpty ? nil : (res.replacingItineraries(kept), drive)
+    }
+
     private func walkingSearch(from f: LatLon, to t: LatLon, time: Date?, arriveBy: Bool, maxWalk: Int,
                                options: RouteOptions, stops: PlanStops = .none) async throws -> PlanResponse {
         guard options.maxWalkMinutes == RouteOptions.defaultWalkMinutes else {
@@ -343,7 +367,10 @@ final class PlanModel {
             // A new search started meanwhile: these results belong to the old query.
             guard token == myToken else { return }
             let known = Set(itineraries.map(\.id))
-            let fresh = res.itineraries.withoutDetours.filter { !known.contains($0.id) }
+            var fresh = res.itineraries.withoutDetours.filter { !known.contains($0.id) }
+            if lastOptions.firstMile == .car {
+                fresh = ParkAndRide.nearStations(ParkAndRide.sensible(fresh), nearest: parkAndRideNearest)
+            }
             itineraries = Self.timetableOrder(itineraries + fresh, arriveBy: req.arriveBy)
             offerForLearning()
             nextCursor = req.arriveBy ? res.previousPageCursor : res.nextPageCursor

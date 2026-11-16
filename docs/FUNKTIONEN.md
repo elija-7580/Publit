@@ -143,7 +143,7 @@ Nach jedem Update (nie bei Neuinstallation – dort kommt das Onboarding –, ni
 - „Earlier connections“ / „Later connections“, „Updated HH:MM“, Abdeckungswarnung für Start/Ziel („From · Kärnten“).
 - **Routenoptionen-Knopf** (`RouteOptionsButton`) mit Kurz-Zusammenfassung („All modes“, „Direct only“, „Step-free“, „With sharing“ …).
 - **Go Now** (`GoNowView`, Schnellroute vom Standort): Zeile „From … Change“ – Start ist der Standort, lässt sich aber über die Ortssuche auf jeden anderen Ort ändern (Überschrift dann „from …“); „Leave now“ / „Leave in x min“, „Walk all the way“, „Later connections“.
-- **Park & Ride statt zwei Stunden Fußweg**: findet die Suche mit 30 und 45 min Fußweg nichts, wird vor dem 2-h-Fußweg eine Autofahrt zum nächsten Bahnhof versucht (max. 15 min Fahrt); Hinweis „No stop within walking distance: these routes start with a drive to the station (Park & Ride).“
+- **Park & Ride statt zwei Stunden Fußweg**: findet die Suche mit 30 und 45 min Fußweg nichts, wird vor dem 2-h-Fußweg eine Autofahrt zum nächsten Bahnhof versucht (max. 15 min Fahrt, bei weiter entferntem nächsten Bahnhof wie unten bis nächster Bahnhof + 10 min); Hinweis „No stop within walking distance: these routes start with a drive to the station (Park & Ride).“
 - **An der Haltestelle** (`Reach.boardingHere`, `Reach.atStopMeters` = 50 m): Wer vom Standort aus plant und höchstens 50 m von der ersten Haltestelle steht (und dessen Fußweg dorthin laut Server ebenfalls höchstens 50 m lang ist), bekommt keinen „1 min“-Fußweg vorneweg: Die Route beginnt mit der Fahrt, statt „Leave in x min“ steht „Departs in x min“ (bei 0 „Board here“). Die Haltestelle gegenüber (Weg über die Straße) behält ihren Fußweg.
 - Treffer → Routendetail (§12).
 
@@ -157,7 +157,7 @@ Nach jedem Update (nie bei Neuinstallation – dort kommt das Onboarding –, ni
 ## 10. Routenoptionen – `RouteOptionsView`
 
 - **Transport modes**: Verkehrsmittelgruppen ein/aus („Routes only use the modes that are switched on.“).
-- **To the first stop** (`FirstMilePicker`): Walk / Bike / Car (Park & Ride; „Park & Ride searches take longer.“). Park & Ride fährt höchstens 15 min zu einem Bahnhof nahe dem Start (`ParkAndRide`); Verbindungen, bei denen die Autofahrt länger dauert als die Fahrten mit Öffis (z. B. 8 min in die Stadt und 2 min Bus), werden verworfen – bleibt keine übrig, kommen die normalen Verbindungen.
+- **To the first stop** (`FirstMilePicker`): Walk / Bike / Car (Park & Ride; „Park & Ride searches take longer.“). Park & Ride fährt zunächst höchstens 15 min zu einem Bahnhof nahe dem Start (`ParkAndRide`); ist der nächste Bahnhof mehr als 5 min entfernt, wird ein zweites Mal bis „Fahrzeit zum nächsten Bahnhof + 10 min“ (höchstens 25 min) gesucht, damit auch ein zweiter Bahnhof an einer anderen Linie mitkonkurriert (z. B. zwei Bahnhöfe je 10 km entfernt); weiter entfernte Bahnhöfe (am eigenen Bahnhof vorbei in den Nachbarort) werden verworfen, auch beim Nachladen späterer Verbindungen. Liegt kein Bahnhof innerhalb von 15 min, wird bis 25 min gesucht. Verbindungen, bei denen die Autofahrt länger dauert als die Fahrten mit Öffis (z. B. 8 min in die Stadt und 2 min Bus), werden verworfen – bleibt keine übrig, kommen die normalen Verbindungen.
 - **Changes**: Any / Direct only / bis zu n Umstiege.
 - **Walk to and from stops**: maximale Gehzeit (Minuten).
 - **Step-free (wheelchair)**, **Shared bikes and e-scooters**.
