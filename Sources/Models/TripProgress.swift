@@ -81,3 +81,38 @@ enum TripProgress: Equatable, Sendable {
         return .atStop(index: stops.count - 1)
     }
 }
+
+/// Where a vehicle's position on the map comes from, said next to it. Publit has no GPS positions
+/// from vehicles: Transitous does not pass them on. A "GPS" label would need a feed that reports
+/// them as such, so there is none.
+enum VehiclePositionSource: Equatable, Sendable {
+    /// Placed between stops by the live (real-time) stop times.
+    case liveTimes
+    /// Placed by the timetable: the operator sends no live data for this trip.
+    case timetable
+    /// Not under way (not left the first stop yet, or arrived): no position to show.
+    case unavailable
+
+    static func of(_ progress: TripProgress, realTime: Bool) -> VehiclePositionSource {
+        switch progress {
+        case .notStarted, .finished: return .unavailable
+        case .atStop, .between: return realTime ? .liveTimes : .timetable
+        }
+    }
+
+    var label: String {
+        switch self {
+        case .liveTimes: return L10n.t("Position estimated from live stop times.")
+        case .timetable: return L10n.t("No live data for this trip. Position estimated from the timetable.")
+        case .unavailable: return L10n.t("Vehicle position unavailable right now.")
+        }
+    }
+
+    var symbol: String {
+        switch self {
+        case .liveTimes: return "dot.radiowaves.left.and.right"
+        case .timetable: return "calendar"
+        case .unavailable: return "questionmark.circle"
+        }
+    }
+}

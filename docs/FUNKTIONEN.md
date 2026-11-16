@@ -112,6 +112,7 @@ Nach jedem Update (nie bei Neuinstallation – dort kommt das Onboarding –, ni
 
 - Alle Halte der Fahrt wie die Abfahrtszeilen am Startbildschirm: **Halt links, Zeit rechts** (davor Gleis „Pl. x“ und Verspätung „+x“), bereits passierte Halte grau.
 - Karte (`TripMap`) mit **geschätzter Fahrzeugposition** („Estimated vehicle position“), Status „Not departed yet“, „Between A and B“, „At …“, „Arrived at …“; ohne Live-Daten aus dem Fahrplan geschätzt.
+- **„Track vehicle“** (`VehicleTrackingView`): die Fahrt dieser Abfahrt auf einer großen Karte (Linienverlauf, Halte, Fahrzeug, eigener Standort), aktualisiert sich alle 15 s selbst; **„Follow vehicle“** hält das Fahrzeug in der Mitte (Verschieben von Hand beendet das). Darunter die Positionsquelle (`VehiclePositionSource`): „Position estimated from live stop times.“, „…estimated from the timetable.“ oder „Vehicle position unavailable right now.“ (vor Abfahrt am ersten Halt / nach Ankunft) – nie „GPS“, weil Transitous keine Fahrzeug-GPS-Positionen liefert – und die nächsten Halte mit Zeiten. Ohne Position bleiben Linie und Halte sichtbar.
 - Aktionen pro Halt: „Route here“, „Route from here“; „From … to here“; Linie speichern.
 - Liste weiterer Abfahrten derselben Linie.
 - „Line …: route and timetable“ öffnet das Linien-Detail (Richtung, Verlauf, Fahrplan).
@@ -386,6 +387,7 @@ Kleinere Bausteine, die in den Abschnitten oben nicht namentlich vorkommen:
 | `ChooseOnMapView` | „Choose on map“: Punkt auf der Karte als Start/Ziel wählen (§9) |
 | `CenterPin` | Stecknadel in der Mitte von „Choose on map“ (§9) |
 | `TurnCard` | Nächste Abbiegung über der Karte des Fußwegs in der Live-Fahrt (§13) |
+| `VehicleTrackingView` | „Track vehicle“: Fahrzeug einer Abfahrt auf großer Karte verfolgen (§6) |
 | `PlaceHitRow` | Treffer der Ortssuche: Haltestelle, Adresse oder Ort, Apple-Vorschläge werden beim Antippen nachgeschlagen; „Save“ per Wischen (§9) |
 | `HeadingDot` | Dein Standort mit Pfeil in Blickrichtung auf allen Karten (SwiftUI über `YouAreHere`, Stationskarte über `UserHeadingView`) (§3) |
 | `ExitMark` | Tür-Markierung des gewählten Stationsausgangs auf der Karte der Live-Fahrt (§13) |

@@ -84,4 +84,11 @@ final class Build49Tests: XCTestCase {
         let ride = itinerary([try leg("TRAM", start: 0, end: 10), try leg("WALK", start: 10, end: 15)])
         XCTAssertFalse(TripStatus.startsOnFoot(ride, now: date(-5)))
     }
+
+    func testVehiclePositionSourceIsNeverCalledGPS() {
+        XCTAssertEqual(VehiclePositionSource.of(.between(index: 1, fraction: 0.5), realTime: true), .liveTimes)
+        XCTAssertEqual(VehiclePositionSource.of(.atStop(index: 2), realTime: false), .timetable)
+        XCTAssertEqual(VehiclePositionSource.of(.notStarted, realTime: true), .unavailable)
+        XCTAssertEqual(VehiclePositionSource.of(.finished, realTime: true), .unavailable)
+    }
 }
