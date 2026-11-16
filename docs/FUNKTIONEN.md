@@ -1,6 +1,6 @@
 # Publit iOS – Funktionen und Screens (vollständige Übersicht)
 
-> Stand: Version 0.1.1 (Build 81). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
+> Stand: Version 0.1.1 (Build 82). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
 > **Pflege:** Jede Änderung an `Sources/`, `Watch/`, `Widgets/` oder `Share/` muss diese Datei im selben Commit/PR mitändern (siehe Abschnitt „Aktualisierung“ ganz unten). Die maschinell erzeugte Liste aller Views steht in [`FUNKTIONEN-INVENTAR.md`](FUNKTIONEN-INVENTAR.md) und wird von der CI automatisch aktualisiert.
 
 ## Inhalt
@@ -61,7 +61,7 @@ Animiertes Logo, mindestens 0,7 s, höchstens 2 s; endet früher, sobald die ers
 Ohne Onboarding startet die Standortabfrage sofort.
 
 ### „What's new“ nach jedem Update (`WhatsNewSheet`, `WhatsNew`)
-Nach jedem Update (nie bei Neuinstallation – dort kommt das Onboarding –, nie darüber, ca. 1,2 s nach dem Splash) ein Blatt **„What's new in Publit“** mit den Punkten aller Builds seit dem zuletzt gesehenen (`whatsNewBuild`), neueste zuerst, höchstens 4 Punkte (je Symbol, Titel, ein Satz). Darunter die **Community-Karte** (`CommunityCard`: „Publit is a community project“, „Vote for what comes next, or suggest your own idea. No account needed.“, Knopf „Suggest features and vote“ → Wunschliste, §16a, und „Support Publit“ → §16b) und „Continue“. Builds ohne Eintrag zeigen nichts. Ersetzt den einmaligen Wünsche-Hinweis (`wishesHintShown` wird mitgesetzt). Inhalte in `Sources/Models/WhatsNew.swift` (Build 81: „Clearer changes“, „Community first“, „Support Publit“).
+Nach jedem Update (nie bei Neuinstallation – dort kommt das Onboarding –, nie darüber, ca. 1,2 s nach dem Splash) ein Blatt **„What's new in Publit“** mit den Punkten aller Builds seit dem zuletzt gesehenen (`whatsNewBuild`), neueste zuerst, höchstens 4 Punkte (je Symbol, Titel, ein Satz). Darunter die **Community-Karte** (`CommunityCard`: „Publit is a community project“, „Vote for what comes next, or suggest your own idea. No account needed.“, Knopf „Suggest features and vote“ → Wunschliste, §16a, und „Support Publit“ → §16b) und „Continue“. Builds ohne Eintrag zeigen nichts. Ersetzt den einmaligen Wünsche-Hinweis (`wishesHintShown` wird mitgesetzt). Inhalte in `Sources/Models/WhatsNew.swift` (Build 82: „Get off on time“, „Track your vehicle“, „Easier on foot“; Build 81: „Clearer changes“, „Community first“, „Support Publit“).
 
 ### Tab-Leiste (`RootView`, `AdaptiveTabs` ab iOS 18)
 | Tab | Symbol | Inhalt |
