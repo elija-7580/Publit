@@ -17,6 +17,8 @@ final class TransitMapModel {
     @ObservationIgnored private var stationsRetryAt: Date?
     /// The first live layer arrived; later refreshes update silently.
     var hasLive = false
+    /// Local lines running in the area last loaded (see `CoverageGuide.isContradicted`).
+    var localLines = 0
     @ObservationIgnored private var liveRetryAt: Date?
 
     var filter = ModeFilter() { didSet { if filter != oldValue { rebuildLive(); bumpStations() } } }
@@ -188,6 +190,7 @@ final class TransitMapModel {
         guard active, !Task.isCancelled, !isLoadingLive, let r = region else { return }
         guard r.span.latitudeDelta <= Self.maxLiveSpan else {
             liveHidden = true
+            localLines = 0
             tracks = []
             if !content.shapes.isEmpty { content.shapes = []; content.shapesVersion += 1 }
             return
@@ -223,6 +226,12 @@ final class TransitMapModel {
         liveError = nil; liveRetryAt = nil
         hasLive = true
         segments = segs
+        localLines = CoverageGuide.localLines(segs)
+        // Lines running where the atlas says there is next to no data: the atlas is out of date.
+        if let notice = CoverageGuide.notice(at: LatLon(lat: r.center.latitude, lon: r.center.longitude)),
+           CoverageGuide.isContradicted(notice, localLines: localLines) {
+            Task.detached(priority: .utility) { await CoverageAtlasStore.shared.recheck() }
+        }
         segmentPrecision = zoom >= 14 ? 5 : 4
         rebuildLive()
     }
@@ -492,8 +501,10 @@ struct StationMapView: View {
     /// The area in the middle of the map has missing timetable data: said at once, over the map.
     /// Not when the map shows a whole country or more (nothing is "here" then).
     private var mapCoverage: CoverageNotice? {
-        guard let r = region, r.span.latitudeDelta < 8, CLLocationCoordinate2DIsValid(r.center) else { return nil }
-        return CoverageGuide.notice(at: LatLon(lat: r.center.latitude, lon: r.center.longitude))
+        guard let r = region, r.span.latitudeDelta < 8, CLLocationCoordinate2DIsValid(r.center),
+              let notice = CoverageGuide.notice(at: LatLon(lat: r.center.latitude, lon: r.center.longitude)) else { return nil }
+        // Many lines running right here: the warning is out of date, not the map.
+        return CoverageGuide.isContradicted(notice, localLines: model.localLines) ? nil : notice
     }
 
     /// The category on the map: how many, "Search this area" after moving, and ✕ to clear it.

@@ -355,9 +355,31 @@ final class CoverageAtlasStore: @unchecked Sendable {
         return true
     }
 
+    private var lastRecheck: Date?
+
+    /// True at most once an hour: for an atlas the map has just contradicted.
+    func claimRecheck(_ now: Date) -> Bool {
+        lock.lock(); defer { lock.unlock() }
+        guard lastRecheck.map({ now.timeIntervalSince($0) > 3600 }) ?? true else { return false }
+        lastRecheck = now
+        return true
+    }
+
+    /// The map shows many lines running where the atlas says there is next to no data: the atlas on
+    /// the phone is probably older than the website's (a feed was added since). Fetch it now instead
+    /// of waiting for the daily check, at most once an hour.
+    func recheck(session: URLSession = .shared, now: Date = Date()) async {
+        guard claimRecheck(now) else { return }
+        await download(session: session, now: now)
+    }
+
     /// Called when the app becomes active: at most one small download a day, failures are silent.
     func refreshIfNeeded(session: URLSession = .shared, now: Date = Date()) async {
         guard claimCheck(now) else { return }
+        await download(session: session, now: now)
+    }
+
+    private func download(session: URLSession, now: Date) async {
         UserDefaults.standard.set(now, forKey: defaultsKey)
         var request = URLRequest(url: Self.remoteURL, cachePolicy: .reloadRevalidatingCacheData, timeoutInterval: 20)
         request.setValue("text/plain", forHTTPHeaderField: "Accept")
@@ -392,6 +414,26 @@ enum CoverageGuide {
 
     static func notice(at point: LatLon?, atlas: CoverageAtlas = .shared) -> CoverageNotice? {
         notices(places: [(point, .here)], atlas: atlas).first
+    }
+
+    /// Local lines (buses, trams, metro, ferries) seen running on the map that make "next to no
+    /// timetable data" wrong: then the atlas on the phone is out of date.
+    static let contradictingLines = 8
+
+    /// True when what the map shows contradicts the notice: a "no data" or "very little data" area
+    /// with many local lines running. Partial notices ("Missing: metro") are kept, lines or not.
+    static func isContradicted(_ notice: CoverageNotice, localLines: Int) -> Bool {
+        notice.area.level >= .sparse && localLines >= contradictingLines
+    }
+
+    /// Distinct local lines among the map's running trips (trains do not count: a "sparse" area
+    /// is one with stations only).
+    static func localLines(_ segments: [TripSegment]) -> Int {
+        Set(segments.compactMap { s -> String? in
+            let m = s.mode.uppercased()
+            guard !m.contains("RAIL"), !m.contains("LONG_DISTANCE"), !m.contains("SUBURBAN"), !m.contains("COACH") else { return nil }
+            return s.trips.first.flatMap { $0.routeShortName ?? $0.displayName }
+        }).count
     }
 }
 
