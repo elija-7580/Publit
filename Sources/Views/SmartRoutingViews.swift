@@ -1,47 +1,38 @@
 import SwiftUI
 
-/// "✦ Recommended · One change fewer", then the other labels of a route in the list.
-struct SmartBadgesRow: View {
+/// The small line above a route: the day when it is another one, then what stands out about it.
+/// One quiet line of text in one style for every label, instead of a row of differently
+/// coloured chips: "Tomorrow · ✦ Recommended – 2 changes fewer · Least walking".
+struct RouteTagLine: View {
+    var dayNote: String? = nil
     let badges: [SmartRouting.Badge]
     var reason: String? = nil
 
     var body: some View {
-        // Chips never wrap or hyphenate ("Recommend-ed"); when the reason does not fit beside
-        // them it goes on its own line below.
-        ViewThatFits(in: .horizontal) {
-            HStack(spacing: 6) { chips; reasonText(fixed: true) }
-            // Three chips can be wider than a phone: they wrap instead of pushing the whole route row
-            // sideways (its times and bar were cut off at both edges).
-            VStack(alignment: .leading, spacing: 4) {
-                FlowRow(spacing: 6) { chips }
-                reasonText(fixed: false)
-            }
-        }
-        .accessibilityElement(children: .combine)
-        .accessibilityIdentifier("smartBadges")
+        line
+            .font(.caption.weight(.bold))
+            .lineLimit(1)
+            .truncationMode(.tail)
+            .accessibilityIdentifier("smartBadges")
     }
 
-    private var chips: some View {
-        ForEach(badges, id: \.self) { badge in
-            Label(badge.title, systemImage: badge.symbol)
-                .labelStyle(.titleAndIcon)
-                .font(.caption2.weight(.bold))
-                .lineLimit(1)
-                .fixedSize()
-                // The suggestion is a solid ink chip (readable in light and dark), the rest stay quiet.
-                .foregroundStyle(badge == .recommended ? Color.onInk : Color.secondary)
-                .padding(.horizontal, 8).padding(.vertical, 3)
-                .background(badge == .recommended ? Color.ink : Color.inkFill, in: Capsule())
+    private var line: Text {
+        let others = badges.filter { $0 != .recommended }.map(\.title)
+        var line = Text(verbatim: "")
+        var first = true
+        func add(_ t: Text) { line = first ? t : line + Text(verbatim: "  ·  ").foregroundStyle(.tertiary) + t; first = false }
+        if let dayNote {
+            add(Text(Image(systemName: "calendar")).foregroundStyle(Color.delay)
+                + Text(verbatim: " " + dayNote).foregroundStyle(Color.delay))
         }
-    }
-
-    /// Fixed beside the chips (so ViewThatFits can tell it does not fit), truncated on its own line.
-    @ViewBuilder
-    private func reasonText(fixed: Bool) -> some View {
-        if let reason {
-            Text(verbatim: reason).font(.caption2).foregroundStyle(.secondary)
-                .lineLimit(1).fixedSize(horizontal: fixed, vertical: false)
+        if badges.contains(.recommended) {
+            var t = Text(Image(systemName: "sparkles")).foregroundStyle(Color.ink)
+                + Text(verbatim: " " + L10n.t("Recommended")).foregroundStyle(Color.ink)
+            if let reason { t = t + Text(verbatim: " – " + reason).foregroundStyle(.secondary).fontWeight(.medium) }
+            add(t)
         }
+        if !others.isEmpty { add(Text(verbatim: others.joined(separator: " · ")).foregroundStyle(.secondary)) }
+        return line
     }
 }
 

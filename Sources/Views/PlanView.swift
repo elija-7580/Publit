@@ -390,18 +390,28 @@ struct ItineraryRow: View {
         let shaky = smartRouting && warnings.isEmpty
             ? SmartRouting.changes(itinerary).filter { $0.chance < 0.8 }.min { $0.chance < $1.chance } : nil
         let overnight = Fmt.dayOffset(from: itinerary.startTime, to: itinerary.endTime, tz: itinerary.legs.last?.to.tz)
-        VStack(alignment: .leading, spacing: 6) {
-            if !badges.isEmpty { SmartBadgesRow(badges: badges, reason: reason) }
-
-            if let dayNote {
-                Label(dayNote, systemImage: "calendar")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(Color.delay)
-                    .accessibilityIdentifier("routeDayNote")
+        // One calm card per route: label line, times, the bar, one line of facts, at most one note.
+        // (It used to stack chips, two text lines and a note per warning: too much to compare routes.)
+        let note: (text: String, tint: Color)? = {
+            if let w = warnings.first { return (w.message, w.level == .missed ? Color.danger : Color.delay) }
+            if itinerary.isCancelled { return (L10n.t("Cancelled"), Color.danger) }
+            if let shaky {
+                return (L10n.f("Change at %@: %lld %% chance", shaky.stopName, shaky.percent),
+                        shaky.level == .risky ? Color.danger : Color.delay)
             }
-            HStack(alignment: .firstTextBaseline) {
+            if itinerary.transitLegs.contains(where: { !$0.serviceAlerts.isEmpty || $0.isReplacementBus }) {
+                return (L10n.t("Service changes on this route"), Color.delay)
+            }
+            return nil
+        }()
+        VStack(alignment: .leading, spacing: 8) {
+            if dayNote != nil || !badges.isEmpty {
+                RouteTagLine(dayNote: dayNote, badges: badges, reason: reason)
+            }
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
                 Text("\(Fmt.time(itinerary.startTime, tz: tz)) – \(Fmt.time(itinerary.endTime, tz: itinerary.legs.last?.to.tz))")
                     .font(.headline.monospacedDigit())
+                    .lineLimit(1).minimumScaleFactor(0.8)
                 // Arrives after midnight: "+1" after the arrival time.
                 if overnight > 0 {
                     Text(verbatim: "+\(overnight)")
@@ -414,41 +424,22 @@ struct ItineraryRow: View {
                         .font(.caption).foregroundStyle(Color.live)
                         .accessibilityLabel("Live data")
                 }
-                Spacer()
+                Spacer(minLength: 8)
                 DurationFigure(seconds: itinerary.duration, size: 22)
             }
             if showTimeline {
                 TimelineBar(itinerary: itinerary, windowStart: windowStart, windowEnd: windowEnd).frame(height: 42)
             }
-            // What decides first: when to leave, then how often you change and which line takes you.
-            HStack(spacing: 0) {
-                if showLeave, !itinerary.isCancelled, let leave = Self.leave(itinerary, now: Ticker.minute.now) {
-                    Text(verbatim: leave).fontWeight(.semibold).foregroundStyle(Color.ink)
-                    Text(verbatim: " · ")
-                }
-                Text(Fmt.changes(itinerary.transfers))
-                if let first = itinerary.firstTransitLeg, let dir = first.shownDirection {
-                    Text(verbatim: " · \(first.lineName) → \(dir)")
-                }
-                if itinerary.isCancelled {
-                    Text(verbatim: " · ")
-                    Text("Cancelled").fontWeight(.semibold).foregroundStyle(Color.danger)
-                }
-            }
-            .font(.footnote)
-            .foregroundStyle(.secondary)
-            .lineLimit(1)
-            // Where to go, at a glance: the stop and platform to get on at, without opening the route.
-            BoardingLine(itinerary: itinerary)
-            if itinerary.transitLegs.contains(where: { !$0.serviceAlerts.isEmpty || $0.isReplacementBus }) {
-                InlineNotice(text: L10n.t("Service changes on this route"))
-            }
-            ForEach(warnings, id: \.self) { w in
-                InlineNotice(text: w.message, tint: w.level == .missed ? Color.danger : Color.delay)
-            }
-            if let shaky {
-                InlineNotice(text: L10n.f("Change at %@: %lld %% chance", shaky.stopName, shaky.percent),
-                             tint: shaky.level == .risky ? Color.danger : Color.delay)
+            // When to leave, how often you change and where to get on: one line.
+            Text(verbatim: factsLine)
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+                .truncationMode(.tail)
+                .accessibilityIdentifier("boardingLine")
+            if let note {
+                InlineNotice(text: note.text, tint: note.tint)
+                    .lineLimit(1)
             }
         }
         .padding(.vertical, 4)
@@ -463,6 +454,18 @@ struct ItineraryRow: View {
 }
 
 extension ItineraryRow {
+    /// "Leave in 6 min · 2 changes · Walk to Hauptbahnhof · Pl. 3 · 4 min".
+    fileprivate var factsLine: String {
+        var parts: [String] = []
+        if showLeave, !itinerary.isCancelled, let leave = Self.leave(itinerary, now: Ticker.minute.now) { parts.append(leave) }
+        parts.append(Fmt.changes(itinerary.transfers))
+        if let leg = itinerary.firstTransitLeg {
+            let walk = itinerary.legs.prefix { !$0.isTransit }.reduce(0) { $0 + $1.duration }
+            parts.append(BoardingLine.text(leg: leg, walkSeconds: walk))
+        }
+        return parts.joined(separator: " · ")
+    }
+
     /// Spoken form of "+1": the arrival day in words ("tomorrow").
     fileprivate func dayNoteA11y(_ days: Int) -> String {
         Fmt.dayNote(itinerary.endTime, reference: itinerary.startTime, tz: itinerary.legs.last?.to.tz) ?? "+\(days)"

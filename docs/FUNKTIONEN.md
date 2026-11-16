@@ -142,7 +142,7 @@ Bewegung reduzieren zeigt jede Demo im Endzustand. Schließen, „Continue“ od
 - **Schnellwahl Zuhause/Arbeit** (`PlaceKeyRow`) und letzte Suchen (`RecentSearchesSection`).
 - **Zeit** („When“): „Now“ / „Depart at“ / „Arrive by“. Der Knopf „Now“ neben Datum und Uhrzeit bleibt einzeilig; ist zu wenig Platz (schmale Geräte, große Schrift), zeigt er nur die Uhr (VoiceOver: „Now“). „Now“ folgt der Uhr: später wiederkommen zeigt Verbindungen ab dann; Ergebnisse werden live nachgeladen.
 - **„Search routes“**: breite Such-Taste unter Von/Nach, Zeit und Routenoptionen (wie in der ÖBB-App), ohne Ziel deaktiviert; startet die Suche, danach sucht jede Änderung automatisch neu; Ziel leeren = Neustart.
-- **Ergebnisliste** (`ItineraryRow`): Ab–An, Dauer (`DurationFigure`), „Leave in x min“ / „Departs in x min“ (innerhalb der nächsten Stunde) vor Umstiegen und erster Linie, Einstiegszeile („Board at …“; „Walk to …“ erst ab 2 min Fußweg), Linien-Badges, Umstiege, Live-Kennzeichen, „Cancelled“, „Service changes on this route“, Umstiegswahrscheinlichkeit („Change at X: y % chance“), Fahrpreis-Schätzung, Smart-Badges; optional **Verbindungs-Zeitleisten** (`TimelineBar`; Fahrt farbig, Fußweg grau, Warten gepunktet).
+- **Ergebnisliste** (`ItineraryRow`), je Route eine ruhige Karte in fester Reihenfolge: (1) eine kleine Zeile `RouteTagLine` nur wenn nötig – Tageswechsel („Tomorrow“), „✦ Recommended – Grund“ in Ink, weitere Auszeichnungen (Fastest, Fewest changes, Least walking) als grauer Text, alles einheitlich als Text statt verschiedenfarbiger Chips, einzeilig; (2) Ab–An, „+1“, Live-Kennzeichen, Dauer (`DurationFigure`); (3) **Verbindungs-Zeitleiste** (`TimelineBar`, optional; Fahrt farbig mit Linie, Fußweg gepunktet, Warten gestrichelt); (4) **eine** Faktenzeile: „Leave in x min“ (innerhalb der nächsten Stunde) · Umstiege · Einstieg („Board at …“ bzw. „Walk to … · Pl. x · n min“ ab 2 min Fußweg); (5) **höchstens ein** Hinweis in dieser Rangfolge: Umstieg nicht erreichbar/Ausfall, „Cancelled“, Umstiegswahrscheinlichkeit („Change at X: y % chance“), „Service changes on this route“. Alle Details stehen in der Routenansicht.
 - **Sortierung**: immer nach Zeit, spätere Verbindungen weiter unten – bei „Depart“ nach Abfahrt, bei „Arrive“ nach Ankunft (Gleichstand: die jeweils andere Zeit). Recommended, Fastest, Fewest changes, Least walking werden nur markiert („Recommended: …“), nicht nach oben sortiert.
 - **Tageskennzeichnung**: die erste Verbindung jedes anderen Tags als des gesuchten trägt „Tomorrow“ bzw. ein Datum (wie ein Tageswechsel im Fahrplan, nicht auf jeder Zeile) (Systemwortlaut, z. B. „Morgen“); Ankunft nach Mitternacht zeigt „+1“ hinter der Ankunftszeit.
 - **Sprung zur Empfehlung**: liegt die empfohlene Verbindung außerhalb der Sicht, springt eine Kapsel „Recommended: …“ am unteren Rand zu ihr; die Liste scrollt frei unter ihr, sie verdeckt keine Zeilen oder Hinweise.
@@ -199,7 +199,7 @@ Bewegung reduzieren zeigt jede Demo im Endzustand. Schließen, „Continue“ od
 ## 13. Gespeicherte Fahrt, Fahrt starten, Live-Fahrt (Guide)
 
 ### Gespeicherte Fahrt (`SavedTripView`)
-Gespeicherte Verbindung mit aktuellem Live-Status (oder „Live status unavailable. Showing saved times.“), „Trip not found“ wenn gelöscht. Abschnitt im Tab Gespeichert.
+Gespeicherte Verbindung mit aktuellem Live-Status (oder „Live status unavailable. Showing saved times.“), „Trip not found“ wenn gelöscht. Abschnitt im Tab Gespeichert. Aus dem Tab Gespeichert geöffnet, zeigt eine schon laufende Fahrt die Routendetails (mit „End trip“; der Guide über die Live-Leiste); wird sie dort gestartet, wird der Bildschirm zum Guide. Aus Nearby, Live-Leiste, Mitteilungen und Kalender öffnet eine laufende Fahrt direkt den Guide.
 
 ### Fahrt starten (`TripSession`)
 - Beginnt die Fahrt mit einem Fußweg, der in der nächsten Stunde ansteht oder schon läuft, heißt die Taste **„Start walking navigation“** (Gehsymbol) und öffnet den Guide direkt auf diesem Fußweg (`TripStatus.startsOnFoot`).
@@ -258,7 +258,7 @@ Screenshot-/Link-Tickets („My tickets“, „Add ticket“, Typ, „Expires“
 ## 15. Tab „Gespeichert“ (Saved) – `FavoritesView`
 
 - **Home and Work**: festlegen („Set Home/Work“), „Change“, „Remove“; Ein-Tipp-Route. Zuhause und Arbeit sind eigene Plätze: Liefert die Suche für beide dieselbe ID (z. B. Adressen in verschiedenen Ländern), ersetzt das Setzen des einen nicht mehr den anderen.
-- **Upcoming trips** (`SavedTripRow`): Ziel und „Leave in x min“ (sonst Datum), Ab–An mit Linien-Badges (max. 3, dann „+n“), „from …“; leer: Hinweis „Save a route to see it here, add it to your calendar and get a reminder when to leave.“
+- **Upcoming trips** (`SavedTripRow`, im Stil der Routen in Plan): Ziel und „Leave in x min“ (sonst Datum), Ab–An und Dauer, die farbige Zeitleiste der Linien (`TimelineBar`, statt gequetschter Linien-Badges), „from … · n changes“; leer: Hinweis „Save a route to see it here, add it to your calendar and get a reminder when to leave.“
 - **Lines** (gespeicherte Linie an Haltestelle, „At …“, nächste Abfahrten), **Stops**, **Places** („Add“ / „Save a place“ via Ortssuche).
 - **Past trips** (`PastTripsView`): „Plan again“, „Remove“.
 - Leer: „Nothing else saved yet“.
@@ -413,7 +413,7 @@ Kleinere Bausteine, die in den Abschnitten oben nicht namentlich vorkommen:
 | `SupportView` | Publit unterstützen: monatlich und einmalig (§16b) |
 | `CommunityCard`, `WhatsNewSheet` | Community-Karte (Wünsche, Unterstützen) und „What's new“ nach Updates (§2, §16) |
 | `ReleaseStoryView`, `StoryChip`, `StoryStat`, `StoryDemo`, `TypingDemo`, `BeforeAfterDemo`, `TrailingClip`, `Beam`, `CompassDemo`, `NearbyMapDemo`, `TicketsDemo`, `FlowChips`, `GetOffDemo`, `PlacesDemo` | Interaktive „What's new“-Story mit Live-Demos (§2) |
-| `SmartBadgesRow`, `SmartChangesSection`, `ChangeChanceRow`, `SmartRoutingSettingsSection` | Smart-Routing-Badges (Chips nie getrennt; passen sie mit der Begründung nicht in eine Zeile, rückt die Begründung darunter und die Chips brechen bei Bedarf um, statt die Routenzeile seitlich zu verschieben), Umstiegsbewertung, Einstellungen (§11) |
+| `RouteTagLine`, `SmartChangesSection`, `ChangeChanceRow`, `SmartRoutingSettingsSection` | Zeile über einer Route: Tageswechsel und Smart-Routing-Auszeichnungen als einheitlicher, einzeiliger Text, Umstiegsbewertung, Einstellungen (§11) |
 | `StopTimeRow` | Haltzeile einer Fahrzeug-Fahrt (§6) |
 | `WalkThereRow` | „6 min walk · 450 m“ zu genau dieser Haltestelle (richtige Straßenseite), öffnet die Karten-App zu Fuß; ausgeblendet, solange man an der Haltestelle steht (≤ 50 m) (§3, §4) |
 | `WideMapCanvas`, `WideRoutesMap` | große Karte und Routenkarte im iPad-Layout (§22) |
