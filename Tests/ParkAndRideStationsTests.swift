@@ -3,7 +3,7 @@ import XCTest
 
 /// Feedback, November 2026: home 10 km from two stations on different lines, both towards Milan.
 /// Park & Ride should let both compete, without driving past the local station to the next town.
-final class Build82Tests: XCTestCase {
+final class ParkAndRideStationsTests: XCTestCase {
     private func plan(_ name: String) throws -> PlanResponse {
         try TransitousClient.makeDecoder().decode(PlanResponse.self, from: Fixtures.data(name))
     }

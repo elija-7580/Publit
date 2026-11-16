@@ -20,6 +20,10 @@ enum WhatsNew {
 
     /// Newest first.
     static let entries: [WhatsNewEntry] = [
+        WhatsNewEntry(build: 84, items: [
+            WhatsNewItem(symbol: "car", title: "Park & Ride: more stations",
+                         text: "Stations a few minutes further away, for example on another line, now compete too."),
+        ]),
         WhatsNewEntry(build: 83, items: [
             WhatsNewItem(symbol: "bell.badge", title: "Get off on time",
                          text: "On a started trip Publit follows your ride and alerts you one stop before yours."),
