@@ -153,7 +153,7 @@ struct PlanView: View {
             if plan.date < .now.addingTimeInterval(-60) { plan.date = .now }
         }
         .sheet(item: $picking) { target in
-            PlaceSearchView(title: target == .from ? "From" : "To", allowCurrentLocation: true) { endpoint in
+            PlaceSearchView(title: target == .from ? "From" : "To", allowCurrentLocation: true, chooseOnMap: true) { endpoint in
                 if target == .from { app.plan.from = endpoint } else { app.plan.to = endpoint; app.plan.source = .search }
             }
         }

@@ -3,7 +3,7 @@
 > Nicht von Hand bearbeiten. Erzeugt von `scripts/feature_inventory.py` (CI: `features-doc.yml`).
 > Die ausführliche Beschreibung steht in [FUNKTIONEN.md](FUNKTIONEN.md).
 
-**187 Views, 5 App Intents, 3 Widgets in 76 Dateien.**
+**189 Views, 5 App Intents, 3 Widgets in 77 Dateien.**
 
 ## `Sources/App/DesignSamples.swift`
 - Views: `DesignSampleView`
@@ -75,6 +75,10 @@
 ## `Sources/Views/BoardingViews.swift`
 - Views: `BoardingLine`, `BoardingSteps`
 - Sichtbare Texte: Walk to %@ · Board at %@ · Pl. %@ · → %@ · Get off at %@
+
+## `Sources/Views/ChooseOnMapView.swift`
+- Views: `ChooseOnMapView`, `CenterPin`
+- Sichtbare Texte: Choose on map · Confirm location · Dropped pin
 
 ## `Sources/Views/Components/CoverageBanner.swift`
 - Views: `CoverageBanner`, `CoverageMapNote`, `CoverageMark`
@@ -169,7 +173,7 @@
 
 ## `Sources/Views/PlaceSearchView.swift`
 - Views: `PlaceSearchView`, `PlaceHitRow`, `PlaceLabel`, `CategoryIcon`
-- Sichtbare Texte: Cancel · Current location · Saved · No matches. · from %@ · Remove · Clear history · Recently searched · Save
+- Sichtbare Texte: Cancel · Current location · Choose on map · Saved · No matches. · from %@ · Remove · Clear history · Recently searched · Save
 
 ## `Sources/Views/PlanView.swift`
 - Views: `PlanView`, `EndpointConnector`, `ItineraryRow`, `TimelineBar`

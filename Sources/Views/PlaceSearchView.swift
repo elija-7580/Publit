@@ -6,6 +6,8 @@ struct PlaceSearchView: View {
     /// Pushed onto the caller's navigation stack (Nearby) instead of shown as its own sheet:
     /// no second window over the screen. The caller goes back itself after a pick.
     var embedded = false
+    /// "Choose on map" under the current location (the From and To fields of the planners).
+    var chooseOnMap = false
     let onSelect: (Endpoint) -> Void
 
     @Environment(\.dismiss) private var dismiss
@@ -55,6 +57,14 @@ struct PlaceSearchView: View {
                         Button { select(.currentLocation) } label: {
                             Label("Current location", systemImage: "location.fill")
                         }
+                    }
+                    if chooseOnMap {
+                        NavigationLink {
+                            ChooseOnMapView(start: location.coordinate) { place in select(.place(place)) }
+                        } label: {
+                            Label("Choose on map", systemImage: "mappin.and.ellipse")
+                        }
+                        .accessibilityIdentifier("chooseOnMap")
                     }
                 }
                 let others = favorites.items.filter { $0.role == nil }

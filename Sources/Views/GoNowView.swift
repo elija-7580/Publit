@@ -115,7 +115,7 @@ struct GoNowView: View {
         .screenTrail("Go now")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $pickingStart) {
-            PlaceSearchView(title: "From", allowCurrentLocation: true) { endpoint in
+            PlaceSearchView(title: "From", allowCurrentLocation: true, chooseOnMap: true) { endpoint in
                 if endpoint == plan.to { plan.to = plan.from }
                 plan.from = endpoint
             }
