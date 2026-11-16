@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1 (build 84) – Park & Ride to more stations
+
+- **Park & Ride**: when the nearest station is more than 5 minutes' drive away, Publit also searches up to that drive plus 10 minutes (at most 25), so a second station on another line competes too (two stations about 10 km from home). Stations past your local one in the next town still stay out. Later connections follow the same rule.
+- No station within 15 minutes: Park & Ride searches up to 25 minutes.
+
 ## 0.1.1 (build 82) – routes for your ticket
 
 - Route options → My tickets: Deutschlandticket, BahnCard 100, KlimaTicket Ö, the VOR KlimaTickets (MetropolRegion, Region), Jahreskarte Wien, the KlimaTickets of Upper Austria, Salzburg, Tyrol, Styria, Carinthia and Vorarlberg (VMOBIL), and the Swiss GA. Several at once.
