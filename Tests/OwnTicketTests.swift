@@ -106,7 +106,8 @@ final class OwnTicketTests: XCTestCase {
         o.tickets = [.deutschlandticket]
         var modes = Set(o.transitModesValue!.split(separator: ",").map(String.init))
         XCTAssertTrue(modes.isSuperset(of: ["REGIONAL_RAIL", "SUBURBAN", "BUS", "TRAM", "SUBWAY"]))
-        XCTAssertTrue(modes.isDisjoint(with: ["HIGHSPEED_RAIL", "LONG_DISTANCE", "NIGHT_RAIL", "COACH", "AIRPLANE"]))
+        // "RAIL" would bring every ICE back (MOTIS meta mode).
+        XCTAssertTrue(modes.isDisjoint(with: ["RAIL", "HIGHSPEED_RAIL", "LONG_DISTANCE", "NIGHT_RAIL", "COACH", "AIRPLANE"]))
         o.tickets.insert(.klimaticket)
         modes = Set(o.transitModesValue!.split(separator: ",").map(String.init))
         XCTAssertTrue(modes.contains("HIGHSPEED_RAIL"))

@@ -185,7 +185,8 @@ struct RouteOptions: Codable, Hashable, Sendable {
     /// (long-distance trains with only a Deutschlandticket). nil = all modes.
     var transitModesValue: String? {
         guard !tickets.isEmpty else { return modes.apiValue }
-        let excluded = OwnTicket.excludedModes(tickets)
+        // "RAIL" stands for every train in MOTIS (ICE included); the train classes are listed one by one.
+        let excluded = OwnTicket.excludedModes(tickets).union(["RAIL"])
         return ModeGroup.allCases.filter(modes.allows).flatMap(\.apiModes)
             .filter { !excluded.contains($0) }.joined(separator: ",")
     }
