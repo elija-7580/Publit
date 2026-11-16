@@ -34,9 +34,16 @@ struct TripActionsSection: View {
                 .accessibilityIdentifier("endTrip")
             } else {
                 Button { Task { await startTrip() } } label: {
-                    Text("Start trip")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
+                    // Starting on foot: the button says so and opens the walk turn by turn.
+                    Group {
+                        if TripStatus.startsOnFoot(itinerary, now: .now) {
+                            Label("Start walking navigation", systemImage: "figure.walk")
+                        } else {
+                            Text("Start trip")
+                        }
+                    }
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.ink)
                 .controlSize(.large)

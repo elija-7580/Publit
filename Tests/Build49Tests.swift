@@ -74,4 +74,14 @@ final class Build49Tests: XCTestCase {
         history.entries.first?.apply(to: plan)
         XCTAssertEqual(plan.source, .map)
     }
+
+    func testStartsOnFootOnlyWhenTheWalkComesSoon() throws {
+        let trip = itinerary([try leg("WALK", start: 0, end: 6), try leg("TRAM", start: 8, end: 20)])
+        XCTAssertTrue(TripStatus.startsOnFoot(trip, now: date(-30)))
+        XCTAssertTrue(TripStatus.startsOnFoot(trip, now: date(3)), "walk under way")
+        XCTAssertFalse(TripStatus.startsOnFoot(trip, now: date(-90)), "more than an hour ahead")
+        XCTAssertFalse(TripStatus.startsOnFoot(trip, now: date(7)), "walk already over")
+        let ride = itinerary([try leg("TRAM", start: 0, end: 10), try leg("WALK", start: 10, end: 15)])
+        XCTAssertFalse(TripStatus.startsOnFoot(ride, now: date(-5)))
+    }
 }

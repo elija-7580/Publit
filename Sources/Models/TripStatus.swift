@@ -145,6 +145,13 @@ enum LiveRefresh {
 
 extension TripStatus {
     /// Why a route cannot be started, or nil when it can.
+    /// The trip begins on foot and soon (within the hour, or already under way): the start button says
+    /// "Start walking navigation" and opens the guide on that walk, turn by turn.
+    static func startsOnFoot(_ it: Itinerary, now: Date) -> Bool {
+        guard let first = it.legs.first, first.mode == "WALK", it.legs.contains(where: \.isTransit) || it.legs.count == 1 else { return false }
+        return first.startTime.timeIntervalSince(now) <= 3600 && first.endTime > now
+    }
+
     static func startBlocked(_ it: Itinerary, now: Date) -> String? {
         if it.endTime < now { return L10n.t("This connection is already over. Plan again for a new one.") }
         if it.isCancelled {
