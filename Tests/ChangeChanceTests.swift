@@ -3,7 +3,7 @@ import XCTest
 
 /// Measured change chances (SmartRouting.chance with DelayHistory).
 final class ChangeChanceTests: XCTestCase {
-    private let t0 = 1_791_360_000.0   // a Wednesday, 10:40 UTC
+    private let t0 = 1_791_360_000.0   // Wednesday 7 Oct 2026, 10:00 in Vienna (stops carry that zone)
 
     private func leg(_ mode: String, from: String, to: String, start: Int, end: Int, delay: Int = 0, realTime: Bool = false,
                      route: String? = "de-T_R1", trip: String? = nil, fromTrack: String? = nil, toTrack: String? = nil,
@@ -11,8 +11,8 @@ final class ChangeChanceTests: XCTestCase {
         func iso(_ m: Int, _ d: Int = 0) -> String { DateParsing.format(Date(timeIntervalSince1970: t0 + Double(m) * 60 + Double(d))) }
         func opt(_ k: String, _ v: String?) -> String { v.map { ",\"\(k)\":\"\($0)\"" } ?? "" }
         let json = """
-        {"mode":"\(mode)","from":{"name":"\(from)","stopId":"de-T_\(from)","lat":48,"lon":11\(opt("track", fromTrack))\(opt("scheduledTrack", fromTrack))},
-         "to":{"name":"\(to)","stopId":"de-T_\(to)","lat":48,"lon":11\(opt("track", toTrack))\(opt("scheduledTrack", toScheduledTrack ?? toTrack))},
+        {"mode":"\(mode)","from":{"name":"\(from)","stopId":"de-T_\(from)","lat":48,"lon":11,"tz":"Europe/Vienna"\(opt("track", fromTrack))\(opt("scheduledTrack", fromTrack))},
+         "to":{"name":"\(to)","stopId":"de-T_\(to)","lat":48,"lon":11,"tz":"Europe/Vienna"\(opt("track", toTrack))\(opt("scheduledTrack", toScheduledTrack ?? toTrack))},
          "duration":\((end - start) * 60),"startTime":"\(iso(start, delay))","endTime":"\(iso(end, delay))",
          "scheduledStartTime":"\(iso(start))","scheduledEndTime":"\(iso(end))","cancelled":\(cancelled),
          "realTime":\(realTime)\(opt("routeId", route)),"tripId":"\(trip ?? "\(mode)-\(from)-\(start)")","legGeometry":{"points":"","precision":6,"length":0}}
