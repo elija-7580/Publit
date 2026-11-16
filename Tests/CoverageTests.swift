@@ -206,4 +206,25 @@ final class CoverageTests: XCTestCase {
         // The next start uses the cached file.
         XCTAssertEqual(CoverageAtlasStore(cacheDirectory: dir).atlas.date, "2099-01-01")
     }
+
+    func testManyLocalLinesContradictASparseNotice() {
+        func notice(_ level: CoverageLevel) -> CoverageNotice {
+            CoverageNotice(area: CoverageArea(id: "x", level: level, gaps: [], nameEN: "X", nameDE: "X",
+                                              shape: .circle(center: LatLon(lat: 45.44, lon: 10.99), radius: 7000)),
+                           roles: [.here])
+        }
+        XCTAssertTrue(CoverageGuide.isContradicted(notice(.sparse), localLines: CoverageGuide.contradictingLines))
+        XCTAssertTrue(CoverageGuide.isContradicted(notice(.none), localLines: 20))
+        XCTAssertFalse(CoverageGuide.isContradicted(notice(.sparse), localLines: CoverageGuide.contradictingLines - 1))
+        // "Missing: metro" stays true however many buses run.
+        XCTAssertFalse(CoverageGuide.isContradicted(notice(.partial), localLines: 50))
+    }
+
+    func testRecheckAtMostOnceAnHour() {
+        let store = CoverageAtlasStore(cacheDirectory: nil)
+        let t = Date()
+        XCTAssertTrue(store.claimRecheck(t))
+        XCTAssertFalse(store.claimRecheck(t.addingTimeInterval(1800)))
+        XCTAssertTrue(store.claimRecheck(t.addingTimeInterval(3700)))
+    }
 }
