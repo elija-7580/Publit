@@ -58,6 +58,7 @@ let core = [
     "Util/TicketLinks.swift",
     "Stores/MapStations.swift",
     "Models/TransitFilter.swift",
+    "Models/OwnTicket.swift",
     "Models/TransitRegions.swift",
     "Stores/LineGrouping.swift",
     "Models/TransitExtras.swift",

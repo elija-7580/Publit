@@ -117,8 +117,8 @@ final class TransitousClient: @unchecked Sendable {
                                                      pageCursor: pageCursor, maxWalk: maxWalk, options: options, stops: stops),
                       cache: CachePolicy(maxAge: time == nil ? 20 : 60, persist: true),
                       timeout: options.isSlowSearch ? 45 : nil)
-        // Deutschlandticket: long-distance trains some feeds file as plain RAIL come out here.
-        return options.localTicket ? res.replacingItineraries(res.itineraries.filter(options.allows)) : res
+        // Own tickets: rides they do not cover (an IC filed as plain RAIL, a train abroad) come out here.
+        return options.tickets.isEmpty ? res : res.replacingItineraries(res.itineraries.filter(options.allows))
     }
 
     static func planQuery(from: LatLon, to: LatLon, time: Date?, arriveBy: Bool,

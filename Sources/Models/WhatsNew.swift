@@ -20,6 +20,12 @@ enum WhatsNew {
 
     /// Newest first.
     static let entries: [WhatsNewEntry] = [
+        WhatsNewEntry(build: 82, items: [
+            WhatsNewItem(symbol: "ticket", title: "Routes for your ticket",
+                         text: "Choose Deutschlandticket, KlimaTicket, GA and more in Route options; routes stay within what they cover."),
+            WhatsNewItem(symbol: "map", title: "Regional KlimaTickets",
+                         text: "VOR, Vienna and each state's ticket only use rides in their region."),
+        ]),
         WhatsNewEntry(build: 81, items: [
             WhatsNewItem(symbol: "arrow.triangle.swap", title: "Clearer changes",
                          text: "Each change shows times, platforms and your buffer in one glance."),
