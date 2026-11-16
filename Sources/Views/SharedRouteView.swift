@@ -61,7 +61,7 @@ struct SharedRouteView: View {
     /// The same route among the saved trips: by ID, by vehicles and times once fetched,
     /// or by places and departure (a calendar entry whose ID is too old).
     private var savedTrip: SavedTrip? {
-        if let id = route.itineraryId, let t = trips.trips.first(where: { $0.itinerary.id == id }) { return t }
+        if let id = route.itineraryId, !id.isEmpty, let t = trips.trips.first(where: { $0.itinerary.id == id }) { return t }
         if let itinerary, let t = trips.saved(itinerary) { return t }
         return trips.trips.first {
             $0.fromName == route.fromName && $0.toName == route.toName

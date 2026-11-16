@@ -201,7 +201,7 @@ Bewegung reduzieren zeigt jede Demo im Endzustand. Schließen, „Continue“ od
 Gespeicherte Verbindung mit aktuellem Live-Status (oder „Live status unavailable. Showing saved times.“), „Trip not found“ wenn gelöscht. Abschnitt im Tab Gespeichert.
 
 ### Fahrt starten (`TripSession`)
-- Beginnt die Fahrt mit einem Fußweg, der in der nächsten Stunde ansteht oder schon läuft, heißt die Taste **„Start walking navigation“** (Gehsymbol) und öffnet den Guide direkt auf diesem Fußweg (`TripStatus.startsOnFoot`).
+- Beginnt die Fahrt mit einem Fußweg, der in der nächsten Stunde ansteht oder schon läuft, heißt die Taste **„Start walking navigation“** (Gehsymbol) und öffnet den Guide direkt auf diesem Fußweg (`TripStatus.startsOnFoot`). Reine Fußwege haben vom Router keine ID (`""`): `TripStore.saved` vergleicht deshalb nur nicht-leere IDs, sonst öffnete jeder neue Fußweg den ältesten gespeicherten (Build 86: Annenheim).
 - „Start trip“ speichert und aktiviert die Fahrt; es gibt nur **eine** manuell gestartete Fahrt (eine neue beendet die alte).
 - Startet die **Live Activity** (Hinweise: „Follow it on the lock screen.“, „Live updates on the lock screen start 8 hours before.“, oder Live Activities in Einstellungen einschalten), setzt pro Fahrtabschnitt einen **Aussteige-Hinweis** (wenn Mitteilungen erlaubt).
 - „End trip“ beendet Tracking, Live Activity und Erinnerungen; Fahrt bleibt unter „Past trips“.
@@ -268,7 +268,7 @@ Screenshot-/Link-Tickets („My tickets“, „Add ticket“, Typ, „Expires“
 | Bereich | Einstellungen |
 |---|---|
 | Kopf | Logo, „Public transport, without the noise.“ |
-| Community | `CommunityCard` ganz oben: „Publit is a community project“, Erklärtext, Knopf „Suggest features and vote“ → Wunschliste (§16a), Knopf „Support Publit“ → Unterstützen (§16b); darunter „What's new in Publit“ → die neueste „What's new“-Story im Vollbild (§2) |
+| Community | `CommunityCard` ganz oben als normale Listenzeile (`boxed: false`, eine gemeinsame Gruppe mit „What's new“): „Publit is a community project“, Erklärtext, Knopf „Suggest features and vote“ → Wunschliste (§16a), Knopf „Support Publit“ → Unterstützen (§16b); darunter „What's new in Publit“ → die neueste „What's new“-Story im Vollbild (§2) |
 | General | Start screen: Nearby / Plan / A saved stop (+ Stop-Auswahl) |
 | Started trips | „Get-off alert“: wann der Aussteige-Hinweis kommt (eine/zwei Stationen vorher, kurz vor der Station, nur nach Uhrzeit), Fußnote zum Standort |
 | Travel preferences | Routenoptionen-Zusammenfassung, „Show connection timelines“, „How to read connections“ (`ConnectionGuideView`: Ride/Walk/Wait/Time axis) |

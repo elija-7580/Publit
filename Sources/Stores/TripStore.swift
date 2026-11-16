@@ -71,9 +71,13 @@ final class TripStore {
     func trip(_ id: String) -> SavedTrip? { trips.first { $0.id == id } }
 
     /// The saved trip for a route shown in the planner, matched by its vehicles and times.
+    /// Walking-only routes come with an empty server ID: matching on it found the first walk ever
+    /// saved (a walk in Annenheim opened instead of the one just planned).
     func saved(_ itinerary: Itinerary) -> SavedTrip? {
         let key = Self.matchKey(itinerary)
-        return trips.first { $0.itinerary.id == itinerary.id || Self.matchKey($0.itinerary) == key }
+        return trips.first {
+            (!itinerary.id.isEmpty && $0.itinerary.id == itinerary.id) || Self.matchKey($0.itinerary) == key
+        }
     }
 
     @discardableResult
