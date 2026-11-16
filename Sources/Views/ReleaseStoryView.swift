@@ -258,7 +258,7 @@ private struct StoryDemo: View {
         switch demo {
         case .typing(let query, let result, let detail): TypingDemo(query: query, result: result, detail: detail, active: active)
         case .beforeAfter: BeforeAfterDemo()
-        case .compass: CompassDemo()
+        case .compass: NearbyMapDemo(active: active)
         case .tickets: TicketsDemo()
         case .getOff: GetOffDemo(active: active)
         case .places(let names): PlacesDemo(names: names, active: active)
@@ -434,8 +434,53 @@ private struct Beam: Shape {
     }
 }
 
-/// A real map (Apple Maps, around Marienplatz in Munich) with the stations nearby and your position;
-/// the beam turns with Left / Ahead / Right. Not interactive, so swiping still turns the page.
+/// The real Nearby map, as in the Nearby tab: you with the arrow the way you face, the stations
+/// around you from the last board (or a fresh query), movable and zoomable, a tap on a station
+/// opens its departures. Without a location it falls back to `CompassDemo`.
+private struct NearbyMapDemo: View {
+    let active: Bool
+    @Environment(LocationManager.self) private var location
+    @State private var groups: [StopGroup] = []
+    @State private var station: StopGroup?
+    @State private var showStation = false
+
+    var body: some View {
+        Group {
+            if let here = location.coordinate {
+                NearbyMap(here: here, groups: groups,
+                          onOpenStation: { g in station = g; showStation = true },
+                          heading: location.heading)
+                    .frame(height: 340)
+                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            } else {
+                CompassDemo()
+            }
+        }
+        .navigationDestination(isPresented: $showStation) {
+            if let g = station {
+                StopDeparturesView(stopId: g.id, name: g.name, coordinate: g.coordinate, exact: g.isPole)
+            }
+        }
+        .task(id: "\(active)-\(location.coordinate != nil)") { await load() }
+        .onChange(of: active, initial: true) { _, on in location.setHeading(on, for: "story") }
+        .onDisappear { location.setHeading(false, for: "story") }
+    }
+
+    private func load() async {
+        guard active, groups.isEmpty, let here = location.coordinate else { return }
+        if let last = await TransitousClient.shared.lastNearby(maxAge: 1800), here.distance(to: last.center) < 400 {
+            groups = StopGrouping.group(StopTime.upcoming(last.response.stopTimes), around: here)
+        }
+        for radius in Reach.nearbyRadii where groups.isEmpty {
+            guard let res = try? await TransitousClient.shared.departures(near: here, radius: radius, count: 40),
+                  !Task.isCancelled else { return }
+            groups = StopGrouping.group(StopTime.upcoming(res.stopTimes), around: here)
+        }
+    }
+}
+
+/// Without a location: Apple Maps around Marienplatz in Munich with five stations; you can move
+/// the map, and the beam turns with Left / Ahead / Right.
 private struct CompassDemo: View {
     private struct Station: Identifiable {
         let id: String
@@ -457,7 +502,7 @@ private struct CompassDemo: View {
             Map(initialPosition: .region(MKCoordinateRegion(
                     center: CLLocationCoordinate2D(latitude: 48.13800, longitude: 11.57350),
                     span: MKCoordinateSpan(latitudeDelta: 0.0125, longitudeDelta: 0.0125))),
-                interactionModes: []) {
+                interactionModes: [.pan, .zoom]) {
                 ForEach(stations) { station in
                     Annotation(station.id, coordinate: station.coordinate, anchor: .center) {
                         Circle().fill(Color(white: 0.07))
@@ -483,9 +528,8 @@ private struct CompassDemo: View {
                 .annotationTitles(.hidden)
             }
             .mapStyle(.standard(pointsOfInterest: .excludingAll))
-            .frame(height: 240)
+            .frame(height: 280)
             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-            .allowsHitTesting(false)
             .accessibilityHidden(true)
             Picker(L10n.t("Direction"), selection: $heading) {
                 Text("Left").tag(-60.0)

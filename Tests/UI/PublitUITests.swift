@@ -383,10 +383,12 @@ final class PublitUITests: XCTestCase {
     /// The interactive "What's new" after updating from the App Store version (build 65): every
     /// page once, then "Continue" closes it and it does not come back on the next start.
     func testF30WhatsNewStory() {
+        XCUIDevice.shared.location = XCUILocation(location: CLLocation(latitude: 48.1372, longitude: 11.5755))
         let app = XCUIApplication()
         app.launchArguments = ["-onboardingDone", "YES", "-wishesHintShown", "YES", "-whatsNewBuild", "65",
                                "-AppleLanguages", "(en)", "-AppleLocale", "en_GB"]
         app.launch()
+        allowLocation()
         XCTAssertTrue(app.otherElements["releaseStory"].waitForExistence(timeout: 20)
                       || app.buttons["storyNext"].waitForExistence(timeout: 5), "story after the update")
         sleep(1)
