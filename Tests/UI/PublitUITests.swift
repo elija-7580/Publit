@@ -96,7 +96,10 @@ final class PublitUITests: XCTestCase {
                 }
                 return element.isHittable
             }
-            app.swipeUp()
+            // Below the map at the top: a drag on the map moves the map, not the list.
+            let window = app.windows.firstMatch
+            window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.8))
+                .press(forDuration: 0.05, thenDragTo: window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.35)))
         }
         return element.exists
     }
@@ -116,8 +119,9 @@ final class PublitUITests: XCTestCase {
                 if frame.minY > height * 0.12, frame.maxY < height * 0.7 { return element.isHittable }
                 down = frame.maxY < height * 0.7
             }
-            let from = window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: down ? 0.2 : 0.32))
-            let to = window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: down ? 0.42 : 0.1))
+            // Below the map at the top (a drag there moves the map, not the list).
+            let from = window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: down ? 0.55 : 0.75))
+            let to = window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: down ? 0.77 : 0.53))
             from.press(forDuration: 0.05, thenDragTo: to)
             drags += 1
         }
