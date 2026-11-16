@@ -116,7 +116,7 @@ struct FavoritesView: View {
         let upcoming = trips.upcoming()
         Section {
             ForEach(upcoming) { t in
-                NavigationLink { SavedTripView(tripId: t.id) } label: { SavedTripRow(trip: t) }
+                NavigationLink { SavedTripView(tripId: t.id, detailsFirst: true) } label: { SavedTripRow(trip: t) }
                     .linkIndicatorHidden()
             }
             .onDelete { idx in idx.map { upcoming[$0].id }.forEach { id in
