@@ -17,7 +17,7 @@ final class WalkTripMatchTests: XCTestCase {
     }
 
     @MainActor
-    func testANewWalkIsNotAnOldSavedWalk() throws {
+    func testANewWalkIsNotAnOldSavedWalk() async throws {
         let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { JSONPersistence.flush(); try? FileManager.default.removeItem(at: dir) }
         let store = TripStore(directory: dir)
