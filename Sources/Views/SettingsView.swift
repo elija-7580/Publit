@@ -6,6 +6,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(TicketStore.self) private var tickets
     @AppStorage("mapLines") private var mapLines = true
+    @AppStorage(GetOffAlert.defaultsKey) private var getOffAlert = GetOffAlert.default.rawValue
     @AppStorage("mapVehicles") private var mapVehicles = true
     @AppStorage("mapSharing") private var mapSharing = false
     @AppStorage("routeTimelines") private var routeTimelines = true
@@ -108,6 +109,16 @@ struct SettingsView: View {
                     if tab == StartTab.stop.rawValue, !savedStops.contains(where: { $0.id == startStop }) {
                         startStop = savedStops.first?.id ?? ""
                     }
+                }
+                Section {
+                    Picker(L10n.t("Get-off alert"), selection: $getOffAlert) {
+                        ForEach(GetOffAlert.allCases) { a in Text(verbatim: a.title).tag(a.rawValue) }
+                    }
+                    .accessibilityIdentifier("settingGetOffAlert")
+                } header: {
+                    Text(L10n.t("Started trips"))
+                } footer: {
+                    Text(L10n.t("Uses your location during the ride, also with the screen locked, so the alert comes on time even when the vehicle is early or late. Without a reliable location it comes about two minutes before the arrival. The location stays on your iPhone."))
                 }
                 Section(L10n.t("Travel preferences")) {
                     RouteOptionsButton()

@@ -92,10 +92,37 @@ final class LocationManager: NSObject, CLLocationManagerDelegate {
     /// Metres of uncertainty of the last fix (large when unknown).
     var accuracy: Double { location.map { $0.horizontalAccuracy >= 0 ? $0.horizontalAccuracy : 1000 } ?? 1000 }
 
+    /// Each fix, for the get-off alert on board (set once by the app).
+    @ObservationIgnored var onFix: (@MainActor (CLLocation) -> Void)?
+
+    /// On board a started trip with a location-based get-off alert: fixes keep coming with the screen
+    /// locked (the blue indicator shows it), every 25 m. Off again at the end of the ride.
+    @ObservationIgnored private(set) var tripTracking = false
+
+    func setTripTracking(_ on: Bool) {
+        guard on != tripTracking, !isDenied else { return }
+        tripTracking = on
+        manager.allowsBackgroundLocationUpdates = on
+        manager.showsBackgroundLocationIndicator = on
+        manager.pausesLocationUpdatesAutomatically = !on
+        if on {
+            manager.activityType = .otherNavigation
+            if manager.distanceFilter > 25 { manager.distanceFilter = 25 }
+            if manager.desiredAccuracy > kCLLocationAccuracyNearestTenMeters { manager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters }
+            manager.startUpdatingLocation()
+        } else {
+            manager.activityType = .other
+            manager.desiredAccuracy = kCLLocationAccuracyHundredMeters
+            manager.distanceFilter = 50
+        }
+    }
+
     /// In the background nothing shows the location: GPS off until the app is open again.
+    /// Except on board with the location-based get-off alert (`setTripTracking`).
     func pause() {
-        manager.stopUpdatingLocation()
         manager.stopUpdatingHeading()
+        guard !tripTracking else { return }
+        manager.stopUpdatingLocation()
     }
 
     nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
@@ -103,6 +130,7 @@ final class LocationManager: NSObject, CLLocationManagerDelegate {
         Task { @MainActor in
             self.location = last
             if !self.hasFix { self.hasFix = true }
+            self.onFix?(last)
         }
     }
 

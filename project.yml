@@ -43,7 +43,7 @@ targets:
           - UIInterfaceOrientationPortraitUpsideDown
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
-        NSLocationWhenInUseUsageDescription: Publit uses your location to show departures near you and to plan trips from where you are.
+        NSLocationWhenInUseUsageDescription: Publit uses your location to show departures near you and to plan trips from where you are. During a started trip it also tells you when to get off, even with the screen locked.
         NSMotionUsageDescription: Publit reads your walking speed from the step counter, only if you turn on “Use my walking speed”. It stays on your iPhone.
         # Required by App Store validation because the HealthKit entitlement is present; Publit only reads.
         NSHealthUpdateUsageDescription: Publit does not write to Apple Health. It only reads your walking speed, if you turn on “Use my walking speed”.
@@ -53,7 +53,7 @@ targets:
         NSSupportsLiveActivities: true
         # Background check of saved lines for disruptions (LineAlertMonitor).
         BGTaskSchedulerPermittedIdentifiers: [io.github.elija7580.publit.lines]
-        UIBackgroundModes: [fetch]
+        UIBackgroundModes: [fetch, location]
         CFBundleURLTypes:
           - CFBundleURLName: io.github.elija7580.publit
             CFBundleURLSchemes: [publit]

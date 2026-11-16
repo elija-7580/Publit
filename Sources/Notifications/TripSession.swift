@@ -35,6 +35,7 @@ enum TripSession {
 
     static func stop(_ trip: SavedTrip, in trips: TripStore) async {
         trips.stop(trip.id)
+        GetOffAlerts.forget(trip.id)
         LeaveReminder.cancel(trip.id)
         GetOffReminder.cancelAll(trip.itinerary)
         await LiveTripActivity.end(trip.id)

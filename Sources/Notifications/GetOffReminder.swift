@@ -14,6 +14,8 @@ enum GetOffReminder {
     enum Result: Equatable { case scheduled(Date), tooLate, denied }
 
     static func schedule(for leg: Leg) async -> Result {
+        // Already told by location (GetOffAlerts): one alert per ride.
+        if await MainActor.run(body: { GetOffAlerts.wasDelivered(leg) }) { return .tooLate }
         let fireDate = max(leg.endTime.addingTimeInterval(-leadTime), leg.startTime)
         guard fireDate > Date().addingTimeInterval(5) else { return .tooLate }
         let center = UNUserNotificationCenter.current()
