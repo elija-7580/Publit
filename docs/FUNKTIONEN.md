@@ -1,6 +1,6 @@
 # Publit iOS – Funktionen und Screens (vollständige Übersicht)
 
-> Stand: Version 0.1.1 (Build 84). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
+> Stand: Version 0.1.1 (Build 85). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
 > **Pflege:** Jede Änderung an `Sources/`, `Watch/`, `Widgets/` oder `Share/` muss diese Datei im selben Commit/PR mitändern (siehe Abschnitt „Aktualisierung“ ganz unten). Die maschinell erzeugte Liste aller Views steht in [`FUNKTIONEN-INVENTAR.md`](FUNKTIONEN-INVENTAR.md) und wird von der CI automatisch aktualisiert.
 
 ## Inhalt
@@ -62,6 +62,13 @@ Ohne Onboarding startet die Standortabfrage sofort.
 
 ### „What's new“ nach jedem Update (`WhatsNewSheet`, `WhatsNew`)
 Nach jedem Update (nie bei Neuinstallation – dort kommt das Onboarding –, nie darüber, ca. 1,2 s nach dem Splash) ein Blatt **„What's new in Publit“** mit den Punkten aller Builds seit dem zuletzt gesehenen (`whatsNewBuild`), neueste zuerst, höchstens 4 Punkte (je Symbol, Titel, ein Satz). Darunter die **Community-Karte** (`CommunityCard`: „Publit is a community project“, „Vote for what comes next, or suggest your own idea. No account needed.“, Knopf „Suggest features and vote“ → Wunschliste, §16a, und „Support Publit“ → §16b) und „Continue“. Builds ohne Eintrag zeigen nichts. Ersetzt den einmaligen Wünsche-Hinweis (`wishesHintShown` wird mitgesetzt). Inhalte in `Sources/Models/WhatsNew.swift` (Build 84: „Park & Ride: more stations“; Build 83: „Get off on time“, „Track your vehicle“, „Easier on foot“; Build 82: „Routes for your ticket“, „Regional KlimaTickets“; Build 81: „Clearer changes“, „Community first“, „Support Publit“).
+
+**Interaktive Story (`ReleaseStoryView`, `ReleaseStory`):** Deckt eine Story in `Sources/Models/ReleaseStory.swift` die neuen Builds ab (0.1.1: Builds 66–85, gilt also für alle, die von 0.1.0 oder einem 0.1.1-Testbuild kommen), erscheint statt des Blatts eine Vollbild-Story; das Blatt bleibt für Builds ohne Story. Oben Fortschrittsbalken (ein Strich pro Seite), „What's new in 0.1.1“ und X zum Schließen; unten Zurück, bei Feature-Karten „Try it“, und „Let's go“/„Next“/„Continue“. Wischen blättert, nichts blättert von selbst. Seiten:
+1. **Intro:** Chip „The first update“, „Built by you.“, Dank-Satz, drei Zahlen (neue Funktionen, „bugs fixed“ = 32, „asked by you“ = Karten mit Wunsch-Chip).
+2. **Sechs Feature-Karten** mit Chip („You asked“ / „Testers asked“ gelb, „New“ grau), Titel, einem Satz und einer Live-Demo: „Your address, found.“ (Suche tippt „Mariahilfer Str 48“, Treffer mit Hausnummer oben), „Search where your thumb is.“ (Vorher/Nachher-Schieber: kleiner Suchknopf neben dem Ziel vs. breiter „Search routes“ unten), „Nearby is a map.“ (echte Apple-Karte rund um den Marienplatz in München mit fünf Stationen samt Namen und deiner Position, nicht verschiebbar; der Blickstrahl dreht sich mit Left/Ahead/Right), „Routes for your ticket.“ (Pässe Deutschlandticket/KlimaTicket Ö/GA antippen, nicht abgedeckte Fahrten wie ICE oder CAT verschwinden), „Get off on time.“ (Fahrzeug fährt die Haltestellen ab, Glocke und „Next stop: …“ eine Station vorher), „Same app abroad.“ (Ortsnamen wechseln, darunter Nearby/Search/Live trip). „Try it“ schließt die Story und öffnet Plan bzw. Nearby (nicht bei „Get off on time“).
+3. **„Also fixed“:** Chip „32 bugs fixed“, die zwölf auffälligsten Fixes, „And many smaller ones. Thanks to everyone who reported them.“
+4. **Community:** „What should come next?“ mit der `CommunityCard` (Wunschliste und Unterstützen öffnen sich in der Story).
+Bewegung reduzieren zeigt jede Demo im Endzustand. Schließen, „Continue“ oder „Try it“ setzen `whatsNewBuild`, die Story kommt also nur einmal. Einstellungen → Community → **„What's new in Publit“** öffnet die neueste Story jederzeit wieder (ohne „Try it“). Konzept: Notion „Update-Screen – Konzept & Standard“.
 
 ### Tab-Leiste (`RootView`, `AdaptiveTabs` ab iOS 18)
 | Tab | Symbol | Inhalt |
@@ -259,7 +266,7 @@ Screenshot-/Link-Tickets („My tickets“, „Add ticket“, Typ, „Expires“
 | Bereich | Einstellungen |
 |---|---|
 | Kopf | Logo, „Public transport, without the noise.“ |
-| Community | `CommunityCard` ganz oben: „Publit is a community project“, Erklärtext, Knopf „Suggest features and vote“ → Wunschliste (§16a), Knopf „Support Publit“ → Unterstützen (§16b) |
+| Community | `CommunityCard` ganz oben: „Publit is a community project“, Erklärtext, Knopf „Suggest features and vote“ → Wunschliste (§16a), Knopf „Support Publit“ → Unterstützen (§16b); darunter „What's new in Publit“ → die neueste „What's new“-Story im Vollbild (§2) |
 | General | Start screen: Nearby / Plan / A saved stop (+ Stop-Auswahl) |
 | Started trips | „Get-off alert“: wann der Aussteige-Hinweis kommt (eine/zwei Stationen vorher, kurz vor der Station, nur nach Uhrzeit), Fußnote zum Standort |
 | Travel preferences | Routenoptionen-Zusammenfassung, „Show connection timelines“, „How to read connections“ (`ConnectionGuideView`: Ride/Walk/Wait/Time axis) |
@@ -401,6 +408,7 @@ Kleinere Bausteine, die in den Abschnitten oben nicht namentlich vorkommen:
 | `SettingsButton` | Zahnrad, öffnet Einstellungen (§16) |
 | `SupportView` | Publit unterstützen: monatlich und einmalig (§16b) |
 | `CommunityCard`, `WhatsNewSheet` | Community-Karte (Wünsche, Unterstützen) und „What's new“ nach Updates (§2, §16) |
+| `ReleaseStoryView`, `StoryChip`, `StoryStat`, `StoryDemo`, `TypingDemo`, `BeforeAfterDemo`, `TrailingClip`, `Beam`, `CompassDemo`, `TicketsDemo`, `FlowChips`, `GetOffDemo`, `PlacesDemo` | Interaktive „What's new“-Story mit Live-Demos (§2) |
 | `SmartBadgesRow`, `SmartChangesSection`, `ChangeChanceRow`, `SmartRoutingSettingsSection` | Smart-Routing-Badges (einzeilig, nie umbrochen; Begründung rückt bei Platzmangel in eine eigene Zeile darunter), Umstiegsbewertung, Einstellungen (§11) |
 | `StopTimeRow` | Haltzeile einer Fahrzeug-Fahrt (§6) |
 | `WalkThereRow` | „6 min walk · 450 m“ zu genau dieser Haltestelle (richtige Straßenseite), öffnet die Karten-App zu Fuß; ausgeblendet, solange man an der Haltestelle steht (≤ 50 m) (§3, §4) |

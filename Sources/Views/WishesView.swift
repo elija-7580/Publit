@@ -173,16 +173,19 @@ struct WishesView: View {
     }
 }
 
-/// After every update: a short "What's new" (WhatsNew.entries) with the wish list right below,
+/// After every update: the interactive story (`ReleaseStory`) when one covers the new builds,
+/// otherwise a short "What's new" (WhatsNew.entries) with the wish list right below,
 /// because Publit is a community project and what comes next is voted on there.
 /// Not on a fresh install (the onboarding introduces the app) and never over the onboarding.
 struct WhatsNewSheet: ViewModifier {
+    @Environment(AppState.self) private var app
     /// Old one-time hint about the wish list; still set so it never comes back.
     static let wishesHintKey = "wishesHintShown"
     /// Captured at launch: true when this start shows the onboarding (fresh install).
     let freshInstall: Bool
     let ready: Bool
     @State private var items: [WhatsNewItem] = []
+    @State private var story: ReleaseStory?
     @State private var presented = false
     @State private var openList = false
     @State private var openSupport = false
@@ -198,6 +201,12 @@ struct WhatsNewSheet: ViewModifier {
                     return
                 }
                 let seen = defaults.integer(forKey: WhatsNew.seenKey)
+                if let found = ReleaseStory.story(seen: seen, current: current) {
+                    try? await Task.sleep(for: .seconds(1.2))
+                    guard !Task.isCancelled else { return }
+                    story = found
+                    return
+                }
                 let new = WhatsNew.items(seen: seen, current: current)
                 guard !new.isEmpty else {
                     if current > seen { defaults.set(current, forKey: WhatsNew.seenKey) }
@@ -218,6 +227,13 @@ struct WhatsNewSheet: ViewModifier {
                     }
                 }
                 .presentationDetents(openList || openSupport ? [.large] : [.medium, .large])
+            }
+            .fullScreenCover(item: $story, onDismiss: markSeen) { story in
+                ReleaseStoryView(story: story, onTry: { target in
+                    markSeen()
+                    self.story = nil
+                    app.tab = target == .plan ? .plan : .nearby
+                }, onClose: { self.story = nil })
             }
     }
 

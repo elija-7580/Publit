@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1 (build 85) – What's new you can try
+
+- **What's new** after the update is now a short story instead of a list: an intro, one card per new feature with a small live demo (the search types itself, drag between the old and the new Plan, turn the beam on the map, tap a pass and watch the ICE disappear, a bus that rings one stop early, place names changing while the app stays the same), "Try it" to jump right there, the fixes, and the wish list and support last. Swipe or use the buttons; nothing moves on by itself, and Reduce Motion shows each demo still.
+- Settings → Community → "What's new in Publit" opens it again.
+
 ## 0.1.1 (build 84) – Park & Ride to more stations
 
 - **Park & Ride**: when the nearest station is more than 5 minutes' drive away, Publit also searches up to that drive plus 10 minutes (at most 25), so a second station on another line competes too (two stations about 10 km from home). Stations past your local one in the next town still stay out. Later connections follow the same rule.
