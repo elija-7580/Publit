@@ -62,7 +62,8 @@ struct CompareMapView: View, Equatable {
     }
 
     private func routesMap(start: MapCameraPosition, interactive: Bool) -> some View {
-        Map(initialPosition: start, interactionModes: interactive ? .all : []) {
+        // The small map moves and zooms too; it only hides its controls.
+        Map(initialPosition: start, interactionModes: .all) {
             ForEach(ordered, id: \.routeKey) { it in
                 let isSelected = it.routeKey == selectedId
                 ForEach(Array(it.legs.enumerated()), id: \.offset) { _, leg in
@@ -384,7 +385,7 @@ extension StrokeStyle {
 /// The whole route on a map, with start and destination.
 struct RouteMap: View {
     let itinerary: Itinerary
-    /// The small preview at the top of a route: no location dot, nothing to steer.
+    /// The small map at the top of a route: no location dot, no controls (it still moves and zooms).
     var isPreview = false
     /// As the picture at the top of the route (`MapHero`): the covered edges of the map, so the
     /// route fills the part that shows.
@@ -490,7 +491,8 @@ struct RouteMap: View {
     }
 
     private func appleMap(start: MapCameraPosition) -> some View {
-        return Map(initialPosition: start, interactionModes: isPreview ? [] : .all) {
+        // The preview moves and zooms too; it only hides its controls and labels.
+        return Map(initialPosition: start, interactionModes: .all) {
             ForEach(Array(itinerary.legs.enumerated()), id: \.offset) { _, leg in
                 MapPolyline(coordinates: leg.overviewPath.map(\.clCoordinate))
                     .stroke(leg.isTransit ? leg.lineStroke : Color.routeAhead, style: .leg(leg.isTransit, width: isPreview ? 4 : 5))
