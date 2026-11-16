@@ -3,7 +3,7 @@
 > Nicht von Hand bearbeiten. Erzeugt von `scripts/feature_inventory.py` (CI: `features-doc.yml`).
 > Die ausführliche Beschreibung steht in [FUNKTIONEN.md](FUNKTIONEN.md).
 
-**203 Views, 5 App Intents, 3 Widgets in 79 Dateien.**
+**204 Views, 5 App Intents, 3 Widgets in 79 Dateien.**
 
 ## `Sources/App/DesignSamples.swift`
 - Views: `DesignSampleView`
@@ -187,7 +187,7 @@
 - Sichtbare Texte: from %@ · Remove · Clear history · Recently searched · Cancel
 
 ## `Sources/Views/ReleaseStoryView.swift`
-- Views: `ReleaseStoryView`, `StoryChip`, `StoryStat`, `StoryDemo`, `TypingDemo`, `BeforeAfterDemo`, `CompassDemo`, `TicketsDemo`, `FlowChips`, `GetOffDemo`, `PlacesDemo`
+- Views: `ReleaseStoryView`, `StoryChip`, `StoryStat`, `StoryDemo`, `TypingDemo`, `BeforeAfterDemo`, `NearbyMapDemo`, `CompassDemo`, `TicketsDemo`, `FlowChips`, `GetOffDemo`, `PlacesDemo`
 - Sichtbare Texte: Page %lld of %lld · What's new in %@ · Close · Back · Try it · Continue · Let's go · Next · The first update · new things · bugs fixed · asked by you · %lld bugs fixed · Also fixed · And many smaller ones. Thanks to everyone who reported them. · Publit is a community project · What should come next? · You asked · Testers asked · New · Your address, found. · Search where your thumb is. · Now · Before · Search routes · Direction · Left · Ahead · Right · Next stop: %@. Get ready to get off. · Nearby · Search · Live trip
 
 ## `Sources/Views/RouteOptionsView.swift`
