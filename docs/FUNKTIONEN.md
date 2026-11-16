@@ -151,6 +151,7 @@ Nach jedem Update (nie bei Neuinstallation – dort kommt das Onboarding –, ni
 - Tippsuche wie in Apple Karten (`PlaceSearchModel`, auch auf der Stationskarte): **Haltestellen von Transitous**, **Adressen und Orte aus Apples Autovervollständigung** (`MKLocalSearchCompleter`: jede Straße und Hausnummer schon beim Tippen, ca. 60 km um den Standort bevorzugt; erst beim Antippen wird der Ort nachgeschlagen) oder optional **Google Places** (dann ohne Apple); Apples Vorschläge stehen nach 0,6 s schon da, wenn Transitous länger braucht. „Current location“; Abschnitt „Saved“; „Recently searched“ (max. 20 Start/Ziel-Paare, einzeln entfernbar, „Clear history“; alte Suchen werden mit aktuellen Abfahrten neu ausgeführt). Das Suchfeld ist beim Öffnen gleich aktiv.
 - Suche nach Ort gewichtet nach Standort; steht ein Komma in der Suche („Corso Buenos Aires, Milano“), ohne Standort-Gewichtung. Trägt kein Treffer alle Suchwörter, wird zusätzlich ohne Standort gesucht. Reihung (`PlaceSearchRanking`): Haltestellen, die alle Suchwörter tragen, zuerst (bis zu drei), dann Apples Adressen und Orte, dann die übrigen; mit Hausnummer („Hauptstraße 12“) die Adressen zuerst. Ein Vorschlag mit dem Namen einer gelisteten Haltestelle kommt nur einmal (als Haltestelle). Ohne Vorschläge (offline, Apple kennt nichts) einmal Apples volle Suche, sonst Transitous' Adressen. Fällt Transitous aus, kommen Apples Adressen und Orte trotzdem.
 - Kategorie-Symbole (`CategoryIcon`), orangefarbenes Warndreieck bei Orten in Gebieten mit Datenlücken, „Save“ eines Treffers, „No matches.“, „Place from the link“ (aus geteiltem Kartenlink).
+- **„Choose on map“** (`ChooseOnMapView`, nur in den Feldern From/To von Plan und Go Now): Karte mit Stecknadel in der Mitte; Karte verschieben oder auf eine Stelle tippen setzt die Nadel dorthin, unten die Straße unter der Nadel („Finding the address…“), **„Confirm location“** übernimmt den Punkt ins Feld (benannt nach der Straße, sonst „Dropped pin“). Das andere Feld, Zeit und Routenoptionen bleiben unverändert.
 
 ## 10. Routenoptionen – `RouteOptionsView`
 
@@ -381,6 +382,8 @@ Kleinere Bausteine, die in den Abschnitten oben nicht namentlich vorkommen:
 | `LineRefRow`, `LineStopRow` | Linienzeile in der Linienliste, Haltzeile im Linien-Detail (§5) |
 | `PlatformChangeLabel` | Gleiswechsel-Anzeige im Guide (§13) |
 | `PlaceLabel` | Ortszeile in der Ortssuche (§9) |
+| `ChooseOnMapView` | „Choose on map“: Punkt auf der Karte als Start/Ziel wählen (§9) |
+| `CenterPin` | Stecknadel in der Mitte von „Choose on map“ (§9) |
 | `PlaceHitRow` | Treffer der Ortssuche: Haltestelle, Adresse oder Ort, Apple-Vorschläge werden beim Antippen nachgeschlagen; „Save“ per Wischen (§9) |
 | `HeadingDot` | Dein Standort mit Pfeil in Blickrichtung auf allen Karten (SwiftUI über `YouAreHere`, Stationskarte über `UserHeadingView`) (§3) |
 | `ExitMark` | Tür-Markierung des gewählten Stationsausgangs auf der Karte der Live-Fahrt (§13) |
