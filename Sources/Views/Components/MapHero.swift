@@ -73,8 +73,6 @@ struct MapHeroSpace: View {
 private struct MapHeroLayer<M: View>: View {
     /// How far the list has moved from its rest: negative scrolled up, positive pulled down.
     let moved: CGFloat
-    /// What each source says (UI test F31 reads it from the expand key).
-    var debug = ""
     let map: (EdgeInsets) -> M
     let onExpand: () -> Void
 
@@ -85,7 +83,10 @@ private struct MapHeroLayer<M: View>: View {
             let bar = g.safeAreaInsets.top
             // Scrolled up the map goes along; pulled down (refresh) it stays and stretches.
             let top = min(0, moved)
-            let cardTop = bar + MapHero.height + max(0, moved)
+            // The first card moves with the list both ways (the bug of builds 91–93: it was held at
+            // its rest, so scrolling up made the map taller by as much as it moved up, and its lower
+            // edge with the cards under it stood still).
+            let cardTop = bar + MapHero.height + moved
             let height = max(1, cardTop - top)
 
             // Read in the safe area, drawn from the top of the screen (like build 87's map).
@@ -112,7 +113,6 @@ private struct MapHeroLayer<M: View>: View {
                         .buttonStyle(.plain)
                         .accessibilityLabel(Text("Map"))
                         .accessibilityIdentifier("mapHeroExpand")
-                        .accessibilityValue(Text(verbatim: debug))
                         .padding(.trailing, 20)
                         .padding(.bottom, 10)
                     }
@@ -169,9 +169,7 @@ private struct MapHeroOverList<M: View>: ViewModifier {
             .overlay {
                 // Kept while scrolled away (only hidden), so the map keeps where you moved it.
                 if let moved {
-                    MapHeroLayer(moved: max(moved, -(MapHero.height + 400)),
-                                 debug: "g=\(Int(track.globalY ?? -9999))/\(Int(track.restGlobalY ?? -9999)) o=\(Int(offset ?? -9999)) r=\(Int(row?.minY ?? -9999))/\(Int(restY ?? -9999))",
-                                 map: map, onExpand: onExpand)
+                    MapHeroLayer(moved: max(moved, -(MapHero.height + 400)), map: map, onExpand: onExpand)
                         .opacity(gone ? 0 : 1)
                         .allowsHitTesting(!gone)
                         .accessibilityHidden(gone)
