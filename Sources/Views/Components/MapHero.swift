@@ -29,8 +29,20 @@ struct MapHeroFrameKey: PreferenceKey {
     }
 }
 
+/// Where the hero row is on screen, written by the row itself and read by the map over the list.
+/// An observed object handed down through the environment, not a preference: preferences from a
+/// List row did not reach the list while scrolling (UI test F31: the list moved 121 pt, the map 0).
+@Observable
+final class MapHeroTrack {
+    /// The row's top in global (screen) coordinates; nil while it is out of the list.
+    var globalY: CGFloat?
+    var restGlobalY: CGFloat?
+}
+
 /// The list's first section: the free space the map shows through.
 struct MapHeroSpace: View {
+    @Environment(MapHeroTrack.self) private var track: MapHeroTrack?
+
     var body: some View {
         Section {
             Color.clear
@@ -41,6 +53,12 @@ struct MapHeroSpace: View {
                         Color.clear.preference(key: MapHeroFrameKey.self, value: g.frame(in: .named(MapHero.space)))
                     }
                 }
+                .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).minY } action: { y in
+                    guard let track else { return }
+                    if track.restGlobalY == nil { track.restGlobalY = y }
+                    track.globalY = y
+                }
+                .onDisappear { track?.globalY = nil }
                 .listRowInsets(EdgeInsets())
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
@@ -55,6 +73,8 @@ struct MapHeroSpace: View {
 private struct MapHeroLayer<M: View>: View {
     /// How far the list has moved from its rest: negative scrolled up, positive pulled down.
     let moved: CGFloat
+    /// What each source says (UI test F31 reads it from the expand key).
+    var debug = ""
     let map: (EdgeInsets) -> M
     let onExpand: () -> Void
 
@@ -92,6 +112,7 @@ private struct MapHeroLayer<M: View>: View {
                         .buttonStyle(.plain)
                         .accessibilityLabel(Text("Map"))
                         .accessibilityIdentifier("mapHeroExpand")
+                        .accessibilityValue(Text(verbatim: debug))
                         .padding(.trailing, 20)
                         .padding(.bottom, 10)
                     }
@@ -117,8 +138,10 @@ private struct MapHeroOverList<M: View>: ViewModifier {
     @State private var row: CGRect?
     @State private var restY: CGFloat?
     @State private var rowGone = false
+    @State private var track = MapHeroTrack()
 
     private var moved: CGFloat? {
+        if let y = track.globalY, let rest = track.restGlobalY { return y - rest }
         if let offset { return offset }
         guard let row, let restY else { return nil }
         return row.minY - restY
@@ -126,7 +149,8 @@ private struct MapHeroOverList<M: View>: ViewModifier {
 
     /// The map is fully out of sight: hidden, and the bar is solid again.
     private var gone: Bool {
-        if offset == nil, rowGone { return true }
+        if track.restGlobalY != nil, track.globalY == nil { return true }
+        if track.restGlobalY == nil, offset == nil, rowGone { return true }
         guard let moved else { return false }
         return moved < -(MapHero.height + 120)
     }
@@ -137,6 +161,7 @@ private struct MapHeroOverList<M: View>: ViewModifier {
 
     func body(content: Content) -> some View {
         content
+            .environment(track)
             .scrollContentBackground(.hidden)
             .contentMargins(.top, 0, for: .scrollContent)
             .background(Color.ground.ignoresSafeArea())
@@ -144,7 +169,9 @@ private struct MapHeroOverList<M: View>: ViewModifier {
             .overlay {
                 // Kept while scrolled away (only hidden), so the map keeps where you moved it.
                 if let moved {
-                    MapHeroLayer(moved: max(moved, -(MapHero.height + 400)), map: map, onExpand: onExpand)
+                    MapHeroLayer(moved: max(moved, -(MapHero.height + 400)),
+                                 debug: "g=\(Int(track.globalY ?? -9999))/\(Int(track.restGlobalY ?? -9999)) o=\(Int(offset ?? -9999)) r=\(Int(row?.minY ?? -9999))/\(Int(restY ?? -9999))",
+                                 map: map, onExpand: onExpand)
                         .opacity(gone ? 0 : 1)
                         .allowsHitTesting(!gone)
                         .accessibilityHidden(gone)

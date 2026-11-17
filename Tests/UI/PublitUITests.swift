@@ -667,6 +667,7 @@ final class PublitUITests: XCTestCase {
         XCTAssertTrue(expand.waitForExistence(timeout: 5))
         sleep(2)
         let cardBefore = whereTo.frame.minY, mapBefore = expand.frame.minY
+        print("HEROPROBE before sources \(expand.value ?? "-")")
         // Drag on the list below the map, slowly, and hold so it does not fling.
         let start = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.8))
         let end = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.65))
@@ -674,7 +675,7 @@ final class PublitUITests: XCTestCase {
         sleep(1)
         snap("hero-scrolled")
         let cardMoved = whereTo.frame.minY - cardBefore, mapMoved = expand.frame.minY - mapBefore
-        print("HEROPROBE card \(cardBefore)->\(whereTo.frame.minY) map \(mapBefore)->\(expand.frame.minY)")
+        print("HEROPROBE card \(cardBefore)->\(whereTo.frame.minY) map \(mapBefore)->\(expand.frame.minY) sources \(expand.value ?? "-")")
         XCTAssertLessThan(cardMoved, -40, "the list did not scroll")
         XCTAssertEqual(mapMoved, cardMoved, accuracy: 12, "the map did not go up with the list (map \(mapMoved), card \(cardMoved))")
     }
