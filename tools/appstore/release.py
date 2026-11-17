@@ -47,7 +47,17 @@ try:
     subs = get(f"/v1/reviewSubmissions?filter[app]={aid}&limit=10")
     for s in subs["data"]:
         a = s["attributes"]; log("reviewSubmission", s["id"], a.get("platform"), a.get("state"), a.get("submittedDate"))
-    editable = [v for v in vers["data"] if v["attributes"]["appStoreState"] in ("PREPARE_FOR_SUBMISSION", "DEVELOPER_REJECTED", "REJECTED", "METADATA_REJECTED", "WAITING_FOR_REVIEW", "IN_REVIEW", "PENDING_DEVELOPER_RELEASE")]
+        items = get(f"/v1/reviewSubmissions/{s['id']}/items?include=appStoreVersion,appCustomProductPageVersion,appEvent,appStoreVersionExperiment")
+        for it in items.get("data", []):
+            r = {k: (v.get("data") or {}).get("type") + ":" + (v.get("data") or {}).get("id", "")[:8] for k, v in it.get("relationships", {}).items() if isinstance(v, dict) and v.get("data")}
+            log("   item", it["attributes"].get("state"), r)
+        for inc in items.get("included", []):
+            log("   incl", inc["type"], {k: inc["attributes"].get(k) for k in ("versionString", "appStoreState", "state", "referenceName", "eventState", "name") if k in inc["attributes"]})
+    for pp in get(f"/v1/apps/{aid}/appCustomProductPages?limit=10")["data"]:
+        log("customProductPage", pp["attributes"].get("name"), pp["attributes"].get("visible"))
+    for ev in get(f"/v1/apps/{aid}/appEvents?limit=10")["data"]:
+        log("appEvent", ev["attributes"].get("referenceName"), ev["attributes"].get("eventState"))
+    editable = [v for v in vers["data"] if v["attributes"]["appStoreState"] in ("READY_FOR_SALE", "PREPARE_FOR_SUBMISSION", "DEVELOPER_REJECTED", "REJECTED", "METADATA_REJECTED", "WAITING_FOR_REVIEW", "IN_REVIEW", "PENDING_DEVELOPER_RELEASE")]
     for v in editable:
         locs = get(f"/v1/appStoreVersions/{v['id']}/appStoreVersionLocalizations")["data"]
         for l in locs:
