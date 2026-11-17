@@ -657,6 +657,28 @@ final class PublitUITests: XCTestCase {
     }
 
     /// F05 Nearby "Where to now?": routes from the current location, leaving now.
+    /// F31 The map at the top goes up with the list: after scrolling, the expand key (on the map) has
+    /// moved up by as much as "Where to now?" (the first card), so the cards never slide under the map.
+    func testF31HeroMapScrollsWithList() {
+        let app = launch()
+        let whereTo = app.buttons["whereToNow"]
+        let expand = app.buttons["mapHeroExpand"]
+        XCTAssertTrue(whereTo.waitForExistence(timeout: 15))
+        XCTAssertTrue(expand.waitForExistence(timeout: 5))
+        sleep(2)
+        let cardBefore = whereTo.frame.minY, mapBefore = expand.frame.minY
+        // Drag on the list below the map, slowly, and hold so it does not fling.
+        let start = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.8))
+        let end = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.65))
+        start.press(forDuration: 0.1, thenDragTo: end, withVelocity: .slow, thenHoldForDuration: 0.5)
+        sleep(1)
+        snap("hero-scrolled")
+        let cardMoved = whereTo.frame.minY - cardBefore, mapMoved = expand.frame.minY - mapBefore
+        print("HEROPROBE card \(cardBefore)->\(whereTo.frame.minY) map \(mapBefore)->\(expand.frame.minY)")
+        XCTAssertLessThan(cardMoved, -40, "the list did not scroll")
+        XCTAssertEqual(mapMoved, cardMoved, accuracy: 12, "the map did not go up with the list (map \(mapMoved), card \(cardMoved))")
+    }
+
     func testF05GoNowFromNearby() {
         let app = launch()
         nudge(app)

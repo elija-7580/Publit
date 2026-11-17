@@ -81,8 +81,21 @@ struct SettingsView: View {
                         .padding(.vertical, 6)
                     if ReleaseStory.all.first != nil {
                         Button { showStory = true } label: {
-                            Label(L10n.t("What's new in Publit"), systemImage: "sparkles")
+                            HStack(spacing: 12) {
+                                Image(systemName: "sparkles")
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(Color.signature)
+                                    .frame(width: 28, height: 28)
+                                    .background(Color.inkFill, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                                    .accessibilityHidden(true)
+                                Text(L10n.t("What's new in Publit")).foregroundStyle(Color.ink)
+                                Spacer(minLength: 0)
+                                Image(systemName: "chevron.right")
+                                    .font(.footnote.weight(.semibold)).foregroundStyle(.tertiary)
+                                    .accessibilityHidden(true)
+                            }
                         }
+                        .alignmentGuide(.listRowSeparatorLeading) { _ in 0 }
                         .accessibilityIdentifier("settingsWhatsNew")
                     }
                 } header: {

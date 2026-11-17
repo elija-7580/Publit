@@ -20,6 +20,12 @@ enum WhatsNew {
 
     /// Newest first.
     static let entries: [WhatsNewEntry] = [
+        WhatsNewEntry(build: 94, items: [
+            WhatsNewItem(symbol: "map", title: "Maps scroll along",
+                         text: "The map at the top now moves up with the list, so nothing slides under it."),
+            WhatsNewItem(symbol: "person.3.fill", title: "Community, rearranged",
+                         text: "In Settings, voting and supporting Publit sit side by side and are easier to find."),
+        ]),
         WhatsNewEntry(build: 91, items: [
             WhatsNewItem(symbol: "map", title: "Maps from edge to edge",
                          text: "Nearby, routes, trips and lines show their map across the whole top again, and you can still move and zoom it right there."),

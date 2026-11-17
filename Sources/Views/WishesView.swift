@@ -283,33 +283,86 @@ struct CommunityCard: View {
     var boxed = true
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            // Not a Label: in a List, Label puts the icon in a fixed narrow column, and the wide
-            // three-person symbol stuck out to the left of the text.
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
+        // Redone 2026-11-17 (feedback: the stacked full-width buttons looked clumsy, "Support" was
+        // nearly invisible): a header with the yellow community tile, then the two actions as
+        // equal tiles side by side, voting in ink as the main one.
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .top, spacing: 12) {
                 Image(systemName: "person.3.fill")
-                Text("Publit is a community project")
-            }
-            .font(.headline)
-            .accessibilityElement(children: .combine)
-            Text("Vote for what comes next, or suggest your own idea. No account needed.")
-                .font(.subheadline).foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-            Button(action: open) {
-                Label("Suggest features and vote", systemImage: "lightbulb").frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.ink)
-            .accessibilityIdentifier("wishesOpen")
-            if let support {
-                Button(action: support) {
-                    Label("Support Publit", systemImage: "heart").frame(maxWidth: .infinity)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(Color.black)
+                    .frame(width: 40, height: 40)
+                    .background(Color.signature, in: RoundedRectangle(cornerRadius: 11, style: .continuous))
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Publit is a community project")
+                        .font(.headline)
+                    Text("Vote for what comes next, or suggest your own idea. No account needed.")
+                        .font(.subheadline).foregroundStyle(.secondary)
                 }
-                .buttonStyle(.soft)
-                .accessibilityIdentifier("supportOpen")
+                .fixedSize(horizontal: false, vertical: true)
             }
+            .accessibilityElement(children: .combine)
+            HStack(spacing: 10) {
+                CommunityTile(title: "Suggest features and vote", symbol: "lightbulb.fill", primary: true, action: open)
+                    .accessibilityIdentifier("wishesOpen")
+                if let support {
+                    CommunityTile(title: "Support Publit", symbol: "heart.fill", primary: false, action: support)
+                        .accessibilityIdentifier("supportOpen")
+                }
+            }
+            .fixedSize(horizontal: false, vertical: true)
         }
         .padding(boxed ? 16 : 0)
-        .background(boxed ? Color.inkFill : .clear, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .background(boxed ? Color.inkFill : .clear, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        // In a List the separator under it runs the full width (not from the icon column).
+        .alignmentGuide(.listRowSeparatorLeading) { _ in 0 }
+    }
+}
+
+/// One action of the community card: a tile with its symbol on top and the title under it.
+private struct CommunityTile: View {
+    let title: LocalizedStringKey
+    let symbol: String
+    let primary: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: 10) {
+                Image(systemName: symbol)
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(primary ? Color.signature : Color.danger)
+                    .accessibilityHidden(true)
+                Spacer(minLength: 0)
+                Text(title)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(primary ? Color.onInk : Color.ink)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity, minHeight: 84, alignment: .topLeading)
+            .padding(14)
+            .background(primary ? Color.ink : Color.inkFill,
+                        in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay {
+                if !primary {
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
+                }
+            }
+            .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        }
+        .buttonStyle(TilePress())
+    }
+}
+
+private struct TilePress: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.97 : 1)
+            .opacity(configuration.isPressed ? 0.8 : 1)
+            .animation(.snappy(duration: 0.15), value: configuration.isPressed)
     }
 }
 

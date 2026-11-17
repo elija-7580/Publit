@@ -5,6 +5,11 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+    inputs:
+      ui_only:
+        description: 'Run only this UI test (e.g. testF31HeroMapScrollsWithList); empty = all'
+        required: false
+        default: ''
 
 permissions:
   contents: write
@@ -76,11 +81,13 @@ jobs:
             -only-testing:PublitTests 2>&1 | tee ci/unit.log | grep -E "Test Case|error:|Executed" || true
           grep -q "TEST EXECUTE SUCCEEDED" ci/unit.log
       - name: UI tests and screenshots
+        env:
+          UI_ONLY: ${{ github.event.inputs.ui_only }}
         run: |
           set -o pipefail
           xcodebuild test-without-building -project Publit.xcodeproj -scheme Publit \
             -destination "id=${{ steps.sim.outputs.udid }}" -derivedDataPath build \
-            -only-testing:PublitUITests \
+            -only-testing:PublitUITests${UI_ONLY:+/PublitUITests/$UI_ONLY} \
             -retry-tests-on-failure -test-iterations 2 \
             -skip-testing:PublitUITests/PublitUITests/testF21DesignScreens \
             -skip-testing:PublitUITests/PublitUITests/testF22StartScreens \
@@ -88,7 +95,7 @@ jobs:
             -skip-testing:PublitUITests/PublitUITests/testF25WebsiteTripDark \
             -skip-testing:PublitUITests/PublitUITests/testF26WebsiteStartLight \
             -skip-testing:PublitUITests/PublitUITests/testF27WebsiteStartDark \
-            -skip-testing:PublitUITests/PublitUITests/testF28WebsiteExtras 2>&1 | tee ci/ui.log | grep -E "Test Case|error:|Executed" || true
+            -skip-testing:PublitUITests/PublitUITests/testF28WebsiteExtras 2>&1 | tee ci/ui.log | grep -E "Test Case|error:|Executed|HEROPROBE" || true
           mkdir -p ci/screenshots && cp ~/publit-shots/*.png ci/screenshots/ 2>/dev/null || true
           grep -E ": error: |WATCHDOG" ci/ui.log | sed -E "s#${GITHUB_WORKSPACE}/##" > ci/ui-failures.txt || true
           grep -q "TEST EXECUTE SUCCEEDED" ci/ui.log

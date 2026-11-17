@@ -3,7 +3,7 @@
 > Nicht von Hand bearbeiten. Erzeugt von `scripts/feature_inventory.py` (CI: `features-doc.yml`).
 > Die ausführliche Beschreibung steht in [FUNKTIONEN.md](FUNKTIONEN.md).
 
-**204 Views, 5 App Intents, 3 Widgets in 79 Dateien.**
+**205 Views, 5 App Intents, 3 Widgets in 79 Dateien.**
 
 ## `Sources/App/DesignSamples.swift`
 - Views: `DesignSampleView`
@@ -261,8 +261,8 @@
 - Views: `WideMapCanvas`, `WideRoutesMap`
 
 ## `Sources/Views/WishesView.swift`
-- Views: `WishesView`, `CommunityCard`
-- Sichtbare Texte: What should Publit do? · Details (optional) · Send wish · Suggest a feature · Check the list first: if your idea is there, vote for it instead. · Sort · Most votes · Newest · Wishes not reachable · The wish list is not reachable right now. Please try again later. · Try again · No wishes yet · Be the first! · Wishes · No account and no tracking: a random ID on this device marks your votes. The wish list does not store addresses. · Also on publit.eu · Vote for %@ · Planned · In progress · Done · Thanks! Your wish is in. · Please describe the wish in at least 6 characters. · At most two links, please. · This wish already exists – just vote for it. · Too many requests. Please wait a moment. · What's new in Publit · Continue · Publit is a community project · Vote for what comes next, or suggest your own idea. No account needed. · Suggest features and vote · Support Publit
+- Views: `WishesView`, `CommunityCard`, `CommunityTile`
+- Sichtbare Texte: What should Publit do? · Details (optional) · Send wish · Suggest a feature · Check the list first: if your idea is there, vote for it instead. · Sort · Most votes · Newest · Wishes not reachable · The wish list is not reachable right now. Please try again later. · Try again · No wishes yet · Be the first! · Wishes · No account and no tracking: a random ID on this device marks your votes. The wish list does not store addresses. · Also on publit.eu · Vote for %@ · Planned · In progress · Done · Thanks! Your wish is in. · Please describe the wish in at least 6 characters. · At most two links, please. · This wish already exists – just vote for it. · Too many requests. Please wait a moment. · What's new in Publit · Continue · Publit is a community project · Vote for what comes next, or suggest your own idea. No account needed.
 
 ## `Watch/WatchHomeView.swift`
 - Views: `WatchHomeView`, `WatchLiveTile`

@@ -29,8 +29,20 @@ struct MapHeroFrameKey: PreferenceKey {
     }
 }
 
+/// Where the hero row is on screen, written by the row itself and read by the map over the list.
+/// An observed object handed down through the environment, not a preference: preferences from a
+/// List row did not reach the list while scrolling (UI test F31: the list moved 121 pt, the map 0).
+@Observable
+final class MapHeroTrack {
+    /// The row's top in global (screen) coordinates; nil while it is out of the list.
+    var globalY: CGFloat?
+    var restGlobalY: CGFloat?
+}
+
 /// The list's first section: the free space the map shows through.
 struct MapHeroSpace: View {
+    @Environment(MapHeroTrack.self) private var track: MapHeroTrack?
+
     var body: some View {
         Section {
             Color.clear
@@ -41,6 +53,12 @@ struct MapHeroSpace: View {
                         Color.clear.preference(key: MapHeroFrameKey.self, value: g.frame(in: .named(MapHero.space)))
                     }
                 }
+                .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).minY } action: { y in
+                    guard let track else { return }
+                    if track.restGlobalY == nil { track.restGlobalY = y }
+                    track.globalY = y
+                }
+                .onDisappear { track?.globalY = nil }
                 .listRowInsets(EdgeInsets())
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
@@ -65,7 +83,10 @@ private struct MapHeroLayer<M: View>: View {
             let bar = g.safeAreaInsets.top
             // Scrolled up the map goes along; pulled down (refresh) it stays and stretches.
             let top = min(0, moved)
-            let cardTop = bar + MapHero.height + max(0, moved)
+            // The first card moves with the list both ways (the bug of builds 91–93: it was held at
+            // its rest, so scrolling up made the map taller by as much as it moved up, and its lower
+            // edge with the cards under it stood still).
+            let cardTop = bar + MapHero.height + moved
             let height = max(1, cardTop - top)
 
             // Read in the safe area, drawn from the top of the screen (like build 87's map).
@@ -117,8 +138,10 @@ private struct MapHeroOverList<M: View>: ViewModifier {
     @State private var row: CGRect?
     @State private var restY: CGFloat?
     @State private var rowGone = false
+    @State private var track = MapHeroTrack()
 
     private var moved: CGFloat? {
+        if let y = track.globalY, let rest = track.restGlobalY { return y - rest }
         if let offset { return offset }
         guard let row, let restY else { return nil }
         return row.minY - restY
@@ -126,7 +149,8 @@ private struct MapHeroOverList<M: View>: ViewModifier {
 
     /// The map is fully out of sight: hidden, and the bar is solid again.
     private var gone: Bool {
-        if offset == nil, rowGone { return true }
+        if track.restGlobalY != nil, track.globalY == nil { return true }
+        if track.restGlobalY == nil, offset == nil, rowGone { return true }
         guard let moved else { return false }
         return moved < -(MapHero.height + 120)
     }
@@ -137,6 +161,7 @@ private struct MapHeroOverList<M: View>: ViewModifier {
 
     func body(content: Content) -> some View {
         content
+            .environment(track)
             .scrollContentBackground(.hidden)
             .contentMargins(.top, 0, for: .scrollContent)
             .background(Color.ground.ignoresSafeArea())
