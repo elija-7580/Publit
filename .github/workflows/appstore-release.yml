@@ -1,0 +1,31 @@
+name: App Store release
+
+# Status of App Store Connect, or prepare the next release (version, build, "What's new"),
+# or submit it for review. Runs by hand only. tools/appstore/release.py
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'status | prepare | submit'
+        required: true
+        default: 'status'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install -q pyjwt cryptography requests
+      - name: App Store Connect
+        env:
+          KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          P8: ${{ secrets.ASC_KEY_P8 }}
+          MODE: ${{ github.event.inputs.mode }}
+        run: python3 tools/appstore/release.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: report
+          path: report.txt
