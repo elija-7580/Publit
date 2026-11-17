@@ -2,7 +2,7 @@
 
 ## 0.1.1 (build 91) – maps edge to edge, a real pin
 
-- **Maps at the top** (Nearby, a route, Go now, a departure's trip and now also a line) are edge to edge again, up under the bar and fading out behind the first card, as in build 87. Build 88 had put the map into the list's first row, which the list drew inset with rounded corners, like a frame around it. The map now lies over the list and moves along with it, so it stays movable and zoomable right there; the first card is cut out of it, so the card stays on top and tappable. Pulling the list down stretches the map.
+- **Maps at the top** (Nearby, a route, Go now, a departure's trip and now also a line) are edge to edge again, up under the bar and fading out right above the first card, as in build 87. Build 88 had put the map into the list's first row, which the list drew inset with rounded corners, like a frame around it. The map now lies over the list and moves along with it, so it stays movable and zoomable right there; it ends at the first card (MapKit's view takes touches over its whole frame, so it must not lie over the card). Pulling the list down stretches the map.
 - **A line** (Lines → a line) shows its route with the vehicles in that map at the top instead of a card in the list; the expand key opens it full screen.
 - **Choose on map**: a new pin (ink head with the yellow dot) that lifts while the map moves and sets down where it stops. The own tap gesture on the map is gone: it swallowed double-taps (no double-tap zoom) and made the map jump. Now pinch, double-tap, two-finger tap and rotate work as in any map; the pin always marks the middle.
 
