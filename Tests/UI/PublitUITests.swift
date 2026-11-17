@@ -682,7 +682,6 @@ final class PublitUITests: XCTestCase {
         var app = open(["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "nearby", "PUBLIT_UI_DARK": "0"])
         allowLocation()
         sleep(10)
-        snap("as-01-nearby")
         app.tab(1).tap()
         sleep(12)
         snap("as-02-plan")
@@ -723,6 +722,14 @@ final class PublitUITests: XCTestCase {
         app = open(["PUBLIT_UI_SAMPLE": "passes", "PUBLIT_UI_DARK": "0", "PUBLIT_UI_LARGE": "0"])
         sleep(4)
         snap("as-08-passes")
+        app.terminate()
+
+        // Nearby last: by now the map tiles of the area are loaded (on the first launch the
+        // map at the top was still an empty grid).
+        app = open(["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "nearby", "PUBLIT_UI_DARK": "0"])
+        allowLocation()
+        sleep(20)
+        snap("as-01-nearby")
         app.terminate()
         XCUIDevice.shared.orientation = .portrait
     }

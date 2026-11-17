@@ -23,7 +23,7 @@ jobs:
     timeout-minutes: 45
     strategy:
       fail-fast: false
-      max-parallel: 2
+      max-parallel: 1
       matrix:
         device: [iphone, ipad]
         lang: [en, de]
@@ -60,6 +60,7 @@ jobs:
           " "$PREF")
           [ -n "$UDID" ] || { echo "no simulator for $PREF"; xcrun simctl list devices available | head -60; exit 1; }
           echo "simulator $UDID"
+          xcrun simctl shutdown "$UDID" 2>/dev/null || true
           xcrun simctl boot "$UDID" || true; xcrun simctl bootstatus "$UDID" -b
           xcrun simctl status_bar "$UDID" override --time "9:41" --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3 || true
           xcrun simctl location "$UDID" set 48.15000,11.58030
@@ -67,7 +68,8 @@ jobs:
           rm -rf ~/publit-shots
           TEST_RUNNER_PUBLIT_SHOT_LANG="$SHOT_LANG" xcodebuild test-without-building -project Publit.xcodeproj -scheme Publit \
             -destination "id=$UDID" -derivedDataPath build -parallel-testing-enabled NO \
-            -only-testing:PublitUITests/PublitUITests/testF40AppStoreShots 2>&1 | grep -E "Test Case|error:|Executed" || true
+            -only-testing:PublitUITests/PublitUITests/testF40AppStoreShots > out/test.log 2>&1 || true
+          grep -E "Test Case|error:|Executed|WATCHDOG" out/test.log || tail -40 out/test.log
           D="out/$SHOT_DEVICE/$SHOT_LANG"; mkdir -p "$D"
           cp ~/publit-shots/as-*.png "$D/" 2>/dev/null || true
           ls -la "$D"
