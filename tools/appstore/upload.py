@@ -27,8 +27,11 @@ def png(path):
     b = io.BytesIO(); Image.open(path).convert("RGB").save(b, "PNG"); return b.getvalue()
 try:
     app = call("GET", "/v1/apps?filter[bundleId]=io.github.elija7580.publit").json()["data"][0]["id"]
-    vers = call("GET", f"/v1/apps/{app}/appStoreVersions?filter[platform]=IOS&limit=5").json()["data"]
-    ver = vers[0]["id"]; log("version", vers[0]["attributes"].get("versionString"), vers[0]["attributes"].get("appStoreState"))
+    vers = call("GET", f"/v1/apps/{app}/appStoreVersions?filter[platform]=IOS&limit=10").json()["data"]
+    # The version being prepared (screenshots of a live version cannot change).
+    editable = [v for v in vers if v["attributes"].get("appStoreState") in ("PREPARE_FOR_SUBMISSION", "DEVELOPER_REJECTED", "REJECTED", "METADATA_REJECTED")]
+    if not editable: raise SystemExit("no editable App Store version")
+    v0 = editable[0]; ver = v0["id"]; log("version", v0["attributes"].get("versionString"), v0["attributes"].get("appStoreState"))
     locs = {l["attributes"]["locale"]: l["id"] for l in call("GET", f"/v1/appStoreVersions/{ver}/appStoreVersionLocalizations").json()["data"]}
     log("locales", list(locs))
     for dev in DEVICES:

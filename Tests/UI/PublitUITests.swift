@@ -1,3 +1,4 @@
+import UIKit
 import CoreLocation
 import XCTest
 
@@ -659,6 +660,71 @@ final class PublitUITests: XCTestCase {
     /// F05 Nearby "Where to now?": routes from the current location, leaving now.
     /// F31 The map at the top goes up with the list: after scrolling, the expand key (on the map) has
     /// moved up by as much as "Where to now?" (the first card), so the cards never slide under the map.
+    // MARK: App Store screenshots
+
+    /// F40 The App Store screens in one language (`PUBLIT_SHOT_LANG`, set on CI through
+    /// `TEST_RUNNER_PUBLIT_SHOT_LANG`). iPad takes them in landscape, the map-first wide layout.
+    /// Run by the "App Store screenshots" workflow only (skipped in normal CI).
+    func testF40AppStoreShots() throws {
+        guard let lang = ProcessInfo.processInfo.environment["PUBLIT_SHOT_LANG"] else { throw XCTSkip("App Store shots run on their own") }
+        let pad = UIDevice.current.userInterfaceIdiom == .pad
+        XCUIDevice.shared.orientation = pad ? .landscapeLeft : .portrait
+        func open(_ env: [String: String]) -> XCUIApplication {
+            let app = XCUIApplication()
+            app.launchArguments = ["-onboardingDone", "YES", "-wishesHintShown", "YES", "-whatsNewBuild", "999999",
+                                   "-AppleLanguages", "(\(lang))", "-AppleLocale", lang == "de" ? "de_AT" : "en_GB"]
+            app.launchEnvironment = env
+            app.launch()
+            return app
+        }
+        var app = open(["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "nearby", "PUBLIT_UI_DARK": "0"])
+        allowLocation()
+        sleep(10)
+        snap("as-01-nearby")
+        app.tab(1).tap()
+        sleep(12)
+        snap("as-02-plan")
+        if pad {
+            let row = app.descendants(matching: .any).matching(identifier: "routeRow").firstMatch
+            if row.waitForExistence(timeout: 5) { row.tap(); sleep(5); snap("as-03-route") }
+        }
+        app.tab(2).tap()
+        sleep(2)
+        snap("as-07-tickets")
+        app.tab(0).tap()
+        sleep(2)
+        if !pad {
+            let map = app.buttons[lang == "de" ? "Haltestellenkarte" : "Station map"].firstMatch
+            if map.waitForExistence(timeout: 5) { map.tap(); sleep(8); snap("as-05-map") }
+        }
+        app.terminate()
+
+        if !pad {
+            app = open(["PUBLIT_UI_SAMPLE": "route", "PUBLIT_UI_DARK": "0"])
+            allowLocation()
+            sleep(7)
+            snap("as-03-route")
+            app.terminate()
+        }
+        app = open(["PUBLIT_UI_SAMPLE": "live", "PUBLIT_UI_DARK": "0"])
+        allowLocation()
+        sleep(10)
+        snap("as-04-live")
+        app.terminate()
+
+        app = open(["PUBLIT_UI_SAMPLE": "route", "PUBLIT_UI_DARK": "1"])
+        allowLocation()
+        sleep(7)
+        snap("as-06-dark")
+        app.terminate()
+
+        app = open(["PUBLIT_UI_SAMPLE": "passes", "PUBLIT_UI_DARK": "0", "PUBLIT_UI_LARGE": "0"])
+        sleep(4)
+        snap("as-08-passes")
+        app.terminate()
+        XCUIDevice.shared.orientation = .portrait
+    }
+
     func testF31HeroMapScrollsWithList() {
         let app = launch()
         let whereTo = app.buttons["whereToNow"]

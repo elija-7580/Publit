@@ -1,0 +1,122 @@
+name: App Store screenshots
+
+# Fresh App Store screenshots of the current app (UI test testF40AppStoreShots), iPhone 6.9" and
+# iPad 13", English and German, composed into Apple's device bezels (tools/appstore/compose.py)
+# and committed to docs/appstore on this branch. With [upload] in the commit message they replace
+# the iPhone and iPad screenshots of the App Store version being prepared (tools/appstore/upload.py).
+on:
+  push:
+    branches: ["appstore-assets"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: appstore-shots
+  cancel-in-progress: true
+
+jobs:
+  shots:
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[shots]') }}
+    runs-on: xcode-27
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        device: [iphone, ipad]
+        lang: [en, de]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Xcode
+        run: |
+          XC=$(ls -d /Applications/Xcode*.app | grep -v -i beta | sort -V | tail -1)
+          sudo xcode-select -s "$XC"
+          mkdir -p out
+      - name: Generate project
+        run: brew install xcodegen && xcodegen generate
+      - name: Build
+        run: |
+          xcodebuild build-for-testing -project Publit.xcodeproj -scheme Publit \
+            -destination "generic/platform=iOS Simulator" -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO > out/build-full.log 2>&1 || { grep -E ": error:" out/build-full.log | sort -u | head -30; exit 1; }
+      - name: Screenshots
+        env:
+          SHOT_DEVICE: ${{ matrix.device }}
+          SHOT_LANG: ${{ matrix.lang }}
+        shell: bash {0}
+        run: |
+          if [ "$SHOT_DEVICE" = iphone ]; then WANT="iPhone 17 Pro Max"; else WANT="iPad Pro 13-inch (M5)"; fi
+          TYPE=$(xcrun simctl list devicetypes -j | python3 -c "import json,sys; w=sys.argv[1]; t=[d for d in json.load(sys.stdin)['devicetypes'] if d['name']==w]; print(t[-1]['identifier'])" "$WANT")
+          RT=$(xcrun simctl list runtimes -j | python3 -c "import json,sys; r=[x for x in json.load(sys.stdin)['runtimes'] if x['platform']=='iOS' and x['isAvailable']]; print(sorted(r,key=lambda x:[int(p) for p in x['version'].split('.')])[-1]['identifier'])")
+          UDID=$(xcrun simctl create "appstore-$SHOT_DEVICE-$SHOT_LANG" "$TYPE" "$RT")
+          xcrun simctl boot "$UDID"; xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl status_bar "$UDID" override --time "9:41" --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3 || true
+          xcrun simctl location "$UDID" set 48.15000,11.58030
+          xcrun simctl privacy "$UDID" grant location io.github.elija7580.publit || true
+          rm -rf ~/publit-shots
+          TEST_RUNNER_PUBLIT_SHOT_LANG="$SHOT_LANG" xcodebuild test-without-building -project Publit.xcodeproj -scheme Publit \
+            -destination "id=$UDID" -derivedDataPath build -parallel-testing-enabled NO \
+            -only-testing:PublitUITests/PublitUITests/testF40AppStoreShots 2>&1 | grep -E "Test Case|error:|Executed" || true
+          D="out/$SHOT_DEVICE/$SHOT_LANG"; mkdir -p "$D"
+          cp ~/publit-shots/as-*.png "$D/" 2>/dev/null || true
+          ls -la "$D"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: shots-${{ matrix.device }}-${{ matrix.lang }}
+          path: out/${{ matrix.device }}/${{ matrix.lang }}
+
+  mockups:
+    needs: shots
+    if: ${{ always() && needs.shots.result != 'skipped' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: new
+      - name: New raw screenshots into docs/appstore/raw
+        run: |
+          for d in iphone ipad; do for l in en de; do
+            src="new/shots-$d-$l"
+            if ls "$src"/as-*.png > /dev/null 2>&1; then rm -f docs/appstore/raw/$d/$l/as-*.png; mkdir -p docs/appstore/raw/$d/$l; cp "$src"/as-*.png docs/appstore/raw/$d/$l/; echo "new $d $l: $(ls $src | wc -l)"; else echo "MISSING $d $l"; fi
+          done; done
+      - name: Apple's product bezels, 7-Zip, font
+        run: |
+          set -e
+          mkdir -p "$RUNNER_TEMP/bz" && cd "$RUNNER_TEMP/bz"
+          curl -sL https://www.7-zip.org/a/7z2301-linux-x64.tar.xz | tar xJ 7zz
+          for n in iPhone-18 iPhone-Duo "iPad-Pro-(M5)" Apple-Watch-Ultra-3-2025; do
+            curl -sfL -o b.dmg "https://devimages-cdn.apple.com/design/resources/download/Bezel-$n.dmg"
+            ./7zz x -y b.dmg -ir'!*PNG*' > /dev/null; rm b.dmg
+          done
+          curl -sL -o "$RUNNER_TEMP/NotoSans-VF.ttf" "https://github.com/google/fonts/raw/main/ofl/notosans/NotoSans%5Bwdth%2Cwght%5D.ttf"
+          python3 -m pip install -q pillow pyjwt cryptography requests
+      - name: Compose
+        run: |
+          set -e
+          keep=$(mktemp -d); cp -r docs/appstore/mockups/iphone/en/08-europe.png docs/appstore/mockups/iphone/de/08-europe.png "$keep/" 2>/dev/null || true
+          cp docs/appstore/mockups/iphone/en/08-europe.png "$keep/en-08.png" 2>/dev/null || true
+          cp docs/appstore/mockups/iphone/de/08-europe.png "$keep/de-08.png" 2>/dev/null || true
+          rm -rf docs/appstore/mockups
+          FONT="$RUNNER_TEMP/NotoSans-VF.ttf" python3 tools/appstore/compose.py docs/appstore/raw "$RUNNER_TEMP/bz" docs/appstore/mockups
+          [ -f "$keep/en-08.png" ] && cp "$keep/en-08.png" docs/appstore/mockups/iphone/en/08-europe.png || true
+          [ -f "$keep/de-08.png" ] && cp "$keep/de-08.png" docs/appstore/mockups/iphone/de/08-europe.png || true
+          find docs/appstore/mockups -name "*.png" | sort
+      - name: Upload to App Store Connect
+        if: ${{ contains(github.event.head_commit.message, '[upload]') }}
+        env:
+          KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          P8: ${{ secrets.ASC_KEY_P8 }}
+          DEVICES: "iphone ipad"
+        run: python3 tools/appstore/upload.py; cp report.txt docs/appstore/upload-report.txt
+      - name: Commit
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A docs/appstore
+          git commit -qm "App Store screenshots from the current app, in Apple's device bezels" || exit 0
+          git push
