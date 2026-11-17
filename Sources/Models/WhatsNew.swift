@@ -20,6 +20,14 @@ enum WhatsNew {
 
     /// Newest first.
     static let entries: [WhatsNewEntry] = [
+        WhatsNewEntry(build: 87, items: [
+            WhatsNewItem(symbol: "location.north.line", title: "Clearer live trips",
+                         text: "Each stage starts at its own place on the map; the whole trip is one tap away under Trip overview."),
+            WhatsNewItem(symbol: "list.bullet.rectangle", title: "Calmer route list",
+                         text: "Every route shows its times, its lines, one line of facts and only the note that matters."),
+            WhatsNewItem(symbol: "star", title: "Saved trips at a glance",
+                         text: "Saved trips show their lines like in Plan and open on the route details."),
+        ]),
         WhatsNewEntry(build: 86, items: [
             WhatsNewItem(symbol: "map", title: "The Nearby map everywhere",
                          text: "Trips, lines and stations show you with your direction, the stops by name and the location button."),
