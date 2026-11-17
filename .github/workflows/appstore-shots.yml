@@ -25,8 +25,9 @@ jobs:
       fail-fast: false
       max-parallel: 1
       matrix:
-        device: [iphone, ipad]
-        lang: [en, de]
+        # Just the iPad in German this time (the others are in docs/appstore/raw already).
+        device: [ipad]
+        lang: [de]
     steps:
       - uses: actions/checkout@v4
       - name: Xcode
@@ -64,11 +65,15 @@ jobs:
           xcrun simctl status_bar "$UDID" override --time "9:41" --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3 || true
           xcrun simctl location "$UDID" set 48.15000,11.58030
           xcrun simctl privacy "$UDID" grant location io.github.elija7580.publit || true
-          rm -rf ~/publit-shots
-          TEST_RUNNER_PUBLIT_SHOT_LANG="$SHOT_LANG" xcodebuild test-without-building -project Publit.xcodeproj -scheme Publit \
-            -destination "id=$UDID" -derivedDataPath build -parallel-testing-enabled NO \
-            -only-testing:PublitUITests/PublitUITests/testF40AppStoreShots > out/test.log 2>&1 || true
-          grep -E "Test Case|error:|Executed|WATCHDOG" out/test.log || tail -40 out/test.log
+          for attempt in 1 2; do
+            rm -rf ~/publit-shots
+            TEST_RUNNER_PUBLIT_SHOT_LANG="$SHOT_LANG" xcodebuild test-without-building -project Publit.xcodeproj -scheme Publit \
+              -destination "id=$UDID" -derivedDataPath build -parallel-testing-enabled NO \
+              -only-testing:PublitUITests/PublitUITests/testF40AppStoreShots > out/test.log 2>&1 || true
+            grep -E "Test Case|error:|Executed|WATCHDOG" out/test.log | head -20 || tail -40 out/test.log
+            ls ~/publit-shots/as-*.png > /dev/null 2>&1 && break
+            echo "no shots on attempt $attempt, retrying"; sleep 30
+          done
           D="out/$SHOT_DEVICE/$SHOT_LANG"; mkdir -p "$D"
           cp ~/publit-shots/as-*.png "$D/" 2>/dev/null || true
           ls -la "$D"
