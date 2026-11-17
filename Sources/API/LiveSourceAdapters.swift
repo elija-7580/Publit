@@ -83,7 +83,7 @@ struct HafasSource: LiveSource {
         }
         guard !lid.isEmpty else { return nil }
         let start = Date(timeIntervalSince1970: (ride.scheduled.timeIntervalSince1970 / 1800).rounded(.down) * 1800 - 120)
-        let deps = try await Self.boards.value("\(name)|\(lid)|\(Int(start.timeIntervalSince1970))", ttl: 45) {
+        let deps = try await Self.boards.value("\(name)|\(lid)|\(Int64(start.timeIntervalSince1970))", ttl: 45) {
             try await board(lid, from: start)
         }
         return LiveMatch.best(for: ride, in: deps).map { LiveMatch.fix($0, source: name) }
@@ -500,7 +500,7 @@ struct SearchChSource: LiveSource {
         }
         guard !id.isEmpty else { return nil }
         let start = Date(timeIntervalSince1970: (ride.scheduled.timeIntervalSince1970 / 1800).rounded(.down) * 1800 - 120)
-        let deps = try await Self.boards.value("\(id)|\(Int(start.timeIntervalSince1970))", ttl: 30) {
+        let deps = try await Self.boards.value("\(id)|\(Int64(start.timeIntervalSince1970))", ttl: 30) {
             try await Self.board(id, from: start)
         }
         return LiveMatch.best(for: ride, in: deps).map { LiveMatch.fix($0, source: name) }
@@ -591,7 +591,7 @@ struct EFASource: LiveSource {
     func fix(for ride: LiveRide, now: Date) async throws -> LiveFix? {
         guard let id = ride.stopId.flatMap(Self.dhid) else { return nil }
         let start = Date(timeIntervalSince1970: (ride.scheduled.timeIntervalSince1970 / 1800).rounded(.down) * 1800 - 120)
-        let deps = try await Self.boards.value("\(name)|\(id)|\(Int(start.timeIntervalSince1970))", ttl: 30) {
+        let deps = try await Self.boards.value("\(name)|\(id)|\(Int64(start.timeIntervalSince1970))", ttl: 30) {
             try await board(id, from: start)
         }
         return LiveMatch.best(for: ride, in: deps).map { LiveMatch.fix($0, source: name) }

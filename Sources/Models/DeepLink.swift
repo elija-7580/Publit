@@ -164,7 +164,7 @@ struct SharedRoute: Hashable, Sendable {
         var items: [(String, String)] = []
         if let itineraryId { items.append(("i", ShareLinks.pack(itineraryId))) }
         items += [("f", fromName), ("fl", from.apiValue), ("t", toName), ("tl", to.apiValue),
-                  ("d", String(Int(departure.timeIntervalSince1970)))]
+                  ("d", String(Int64(departure.timeIntervalSince1970)))]
         return items.map { "\($0)=\(ShareLinks.encode($1))" }.joined(separator: "&")
     }
 

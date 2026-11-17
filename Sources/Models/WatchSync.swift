@@ -51,7 +51,7 @@ enum WatchCodeFile {
         let safe = String(passId.unicodeScalars.map { s -> Character in
             (s.isASCII && (CharacterSet.alphanumerics.contains(s) || s == "-")) ? Character(s) : "_"
         })
-        return "\(safe)-\(Int(updatedAt.timeIntervalSince1970))-\(clamped(pixels)).png"
+        return "\(safe)-\(Int64(updatedAt.timeIntervalSince1970))-\(clamped(pixels)).png"
     }
 }
 
@@ -298,13 +298,13 @@ enum WatchSyncPolicy {
         var parts: [String] = ["v\(s.version)", s.ticketsOn ? "t1" : "t0", "a:\(s.activeTripId ?? "-")"]
         parts += s.trips.map { "T:\($0.id):\($0.itinerary.routeKey):\($0.followLive == true ? 1 : 0)" }
         parts += s.places.map { "P:\($0.id):\($0.role?.rawValue ?? "-")" }
-        parts += s.tickets.map { "K:\($0.id):\(Int($0.pass.updatedAt.timeIntervalSince1970)):\($0.code ?? "-")" }
+        parts += s.tickets.map { "K:\($0.id):\(Int64($0.pass.updatedAt.timeIntervalSince1970)):\($0.code ?? "-")" }
         return parts.joined(separator: "\n")
     }
 
     /// Changes also when only times were refreshed.
     static func content(_ s: WatchSnapshot) -> String {
-        structure(s) + "\n" + s.trips.map { "\($0.id)=\(Int(($0.refreshedAt ?? $0.savedAt).timeIntervalSince1970))" }.joined(separator: ",")
+        structure(s) + "\n" + s.trips.map { "\($0.id)=\(Int64(($0.refreshedAt ?? $0.savedAt).timeIntervalSince1970))" }.joined(separator: ",")
     }
 
     static func decide(last: (structure: String, content: String, sentAt: Date)?, new: WatchSnapshot, now: Date) -> Decision {

@@ -578,7 +578,9 @@ enum DateParsing {
             let doy = (153 * mp + 2) / 5 + d - 1
             let doe = yoe * 365 + yoe / 4 - yoe / 100 + doy
             let days = era * 146097 + doe - 719468
-            let seconds = Double(days * 86400 + h * 3600 + mi * 60 + sec) + fraction
+            // In Double: on 32-bit watches (arm64_32) `days * 86400` overflows Int for dates outside 1901–2038,
+            // such as `.distantPast` saved for "never synced", and the app crashed on every launch (#80).
+            let seconds = Double(days) * 86400 + Double(h * 3600 + mi * 60 + sec) + fraction
             return Date(timeIntervalSince1970: seconds)
         } ?? nil
     }

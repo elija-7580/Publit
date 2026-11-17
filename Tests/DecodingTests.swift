@@ -38,4 +38,14 @@ final class DecodingTests: XCTestCase {
         XCTAssertNotNil(DateParsing.parse("2026-10-06T20:18:00Z"))
         XCTAssertNotNil(DateParsing.parse("2026-10-06T20:18:00.123Z"))
     }
+
+    /// `.distantPast`/`.distantFuture` are saved (e.g. "never synced" on the watch) and read back at launch.
+    /// They are computed without Int overflow, so 32-bit watches (arm64_32) no longer crash on them (#80).
+    func testDateParsingFarDatesRoundTrip() throws {
+        for date in [Date.distantPast, .distantFuture, Date(timeIntervalSince1970: 0), Date(timeIntervalSince1970: 4_200_000_000)] {
+            let text = DateParsing.format(date)
+            let parsed = try XCTUnwrap(DateParsing.fastUTC(text), text)
+            XCTAssertEqual(parsed.timeIntervalSince1970, date.timeIntervalSince1970.rounded(.down), accuracy: 1, text)
+        }
+    }
 }

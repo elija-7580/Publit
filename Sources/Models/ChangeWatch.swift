@@ -15,7 +15,7 @@ enum ChangeWatch {
 
     static func key(_ c: SmartRouting.Change) -> String {
         // Time first: sorting the keys sorts by time (old ones are dropped first).
-        "\(Int(c.outgoing.scheduledStartTime.timeIntervalSince1970))|\(c.incoming.to.stationId)|\(c.outgoing.tripId ?? c.outgoing.lineName)"
+        "\(Int64(c.outgoing.scheduledStartTime.timeIntervalSince1970))|\(c.incoming.to.stationId)|\(c.outgoing.tripId ?? c.outgoing.lineName)"
     }
 
     static func isCancelled(_ c: SmartRouting.Change) -> Bool {
