@@ -177,7 +177,7 @@
 
 ## `Sources/Views/PlanView.swift`
 - Views: `PlanView`, `EndpointConnector`, `ItineraryRow`, `TimelineBar`
-- Sichtbare Texte: Swap · Depart · Arrive · When · Arrive by · Depart at · Now · Search routes · Recommended: %@ · Plan · Where to? · not set · Earlier connections · Later connections · Updated %@ · Live data · Cancelled · Service changes on this route · Change at %@ may be tight · Change at %@: %lld %% chance
+- Sichtbare Texte: Swap · Depart · Arrive · When · Arrive by · Depart at · Now · Search routes · Recommended: %@ · Plan · Where to? · not set · Earlier connections · Later connections · Updated %@ · Cancelled · Change at %@ may be tight · Change at %@: %lld %% chance · Service changes on this route · Live data
 
 ## `Sources/Views/PublitLogo.swift`
 - Views: `PublitLogo`, `PublitAppIcon`
@@ -196,7 +196,7 @@
 
 ## `Sources/Views/SavedTripView.swift`
 - Views: `SavedTripView`, `SavedTripRow`
-- Sichtbare Texte: Trip not found · It was removed from this device. · Live status unavailable. Showing saved times.
+- Sichtbare Texte: Trip not found · It was removed from this device. · Live status unavailable. Showing saved times. · from %@
 
 ## `Sources/Views/ServiceAlertsView.swift`
 - Views: `ServiceAlertRow`, `ServiceAlertsView`
@@ -210,8 +210,8 @@
 - Sichtbare Texte: This route could not be loaded. · It may be too old or no longer in the timetable. You can search for it again. · Search this route
 
 ## `Sources/Views/SmartRoutingViews.swift`
-- Views: `SmartBadgesRow`, `SmartChangesSection`, `ChangeChanceRow`, `SmartRoutingSettingsSection`
-- Sichtbare Texte: No change: nothing to miss · Smart routing · Feels like %@: waiting, walking and changes count more than riding. · Based on %lld past trips · Estimate · Same vehicle continues · Stay on board · Safe change · Change should work · Risky change · %@ to spare · Very tight change · Change at %@ · Arrive %@ · still makes the next change · If missed: %@ at %@ · No backup found if you miss it. · Changes · Faster · Fewer changes · A change counts like %lld extra minutes. · Extra time for changes · None · +%lld min · Use my walking speed · From Apple Health · Your walking speed · From the step counter · Not enough walking measured yet. · Avoid steep walks · Learn from my choices · Reset learned preferences
+- Views: `RouteTagLine`, `SmartChangesSection`, `ChangeChanceRow`, `SmartRoutingSettingsSection`
+- Sichtbare Texte: Recommended · No change: nothing to miss · Smart routing · Feels like %@: waiting, walking and changes count more than riding. · Based on %lld past trips · Estimate · Same vehicle continues · Stay on board · Safe change · Change should work · Risky change · %@ to spare · Very tight change · Change at %@ · Arrive %@ · still makes the next change · If missed: %@ at %@ · No backup found if you miss it. · Changes · Faster · Fewer changes · A change counts like %lld extra minutes. · Extra time for changes · None · +%lld min · Use my walking speed · From Apple Health · Your walking speed · From the step counter · Not enough walking measured yet. · Avoid steep walks · Learn from my choices · Reset learned preferences
 
 ## `Sources/Views/StationMapView.swift`
 - Views: `StationMapView`, `MapLayersSheet`, `MapPlaceView`, `MapSelectionView`, `RentalDetailView`, `VehicleTripView`

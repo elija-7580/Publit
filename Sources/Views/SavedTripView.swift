@@ -3,6 +3,10 @@ import SwiftUI
 /// A saved trip with its live status. Opened from Plan, from the calendar entry and from the Live Activity.
 struct SavedTripView: View {
     let tripId: String
+    /// From the Saved list: a trip already running opens on its route details (the live bar and
+    /// "Start" lead to the guide); started here, the screen still turns into the guide.
+    var detailsFirst = false
+    @State private var runningWhenOpened: Bool?
     @Environment(TripStore.self) private var trips
     @Environment(\.scenePhase) private var scenePhase
     @State private var isVisible = false
@@ -13,7 +17,7 @@ struct SavedTripView: View {
         if let trip = trips.trip(tripId) {
             Group {
                 // Started by hand: the trip screen becomes the step-by-step guide until it is ended.
-                if trips.activeTrip?.id == tripId {
+                if trips.activeTrip?.id == tripId, !(detailsFirst && runningWhenOpened != false) {
                     LiveTripView(trip: trip)
                 } else {
                     ItineraryDetailView(itinerary: trip.itinerary, fromName: trip.fromName, toName: trip.toName,
@@ -38,7 +42,10 @@ struct SavedTripView: View {
                         .padding(.horizontal, 12).padding(.bottom, 8)
                 }
             }
-            .onAppear { isVisible = true }
+            .onAppear {
+                isVisible = true
+                if runningWhenOpened == nil { runningWhenOpened = trips.activeTrip?.id == tripId }
+            }
             .onDisappear { isVisible = false }
             .task(id: "\(tripId)|\(scenePhase)|\(isVisible)") {
                 guard isVisible, scenePhase == .active else { return }
@@ -82,40 +89,39 @@ struct SavedTripView: View {
     }
 }
 
-/// One saved trip in a list.
+/// One saved trip in a list, in the look of a route in Plan: where to and when, times and length,
+/// then the same coloured bar of its lines (no squeezed badges that wrapped mid-name).
 struct SavedTripRow: View {
     let trip: SavedTrip
 
-    /// Where to and when to go first; lines and start in one row each underneath.
     var body: some View {
-        let tz = trip.itinerary.legs.first?.from.tz
-        let leave = ItineraryRow.leave(trip.itinerary, now: Ticker.minute.now)
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(alignment: .firstTextBaseline) {
+        let it = trip.itinerary
+        let tz = it.legs.first?.from.tz
+        let leave = ItineraryRow.leave(it, now: Ticker.minute.now)
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Text(trip.toName).font(.headline).lineLimit(1)
-                Spacer()
+                Spacer(minLength: 8)
                 if let leave {
-                    Text(verbatim: leave).font(.subheadline.weight(.semibold)).foregroundStyle(Color.ink)
+                    Text(verbatim: leave).font(.subheadline.weight(.semibold)).foregroundStyle(Color.ink).lineLimit(1)
                 } else {
                     Text(trip.startTime.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated)))
-                        .font(.subheadline).foregroundStyle(.secondary)
+                        .font(.subheadline).foregroundStyle(.secondary).lineLimit(1)
                 }
             }
-            HStack(alignment: .center, spacing: 8) {
-                Text("\(Fmt.time(trip.startTime, tz: tz)) – \(Fmt.time(trip.endTime, tz: trip.itinerary.legs.last?.to.tz))")
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                Text("\(Fmt.time(trip.startTime, tz: tz)) – \(Fmt.time(trip.endTime, tz: it.legs.last?.to.tz))")
                     .font(.subheadline.weight(.semibold).monospacedDigit()).lineLimit(1)
-                Spacer(minLength: 4)
-                HStack(spacing: 4) {
-                    ForEach(Array(trip.itinerary.transitLegs.prefix(3).enumerated()), id: \.offset) { _, leg in
-                        LineBadge(leg, compact: true)
-                    }
-                    if trip.itinerary.transitLegs.count > 3 {
-                        Text(verbatim: "+\(trip.itinerary.transitLegs.count - 3)").font(.footnote.weight(.semibold)).foregroundStyle(.secondary)
-                    }
-                }
+                Spacer(minLength: 8)
+                Text(verbatim: Fmt.duration(seconds: it.duration))
+                    .font(.subheadline.monospacedDigit()).foregroundStyle(.secondary).lineLimit(1)
             }
-            Text("from \(trip.fromName)").font(.footnote).foregroundStyle(.secondary).lineLimit(1)
+            TimelineBar(itinerary: it, windowStart: it.startTime, windowEnd: it.endTime)
+                .frame(height: 24)
+            Text(verbatim: [L10n.f("from %@", trip.fromName), Fmt.changes(it.transfers)].joined(separator: " · "))
+                .font(.footnote).foregroundStyle(.secondary).lineLimit(1)
         }
+        .padding(.vertical, 2)
         .accessibilityElement(children: .combine)
     }
 }
