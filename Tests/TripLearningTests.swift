@@ -141,8 +141,8 @@ final class TripLearningTests: XCTestCase {
     }
 
     func testAlternativesLinkRoundTrip() throws {
-        let to = SavedPlace(id: "d", name: "Home", subtitle: nil, lat: 48.2, lon: 16.3, stopId: nil)
-        let from = SavedPlace(id: "s", name: "Krems", subtitle: nil, lat: 48.4, lon: 15.6, stopId: "at-X_1")
+        let to = DeepLink.Spot(name: "Home", lat: 48.2, lon: 16.3, stopId: nil)
+        let from = DeepLink.Spot(name: "Krems", lat: 48.4, lon: 15.6, stopId: "at-X_1")
         guard case .alternatives(let f, let t) = try XCTUnwrap(DeepLink(url: DeepLink.alternatives(from: from, to: to).url)) else { return XCTFail() }
         XCTAssertEqual(f?.name, "Krems"); XCTAssertEqual(f?.stopId, "at-X_1"); XCTAssertEqual(t.name, "Home")
         guard case .alternatives(nil, _) = try XCTUnwrap(DeepLink(url: DeepLink.alternatives(from: nil, to: to).url)) else { return XCTFail() }

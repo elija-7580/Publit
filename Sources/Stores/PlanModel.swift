@@ -480,8 +480,11 @@ final class AppState {
         case .alternatives(let from, let to):
             // A change at risk: other routes from the change stop (or from here) to the destination, leaving now.
             deepLink = nil
-            routeShared(to: to)
-            if let from { plan.from = .place(from) }
+            func place(_ s: DeepLink.Spot, _ kind: String) -> SavedPlace {
+                SavedPlace(id: "\(kind)|\(s.lat),\(s.lon)", name: s.name, subtitle: nil, lat: s.lat, lon: s.lon, stopId: s.stopId)
+            }
+            routeShared(to: place(to, "dest"))
+            if let from { plan.from = .place(place(from, "stop")) }
             return
         case .place(let name, let lat, let lon):
             // Shared from Google Maps or another map app: the Plan tab with routes there from here, leaving now.

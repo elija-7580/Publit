@@ -21,7 +21,15 @@ enum DeepLink: Hashable, Identifiable {
     case place(name: String, lat: Double?, lon: Double?)
     /// Other routes when a change is at risk: `publit://alternatives?tn=…&tlat=…&tlon=…[&fn=…&flat=…&flon=…&fs=…]`,
     /// from the change stop (or from here without `fn`) to the destination, leaving now.
-    case alternatives(from: SavedPlace?, to: SavedPlace)
+    case alternatives(from: Spot?, to: Spot)
+
+    /// A place in a link (no dependency on `SavedPlace`, so the extensions that build links compile without it).
+    struct Spot: Hashable, Sendable {
+        var name: String
+        var lat: Double
+        var lon: Double
+        var stopId: String?
+    }
 
     static let scheme = "publit"
 
@@ -73,10 +81,10 @@ enum DeepLink: Hashable, Identifiable {
                 return (lat, lon)
             }
             guard let tn = value("tn"), let t = coord("tlat", "tlon") else { return nil }
-            let to = SavedPlace(id: "dest|\(t.0),\(t.1)", name: tn, subtitle: nil, lat: t.0, lon: t.1, stopId: value("ts"))
-            var from: SavedPlace?
+            let to = Spot(name: tn, lat: t.0, lon: t.1, stopId: value("ts"))
+            var from: Spot?
             if let fn = value("fn"), let f = coord("flat", "flon") {
-                from = SavedPlace(id: "stop|\(f.0),\(f.1)", name: fn, subtitle: nil, lat: f.0, lon: f.1, stopId: value("fs"))
+                from = Spot(name: fn, lat: f.0, lon: f.1, stopId: value("fs"))
             }
             self = .alternatives(from: from, to: to)
         default:

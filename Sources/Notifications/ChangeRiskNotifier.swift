@@ -40,11 +40,11 @@ enum ChangeRiskNotifier {
         // Still on the feeder: from the change stop. Already off it: from here.
         let fromHere = here != nil && now >= c.incoming.endTime.addingTimeInterval(-60)
         let stop = c.incoming.to
-        let from: SavedPlace? = fromHere ? nil
-            : SavedPlace(id: "stop|\(stop.stationId)", name: stop.name, subtitle: nil, lat: stop.lat, lon: stop.lon, stopId: stop.parentId ?? stop.stopId)
+        let from: DeepLink.Spot? = fromHere ? nil
+            : DeepLink.Spot(name: stop.name, lat: stop.lat, lon: stop.lon, stopId: stop.parentId ?? stop.stopId)
         let end = trip.itinerary.legs.last?.to
         if let end {
-            let to = SavedPlace(id: "dest|\(end.lat),\(end.lon)", name: trip.toName, subtitle: nil, lat: end.lat, lon: end.lon, stopId: end.stopId)
+            let to = DeepLink.Spot(name: trip.toName, lat: end.lat, lon: end.lon, stopId: end.stopId)
             content.userInfo = ["url": DeepLink.alternatives(from: from, to: to).url.absoluteString]
         }
         try? await center.add(UNNotificationRequest(identifier: "changerisk|\(ChangeWatch.key(c))", content: content, trigger: nil))
