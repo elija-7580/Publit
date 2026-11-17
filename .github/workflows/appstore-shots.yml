@@ -49,7 +49,9 @@ jobs:
           if [ "$SHOT_DEVICE" = iphone ]; then WANT="iPhone 17 Pro Max"; else WANT="iPad Pro 13-inch (M5)"; fi
           TYPE=$(xcrun simctl list devicetypes -j | python3 -c "import json,sys; w=sys.argv[1]; t=[d for d in json.load(sys.stdin)['devicetypes'] if d['name']==w]; print(t[-1]['identifier'])" "$WANT")
           RT=$(xcrun simctl list runtimes -j | python3 -c "import json,sys; r=[x for x in json.load(sys.stdin)['runtimes'] if x['platform']=='iOS' and x['isAvailable']]; print(sorted(r,key=lambda x:[int(p) for p in x['version'].split('.')])[-1]['identifier'])")
-          UDID=$(xcrun simctl create "appstore-$SHOT_DEVICE-$SHOT_LANG" "$TYPE" "$RT")
+          UDID=""
+          for try in 1 2 3; do UDID=$(xcrun simctl create "appstore-$SHOT_DEVICE-$SHOT_LANG-$try" "$TYPE" "$RT" 2>/dev/null) && [ ${#UDID} -eq 36 ] && break; UDID=""; sleep 20; done
+          [ -n "$UDID" ] || { echo "simulator could not be created"; exit 1; }
           xcrun simctl boot "$UDID"; xcrun simctl bootstatus "$UDID" -b
           xcrun simctl status_bar "$UDID" override --time "9:41" --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3 || true
           xcrun simctl location "$UDID" set 48.15000,11.58030

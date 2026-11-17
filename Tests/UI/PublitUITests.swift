@@ -18,13 +18,15 @@ final class PublitUITests: XCTestCase {
         continueAfterFailure = false
         startedAt = Date()
         let name = self.name
+        // The App Store shots relaunch the app several times on purpose.
+        let seconds: TimeInterval = name.contains("testF40AppStoreShots") ? 600 : Self.watchdogSeconds
         let item = DispatchWorkItem {
-            print("WATCHDOG: \(name) still running after \(Int(Self.watchdogSeconds)) s - stopping the runner")
+            print("WATCHDOG: \(name) still running after \(Int(seconds)) s - stopping the runner")
             fflush(stdout)
             abort()
         }
         watchdog = item
-        DispatchQueue.global().asyncAfter(deadline: .now() + Self.watchdogSeconds, execute: item)
+        DispatchQueue.global().asyncAfter(deadline: .now() + seconds, execute: item)
         addUIInterruptionMonitor(withDescription: "Location") { alert in
             for label in ["Allow While Using App", "Allow Once", "Allow"] where alert.buttons[label].exists {
                 alert.buttons[label].tap(); return true
