@@ -36,6 +36,7 @@ struct TripView: View {
     @State private var shape: [LatLon] = []
     @State private var generation = 0
     @State private var now = Date()
+    @State private var showsMap = false
 
     private var leg: Leg? { trip?.legs.first(where: \.isTransit) }
     private var savedLine: SavedLine {
@@ -44,6 +45,8 @@ struct TripView: View {
 
     var body: some View {
         List {
+            // The trip as the map at the top, like Nearby and a route: movable right there.
+            if leg != nil { MapHeroSpace { showsMap = true } }
             Section {
                 DepartureRow(stopTime: stopTime)
                 ServiceAlertsView(alerts: trip == nil ? stopTime.serviceAlerts : alerts)
@@ -52,13 +55,6 @@ struct TripView: View {
                 let progress = TripProgress.at(now, stops: stops)
                 Section {
                     OfflineNote()
-                    TripMap(generation: generation, shape: shape, stops: stops.map(\.coordinate),
-                            stopNames: stops.map(\.name),
-                            color: leg.lineStroke, textColor: leg.lineTextColor, mode: leg.mode,
-                            vehicle: TripProgress.position(progress, stops: stops))
-                        .equatable()
-                        .frame(height: 240)
-                        .listRowInsets(EdgeInsets())
                     statusLine(progress: progress, stops: stops, leg: leg)
                     NavigationLink {
                         VehicleTrackingView(stopTime: stopTime, stationName: stationName)
@@ -109,7 +105,20 @@ struct TripView: View {
             }
         }
         .readableWidth()
-        .inkList()
+        .inkList(hero: leg != nil) { insets in
+            tripMap(controls: false).safeAreaPadding(insets)
+        }
+        .fullScreenCover(isPresented: $showsMap) {
+            NavigationStack {
+                tripMap(controls: true)
+                    .ignoresSafeArea(edges: .bottom)
+                    .navigationTitle(stopTime.lineName)
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) { Button("Done") { showsMap = false } }
+                    }
+            }
+        }
         .ticking(every: 15, now: $now)
         .navigationTitle(stopTime.lineName)
         .screenTrail("Trip")
@@ -195,6 +204,20 @@ struct TripView: View {
     }
 }
 
+extension TripView {
+    @ViewBuilder
+    fileprivate func tripMap(controls: Bool) -> some View {
+        if let leg {
+            TripMap(generation: generation, shape: shape, stops: stops.map(\.coordinate),
+                    stopNames: stops.map(\.name),
+                    color: leg.lineStroke, textColor: leg.lineTextColor, mode: leg.mode,
+                    vehicle: TripProgress.position(TripProgress.at(now, stops: stops), stops: stops),
+                    controls: controls)
+                .equatable()
+        }
+    }
+}
+
 /// The trip on a map, like the Nearby map: the line with its stops (named where there is room),
 /// the vehicle, you with the arrow the way you face, the location button and the compass.
 /// Redrawn only for a new load or a moved vehicle, not on every list update.
@@ -207,12 +230,14 @@ private struct TripMap: View, Equatable {
     let textColor: Color
     let mode: String
     let vehicle: LatLon?
+    /// Location button and compass: in the full map; the small one at the top keeps it clean like Nearby.
+    var controls = true
     @Environment(LocationManager.self) private var location
     /// The map's own turn, so the arrow on your position keeps pointing the real way.
     @State private var mapHeading = 0.0
 
     static func == (a: TripMap, b: TripMap) -> Bool {
-        a.generation == b.generation && a.vehicle?.lat == b.vehicle?.lat && a.vehicle?.lon == b.vehicle?.lon
+        a.generation == b.generation && a.controls == b.controls && a.vehicle?.lat == b.vehicle?.lat && a.vehicle?.lon == b.vehicle?.lon
     }
 
     var body: some View {
@@ -239,6 +264,7 @@ private struct TripMap: View, Equatable {
         }
         .publitMapStyle()
         .mapControls { MapUserLocationButton(); MapCompass() }
+        .mapControlVisibility(controls ? .automatic : .hidden)
         .onMapCameraChange(frequency: .onEnd) { mapHeading = $0.camera.heading }
         .compassWhileShown("tripMap")
     }

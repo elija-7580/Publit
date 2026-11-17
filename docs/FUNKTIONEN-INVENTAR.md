@@ -247,7 +247,7 @@
 
 ## `Sources/Views/TripView.swift`
 - Views: `TripView`, `TripMap`, `StopTimeRow`, `LineDeparturesView`
-- Sichtbare Texte: Track vehicle · Stops · From %@ to here · Route here · Route from here · Line %@: route and timetable · Saved line · Save line · Not departed yet · Arrived at %@ · At %@ · Between %@ and %@ · No live data for this trip. Position estimated from the timetable. · Position estimated from live stop times. · Estimated vehicle position
+- Sichtbare Texte: Track vehicle · Stops · From %@ to here · Route here · Route from here · Line %@: route and timetable · Done · Saved line · Save line · Not departed yet · Arrived at %@ · At %@ · Between %@ and %@ · No live data for this trip. Position estimated from the timetable. · Position estimated from live stop times. · Estimated vehicle position
 
 ## `Sources/Views/VehicleTrackingView.swift`
 - Views: `VehicleTrackingView`

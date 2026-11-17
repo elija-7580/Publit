@@ -118,7 +118,7 @@ Bewegung reduzieren zeigt jede Demo im Endzustand. Schließen, „Continue“ od
 ## 6. Fahrt eines Fahrzeugs (`TripView`, `LineDeparturesView`)
 
 - Alle Halte der Fahrt wie die Abfahrtszeilen am Startbildschirm: **Halt links, Zeit rechts** (davor Gleis „Pl. x“ und Verspätung „+x“), bereits passierte Halte grau.
-- Karte (`TripMap`) mit **geschätzter Fahrzeugposition** („Estimated vehicle position“), Status „Not departed yet“, „Between A and B“, „At …“, „Arrived at …“; ohne Live-Daten aus dem Fahrplan geschätzt.
+- Karte (`TripMap`) **oben als Bild wie bei Nearby und Route** (`MapHeroSpace`, reicht unter die Leiste, klein verschieb-/zoombar, ohne Knöpfe; Vergrößern-Taste → Vollbildkarte mit Standort-Knopf und Kompass, „Done“) mit **geschätzter Fahrzeugposition** („Estimated vehicle position“), Status „Not departed yet“, „Between A and B“, „At …“, „Arrived at …“; ohne Live-Daten aus dem Fahrplan geschätzt.
 - **„Track vehicle“** (`VehicleTrackingView`): die Fahrt dieser Abfahrt auf einer großen Karte (Linienverlauf, Halte, Fahrzeug, eigener Standort), aktualisiert sich alle 15 s selbst; **„Follow vehicle“** hält das Fahrzeug in der Mitte (Verschieben von Hand beendet das). Darunter die Positionsquelle (`VehiclePositionSource`): „Position estimated from live stop times.“, „…estimated from the timetable.“ oder „Vehicle position unavailable right now.“ (vor Abfahrt am ersten Halt / nach Ankunft) – nie „GPS“, weil Transitous keine Fahrzeug-GPS-Positionen liefert – und die nächsten Halte mit Zeiten. Ohne Position bleiben Linie und Halte sichtbar.
 - Aktionen pro Halt: „Route here“, „Route from here“; „From … to here“; Linie speichern.
 - Liste weiterer Abfahrten derselben Linie.
