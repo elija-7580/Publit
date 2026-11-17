@@ -43,7 +43,7 @@ try:
     pre = {p["id"]: p["attributes"] for p in builds.get("included", [])}
     for b in builds["data"]:
         a = b["attributes"]; pv = pre.get(b["relationships"]["preReleaseVersion"]["data"]["id"], {})
-        log("build", pv.get("platform"), pv.get("version"), a.get("version"), a.get("processingState"), "expired" if a.get("expired") else "", a.get("uploadedDate"))
+        log("build", pv.get("platform"), pv.get("version"), a.get("version"), a.get("processingState"), "expired" if a.get("expired") else "", a.get("uploadedDate"), "encryption", a.get("usesNonExemptEncryption"))
     subs = get(f"/v1/reviewSubmissions?filter[app]={aid}&limit=10")
     for s in subs["data"]:
         a = s["attributes"]; log("reviewSubmission", s["id"], a.get("platform"), a.get("state"), a.get("submittedDate"))
