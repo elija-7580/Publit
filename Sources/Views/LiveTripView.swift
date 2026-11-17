@@ -93,6 +93,9 @@ struct LiveTripView: View {
              detour: detourRoute.map { (legIndex: step.legIndex, points: $0.points) },
              exit: walk?.exitDoor,
              isLive: index == live,
+             // Walking navigation only on the walk you are on and near its path. Every other stage
+             // (a change, a ride, a walk you are not on yet) starts on its own place, not on you.
+             followsYou: index == live && step.kind == .walk && walkPos != nil,
              overview: $overview,
              away: away,
              toggleOverview: {
@@ -226,31 +229,41 @@ struct LiveTripView: View {
                 }
             }
 
-            if picked != nil || overview {
-                Section {
-                    Button { picked = nil; overview = false } label: { Label("Back to now", systemImage: "location.fill") }
-                        .font(.subheadline.weight(.semibold))
+            // Back to the stage you are on, and the whole trip: the overview is its own place
+            // (the first card), not a list under every stage.
+            Section {
+                HStack(spacing: 8) {
+                    if picked != nil || overview {
+                        Button { withAnimation(.snappy) { picked = nil; overview = false } } label: {
+                            Label("Back to now", systemImage: "location.fill")
+                        }
+                        .accessibilityIdentifier("liveBackToNow")
+                    }
+                    if !overview {
+                        Button { withAnimation(.snappy) { overview = true } } label: {
+                            Label("Trip overview", systemImage: "point.topleft.down.to.point.bottomright.curvepath")
+                        }
+                        .accessibilityIdentifier("liveTripOverview")
+                    }
                 }
+                .font(.subheadline.weight(.semibold))
+                .buttonStyle(.soft)
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
             }
 
-            // Pulled up: the whole trip, with the stage on the map opened in its place.
-            let upTo = overview ? steps.count - 1 : index
-            Section("Trip overview") {
-                ForEach(0...upTo, id: \.self) { i in stageButton(i, steps: steps, it: it, index: index, live: live) }
-            }
-
-            if !overview {
+            if overview {
+                // The whole trip, stage by stage; a tap opens that stage.
+                Section("Trip overview") {
+                    ForEach(steps.indices, id: \.self) { i in stageButton(i, steps: steps, it: it, index: index, live: live) }
+                }
+            } else {
+                // Only the stage in front: the others are the cards above and the route details.
                 switch step.kind {
                 case .walk: walkSections(leg, index: step.legIndex, in: it, route: walk!, position: walkPos, detour: detour, check: check, isLive: index == live)
                 case .wait: waitSection(leg, index: step.legIndex, in: it)
                 case .ride: rideSections(leg, index: step.legIndex, in: it, progress: ride?.progress ?? .notStarted, fromGPS: ride?.fromGPS ?? false, check: check)
                 case .arrive: arriveSection(it, here: here)
-                }
-            }
-
-            if upTo + 1 < steps.count {
-                Section {
-                    ForEach((upTo + 1)..<steps.count, id: \.self) { i in stageButton(i, steps: steps, it: it, index: index, live: live) }
                 }
             }
 
@@ -826,6 +839,8 @@ private struct GuideMap: View {
     var exit: (point: LatLon, label: String?)? = nil
     /// The stage shown is the one you are on: only then does a walk follow your position.
     var isLive = true
+    /// The camera follows you (walking navigation); otherwise it frames the stage.
+    var followsYou = false
     @State private var camera: MapCameraPosition = .automatic
     /// The map turns with the phone (like a compass) and follows you.
     @State private var followHeading = false
@@ -848,8 +863,8 @@ private struct GuideMap: View {
                     followHeading.toggle()
                     overview = false
                     withAnimation {
-                        camera = followHeading ? .userLocation(followsHeading: true, fallback: Self.camera(step, itinerary, live: isLive))
-                            : Self.camera(step, itinerary, live: isLive)
+                        camera = followHeading ? .userLocation(followsHeading: true, fallback: stageCamera(step))
+                            : stageCamera(step)
                     }
                 } label: {
                     Image(systemName: followHeading ? "location.north.line.fill" : "location.north.line")
@@ -892,9 +907,9 @@ private struct GuideMap: View {
         }
         .overlay(alignment: .topTrailing) {
             // Moved the map by hand while walking: one tap follows you again.
-            if isLive, !overview, !followHeading, step.kind == .walk, camera.positionedByUser {
+            if followsYou, !overview, !followHeading, camera.positionedByUser {
                 Button {
-                    withAnimation { camera = Self.camera(step, itinerary, live: true) }
+                    withAnimation { camera = stageCamera(step) }
                 } label: {
                     Image(systemName: "location.fill")
                         .font(.body.weight(.semibold))
@@ -907,18 +922,23 @@ private struct GuideMap: View {
                 .padding(8)
             }
         }
-        .onAppear { camera = overview ? Self.overviewCamera(itinerary) : Self.camera(step, itinerary, live: isLive) }
+        .onAppear { camera = overview ? Self.overviewCamera(itinerary) : stageCamera(step) }
         .onChange(of: step) { _, s in
             guard !followHeading, !overview else { return }
-            withAnimation { camera = Self.camera(s, itinerary, live: isLive) }
+            withAnimation { camera = stageCamera(s) }
         }
-        .onChange(of: isLive) { _, live in
+        // The way from where you are came in: frame it once (not on every update while you walk).
+        .onChange(of: detour == nil) { _, _ in
+            guard !followHeading, !overview, step.kind == .walk, !followsYou else { return }
+            withAnimation { camera = stageCamera(step) }
+        }
+        .onChange(of: followsYou) { _, _ in
             guard !followHeading, !overview else { return }
-            withAnimation { camera = Self.camera(step, itinerary, live: live) }
+            withAnimation { camera = stageCamera(step) }
         }
         .onChange(of: overview) { _, whole in
             if whole { followHeading = false } else if followHeading { return }
-            withAnimation { camera = whole ? Self.overviewCamera(itinerary) : Self.camera(step, itinerary, live: isLive) }
+            withAnimation { camera = whole ? Self.overviewCamera(itinerary) : stageCamera(step) }
         }
     }
 
@@ -1046,7 +1066,7 @@ private struct GuideMap: View {
         let stage = leg.legGeometry.mapPoints + [leg.from.coordinate, leg.to.coordinate]
         if followHeading { return .follow(heading: true, fallback: stage) }
         switch step.kind {
-        case .walk: return isLive ? .follow(heading: false, fallback: stage) : .fit(stage)
+        case .walk: return followsYou ? .follow(heading: false, fallback: stage) : .fit(detour?.points ?? stage)
         case .wait: return .around(leg.from.coordinate, meters: 900)
         case .ride: return .fit(leg.legGeometry.mapPoints + leg.allStops.map(\.coordinate))
         case .arrive: return .around(leg.to.coordinate, meters: 900)
@@ -1057,13 +1077,20 @@ private struct GuideMap: View {
         .rect(rect(it.legs.flatMap { $0.legGeometry.mapPoints + [$0.from.coordinate, $0.to.coordinate] }))
     }
 
-    static func camera(_ step: GuideStep, _ it: Itinerary, live: Bool = true) -> MapCameraPosition {
+    /// The camera for a stage on this map: following you on the walk you are on, else the stage's place.
+    private func stageCamera(_ step: GuideStep) -> MapCameraPosition {
+        Self.camera(step, itinerary, follow: followsYou, detour: detour?.points)
+    }
+
+    static func camera(_ step: GuideStep, _ it: Itinerary, follow: Bool = false, detour: [LatLon]? = nil) -> MapCameraPosition {
         let leg = it.legs[step.legIndex]
         switch step.kind {
         case .walk:
-            // A later walk: its own way from start to end, not where you stand now.
-            let whole = MapCameraPosition.rect(rect(leg.legGeometry.mapPoints + [leg.from.coordinate, leg.to.coordinate]))
-            return live ? .userLocation(fallback: whole) : whole
+            // Not on this walk (a later one, or you are still elsewhere): its own way from start to end;
+            // away from it with a way from here, that way. Only on the walk does the map follow you.
+            let points = (detour?.count ?? 0) > 1 ? detour! : leg.legGeometry.mapPoints + [leg.from.coordinate, leg.to.coordinate]
+            let whole = MapCameraPosition.rect(rect(points))
+            return follow ? .userLocation(fallback: whole) : whole
         case .wait:
             return .camera(MapCamera(centerCoordinate: leg.from.coordinate.clCoordinate, distance: 900))
         case .ride:
