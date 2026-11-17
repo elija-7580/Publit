@@ -124,7 +124,7 @@ struct ItineraryDetailView: View {
             // 1. What matters first: the way at a glance, when, how long, which lines, live state and warnings.
             // The route as the picture at the top (iPad: it is on the big map next to this panel already).
             if wideMap == nil {
-                MapHeroSpace { showsMap = true }
+                MapHeroSpace()
             }
 
             Section {
@@ -214,7 +214,7 @@ struct ItineraryDetailView: View {
             }
         }
         .readableWidth()
-        .inkList(hero: wideMap == nil) { insets in
+        .inkList(hero: wideMap == nil, onExpand: { showsMap = true }) { insets in
             ZStack {
                 Color.surface
                 // Drawn a moment after the screen opens: building a map with a long route made the push wait.

@@ -78,7 +78,7 @@
 
 ## `Sources/Views/ChooseOnMapView.swift`
 - Views: `ChooseOnMapView`, `CenterPin`
-- Sichtbare Texte: Choose on map · Finding the address… · Move the map or tap to place the pin · Confirm location · Dropped pin
+- Sichtbare Texte: Choose on map · Finding the address… · Move the map to place the pin · Confirm location · Dropped pin
 
 ## `Sources/Views/Components/CoverageBanner.swift`
 - Views: `CoverageBanner`, `CoverageMapNote`, `CoverageMark`
@@ -141,7 +141,7 @@
 
 ## `Sources/Views/LinesView.swift`
 - Views: `LinesView`, `LineRefRow`, `LineDetailView`, `LineMap`, `LineStopRow`, `LineTimetableView`
-- Sichtbare Texte: Saved lines · At %@ · Allow location access to see the lines around you, or search for a station. · No lines found nearby. · No lines for these modes. · No line nearby matches. Try a station below. · Stations · Lines · Line, destination or station · Direction · Towards %@ · Vehicle positions are estimated from live departure times. · %lld stops · Tap a stop for its timetable. · Saved line · Save line · %@ to %@, next stop %@ · +%lld min · Day · No departures on this day. · %lld departures · Scheduled times. Live delays are on the departure board.
+- Sichtbare Texte: Saved lines · At %@ · Allow location access to see the lines around you, or search for a station. · No lines found nearby. · No lines for these modes. · No line nearby matches. Try a station below. · Stations · Lines · Line, destination or station · Direction · Towards %@ · %lld stops · Tap a stop for its timetable. · Vehicle positions are estimated from live departure times. · Done · Saved line · Save line · %@ to %@, next stop %@ · +%lld min · Day · No departures on this day. · %lld departures · Scheduled times. Live delays are on the departure board.
 
 ## `Sources/Views/LiveSourcesView.swift`
 - Views: `LiveSourcesView`

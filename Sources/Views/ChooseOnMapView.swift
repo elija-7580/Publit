@@ -1,9 +1,12 @@
 import SwiftUI
 import MapKit
 
-/// "Choose on map" from the From and To fields: a pin in the middle of the map. Move the map, or tap
-/// a spot, to put the pin there; "Confirm location" fills the field with that point (and the street,
-/// once it is known). Nothing else in the planner changes.
+/// "Choose on map" from the From and To fields: a pin stands in the middle of the map, like in Apple
+/// Maps; move the map under it. The map behaves like any map (pinch, double-tap to zoom in, two-finger
+/// tap to zoom out, rotate): no own tap gesture on it, which used to swallow double-taps and made the
+/// map jump (feedback 2026-11-17). The pin lifts while the map moves and sets down where it stops;
+/// "Confirm location" fills the field with that point (and the street, once it is known).
+/// Nothing else in the planner changes.
 struct ChooseOnMapView: View {
     /// Where the map opens: where you are (else wherever MapKit starts).
     let start: LatLon?
@@ -13,16 +16,15 @@ struct ChooseOnMapView: View {
     @State private var center: LatLon?
     @State private var address: String?
     @State private var lookingUp = false
-    /// The visible height in metres, kept when a tap moves the pin.
-    @State private var span: CLLocationDistance = 600
-    @State private var regionCenter: CLLocationCoordinate2D?
+    /// The map is being moved: the pin is lifted.
+    @State private var moving = false
     @State private var geocoder = CLGeocoder()
 
     init(start: LatLon?, onConfirm: @escaping (SavedPlace) -> Void) {
         self.start = start
         self.onConfirm = onConfirm
         if let start, start.isValidCoordinate {
-            _camera = State(initialValue: .region(MKCoordinateRegion(center: start.clCoordinate, latitudinalMeters: 600, longitudinalMeters: 600)))
+            _camera = State(initialValue: .camera(MapCamera(centerCoordinate: start.clCoordinate, distance: 900)))
             _center = State(initialValue: start)
         } else {
             _camera = State(initialValue: .userLocation(fallback: .automatic))
@@ -38,29 +40,23 @@ struct ChooseOnMapView: View {
                 Map(position: $camera) {
                     UserAnnotation()
                 }
-                .mapStyle(.standard)
-                .mapControls { MapUserLocationButton(); MapCompass() }
-                .onMapCameraChange(frequency: .onEnd) { context in
-                    regionCenter = context.region.center
-                    span = max(150, context.region.span.latitudeDelta * 111_000)
+                .mapStyle(.standard(pointsOfInterest: .excludingAll))
+                .mapControls { MapUserLocationButton(); MapCompass(); MapScaleView() }
+                .onMapCameraChange(frequency: .continuous) { _ in
+                    guard !moving else { return }
+                    address = nil
+                    withAnimation(.spring(response: 0.25, dampingFraction: 0.7)) { moving = true }
+                }
+                .onMapCameraChange(frequency: .onEnd) { _ in
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.55)) { moving = false }
                     guard let c = proxy.convert(tip, from: .local) else { return }
                     let point = LatLon(lat: c.latitude, lon: c.longitude)
-                    guard point.isValidCoordinate else { return }
+                    guard point.isValidCoordinate, point != center || address == nil else { return }
                     center = point
                     lookUp(point)
                 }
-                // A tap puts the pin there: the map moves so the tapped spot lies under the pin.
-                .onTapGesture { screenPoint in
-                    guard let tapped = proxy.convert(screenPoint, from: .local),
-                          let underPin = proxy.convert(tip, from: .local),
-                          let regionCenter else { return }
-                    let target = CLLocationCoordinate2D(latitude: regionCenter.latitude + tapped.latitude - underPin.latitude,
-                                                        longitude: regionCenter.longitude + tapped.longitude - underPin.longitude)
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        camera = .region(MKCoordinateRegion(center: target, latitudinalMeters: span, longitudinalMeters: span))
-                    }
-                }
-                .overlay { CenterPin().allowsHitTesting(false) }
+                .overlay { CenterPin(lifted: moving).allowsHitTesting(false) }
+                .sensoryFeedback(.impact(weight: .light), trigger: moving) { was, now in was && !now }
             }
         }
         .safeAreaInset(edge: .bottom) { confirmBar }
@@ -78,7 +74,7 @@ struct ChooseOnMapView: View {
                     Text(verbatim: address).font(.subheadline.weight(.semibold)).lineLimit(2)
                 } else {
                     Group {
-                        if lookingUp { Text("Finding the address…") } else { Text("Move the map or tap to place the pin") }
+                        if lookingUp || moving { Text("Finding the address…") } else { Text("Move the map to place the pin") }
                     }
                     .font(.subheadline).foregroundStyle(.secondary)
                 }
@@ -123,18 +119,38 @@ struct ChooseOnMapView: View {
     }
 }
 
-/// The pin in the middle of the map, its tip on the point that will be used.
+/// The pin in the middle of the map, in Publit's look: an ink head with the yellow dot on a short
+/// stem, its tip on the point that will be used. While the map moves it lifts, and its shadow on
+/// the ground grows and fades, so it is clear where it will set down.
 private struct CenterPin: View {
+    var lifted = false
+
+    private static let head: CGFloat = 34
+    private static let stem: CGFloat = 16
+
     var body: some View {
-        VStack(spacing: 0) {
-            Image(systemName: "mappin")
-                .font(.system(size: 34, weight: .semibold))
-                .foregroundStyle(Color.danger)
-                .shadow(radius: 2)
-            Circle().fill(.black.opacity(0.35)).frame(width: 6, height: 3)
+        ZStack {
+            // The shadow on the ground, right under the tip.
+            Ellipse()
+                .fill(.black.opacity(lifted ? 0.18 : 0.32))
+                .frame(width: lifted ? 18 : 10, height: lifted ? 7 : 4)
+                .blur(radius: lifted ? 2 : 0.5)
+            VStack(spacing: 0) {
+                ZStack {
+                    Circle().fill(Color.ink)
+                    Circle().strokeBorder(.white, lineWidth: 3)
+                    SignatureDot(size: 12)
+                }
+                .frame(width: Self.head, height: Self.head)
+                .shadow(color: .black.opacity(0.3), radius: lifted ? 6 : 3, y: lifted ? 4 : 2)
+                Capsule()
+                    .fill(Color.ink)
+                    .frame(width: 3, height: Self.stem)
+                    .overlay(Capsule().strokeBorder(.white.opacity(0.7), lineWidth: 0.5))
+            }
+            // The tip, not the middle, sits on the centre of the map; lifted it floats above it.
+            .offset(y: -(Self.head + Self.stem) / 2 - (lifted ? 12 : 0))
         }
-        // The tip, not the middle of the symbol, sits on the centre of the map.
-        .offset(y: -18)
         .accessibilityHidden(true)
     }
 }

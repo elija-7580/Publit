@@ -160,6 +160,7 @@ struct LineDetailView: View {
     @State private var vehicleDepartures: [StopTime] = []
     @State private var errorMessage: String?
     @State private var loaded = false
+    @State private var showsMap = false
 
     private var direction: LineDirection? { directions.first { $0.id == directionId } ?? directions.first }
     private var leg: Leg? { direction.flatMap { legs[$0.id] } }
@@ -167,6 +168,8 @@ struct LineDetailView: View {
 
     var body: some View {
         List {
+            // The line as the map at the top, like Nearby, a route and a trip: movable right there.
+            if leg != nil { MapHeroSpace() }
             Section {
                 HStack(spacing: 10) {
                     LineBadge(line)
@@ -188,19 +191,6 @@ struct LineDetailView: View {
                 let stops = leg.allStops
                 let pattern = direction.flatMap { patterns[$0.id] }
                 Section {
-                    Clocked(every: Energy.interval(5)) { now in
-                        LineMap(line: line, shape: leg.legGeometry.mapPoints, stops: stops,
-                                vehicles: pattern.map { p in
-                                    LineVehicles.estimate(p, at: p.index(of: line.stopId, near: line.coordinate),
-                                                          departures: vehicleDepartures, now: now)
-                                } ?? [])
-                    }
-                    .frame(height: 280)
-                    .listRowInsets(EdgeInsets())
-                } footer: {
-                    Text("Vehicle positions are estimated from live departure times.")
-                }
-                Section {
                     ForEach(Array(stops.enumerated()), id: \.offset) { i, stop in
                         NavigationLink {
                             LineTimetableView(line: line, stopId: stop.stopId ?? stop.stationId, stopName: stop.name,
@@ -215,7 +205,7 @@ struct LineDetailView: View {
                 } header: {
                     Text(L10n.f("%lld stops", stops.count))
                 } footer: {
-                    Text("Tap a stop for its timetable.")
+                    Text("Tap a stop for its timetable.") + Text(verbatim: " ") + Text("Vehicle positions are estimated from live departure times.")
                 }
             } else if let errorMessage {
                 Text(errorMessage).foregroundStyle(.secondary)
@@ -226,7 +216,20 @@ struct LineDetailView: View {
             }
         }
         .readableWidth()
-        .inkList()
+        .inkList(hero: leg != nil, onExpand: { showsMap = true }) { insets in
+            lineMap(controls: false).safeAreaPadding(insets)
+        }
+        .fullScreenCover(isPresented: $showsMap) {
+            NavigationStack {
+                lineMap(controls: true)
+                    .ignoresSafeArea(edges: .bottom)
+                    .navigationTitle(line.lineName)
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) { Button("Done") { showsMap = false } }
+                    }
+            }
+        }
         .navigationTitle(line.lineName)
         .screenTrail("Line")
         .navigationBarTitleDisplayMode(.inline)
@@ -253,6 +256,23 @@ struct LineDetailView: View {
             while !Task.isCancelled {
                 await loadVehicles(d)
                 try? await Task.sleep(for: Energy.duration(30))
+            }
+        }
+    }
+
+    /// The route with its stops and the vehicles on it (estimated from live departures, every few seconds).
+    @ViewBuilder
+    private func lineMap(controls: Bool) -> some View {
+        if let leg {
+            let stops = leg.allStops
+            let pattern = direction.flatMap { patterns[$0.id] }
+            Clocked(every: Energy.interval(5)) { now in
+                LineMap(line: line, shape: leg.legGeometry.mapPoints, stops: stops,
+                        vehicles: pattern.map { p in
+                            LineVehicles.estimate(p, at: p.index(of: line.stopId, near: line.coordinate),
+                                                  departures: vehicleDepartures, now: now)
+                        } ?? [],
+                        controls: controls)
             }
         }
     }
@@ -317,6 +337,8 @@ private struct LineMap: View {
     let shape: [LatLon]
     let stops: [Place]
     let vehicles: [LineVehicles.Vehicle]
+    /// Location button and compass: in the full map; the one at the top stays clean like Nearby.
+    var controls = true
     @Environment(LocationManager.self) private var location
     /// The map's own turn, so the arrow on your position keeps pointing the real way.
     @State private var mapHeading = 0.0
@@ -343,6 +365,7 @@ private struct LineMap: View {
         }
         .publitMapStyle()
         .mapControls { MapUserLocationButton(); MapCompass() }
+        .mapControlVisibility(controls ? .automatic : .hidden)
         .onMapCameraChange(frequency: .onEnd) { mapHeading = $0.camera.heading }
         .compassWhileShown("lineMap")
     }

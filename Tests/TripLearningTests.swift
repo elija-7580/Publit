@@ -21,7 +21,10 @@ final class TripLearningTests: XCTestCase {
     func testFewTripsMoveItLittleManyMore() {
         // This user needs twice the planned time.
         let few = TripLearning.walkModel(from: (0..<2).map { _ in obs(planned: 180, actual: 360) })
-        let many = TripLearning.walkModel(from: (0..<60).map { i in obs(planned: Double(120 + i % 5 * 60), actual: Double(120 + i % 5 * 60) * 2) })
+        let many = TripLearning.walkModel(from: (0..<60).map { (i: Int) -> TripLearning.Observation in
+            let planned = Double(120 + (i % 5) * 60)
+            return obs(planned: planned, actual: planned * 2)
+        })
         let walk = TransferWalk(plannedSeconds: 180)
         let prior = WalkModel.prior.expectedSeconds(walk)
         XCTAssertGreaterThan(few.expectedSeconds(walk), prior)

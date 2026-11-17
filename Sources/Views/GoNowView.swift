@@ -21,7 +21,7 @@ struct GoNowView: View {
         let badges = SmartRouting.isEnabled ? SmartRouting.badges(its, arriveBy: false) : [:]
         List {
             // The routes as the picture at the top (iPad: on the big map next to this panel).
-            if wideMap == nil { MapHeroSpace { showsMap = true } }
+            if wideMap == nil { MapHeroSpace() }
             Section {
                 // Not always from here: a friend's place, the hotel, the station you will be at.
                 Button { pickingStart = true } label: {
@@ -93,7 +93,7 @@ struct GoNowView: View {
                                     fromName: plan.from.title, toName: plan.to?.title ?? "")
         }
         .readableWidth()
-        .inkList(hero: wideMap == nil) { insets in
+        .inkList(hero: wideMap == nil, onExpand: { showsMap = true }) { insets in
             // Redrawn only when the routes change, not on every refresh of this list (long routes
             // with many points made opening one wait for the map).
             CompareMapView(itineraries: its, selectedId: selectedId ?? its.first?.routeKey, previewInsets: insets)
