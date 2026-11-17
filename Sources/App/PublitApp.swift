@@ -249,7 +249,7 @@ struct RootView: View {
             if scenePhase == .background {
                 LineAlertMonitor.scheduleBackgroundCheck()
                 // On board with the location-based get-off alert: the location keeps running.
-                location.setTripTracking(GetOffAlerts.wantsTracking(trips.activeTrip))
+                location.setTripTracking(TripTracking.wanted(trips.activeTrip))
                 location.pause()
                 // Nothing updates a Live Activity without the app: it goes by itself after the arrival.
                 await LiveTripActivity.handOver { trips.trip($0) }
@@ -259,11 +259,16 @@ struct RootView: View {
             location.start()
             // Each fix on board: the get-off alert by location (#69); off again after the ride.
             location.onFix = { [trips, location] fix in
-                guard let trip = trips.activeTrip, GetOffAlerts.wantsTracking(trip) else {
+                guard let trip = trips.activeTrip, TripTracking.wanted(trip) else {
                     location.setTripTracking(false)
                     return
                 }
-                Task { await GetOffAlerts.handle(fix, trip: trip) }
+                // Smart routing: learn from your changes (only with "Learn from my trips") and warn
+                // when the next one will not work from where you are. Positions stay in memory.
+                let here = LatLon(lat: fix.coordinate.latitude, lon: fix.coordinate.longitude)
+                TransferRecorder.shared.handle(here, accuracy: fix.horizontalAccuracy, at: fix.timestamp, trip: trip)
+                ChangeRiskNotifier.check(trip, position: here)
+                if GetOffAlerts.wantsTracking(trip) { Task { await GetOffAlerts.handle(fix, trip: trip) } }
             }
             // Where open timetable data is missing changes every week; get the newest map of it.
             Task.detached(priority: .utility) { await CoverageAtlasStore.shared.refreshIfNeeded() }
@@ -328,6 +333,7 @@ struct RootView: View {
                     await LeaveReminder.follow(trip, to: updated)
                     await GetOffReminder.follow(from: trip.itinerary, to: updated.itinerary)
                     await TripChangeAlert.follow(trip.id, from: trip.itinerary, to: updated.itinerary)
+                    ChangeRiskNotifier.check(updated)
                     await ArrivalUpdates.follow(updated)
                 }
             }
@@ -339,7 +345,7 @@ struct RootView: View {
                 LiveTripActivity.start(trip, hasTicket: !passes.passes(forTrip: trip.id, at: trip.startTime).isEmpty)
             }
         }
-        location.setTripTracking(GetOffAlerts.wantsTracking(trips.activeTrip))
+        location.setTripTracking(TripTracking.wanted(trips.activeTrip))
         let live = trips.upcoming(now: Date().addingTimeInterval(-15 * 60)).filter { LiveTripActivity.isRunning($0.id) || trips.activeTripId == $0.id }
         return LiveRefresh.interval(live.map(\.itinerary))
     }

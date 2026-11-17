@@ -84,6 +84,15 @@ struct ChangeChanceRow: View {
         }
     }
 
+    /// Where the number comes from: never a precise-looking figure without anything behind it.
+    private var basis: String {
+        switch change.basis {
+        case .estimate: return L10n.t("Estimate")
+        case .ownTrips(let n): return L10n.f("Based on %lld of your trips", n)
+        case .throughRun: return L10n.t("Stays on the same vehicle")
+        }
+    }
+
     var body: some View {
         let spare = change.spareMinutes >= 1 ? L10n.f("%@ to spare", Fmt.duration(seconds: Int(change.spareMinutes * 60)))
             : L10n.t("Very tight change")
@@ -93,12 +102,13 @@ struct ChangeChanceRow: View {
                     .foregroundStyle(tint)
                 Text(L10n.f("Change at %@", change.stopName)).font(.subheadline.weight(.semibold))
                 Spacer(minLength: 8)
-                Text(verbatim: "\(change.percent) %")
+                Text(verbatim: change.basis == .estimate ? "~\(change.percent) %" : "\(change.percent) %")
                     .font(.subheadline.weight(.bold).monospacedDigit())
                     .foregroundStyle(tint)
             }
             Text(verbatim: "\(verdict) · \(spare)")
                 .font(.caption).foregroundStyle(.secondary)
+            Text(basis).font(.caption2).foregroundStyle(.tertiary)
             if let backup = SmartRouting.backup(for: change.outgoing) {
                 let then = isLastRide ? L10n.f("Arrive %@", Fmt.time(backup.arrival, tz: change.outgoing.to.tz))
                     : L10n.t("still makes the next change")
@@ -125,10 +135,15 @@ struct SmartRoutingSettingsSection: View {
     @AppStorage(SmartRouting.measuredSpeedKey) private var measuredSpeed = 0.0
     @AppStorage(SmartRouting.flatWalksKey) private var flatWalks = false
     @AppStorage(SmartRouting.learnKey) private var learn = true
+    @AppStorage(TransferLearning.enabledKey) private var learnTrips = false
+    @AppStorage(TransferLearning.warnKey) private var warnChanges = true
     @State private var measuring = false
+    @State private var resets = 0
 
     private var learnedSomething: Bool {
-        transferMinutes != SmartRouting.defaultTransferMinutes || walkWeight != SmartRouting.defaultWalkWeight
+        _ = resets
+        return transferMinutes != SmartRouting.defaultTransferMinutes || walkWeight != SmartRouting.defaultWalkWeight
+            || TransferLearning.learnedSomething
     }
 
     var body: some View {
@@ -190,9 +205,18 @@ struct SmartRoutingSettingsSection: View {
                 }
                 Toggle(L10n.t("Avoid steep walks"), isOn: $flatWalks)
                 Toggle(L10n.t("Learn from my choices"), isOn: $learn)
+                Toggle(isOn: $learnTrips) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(L10n.t("Learn from my trips"))
+                        Text(L10n.t("How long your changes take on trips you start – your pace, stairs, lifts. Used for every change, kept only on this iPhone."))
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+                Toggle(L10n.t("Warn me if a change won't work"), isOn: $warnChanges)
                 if learnedSomething {
                     Button(L10n.t("Reset learned preferences")) {
                         SmartRouting.resetLearning()
+                        resets += 1
                         transferMinutes = SmartRouting.defaultTransferMinutes
                         walkWeight = SmartRouting.defaultWalkWeight
                     }

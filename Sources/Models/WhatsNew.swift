@@ -20,6 +20,14 @@ enum WhatsNew {
 
     /// Newest first.
     static let entries: [WhatsNewEntry] = [
+        WhatsNewEntry(build: 88, items: [
+            WhatsNewItem(symbol: "figure.walk", title: "Changes at your pace",
+                         text: "Turn on “Learn from my trips” and Publit learns how long your changes take, stairs and lifts included – only on your iPhone."),
+            WhatsNewItem(symbol: "bell.badge", title: "Warned before you miss it",
+                         text: "If a change on your trip stops working because of delays, you get a notification with other connections."),
+            WhatsNewItem(symbol: "checkmark.seal", title: "Honest chances",
+                         text: "Each change says where its chance comes from: an estimate, or your own trips."),
+        ]),
         WhatsNewEntry(build: 87, items: [
             WhatsNewItem(symbol: "location.north.line", title: "Clearer live trips",
                          text: "Each stage starts at its own place on the map; the whole trip is one tap away under Trip overview."),
