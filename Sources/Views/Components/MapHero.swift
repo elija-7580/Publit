@@ -53,19 +53,16 @@ struct MapHeroSpace: View {
 /// MapKit's map is a UIKit view, and a shape cut out of it does not stop it taking touches, so it
 /// must not lie over the card at all (a cut-out version swallowed taps on "Where to now?").
 private struct MapHeroLayer<M: View>: View {
-    let row: CGRect
-    /// The row's place when the screen opened: further up it has scrolled, further down it is pulled.
-    let restY: CGFloat
+    /// How far the list has moved from its rest: negative scrolled up, positive pulled down.
+    let moved: CGFloat
     let map: (EdgeInsets) -> M
     let onExpand: () -> Void
 
     var body: some View {
         GeometryReader { g in
-            // Only how far the row has moved is reliable (a list row's absolute place in the space is
-            // not), so the map is placed from the bar's lower edge, where the row sits at rest (as in
-            // build 87).
+            // Placed from the bar's lower edge, where the hero row sits at rest (as in build 87), and
+            // moved exactly as far as the list.
             let bar = g.safeAreaInsets.top
-            let moved = row.minY - restY
             // Scrolled up the map goes along; pulled down (refresh) it stays and stretches.
             let top = min(0, moved)
             let cardTop = bar + MapHero.height + max(0, moved)
@@ -107,17 +104,35 @@ private struct MapHeroLayer<M: View>: View {
 }
 
 /// The ground behind the list and the map over its first row; the bar is see-through while the map shows.
+///
+/// The map follows the list's own scroll offset (iOS 18+), read every frame, so it goes up exactly
+/// with the content (feedback 2026-11-17: with the hero row's reported place it lagged or stood
+/// still, and the cards slid under the map). On iOS 17 the hero row's movement is the fallback.
 private struct MapHeroOverList<M: View>: ViewModifier {
     let map: (EdgeInsets) -> M
     let onExpand: () -> Void
+    /// iOS 18+: the list's offset from its rest (negative = scrolled up).
+    @State private var offset: CGFloat?
+    /// iOS 17: the hero row's place now and when the screen opened; nil while it is out of the list.
     @State private var row: CGRect?
     @State private var restY: CGFloat?
-    /// The row has scrolled out of the list.
-    @State private var gone = false
+    @State private var rowGone = false
+
+    private var moved: CGFloat? {
+        if let offset { return offset }
+        guard let row, let restY else { return nil }
+        return row.minY - restY
+    }
+
+    /// The map is fully out of sight: hidden, and the bar is solid again.
+    private var gone: Bool {
+        if offset == nil, rowGone { return true }
+        guard let moved else { return false }
+        return moved < -(MapHero.height + 120)
+    }
 
     private var scrolledAway: Bool {
-        guard !gone, let row, let restY else { return gone }
-        return row.minY - restY < -MapHero.height * 0.6
+        gone || (moved ?? 0) < -MapHero.height * 0.6
     }
 
     func body(content: Content) -> some View {
@@ -125,10 +140,11 @@ private struct MapHeroOverList<M: View>: ViewModifier {
             .scrollContentBackground(.hidden)
             .contentMargins(.top, 0, for: .scrollContent)
             .background(Color.ground.ignoresSafeArea())
+            .modifier(ListOffset(offset: $offset))
             .overlay {
                 // Kept while scrolled away (only hidden), so the map keeps where you moved it.
-                if let row, let restY {
-                    MapHeroLayer(row: row, restY: restY, map: map, onExpand: onExpand)
+                if let moved {
+                    MapHeroLayer(moved: max(moved, -(MapHero.height + 400)), map: map, onExpand: onExpand)
                         .opacity(gone ? 0 : 1)
                         .allowsHitTesting(!gone)
                         .accessibilityHidden(gone)
@@ -138,15 +154,32 @@ private struct MapHeroOverList<M: View>: ViewModifier {
             .onPreferenceChange(MapHeroFrameKey.self) { frame in
                 guard let frame else {
                     // The row left the list: the map is gone with it.
-                    if row != nil { gone = true }
+                    if row != nil { rowGone = true }
                     return
                 }
-                gone = false
+                rowGone = false
                 if restY == nil { restY = frame.minY }
                 row = frame
             }
             // Over the map the bar is see-through; once the map has scrolled away it is solid again.
             .toolbarBackground(scrolledAway ? .automatic : .hidden, for: .navigationBar)
+    }
+}
+
+/// The list's scroll offset from its rest (0 at rest, negative scrolled up, positive pulled down), iOS 18+.
+private struct ListOffset: ViewModifier {
+    @Binding var offset: CGFloat?
+
+    func body(content: Content) -> some View {
+        if #available(iOS 18.0, *) {
+            content.onScrollGeometryChange(for: CGFloat.self) { geo in
+                -(geo.contentOffset.y + geo.contentInsets.top)
+            } action: { _, now in
+                offset = now
+            }
+        } else {
+            content
+        }
     }
 }
 

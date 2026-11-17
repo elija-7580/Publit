@@ -102,9 +102,9 @@ struct PlanView: View {
                 CoverageBanner(notices: coverage).coverageRow()
             }
 
-            if plan.to == nil || !plan.searchStarted {
-                RecentSearchesSection()
-            } else {
+            // Recent searches live in the place search (tap From or To), not under the form
+            // (feedback 2026-11-17): the plan shows only results once a search has started.
+            if plan.to != nil && plan.searchStarted {
                 resultsSection(plan, pick: pick)
                 StreetComparisonSection(comparisons: plan.comparisons,
                                         bestTransit: plan.itineraries.filter { !$0.isDirect }.map(\.duration).min(),
