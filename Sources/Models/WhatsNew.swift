@@ -20,7 +20,7 @@ enum WhatsNew {
 
     /// Newest first.
     static let entries: [WhatsNewEntry] = [
-        WhatsNewEntry(build: 88, items: [
+        WhatsNewEntry(build: 89, items: [
             WhatsNewItem(symbol: "arrow.triangle.swap", title: "Honest change chances",
                          text: "Changes get a percentage only where Publit has measured how late the vehicles really run; elsewhere it says Estimate."),
             WhatsNewItem(symbol: "bell.badge", title: "Warned before a change breaks",
