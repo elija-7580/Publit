@@ -396,7 +396,8 @@ struct ItineraryRow: View {
             if let w = warnings.first { return (w.message, w.level == .missed ? Color.danger : Color.delay) }
             if itinerary.isCancelled { return (L10n.t("Cancelled"), Color.danger) }
             if let shaky {
-                return (L10n.f("Change at %@: %lld %% chance", shaky.stopName, shaky.percent),
+                return (shaky.isEstimate ? L10n.f("Change at %@ may be tight", shaky.stopName)
+                            : L10n.f("Change at %@: %lld %% chance", shaky.stopName, shaky.percent),
                         shaky.level == .risky ? Color.danger : Color.delay)
             }
             if itinerary.transitLegs.contains(where: { !$0.serviceAlerts.isEmpty || $0.isReplacementBus }) {

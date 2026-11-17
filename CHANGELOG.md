@@ -1,17 +1,20 @@
 # Changelog
 
-## 0.1.1 (build 88) – changes at your pace
-
-- **Smart routing → "Learn from my trips"** (off by default): on trips you start, Publit notes per change when the ride arrived, when you reached the next stop and whether you caught it. From that it learns a personal walk model – your pace against the plan, extra time per floor (stairs, escalators), per lift, for a changed platform, another station or a station with many levels – and uses it for every change, also ones you never made. Bayesian: a few own changes move the starting values only a little. Changes you make again and again (same stop, lines, time of day) also count their own success rate (worth 8 changes against the model). Only sums and counts are kept on the iPhone; positions are dropped right away. "Reset learned preferences" deletes it.
-- **New change chance**: P(arrival + your walk ≤ departure). Arrival: late more often than early; with a live forecast that forecast is the middle and its doubt grows with how far ahead it looks. Departure: only a live forecast counts. A cancelled ride breaks the change; the same vehicle going on (same trip) makes it safe. There is no delay history yet, so these chances are marked "Estimate" (shown as "~80 %", never above 97 %); with three or more own trips on that change: "Based on N of your trips".
-- **"Warn me if a change won't work"** (on): during a started or followed trip the chance is recomputed on every live refresh and, during the change, from where you are at your pace. Below 50 % (or cancelled) a notification "Change at risk" with the backup; tapping it opens the trip with other connections. Once per change, again only when it gets 20 points worse.
-- The app does not load measured delay tables yet (services/delay-history); until it does, chances stay marked "Estimate".
-
 ## Unreleased – fixes, maps you can touch
 
 - **Maps everywhere work in their small size**: the map at the top of Nearby, Go now and a route moves and zooms right where it is, and on Nearby a tap on a station opens its departures. The expand key still opens the full map.
 - **Walking navigation**: a walking-only route opened the first walk ever saved (an old walk in Annenheim, also in Apple Maps) instead of the one just planned. Walks have no ID from the router, and every walk matched the first saved one.
 - **Settings → Community**: the card sits in one rounded group with "What's new in Publit" again, and the community icon no longer sticks out to the left.
+
+## 0.1.1 (build 88) – measured change chances, change alerts, learning from your trips
+
+- **Change alerts**: for a started trip (and trips with a running Live Activity) every coming change is recomputed when live data changes and, on foot between two rides, from how far you still are from the departure and how fast you walk. Below "likely" or when the connection is cancelled: a notification "Your connection at … is unlikely – n alternatives"; tapping it opens routes from the change stop (or from where you are) to your destination, leaving now. One alert per change, another only if it gets clearly worse; none for through-runs. Settings → Smart routing → "Change alerts".
+- **Learn from my trips** (off by default, on the iPhone only): during started trips Publit measures how long each change really took and whether you made it, keeps only those values (no location track), and learns your own walking model – pace, stairs, lifts, platform and station changes, your own overhead – which also applies to changes you have never made. Changes made often also use your own success rate. "Reset learned preferences" deletes it.
+- Background limits: iOS runs background refreshes when it chooses (often not every 15 minutes); during a started trip with learning or the location-based get-off alert, location fixes keep the checks going.
+
+- **Smart routing**: the chance of a change now comes from measured delays where Publit has them (new table per country on publit.eu, built by `services/delay-history` from open real-time feeds): the feeder's arrival delay and the connection's departure delay at that stop, line and time of day, combined (a connection that often leaves late helps). With live data: the current forecast and how far such forecasts are usually off at that distance. The walk adds lifts, levels, a platform that changed after planning, a station change and big stations; "Extra time for changes" comes on top. Cancellation rates count. Through-runs (same vehicle continues) are always safe.
+- Under each change: "Based on N past trips" or "Estimate". Without measured data the old rule of thumb stays, shown without a percentage. Few observations never give 99 %.
+- Thresholds (Safe 90 %, likely 70 %) stay until the new chances are calibrated against real outcomes (docs/calibration.md).
 
 ## 0.1.1 (build 86) – the Nearby map everywhere
 

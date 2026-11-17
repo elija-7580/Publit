@@ -81,19 +81,3 @@ enum GetOffAlerts {
 
     static func forget(_ tripId: String) { lastRideNote[tripId] = nil }
 }
-
-/// Whether the position should keep coming with the screen locked during the started trip:
-/// for the get-off alert by location, or to learn from the changes ("Learn from my trips").
-@MainActor
-enum TripTracking {
-    static func wanted(_ trip: SavedTrip?, now: Date = .now) -> Bool {
-        GetOffAlerts.wantsTracking(trip, now: now) || learns(trip, now: now)
-    }
-
-    static func learns(_ trip: SavedTrip?, now: Date = .now) -> Bool {
-        guard let trip, TransferLearning.isEnabled else { return false }
-        return SmartRouting.changes(trip.itinerary, at: now).contains {
-            !$0.isThroughRun && $0.incoming.endTime.addingTimeInterval(-600) <= now && $0.outgoing.startTime.addingTimeInterval(300) >= now
-        }
-    }
-}

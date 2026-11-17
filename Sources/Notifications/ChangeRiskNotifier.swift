@@ -1,55 +1,52 @@
 import Foundation
 import UserNotifications
 
-/// A change on a followed trip has become unlikely: a notification right away, with the backup;
-/// tapping it opens the trip with other connections from that stop. Once per change, again only
-/// when the chance falls by another 20 points or the ride is cancelled. Computed on the iPhone
-/// (live refresh while Publit is open, the position during a started trip); never asks for permission.
+/// "Your connection at … is unlikely": a local notification when a change of a started or remembered
+/// trip drops below "likely" or its connection is cancelled (`ChangeWatch` decides, at most once per
+/// change unless it gets clearly worse). Tapping it opens routes from the change stop – or from where
+/// the user is, once off the feeder – to the destination, leaving now. Only when notifications are
+/// already allowed and Settings → Smart routing → "Change alerts" is on; this never asks.
+@MainActor
 enum ChangeRiskNotifier {
-    private static let sentKey = "changeRiskSent"
-
-    static func identifier(tripId: String, _ change: SmartRouting.Change) -> String {
-        "changerisk|\(tripId)|\(change.stopName)|\(change.outgoing.tripId ?? change.outgoing.lineName)"
-    }
-
-    @MainActor
-    static func check(_ trip: SavedTrip, at now: Date = .now, position: LatLon? = nil) {
-        guard SmartRouting.isEnabled, TransferLearning.warns,
-              let risk = SmartRouting.changeAtRisk(trip.itinerary, at: now, position: position) else { return }
-        notify(risk, tripId: trip.id, message: riskMessage(risk), now: now)
-    }
-
-    static func notify(_ change: SmartRouting.Change, tripId: String, message: String, now: Date = .now) {
-        guard TransferLearning.warns else { return }
-        let id = identifier(tripId: tripId, change)
-        let cancelled = change.outgoing.cancelled == true || change.incoming.cancelled == true
-        var sent = UserDefaults.standard.dictionary(forKey: sentKey) as? [String: [Double]] ?? [:]
-        sent = sent.filter { now.timeIntervalSince1970 - ($0.value.last ?? 0) < 2 * 86_400 }
-        guard TransferLearning.warningDue(chance: change.chance, cancelled: cancelled, lastWarned: sent[id]?.first) else { return }
-        sent[id] = [cancelled ? 0.01 : change.chance, now.timeIntervalSince1970]
-        UserDefaults.standard.set(sent, forKey: sentKey)
-        Task {
-            let center = UNUserNotificationCenter.current()
-            let settings = await center.notificationSettings()
-            guard settings.authorizationStatus == .authorized || settings.authorizationStatus == .provisional else { return }
-            let content = UNMutableNotificationContent()
-            content.title = L10n.t("Change at risk")
-            content.body = message + " " + L10n.t("Tap for other connections.")
-            content.sound = .default
-            content.interruptionLevel = .active
-            content.userInfo = ["url": DeepLink.trip(tripId).url.absoluteString]
-            try? await center.add(UNNotificationRequest(identifier: id, content: content, trigger: nil))
+    /// Recomputes the trip's changes (live data, and the user's position and pace while on foot) and warns.
+    static func follow(_ trip: SavedTrip, here: LatLon? = nil, speed: Double? = nil, now: Date = .now) async {
+        guard SmartRouting.isEnabled, ChangeWatch.isEnabled else { return }
+        var changes = SmartRouting.changes(trip.itinerary, at: now)
+        if let here {
+            let pace = speed ?? (UserDefaults.standard.object(forKey: SmartRouting.measuredSpeedKey) as? Double ?? 1.3)
+            changes = changes.map { c in
+                let table = DelayHistoryStore.shared.table(country: DelayHistory.country(ofId: c.outgoing.routeId))
+                guard let p = ChangeWatch.onFoot(c, here: here, now: now, speed: pace, table: table) else { return c }
+                return SmartRouting.Change(stopName: c.stopName, incoming: c.incoming, outgoing: c.outgoing, outgoingIndex: c.outgoingIndex,
+                                           walkSeconds: c.walkSeconds, spareMinutes: c.spareMinutes, chance: min(c.chance, p),
+                                           source: c.source, walk: c.walk)
+            }
+        }
+        for c in ChangeWatch.due(changes, warned: ChangeWatch.warned, now: now) {
+            ChangeWatch.markWarned(c)
+            await post(c, trip: trip, here: here, now: now)
         }
     }
 
-    /// "Your change at Ostbahnhof may not work (40 %). Backup: S7 at 13:27"
-    static func riskMessage(_ r: SmartRouting.Change) -> String {
-        if r.outgoing.cancelled == true {
-            return L10n.f("%@ from %@ does not run.", r.outgoing.lineName, r.outgoing.from.name)
+    private static func post(_ c: SmartRouting.Change, trip: SavedTrip, here: LatLon?, now: Date) async {
+        let center = UNUserNotificationCenter.current()
+        let settings = await center.notificationSettings()
+        guard settings.authorizationStatus == .authorized || settings.authorizationStatus == .provisional else { return }
+        let content = UNMutableNotificationContent()
+        content.title = L10n.t("Change at risk")
+        content.body = ChangeWatch.message(c)
+        content.sound = .default
+        content.interruptionLevel = .active
+        // Still on the feeder: from the change stop. Already off it: from here.
+        let fromHere = here != nil && now >= c.incoming.endTime.addingTimeInterval(-60)
+        let stop = c.incoming.to
+        let from: SavedPlace? = fromHere ? nil
+            : SavedPlace(id: "stop|\(stop.stationId)", name: stop.name, subtitle: nil, lat: stop.lat, lon: stop.lon, stopId: stop.parentId ?? stop.stopId)
+        let end = trip.itinerary.legs.last?.to
+        if let end {
+            let to = SavedPlace(id: "dest|\(end.lat),\(end.lon)", name: trip.toName, subtitle: nil, lat: end.lat, lon: end.lon, stopId: end.stopId)
+            content.userInfo = ["url": DeepLink.alternatives(from: from, to: to).url.absoluteString]
         }
-        let backup = SmartRouting.backup(for: r.outgoing).map { b -> String in
-            " " + L10n.f("Backup: %@ at %@", b.leg.lineName, Fmt.time(b.leg.startTime, tz: b.leg.from.tz))
-        } ?? ""
-        return L10n.f("Your change at %@ may not work (%lld %%).", r.stopName, r.percent) + backup
+        try? await center.add(UNNotificationRequest(identifier: "changerisk|\(ChangeWatch.key(c))", content: content, trigger: nil))
     }
 }
