@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1 (build 92) – the first card under the map is tappable again
+
+- Build 91 placed the map at the top from the hero row's reported position, which inside the list is off; the map (a UIKit view that takes touches over its whole frame) reached over the first card, so "Where to now?" and other first cards could not be tapped at their top. The map is now placed from the bar's lower edge, where the row sits at rest, and only follows the row's movement.
+
 ## 0.1.1 (build 91) – maps edge to edge, a real pin
 
 - **Maps at the top** (Nearby, a route, Go now, a departure's trip and now also a line) are edge to edge again, up under the bar and fading out right above the first card, as in build 87. Build 88 had put the map into the list's first row, which the list drew inset with rounded corners, like a frame around it. The map now lies over the list and moves along with it, so it stays movable and zoomable right there; it ends at the first card (MapKit's view takes touches over its whole frame, so it must not lie over the card). Pulling the list down stretches the map.
