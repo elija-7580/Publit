@@ -278,11 +278,20 @@ struct CommunityCard: View {
     let open: () -> Void
     /// Support Publit (monthly or one-time); nil hides the button.
     var support: (() -> Void)? = nil
+    /// Its own rounded box; off inside a List row, which already draws one (in Settings the box
+    /// sat apart from the "What's new" row below it).
+    var boxed = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Label("Publit is a community project", systemImage: "person.3.fill")
-                .font(.headline)
+            // Not a Label: in a List, Label puts the icon in a fixed narrow column, and the wide
+            // three-person symbol stuck out to the left of the text.
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Image(systemName: "person.3.fill")
+                Text("Publit is a community project")
+            }
+            .font(.headline)
+            .accessibilityElement(children: .combine)
             Text("Vote for what comes next, or suggest your own idea. No account needed.")
                 .font(.subheadline).foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -299,8 +308,8 @@ struct CommunityCard: View {
                 .accessibilityIdentifier("supportOpen")
             }
         }
-        .padding(16)
-        .background(Color.inkFill, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .padding(boxed ? 16 : 0)
+        .background(boxed ? Color.inkFill : .clear, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 }
 

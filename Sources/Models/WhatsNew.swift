@@ -21,14 +21,20 @@ enum WhatsNew {
     /// Newest first.
     static let entries: [WhatsNewEntry] = [
         WhatsNewEntry(build: 88, items: [
+            WhatsNewItem(symbol: "arrow.triangle.swap", title: "Honest change chances",
+                         text: "Changes get a percentage only where Publit has measured how late the vehicles really run; elsewhere it says Estimate."),
             WhatsNewItem(symbol: "bell.badge", title: "Warned before a change breaks",
                          text: "On a started trip Publit rechecks each change with live times and warns you, with alternatives, when it becomes unlikely."),
             WhatsNewItem(symbol: "figure.walk", title: "Learns how you change",
                          text: "Turn on Learn from my trips and Publit learns how long your changes take, on your iPhone only."),
         ]),
         WhatsNewEntry(build: 87, items: [
-            WhatsNewItem(symbol: "arrow.triangle.swap", title: "Honest change chances",
-                         text: "Changes get a percentage only where Publit has measured how late the vehicles really run; elsewhere it says Estimate."),
+            WhatsNewItem(symbol: "location.north.line", title: "Clearer live trips",
+                         text: "Each stage starts at its own place on the map; the whole trip is one tap away under Trip overview."),
+            WhatsNewItem(symbol: "list.bullet.rectangle", title: "Calmer route list",
+                         text: "Every route shows its times, its lines, one line of facts and only the note that matters."),
+            WhatsNewItem(symbol: "star", title: "Saved trips at a glance",
+                         text: "Saved trips show their lines like in Plan and open on the route details."),
         ]),
         WhatsNewEntry(build: 86, items: [
             WhatsNewItem(symbol: "map", title: "The Nearby map everywhere",

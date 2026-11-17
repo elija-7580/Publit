@@ -76,9 +76,9 @@ struct SettingsView: View {
                 }
                 // Publit is a community project: what comes next is voted on, so this comes first.
                 Section {
-                    CommunityCard(open: { showWishes = true }, support: { showSupport = true })
-                        .listRowInsets(EdgeInsets())
-                        .listRowBackground(Color.clear)
+                    // A normal row: card and "What's new" share one rounded group.
+                    CommunityCard(open: { showWishes = true }, support: { showSupport = true }, boxed: false)
+                        .padding(.vertical, 6)
                     if ReleaseStory.all.first != nil {
                         Button { showStory = true } label: {
                             Label(L10n.t("What's new in Publit"), systemImage: "sparkles")
