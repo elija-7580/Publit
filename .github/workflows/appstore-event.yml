@@ -1,0 +1,21 @@
+name: App Store in-app event
+
+# Creates or updates the In-App Event for the update as a draft (tools/appstore/event.py).
+# Never submits it. Runs on a push to this branch or by hand.
+on:
+  push:
+    branches: ["appstore-event"]
+  workflow_dispatch:
+
+jobs:
+  event:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install -q pyjwt cryptography requests
+      - env:
+          KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          P8: ${{ secrets.ASC_KEY_P8 }}
+        run: python3 tools/appstore/event.py
