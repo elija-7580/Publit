@@ -84,6 +84,7 @@ enum GetOffAlerts {
 
 /// Whether the position should keep coming with the screen locked during the started trip:
 /// for the get-off alert by location, or to learn from the changes ("Learn from my trips").
+@MainActor
 enum TripTracking {
     static func wanted(_ trip: SavedTrip?, now: Date = .now) -> Bool {
         GetOffAlerts.wantsTracking(trip, now: now) || learns(trip, now: now)
