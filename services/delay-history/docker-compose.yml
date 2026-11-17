@@ -1,0 +1,17 @@
+services:
+  delay-history:
+    build: .
+    restart: unless-stopped
+    environment:
+      USER_AGENT: "Publit-DelayHistory/0.1 (+https://publit.eu)"
+      INTERVAL_SECONDS: "60"
+      RETENTION_DAYS: "90"
+      CH_OTD_KEY: "${CH_OTD_KEY:-}"     # free key from opentransportdata.swiss; feed is skipped without it
+    volumes:
+      - ./data:/data
+    networks: [caddy]
+    # no published port: Caddy reaches it on the shared network
+
+networks:
+  caddy:
+    external: true

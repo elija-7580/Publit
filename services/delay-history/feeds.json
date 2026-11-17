@@ -1,0 +1,12 @@
+[
+  {"tag": "de-DELFI", "url": "https://germany.motis-project.org/gtfsrt", "tz": "Europe/Berlin",
+   "static": "https://www.opendata-oepnv.de/ht/de/datensaetze/sharing?tx_vrrkit_view%5Bsharing%5D=eyJkYXRhc2V0IjoiZGV1dHNjaGxhbmR3ZWl0ZS1zb2xsZmFocnBsYW5kYXRlbi1ndGZzIn0",
+   "license": "CC-BY-SA-4.0 (realtime), CC-BY-4.0 (static)"},
+  {"tag": "de-VBN", "url": "http://gtfsr.vbn.de/gtfsr_connect.bin", "tz": "Europe/Berlin",
+   "static": "https://www.connect-info.net/opendata/gtfs/connect-nds-lowlevel/eyqasqtsse",
+   "license": "CC-BY-SA-4.0"},
+  {"tag": "ch-opentransportdataswiss26", "url": "https://api.opentransportdata.swiss/la/gtfs-rt", "tz": "Europe/Zurich",
+   "headers": {"Authorization": "env:CH_OTD_KEY"},
+   "static": "https://data.opentransportdata.swiss/de/dataset/timetable-2026-gtfs2020/permalink",
+   "license": "opentransportdata.swiss terms of use (free key, attribution)"}
+]
