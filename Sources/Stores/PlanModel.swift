@@ -477,6 +477,12 @@ final class AppState {
         case .trip, .route: tab = .plan
         case .stop: tab = .nearby
         case .ticket, .tripTickets, .go: break
+        case .alternatives(let from, let to):
+            // A change at risk: other routes from the change stop (or from here) to the destination, leaving now.
+            deepLink = nil
+            routeShared(to: to)
+            if let from { plan.from = .place(from) }
+            return
         case .place(let name, let lat, let lon):
             // Shared from Google Maps or another map app: the Plan tab with routes there from here, leaving now.
             deepLink = nil

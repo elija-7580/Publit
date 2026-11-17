@@ -11,7 +11,7 @@ settings:
   base:
     SWIFT_VERSION: "5.0"
     MARKETING_VERSION: "0.1.1"
-    CURRENT_PROJECT_VERSION: "87"
+    CURRENT_PROJECT_VERSION: "88"
     # Personal Team — Automatic Signing for local device installs.
     DEVELOPMENT_TEAM: "3D6S8GFSGK"
 packages:
@@ -140,6 +140,8 @@ targets:
       - Sources/Models/SmartRouting.swift
       - Sources/Models/DelayHistory.swift
       - Sources/Models/TransferWalk.swift
+      - Sources/Models/TripLearning.swift
+      - Sources/Models/ChangeWatch.swift
       - Sources/Models/TransitExtras.swift
       - Sources/Models/Reach.swift
       - Sources/Models/CircularLine.swift
@@ -192,6 +194,8 @@ targets:
       - Sources/Models/SmartRouting.swift
       - Sources/Models/DelayHistory.swift
       - Sources/Models/TransferWalk.swift
+      - Sources/Models/TripLearning.swift
+      - Sources/Models/ChangeWatch.swift
       - Sources/Models/TransitExtras.swift
       - Sources/Models/Reach.swift
       - Sources/Models/CircularLine.swift
