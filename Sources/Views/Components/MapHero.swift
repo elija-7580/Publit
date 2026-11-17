@@ -61,43 +61,48 @@ private struct MapHeroLayer<M: View>: View {
 
     var body: some View {
         GeometryReader { g in
-            // From the space's coordinates (the list) to this layer's (from the top of the screen).
-            let origin = g.frame(in: .named(MapHero.space)).origin
-            let rowTop = row.minY - origin.y
-            let restTop = restY - origin.y
+            // Only how far the row has moved is reliable (a list row's absolute place in the space is
+            // not), so the map is placed from the bar's lower edge, where the row sits at rest (as in
+            // build 87).
+            let bar = g.safeAreaInsets.top
+            let moved = row.minY - restY
             // Scrolled up the map goes along; pulled down (refresh) it stays and stretches.
-            let top = min(0, row.minY - restY)
-            let cardTop = rowTop + row.height + MapHero.gap
+            let top = min(0, moved)
+            let cardTop = bar + MapHero.height + max(0, moved)
             let height = max(1, cardTop - top)
 
-            // The insets keep the content in the part that shows: not under the bar, not in the fade.
-            map(EdgeInsets(top: max(0, restTop), leading: 0, bottom: MapHero.fade, trailing: 0))
-                .frame(width: g.size.width, height: height)
-                .mask {
-                    LinearGradient(stops: [
-                        .init(color: .black, location: 0),
-                        .init(color: .black, location: max(0, (height - MapHero.fade) / height)),
-                        .init(color: .clear, location: 1),
-                    ], startPoint: .top, endPoint: .bottom)
-                }
-                .overlay(alignment: .bottomTrailing) {
-                    Button(action: onExpand) {
-                        Image(systemName: "arrow.up.left.and.arrow.down.right")
-                            .font(.body.weight(.semibold))
-                            .foregroundStyle(Color.ink)
-                            .frame(width: 44, height: 44)
-                            .matteSurface(in: Circle())
-                            .mapShadow()
+            // Read in the safe area, drawn from the top of the screen (like build 87's map).
+            ZStack(alignment: .top) {
+                // The insets keep the content in the part that shows: not under the bar, not in the fade.
+                map(EdgeInsets(top: bar, leading: 0, bottom: MapHero.fade, trailing: 0))
+                    .frame(width: g.size.width, height: height)
+                    .mask {
+                        LinearGradient(stops: [
+                            .init(color: .black, location: 0),
+                            .init(color: .black, location: max(0, (height - MapHero.fade) / height)),
+                            .init(color: .clear, location: 1),
+                        ], startPoint: .top, endPoint: .bottom)
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(Text("Map"))
-                    .accessibilityIdentifier("mapHeroExpand")
-                    .padding(.trailing, max(4, g.size.width - (row.maxX - origin.x)))
-                    .padding(.bottom, 10)
-                }
-                .offset(y: top)
+                    .overlay(alignment: .bottomTrailing) {
+                        Button(action: onExpand) {
+                            Image(systemName: "arrow.up.left.and.arrow.down.right")
+                                .font(.body.weight(.semibold))
+                                .foregroundStyle(Color.ink)
+                                .frame(width: 44, height: 44)
+                                .matteSurface(in: Circle())
+                                .mapShadow()
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(Text("Map"))
+                        .accessibilityIdentifier("mapHeroExpand")
+                        .padding(.trailing, 20)
+                        .padding(.bottom, 10)
+                    }
+                    .offset(y: top)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            .ignoresSafeArea()
         }
-        .ignoresSafeArea(edges: .top)
     }
 }
 
