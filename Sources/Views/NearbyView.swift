@@ -112,7 +112,7 @@ struct NearbyView: View {
     /// With `hero` the map is the picture at its top.
     private func board(hero: Bool) -> some View {
         List {
-            if hero { MapHeroSpace { showMap = true } }
+            if hero { MapHeroSpace() }
             goSection(search: true)
             activeTripSection
             OfflineNote()
@@ -213,7 +213,7 @@ struct NearbyView: View {
             }
         }
         .readableWidth()
-        .inkList(hero: hero) { insets in
+        .inkList(hero: hero, onExpand: { showMap = true }) { insets in
             NearbyMap(here: location.coordinate, groups: groups, onOpenStation: { openedStop = StopTarget($0) }, preview: true,
                       heading: location.heading)
                 .safeAreaPadding(insets)

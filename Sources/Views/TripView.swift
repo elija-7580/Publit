@@ -46,7 +46,7 @@ struct TripView: View {
     var body: some View {
         List {
             // The trip as the map at the top, like Nearby and a route: movable right there.
-            if leg != nil { MapHeroSpace { showsMap = true } }
+            if leg != nil { MapHeroSpace() }
             Section {
                 DepartureRow(stopTime: stopTime)
                 ServiceAlertsView(alerts: trip == nil ? stopTime.serviceAlerts : alerts)
@@ -105,7 +105,7 @@ struct TripView: View {
             }
         }
         .readableWidth()
-        .inkList(hero: leg != nil) { insets in
+        .inkList(hero: leg != nil, onExpand: { showsMap = true }) { insets in
             tripMap(controls: false).safeAreaPadding(insets)
         }
         .fullScreenCover(isPresented: $showsMap) {

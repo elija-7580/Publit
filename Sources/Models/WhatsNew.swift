@@ -20,6 +20,12 @@ enum WhatsNew {
 
     /// Newest first.
     static let entries: [WhatsNewEntry] = [
+        WhatsNewEntry(build: 91, items: [
+            WhatsNewItem(symbol: "map", title: "Maps from edge to edge",
+                         text: "Nearby, routes, trips and lines show their map across the whole top again, and you can still move and zoom it right there."),
+            WhatsNewItem(symbol: "mappin", title: "A better pin on the map",
+                         text: "Choose on map has a new pin that lifts while you move the map, and double-tap to zoom works."),
+        ]),
         WhatsNewEntry(build: 90, items: [
             WhatsNewItem(symbol: "hand.draw", title: "Maps you can move",
                          text: "Move and zoom the maps at the top of Nearby, routes and departures right where they are, and tap a station on Nearby to see its departures."),
