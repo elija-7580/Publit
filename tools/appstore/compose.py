@@ -147,11 +147,18 @@ def compose(root, src, scene, lang, kind, out):
         a.paste(Image.composite(a.crop((0, 0, dev.width, fade)), Image.new("L", (dev.width, fade), 0), grad), (0, 0))
         dev.putalpha(a)
     else:
+        # The same device size on every screen of a set: sized for the longest caption (two lines
+        # of headline, two of subtitle) and sitting on the same bottom line, so a short caption
+        # only leaves more room above it (feedback 2026-11-18: the iPhones were of different sizes,
+        # each filled whatever room its caption left).
         mx = int(70*k) if not land else x0
-        scale = (H - top - (int(50*k) if not land else 40)) / dev.height
+        bottom = int(50*k) if not land else 40
+        y0 = (gy + int(110*k)) if not land else 210
+        top_max = y0 + 2 * int(hs * 1.1) + (int(38*k) if not land else 30) + 2 * int(ss * 1.42) + (int(44*k) if not land else 60)
+        scale = (H - top_max - bottom) / dev.height
         if dev.width * scale > W - 2*mx: scale = (W - 2*mx) / dev.width
         dev = dev.resize((int(dev.width*scale), int(dev.height*scale)), Image.LANCZOS)
-        fx, fy = (W - dev.width)//2, top
+        fx, fy = (W - dev.width)//2, max(top, H - bottom - dev.height)
     sh = Image.new("L", (W, H), 0)
     sh.paste(dev.getchannel("A").point(lambda v: 110 if v > 128 else 0), (fx, fy + int(22*k)))
     sh = sh.filter(ImageFilter.GaussianBlur(max(6, int(34*k))))
