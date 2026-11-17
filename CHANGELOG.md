@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1 (build 93) – the map scrolls with the list, no recent searches under the Plan form
+
+- **Map at the top**: when scrolling, the cards slid under the map, which lagged or stood still (it followed the hero row's reported place, which a list does not report every frame). On iOS 18+ it now follows the list's own scroll offset every frame and goes up exactly with the content; iOS 17 keeps the row-based fallback.
+- **Plan**: "Recently searched" no longer appears under the form; recent searches are in the place search (tap From or To). Under the form only results show, once a search has started.
+
 ## 0.1.1 (build 92) – the first card under the map is tappable again
 
 - Build 91 placed the map at the top from the hero row's reported position, which inside the list is off; the map (a UIKit view that takes touches over its whole frame) reached over the first card, so "Where to now?" and other first cards could not be tapped at their top. The map is now placed from the bar's lower edge, where the row sits at rest, and only follows the row's movement.
