@@ -96,10 +96,10 @@ final class PublitUITests: XCTestCase {
                 }
                 return element.isHittable
             }
-            // Below the map at the top: a drag on the map moves the map, not the list.
+            // Below the map at the top (a drag there moves the map) and above the live bar (a press opens the trip).
             let window = app.windows.firstMatch
-            window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.8))
-                .press(forDuration: 0.05, thenDragTo: window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.35)))
+            window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.68))
+                .press(forDuration: 0.05, thenDragTo: window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.3)))
         }
         return element.exists
     }
@@ -120,8 +120,8 @@ final class PublitUITests: XCTestCase {
                 down = frame.maxY < height * 0.7
             }
             // Below the map at the top (a drag there moves the map, not the list).
-            let from = window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: down ? 0.55 : 0.75))
-            let to = window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: down ? 0.77 : 0.53))
+            let from = window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: down ? 0.5 : 0.68))
+            let to = window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: down ? 0.7 : 0.46))
             from.press(forDuration: 0.05, thenDragTo: to)
             drags += 1
         }
