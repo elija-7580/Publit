@@ -73,6 +73,10 @@ struct MapHeroSpace: View {
 private struct MapHeroLayer<M: View>: View {
     /// How far the list has moved from its rest: negative scrolled up, positive pulled down.
     let moved: CGFloat
+    /// The hero row's top on screen (global), when the row reports it: then the map is placed from
+    /// it directly, not from a rest remembered once (on Route that rest was caught mid-push and
+    /// the map lay over "Leave now", feedback 2026-11-17).
+    var rowTop: CGFloat? = nil
     let map: (EdgeInsets) -> M
     let onExpand: () -> Void
 
@@ -81,6 +85,8 @@ private struct MapHeroLayer<M: View>: View {
             // Placed from the bar's lower edge, where the hero row sits at rest (as in build 87), and
             // moved exactly as far as the list.
             let bar = g.safeAreaInsets.top
+            // The row's distance below the bar's lower edge (the top of this reader).
+            let moved = rowTop.map { $0 - g.frame(in: .global).minY } ?? self.moved
             // Scrolled up the map goes along; pulled down (refresh) it stays and stretches.
             let top = min(0, moved)
             // The first card moves with the list both ways (the bug of builds 91–93: it was held at
@@ -169,7 +175,9 @@ private struct MapHeroOverList<M: View>: ViewModifier {
             .overlay {
                 // Kept while scrolled away (only hidden), so the map keeps where you moved it.
                 if let moved {
-                    MapHeroLayer(moved: max(moved, -(MapHero.height + 400)), map: map, onExpand: onExpand)
+                    MapHeroLayer(moved: max(moved, -(MapHero.height + 400)),
+                                 rowTop: track.globalY.map { max($0, -(MapHero.height + 1000)) },
+                                 map: map, onExpand: onExpand)
                         .opacity(gone ? 0 : 1)
                         .allowsHitTesting(!gone)
                         .accessibilityHidden(gone)

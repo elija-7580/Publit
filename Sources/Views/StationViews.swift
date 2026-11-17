@@ -161,6 +161,23 @@ struct ChangeGuideCard: View {
     init?(before legIndex: Int, in it: Itinerary) {
         guard let g = ChangeGuide(before: legIndex, in: it) else { return nil }
         guide = g
+        _camera = State(initialValue: Self.framing(g))
+    }
+
+    /// The change itself: where you get off, where you board and the way between, close up.
+    /// `.automatic` also took in your own position, so far from the station the map showed half the
+    /// country (feedback 2026-11-17); your position is still on the map, one pan away.
+    static func framing(_ g: ChangeGuide) -> MapCameraPosition {
+        let points = ([g.arriving.to.coordinate, g.departing.from.coordinate] + g.path).filter(\.isValidCoordinate)
+        guard let first = points.first else { return .automatic }
+        let lats = points.map(\.lat), lons = points.map(\.lon)
+        let minLat = lats.min() ?? first.lat, maxLat = lats.max() ?? first.lat
+        let minLon = lons.min() ?? first.lon, maxLon = lons.max() ?? first.lon
+        let center = CLLocationCoordinate2D(latitude: (minLat + maxLat) / 2, longitude: (minLon + maxLon) / 2)
+        // At least ~250 m across, with room around the two ends.
+        let span = MKCoordinateSpan(latitudeDelta: max((maxLat - minLat) * 1.8, 0.0025),
+                                    longitudeDelta: max((maxLon - minLon) * 1.8, 0.0035))
+        return .region(MKCoordinateRegion(center: center, span: span))
     }
 
     var body: some View {

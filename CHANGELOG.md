@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.1 (build 95) – position beam, change map up close, live bar for later trips, Route map
+
+- **Your position** (`HeadingDot`, `UserHeadingView`): the blue dot with a fading beam the way you face, like Apple Maps' own position (what the live trip had until build 79), instead of build 80's white arrow inside the dot. On every map.
+- **Change map** in the live trip (`ChangeGuideCard`): opens on the change itself (get off, board, the way between, at least ~250 m) instead of `.automatic`, which also took in your position and showed half the country.
+- **Live bar**: a trip started by hand stays in the bar however far ahead it leaves; it only took started trips leaving within 3 h, so a trip started for a later day vanished from the bar. The live trip's stage card shows the day or hours instead of "7476 min" for such trips.
+- **Map at the top** (Route and every hero screen): placed every frame from the hero row's real position, not from a rest remembered once; on Route the rest was caught mid-push and the map lay over "Leave now".
+
 ## 0.1.1 (build 94) – the map really scrolls with the list; community card redone
 
 - **Map at the top**: still stood still while scrolling in builds 91–93. A new UI test (F31) measured it: the list moved 240 pt, the map 0, while every position source reported the right offset. The cause was the map's lower edge, held at its rest: scrolling up moved the map up and made it taller by the same amount. Now the edge moves with the list. The row's place is handed to the map through an observed object (`MapHeroTrack`, global frame) instead of a preference; the list's scroll offset (iOS 18) is the fallback. F31 checks map and first card move by the same amount.

@@ -1388,8 +1388,17 @@ private struct StagePager: View {
             Spacer(minLength: 8)
             if isNow, step.kind != .arrive {
                 VStack(alignment: .trailing, spacing: 0) {
-                    Text(verbatim: "\(left)").font(.system(size: 34, weight: .heavy).monospacedDigit())
-                    Text(verbatim: "min").font(.footnote.weight(.bold)).foregroundStyle(.secondary)
+                    // Far ahead (a trip started for a later day): the day, or hours, not "7476 min".
+                    if left >= 24 * 60 {
+                        Text(until, format: .dateTime.weekday(.abbreviated)).font(.system(size: 30, weight: .heavy))
+                        Text(until, format: .dateTime.day().month(.abbreviated)).font(.footnote.weight(.bold)).foregroundStyle(.secondary)
+                    } else if left >= 120 {
+                        Text(verbatim: "\(left / 60)").font(.system(size: 34, weight: .heavy).monospacedDigit())
+                        Text(verbatim: "h").font(.footnote.weight(.bold)).foregroundStyle(.secondary)
+                    } else {
+                        Text(verbatim: "\(left)").font(.system(size: 34, weight: .heavy).monospacedDigit())
+                        Text(verbatim: "min").font(.footnote.weight(.bold)).foregroundStyle(.secondary)
+                    }
                 }
             }
         }
