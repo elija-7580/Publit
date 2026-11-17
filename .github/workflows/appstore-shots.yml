@@ -60,7 +60,6 @@ jobs:
           " "$PREF")
           [ -n "$UDID" ] || { echo "no simulator for $PREF"; xcrun simctl list devices available | head -60; exit 1; }
           echo "simulator $UDID"
-          xcrun simctl shutdown "$UDID" 2>/dev/null || true
           xcrun simctl boot "$UDID" || true; xcrun simctl bootstatus "$UDID" -b
           xcrun simctl status_bar "$UDID" override --time "9:41" --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3 || true
           xcrun simctl location "$UDID" set 48.15000,11.58030
