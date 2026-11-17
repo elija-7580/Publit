@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased – fixes, maps you can touch
+## 0.1.1 (build 89) – maps you can touch, walking fix
 
 - **A departure's trip** (tap a departure) shows its map at the top like Nearby and a route, with the expand key for the full map.
 - **Maps everywhere work in their small size**: the map at the top of Nearby, Go now and a route moves and zooms right where it is, and on Nearby a tap on a station opens its departures. The expand key still opens the full map.

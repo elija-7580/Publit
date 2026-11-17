@@ -20,6 +20,12 @@ enum WhatsNew {
 
     /// Newest first.
     static let entries: [WhatsNewEntry] = [
+        WhatsNewEntry(build: 89, items: [
+            WhatsNewItem(symbol: "hand.draw", title: "Maps you can move",
+                         text: "Move and zoom the maps at the top of Nearby, routes and departures right where they are, and tap a station on Nearby to see its departures."),
+            WhatsNewItem(symbol: "figure.walk", title: "Walking navigation fixed",
+                         text: "Starting a walk now opens the route you just planned, not an old one."),
+        ]),
         WhatsNewEntry(build: 88, items: [
             WhatsNewItem(symbol: "arrow.triangle.swap", title: "Honest change chances",
                          text: "Changes get a percentage only where Publit has measured how late the vehicles really run; elsewhere it says Estimate."),
