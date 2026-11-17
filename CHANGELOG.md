@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased – fixes, maps you can touch
+
+- **Maps everywhere work in their small size**: the map at the top of Nearby, Go now and a route moves and zooms right where it is, and on Nearby a tap on a station opens its departures. The expand key still opens the full map.
+- **Walking navigation**: a walking-only route opened the first walk ever saved (an old walk in Annenheim, also in Apple Maps) instead of the one just planned. Walks have no ID from the router, and every walk matched the first saved one.
+- **Settings → Community**: the card sits in one rounded group with "What's new in Publit" again, and the community icon no longer sticks out to the left.
+
 ## 0.1.1 (build 86) – the Nearby map everywhere
 
 - The maps on a departure (trip view), "Track vehicle", a line, the platform map and the change guide now work like the Nearby map: you with the arrow the way you face, the stops by name where there is room (MapKit hides names that would overlap), the location button and the compass, movable and zoomable. Route maps get the location button too.

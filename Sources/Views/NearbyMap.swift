@@ -14,7 +14,7 @@ struct NearbyMap: View {
     let here: LatLon?
     let groups: [StopGroup]
     var onOpenStation: (StopGroup) -> Void
-    /// The picture at the top of Nearby: nothing to tap or steer, no controls.
+    /// The map at the top of Nearby: movable, stations tappable, no controls.
     var preview = false
     /// Which way the iPhone points (degrees from north), when the compass runs.
     var heading: Double? = nil
