@@ -25,7 +25,7 @@ jobs:
           KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           P8: ${{ secrets.ASC_KEY_P8 }}
-          MODE: ${{ github.event.inputs.mode || 'prepare' }}
+          MODE: ${{ github.event.inputs.mode || 'status' }}
         run: python3 tools/appstore/release.py
       - uses: actions/upload-artifact@v4
         if: always()
