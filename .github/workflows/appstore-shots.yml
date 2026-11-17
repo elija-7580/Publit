@@ -79,12 +79,13 @@ jobs:
 
   mockups:
     needs: shots
-    if: ${{ always() && needs.shots.result != 'skipped' }}
+    if: ${{ always() && (needs.shots.result != 'skipped' || contains(github.event.head_commit.message, '[upload]') || contains(github.event.head_commit.message, '[compose]')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
+        continue-on-error: true
         with:
           path: new
       - name: New raw screenshots into docs/appstore/raw
@@ -93,6 +94,18 @@ jobs:
             src="new/shots-$d-$l"
             if ls "$src"/as-*.png > /dev/null 2>&1; then rm -f docs/appstore/raw/$d/$l/as-*.png; mkdir -p docs/appstore/raw/$d/$l; cp "$src"/as-*.png docs/appstore/raw/$d/$l/; echo "new $d $l: $(ls $src | wc -l)"; else echo "MISSING $d $l"; fi
           done; done
+      - name: iPad shots in landscape
+        run: |
+          python3 -m pip install -q pillow
+          python3 - <<'PY'
+          import glob
+          from PIL import Image
+          # The iPad runs in landscape, but the screenshot comes back in the portrait raw orientation.
+          for f in glob.glob("docs/appstore/raw/ipad/*/as-*.png"):
+              im = Image.open(f)
+              if im.height > im.width:
+                  im.rotate(90, expand=True).save(f); print("rotated", f)
+          PY
       - name: Apple's product bezels, 7-Zip, font
         run: |
           set -e
