@@ -20,6 +20,12 @@ enum WhatsNew {
 
     /// Newest first.
     static let entries: [WhatsNewEntry] = [
+        WhatsNewEntry(build: 95, items: [
+            WhatsNewItem(symbol: "location.fill", title: "Your position, as before",
+                         text: "The blue dot shows the way you face with a soft beam again, on every map."),
+            WhatsNewItem(symbol: "arrow.triangle.swap", title: "Changes up close",
+                         text: "During a live trip, the change map opens right on the platforms where you get off and board."),
+        ]),
         WhatsNewEntry(build: 94, items: [
             WhatsNewItem(symbol: "map", title: "Maps scroll along",
                          text: "The map at the top now moves up with the list, so nothing slides under it."),

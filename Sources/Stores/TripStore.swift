@@ -50,8 +50,11 @@ final class TripStore {
     /// The trip for the live bar: the one started by hand, otherwise a saved trip that is under way
     /// or leaves within `liveLead`. Up to 5 min after arrival it still shows "Arrived".
     func current(now: Date = .now) -> SavedTrip? {
+        // A trip started by hand stays in the bar however far ahead it leaves (feedback 2026-11-17:
+        // a trip planned for a later day was started and then vanished from the bar, which only took
+        // started trips leaving within 3 h).
         if let id = activeTripId, let t = trip(id), t.endTime.addingTimeInterval(5 * 60) >= now,
-           t.startTime.addingTimeInterval(-3 * 3600) <= now, !pendingRemoval.contains(id) { return t }
+           !pendingRemoval.contains(id) { return t }
         return trips
             .filter { !pendingRemoval.contains($0.id) && $0.startTime.addingTimeInterval(-Self.liveLead) <= now
                 && $0.endTime.addingTimeInterval(5 * 60) >= now }

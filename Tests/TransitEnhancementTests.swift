@@ -200,6 +200,8 @@ final class TransitEnhancementTests: XCTestCase {
         XCTAssertNil(store.current(now: b.endTime.addingTimeInterval(10 * 60)), "after arrival the bar goes away")
         store.start(b.id)
         XCTAssertEqual(store.current(now: a.startTime)?.id, b.id, "a trip started by hand wins")
+        XCTAssertEqual(store.current(now: b.startTime.addingTimeInterval(-5 * 24 * 3600))?.id, b.id,
+                       "a trip started by hand for a later day stays in the bar")
         store.markForRemoval(b.id)
         XCTAssertEqual(store.current(now: a.startTime)?.id, a.id, "an unsaved trip is not shown")
     }
