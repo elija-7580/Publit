@@ -1,43 +1,79 @@
-# Publit
+<p align="center">
+  <a href="https://publit.eu">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="docs/readme/hero-dark.webp">
+      <img alt="Publit – public transport, without the noise. Live departures, every route on one timeline and your trip on the lock screen, for iPhone, Apple Watch and Android." src="docs/readme/hero-light.webp" width="100%">
+    </picture>
+  </a>
+</p>
 
-## iOS and Android
+<p align="center">
+  <a href="https://apps.apple.com/app/id6824481988"><img alt="Download on the App Store" src="https://img.shields.io/badge/App_Store-Download-000000?style=for-the-badge&logo=apple&logoColor=white"></a>
+  <a href="https://github.com/elija-7580/Publit-Android/releases/tag/native-latest"><img alt="Android APK (beta)" src="https://img.shields.io/badge/Android-APK_beta-3DDC84?style=for-the-badge&logo=android&logoColor=white"></a>
+  <a href="https://publit.eu"><img alt="publit.eu" src="https://img.shields.io/badge/publit.eu-Website-FFC531?style=for-the-badge&logoColor=black"></a>
+</p>
 
-Publit supports iOS and Android. **iOS uses Apple Maps; Android uses MapLibre.**
+<p align="center">
+  <b>A free, open-source transit app for iPhone, Apple Watch and Android.</b><br>
+  Built on the open <a href="https://transitous.org">Transitous</a> routing service. No ads, no account, no tracking.
+</p>
 
-[Download the Android APK (development build)](https://github.com/elija-7580/Publit-Android/releases/tag/native-latest) · [Android source](https://github.com/elija-7580/Publit-Android/tree/native-android) · [iOS source](https://github.com/elija-7580/Publit) · [Website](https://publit.eu)
+<p align="center">
+  <a href="https://github.com/elija-7580/Publit/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/elija-7580/Publit/actions/workflows/ci.yml/badge.svg"></a>
+  <img alt="iOS 17+" src="https://img.shields.io/badge/iOS-17%2B-black">
+  <img alt="watchOS 10+" src="https://img.shields.io/badge/watchOS-10%2B-black">
+  <img alt="SwiftUI" src="https://img.shields.io/badge/Swift-SwiftUI-orange">
+  <a href="LICENSE"><img alt="License: AGPL-3.0" src="https://img.shields.io/badge/license-AGPL--3.0-blue"></a>
+</p>
 
-Android remains in development. APK availability does not imply completed device QA or a Google Play release.
+<br>
 
-**Public transport, without the noise.** A free, open-source transit app for iPhone and Apple Watch, built on the open [Transitous](https://transitous.org) routing service. No ads, no account, no tracking.
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/readme/screens-dark.webp">
+    <img alt="Nearby, Plan, Route, Live trip and Map screens" src="docs/readme/screens-light.webp" width="100%">
+  </picture>
+</p>
 
-[![CI](https://github.com/elija-7580/Publit/actions/workflows/ci.yml/badge.svg)](https://github.com/elija-7580/Publit/actions/workflows/ci.yml)
-[![TestFlight](https://github.com/elija-7580/Publit/actions/workflows/testflight.yml/badge.svg)](https://github.com/elija-7580/Publit/actions/workflows/testflight.yml)
-![iOS 17+](https://img.shields.io/badge/iOS-17%2B-black)
-![watchOS 10+](https://img.shields.io/badge/watchOS-10%2B-black)
-![Swift](https://img.shields.io/badge/Swift-SwiftUI-orange)
-[![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
+## What Publit does
 
-**Features, coverage map and privacy policy live on the website:** [publit.eu](https://publit.eu/) · [Features](https://publit.eu/features/) · [Coverage](https://publit.eu/abdeckung/) · [Privacy](https://publit.eu/privacy/)
+- **Departures around you.** Every stop nearby on a live map, with line, platform and real-time minutes.
+- **Every route on one timeline.** Compare connections at a glance and see where you change and where it gets tight.
+- **Smart routing.** Publit learns how fast you change trains from your own trips, on your phone, and warns you before a change won't work.
+- **Your trip, live.** When to leave, when to get off, on the lock screen, in the Dynamic Island and on your watch.
+- **Tickets in the app.** Add one from a PDF, a photo or a screenshot; Publit reads it on the device.
+- **Works abroad like at home.** Timetables and live data from [Transitous](https://transitous.org), wherever there is open data. [Coverage map](https://publit.eu/abdeckung/)
+- **15 languages**, light and dark, widgets, Siri and Shortcuts.
 
-This README covers the code: architecture, build, tests and CI. A complete description of every feature and screen (German) is in [docs/FUNKTIONEN.md](docs/FUNKTIONEN.md).
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/readme/more-dark.webp">
+    <img alt="Tickets, dark mode, Apple Watch and the Android app" src="docs/readme/more-light.webp" width="100%">
+  </picture>
+</p>
 
-## Screenshots
+## A community project
 
-| Nearby | Plan | Route | Steps |
-| --- | --- | --- | --- |
-| ![Nearby departures](https://publit.eu/assets/app/web-nearby.webp) | ![Trip planning](https://publit.eu/assets/app/web-plan.webp) | ![Route on the map](https://publit.eu/assets/app/web-route.webp) | ![Route steps](https://publit.eu/assets/app/web-route-steps.webp) |
-| **Live trip** | **Map** | **Tickets** | **Widgets** |
-| ![Live trip](https://publit.eu/assets/app/web-live-up.webp) | ![Map with places](https://publit.eu/assets/app/web-map-cafes.webp) | ![Tickets and passes](https://publit.eu/assets/app/web-passes.webp) | ![Home screen widgets](https://publit.eu/assets/app/web-widgets.webp) |
-| **Dark** | | | |
-| ![Nearby, dark](https://publit.eu/assets/app/web-nearby-dark.webp) | ![Route, dark](https://publit.eu/assets/app/web-route-dark.webp) | ![Live trip, dark](https://publit.eu/assets/app/web-live-up-dark.webp) | ![Map, dark](https://publit.eu/assets/app/web-map-dark.webp) |
+Publit is built in the open and shaped by the people who use it.
 
-<sub>Images are served from the website (`publit-site/assets/app`). Real app screens from the UI test run in the iOS simulator, filled with live Transitous data. CI regenerates them on every run (artifact `screenshots`).</sub>
+- 💡 **Wish for a feature** and vote on others: [publit.eu/wuensche](https://publit.eu/wuensche/)
+- 💬 **Talk to us** on [r/Publit](https://www.reddit.com/r/Publit/) or at [support@publit.eu](mailto:support@publit.eu)
+- ❤️ **Support Publit** with a monthly or one-time donation: [publit.eu/unterstuetzen](https://publit.eu/unterstuetzen/) or [GitHub Sponsors](https://github.com/sponsors/elija-7580)
+- 🌍 **Help translate** the app: [open a translation issue](https://github.com/elija-7580/Publit/issues/new?template=translation.md)
 
-## Status
+**Source code:** iOS and watchOS here · Android in [Publit-Android](https://github.com/elija-7580/Publit-Android/tree/native-android) (native Kotlin/Compose, MapLibre maps; still in testing, Google Play release pending).
 
-`v0.1.0`, build 64 — first App Store release (earlier builds up to 0.6.0 / 63 were TestFlight only). Changes per build: [CHANGELOG.md](CHANGELOG.md).
+---
 
-## Architecture
+## For developers
+
+This part covers the code: architecture, build, tests and CI. Every feature and screen is described (in German) in [docs/FUNKTIONEN.md](docs/FUNKTIONEN.md). Features, coverage and privacy policy for users live on [publit.eu](https://publit.eu/) ([Features](https://publit.eu/features/) · [Coverage](https://publit.eu/abdeckung/) · [Privacy](https://publit.eu/privacy/)).
+
+### Status
+
+`v0.1.1`, build 96. `0.1.0` (build 64) was the first App Store release; earlier builds were TestFlight only. Changes per build: [CHANGELOG.md](CHANGELOG.md).
+
+### Architecture
 
 ```mermaid
 flowchart LR
@@ -67,7 +103,7 @@ flowchart LR
 
 The Xcode project is generated from [`project.yml`](project.yml) with XcodeGen; there is no checked-in `.xcodeproj`.
 
-### Source layout
+#### Source layout
 
 ```
 Sources/
@@ -91,7 +127,7 @@ scripts/          CI signing helper
 docs/             design, data sources, coverage, CI, localization notes
 ```
 
-### Data
+#### Data
 
 - **Routing, timetables, real time:** [Transitous](https://transitous.org) (MOTIS API). Publit follows the [Transitous API policy](https://transitous.org/api/): open source, non-commercial, identifying User-Agent, visible attribution. Responses are cached (`ResponseCache`, `MapStopCache`) to keep load on the community servers low.
 - **Map:** Apple Maps by default; Google Maps SDK only if chosen in Settings and an API key is set.
@@ -103,7 +139,7 @@ docs/             design, data sources, coverage, CI, localization notes
 
 Details: [docs/DATA-SOURCES.md](docs/DATA-SOURCES.md), [docs/COVERAGE.md](docs/COVERAGE.md), [docs/tickets.md](docs/tickets.md), [services/pass-signer](services/pass-signer).
 
-## Build
+### Build
 
 Requirements: macOS, Xcode 15 or newer, [XcodeGen](https://github.com/yonaskolb/XcodeGen).
 
@@ -121,7 +157,7 @@ Core only, no Xcode needed (also on Linux):
 swift test
 ```
 
-## Tests and CI
+### Tests and CI
 
 | Workflow | Trigger | Does |
 | --- | --- | --- |
@@ -131,7 +167,7 @@ swift test
 
 Tips for faster runs: [docs/ci.md](docs/ci.md). Performance notes: [docs/performance.md](docs/performance.md).
 
-## Localization
+### Localization
 
 15 languages (en, de, fr, it, es, pt-PT, nl, pl, uk, ro, cs, sv, el, hu, tr) in String Catalogs (`*.xcstrings`); `LocalizationTests` checks that every catalog has all languages, keeps placeholders and uses correct plural forms. Guide: [docs/localization.md](docs/localization.md).
 
