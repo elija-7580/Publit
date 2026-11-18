@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1 (build 96) – no crash on first launch on a Mac
+
+- **Onboarding** (`RootView`): the iPad app on a Mac ("Designed for iPad") crashed half a second after the first launch: the onboarding cover was presented in the very first render pass, and `OnboardingView` found no `LocationManager` in its environment (crash report build 67, macOS 27.2). The cover now opens from `onAppear`, and `LocationManager` and `FavoritesStore` are passed to it explicitly.
+
 ## 0.1.1 (build 95) – position beam, change map up close, live bar for later trips, Route map
 
 - **Your position** (`HeadingDot`, `UserHeadingView`): the blue dot with a fading beam the way you face, like Apple Maps' own position (what the live trip had until build 79), instead of build 80's white arrow inside the dot. On every map.
