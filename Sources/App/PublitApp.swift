@@ -122,7 +122,9 @@ struct RootView: View {
     @Environment(\.horizontalSizeClass) private var sizeClass
     /// Width of the window: the iPad layout needs room for the panel and the map.
     @State private var rootWidth: CGFloat = 0
-    @State private var onboarding = OnboardingView.needed
+    /// Set in onAppear, not at init: an iPad app on a Mac (Designed for iPad) presented the cover in the
+    /// very first render pass without the injected LocationManager and crashed at launch (build 67, macOS 27.2).
+    @State private var onboarding = false
     /// A fresh install gets the onboarding, not the "What's new" note.
     @State private var freshInstall = OnboardingView.needed
     @AppStorage(OnboardingView.doneKey) private var onboardingDone = false
@@ -136,8 +138,14 @@ struct RootView: View {
                         .transition(.opacity)
                 }
             }
+            .onAppear { if OnboardingView.needed && !onboardingDone { onboarding = true } }
             .task { await endSplash() }
-            .fullScreenCover(isPresented: $onboarding) { OnboardingView() }
+            .fullScreenCover(isPresented: $onboarding) {
+                // Passed on explicitly: presentations don't always inherit the scene's @Observable objects.
+                OnboardingView()
+                    .environment(location)
+                    .environment(favorites)
+            }
             .onChange(of: onboardingDone) { _, done in if done { onboarding = false } }
             // After each update: what's new and the wish list (after onboarding, never over it).
             .whatsNew(freshInstall: freshInstall, ready: onboardingDone && !onboarding && !splash)
