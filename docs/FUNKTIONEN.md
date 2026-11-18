@@ -1,6 +1,6 @@
 # Publit iOS – Funktionen und Screens (vollständige Übersicht)
 
-> Stand: Version 0.1.1 (Build 95). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
+> Stand: Version 0.1.1 (Build 96). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
 > **Pflege:** Jede Änderung an `Sources/`, `Watch/`, `Widgets/` oder `Share/` muss diese Datei im selben Commit/PR mitändern (siehe Abschnitt „Aktualisierung“ ganz unten). Die maschinell erzeugte Liste aller Views steht in [`FUNKTIONEN-INVENTAR.md`](FUNKTIONEN-INVENTAR.md) und wird von der CI automatisch aktualisiert.
 
 ## Inhalt
@@ -58,7 +58,7 @@ Animiertes Logo, mindestens 0,7 s, höchstens 2 s; endet früher, sobald die ers
 2. **„Departures where you are“** – Erklärung der Standortnutzung (nur mit Suche gesendet, nie gespeichert). Button „Continue“; beim Verlassen des Schritts (Button oder Wischen) kommt immer die Systemabfrage, kein „Not now“ (App Review 5.1.1(iv)).
 3. **„Home and Work“** – Zuhause und Arbeit festlegen (Felder „Not set“ → Ortssuche); später unter „Gespeichert“ änderbar.
 4. **„On the way“** – Erklärung Live-Fahrt, Umstiege, Aussteige-Hinweis, Sperrbildschirm, Widget. Button „Get started“.
-Ohne Onboarding startet die Standortabfrage sofort.
+Ohne Onboarding startet die Standortabfrage sofort. Das Onboarding erscheint erst nach dem ersten Erscheinen der Oberfläche (`onAppear`) und bekommt `LocationManager` und `FavoritesStore` ausdrücklich mitgegeben (iPad-App auf dem Mac stürzte sonst beim ersten Start ab, Build 67–95).
 
 ### „What's new“ nach jedem Update (`WhatsNewSheet`, `WhatsNew`)
 Nach jedem Update (nie bei Neuinstallation – dort kommt das Onboarding –, nie darüber, ca. 1,2 s nach dem Splash) ein Blatt **„What's new in Publit“** mit den Punkten aller Builds seit dem zuletzt gesehenen (`whatsNewBuild`), neueste zuerst, höchstens 4 Punkte (je Symbol, Titel, ein Satz). Darunter die **Community-Karte** (`CommunityCard`: „Publit is a community project“, „Vote for what comes next, or suggest your own idea. No account needed.“, Knopf „Suggest features and vote“ → Wunschliste, §16a, und „Support Publit“ → §16b) und „Continue“. Builds ohne Eintrag zeigen nichts. Ersetzt den einmaligen Wünsche-Hinweis (`wishesHintShown` wird mitgesetzt). Inhalte in `Sources/Models/WhatsNew.swift` (Build 95: „Your position, as before“, „Changes up close“; Build 94: „Maps scroll along“, „Community, rearranged“; Build 91: „Maps from edge to edge“, „A better pin on the map“; Build 90: „Maps you can move“, „Walking navigation fixed“; Build 87: „Clearer live trips“, „Calmer route list“, „Saved trips at a glance“; Build 84: „Park & Ride: more stations“; Build 83: „Get off on time“, „Track your vehicle“, „Easier on foot“; Build 82: „Routes for your ticket“, „Regional KlimaTickets“; Build 81: „Clearer changes“, „Community first“, „Support Publit“).
