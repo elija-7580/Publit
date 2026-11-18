@@ -195,8 +195,8 @@ final class TripStore {
 
     /// Same vehicles from the same stops on the same scheduled times.
     nonisolated static func matchKey(_ it: Itinerary) -> String {
-        let legs = it.transitLegs.map { "\($0.tripId ?? $0.lineName)@\($0.from.name)@\(Int($0.scheduledStartTime.timeIntervalSince1970))" }
-        return legs.isEmpty ? "walk@\(Int(it.startTime.timeIntervalSince1970))@\(it.legs.last?.to.name ?? "")" : legs.joined(separator: ">")
+        let legs = it.transitLegs.map { "\($0.tripId ?? $0.lineName)@\($0.from.name)@\(Int64($0.scheduledStartTime.timeIntervalSince1970))" }
+        return legs.isEmpty ? "walk@\(Int64(it.startTime.timeIntervalSince1970))@\(it.legs.last?.to.name ?? "")" : legs.joined(separator: ">")
     }
 
     private func persist() {

@@ -38,4 +38,16 @@ final class DecodingTests: XCTestCase {
         XCTAssertNotNil(DateParsing.parse("2026-10-06T20:18:00Z"))
         XCTAssertNotNil(DateParsing.parse("2026-10-06T20:18:00.123Z"))
     }
+
+    /// `.distantPast`/`.distantFuture` are saved (e.g. "never synced" on the watch) and read back at launch.
+    /// They are computed without Int overflow, so 32-bit watches (arm64_32) no longer crash on them (#80).
+    func testDateParsingFarDatesRoundTrip() throws {
+        // Exact within the Gregorian era; for year 1 the formatter counts Julian days (2 days apart), which is fine.
+        for (date, slack) in [(Date.distantPast, 3 * 86400.0), (.distantFuture, 1), (Date(timeIntervalSince1970: 0), 1),
+                              (Date(timeIntervalSince1970: 4_200_000_000), 1)] {
+            let text = DateParsing.format(date)
+            let parsed = try XCTUnwrap(DateParsing.parse(text), text)
+            XCTAssertEqual(parsed.timeIntervalSince1970, date.timeIntervalSince1970.rounded(.down), accuracy: slack, text)
+        }
+    }
 }

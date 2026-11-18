@@ -217,7 +217,7 @@ struct Itinerary: Codable, Identifiable, Sendable {
     /// with every delay update, so lists, selection and navigation must not depend on it.
     var routeKey: String {
         legs.map { leg in
-            "\(leg.mode)~\(leg.tripId ?? leg.from.name)~\(Int(leg.scheduledStartTime.timeIntervalSince1970))"
+            "\(leg.mode)~\(leg.tripId ?? leg.from.name)~\(Int64(leg.scheduledStartTime.timeIntervalSince1970))"
         }.joined(separator: "|")
     }
 }

@@ -47,7 +47,7 @@ final class PassStore {
         if let old = logoURL(pass) { try? FileManager.default.removeItem(at: old) }
         if let png {
             // A new name each time, so views showing the old file reload.
-            let name = "\(id)-logo-\(Int(Date().timeIntervalSince1970)).png"
+            let name = "\(id)-logo-\(Int64(Date().timeIntervalSince1970)).png"
             guard (try? png.write(to: documentDirectory.appendingPathComponent(name), options: [.atomic, .completeFileProtection])) != nil
             else { return }
             pass.logo = TicketPass.Logo(file: name, source: source)

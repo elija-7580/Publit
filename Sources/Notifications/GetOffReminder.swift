@@ -8,7 +8,7 @@ enum GetOffReminder {
     static let leadTime: TimeInterval = 120
 
     static func identifier(for leg: Leg) -> String {
-        "getoff|\(leg.tripId ?? leg.lineName)|\(leg.to.name)|\(Int(leg.scheduledEndTime.timeIntervalSince1970))"
+        "getoff|\(leg.tripId ?? leg.lineName)|\(leg.to.name)|\(Int64(leg.scheduledEndTime.timeIntervalSince1970))"
     }
 
     enum Result: Equatable { case scheduled(Date), tooLate, denied }
