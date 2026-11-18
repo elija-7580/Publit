@@ -816,6 +816,7 @@ private struct ExitMark: View {
     }
 }
 
+// ref 95eff08cd698
 /// The map of the stage: its leg in full colour, the rest faded; you, the vehicle and the next turn.
 private struct GuideMap: View {
     let itinerary: Itinerary

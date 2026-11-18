@@ -104,6 +104,7 @@ extension TicketPass {
     }
 }
 
+// ref ccc4aa85e50c
 /// Reads ticket details from recognised text lines, entirely on the device. Rules, not guesses:
 /// a field stays empty when no label or pattern supports it. Covers common German, English,
 /// French and Italian ticket wording, and the usual labels in Spanish, Portuguese, Dutch, Polish,
