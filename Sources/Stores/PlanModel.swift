@@ -229,6 +229,8 @@ final class PlanModel {
             var transit = res.itineraries.withoutDetours
             // Standing at the first stop: board there, no "walk 1 min" first.
             if case .currentLocation = searchedFrom { transit = Reach.boardingHere(transit, here: f) }
+            // After dropping the walk, the short- and long-walk copies of a ride are identical: list it once.
+            transit = transit.uniqueRides
             itineraries = Self.merge(transit: transit, direct: res.direct)
             offerForLearning()
             walkNote = parkAndRide && options.firstMile != .car ? ParkAndRide.fallbackNote
@@ -368,7 +370,9 @@ final class PlanModel {
             // A new search started meanwhile: these results belong to the old query.
             guard token == myToken else { return }
             let known = Set(itineraries.map(\.id))
-            var fresh = res.itineraries.withoutDetours.filter { !known.contains($0.id) }
+            let knownRides = Set(itineraries.map(\.rideKey))
+            var fresh = res.itineraries.withoutDetours.uniqueRides
+                .filter { !known.contains($0.id) && !knownRides.contains($0.rideKey) }
             if lastOptions.firstMile == .car {
                 fresh = ParkAndRide.nearStations(ParkAndRide.sensible(fresh), nearest: parkAndRideNearest)
             }

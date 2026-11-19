@@ -250,6 +250,34 @@ extension Array where Element == Itinerary {
         var seen = Set<String>()
         return filter { seen.insert($0.routeKey).inserted }
     }
+
+    /// One row per ride: the same vehicles at the same times are one connection, however the walk
+    /// to the first stop goes. The short- and long-walk searches both find the train you can
+    /// see from here, and once "board here" drops the walk the two copies are identical (Brig → Visp,
+    /// 2026-11-19: every connection twice). Of the copies the one arriving first stays, then the
+    /// one leaving last (less walking); the list keeps its order otherwise.
+    var uniqueRides: [Itinerary] {
+        var best: [String: Int] = [:]
+        for (i, it) in enumerated() {
+            guard let j = best[it.rideKey] else { best[it.rideKey] = i; continue }
+            let kept = self[j]
+            if (it.endTime, kept.startTime) < (kept.endTime, it.startTime) { best[it.rideKey] = i }
+        }
+        let keep = Set(best.values)
+        return enumerated().filter { keep.contains($0.offset) }.map(\.element)
+    }
+}
+
+extension Itinerary {
+    /// The vehicles ridden and when (scheduled, so a delay update keeps the key); walks don't count.
+    /// Walking only: the route itself, so a walk is never merged with another walk of other length.
+    var rideKey: String {
+        let rides = transitLegs
+        guard !rides.isEmpty else { return "direct~" + routeKey }
+        return rides.map { leg in
+            "\(leg.mode)~\(leg.tripId ?? "\(leg.routeShortName ?? "")>\(leg.headsign ?? "")")~\(leg.from.name)~\(Int64(leg.scheduledStartTime.timeIntervalSince1970))"
+        }.joined(separator: "|")
+    }
 }
 
 /// A route opened from a list. Holds its own copy: a live refresh of the list underneath
