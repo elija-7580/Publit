@@ -269,13 +269,14 @@ extension Array where Element == Itinerary {
 }
 
 extension Itinerary {
-    /// The vehicles ridden and when (scheduled, so a delay update keeps the key); walks don't count.
+    /// The vehicles ridden, where you get on and off and when (scheduled, so a delay update keeps
+    /// the key); walks don't count. Getting off earlier and walking on is another connection.
     /// Walking only: the route itself, so a walk is never merged with another walk of other length.
     var rideKey: String {
         let rides = transitLegs
         guard !rides.isEmpty else { return "direct~" + routeKey }
         return rides.map { leg in
-            "\(leg.mode)~\(leg.tripId ?? "\(leg.routeShortName ?? "")>\(leg.headsign ?? "")")~\(leg.from.name)~\(Int64(leg.scheduledStartTime.timeIntervalSince1970))"
+            "\(leg.mode)~\(leg.tripId ?? "\(leg.routeShortName ?? "")>\(leg.headsign ?? "")")~\(leg.from.name)~\(Int64(leg.scheduledStartTime.timeIntervalSince1970))~\(leg.to.name)~\(Int64(leg.scheduledEndTime.timeIntervalSince1970))"
         }.joined(separator: "|")
     }
 }
