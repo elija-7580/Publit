@@ -410,7 +410,7 @@ Kleinere Bausteine, die in den Abschnitten oben nicht namentlich vorkommen:
 | `PlaceHitRow` | Treffer der Ortssuche: Haltestelle, Adresse oder Ort, Apple-Vorschläge werden beim Antippen nachgeschlagen; „Save“ per Wischen (§9) |
 | `HeadingDot` | Dein Standort mit Lichtkegel in Blickrichtung auf allen Karten (SwiftUI über `YouAreHere`, Stationskarte über `UserHeadingView`) (§3) |
 | `ExitMark` | Tür-Markierung des gewählten Stationsausgangs auf der Karte der Live-Fahrt (§13) |
-| `MapHeroSpace` | Platz für die Karte oben (Nearby, Go Now, Routendetail, Fahrt, Linie) als erste Listenzeile; die Karte selbst (`MapHeroLayer`) liegt randlos über der Liste, reicht unter die Leiste, läuft über der ersten Karte aus und ist auch klein verschieb-/zoombar (Nearby: Stationen antippbar); Vergrößern-Taste öffnet die volle Karte (§3) |
+| `MapHeroSpace` | Platz für die Karte oben (Nearby, Go Now, Routendetail, Fahrt, Linie) als erste Listenzeile; die Karte selbst (`MapHeroLayer`) liegt randlos über der Liste, reicht unter die Leiste, läuft über der ersten Karte aus und ist auch klein verschieb-/zoombar (Nearby: Stationen antippbar); beim Herunterziehen (Aktualisieren) wird sie gedehnt statt neu ausgelegt, damit sie nicht springt, und nach einem Tab-Wechsel erscheint sie sofort wieder; Vergrößern-Taste öffnet die volle Karte (§3) |
 | `EndpointConnector` | Verbindungslinie zwischen Von/Nach im Planer (§8) |
 | `ServiceAlertRow` | eine aufklappbare Störungsmeldung (§3, §12) |
 | `SettingsButton` | Zahnrad, öffnet Einstellungen (§16) |
