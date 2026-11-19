@@ -42,6 +42,10 @@ final class MapHeroTrack {
 /// The list's first section: the free space the map shows through.
 struct MapHeroSpace: View {
     @Environment(MapHeroTrack.self) private var track: MapHeroTrack?
+    /// Where the row was last seen. A tab switch makes the row disappear and come back at the same
+    /// place, so `onGeometryChange` does not fire again and the map stayed hidden (feedback
+    /// 2026-11-19: "where the map would be, just black", back only after switching tabs a few times).
+    @State private var lastY: CGFloat?
 
     var body: some View {
         Section {
@@ -57,7 +61,9 @@ struct MapHeroSpace: View {
                     guard let track else { return }
                     if track.restGlobalY == nil { track.restGlobalY = y }
                     track.globalY = y
+                    lastY = y
                 }
+                .onAppear { if let lastY, track?.globalY == nil { track?.globalY = lastY } }
                 .onDisappear { track?.globalY = nil }
                 .listRowInsets(EdgeInsets())
                 .listRowBackground(Color.clear)
@@ -89,11 +95,15 @@ private struct MapHeroLayer<M: View>: View {
             let moved = rowTop.map { $0 - g.frame(in: .global).minY } ?? self.moved
             // Scrolled up the map goes along; pulled down (refresh) it stays and stretches.
             let top = min(0, moved)
+            let pull = max(0, moved)
             // The first card moves with the list both ways (the bug of builds 91–93: it was held at
             // its rest, so scrolling up made the map taller by as much as it moved up, and its lower
-            // edge with the cards under it stood still).
-            let cardTop = bar + MapHero.height + moved
-            let height = max(1, cardTop - top)
+            // edge with the cards under it stood still). Its frame never changes size: a MapKit map
+            // that is resized every frame lays itself out anew and re-centres, so pulling to refresh
+            // made it jump (feedback 2026-11-19). Pulled down it is scaled from the top edge instead,
+            // so its lower edge stays on the first card.
+            let height = bar + MapHero.height
+            let stretch = (height + pull) / height
 
             // Read in the safe area, drawn from the top of the screen (like build 87's map).
             ZStack(alignment: .top) {
@@ -107,6 +117,7 @@ private struct MapHeroLayer<M: View>: View {
                             .init(color: .clear, location: 1),
                         ], startPoint: .top, endPoint: .bottom)
                     }
+                    .scaleEffect(stretch, anchor: .top)
                     .overlay(alignment: .bottomTrailing) {
                         Button(action: onExpand) {
                             Image(systemName: "arrow.up.left.and.arrow.down.right")
@@ -121,6 +132,7 @@ private struct MapHeroLayer<M: View>: View {
                         .accessibilityIdentifier("mapHeroExpand")
                         .padding(.trailing, 20)
                         .padding(.bottom, 10)
+                        .offset(y: pull)
                     }
                     .offset(y: top)
             }
