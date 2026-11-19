@@ -1,0 +1,4 @@
+WATCHDOG: -[PublitUITests testF01NearbyShowsDepartures] still running after 150 s - stopping the runner
+Tests/UI/PublitUITests.swift:186: error: -[PublitUITests.PublitUITests testF09TransitPresentationLightDarkAndAccessibility] : Failed to terminate io.github.elija7580.publit:31395: Failed to terminate io.github.elija7580.publit:0
+Tests/UI/PublitUITests.swift:864: error: -[PublitUITests.PublitUITests testF15TicketsTabAndStopActions] : XCTAssertTrue failed - no labelled Route here action
+Tests/UI/PublitUITests.swift:864: error: -[PublitUITests.PublitUITests testF15TicketsTabAndStopActions] : XCTAssertTrue failed - no labelled Route here action
