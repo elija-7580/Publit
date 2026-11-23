@@ -3,7 +3,7 @@
 > Nicht von Hand bearbeiten. Erzeugt von `scripts/feature_inventory.py` (CI: `features-doc.yml`).
 > Die ausführliche Beschreibung steht in [FUNKTIONEN.md](FUNKTIONEN.md).
 
-**207 Views, 5 App Intents, 3 Widgets in 80 Dateien.**
+**212 Views, 5 App Intents, 3 Widgets in 80 Dateien.**
 
 ## `Sources/App/DesignSamples.swift`
 - Views: `DesignSampleView`
@@ -311,6 +311,6 @@
 - Sichtbare Texte: Choose a stop · No departures soon
 
 ## `Widgets/PublitWidgets.swift`
-- Views: `LineChip`, `PlatformChip`, `Countdown`, `FamilyAdaptiveView`, `SmallActivityView`, `ActivityContent`, `LockScreenView`
+- Views: `LineChip`, `PlatformChip`, `Countdown`, `FamilyAdaptiveView`, `SmallActivityView`, `StepIcon`, `CueLabel`, `DelayText`, `TripProgressBar`, `VehicleRow`, `ActivityContent`, `LockScreenView`
 - Widgets: `WatchTripLiveActivity`, `TripLiveActivity`
-- Sichtbare Texte: Show ticket
+- Sichtbare Texte: Leave in · Get off in · Arrive in · Departs in · Show ticket · from %@

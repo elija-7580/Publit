@@ -338,3 +338,19 @@ enum WatchCodec {
     static func intent(from data: Data) throws -> WatchIntent { try TransitousClient.makeDecoder().decode(WatchIntent.self, from: data) }
     static func state(from data: Data) throws -> WatchState { try TransitousClient.makeDecoder().decode(WatchState.self, from: data) }
 }
+
+/// The watch opens the trip under way by itself, as Maps does with a route started on the iPhone: when the app comes
+/// to the front (also when it is opened from the trip's Live Activity in the Smart Stack) and when a trip is started
+/// while the app is open. Only from the first screen, so whatever the user opened stays; and only once per time
+/// in front, so going back to the first screen keeps it there.
+enum WatchAutoOpen {
+    /// The trip to open now, or nil.
+    /// - Parameters:
+    ///   - onHome: the first screen is showing (nothing opened on top of it).
+    ///   - opened: the trip this rule already opened since the app came to the front.
+    static func trip(in snapshot: WatchSnapshot, now: Date, onHome: Bool, opened: String?) -> String? {
+        guard onHome, let trip = snapshot.activeTrip, trip.id != opened,
+              snapshot.current(now: now)?.id == trip.id, now < trip.endTime else { return nil }
+        return trip.id
+    }
+}

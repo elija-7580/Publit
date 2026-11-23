@@ -332,7 +332,7 @@ Fragt nie selbst nach Erlaubnis außer bei „Remind me to get off“/Erinnerung
 ## 18. Widgets und Live Activity (`Widgets/`)
 
 - **Abfahrten-Widget** (`DeparturesWidget`): Haltestelle in der Widget-Konfiguration suchen („Choose a stop“); Größen klein, mittel, groß, Sperrbildschirm rechteckig; Minuten-Timeline, neue Daten ca. alle 15 min; „No departures soon“, „Saved data: HH:MM“; Tippen öffnet die Tafel.
-- **Live Activity** (`TripLiveActivity`, Sperrbildschirm + Dynamic Island, `WatchTripLiveActivity` auch auf der Apple Watch): aktuelle Etappe, Linien-Chip, Gleis-Chip, Countdown, Verspätung „+x min“, „Show ticket“-Knopf; bis 8 h vor Abfahrt; „Arrived“ bleibt kurz stehen; Updates nur bei sichtbarer Änderung.
+- **Live Activity** (`TripLiveActivity`, Sperrbildschirm + Dynamic Island, `WatchTripLiveActivity` auch auf der Apple Watch): oben der Schritt jetzt mit Symbol (Gehen grau, Fahrt in Linienfarbe; „Arrived“ Zielflagge) und der Satz dazu in bis zu zwei Zeilen („Walk to …“, „Get off at …“; vor dem Losgehen darunter „from <Halt>“, während der Fahrt „Next stop: …“), rechts der Countdown mit Beschriftung „Leave in“ / „Departs in“ / „Get off in“ / „Arrive in“ und „+x min“. Darunter das Fahrzeug, um das es geht: Linien-Chip, „→ Richtung“, Gleis-Chip (orange bei Änderung) und Abfahrts- bzw. Ankunftszeit; im Fahrzeug zusätzlich „Then: …“ mit Gleis des Anschlusses. Unten ein Fortschrittsbalken von Abfahrt bis Ankunft (läuft ohne Updates von selbst), Ziel mit Ankunftszeit und „Show ticket“. Dynamic Island: kompakt Schritt-Symbol (+ Linie während der Fahrt) und Countdown; aufgeklappt (lange drücken) Symbol, Satz, beschrifteter Countdown, Fahrzeugzeile, im Fahrzeug nächster Halt und Halte bis zum Aussteigen bzw. Ankunft der Linie, Fortschritt, Ziel mit Ankunftszeit und „Show ticket“. Watch (Smart Stack): Symbol, beschrifteter Countdown, Linie, Satz, Gleis/Richtung, Fortschritt; Tippen öffnet die Watch-App direkt auf der Fahrt (`WKSupportsLiveActivityLaunchAttributeTypes`, watchOS 11.1+). Bis 8 h vor Abfahrt; „Arrived“ bleibt kurz stehen; Updates nur bei sichtbarer Änderung.
 
 ## 19. Siri / Kurzbefehle (`PublitIntents`)
 
@@ -355,6 +355,7 @@ Beispielphrasen: „Nächste Abfahrten in Publit“, „Bring mich nach Hause mi
 | Screen | Inhalt |
 |---|---|
 | Home (`WatchHomeView`) | jetzt gültige Tickets (ein Tipp → Code), Tickets, Live-Kachel der laufenden Fahrt, Where to?, Nearby, Saved |
+| Gestartete Fahrt öffnet sich von selbst (`WatchAutoOpen`, `PublitWatchApp`) | Wie eine Route aus Karten: Ist auf dem iPhone (oder der Uhr) eine Fahrt gestartet und noch nicht angekommen, öffnet die Watch-App sie selbst, sobald sie nach vorn kommt (auch per Tipp auf die Live Activity im Smart Stack) oder die Fahrt gestartet wird, während die App offen ist. Nur vom ersten Bildschirm aus und einmal je Öffnen: Wer zurück zum Home geht, bleibt dort. Ab einer halben Stunde vor Abfahrt (Regel der Live-Kachel). Die Seite startet beim Abschnitt, auf dem man gerade ist (Karte über „Map“). |
 | Tickets (`WatchTicketsView`) | gruppiert wie iPhone; Code auf weißer Fläche in voller Breite, danach Details |
 | Fahrt (`WatchTripView`) | Seiten per Digital Crown: Übersicht (Abdeckungshinweis, Zeiten, Status, Tickets, Map, Start/End trip, Save trip/Remove), dann je Fahrt/Fußweg eine Seite (Linie, Richtung, Zeiten, Gleis/„Platform changed“, Halte, Störungen, Map) |
 | Ganze Fahrt einer Linie (`WatchVehicleTripView`) | Aus einer Fahrt-Etappe (Linien-Symbol oder „Line …: all stops and map“): alle Halte des Fahrzeugs mit Zeiten, Verspätung, Gleis, auch vor dem Einstieg; Ein-/Ausstieg fett, passierte Halte grau, Status („At …“, „Between … and …“), Map |
@@ -444,7 +445,7 @@ Kleinere Bausteine, die in den Abschnitten oben nicht namentlich vorkommen:
 | `WatchTripOverview`, `WatchLegPage` | Übersichts- und Abschnittsseite einer Fahrt (§21) |
 | `WatchVehicleTripView` | Ganze Fahrt des Fahrzeugs einer Etappe (§21) |
 | `DeparturesWidgetView` | Darstellung des Abfahrten-Widgets (§18) |
-| `LineChip`, `PlatformChip`, `FamilyAdaptiveView`, `SmallActivityView`, `ActivityContent`, `LockScreenView` | Bausteine der Live Activity (Sperrbildschirm, Dynamic Island, Watch) (§18) |
+| `LineChip`, `PlatformChip`, `FamilyAdaptiveView`, `SmallActivityView`, `ActivityContent`, `LockScreenView`, `StepIcon`, `CueLabel`, `DelayText`, `TripProgressBar`, `VehicleRow` | Bausteine der Live Activity (Sperrbildschirm, Dynamic Island, Watch) (§18) |
 | `DesignSampleView`, `PassSampleView` | nur DEBUG-Demos (§26) |
 
 ## 27. Aktualisierung dieser Datei
