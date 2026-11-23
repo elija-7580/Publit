@@ -13,6 +13,7 @@ let core = [
     "API/MD5.swift",
     "App/AppInfo.swift",
     "Models/TransitModels.swift",
+    "Models/RouteBuilder.swift",
     "Models/ServiceAlerts.swift",
     "Models/Fares.swift",
     "Models/ModeStyle.swift",
