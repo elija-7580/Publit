@@ -364,6 +364,8 @@ Beispielphrasen: „Nächste Abfahrten in Publit“, „Bring mich nach Hause mi
 | Saved (`WatchSavedView`) | kommende Fahrten, Home/Work, Haltestellen (Abfahrten, Route here), Orte, vergangene Fahrten |
 Sync per WatchConnectivity (`WatchSyncHub`): bis 8 Fahrten, Orte, bis 12 Tickets (nur Code-Bild, vom iPhone gezeichnet). Änderungen auf der Uhr gehen als Anfragen ans iPhone.
 
+**Gespeicherte Haltestellen auf Home** (Issue #123): `WatchHomeView` zeigt zwischen „Nearby“ und „Saved“ die ersten vier gespeicherten Haltestellen (`WatchSnapshot.homeStops`); ein Tipp öffnet ihre Abfahrten (`WatchStopView`). Die Reihenfolge ist die am iPhone unter „Saved“ festgelegte; alle Haltestellen stehen weiter unter „Saved“, Home und Work werden hier nicht wiederholt.
+
 ## 22. iPad / breites Layout (`Wide/WideLayout`)
 
 Ab 680 pt Breite (regular): Karte bildschirmfüllend, Inhalte in einem schwebenden Panel links (340–420 pt) wie Apple Maps auf dem iPad; die Panel-Views sind die iPhone-Views und steuern die große Karte (Routen, Stationen).
