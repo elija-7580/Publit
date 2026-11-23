@@ -81,16 +81,6 @@ final class PublitUITests: XCTestCase {
         app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.01)).tap()
     }
 
-    /// A row that reaches under the live trip bar counts as hittable, but a tap on it lands on the
-    /// bar and opens the trip. A trip saved by an earlier test (F07) is in the bar while it runs,
-    /// so whether this happened depended on the time of day (F13 on main, 2026-11-23: "Route"
-    /// opened instead of the stop, #136).
-    private func underLiveBar(_ element: XCUIElement, in app: XCUIApplication) -> Bool {
-        let bar = app.descendants(matching: .any)["liveTripBar"].firstMatch
-        guard bar.exists, element.exists else { return false }
-        return element.frame.maxY > bar.frame.minY - 4
-    }
-
     /// Waits for an element in a lazy list, scrolling down when it is not there yet.
     private func reveal(_ element: XCUIElement, in app: XCUIApplication) -> Bool {
         let deadline = Date().addingTimeInterval(timeout)
@@ -98,14 +88,13 @@ final class PublitUITests: XCTestCase {
             if element.waitForExistence(timeout: 4) {
                 // Short drags: a full swipe can scroll a row past the top in one go.
                 let window = app.windows.firstMatch
-                for _ in 0..<10 where !element.isHittable || underLiveBar(element, in: app) {
+                for _ in 0..<10 where !element.isHittable {
                     let up = element.frame.minY > window.frame.midY
-                    // Start the drag above the live bar: a press on the bar opens the trip.
-                    let from = window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: up ? 0.68 : 0.35))
+                    let from = window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: up ? 0.7 : 0.35))
                     let to = window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: up ? 0.45 : 0.6))
                     from.press(forDuration: 0.05, thenDragTo: to)
                 }
-                return element.isHittable && !underLiveBar(element, in: app)
+                return element.isHittable
             }
             // Below the map at the top (a drag there moves the map) and above the live bar (a press opens the trip).
             let window = app.windows.firstMatch
@@ -761,17 +750,10 @@ final class PublitUITests: XCTestCase {
         // the chips at the top appear as soon as a board with several modes has loaded.
         if !app.buttons["modeChip-all"].waitForExistence(timeout: timeout) { snap("nearby-filter-fail") }
         XCTAssertTrue(app.buttons["modeChip-all"].exists, "no mode chips on Nearby")
-        // Any mode that has a board will do: at night the first kind in the row may not run (#136).
-        let chips = ["modeChip-subway", "modeChip-suburban", "modeChip-tram", "modeChip-bus"].map { app.buttons[$0] }.filter { $0.exists }
-        XCTAssertFalse(chips.isEmpty, "no mode chips on Nearby")
-        var filtered = false
-        for chip in chips where !filtered {
-            chip.tap()
-            filtered = app.buttons["All departures"].firstMatch.waitForExistence(timeout: 8)
-            // A second tap takes the mode out again (back to all) before the next one is tried.
-            if !filtered { chip.tap() }
-        }
-        XCTAssertTrue(filtered && reveal(app.buttons["All departures"].firstMatch, in: app), "filtered board empty")
+        let chip = ["modeChip-subway", "modeChip-suburban", "modeChip-tram", "modeChip-bus"].map { app.buttons[$0] }.first { $0.exists }
+        XCTAssertNotNil(chip, "no mode chips on Nearby")
+        chip?.tap()
+        XCTAssertTrue(reveal(app.buttons["All departures"].firstMatch, in: app), "filtered board empty")
         for _ in 0..<2 { app.swipeDown() } // back to the top for the screenshot
         sleep(2)
         snap("nearby-filter")
