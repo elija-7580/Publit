@@ -70,6 +70,10 @@ chmod 600 .env
 node --env-file=.env src/node.js
 ```
 
+To try it without any Stripe account, leave out `STRIPE_SECRET_KEY` and set `DEMO_PAYMENTS=on` together with
+`DEMO_PROVIDER=on`: a demo payment page (`/v1/demo-pay`) stands in for Stripe and charges nothing. It switches
+itself off as soon as a Stripe key or a real seller key is set.
+
 It listens on 127.0.0.1 only. Put a reverse proxy with HTTPS in front, for example Caddy:
 
 ```
