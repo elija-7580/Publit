@@ -12,7 +12,7 @@
 5. [Linien, Linien-Detail und Fahrplan](#5-linien-linien-detail-und-fahrplan)
 6. [Fahrt eines Fahrzeugs (TripView)](#6-fahrt-eines-fahrzeugs-tripview)
 7. [Stationskarte / Karte](#7-stationskarte--karte)
-8. [Tab „Planen“ (Plan)](#8-tab-planen-plan)
+8. [Tab „Planen“ (Plan)](#8-tab-planen-plan) – mit [8a. Termine aus dem Kalender](#8a-termine-aus-dem-kalender-als-ziele-calendarsuggestions-calendartrips-calendarplansection)
 9. [Ortssuche](#9-ortssuche)
 10. [Routenoptionen](#10-routenoptionen)
 11. [Smart Routing](#11-smart-routing)
@@ -91,7 +91,7 @@ Bewegung reduzieren zeigt jede Demo im Endzustand. Schließen, „Continue“ od
 - Pro Zeile (`DepartureRow`), zwei Zeilen: oben Linien-Badge (Betreiberfarbe, Verkehrsmittel-Symbol) und Ziel (einzeilig, ohne „Towards“; bei Ringlinien Ziel + „Circle line“), rechts die Minuten („now“, „x min“, ab 60 min die Uhrzeit; orange bei Verspätung) mit kleinem Symbol davor (grüne Funkwellen = Live, graues Kalender-Symbol = Fahrplan); darunter eine graue Zeile „Pl. x · Uhrzeit · +x min · Next: …“ bzw. „Cancelled“ – **nächster Halt** zuletzt, damit ein schmaler Bildschirm ihn kürzt und nicht die Uhrzeit (Abfrage mit `fetchStops=true`, nur die ersten 3 Halte werden behalten, `UpcomingStops`; ist der nächste Halt das Ziel, entfällt er); Hinweise („Rail replacement bus“, Störungen) nur wenn vorhanden. Kein Pfeil am Zeilenende (ab iOS 26). Steht man an der Haltestelle (≤ 50 m), zeigt der Stationskopf „Here“ statt der Entfernung.
 - **Linien-Gruppierung** (`LineAtStopRow`): pro Linie die nächsten Abfahrten je Richtung („U3 → Moosach: 3, 13, 23 min“), darunter je Richtung nächster Halt und Steig („Next: … · Platform …“).
 - **Verkehrsmittel-Filter** (`ModeFilterBar`): All, Train, S-Bahn, Metro, Tram, Bus, Ferry, Other. Leerer Filter = alle. Bei leerem Ergebnis: „No departures for these modes“ + „Show all modes“.
-- **„Where to now? Route from your location“** – Sprung in den Planer ab aktuellem Standort; **„Next trip: …“** wenn eine gespeicherte Fahrt ansteht; Abschnitt **„Active trip“** bei laufender Fahrt.
+- **„Where to now? Route from your location“** – Sprung in den Planer ab aktuellem Standort; **„Next trip: …“** wenn eine gespeicherte Fahrt ansteht; **„Next appointment: …“** (Uhrzeit · Ort) für den nächsten Kalendertermin mit Ort in den nächsten 4 Stunden, wenn Kalendervorschläge an sind (§8a), Tipp → Planen mit Ankunft 5 min vor Beginn; Abschnitt **„Active trip“** bei laufender Fahrt.
 - **Störungen** (Abschnitt „Alerts“, `ServiceAlertsView`): nach Schwere sortiert, dedupliziert, aufklappbar.
 - **Abdeckungswarnung** (`CoverageBanner`) „Not reliable here“, wenn der Standort in einem Gebiet mit fehlenden Daten liegt.
 - Toolbar: „Station map“ (Karte), Einstellungen (Zahnrad).
@@ -155,6 +155,15 @@ Bewegung reduzieren zeigt jede Demo im Endzustand. Schließen, „Continue“ od
 - **An der Haltestelle** (`Reach.boardingHere`, `Reach.atStopMeters` = 50 m): Wer vom Standort aus plant und höchstens 50 m von der ersten Haltestelle steht (und dessen Fußweg dorthin laut Server ebenfalls höchstens 50 m lang ist), bekommt keinen „1 min“-Fußweg vorneweg: Die Route beginnt mit der Fahrt, statt „Leave in x min“ steht „Departs in x min“ (bei 0 „Board here“). Die Haltestelle gegenüber (Weg über die Straße) behält ihren Fußweg.
 - **Jede Verbindung nur einmal** (`Itinerary.rideKey`, `uniqueRides`): Dieselben Fahrzeuge mit gleichem Ein- und Ausstieg zur selben Zeit sind eine Verbindung, egal wie der Fußweg zur ersten Haltestelle verläuft. Die Suchen mit kurzem und langem Fußweg finden oft denselben Zug; nach „An der Haltestelle“ wären beide Kopien gleich. Von den Kopien bleibt die mit der frühesten Ankunft, dann die mit dem spätesten Losgehen (weniger Fußweg); auch beim Nachladen späterer Verbindungen kommt keine schon gelistete Fahrt dazu.
 - Treffer → Routendetail (§12).
+
+### 8a. Termine aus dem Kalender als Ziele (`CalendarSuggestions`, `CalendarTrips`, `CalendarPlanSection`)
+
+- **Aus, bis man es einschaltet.** Ohne Suche zeigt Planen unter dem Formular einmal die Karte „Your appointments as destinations“ mit „Turn on“ / „Not now“ („Not now“ blendet sie dauerhaft aus). Erst „Turn on“ (oder der Schalter in Einstellungen → Calendar) fragt nach Kalenderzugriff (iOS 17 „Full Access“, `NSCalendarsFullAccessUsageDescription`). Abgelehnt: die Karte verschwindet, Einstellungen zeigen „Open Settings“.
+- **Welche Termine:** EventKit liest auf dem Gerät die Termine der nächsten 36 Stunden aus allen Kalendern. Angeboten werden höchstens drei, die frühesten zuerst: nicht ganztägig, nicht abgesagt oder abgelehnt, Beginn frühestens in 5 Minuten, mit einem Ort, der kein Videocall ist (Links, Zoom, Teams, Meet, Webex, „online“ usw. fallen weg) und nicht weniger als 200 m vom Standort entfernt. Änderungen im Kalender werden sofort übernommen; sonst wird beim Erscheinen von Planen/In der Nähe höchstens einmal pro Minute neu gelesen.
+- **Wo:** Abschnitt **„From your calendar“** in Planen (vor einer Suche), derselbe Abschnitt oben in der Ortssuche des Ziel-Felds, und die Zeile „Next appointment: …“ in In der Nähe (§3). Jede Zeile (`CalendarAppointmentRow`): kleines Kalenderblatt mit Tag („Today“, „Tomorrow“) und Uhrzeit, Titel, erste Zeile des Orts (gefüllte Nadel, wenn der Termin eine Kartenposition hat), Pfeil.
+- **Tipp:** Hat der Termin eine Kartenposition, wird sie genommen; sonst wird der Ortstext erst jetzt nachgeschlagen (Apples Ortssuche, sonst Transitous), mit Ladekreis in der Zeile. Dann öffnet Planen vom Standort mit „Arrive by“ 5 Minuten vor Beginn und sucht sofort. Nicht gefunden: „No place found for “…”.“ Im Suchverlauf trägt die Suche das Kalender-Symbol.
+- **Über den Verbindungen** (`AppointmentBanner`): „Titel · 15:00“ und „Leave by 14:21 to arrive 5 min early“ (die spätest abfahrende Verbindung, die rechtzeitig ankommt), sonst „No connection arrives before 15:00“. Ein anderes Ziel löst die Verbindung zum Termin.
+- **Datenschutz:** Termine bleiben auf dem iPhone und werden nicht gespeichert; nur der Ort eines angetippten Termins geht an die Ortssuche bzw. als Ziel an Transitous, wie bei jeder getippten Suche.
 
 ## 9. Ortssuche – `PlaceSearchView`
 
@@ -292,6 +301,7 @@ Screenshot-/Link-Tickets („My tickets“, „Add ticket“, Typ, „Expires“
 | Nearby | „Map“ (Standard an): Karte als Bild oben, Liste scrollt darüber (iPhone), siehe §3 |
 | Stations | „Platform map“ (Standard an), „Departures by platform“ (Standard aus), „Change guide“ (Standard an), Erklärtext; siehe §4 und §13 |
 | Smart routing | siehe §11 |
+| Calendar | „Suggest appointments as destinations“ (Standard aus, fragt beim Einschalten nach Kalenderzugriff), Erklärtext; bei verweigertem Zugriff „Open Settings“; siehe §8a |
 | Map | Map provider (Apple/Google), Map style, Points of interest, Lines, Vehicles, Bikes and scooters, „Open directions in“ (Apple Maps, Google Maps, Citymapper) |
 | Search | Place search („OpenStreetMap and Apple Maps“ / Google), Google API key |
 | Tickets | My tickets, Ticket apps per operator (wenn alte Ticketfunktion aktiv) |
@@ -380,6 +390,7 @@ Ab 680 pt Breite (regular): Karte bildschirmfüllend, Inhalte in einem schwebend
 - **Diagnose** (`HangLog`, `CrashReports`, `MainThreadSampler`): Hänger ≥ 2 s mit Stack, fehlgeschlagene Requests (nur Art), Abstürze (MetricKit), unerwartete Beendigungen – ohne Orte/Haltestellen/Tickets; bleibt auf dem Gerät bis „Share diagnostics“.
 - **Overpass/OpenStreetMap** (`StationExits`): nur für Stationsausgänge, nur die Lage des Ausgangs, Ergebnis nur im Speicher; Schalter in Einstellungen → Data.
 - **Wunschliste** (`WishesClient`): nur auf der Wunsch-Seite; sendet Wunsch-Text, Sprache (de/en) und die zufällige Abstimmungs-ID.
+- **Kalender** (`CalendarSuggestions`): nur nach Einschalten; Termine werden nur auf dem Gerät gelesen, nicht gespeichert; nur der Ort eines angetippten Termins wird nachgeschlagen (§8a).
 - **Datenexport** (`DataExport`): alle gespeicherten Daten (Orte, Linien, Fahrten, Suchverlauf, Tickets ohne Bilder) als JSON über Teilen-Dialog.
 - `PrivacyInfo.xcprivacy` in App und Widgets.
 
@@ -424,6 +435,7 @@ Kleinere Bausteine, die in den Abschnitten oben nicht namentlich vorkommen:
 | `ExitMark` | Tür-Markierung des gewählten Stationsausgangs auf der Karte der Live-Fahrt (§13) |
 | `MapHeroSpace` | Platz für die Karte oben (Nearby, Go Now, Routendetail, Fahrt, Linie) als erste Listenzeile; die Karte selbst (`MapHeroLayer`) liegt randlos über der Liste, reicht unter die Leiste, läuft über der ersten Karte aus und ist auch klein verschieb-/zoombar (Nearby: Stationen antippbar); Vergrößern-Taste öffnet die volle Karte (§3) |
 | `EndpointConnector` | Verbindungslinie zwischen Von/Nach im Planer (§8) |
+| `CalendarPlanSection`, `CalendarAppointmentRow`, `AppointmentBanner`, `CalendarSettingsSection` | Kalendertermine als Ziele: Abschnitt/Einladung in Planen, Terminzeile (auch Ortssuche), „Leave by“ über den Verbindungen, Schalter in Einstellungen (§8a) |
 | `ServiceAlertRow` | eine aufklappbare Störungsmeldung (§3, §12) |
 | `SettingsButton` | Zahnrad, öffnet Einstellungen (§16) |
 | `SupportView` | Publit unterstützen: monatlich und einmalig (§16b) |
