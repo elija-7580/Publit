@@ -199,6 +199,7 @@ Bewegung reduzieren zeigt jede Demo im Endzustand. Schließen, „Continue“ od
 - Smart-Routing-Abschnitt (§11), Abdeckungskarten für Start, Umstiegsorte, Ziel.
 - **Aktionen** (`TripActionsSection`): „Start trip“, „Save trip“/„Saved“, **„Leave reminder“** (5 min vor Losgehen), **„Add to Calendar“** (Eintrag verlinkt zurück auf die Fahrt), „Share trip“, „Share arrival“ (drei Aktionen in einer Reihe, vier als 2 × 2), Tickets (§14: „Show ticket“, „Add ticket for this trip“; Hinweis, wenn der Betreiber keinen Ticket-Link hat).
 - Haftungshinweis „All information without guarantee …“.
+- **Verbindung selbst zusammenstellen, Grundlage** (`RouteBuilder`, Issue #91, noch ohne Oberfläche): Eine Route lässt sich an einem Abschnitt teilen; die Abschnitte davor bleiben, der Rest wird ab dem Beginn dieses Abschnitts neu geplant, frühestens zur Ankunft der behaltenen Abschnitte (`restart`). Behaltene Abschnitte und neuer Rest werden eine Route mit eigenen Zeiten, Dauer und Umstiegen (`splice`); ein Rest, der zu früh abfährt oder mehr als 400 m entfernt beginnt, wird abgelehnt. Eine so gebaute Route merkt sich in `Itinerary.builtFrom`, aus welchen geplanten Routen sie besteht, und wird Teil für Teil mit Live-Zeiten aufgefrischt (`refreshed`); `firstBrokenLeg` nennt den ersten Abschnitt, der nach einer Verspätung nicht mehr erreicht wird. Routen vom Server und früher gespeicherte Fahrten haben kein `builtFrom` und bleiben unverändert.
 
 ## 13. Gespeicherte Fahrt, Fahrt starten, Live-Fahrt (Guide)
 
