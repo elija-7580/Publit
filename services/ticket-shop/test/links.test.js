@@ -3,7 +3,7 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { findLinks, knownShop, partners, validTemplate, PROGRAMS } from "../src/links.js";
+import { findLinks, knownShop, partners, validTemplate, withSubId, PROGRAMS } from "../src/links.js";
 import { ShopError } from "../src/shop.js";
 import worker from "../src/index.js";
 
@@ -64,4 +64,16 @@ test("the link layer works without shop secrets and allows browsers", async () =
   assert.equal((await get.json()).programs.length, 1);
   const bad = await worker.fetch(new Request("https://shop.example/v1/links", { method: "POST", body: "{}" }), {});
   assert.equal(bad.status, 400);
+});
+
+test("apps sharing Publit's links are told apart by the network's sub-ID", () => {
+  const body = { legs: [{ index: 0, operator: "FlixBus", links: { booking: "https://shop.flixbus.de/x" } }], app: "city-app" };
+  const link = new URL(findLinks(body, env).links[0].url);
+  assert.equal(link.searchParams.get("clickref"), "city-app");
+  assert.equal(link.searchParams.get("ued"), "https://shop.flixbus.de/x");
+  assert.equal(withSubId("partnerize", "https://prf.hn/click/camref:1/destination:x", "a"), "https://prf.hn/click/camref:1/pubref:a/destination:x");
+  assert.equal(new URL(withSubId("impact", "https://omio.sjv.io/c/1/2/3?u=x", "a")).searchParams.get("subId1"), "a");
+  const own = findLinks({ ...body, partners: { flixbus: AWIN.replace("awinaffid=2", "awinaffid=9") } }, env).links[0].url;
+  assert.equal(new URL(own).searchParams.get("clickref"), null);
+  assert.throws(() => findLinks({ ...body, app: "Bad App!" }, env), ShopError);
 });

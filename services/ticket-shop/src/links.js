@@ -7,11 +7,14 @@
 //
 //   GET  /v1/partners   → { programs: [{ id, name, hosts, template }] }   Publit's active programs (for the app)
 //   POST /v1/links      { legs: [{ index, operator, mode?, links?: { booking?, fares?, website? } }],
-//                         partners?: { <program id>: <your own tracking template> } }
+//                         partners?: { <program id>: <your own tracking template> }, app?: "<your app id>" }
 //                       → { links: [{ leg, operator, url, source, partner, via }] }
 //
 // "Bring your own ID": a caller that sends its own template for a program earns the commission itself. Legs without
 // one use Publit's template (PARTNER_TEMPLATES), and Publit's commission pays for running this service.
+// "Share": an app without its own affiliate accounts sends `app`; its clicks on Publit's links carry that id as the
+// network's sub-ID (Awin clickref, Partnerize pubref, Impact subId1, Tradedoubler epi), so the network's report
+// shows each app's commission and Publit can pay out the agreed share.
 
 import { ShopError } from "./shop.js";
 
@@ -54,6 +57,20 @@ export const KNOWN_SHOPS = {
   eurostar: "https://www.eurostar.com",
 };
 
+// The network's own field for a publisher sub-ID.
+export function withSubId(network, link, app) {
+  if (!app) return link;
+  if (network === "partnerize") {
+    return link.includes("/destination:") ? link.replace("/destination:", `/pubref:${app}/destination:`) : link;
+  }
+  const field = { awin: "clickref", impact: "subId1", tradedoubler: "epi" }[network];
+  if (!field) return link;
+  const url = new URL(link);
+  url.searchParams.set(field, app);
+  return url.toString();
+}
+
+const APP_ID = /^[a-z0-9][a-z0-9-]{0,39}$/;
 const MAX_LEGS = 20;
 const SOURCES = ["booking", "fares", "website"];
 
@@ -141,7 +158,14 @@ export function parseLinkRequest(body) {
       own[p.id] = t;
     }
   }
-  return { legs, partners: own };
+  let app = null;
+  if (body.app !== undefined && body.app !== null) {
+    if (typeof body.app !== "string" || !APP_ID.test(body.app)) {
+      throw new ShopError(400, "invalid", "app must be 1 to 40 lower-case letters, digits or dashes");
+    }
+    app = body.app;
+  }
+  return { legs, partners: own, app };
 }
 
 /** One link per leg: the feed's booking link, fare page or website, else a known shop; wrapped when possible. */
@@ -170,10 +194,11 @@ export function findLinks(body, env) {
     const program = programFor(url);
     const own = program && request.partners[program.id];
     const template = own ?? (program && publit[program.id]);
+    const link = template ? wrap(url, template) : null;
     links.push({
       leg: leg.index,
       operator: leg.operator || null,
-      url: template ? wrap(url, template) : url.toString(),
+      url: link ? (own ? link : withSubId(program.network, link, request.app)) : url.toString(),
       source,
       partner: template ? program.name : null,
       via: template ? (own ? "caller" : "publit") : null,
