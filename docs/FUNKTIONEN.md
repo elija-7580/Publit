@@ -354,7 +354,7 @@ Beispielphrasen: „Nächste Abfahrten in Publit“, „Bring mich nach Hause mi
 
 | Screen | Inhalt |
 |---|---|
-| Home (`WatchHomeView`) | jetzt gültige Tickets (ein Tipp → Code), Tickets, Live-Kachel der laufenden Fahrt, Where to?, Nearby, die ersten vier gespeicherten Haltestellen (ein Tipp → Abfahrten; Reihenfolge wie am iPhone unter „Saved“ festgelegt, `WatchSnapshot.homeStops`, Issue #123), Saved |
+| Home (`WatchHomeView`) | jetzt gültige Tickets (ein Tipp → Code), Tickets, Live-Kachel der laufenden Fahrt, Where to?, Nearby, Saved |
 | Tickets (`WatchTicketsView`) | gruppiert wie iPhone; Code auf weißer Fläche in voller Breite, danach Details |
 | Fahrt (`WatchTripView`) | Seiten per Digital Crown: Übersicht (Abdeckungshinweis, Zeiten, Status, Tickets, Map, Start/End trip, Save trip/Remove), dann je Fahrt/Fußweg eine Seite (Linie, Richtung, Zeiten, Gleis/„Platform changed“, Halte, Störungen, Map) |
 | Ganze Fahrt einer Linie (`WatchVehicleTripView`) | Aus einer Fahrt-Etappe (Linien-Symbol oder „Line …: all stops and map“): alle Halte des Fahrzeugs mit Zeiten, Verspätung, Gleis, auch vor dem Einstieg; Ein-/Ausstieg fett, passierte Halte grau, Status („At …“, „Between … and …“), Map |
@@ -363,6 +363,8 @@ Beispielphrasen: „Nächste Abfahrten in Publit“, „Bring mich nach Hause mi
 | Nearby (`WatchNearbyView`) | nächste Haltestellen mit Abfahrten |
 | Saved (`WatchSavedView`) | kommende Fahrten, Home/Work, Haltestellen (Abfahrten, Route here), Orte, vergangene Fahrten |
 Sync per WatchConnectivity (`WatchSyncHub`): bis 8 Fahrten, Orte, bis 12 Tickets (nur Code-Bild, vom iPhone gezeichnet). Änderungen auf der Uhr gehen als Anfragen ans iPhone.
+
+**Gespeicherte Haltestellen auf Home** (Issue #123): `WatchHomeView` zeigt zwischen „Nearby“ und „Saved“ die ersten vier gespeicherten Haltestellen (`WatchSnapshot.homeStops`); ein Tipp öffnet ihre Abfahrten (`WatchStopView`). Die Reihenfolge ist die am iPhone unter „Saved“ festgelegte; alle Haltestellen stehen weiter unter „Saved“, Home und Work werden hier nicht wiederholt.
 
 ## 22. iPad / breites Layout (`Wide/WideLayout`)
 
