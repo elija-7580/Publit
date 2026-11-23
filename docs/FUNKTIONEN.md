@@ -266,6 +266,7 @@ Screenshot-/Link-Tickets („My tickets“, „Add ticket“, Typ, „Expires“
 - **Lines** (gespeicherte Linie an Haltestelle, „At …“, nächste Abfahrten), **Stops**, **Places** („Add“ / „Save a place“ via Ortssuche).
 - **Past trips** (`PastTripsView`): „Plan again“, „Remove“.
 - Leer: „Nothing else saved yet“.
+- **Eigene Reihenfolge** (Issue #124): Linien, Haltestellen und Orte lassen sich in ihrer Liste per Ziehen (lange drücken) verschieben (`FavoritesStore.moveStops/movePlaces/moveLines`). Die Reihenfolge wird gespeichert, übersteht den Neustart und gilt überall, wo die Liste erscheint (Ortssuche, Start-Tab „A saved stop“, Apple Watch). Neue Einträge kommen weiter ans Ende; Home und Work behalten ihre festen Plätze.
 
 **Karten wie Nearby (Build 86):** Die eingebetteten Karten bei einer Abfahrt (`TripView`/`TripMap`), „Track vehicle“ (`VehicleTrackingView`), einer Linie (`LineMap`), der Bahnsteigkarte (`PlatformMapSection`) und der Umstiegshilfe (`ChangeGuideCard`) zeigen wie die Nearby-Karte deine Position mit Lichtkegel in Blickrichtung (`YouAreHere`, Kompass läuft nur solange die Karte sichtbar ist), die Halte mit Namen, soweit Platz ist, den Standort-Knopf und den Kompass; verschieb- und zoombar. Die Routenkarte im Routendetail hat ebenfalls den Standort-Knopf.
 
