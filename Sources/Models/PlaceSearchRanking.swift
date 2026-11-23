@@ -90,8 +90,10 @@ enum PlaceSearchRanking {
         if scope == .stops { return Array(stops.prefix(limit)).map(PlaceHit.match) }
 
         // A suggestion that is a stop already listed (same name) only once: the stop routes better.
+        // A street stays next to the stop named after it: it is another place to go to
+        // ("Utendorfgasse" in Vienna, the bus stop and the street, #115).
         let stopNames = Set(stops.map { StopGrouping.normalizedName($0.name) })
-        let kept = suggestions.filter { !stopNames.contains(StopGrouping.normalizedName($0.title)) }
+        let kept = suggestions.filter { $0.isAddress || !stopNames.contains(StopGrouping.normalizedName($0.title)) }
         let keptNames = Set(kept.map { StopGrouping.normalizedName($0.title) })
         // Transitous' own addresses and places only when Apple has none of that name.
         let others = sorted(transit.filter { !$0.isStop && !keptNames.contains(StopGrouping.normalizedName($0.name)) })
