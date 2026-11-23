@@ -134,7 +134,7 @@
 
 ## `Sources/Views/FavoritesView.swift`
 - Views: `FavoritesView`, `PastTripsView`
-- Sichtbare Texte: Home and Work · Remove · Change · Set %@ · Lines · At %@ · Nothing else saved yet · Save stops from their departure board, lines from a trip, or add places with +. · Stops · Places · Home · Work · Saved · Add · Past trips · Upcoming trips · Save a route to see it here, add it to your calendar and get a reminder when to leave. · Plan again
+- Sichtbare Texte: Home and Work · Remove · Change · Set %@ · Lines · At %@ · Nothing else saved yet · Save stops from their departure board, lines from a trip, or add places with +. · Stops · Places · Home · Work · Saved · Add · Past trips · Upcoming trips · Save a route to see it here, add it to your calendar and get a reminder when to leave. · Last connection · Plan again
 
 ## `Sources/Views/GoNowView.swift`
 - Views: `GoNowView`
@@ -189,7 +189,7 @@
 
 ## `Sources/Views/PlanView.swift`
 - Views: `PlanView`, `EndpointConnector`, `ItineraryRow`, `TimelineBar`
-- Sichtbare Texte: Swap · Depart · Arrive · When · Arrive by · Depart at · Now · Plan in sections · Search routes · Recommended: %@ · Plan · Where to? · not set · Earlier connections · Later connections · Updated %@ · Cancelled · Change at %@ may be tight · Change at %@: %lld %% chance · Service changes on this route · Live data
+- Sichtbare Texte: Swap · Depart · Arrive · Last · When · Arrive by · Day · Depart at · Now · The latest you can leave and still get there tonight. · Plan in sections · Search routes · Last connection: %@ · Recommended: %@ · Plan · Where to? · not set · Earlier connections · Later connections · Updated %@ · Cancelled · Change at %@ may be tight · Change at %@: %lld %% chance · Service changes on this route · Live data
 
 ## `Sources/Views/PublitLogo.swift`
 - Views: `PublitLogo`, `PublitAppIcon`
@@ -227,7 +227,7 @@
 
 ## `Sources/Views/SmartRoutingViews.swift`
 - Views: `RouteTagLine`, `SmartChangesSection`, `ChangeChanceRow`, `SmartRoutingSettingsSection`
-- Sichtbare Texte: Recommended · No change: nothing to miss · Smart routing · Feels like %@: waiting, walking and changes count more than riding. · Based on %lld past trips · Estimate · Same vehicle continues · Stay on board · Safe change · Change should work · Risky change · %@ to spare · Very tight change · Change at %@ · Arrive %@ · still makes the next change · If missed: %@ at %@ · No backup found if you miss it. · Changes · Faster · Fewer changes · A change counts like %lld extra minutes. · Extra time for changes · None · +%lld min · Use my walking speed · From Apple Health · Your walking speed · From the step counter · Not enough walking measured yet. · Avoid steep walks · Learn from my choices · Learn from my trips · Learned from %lld changes. Stays on this iPhone. · How long your changes take, from your started trips. Stays on this iPhone. · Change alerts · Reset learned preferences
+- Sichtbare Texte: Last connection · Recommended · No change: nothing to miss · Smart routing · Feels like %@: waiting, walking and changes count more than riding. · Based on %lld past trips · Estimate · Same vehicle continues · Stay on board · Safe change · Change should work · Risky change · %@ to spare · Very tight change · Change at %@ · Arrive %@ · still makes the next change · If missed: %@ at %@ · No backup found if you miss it. · Changes · Faster · Fewer changes · A change counts like %lld extra minutes. · Extra time for changes · None · +%lld min · Use my walking speed · From Apple Health · Your walking speed · From the step counter · Not enough walking measured yet. · Avoid steep walks · Learn from my choices · Learn from my trips · Learned from %lld changes. Stays on this iPhone. · How long your changes take, from your started trips. Stays on this iPhone. · Change alerts · Reset learned preferences
 
 ## `Sources/Views/StationMapView.swift`
 - Views: `StationMapView`, `MapLayersSheet`, `MapPlaceView`, `MapSelectionView`, `RentalDetailView`, `VehicleTripView`

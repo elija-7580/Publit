@@ -39,7 +39,11 @@ enum TimeMode: String, Codable, CaseIterable, Identifiable, Sendable {
     case now = "Now"
     case departAt = "Depart"
     case arriveBy = "Arrive"
+    /// The last connection of the day: routes that still arrive tonight (see `LastConnection`).
+    case lastConnection = "Last"
     var id: String { rawValue }
+    /// Searched backwards from an arrival time, so later pages are earlier routes.
+    var searchesBackwards: Bool { self == .arriveBy || self == .lastConnection }
 }
 
 @MainActor
@@ -109,6 +113,7 @@ final class PlanModel {
         return Self.timetableOrder(list, arriveBy: timeMode == .arriveBy)
     }
 
+
     /// Departure order when searching by departure, arrival order when searching "Arrive by":
     /// the time the user asked about is the one that always grows down the list. Ties fall back to
     /// the other time, then to the server's order.
@@ -127,7 +132,8 @@ final class PlanModel {
 
     /// Changes whenever a new search is needed.
     var queryKey: String {
-        let t = isLive ? "now" : String(Int(date.timeIntervalSince1970 / 60))
+        let t = timeMode == .lastConnection ? LastConnection.dayKey(for: date)
+            : isLive ? "now" : String(Int(date.timeIntervalSince1970 / 60))
         return "\(from.key)|\(to?.key ?? "-")|\(timeMode.rawValue)|\(t)|\(options.key)"
     }
 
@@ -135,7 +141,7 @@ final class PlanModel {
     private func offerForLearning() {
         SmartRouting.offered = itineraries
         if SmartRouting.isEnabled { DelayHistoryStore.shared.refresh(for: itineraries) }
-        SmartRouting.offeredArriveBy = timeMode == .arriveBy
+        SmartRouting.offeredArriveBy = timeMode.searchesBackwards
     }
 
     func swap() {
@@ -172,8 +178,9 @@ final class PlanModel {
         defer { if token == myToken { isLoading = false } }
         errorMessage = nil
         if !silent { walkNote = nil }
-        let time: Date? = isLive ? nil : date
-        let arriveBy = timeMode == .arriveBy
+        let lastMode = timeMode == .lastConnection
+        let time: Date? = lastMode ? LastConnection.deadline(for: date) : isLive ? nil : date
+        let arriveBy = timeMode.searchesBackwards
         let options = options
         let stops = PlanStops(from: from.stopId, to: to.stopId)
         do {
@@ -239,7 +246,8 @@ final class PlanModel {
             if case .currentLocation = searchedFrom { transit = Reach.boardingHere(transit, here: f) }
             // After dropping the walk, the short- and long-walk copies of a ride are identical: list it once.
             transit = transit.uniqueRides
-            itineraries = Self.merge(transit: transit, direct: res.direct)
+            // Last connection: only what has not left yet; walking the whole way is not a connection.
+            itineraries = lastMode ? LastConnection.upcoming(transit) : Self.merge(transit: transit, direct: res.direct)
             offerForLearning()
             walkNote = parkAndRide && options.firstMile != .car ? ParkAndRide.fallbackNote
                 : maxWalk > RouteOptions.defaultWalkMinutes * 60 ? Reach.longWalkNote(res.itineraries) : nil
@@ -253,7 +261,9 @@ final class PlanModel {
             lastRequest = (f, t, time, arriveBy, maxWalk, stops.forFirstMile(used.firstMile))
             lastOptions = used
             if !silent { history.record(from: searchedFrom, to: to, mode: searchedMode, date: searchedDate, source: source) }
-            if itineraries.isEmpty {
+            if itineraries.isEmpty, lastMode, !transit.isEmpty {
+                errorMessage = L10n.t("The last connection there has already left. Choose another day.")
+            } else if itineraries.isEmpty {
                 errorMessage = options.isDefault ? L10n.t("No connections found.")
                     : !options.tickets.isEmpty ? L10n.t("No connection is fully covered by your tickets. Change them in Route options to see all.")
                     : options.maxWalkMinutes < RouteOptions.defaultWalkMinutes ? Reach.ownLimitNote(minutes: options.maxWalkMinutes)
@@ -384,6 +394,7 @@ final class PlanModel {
             if lastOptions.firstMile == .car {
                 fresh = ParkAndRide.nearStations(ParkAndRide.sensible(fresh), nearest: parkAndRideNearest)
             }
+            if timeMode == .lastConnection { fresh = LastConnection.upcoming(fresh.filter { !$0.isDirect }) }
             itineraries = Self.timetableOrder(itineraries + fresh, arriveBy: req.arriveBy)
             offerForLearning()
             nextCursor = req.arriveBy ? res.previousPageCursor : res.nextPageCursor
@@ -572,6 +583,14 @@ final class AppState {
         plan.to = .place(place)
         plan.source = source
         tab = .plan
+    }
+
+    /// Plan tab with tonight's last connection to `place`, from here.
+    func lastConnection(to place: SavedPlace, source: RecentSearch.Source = .favorite) {
+        route(to: place, source: source)
+        plan.timeMode = .lastConnection
+        plan.date = .now
+        plan.searchStarted = true
     }
 
     /// Plan tab from one stop to another (a stop picked on a line's trip).
