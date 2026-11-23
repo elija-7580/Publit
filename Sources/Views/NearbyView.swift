@@ -216,7 +216,8 @@ struct NearbyView: View {
             }
         }
         .readableWidth()
-        .inkList(hero: hero, onExpand: { showMap = true }) { insets in
+        // Pulled far down, the board gives way to the station map (#17).
+        .inkList(hero: hero, pullToExpand: true, onExpand: { showMap = true }) { insets in
             NearbyMap(here: location.coordinate, groups: groups, onOpenStation: { openedStop = StopTarget($0) }, preview: true,
                       heading: location.heading)
                 .safeAreaPadding(insets)
