@@ -43,6 +43,14 @@ enum LiveTripActivity {
             phase: s.phase.rawValue, headline: s.headline, detail: s.detail, nextEvent: s.nextEvent,
             delayMinutes: s.delayMinutes, arrival: trip.endTime, lineName: leg?.lineName,
             lineColor: leg?.lineColors.background, lineTextColor: leg?.lineColors.text, updatedAt: now)
+        state.stepMode = (legs.first { now < $0.endTime } ?? legs.first)?.mode
+        state.direction = leg?.directionName
+        if let leg, s.phase != .arrived, s.phase != .cancelled {
+            state.legTime = riding ? leg.endTime : leg.startTime
+            state.boardAt = riding ? nil : leg.from.name
+        }
+        state.tripStart = trip.startTime
+        state.destination = trip.toName
         // On board with location: the next stop and stops to go, from where the phone really is.
         if s.phase == .riding, let note = GetOffAlerts.rideNote(trip.id) { state.detail = note }
         if let departing, s.phase != .cancelled, s.phase != .arrived {

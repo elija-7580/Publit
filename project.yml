@@ -244,6 +244,9 @@ targets:
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         WKApplication: true
         WKCompanionAppBundleIdentifier: io.github.elija7580.publit
+        # A tap on the trip's Live Activity in the Smart Stack opens this app (on the trip) instead of "Open on iPhone".
+        WKSupportsLiveActivityLaunchAttributeTypes:
+          - TripActivityAttributes
         NSLocationWhenInUseUsageDescription: Publit uses your location to show departures near you.
         PublitContact: https://github.com/elija-7580/Publit
     settings:
