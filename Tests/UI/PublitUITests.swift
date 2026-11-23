@@ -571,9 +571,9 @@ final class PublitUITests: XCTestCase {
         snap("nearby")
 
         let all = app.buttons["All departures"].firstMatch
-        XCTAssertTrue(reveal(all, in: app), "no link to all departures")
+        XCTAssertTrue(bringUp(all, in: app), "no link to all departures")   // clear of the live trip bar, see F13
         all.tap()
-        XCTAssertTrue(app.buttons["Save"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["Save"].waitForExistence(timeout: 10), "stop screen did not open")
         snap("stop")
         app.buttons["Save"].tap()
         app.tab(3).tap()
@@ -740,8 +740,10 @@ final class PublitUITests: XCTestCase {
         snap("trips")
     }
 
-    /// F13 Filters: mode chips on Nearby, lines at a station, route options and the walk/bike/car comparison.
-    func testF13ModeFiltersLinesAndComparison() {
+    /// F13 Filters, first half: mode chips on Nearby and the lines at a station. The route options
+    /// and the comparison are a test of their own (below): together they were two app launches and
+    /// many waits on the live API in one test; apart, each half stays well below the 150 s watchdog (#136).
+    func testF13ModeFiltersAndLines() {
         let app = launch()
         nudge(app)
         // Earlier tests pin places and save a trip, so the first board can sit below the fold;
@@ -758,17 +760,22 @@ final class PublitUITests: XCTestCase {
         app.buttons["modeChip-all"].tap()
 
         let all = app.buttons["All departures"].firstMatch
-        XCTAssertTrue(reveal(all, in: app), "no departure board loaded")
+        // Into the clear first: with a trip in the live bar, the link can sit under the bar, and the
+        // tap opens that trip's route instead of the stop (CI, 2026-11-23, twice at this line).
+        XCTAssertTrue(bringUp(all, in: app), "no departure board loaded")
         all.tap()
-        XCTAssertTrue(app.buttons["Save"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["Save"].waitForExistence(timeout: 10), "stop screen did not open")
         app.segmentedControls.buttons["Lines"].tap()
         // Lazy list: the rows exist only once scrolled near (the board starts with actions and filters).
         XCTAssertTrue(reveal(app.descendants(matching: .any)["lineAtStop"].firstMatch, in: app), "no lines at the station")
         sleep(1)
         snap("stop-lines")
-        app.terminate()
+    }
 
+    /// F13 Filters, second half: the walk/bike/car comparison and the route options in Plan.
+    func testF13RouteOptionsAndComparison() {
         let plan = launch(["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "plan"])
+        nudge(plan)   // the location prompt can cover the routes
         let routes = plan.buttons.matching(identifier: "routeRow")
         XCTAssertTrue(routes.firstMatch.waitForExistence(timeout: timeout), "no routes found")
         // Driving comes a little after the routes (its own, slower request).
@@ -859,7 +866,7 @@ final class PublitUITests: XCTestCase {
 
         app.tab(0).tap()
         let all = app.buttons["All departures"].firstMatch
-        XCTAssertTrue(reveal(all, in: app), "no link to all departures")
+        XCTAssertTrue(bringUp(all, in: app), "no link to all departures")   // clear of the live trip bar, see F13
         all.tap()
         XCTAssertTrue(app.buttons["routeHere"].waitForExistence(timeout: 10), "no labelled Route here action")
         XCTAssertTrue(app.buttons["routeFromHere"].exists, "no labelled Route from here action")
