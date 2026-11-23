@@ -78,7 +78,7 @@ final class CalendarTripsTests: XCTestCase {
     }
 
     @MainActor
-    func testAnotherDestinationDropsTheEvent() {
+    func testAnotherDestinationDropsTheEvent() async {
         let plan = PlanModel()
         let a = event("x", inMinutes: 60, lat: 48.21, lon: 16.37)
         let place = a.place(at: a.coordinate!)
