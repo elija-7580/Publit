@@ -281,6 +281,7 @@ struct RootView: View {
             // Keep running Live Activities current while the app is open.
             guard scenePhase == .active else { return }
             location.start()
+            Task.detached(priority: .utility) { await PartnerLinks.refresh() }
             // Each fix on board: the get-off alert by location (#69); off again after the ride.
             location.onFix = { [trips, location] fix in
                 guard let trip = trips.activeTrip else { location.setTripTracking(false); return }
