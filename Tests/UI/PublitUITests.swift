@@ -270,31 +270,35 @@ final class PublitUITests: XCTestCase {
 
     /// The wide layout (iPad, iPhone Duo unfolded): map with the panel, an opened route, both
     /// orientations. On iPhone it takes the same shots in the iPhone layout.
-    func testF23WideLayout() {
-        for landscape in [false, true] {
-            let o = landscape ? "-landscape" : ""
-            XCUIDevice.shared.orientation = landscape ? .landscapeLeft : .portrait
-            let app = XCUIApplication()
-            app.launchArguments = ["-onboardingDone", "YES", "-wishesHintShown", "YES", "-whatsNewBuild", "999999", "-AppleLanguages", "(de)", "-AppleLocale", "de_AT"]
-            app.launchEnvironment = ["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "nearby", "PUBLIT_UI_DARK": "0"]
-            app.launch()
-            allowLocation()
-            sleep(10) // departures, stations and vehicles on the map
-            snap("wide-nearby\(o)")
-            app.tab(1).tap()
-            sleep(12) // routes on the map
-            snap("wide-plan\(o)")
-            let row = app.descendants(matching: .any).matching(identifier: "routeRow").firstMatch
-            if row.waitForExistence(timeout: 5) {
-                row.tap()
-                sleep(4)
-                snap("wide-route\(o)")
-            }
-            app.tab(3).tap()
-            sleep(2)
-            snap("wide-saved\(o)")
-            app.terminate()
+    func testF23WideLayout() { wideLayout(landscape: false) }
+
+    /// A pass of its own: both orientations in one test took 120 s on a quiet runner and ran
+    /// into the watchdog on a busy one.
+    func testF23WideLayoutLandscape() { wideLayout(landscape: true) }
+
+    private func wideLayout(landscape: Bool) {
+        let o = landscape ? "-landscape" : ""
+        XCUIDevice.shared.orientation = landscape ? .landscapeLeft : .portrait
+        let app = XCUIApplication()
+        app.launchArguments = ["-onboardingDone", "YES", "-wishesHintShown", "YES", "-whatsNewBuild", "999999", "-AppleLanguages", "(de)", "-AppleLocale", "de_AT"]
+        app.launchEnvironment = ["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "nearby", "PUBLIT_UI_DARK": "0"]
+        app.launch()
+        allowLocation()
+        sleep(10) // departures, stations and vehicles on the map
+        snap("wide-nearby\(o)")
+        app.tab(1).tap()
+        sleep(12) // routes on the map
+        snap("wide-plan\(o)")
+        let row = app.descendants(matching: .any).matching(identifier: "routeRow").firstMatch
+        if row.waitForExistence(timeout: 5) {
+            row.tap()
+            sleep(4)
+            snap("wide-route\(o)")
         }
+        app.tab(3).tap()
+        sleep(2)
+        snap("wide-saved\(o)")
+        app.terminate()
         XCUIDevice.shared.orientation = .portrait
     }
 
