@@ -80,7 +80,7 @@ struct NextDepartureView: View {
             Image(systemName: "tram.fill")
                 .font(.title3)
                 .widgetLabel {
-                    if let next { Text(verbatim: "\(next.lineName) \(Fmt.time(next.time, tz: next.tz))") } else { Text("Publit") }
+                    if let next { Text(verbatim: "\(next.lineName) \(Fmt.time(next.time, tz: next.tz))") } else { Text(verbatim: "Publit") }
                 }
         case .accessoryInline:
             if let next {

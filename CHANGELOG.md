@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.1.2 (build 100) – widgets and complications, saved connections and lines, Wallet passes, plan around your ticket
+
+- **Widgets** (`ShortcutsWidget`, `NearbyWidget`, #6, #19): "Shortcuts" opens the routes to Home, Work or your own places with one tap (Home Screen and Lock Screen); "Departures nearby" shows the stops closest to you, favourite stops first when you are near them.
+- **Apple Watch complications** (`PublitComplications`, #18): the next departure at a chosen stop, or Publit with one tap, on the watch face.
+- **Own shortcuts** (`SavedPlace.shortcut`, `ShortcutEntity`, #22): places can become shortcuts with their own symbol next to Home and Work, in Nearby, the watch, the widget and Siri ("Route to … in Publit").
+- **Saved connections** (`SavedConnection`, #28): Plan has a star that saves the connection from → to; Favourites lists it with the next departure and the way back.
+- **Lines in one direction** (`SavedLine.directionId`, #21): a line saved from its detail keeps its direction and opens that direction's departures.
+- **Wallet passes** (`WalletPassImport`, `ZipReader`, #20): .pkpass files can be imported as tickets with their code, colours and fields.
+- **Scanned PDF tickets** (`TicketRecognizer`, #5): text in pictures inside a PDF is read too and merged with the PDF's own text.
+- **Plan around a ticket** (`TicketRoutePlanView`, `SectionPlanModel.aroundTicket`, #23, #24): a ticket's detail has "Plan around this ticket": the ride on the ticket stays fixed, the way to its start and on from its end is planned.
+- **Plan in sections** (`SectionPlanModel.split`, #10): "Change at…" splits a section at a stop of the found route.
+- **Station map** (`MapHero.pullToExpand`, `StationMapView`, #17): pulling Nearby down opens the station map, its "Departures nearby" pill leads back.
+
 ## 0.1.2 (build 99) – fixes from build 98, sections in your order, all routes on one map
 
 - **Map at the top** (`MapHero`): whether the map has scrolled away is decided by the list's own scroll offset (iOS 18+), not by a rest position caught once; caught while a screen or sheet slid in, the map stayed hidden for good.

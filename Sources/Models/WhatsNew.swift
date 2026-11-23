@@ -20,6 +20,14 @@ enum WhatsNew {
 
     /// Newest first.
     static let entries: [WhatsNewEntry] = [
+        WhatsNewEntry(build: 100, items: [
+            WhatsNewItem(symbol: "square.grid.2x2", title: "Widgets and complications",
+                         text: "Home, Work, your own shortcuts and departures near you, on the Home Screen and on the Apple Watch face."),
+            WhatsNewItem(symbol: "star", title: "Save connections and lines",
+                         text: "Save a connection or a line in one direction, and see right away when the next one leaves."),
+            WhatsNewItem(symbol: "ticket", title: "Wallet passes and your own ticket",
+                         text: "Add tickets from Wallet pass files, and plan your journey around a ticket you already have."),
+        ]),
         WhatsNewEntry(build: 99, items: [
             WhatsNewItem(symbol: "arrow.up.arrow.down", title: "Sections in your order",
                          text: "In Plan in sections, hold a place and drag it to put your stops in another order."),
