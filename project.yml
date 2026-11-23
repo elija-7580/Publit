@@ -76,6 +76,8 @@ targets:
         # Optional ticket shop (services/ticket-shop), e.g. https://shop.example.org. Empty: no "Buy tickets in Publit".
         # In an .xcconfig write the URL as https:/$()/shop.example.org, since // starts a comment there.
         PublitTicketShopURL: $(TICKET_SHOP_URL)
+        # Optional ticket-link service (partner programs, /v1/partners). Empty: the ticket shop's address, else built-in list.
+        PublitTicketLinksURL: $(TICKET_LINKS_URL)
     # Apple Health: read the walking speed for smart routing (read only).
     entitlements:
       path: Config/Publit.entitlements

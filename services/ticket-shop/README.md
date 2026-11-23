@@ -36,6 +36,28 @@ Planned, each needs a contract and API access first: Wiener Linien ticket interf
 tickets), Samtrafiken Connect / BoB (Sweden), railways via OSDM, transport authorities using Masabi Justride.
 To add one, write a provider object as described in `src/providers/index.js` and list it there.
 
+## Open ticket-link layer (for any app)
+
+The cheap first step: no customer money and no personal data. An app sends the operators of a journey and the
+ticket links it already has; it gets back the best link per leg, sent through the shop's affiliate program when
+there is one. Works without Stripe or seller keys (only `PARTNER_TEMPLATES` for Publit's own programs).
+
+```sh
+curl -X POST https://<worker>/v1/links -H 'Content-Type: application/json' -d '{
+  "legs": [{ "index": 0, "operator": "FlixBus", "links": { "booking": "https://shop.flixbus.de/search?…" } },
+           { "index": 1, "operator": "ÖBB" }],
+  "partners": { "flixbus": "https://www.awin1.com/cread.php?awinmid=<advertiser>&awinaffid=<your id>&ued={url}" }
+}'
+```
+
+- `links` per leg: `booking`, `fares`, `website` (first valid one wins); without any, a known shop for the operator.
+- `partners` (optional, "bring your own ID"): your own tracking links per program (`db`, `flixbus`, `trainline`,
+  `omio`, `sncf`, `eurostar`). They must be https on the network's own host (Awin, Partnerize, Impact,
+  Tradedoubler) and contain `{url}` once. Legs without your ID use Publit's, which funds this service.
+- Answer: `{ links: [{ leg, operator, url, source, partner, via: "caller" | "publit" | null }] }`. CORS is open.
+- `GET /v1/partners` lists Publit's active programs. The Publit app loads it on start, so a new partner program
+  goes live by changing `PARTNER_TEMPLATES` in `wrangler.toml` and redeploying, without an app update.
+
 ## Setup
 
 1. Stripe: create an account, get the secret key (`sk_test_…` first). Apple Pay on Checkout needs the domain of

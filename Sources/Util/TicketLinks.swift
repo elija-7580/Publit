@@ -1,4 +1,7 @@
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 /// Where to buy a ticket for each operator of a route.
 ///
@@ -107,7 +110,7 @@ enum TicketLinks {
 
 /// A ticket shop's affiliate program. `template` is the program's tracking link with `{url}` where the
 /// shop link goes (percent-encoded). An empty template means the program is off.
-struct PartnerProgram: Sendable {
+struct PartnerProgram: Codable, Sendable {
     let name: String
     /// Hosts of the shop; subdomains match too ("bahn.de" covers "int.bahn.de").
     let hosts: [String]
@@ -117,8 +120,20 @@ struct PartnerProgram: Sendable {
 /// Partner links for ticket shops, so a ticket bought through Publit can earn a commission.
 /// The app records nothing about the user: the network only sees the click, as with any web link.
 /// Templates are filled in once the program has accepted Publit; until then every link stays as it was.
+/// The ticket-link service (services/ticket-shop, `GET /v1/partners`) can switch programs on without an app update.
 enum PartnerLinks {
-    static let programs: [PartnerProgram] = [
+    /// The programs in use: the ones last loaded from the ticket-link service, else the built-in list.
+    static var programs: [PartnerProgram] {
+        lock.lock(); defer { lock.unlock() }
+        if remote == nil { remote = cached() }
+        return remote ?? builtIn
+    }
+
+    private static let lock = NSLock()
+    nonisolated(unsafe) private static var remote: [PartnerProgram]?
+    private static let cacheKey = "partnerPrograms"
+
+    static let builtIn: [PartnerProgram] = [
         // Awin:       https://www.awin1.com/cread.php?awinmid=<advertiser id>&awinaffid=<publisher id>&ued={url}
         PartnerProgram(name: "Deutsche Bahn", hosts: ["bahn.de", "bahn.com"], template: ""),
         PartnerProgram(name: "FlixBus", hosts: ["flixbus.de", "flixbus.com", "flixbus.at", "flixbus.ch", "flixbus.fr", "flixbus.it",
@@ -133,6 +148,42 @@ enum PartnerLinks {
         PartnerProgram(name: "SNCF Connect", hosts: ["sncf-connect.com"], template: ""),
         PartnerProgram(name: "Eurostar", hosts: ["eurostar.com"], template: ""),
     ]
+
+    /// The ticket-link service: `PublitTicketLinksURL`, else the ticket shop's address. Nil: built-in list only.
+    static var serviceURL: URL? {
+        let raw = (Bundle.main.object(forInfoDictionaryKey: "PublitTicketLinksURL") as? String)?.trimmingCharacters(in: .whitespaces)
+        return TicketShop.validURL(raw) ?? TicketShop.baseURL
+    }
+
+    struct Response: Decodable { let programs: [PartnerProgram] }
+
+    /// Programs from a service answer, keeping only https templates with one {url}. Nil when the answer is unusable.
+    static func decode(_ data: Data) -> [PartnerProgram]? {
+        guard let response = try? JSONDecoder().decode(Response.self, from: data) else { return nil }
+        return response.programs.filter { p in
+            !p.hosts.isEmpty && p.template.hasPrefix("https://") && p.template.components(separatedBy: "{url}").count == 2
+        }
+    }
+
+    /// Loads the current programs (one small request, no user data). Keeps the last list when offline.
+    static func refresh(session: URLSession = .shared) async {
+        guard let base = serviceURL else { return }
+        var request = URLRequest(url: base.appendingPathComponent("v1/partners"), timeoutInterval: 10)
+        request.cachePolicy = .reloadRevalidatingCacheData
+        guard let (data, response) = try? await session.data(for: request),
+              (response as? HTTPURLResponse)?.statusCode == 200, let list = decode(data) else { return }
+        UserDefaults.standard.set(data, forKey: cacheKey)
+        set(list)
+    }
+
+    static func set(_ list: [PartnerProgram]?) {
+        lock.lock(); defer { lock.unlock() }
+        remote = list
+    }
+
+    private static func cached() -> [PartnerProgram]? {
+        UserDefaults.standard.data(forKey: cacheKey).flatMap(decode)
+    }
 
     static func program(for url: URL, in programs: [PartnerProgram] = PartnerLinks.programs) -> PartnerProgram? {
         guard let scheme = url.scheme?.lowercased(), scheme == "http" || scheme == "https",
