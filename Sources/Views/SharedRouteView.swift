@@ -18,7 +18,7 @@ struct SharedRouteView: View {
                 ItineraryDetailView(itinerary: itinerary, fromName: route.fromName, toName: route.toName,
                                     statusAt: status(itinerary))
                     .navigationTitle(route.toName)
-            } else if failed || route.itineraryId == nil {
+            } else if failed || (route.itineraryId == nil && route.parts == nil) {
                 ContentUnavailableView {
                     Label(L10n.t("This route could not be loaded."), systemImage: "point.topleft.down.to.point.bottomright.curvepath")
                 } description: {
@@ -36,10 +36,18 @@ struct SharedRouteView: View {
         .screenTrail("Shared route")
         .navigationBarTitleDisplayMode(.inline)
         .task(id: "\(scenePhase)") {
-            guard scenePhase == .active, savedTrip == nil, let id = route.itineraryId else { return }
+            guard scenePhase == .active, savedTrip == nil, route.itineraryId != nil || route.parts != nil else { return }
             while !Task.isCancelled {
                 do {
-                    let fresh = try await TransitousClient.shared.refresh(itineraryId: itinerary?.id ?? id)
+                    let fresh: Itinerary
+                    if let built = itinerary, built.builtFrom != nil {
+                        fresh = try await TripRefreshCoordinator.shared.refresh(route: built)
+                    } else if itinerary == nil, let parts = route.parts {
+                        // Built leg by leg on the sender's iPhone: put together again from its parts.
+                        fresh = try await TripRefreshCoordinator.shared.load(parts: parts)
+                    } else {
+                        fresh = try await TransitousClient.shared.refresh(itineraryId: itinerary?.id ?? route.itineraryId ?? "")
+                    }
                     guard !Task.isCancelled else { return }
                     // Walks keep their path when the refresh comes without it (see `TripStore.keepingSteps`).
                     itinerary = itinerary.map { TripStore.keepingSteps(of: $0, in: fresh) } ?? fresh

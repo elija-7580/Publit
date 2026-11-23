@@ -3,6 +3,7 @@
 ## Unreleased
 
 - **Plan in sections** (`SectionPlanView`, `SectionPlanModel`, `RouteBuilder.chain`, #144): Plan has "Plan in sections": places in order with stops in between, for each section how to travel (public transport, on foot, by bike, by car) and which departure, and a stay at each stop. The sections chain by time and become one route that can be started and saved; only its public transport parts are asked for live times.
+- **Share links** (`SharedRoute.parts`, `RouteBuilder.assemble`, #145): the link of a route built leg by leg carries its parts and opens with the same legs; older versions get the search as before.
 
 ## 0.1.1 (build 97) – go on another way, appointments as destinations, without long-distance trains, steadier maps
 

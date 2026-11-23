@@ -196,4 +196,41 @@ final class RouteBuilderTests: XCTestCase {
         let plain = try await coordinator.refresh(route: a)
         XCTAssertEqual(plain.id, "A'")
     }
+
+    // MARK: Part 6 (#145): share links
+
+    func testABuiltRouteTravelsInALinkAndIsPutTogetherAgain() throws {
+        let a = try planned()
+        let b = route("B", [try leg("SUBWAY", 2, 4, start: 25, end: 33)])
+        let built = try XCTUnwrap(RouteBuilder.splice(a, at: 2, with: b))
+        let link = SharedRoute(built, fromName: "Home", toName: "Work")
+        XCTAssertNil(link.itineraryId, "a built route has no server ID of its own")
+        XCTAssertEqual(link.parts, built.builtFrom)
+
+        let read = try XCTUnwrap(SharedRoute(query: link.query))
+        XCTAssertEqual(read.parts, built.builtFrom)
+        XCTAssertEqual(read.fromName, "Home")
+        let again = try XCTUnwrap(RouteBuilder.assemble(try XCTUnwrap(read.parts), from: ["A": a, "B": b]))
+        XCTAssertEqual(again.routeKey, built.routeKey)
+        XCTAssertEqual(again.endTime, built.endTime)
+        XCTAssertNil(RouteBuilder.assemble(try XCTUnwrap(read.parts), from: ["A": a]), "a part that is gone")
+
+        // What older versions read is unchanged: places and departure, in the same fields.
+        let plain = SharedRoute(a, fromName: "Home", toName: "Work")
+        XCTAssertNil(plain.parts)
+        XCTAssertFalse(plain.query.contains("p0="))
+        XCTAssertTrue(link.query.contains("f=Home") && link.query.contains("t=Work") && link.query.contains("&d="))
+    }
+
+    func testABuiltRouteWithAPartOnTheStreetSharesTheSearchOnly() throws {
+        let drive = route("", [try leg("WALK", 0, 2, start: 0, end: 20)])
+        let b = route("B", [try leg("SUBWAY", 2, 4, start: 25, end: 33)])
+        let built = try XCTUnwrap(RouteBuilder.chain([drive, b]))
+        XCTAssertNil(SharedRoute(built, fromName: "", toName: "").parts)
+    }
+
+    func testABrokenPartInALinkIsIgnored() throws {
+        let read = try XCTUnwrap(SharedRoute(query: "f=A&fl=48.0,16.0&t=B&tl=48.1,16.0&d=1791360000&p0=sA~x~2"))
+        XCTAssertNil(read.parts)
+    }
 }

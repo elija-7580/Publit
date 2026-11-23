@@ -114,6 +114,23 @@ enum RouteBuilder {
         return make(legs: legs, parts: updated)
     }
 
+    /// A built route from a link (#145): its parts, each cut out of the planned route fetched by
+    /// the part's ID. Nil when one is missing, too short, or the parts no longer meet.
+    static func assemble(_ parts: [RoutePart], from fetched: [String: Itinerary]) -> Itinerary? {
+        var legs: [Leg] = []
+        var updated: [RoutePart] = []
+        for part in parts {
+            guard let source = fetched[part.itineraryId], part.firstLeg >= 0, part.legCount > 0,
+                  source.legs.count >= part.firstLeg + part.legCount else { return nil }
+            let cut = Array(source.legs[part.firstLeg ..< part.firstLeg + part.legCount])
+            if let last = legs.last, let first = cut.first,
+               last.to.coordinate.distance(to: first.from.coordinate) > joinRadius { return nil }
+            legs += cut
+            updated.append(RoutePart(itineraryId: source.id, firstLeg: part.firstLeg, legCount: part.legCount))
+        }
+        return make(legs: legs, parts: updated)
+    }
+
     /// The first leg that can no longer be reached, after live times moved: it leaves before the
     /// leg in front of it arrives. Nil while the whole route holds.
     static func firstBrokenLeg(in route: Itinerary) -> Int? {
