@@ -263,7 +263,7 @@ Screenshot-/Link-Tickets („My tickets“, „Add ticket“, Typ, „Expires“
 
 - **Home and Work**: festlegen („Set Home/Work“), „Change“, „Remove“; Ein-Tipp-Route. Zuhause und Arbeit sind eigene Plätze: Liefert die Suche für beide dieselbe ID (z. B. Adressen in verschiedenen Ländern), ersetzt das Setzen des einen nicht mehr den anderen.
 - **Upcoming trips** (`SavedTripRow`, im Stil der Routen in Plan): Ziel und „Leave in x min“ (sonst Datum), Ab–An und Dauer, die farbige Zeitleiste der Linien (`TimelineBar`, statt gequetschter Linien-Badges), „from … · n changes“; leer: Hinweis „Save a route to see it here, add it to your calendar and get a reminder when to leave.“
-- **Lines** (gespeicherte Linie an Haltestelle, „At …“, nächste Abfahrten), **Stops**, **Places** („Add“ / „Save a place“ via Ortssuche).
+- **Lines** (gespeicherte Linie an Haltestelle, „At …“, nächste Abfahrten), **Stops**, **Places** („Add“ / „Save a place“ via Ortssuche). Adressen gelten nur am selben Ort (unter 30 m) als derselbe Platz: Liefert die Suche für zwei verschiedene Adressen dieselbe ID, bleiben beide gespeichert, jede unter einer eigenen ID; Speichern, Entfernen und das Setzen von Home/Work ändern nie einen anderen gespeicherten Platz (auch auf der Watch). Haltestellen werden weiter an ihrer ID erkannt.
 - **Past trips** (`PastTripsView`): „Plan again“, „Remove“.
 - Leer: „Nothing else saved yet“.
 

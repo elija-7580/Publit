@@ -206,6 +206,19 @@ final class WatchSyncTests: XCTestCase {
         XCTAssertEqual(state.received.trips.map(\.id), ["a"], "what the iPhone sent is not touched")
     }
 
+    /// #121: two addresses can share a geocoder ID; saving the second on the watch keeps both.
+    func testTheWatchKeepsTwoAddressesWithTheSameId() {
+        let roma = SavedPlace(id: "adr-1", name: "Via Roma 1", subtitle: nil, lat: 45.46, lon: 9.19, stopId: nil)
+        let haupt = SavedPlace(id: "adr-1", name: "Hauptstraße 1", subtitle: nil, lat: 46.00, lon: 8.95, stopId: nil)
+        var state = WatchState(received: WatchSnapshot(sentAt: Date(timeIntervalSince1970: 100)))
+        state.add(.savePlace(roma))
+        state.add(.savePlace(haupt))
+        state.add(.savePlace(haupt))
+        let places = state.snapshot.places
+        XCTAssertEqual(places.map(\.name), ["Via Roma 1", "Hauptstraße 1"])
+        XCTAssertEqual(Set(places.map(\.id)).count, 2)
+    }
+
     func testConfirmedRequestsLeaveTheListAndOldSnapshotsAreIgnored() throws {
         let it = try XCTUnwrap(plan("plan_muc").itineraries.first)
         var state = WatchState(received: WatchSnapshot(sentAt: Date(timeIntervalSince1970: 100)))

@@ -17,7 +17,12 @@ struct SavedPlace: Codable, Hashable, Identifiable, Sendable {
     /// Same saved thing: same ID, or the same station reached via a different stop ID
     /// (search returns one platform, Nearby another).
     func isSame(as other: SavedPlace) -> Bool {
-        if id == other.id { return true }
+        if id == other.id {
+            // A stop is known by its ID. An address ID is not unique: the search can hand out the
+            // same one for two addresses, so two addresses are the same only at the same spot.
+            if isStop || other.isStop { return true }
+            return coordinate.distance(to: other.coordinate) < Self.sameSpotRadius
+        }
         guard isStop, other.isStop else { return false }
         if stopId == other.stopId { return true }
         // The stop across the road has the same name but other departures.
@@ -26,6 +31,17 @@ struct SavedPlace: Codable, Hashable, Identifiable, Sendable {
             && coordinate.distance(to: other.coordinate) < StopGrouping.mergeRadius
     }
     var coordinate: LatLon { LatLon(lat: lat, lon: lon) }
+
+    /// Two addresses with the same ID closer than this (metres) are one saved place.
+    static let sameSpotRadius: Double = 30
+
+    /// A stable ID of its own for an address whose ID another saved address already has.
+    var ownID: String { "\(id)|\(String(format: "%.5f,%.5f", lat, lon))" }
+
+    /// The same saved thing, also when this address was saved under its own ID (`ownID`).
+    func isSaved(as saved: SavedPlace) -> Bool {
+        saved.isSame(as: self) || (!isStop && saved.id == ownID)
+    }
 
     init(id: String, name: String, subtitle: String?, lat: Double, lon: Double, stopId: String?) {
         self.id = id; self.name = name; self.subtitle = subtitle
