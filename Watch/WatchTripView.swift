@@ -89,7 +89,7 @@ struct WatchTripView: View {
         guard now >= it.startTime.addingTimeInterval(-3 * 3600), now <= it.endTime.addingTimeInterval(10 * 60) else { return }
         if let saved = library.snapshot.trip(for: it) {
             await library.refresh(trip: saved.id)
-        } else if let fresh = try? await TripRefreshCoordinator.shared.refresh(it.id) {
+        } else if let fresh = try? await TripRefreshCoordinator.shared.refresh(route: it) {
             loaded = fresh
         }
     }
