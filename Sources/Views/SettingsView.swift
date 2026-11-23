@@ -167,6 +167,7 @@ struct SettingsView: View {
                     Text(L10n.t("Platform map: where each platform of a station is, with its lines and next stops. Departures by platform: the stop board grouped by platform, with where the vehicles go next. Change guide: during a trip, a map from platform to platform with stairs, lifts and exits."))
                 }
                 SmartRoutingSettingsSection()
+                CalendarSettingsSection()
                 Section {
                     if MapProvider.googleAvailable {
                         Picker(L10n.t("Map provider"), selection: $mapProvider) {

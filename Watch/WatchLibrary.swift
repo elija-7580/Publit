@@ -109,7 +109,7 @@ final class WatchLibrary: NSObject, WCSessionDelegate {
     /// Fresh times for a saved trip, straight from Transitous.
     func refresh(trip id: String) async {
         guard let trip = snapshot.trip(id),
-              let fresh = try? await TripRefreshCoordinator.shared.refresh(trip.itinerary.id) else { return }
+              let fresh = try? await TripRefreshCoordinator.shared.refresh(route: trip.itinerary) else { return }
         state.update(tripId: id, itinerary: fresh, at: .now)
         persist()
     }

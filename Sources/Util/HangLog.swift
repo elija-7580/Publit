@@ -46,6 +46,8 @@ final class HangLog: @unchecked Sendable {
     static let errorRepeatWindow: TimeInterval = 300
     private var recentErrors: [String: Date] = [:]
     private var sessionActive = false
+    /// False until the first scene change (tests and extensions without a scene report everything).
+    private var sceneKnown = false
     private var pendingSession: String?
     private var sessionWriteScheduled = false
     private var timerSuspended = false
@@ -62,9 +64,12 @@ final class HangLog: @unchecked Sendable {
         let repeated = recentErrors[key].map { now.timeIntervalSince($0) < Self.errorRepeatWindow } ?? false
         if !repeated { recentErrors[key] = now }
         if recentErrors.count > 50 { recentErrors = recentErrors.filter { now.timeIntervalSince($0.value) < Self.errorRepeatWindow } }
+        // Asked while open, answered after iOS froze the app in the background: the timeout is
+        // iOS's doing, not a fault. It stays in the steps and does not become an entry of its own.
+        let frozen = sceneKnown && !sessionActive && Self.isSuspensionNoise(error)
         lock.unlock()
         note("error \(context): \(detail)", at: now)
-        guard !repeated else { return }
+        guard !repeated, !frozen else { return }
         report("ERROR", "\(context): \(detail)", at: now)
     }
 
@@ -81,6 +86,7 @@ final class HangLog: @unchecked Sendable {
     func scene(active: Bool, at now: Date = Date()) {
         lock.lock()
         sessionActive = active
+        sceneKnown = true
         // The watchdog sleeps while Publit is in the background: nothing to watch, and no wake-ups.
         if let timer, timerSuspended == active {
             if active { timer.resume() } else { timer.suspend() }
@@ -142,6 +148,12 @@ final class HangLog: @unchecked Sendable {
         if error is CancellationError { return true }
         if let u = error as? URLError, u.code == .cancelled { return true }
         return false
+    }
+
+    /// Timeouts and lost connections of a request that iOS froze together with the app.
+    static func isSuspensionNoise(_ error: Error) -> Bool {
+        guard let u = error as? URLError else { return false }
+        return [.timedOut, .networkConnectionLost, .notConnectedToInternet, .backgroundSessionWasDisconnected].contains(u.code)
     }
 
     /// Kind and code, plus the field path of a decoding error ("legs[2].from.lat: missing").

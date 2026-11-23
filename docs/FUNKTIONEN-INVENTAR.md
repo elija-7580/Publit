@@ -3,7 +3,7 @@
 > Nicht von Hand bearbeiten. Erzeugt von `scripts/feature_inventory.py` (CI: `features-doc.yml`).
 > Die ausführliche Beschreibung steht in [FUNKTIONEN.md](FUNKTIONEN.md).
 
-**207 Views, 5 App Intents, 3 Widgets in 80 Dateien.**
+**213 Views, 5 App Intents, 3 Widgets in 82 Dateien.**
 
 ## `Sources/App/DesignSamples.swift`
 - Views: `DesignSampleView`
@@ -80,6 +80,10 @@
 - Views: `BoardingLine`, `BoardingSteps`
 - Sichtbare Texte: Walk to %@ · Board at %@ · Pl. %@ · → %@ · Get off at %@
 
+## `Sources/Views/CalendarSuggestionViews.swift`
+- Views: `CalendarAppointmentRow`, `CalendarPlanSection`, `AppointmentBanner`, `CalendarSettingsSection`
+- Sichtbare Texte: No place found for “%@”. · Today · Shows routes that get you there on time · From your calendar · Your appointments as destinations · Turn on · Not now · Leave by %@ to arrive %lld min early · No connection arrives before %@ · Suggest appointments as destinations · Open Settings · Calendar · Calendar access is off for Publit. Turn it on in the Settings app.
+
 ## `Sources/Views/ChooseOnMapView.swift`
 - Views: `ChooseOnMapView`, `CenterPin`
 - Sichtbare Texte: Choose on map · Finding the address… · Move the map to place the pin · Confirm location · Dropped pin
@@ -138,10 +142,14 @@
 
 ## `Sources/Views/ItineraryDetailView.swift`
 - Views: `CompareMapView`, `ItineraryDetailView`, `RouteSummary`, `RouteMap`, `RouteMark`, `VehicleKindLine`, `LegRow`, `GetOffButton`, `StatusBanner`, `TimelineLegRow`, `TimelineEndRow`, `TimelineRail`, `LeaveHero`
-- Sichtbare Texte: Destination · Driving times are without traffic and parking. · Steps · Trip overview · Done · Route · Live · Cancelled · Rail replacement bus · Timetable · This trip is cancelled. · Pick up at %@ · Return at %@ · Rent in the provider's app · +%lld min · Platform %@ · Reminder set · Remind me to get off · We'll notify you at %@. · This stop is less than two minutes away. · Allow notifications for Publit in Settings. · On time · Line %@: all stops and map · Board at %@ · Get off at %@ · Service changes on this route · Arrive
+- Sichtbare Texte: Destination · Driving times are without traffic and parking. · Steps · Trip overview · Done · Route · Live · Cancelled · Rail replacement bus · Timetable · This trip is cancelled. · Pick up at %@ · Return at %@ · Rent in the provider's app · +%lld min · Platform %@ · Reminder set · Remind me to get off · We'll notify you at %@. · This stop is less than two minutes away. · Allow notifications for Publit in Settings. · On time · Line %@: all stops and map · Board at %@ · Get off at %@ · Service changes on this route · Go on another way · Arrive
 
 ## `Sources/Views/LaunchSplash.swift`
 - Views: `LaunchSplash`
+
+## `Sources/Views/LegChangeView.swift`
+- Views: `LegChangeView`, `LegChoiceRow`
+- Sichtbare Texte: The ways to go on could not be loaded. Check your connection and try again. · Try again · No other way to go on from here. · Later · From %@, after %@ · The way up to here stays as it is. Only ways you can still reach are listed. · Go on another way · Cancel · Live data · Your route · On foot
 
 ## `Sources/Views/LinesView.swift`
 - Views: `LinesView`, `LineRefRow`, `LineDetailView`, `LineMap`, `LineStopRow`, `LineTimetableView`
@@ -169,7 +177,7 @@
 
 ## `Sources/Views/NearbyView.swift`
 - Views: `NearbyView`, `StopGroupHeader`, `StopDeparturesView`, `LineAtStopRow`
-- Sichtbare Texte: Nearby · Station map · Location is off · Allow location access in Settings to see departures near you. Trip planning works without it. · Departures unavailable · No departures for these modes · Show all modes · No departures nearby · No departures within 5 km. The station map shows stops further away. · Couldn't refresh. Times may be out of date. · Route here · All departures · Active trip · Where to now? Route from your location · Next trip: %@ · Here · %lld min · Alerts · Towards %@ · Route from here · Share departures · View · Departures · Lines · Platforms · No upcoming departures. · Saved line · Save line · Save · Direction unavailable · Next: %@ · Platform %@ · now
+- Sichtbare Texte: Nearby · Station map · Location is off · Allow location access in Settings to see departures near you. Trip planning works without it. · Departures unavailable · No departures for these modes · Show all modes · No departures nearby · No departures within 5 km. The station map shows stops further away. · Couldn't refresh. Times may be out of date. · Route here · All departures · Active trip · Where to now? Route from your location · Next trip: %@ · Next appointment: %@ · Here · %lld min · Alerts · Towards %@ · Route from here · Share departures · View · Departures · Lines · Platforms · No upcoming departures. · Saved line · Save line · Save · Direction unavailable · Next: %@ · Platform %@ · now
 
 ## `Sources/Views/OnboardingView.swift`
 - Views: `OnboardingView`
@@ -177,7 +185,7 @@
 
 ## `Sources/Views/PlaceSearchView.swift`
 - Views: `PlaceSearchView`, `PlaceHitRow`, `PlaceLabel`, `CategoryIcon`
-- Sichtbare Texte: Cancel · Current location · Choose on map · Saved · No matches. · from %@ · Remove · Clear history · Recently searched · Save
+- Sichtbare Texte: Cancel · Current location · Choose on map · From your calendar · Saved · No matches. · from %@ · Remove · Clear history · Recently searched · Save
 
 ## `Sources/Views/PlanView.swift`
 - Views: `PlanView`, `EndpointConnector`, `ItineraryRow`, `TimelineBar`
@@ -196,7 +204,7 @@
 
 ## `Sources/Views/RouteOptionsView.swift`
 - Views: `RouteOptionsView`, `RouteOptionsButton`, `StreetComparisonSection`, `FirstMilePicker`, `OwnTicketsView`
-- Sichtbare Texte: Transport modes · Routes only use the modes that are switched on. · None · My tickets · Routes only use rides your tickets cover, e.g. no ICE with the Deutschlandticket. · Your %@ is saved in Tickets. · To the first stop · Changes · Walk to and from stops · %lld min · Step-free (wheelchair) · Shared bikes and e-scooters · Compare with walking, cycling and driving · Driving times are without traffic and parking. · Route options · Reset · Done · All modes · Other ways · About as fast · %@ faster · %@ slower · Park & Ride searches take longer. · %@ · %@ · Saved in Tickets
+- Sichtbare Texte: Without long-distance trains · Transport modes · Routes only use the modes that are switched on. · Long-distance trains are high-speed, intercity and night trains (ICE, TGV, Railjet …). · None · My tickets · Routes only use rides your tickets cover, e.g. no ICE with the Deutschlandticket. · Your %@ is saved in Tickets. · To the first stop · Changes · Walk to and from stops · %lld min · Step-free (wheelchair) · Shared bikes and e-scooters · Compare with walking, cycling and driving · Driving times are without traffic and parking. · Route options · Reset · Done · All modes · Other ways · About as fast · %@ faster · %@ slower · Park & Ride searches take longer. · %@ · %@ · Saved in Tickets
 
 ## `Sources/Views/SavedTripView.swift`
 - Views: `SavedTripView`, `SavedTripRow`
@@ -251,7 +259,7 @@
 
 ## `Sources/Views/TripView.swift`
 - Views: `TripView`, `TripMap`, `StopTimeRow`, `LineDeparturesView`
-- Sichtbare Texte: Track vehicle · Stops · From %@ to here · Route here · Route from here · Line %@: route and timetable · Done · Saved line · Save line · Not departed yet · Arrived at %@ · At %@ · Between %@ and %@ · No live data for this trip. Position estimated from the timetable. · Position estimated from live stop times. · Estimated vehicle position
+- Sichtbare Texte: Track vehicle · Stops · From %@ to here · Route here · Route from here · Departures · Line %@: route and timetable · Done · Saved line · Save line · Not departed yet · Arrived at %@ · At %@ · Between %@ and %@ · No live data for this trip. Position estimated from the timetable. · Position estimated from live stop times. · Estimated vehicle position
 
 ## `Sources/Views/VehicleTrackingView.swift`
 - Views: `VehicleTrackingView`

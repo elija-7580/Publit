@@ -15,6 +15,9 @@ enum RouteBuilder {
         let earliest: Date
     }
 
+    /// A refresh came back with other rides than the route was built from.
+    struct NoLongerTheSame: Error {}
+
     /// The rest of a built route must start where the kept legs end, within this many metres
     /// (the router may hand back the stop's other platform or the point on the street).
     static let joinRadius: Double = 400
@@ -40,6 +43,22 @@ enum RouteBuilder {
         let kept = Array(route.legs[..<index])
         guard fits(rest, after: kept) else { return nil }
         return make(legs: kept + rest.legs, parts: prefix(parts(of: route), legs: index) + parts(of: rest))
+    }
+
+    /// The ways to go on from leg `index`, out of what a search from `restart(_:at:)` found: each
+    /// one as the whole route, the kept legs first. What cannot be reached is left out, the same
+    /// rides are listed once, earliest arrival first. The route as it is can be among them.
+    static func choices(for route: Itinerary, at index: Int, from found: [Itinerary]) -> [Itinerary] {
+        var seen = Set<String>()
+        return found.compactMap { splice(route, at: index, with: $0) }
+            .filter { seen.insert($0.routeKey).inserted }
+            .sorted { ($0.endTime, $0.startTime) < ($1.endTime, $1.startTime) }
+    }
+
+    /// The IDs to ask the server about for fresh live times, each once.
+    static func refreshIds(of route: Itinerary) -> [String] {
+        var seen = Set<String>()
+        return parts(of: route).map(\.itineraryId).filter { seen.insert($0).inserted }
     }
 
     /// The planned routes a route is made of: its own parts when it was built, else itself.

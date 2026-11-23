@@ -12,7 +12,7 @@ struct RecentSearch: Codable, Identifiable, Equatable, Sendable {
     var source: Source? = nil
 
     enum Source: String, Codable, Sendable {
-        case search, map, favorite, line, shared
+        case search, map, favorite, line, shared, calendar
 
         var symbol: String {
             switch self {
@@ -21,6 +21,7 @@ struct RecentSearch: Codable, Identifiable, Equatable, Sendable {
             case .favorite: return "star"
             case .line: return "tram"
             case .shared: return "link"
+            case .calendar: return "calendar"
             }
         }
     }

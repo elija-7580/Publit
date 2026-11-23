@@ -1,6 +1,101 @@
 {
  "sourceLanguage": "en",
  "strings": {
+  "NSCalendarsFullAccessUsageDescription": {
+   "extractionState": "manual",
+   "localizations": {
+    "cs": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit čte nadcházející události s místem, aby navrhl spojení, jen pokud zapnete návrhy z kalendáře. Kalendář zůstává ve vašem iPhonu."
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit liest kommende Termine mit Ort, um Verbindungen dorthin vorzuschlagen, nur wenn du Kalendervorschläge einschaltest. Dein Kalender bleibt auf deinem iPhone."
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Το Publit διαβάζει τα επόμενα γεγονότα με τοποθεσία για να προτείνει διαδρομές, μόνο αν ενεργοποιήσετε τις προτάσεις ημερολογίου. Το ημερολόγιο μένει στο iPhone σας."
+     }
+    },
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit reads upcoming events that have a place to suggest routes there, only if you turn on calendar suggestions. Your calendar stays on your iPhone."
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit lee los próximos eventos con lugar para sugerir rutas, solo si activas las sugerencias del calendario. Tu calendario se queda en tu iPhone."
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit lit les prochains événements qui ont un lieu pour proposer des itinéraires, uniquement si vous activez les suggestions du calendrier. Votre calendrier reste sur votre iPhone."
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "A Publit csak akkor olvassa a közelgő, helyszínnel rendelkező eseményeket útvonaljavaslatokhoz, ha bekapcsolod a naptárjavaslatokat. A naptárad az iPhone-odon marad."
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit legge i prossimi eventi con un luogo per proporre percorsi, solo se attivi i suggerimenti dal calendario. Il calendario resta sul tuo iPhone."
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit leest komende afspraken met een locatie om routes voor te stellen, alleen als je agendasuggesties aanzet. Je agenda blijft op je iPhone."
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit odczytuje nadchodzące wydarzenia z miejscem, aby proponować trasy, tylko jeśli włączysz sugestie z kalendarza. Kalendarz pozostaje na Twoim iPhonie."
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O Publit lê os próximos eventos com local para sugerir percursos, apenas se ativar as sugestões do calendário. O seu calendário fica no seu iPhone."
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit citește evenimentele viitoare care au un loc pentru a sugera rute, doar dacă activați sugestiile din calendar. Calendarul rămâne pe iPhone-ul dvs."
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit läser kommande händelser med en plats för att föreslå resor, bara om du slår på kalenderförslag. Din kalender stannar på din iPhone."
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit, yalnızca takvim önerilerini açarsanız, rota önermek için yeri olan yaklaşan etkinlikleri okur. Takviminiz iPhone’unuzda kalır."
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Publit читає найближчі події з місцем, щоб пропонувати маршрути, лише якщо ви ввімкнете пропозиції з календаря. Календар залишається на вашому iPhone."
+     }
+    }
+   }
+  },
   "NSCalendarsWriteOnlyAccessUsageDescription": {
    "extractionState": "manual",
    "localizations": {

@@ -46,7 +46,15 @@ enum TimeMode: String, Codable, CaseIterable, Identifiable, Sendable {
 @Observable
 final class PlanModel {
     var from: Endpoint = .currentLocation
-    var to: Endpoint? { didSet { if to == nil { searchStarted = false } } }
+    var to: Endpoint? {
+        didSet {
+            if to == nil { searchStarted = false }
+            // Another destination: the calendar event no longer belongs to the search.
+            if let a = appointment, to?.key != CalendarTrips.placePrefix + a.id { appointment = nil }
+        }
+    }
+    /// The calendar event the destination came from: the routes say when to leave to be there on time.
+    var appointment: CalendarAppointment?
     /// Plan tab: routes load after "Search routes"; from then on, changes search again by themselves.
     /// Clearing the destination starts over.
     var searchStarted = false
@@ -384,14 +392,13 @@ final class PlanModel {
         }
     }
 
-    /// Walking there is listed first when it is about as fast as the best ride, or the only way.
+    /// Walking there is listed first when it is a real choice (`StreetComparison.walkIsAChoice`):
+    /// about as fast as the best ride, the only way, or there before any ride door to door.
     nonisolated static func merge(transit: [Itinerary], direct: [Itinerary]) -> [Itinerary] {
         // Only walking joins the list; cycling and driving are shown as a comparison.
-        let walking = direct.filter { let m = StreetComparison.streetMode($0); return m != "BIKE" && m != "CAR" }
-        guard let walk = walking.min(by: { $0.duration < $1.duration }) else { return transit }
-        guard let best = transit.map(\.duration).min() else { return [walk] }
-        let worthIt = Double(walk.duration) <= Double(best) * 1.25 || walk.duration <= 10 * 60
-        return worthIt ? [walk] + transit : transit
+        guard let walk = StreetComparison.walk(in: direct) else { return transit }
+        guard !transit.isEmpty else { return [walk] }
+        return StreetComparison.walkIsAChoice(walk, transit: transit) ? [walk] + transit : transit
     }
 
     /// Street modes to compare. Walking is left out when it is already in the list of routes.
@@ -524,6 +531,21 @@ final class AppState {
         plan.timeMode = .now
         plan.date = .now
         plan.searchStarted = true
+    }
+
+    /// A calendar event as the destination: the Plan tab from here, arriving a few minutes before it
+    /// starts, with the routes searched at once. The routes then say when to leave.
+    func route(to appointment: CalendarAppointment, place: SavedPlace, now: Date = .now) {
+        dismissToken &+= 1
+        showGoNow = false
+        plan.from = .currentLocation
+        plan.to = .place(place)
+        plan.appointment = appointment
+        plan.source = .calendar
+        plan.timeMode = .arriveBy
+        plan.date = max(appointment.arriveBy, now.addingTimeInterval(60))
+        plan.searchStarted = true
+        tab = .plan
     }
 
     /// Routes from the current location to `place`, leaving now (Nearby → "Where to now?").
