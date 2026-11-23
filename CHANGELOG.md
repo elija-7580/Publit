@@ -20,6 +20,7 @@
 - **Change chances** (`SmartChangesSection`, `ItineraryRow`): shown with smart routing off too; estimates show their percentage with "≈". Delay history is always loaded for the planned countries.
 - **Plan in sections** (`SectionPlanView`, `SectionPlanModel.moveStops`): places can be dragged into another order (or with "Edit"); times and durations no longer get cut off, line badges wrap instead of being squeezed one letter wide.
 - **All routes on one map** (`CompareRoutesMapView`): iPhone Plan has a map button with every route found, pick one and open it.
+- **Ending a trip** (`LiveTripBar`): a started trip always shows in the bar, also when it was hidden before it started (it kept running out of sight); the X on a started trip ends it.
 - **Ticket shop** (`TicketShop.isTestBuild`): buying in Publit only in TestFlight and development builds, never in the App Store version.
 
 ## 0.1.2 (build 98) – plan in sections, your way out, last connection, your trip on the watch

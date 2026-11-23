@@ -231,7 +231,7 @@ Gespeicherte Verbindung mit aktuellem Live-Status (oder „Live status unavailab
 - „End trip“ beendet Tracking, Live Activity und Erinnerungen; Fahrt bleibt unter „Past trips“.
 
 ### Live-Leiste (`LiveTripBar`)
-Erscheint für die gestartete Fahrt (egal wie weit voraus sie losfährt, auch an einem späteren Tag) oder eine gespeicherte, die gerade läuft/bald startet (30 min vorher); „Live trip“, Countdown in min, „Open trip“, „Start trip“, „Hide“; bis 5 min nach Ankunft „Arrived“.
+Erscheint für die gestartete Fahrt (egal wie weit voraus sie losfährt, auch an einem späteren Tag) oder eine gespeicherte, die gerade läuft/bald startet (30 min vorher); „Live trip“, Countdown in min, „Open trip“, „Start trip“, „Hide“ (X, nur bei nicht gestarteter Fahrt: blendet die Leiste für diese Fahrt aus, die Fahrt bleibt gespeichert); bei der gestarteten Fahrt beendet das X die Fahrt („End trip“: Erinnerungen, Live Activity und Uhr enden mit) und blendet die Leiste aus. Eine gestartete Fahrt erscheint immer in der Leiste, auch wenn sie vorher ausgeblendet war; bis 5 min nach Ankunft „Arrived“.
 
 ### Live-Fahrt / Guide (`LiveTripView`)
 - **Etappen** (`StagePager`, `StageStrip`, `StageRow`): Gehen → Warten → Fahren → Ankommen, bestimmt durch Live-Zeiten und GPS. Die aktuelle Etappenkarte trägt „Now“; keine „3/8“-Zähler (die Leiste darüber zeigt die Etappen). Im Panel steht unter den Karten nur die Etappe vorne (keine Liste aller Etappen darunter); darüber die Tasten „Back to now“ (nach manuellem Blättern) und „Trip overview“. Die Liste aller Etappen (`StageRow`) gibt es nur in der Übersicht (erste Karte bzw. „Trip overview“), Tipp öffnet die Etappe.
