@@ -42,6 +42,8 @@ jobs:
         with: { node-version: "22" }
       - working-directory: feeds/amtab-gtfsrt/worker
         run: node --test
+      - working-directory: services/ticket-shop
+        run: node --test
 
   ios:
     name: iOS build, unit and UI tests
