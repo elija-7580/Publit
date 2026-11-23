@@ -54,7 +54,7 @@
 Animiertes Logo, mindestens 0,7 s, höchstens 2 s; endet früher, sobald die erste Abfahrtstafel geladen ist.
 
 ### Onboarding (`OnboardingView`, nur beim ersten Start, Vollbild, Seiten mit Punkten, „Skip“)
-1. **„Public transport, without the noise.“** – Abfahrten in der Nähe, Routen durch Europa, Begleitung bis zum Aussteigen; kein Konto, keine Werbung, kein Tracking.
+1. **„Public transport, without the noise.“** – Abfahrten in der Nähe, Routen „wherever you go“ (nicht mehr „across Europe“: Publit läuft überall, wo es offene Fahrplandaten gibt), Begleitung bis zum Aussteigen; kein Konto, keine Werbung, kein Tracking.
 2. **„Departures where you are“** – Erklärung der Standortnutzung (nur mit Suche gesendet, nie gespeichert). Button „Continue“; beim Verlassen des Schritts (Button oder Wischen) kommt immer die Systemabfrage, kein „Not now“ (App Review 5.1.1(iv)).
 3. **„Home and Work“** – Zuhause und Arbeit festlegen (Felder „Not set“ → Ortssuche); später unter „Gespeichert“ änderbar.
 4. **„On the way“** – Erklärung Live-Fahrt, Umstiege, Aussteige-Hinweis, Sperrbildschirm, Widget. Button „Get started“.
