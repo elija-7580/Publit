@@ -32,7 +32,7 @@ struct OnboardingView: View {
 
             TabView(selection: $step) {
                 page(symbol: nil, title: L10n.t("Public transport, without the noise."),
-                     text: L10n.t("Departures near you, routes across Europe and a guide until you get off. No ads, no account, no tracking."))
+                     text: L10n.t("Departures near you, routes wherever you go and a guide until you get off. No ads, no account, no tracking."))
                     .tag(0)
                 page(symbol: "location.circle", title: L10n.t("Departures where you are"),
                      text: L10n.t("Publit uses your location to show what leaves nearby and to plan from here. It is only sent with a search, never stored or shared."))
