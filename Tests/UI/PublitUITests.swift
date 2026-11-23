@@ -9,7 +9,9 @@ final class PublitUITests: XCTestCase {
     /// Started per test. CI has one 45-minute job for build and all UI tests; a single hanging
     /// test must not use it up, or no log at all is published. After this many seconds the runner
     /// stops, xcodebuild reports the test as crashed and continues with the next one.
-    private static let watchdogSeconds: TimeInterval = 150
+    /// 150 s was too close: on a loaded runner the import and wide layout tests take 125 to 150 s
+    /// without hanging, and the stopped runner counted as a failed run.
+    private static let watchdogSeconds: TimeInterval = 240
     private var watchdog: DispatchWorkItem?
     private var startedAt = Date()
 

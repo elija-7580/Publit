@@ -100,6 +100,8 @@ jobs:
             -skip-testing:PublitUITests/PublitUITests/testF28WebsiteExtras 2>&1 | tee ci/ui.log | grep -E "Test Case|error:|Executed|HEROPROBE" || true
           mkdir -p ci/screenshots && cp ~/publit-shots/*.png ci/screenshots/ 2>/dev/null || true
           grep -E ": error: |WATCHDOG" ci/ui.log | sed -E "s#${GITHUB_WORKSPACE}/##" > ci/ui-failures.txt || true
+          # What a stopped test was doing: its last steps, in the job log (pull request runs publish no ui.log).
+          grep -B 40 "^WATCHDOG" ci/ui.log | grep -E "^ +t = |WATCHDOG|^--" | cut -c1-160 || true
           grep -q "TEST EXECUTE SUCCEEDED" ci/ui.log
       - name: Upload screenshots
         if: always()
