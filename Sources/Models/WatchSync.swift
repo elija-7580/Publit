@@ -209,7 +209,11 @@ struct WatchSnapshot: Codable, Sendable {
             case .stopTrip:
                 if let id = intent.tripId, s.activeTripId == id { s.activeTripId = nil }
             case .savePlace:
-                if let p = intent.place, !s.places.contains(where: { $0.isSame(as: p) }) { s.places.append(p) }
+                if var p = intent.place, !s.places.contains(where: { p.isSaved(as: $0) }) {
+                    // As on the phone: an address whose ID is taken is kept under its own ID.
+                    if s.places.contains(where: { $0.id == p.id }) { p.id = p.ownID }
+                    s.places.append(p)
+                }
             case .removePlace:
                 if let id = intent.placeId { s.places.removeAll { $0.id == id } }
             case .resend:

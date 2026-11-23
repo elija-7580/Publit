@@ -54,7 +54,7 @@
 Animiertes Logo, mindestens 0,7 s, höchstens 2 s; endet früher, sobald die erste Abfahrtstafel geladen ist.
 
 ### Onboarding (`OnboardingView`, nur beim ersten Start, Vollbild, Seiten mit Punkten, „Skip“)
-1. **„Public transport, without the noise.“** – Abfahrten in der Nähe, Routen durch Europa, Begleitung bis zum Aussteigen; kein Konto, keine Werbung, kein Tracking.
+1. **„Public transport, without the noise.“** – Abfahrten in der Nähe, Routen „wherever you go“ (nicht mehr „across Europe“: Publit läuft überall, wo es offene Fahrplandaten gibt), Begleitung bis zum Aussteigen; kein Konto, keine Werbung, kein Tracking.
 2. **„Departures where you are“** – Erklärung der Standortnutzung (nur mit Suche gesendet, nie gespeichert). Button „Continue“; beim Verlassen des Schritts (Button oder Wischen) kommt immer die Systemabfrage, kein „Not now“ (App Review 5.1.1(iv)).
 3. **„Home and Work“** – Zuhause und Arbeit festlegen (Felder „Not set“ → Ortssuche); später unter „Gespeichert“ änderbar.
 4. **„On the way“** – Erklärung Live-Fahrt, Umstiege, Aussteige-Hinweis, Sperrbildschirm, Widget. Button „Get started“.
@@ -274,7 +274,7 @@ Screenshot-/Link-Tickets („My tickets“, „Add ticket“, Typ, „Expires“
 
 - **Home and Work**: festlegen („Set Home/Work“), „Change“, „Remove“; Ein-Tipp-Route. Zuhause und Arbeit sind eigene Plätze: Liefert die Suche für beide dieselbe ID (z. B. Adressen in verschiedenen Ländern), ersetzt das Setzen des einen nicht mehr den anderen.
 - **Upcoming trips** (`SavedTripRow`, im Stil der Routen in Plan): Ziel und „Leave in x min“ (sonst Datum), Ab–An und Dauer, die farbige Zeitleiste der Linien (`TimelineBar`, statt gequetschter Linien-Badges), „from … · n changes“; leer: Hinweis „Save a route to see it here, add it to your calendar and get a reminder when to leave.“
-- **Lines** (gespeicherte Linie an Haltestelle, „At …“, nächste Abfahrten), **Stops**, **Places** („Add“ / „Save a place“ via Ortssuche).
+- **Lines** (gespeicherte Linie an Haltestelle, „At …“, nächste Abfahrten), **Stops**, **Places** („Add“ / „Save a place“ via Ortssuche). Adressen gelten nur am selben Ort (unter 30 m) als derselbe Platz: Liefert die Suche für zwei verschiedene Adressen dieselbe ID, bleiben beide gespeichert, jede unter einer eigenen ID; Speichern, Entfernen und das Setzen von Home/Work ändern nie einen anderen gespeicherten Platz (auch auf der Watch). Haltestellen werden weiter an ihrer ID erkannt.
 - **Past trips** (`PastTripsView`): „Plan again“, „Remove“.
 - Leer: „Nothing else saved yet“.
 

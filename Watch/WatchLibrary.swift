@@ -95,7 +95,7 @@ final class WatchLibrary: NSObject, WCSessionDelegate {
     func start(trip id: String) { perform(.startTrip(id)) }
     func stop(trip id: String) { perform(.stopTrip(id)) }
 
-    func isSaved(_ place: SavedPlace) -> Bool { snapshot.places.contains { $0.isSame(as: place) } }
+    func isSaved(_ place: SavedPlace) -> Bool { snapshot.places.contains { place.isSaved(as: $0) } }
 
     func save(place: SavedPlace) {
         guard !isSaved(place) else { return }
@@ -103,7 +103,7 @@ final class WatchLibrary: NSObject, WCSessionDelegate {
     }
 
     func remove(place: SavedPlace) {
-        for saved in snapshot.places where saved.isSame(as: place) { perform(.removePlace(saved.id)) }
+        for saved in snapshot.places where place.isSaved(as: saved) { perform(.removePlace(saved.id)) }
     }
 
     /// Fresh times for a saved trip, straight from Transitous.

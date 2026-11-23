@@ -25,6 +25,21 @@ final class LocalizationTests: XCTestCase {
             .sorted()
     }
 
+    /// #137: Publit works wherever open timetable data exists; the first onboarding page said "routes across Europe".
+    func testNoTextLimitsRoutesToEurope() throws {
+        let strings = try XCTUnwrap(catalog("Sources/Shared/Localizable.xcstrings")["strings"] as? [String: [String: Any]])
+        XCTAssertNotNil(strings["Departures near you, routes wherever you go and a guide until you get off. No ads, no account, no tracking."])
+        let onboarding = try String(contentsOf: root.appendingPathComponent("Sources/Views/OnboardingView.swift"), encoding: .utf8)
+        XCTAssertTrue(onboarding.contains("routes wherever you go"))
+        for (key, item) in strings {
+            XCTAssertFalse(key.contains("across Europe"), key)
+            let loc = try XCTUnwrap(item["localizations"] as? [String: [String: Any]])
+            for word in ["ganz Europa", "toute l'Europe", "tutta Europa", "toda Europa", "toda a Europa", "heel Europa", "hela Europa"] {
+                XCTAssertFalse(loc.values.flatMap(leaves).contains { $0.contains(word) }, "\(key): \(word)")
+            }
+        }
+    }
+
     func testEveryCatalogHasAllLanguagesAndPreservesPlaceholders() throws {
         for path in ["Sources/Shared/Localizable.xcstrings", "Sources/Shared/Transfers.xcstrings", "Sources/App/AppShortcuts.xcstrings", "Sources/App/InfoPlist.xcstrings"] {
             let data = try catalog(path)

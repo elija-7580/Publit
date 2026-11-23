@@ -224,6 +224,93 @@ final class FavoritesTests: XCTestCase {
         XCTAssertEqual(s.place(for: .home)?.name, "Via Roma 1")
     }
 
+    // MARK: Addresses that share an ID (#121, Publit-Android#21)
+
+    private let roma = SavedPlace(id: "adr-1", name: "Via Roma 1", subtitle: "Milano, IT", lat: 45.46, lon: 9.19, stopId: nil)
+    private let haupt = SavedPlace(id: "adr-1", name: "Hauptstraße 1", subtitle: "Lugano, CH", lat: 46.00, lon: 8.95, stopId: nil)
+
+    func testSavingASecondAddressWithTheSameIdKeepsBoth() async {
+        let s = store()
+        s.toggle(roma)
+        XCTAssertFalse(s.contains(haupt), "another address, although the ID is the same")
+        s.toggle(haupt)
+        XCTAssertEqual(s.places.map(\.name), ["Via Roma 1", "Hauptstraße 1"])
+        XCTAssertEqual(Set(s.items.map(\.id)).count, 2, "each entry has an ID of its own")
+        XCTAssertTrue(s.contains(roma))
+        XCTAssertTrue(s.contains(haupt))
+    }
+
+    func testRemovingOneOfTwoAddressesWithTheSameIdLeavesTheOther() async {
+        let s = store()
+        s.toggle(roma)
+        s.toggle(haupt)
+        s.toggle(haupt)   // found again in the search and unsaved
+        XCTAssertEqual(s.places.map(\.name), ["Via Roma 1"])
+        s.toggle(haupt)
+        s.toggle(roma)
+        XCTAssertEqual(s.places.map(\.name), ["Hauptstraße 1"])
+        s.toggle(haupt)
+        XCTAssertTrue(s.items.isEmpty)
+    }
+
+    func testSavingTheSameAddressTwiceStaysOneEntry() async {
+        let s = store()
+        s.toggle(roma)
+        var again = roma
+        again.lat += 0.00005   // a few metres off
+        XCTAssertTrue(s.contains(again))
+        s.toggle(haupt)
+        XCTAssertTrue(s.contains(haupt))
+        XCTAssertEqual(s.items.count, 2)
+    }
+
+    func testHomeDoesNotOverwriteASavedAddressWithTheSameId() async {
+        let s = store()
+        s.toggle(roma)
+        s.set(haupt, as: .home)
+        XCTAssertEqual(s.places.map(\.name), ["Via Roma 1"])
+        XCTAssertEqual(s.place(for: .home)?.name, "Hauptstraße 1")
+        s.set(roma, as: .work)
+        XCTAssertTrue(s.places.isEmpty, "the saved address itself became Work")
+        XCTAssertEqual(s.place(for: .work)?.name, "Via Roma 1")
+        XCTAssertEqual(s.place(for: .home)?.name, "Hauptstraße 1")
+        XCTAssertEqual(Set(s.items.map(\.id)).count, s.items.count)
+    }
+
+    func testSavingAnAddressDoesNotTouchHomeOrWorkWithTheSameId() async {
+        let s = store()
+        s.set(roma, as: .home)
+        s.set(haupt, as: .work)
+        let third = SavedPlace(id: "adr-1", name: "Rue de Rome 1", subtitle: "Paris, FR", lat: 48.87, lon: 2.32, stopId: nil)
+        s.toggle(third)
+        XCTAssertEqual(s.place(for: .home)?.name, "Via Roma 1")
+        XCTAssertEqual(s.place(for: .work)?.name, "Hauptstraße 1")
+        XCTAssertEqual(s.places.map(\.name), ["Rue de Rome 1"])
+        s.toggle(third)
+        XCTAssertEqual(s.items.count, 2)
+    }
+
+    func testSettingTheSameWorkAgainLeavesNoCopy() async {
+        let s = store()
+        s.set(roma, as: .home)
+        s.set(haupt, as: .work)
+        s.set(haupt, as: .work)
+        XCTAssertEqual(s.items.count, 2)
+        XCTAssertEqual(s.place(for: .work)?.name, "Hauptstraße 1")
+        XCTAssertEqual(s.place(for: .home)?.name, "Via Roma 1")
+    }
+
+    func testAStopIsStillKnownByItsId() async {
+        let s = store()
+        let stop = SavedPlace(id: "s1", name: "Marienplatz", subtitle: nil, lat: 48.137, lon: 11.575, stopId: "s1")
+        var moved = stop
+        moved.lat = 48.2
+        s.toggle(stop)
+        XCTAssertTrue(s.contains(moved))
+        s.toggle(moved)
+        XCTAssertTrue(s.items.isEmpty)
+    }
+
     func testPinnedPlacesAreNotListedTwice() async {
         let s = store()
         s.set(a, as: .work)
