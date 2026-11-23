@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.1 (build 97) – walking as a real choice, without long-distance trains, departures along a trip
+## 0.1.1 (build 97) – go on another way, appointments as destinations, without long-distance trains, steadier maps
 
 - **Walking** (`StreetComparison.walkIsAChoice`, #110): the walk is listed first among the routes when no ride gets there sooner door to door (waiting counts), also on the watch. Before, only its duration was compared with the fastest ride's.
 - **Route options** (`RouteOptions.regionalOnly`, #119): "Without long-distance trains" leaves out high-speed, intercity and night trains, by mode in the search and by name or operator in the answer.
@@ -8,6 +8,7 @@
 - **Saved addresses** (#122): addresses that share an ID no longer replace or remove each other.
 - **Onboarding** (#140): "routes wherever you go" instead of "across Europe".
 - **Route details** (`LegChangeView`, `RouteBuilder.choices`, #142, with the core of #141): an opened ride has "Go on another way". It lists the ways to go on from where that ride starts, not before the legs in front of it arrive; the choice becomes a route of its own that can be started and saved. Live times of such a route are refreshed part by part (`TripRefreshCoordinator.refresh(route:)`).
+- **Calendar** (`CalendarTrips`, `CalendarSuggestions`, #159): appointments with a place are offered as destinations in Plan, the place search and Nearby; off by default, access is asked for when it is turned on.
 - **Stability** (`MapHero`, diagnostics of build 96): the app froze for 5.8 s in the map renderer on the way back from Tickets to Nearby, after iOS had warned about memory. The maps at the top of Nearby, Go now, a route, a trip and a line stayed alive under other screens and tabs; a covered map is now let go after 20 s, and at once in the background or on a memory warning, and built anew when its screen comes back.
 - **Diagnostics** (`CrashReports`, `HangLog`): a memory warning notes how much memory Publit itself uses. A request that iOS froze with the app and that timed out in the background stays a step and is no longer an error entry.
 - **Data** (#135): the feed has no bus 240 Krems → St. Pölten; recorded in `docs/DATA-SOURCES.md`.
