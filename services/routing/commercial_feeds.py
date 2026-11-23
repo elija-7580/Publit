@@ -10,7 +10,10 @@ licence of their publisher, so this script keeps only the feeds that may be used
   2. else the licence in Transitland Atlas (incl. commercial_use_allowed) or the Mobility Database catalogue,
   3. else terms pages that were read by hand (TERMS below),
   4. realtime feeds take the licence of their timetable,
-  5. permissions.json: feeds a publisher has allowed in writing (overrides everything; keep the e-mail on file).
+  5. permissions.json: feeds a publisher has allowed in writing (overrides everything; keep the e-mail on file),
+  6. extras.json: openly licensed feeds found in the Mobility Database or on open data portals that Transitous
+     does not load (often the publisher's own copy of a feed Transitous takes from a non-commercial proxy).
+     An extra can replace Transitous sources ("replaces"); it is only added if its own licence allows it.
 
 Usage:
   git clone --depth 1 https://github.com/public-transport/transitous
@@ -40,6 +43,7 @@ TERMS = {
     "www.dati.gov.it": "ja", "1.gtfs.download": "ja", "transport.data.gouv.fr": "ja",
     "own-net.com": "nein",                        # commercial use needs a separate agreement
     "www.gtt.to.it": "nein",                      # "non-commercial use only"
+    "dati.toscana.it": "ja",                      # Regione Toscana timetables, CKAN licence "cc-by"
 }
 # BusOne (proxy.busone.app): free for commercial use only for feeds with its badge.
 BUSONE_COMMERCIAL = ("italo", "arriva", "flix")
@@ -61,6 +65,12 @@ def verdict(spdx, url, commercial=None):
         if host in TERMS:
             return TERMS[host]
     return "bedingungen" if (spdx or url) else "unbekannt"
+
+
+def licence_of(extra, mdb):
+    """Licence of an extras.json entry: its own "license", else the Mobility Database catalogue."""
+    lic = extra.get("license") or {}
+    return lic.get("spdx-identifier", ""), lic.get("url", "") or mdb.get(extra.get("mdb-id"), "")
 
 
 def main(transitous, atlas_dir, mdb_csv, out):
@@ -85,6 +95,13 @@ def main(transitous, atlas_dir, mdb_csv, out):
         permissions = json.load(open(os.path.join(os.path.dirname(__file__), "permissions.json")))
     except FileNotFoundError:
         permissions = {}
+
+    try:
+        extras = json.load(open(os.path.join(os.path.dirname(__file__), "extras.json")))
+    except FileNotFoundError:
+        extras = {}
+    replaced = {f"{region}/{name}" for region, items in extras.items() for x in items
+                if verdict(*licence_of(x, mdb)) == "ja" for name in x.get("replaces", [])}
 
     rows, kept = [], defaultdict(list)
     for path in sorted(glob.glob(os.path.join(transitous, "feeds", "*.json"))):
@@ -114,6 +131,8 @@ def main(transitous, atlas_dir, mdb_csv, out):
             key = f"{region}/{src['name']}"
             if key in permissions:
                 v, via = "ja", "Erlaubnis: " + permissions[key]
+            if key in replaced:
+                v, via = "ersetzt", "ersetzt durch extras.json"
             local.append({"src": src, "row": dict(region=region, feed=src["name"], spec=src.get("spec", "gtfs"),
                                                    spdx=spdx, licence_url=url, source=via, commercial=v)})
         static = {x["row"]["feed"]: x["row"] for x in local if x["row"]["spec"] == "gtfs" and x["row"]["commercial"] != "unbekannt"}
@@ -125,6 +144,13 @@ def main(transitous, atlas_dir, mdb_csv, out):
             rows.append(r)
             if r["commercial"] == "ja":
                 kept[region].append(x["src"])
+        for x in extras.get(region, []):
+            spdx, url = licence_of(x, mdb)
+            v = verdict(spdx, url)
+            rows.append(dict(region=region, feed=x["name"], spec=x.get("spec", "gtfs"), spdx=spdx, licence_url=url,
+                             source="extras.json", commercial=v))
+            if v == "ja":
+                kept[region].append({k: val for k, val in x.items() if k not in ("replaces", "note")})
         if kept[region]:
             os.makedirs(os.path.join(out, "feeds"), exist_ok=True)
             json.dump({**doc, "sources": kept[region]}, open(os.path.join(out, "feeds", f"{region}.json"), "w"),
