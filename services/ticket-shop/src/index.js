@@ -8,10 +8,14 @@
 //   POST /v1/checkout                { offers: [token], customer, termsAccepted } → { order, paymentURL, amount, currency }
 //   GET  /v1/return                  Stripe returns here; redirects to publit://shop/return?…
 //   POST /v1/orders/{order}/complete                                          → { status, amountCharged, items }
+//   GET/POST /v1/demo-pay            only with DEMO_PAYMENTS="on": a payment page that charges nothing
 
 import { checkout, complete, findOffers, ShopError } from "./shop.js";
 import { stripe as stripeClient, StripeError } from "./stripe.js";
 import { ProviderError } from "./providers/errors.js";
+import { demoPayments, demoPaymentsActive } from "./demopay.js";
+
+let demoPay = null;
 
 const MAX_BODY = 64 * 1024;
 
@@ -52,13 +56,15 @@ export default {
     const fetchImpl = deps.fetch ?? fetch;
     try {
       if (url.pathname === "/v1/return" && request.method === "GET") return returnRedirect(url);
+      const demo = deps.demoPay ?? (demoPaymentsActive(env) ? (demoPay ??= demoPayments()) : null);
+      if (url.pathname === "/v1/demo-pay" && demo) return demo.page(request);
       if (request.method !== "POST") return failure("not_found", "Not found", 404);
       if (env.RATE_LIMITER) {
         const { success } = await env.RATE_LIMITER.limit({ key: request.headers.get("CF-Connecting-IP") ?? "unknown" });
         if (!success) return failure("rate_limited", "Too many requests", 429);
       }
       if (!env.TOKEN_SECRET) return failure("not_configured", "Shop not configured", 503);
-      const stripe = deps.stripe ?? (env.STRIPE_SECRET_KEY ? stripeClient(env.STRIPE_SECRET_KEY, fetchImpl) : null);
+      const stripe = deps.stripe ?? (env.STRIPE_SECRET_KEY ? stripeClient(env.STRIPE_SECRET_KEY, fetchImpl) : demo);
 
       if (url.pathname === "/v1/offers") {
         return json(await findOffers(await readJSON(request), env, { fetchImpl }));

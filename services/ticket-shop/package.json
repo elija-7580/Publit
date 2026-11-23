@@ -6,7 +6,8 @@
   "description": "Sells public transport tickets inside Publit: offers per journey leg, one Stripe checkout, tickets into the app's wallet.",
   "scripts": {
     "test": "node --test",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "start": "node src/node.js"
   },
   "devDependencies": {
     "wrangler": "^3.80.0"
