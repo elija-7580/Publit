@@ -6,6 +6,11 @@ on:
   push:
     tags: ['v*']
   workflow_dispatch:
+    inputs:
+      ticket_shop_url:
+        description: "Optional ticket shop (https://…) for this build only; empty = no in-app ticket shop"
+        required: false
+        default: ""
 
 concurrency:
   group: testflight
@@ -81,11 +86,14 @@ jobs:
           test -n "$ID" || { echo "::error::Distribution identity missing"; exit 1; }
           echo "SIGN_ID=$ID" >> "$GITHUB_ENV"
       - name: Archive (unsigned)
+        env:
+          TICKET_SHOP_URL: ${{ inputs.ticket_shop_url }}
         run: |
           set -o pipefail
+          case "$TICKET_SHOP_URL" in ""|https://*) ;; *) echo "::error::ticket_shop_url must start with https://"; exit 1;; esac
           xcodebuild archive -project Publit.xcodeproj -scheme Publit -configuration Release \
             -destination 'generic/platform=iOS' -archivePath "$RUNNER_TEMP/Publit.xcarchive" \
-            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" TICKET_SHOP_URL="$TICKET_SHOP_URL" \
             > "$RUNNER_TEMP/archive.log" 2>&1 || { grep -E "error:" "$RUNNER_TEMP/archive.log" | sort -u | head -30; exit 1; }
           echo "Archived"
       - name: Sign and upload

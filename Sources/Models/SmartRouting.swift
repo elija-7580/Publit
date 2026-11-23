@@ -116,6 +116,8 @@ enum SmartRouting {
     /// Labels on the routes of a list: the suggested one and the best in each respect.
     enum Badge: String, CaseIterable, Sendable {
         case recommended, fastest, fewestChanges, leastWalking
+        /// The route that leaves last and still arrives tonight ("Last connection").
+        case lastConnection
 
         var title: String {
             switch self {
@@ -123,6 +125,7 @@ enum SmartRouting {
             case .fastest: return L10n.t("Fastest")
             case .fewestChanges: return L10n.t("Fewest changes")
             case .leastWalking: return L10n.t("Least walking")
+            case .lastConnection: return L10n.t("Last connection")
             }
         }
 
@@ -132,6 +135,7 @@ enum SmartRouting {
             case .fastest: return "hare"
             case .fewestChanges: return "arrow.triangle.swap"
             case .leastWalking: return "figure.walk"
+            case .lastConnection: return "moon.stars"
             }
         }
     }

@@ -43,8 +43,21 @@ enum LiveTripActivity {
             phase: s.phase.rawValue, headline: s.headline, detail: s.detail, nextEvent: s.nextEvent,
             delayMinutes: s.delayMinutes, arrival: trip.endTime, lineName: leg?.lineName,
             lineColor: leg?.lineColors.background, lineTextColor: leg?.lineColors.text, updatedAt: now)
+        state.stepMode = (legs.first { now < $0.endTime } ?? legs.first)?.mode
+        state.direction = leg?.directionName
+        if let leg, s.phase != .arrived, s.phase != .cancelled {
+            state.legTime = riding ? leg.endTime : leg.startTime
+            state.boardAt = riding ? nil : leg.from.name
+        }
+        state.tripStart = trip.startTime
+        state.destination = trip.toName
         // On board with location: the next stop and stops to go, from where the phone really is.
         if s.phase == .riding, let note = GetOffAlerts.rideNote(trip.id) { state.detail = note }
+        // On board: the end of the train nearest the exit or the next train ("Front of the train · Exit B2").
+        if s.phase == .riding, let i = legs.firstIndex(where: { $0.isTransit && $0.endTime > now }),
+           let short = ExitAdvice.forRide(i, in: legs)?.short {
+            state.detail = state.detail.isEmpty ? short : short + " · " + state.detail
+        }
         if let departing, s.phase != .cancelled, s.phase != .arrived {
             state.platform = TransitLabels.clean(departing.from.track).map { L10n.f("Pl. %@", $0) }
             state.platformChanged = departing.from.platformChange != nil ? true : nil

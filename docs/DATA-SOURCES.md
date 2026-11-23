@@ -169,3 +169,7 @@ The published tables are a derived database of CC BY-SA data: they are released 
 | [Trafiklab KoDa](https://www.trafiklab.se/api/trafiklab-apis/koda/) | Historical GTFS-RT for Swedish regional operators since 2020 | Trafiklab's GTFS datasets are CC0; KoDa's own licence page was not found – ask Trafiklab before use. Needs a free API key. | Not yet: Sweden is not in the first regions, and the licence of KoDa itself must be confirmed. |
 
 Nothing of this has been imported yet; the service starts from its own observations. Without enough observations the app keeps the old formula and says "Estimate".
+
+## 7. Gaps noted from reports
+
+- **Bus 240 Krems → St. Pölten (issue #135, checked 23 Nov 2026):** the data has no line 240 on this relation. A weekday of departures at Krems Bahnhof (400 rows) and the bus connections to St. Pölten Hbf list 101, 102, 103 direct and 446, 488, 489, 715, 720 with a change; none is 240. Every bus and train there comes with a line name (`routeShortName` and `displayName` set), so nothing is left for the app to name. If the line runs, it is missing in the Austrian feed (`at-PTA-Eastern-Region`), which is a matter for the feed, not the app.

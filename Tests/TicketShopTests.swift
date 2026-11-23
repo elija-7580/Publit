@@ -24,22 +24,7 @@ final class PartnerLinkTests: XCTestCase {
     }
 
     func testNoProgramIsActiveUntilFilledIn() {
-        XCTAssertTrue(PartnerLinks.builtIn.allSatisfy { $0.template.isEmpty || $0.template.hasPrefix("https://") })
-    }
-
-    func testProgramsFromTheLinkServiceReplaceTheBuiltInList() throws {
-        let json = """
-        {"programs":[{"id":"flixbus","name":"FlixBus","hosts":["flixbus.de"],"template":"https://www.awin1.com/cread.php?awinmid=1&awinaffid=2&ued={url}"},
-                     {"id":"x","name":"Bad","hosts":["x.de"],"template":"http://x.de/{url}"},
-                     {"id":"y","name":"Twice","hosts":["y.de"],"template":"https://y.de/{url}{url}"}]}
-        """
-        let list = try XCTUnwrap(PartnerLinks.decode(Data(json.utf8)))
-        XCTAssertEqual(list.map(\.name), ["FlixBus"])
-        XCTAssertNil(PartnerLinks.decode(Data("nope".utf8)))
-        PartnerLinks.set(list)
-        defer { PartnerLinks.set(nil) }
-        XCTAssertEqual(PartnerLinks.wrap(URL(string: "https://shop.flixbus.de/x")!)?.host, "www.awin1.com")
-        XCTAssertNil(PartnerLinks.wrap(URL(string: "https://int.bahn.de")!))
+        XCTAssertTrue(PartnerLinks.programs.allSatisfy { $0.template.isEmpty || $0.template.hasPrefix("https://") })
     }
 }
 

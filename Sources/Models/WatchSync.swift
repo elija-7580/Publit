@@ -188,6 +188,12 @@ struct WatchSnapshot: Codable, Sendable {
     var otherPlaces: [SavedPlace] { places.filter { !$0.isStop && $0.role == nil } }
     var pinned: [SavedPlace] { PlaceRole.allCases.compactMap { role in places.first { $0.role == role } } }
 
+    /// How many saved stops the watch's first screen lists; all of them are under Saved.
+    static let homeStopLimit = 4
+    /// The saved stops on the watch's first screen, one tap from their departures (#123):
+    /// the first ones in the order chosen on the iPhone.
+    var homeStops: [SavedPlace] { Array(stops.prefix(Self.homeStopLimit)) }
+
     // MARK: Changes made on the watch
 
     /// The snapshot with requests the iPhone has not confirmed yet, so the watch answers at once.
@@ -209,7 +215,11 @@ struct WatchSnapshot: Codable, Sendable {
             case .stopTrip:
                 if let id = intent.tripId, s.activeTripId == id { s.activeTripId = nil }
             case .savePlace:
-                if let p = intent.place, !s.places.contains(where: { $0.isSame(as: p) }) { s.places.append(p) }
+                if var p = intent.place, !s.places.contains(where: { p.isSaved(as: $0) }) {
+                    // As on the phone: an address whose ID is taken is kept under its own ID.
+                    if s.places.contains(where: { $0.id == p.id }) { p.id = p.ownID }
+                    s.places.append(p)
+                }
             case .removePlace:
                 if let id = intent.placeId { s.places.removeAll { $0.id == id } }
             case .resend:
@@ -333,4 +343,20 @@ enum WatchCodec {
     static func snapshot(from data: Data) throws -> WatchSnapshot { try TransitousClient.makeDecoder().decode(WatchSnapshot.self, from: data) }
     static func intent(from data: Data) throws -> WatchIntent { try TransitousClient.makeDecoder().decode(WatchIntent.self, from: data) }
     static func state(from data: Data) throws -> WatchState { try TransitousClient.makeDecoder().decode(WatchState.self, from: data) }
+}
+
+/// The watch opens the trip under way by itself, as Maps does with a route started on the iPhone: when the app comes
+/// to the front (also when it is opened from the trip's Live Activity in the Smart Stack) and when a trip is started
+/// while the app is open. Only from the first screen, so whatever the user opened stays; and only once per time
+/// in front, so going back to the first screen keeps it there.
+enum WatchAutoOpen {
+    /// The trip to open now, or nil.
+    /// - Parameters:
+    ///   - onHome: the first screen is showing (nothing opened on top of it).
+    ///   - opened: the trip this rule already opened since the app came to the front.
+    static func trip(in snapshot: WatchSnapshot, now: Date, onHome: Bool, opened: String?) -> String? {
+        guard onHome, let trip = snapshot.activeTrip, trip.id != opened,
+              snapshot.current(now: now)?.id == trip.id, now < trip.endTime else { return nil }
+        return trip.id
+    }
 }

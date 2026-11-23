@@ -28,10 +28,17 @@ struct RouteOptionsView: View {
                         .disabled(draft.modes.isActive && draft.modes.included == [group])
                         .accessibilityIdentifier("routeMode-\(group.rawValue)")
                     }
+                    Toggle(isOn: $draft.regionalOnly) {
+                        Label("Without long-distance trains", systemImage: "train.side.rear.car")
+                    }
+                    .accessibilityIdentifier("routeRegionalOnly")
                 } header: {
                     Text("Transport modes")
                 } footer: {
-                    Text("Routes only use the modes that are switched on.")
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Routes only use the modes that are switched on.")
+                        Text("Long-distance trains are high-speed, intercity and night trains (ICE, TGV, Railjet …).")
+                    }
                 }
 
                 Section {

@@ -9,7 +9,9 @@ final class PublitUITests: XCTestCase {
     /// Started per test. CI has one 45-minute job for build and all UI tests; a single hanging
     /// test must not use it up, or no log at all is published. After this many seconds the runner
     /// stops, xcodebuild reports the test as crashed and continues with the next one.
-    private static let watchdogSeconds: TimeInterval = 150
+    /// 150 s was too close: on a loaded runner the import and wide layout tests take 125 to 150 s
+    /// without hanging, and the stopped runner counted as a failed run.
+    private static let watchdogSeconds: TimeInterval = 240
     private var watchdog: DispatchWorkItem?
     private var startedAt = Date()
 
@@ -270,31 +272,35 @@ final class PublitUITests: XCTestCase {
 
     /// The wide layout (iPad, iPhone Duo unfolded): map with the panel, an opened route, both
     /// orientations. On iPhone it takes the same shots in the iPhone layout.
-    func testF23WideLayout() {
-        for landscape in [false, true] {
-            let o = landscape ? "-landscape" : ""
-            XCUIDevice.shared.orientation = landscape ? .landscapeLeft : .portrait
-            let app = XCUIApplication()
-            app.launchArguments = ["-onboardingDone", "YES", "-wishesHintShown", "YES", "-whatsNewBuild", "999999", "-AppleLanguages", "(de)", "-AppleLocale", "de_AT"]
-            app.launchEnvironment = ["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "nearby", "PUBLIT_UI_DARK": "0"]
-            app.launch()
-            allowLocation()
-            sleep(10) // departures, stations and vehicles on the map
-            snap("wide-nearby\(o)")
-            app.tab(1).tap()
-            sleep(12) // routes on the map
-            snap("wide-plan\(o)")
-            let row = app.descendants(matching: .any).matching(identifier: "routeRow").firstMatch
-            if row.waitForExistence(timeout: 5) {
-                row.tap()
-                sleep(4)
-                snap("wide-route\(o)")
-            }
-            app.tab(3).tap()
-            sleep(2)
-            snap("wide-saved\(o)")
-            app.terminate()
+    func testF23WideLayout() { wideLayout(landscape: false) }
+
+    /// A pass of its own: both orientations in one test took 120 s on a quiet runner and ran
+    /// into the watchdog on a busy one.
+    func testF23WideLayoutLandscape() { wideLayout(landscape: true) }
+
+    private func wideLayout(landscape: Bool) {
+        let o = landscape ? "-landscape" : ""
+        XCUIDevice.shared.orientation = landscape ? .landscapeLeft : .portrait
+        let app = XCUIApplication()
+        app.launchArguments = ["-onboardingDone", "YES", "-wishesHintShown", "YES", "-whatsNewBuild", "999999", "-AppleLanguages", "(de)", "-AppleLocale", "de_AT"]
+        app.launchEnvironment = ["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "nearby", "PUBLIT_UI_DARK": "0"]
+        app.launch()
+        allowLocation()
+        sleep(10) // departures, stations and vehicles on the map
+        snap("wide-nearby\(o)")
+        app.tab(1).tap()
+        sleep(12) // routes on the map
+        snap("wide-plan\(o)")
+        let row = app.descendants(matching: .any).matching(identifier: "routeRow").firstMatch
+        if row.waitForExistence(timeout: 5) {
+            row.tap()
+            sleep(4)
+            snap("wide-route\(o)")
         }
+        app.tab(3).tap()
+        sleep(2)
+        snap("wide-saved\(o)")
+        app.terminate()
         XCUIDevice.shared.orientation = .portrait
     }
 
@@ -571,9 +577,9 @@ final class PublitUITests: XCTestCase {
         snap("nearby")
 
         let all = app.buttons["All departures"].firstMatch
-        XCTAssertTrue(reveal(all, in: app), "no link to all departures")
+        XCTAssertTrue(bringUp(all, in: app), "no link to all departures")   // clear of the live trip bar, see F13
         all.tap()
-        XCTAssertTrue(app.buttons["Save"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["Save"].waitForExistence(timeout: 10), "stop screen did not open")
         snap("stop")
         app.buttons["Save"].tap()
         app.tab(3).tap()
@@ -740,8 +746,10 @@ final class PublitUITests: XCTestCase {
         snap("trips")
     }
 
-    /// F13 Filters: mode chips on Nearby, lines at a station, route options and the walk/bike/car comparison.
-    func testF13ModeFiltersLinesAndComparison() {
+    /// F13 Filters, first half: mode chips on Nearby and the lines at a station. The route options
+    /// and the comparison are a test of their own (below): together they were two app launches and
+    /// many waits on the live API in one test; apart, each half stays well below the 150 s watchdog (#136).
+    func testF13ModeFiltersAndLines() {
         let app = launch()
         nudge(app)
         // Earlier tests pin places and save a trip, so the first board can sit below the fold;
@@ -758,17 +766,22 @@ final class PublitUITests: XCTestCase {
         app.buttons["modeChip-all"].tap()
 
         let all = app.buttons["All departures"].firstMatch
-        XCTAssertTrue(reveal(all, in: app), "no departure board loaded")
+        // Into the clear first: with a trip in the live bar, the link can sit under the bar, and the
+        // tap opens that trip's route instead of the stop (CI, 2026-11-23, twice at this line).
+        XCTAssertTrue(bringUp(all, in: app), "no departure board loaded")
         all.tap()
-        XCTAssertTrue(app.buttons["Save"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["Save"].waitForExistence(timeout: 10), "stop screen did not open")
         app.segmentedControls.buttons["Lines"].tap()
         // Lazy list: the rows exist only once scrolled near (the board starts with actions and filters).
         XCTAssertTrue(reveal(app.descendants(matching: .any)["lineAtStop"].firstMatch, in: app), "no lines at the station")
         sleep(1)
         snap("stop-lines")
-        app.terminate()
+    }
 
+    /// F13 Filters, second half: the walk/bike/car comparison and the route options in Plan.
+    func testF13RouteOptionsAndComparison() {
         let plan = launch(["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "plan"])
+        nudge(plan)   // the location prompt can cover the routes
         let routes = plan.buttons.matching(identifier: "routeRow")
         XCTAssertTrue(routes.firstMatch.waitForExistence(timeout: timeout), "no routes found")
         // Driving comes a little after the routes (its own, slower request).
@@ -859,7 +872,7 @@ final class PublitUITests: XCTestCase {
 
         app.tab(0).tap()
         let all = app.buttons["All departures"].firstMatch
-        XCTAssertTrue(reveal(all, in: app), "no link to all departures")
+        XCTAssertTrue(bringUp(all, in: app), "no link to all departures")   // clear of the live trip bar, see F13
         all.tap()
         XCTAssertTrue(app.buttons["routeHere"].waitForExistence(timeout: 10), "no labelled Route here action")
         XCTAssertTrue(app.buttons["routeFromHere"].exists, "no labelled Route from here action")

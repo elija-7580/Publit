@@ -34,8 +34,9 @@ extension Leg {
 
 extension Itinerary {
     func forWatch() -> Itinerary {
-        var it = self
-        it.legs = legs.map { $0.forWatch() }
+        // Where to ride and which exit, worked out here while the walking directions are still there.
+        var it = withExitAdvice()
+        it.legs = it.legs.map { $0.forWatch() }
         it.fareTransfers = nil
         return it
     }
@@ -154,11 +155,9 @@ enum WatchMapFit {
 /// (the same rule as the planner on the iPhone), without cycling and driving.
 enum WatchRoutes {
     static func merge(transit: [Itinerary], direct: [Itinerary]) -> [Itinerary] {
-        let walking = direct.filter { let m = StreetComparison.streetMode($0); return m != "BIKE" && m != "CAR" }
-        guard let walk = walking.min(by: { $0.duration < $1.duration }) else { return transit }
-        guard let best = transit.map(\.duration).min() else { return [walk] }
-        let worthIt = Double(walk.duration) <= Double(best) * 1.25 || walk.duration <= 10 * 60
-        return worthIt ? [walk] + transit : transit
+        guard let walk = StreetComparison.walk(in: direct) else { return transit }
+        guard !transit.isEmpty else { return [walk] }
+        return StreetComparison.walkIsAChoice(walk, transit: transit) ? [walk] + transit : transit
     }
 
     /// Up to `limit` routes for a small screen: no detours, one row per route, walking first when it is a choice.

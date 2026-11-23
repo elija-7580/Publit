@@ -154,6 +154,8 @@ struct Leg: Codable, Sendable, RouteStyled {
     var wheelchairAccessible: String? = nil
     /// Last stop of the vehicle's trip.
     var tripTo: SegmentStop? = nil
+    /// Where to ride and which way out, worked out on the iPhone for the watch (nil elsewhere).
+    var exitAdvice: ExitAdvice? = nil
 
     var directionName: String? { TransitLabels.direction(headsign: headsign, tripEnd: tripTo?.name) }
     var isTransit: Bool { ModeStyle.isTransit(mode) }
@@ -193,6 +195,14 @@ struct StepInstruction: Codable, Sendable {
     var toOsmNode: Int64? = nil
 }
 
+/// One planned route's share of a route built leg by leg (#91): the server's ID of that route
+/// (live times are refreshed through it) and which of its legs are used.
+struct RoutePart: Codable, Hashable, Sendable {
+    var itineraryId: String
+    var firstLeg: Int
+    var legCount: Int
+}
+
 struct Itinerary: Codable, Identifiable, Sendable {
     let id: String
     var duration: Int
@@ -201,6 +211,9 @@ struct Itinerary: Codable, Identifiable, Sendable {
     let transfers: Int
     var legs: [Leg]
     var fareTransfers: [FareTransfer]? = nil
+    /// Only for a route built leg by leg (#91, `RouteBuilder`): the planned routes it is made of,
+    /// in order. Routes from the server, saved trips and older versions have none.
+    var builtFrom: [RoutePart]? = nil
 
     var transitLegs: [Leg] { legs.filter(\.isTransit) }
     var firstTransitLeg: Leg? { legs.first(where: \.isTransit) }
@@ -422,6 +435,23 @@ struct GeocodeMatch: Decodable, Identifiable, Hashable, Sendable {
         if let country { parts.append(country) }
         return parts.joined(separator: ", ")
     }
+}
+
+/// Where to ride in the train and which way out, for a ride that ends in a station (see `ExitAdvice.swift`).
+/// Kept on the ride when the trip goes to the watch, which gets no walking directions to work it out.
+struct ExitAdvice: Codable, Equatable, Sendable {
+    /// Part of the train nearest the way out.
+    enum Part: String, Codable, Sendable { case front, middle, back }
+
+    var part: Part?
+    /// The station door to take (its sign: "B2", "Nord"), when the walk after the ride leaves the station.
+    var door: String? = nil
+    /// The user chose this door (remembered for the station and destination).
+    var doorSaved: Bool = false
+    /// The part aims at the next train (a change in the station) rather than the way out.
+    var forChange: Bool = false
+
+    var isEmpty: Bool { part == nil && door == nil }
 }
 
 /// A stop on the station map (`/api/v6/map/stops`).

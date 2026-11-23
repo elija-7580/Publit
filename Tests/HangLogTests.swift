@@ -141,6 +141,34 @@ final class HangLogTests: XCTestCase {
         try "\n— 2025-01-02 10:00:00 · Publit 0.5 (12) · iPhone · iOS 18\nNo response for 2 s.\n".write(to: log.fileURL, atomically: true, encoding: .utf8)
         XCTAssertEqual(log.summary.freezes, 1)
     }
+
+    /// Build 96 diagnostics: a request frozen with the app timed out 47 minutes later and showed up as an error.
+    func testATimeoutInTheBackgroundIsAStepNotAnEntry() throws {
+        let log = makeLog()
+        let t0 = Date(timeIntervalSince1970: 1_000_000)
+        log.scene(active: true, at: t0)
+        log.scene(active: false, at: t0.addingTimeInterval(1))
+        log.error("request refresh-itinerary", URLError(.timedOut), at: t0.addingTimeInterval(2800))
+        log.flush()
+        XCTAssertFalse(log.hasEntries)
+
+        // Open again, the same timeout is a real one.
+        log.scene(active: true, at: t0.addingTimeInterval(4000))
+        log.error("request plan", URLError(.timedOut), at: t0.addingTimeInterval(4001))
+        log.flush()
+        let text = try String(contentsOf: log.fileURL, encoding: .utf8)
+        XCTAssertTrue(text.contains("request plan: URLError -1001"), text)
+        XCTAssertTrue(text.contains("error request refresh-itinerary"), text)
+    }
+
+    func testOtherErrorsInTheBackgroundStayEntries() {
+        let log = makeLog()
+        let t0 = Date(timeIntervalSince1970: 1_000_000)
+        log.scene(active: false, at: t0)
+        log.error("request plan", URLError(.badServerResponse), at: t0.addingTimeInterval(1))
+        log.flush()
+        XCTAssertTrue(log.hasEntries)
+    }
 }
 
 /// A board refresh must not turn a departure into a different list row (that closed the trip opened from it).

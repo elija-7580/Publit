@@ -101,7 +101,7 @@ struct PublitApp: App {
     private func followTripsInBackground() async {
         let now = Date()
         for trip in trips.upcoming(now: now.addingTimeInterval(-15 * 60)) where trips.activeTripId == trip.id || LiveTripActivity.isRunning(trip.id) {
-            guard let fresh = try? await TripRefreshCoordinator.shared.refresh(trip.itinerary.id) else { continue }
+            guard let fresh = try? await TripRefreshCoordinator.shared.refresh(route: trip.itinerary) else { continue }
             trips.update(trip.id, with: fresh)
             if let updated = trips.trip(trip.id) { await ChangeRiskNotifier.follow(updated) }
             LineAlertMonitor.scheduleBackgroundCheck(forTrips: true)
@@ -351,7 +351,7 @@ struct RootView: View {
     private func refreshLiveTrips() async -> TimeInterval {
         let now = Date()
         for trip in trips.upcoming(now: now.addingTimeInterval(-15 * 60)) where LiveTripActivity.isRunning(trip.id) || trips.activeTripId == trip.id {
-            if let fresh = try? await TripRefreshCoordinator.shared.refresh(trip.itinerary.id) {
+            if let fresh = try? await TripRefreshCoordinator.shared.refresh(route: trip.itinerary) {
                 trips.update(trip.id, with: fresh)
                 if let updated = trips.trip(trip.id) {
                     await LeaveReminder.follow(trip, to: updated)

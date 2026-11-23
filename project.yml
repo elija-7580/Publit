@@ -10,8 +10,8 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "0.1.1"
-    CURRENT_PROJECT_VERSION: "96"
+    MARKETING_VERSION: "0.1.2"
+    CURRENT_PROJECT_VERSION: "98"
     # Personal Team — Automatic Signing for local device installs.
     DEVELOPMENT_TEAM: "3D6S8GFSGK"
 packages:
@@ -50,6 +50,7 @@ targets:
         NSHealthShareUsageDescription: Publit reads your walking speed from Apple Health, only if you turn on “Use my walking speed”, so routes plan walks and changes at your pace. It stays on your iPhone.
         NSCameraUsageDescription: Publit uses the camera only when you choose to scan a paper ticket. The scan stays on your iPhone.
         NSCalendarsWriteOnlyAccessUsageDescription: Publit adds the trips you choose to your calendar.
+        NSCalendarsFullAccessUsageDescription: Publit reads upcoming events that have a place to suggest routes there, only if you turn on calendar suggestions. Your calendar stays on your iPhone.
         NSSupportsLiveActivities: true
         # Background check of saved lines for disruptions (LineAlertMonitor).
         BGTaskSchedulerPermittedIdentifiers: [io.github.elija7580.publit.lines]
@@ -76,8 +77,6 @@ targets:
         # Optional ticket shop (services/ticket-shop), e.g. https://shop.example.org. Empty: no "Buy tickets in Publit".
         # In an .xcconfig write the URL as https:/$()/shop.example.org, since // starts a comment there.
         PublitTicketShopURL: $(TICKET_SHOP_URL)
-        # Optional ticket-link service (partner programs, /v1/partners). Empty: the ticket shop's address, else built-in list.
-        PublitTicketLinksURL: $(TICKET_LINKS_URL)
     # Apple Health: read the walking speed for smart routing (read only).
     entitlements:
       path: Config/Publit.entitlements
@@ -134,6 +133,8 @@ targets:
       - Sources/API
       - Sources/App/AppInfo.swift
       - Sources/Models/TransitModels.swift
+      # Routes built leg by leg are refreshed part by part (TripRefreshCoordinator).
+      - Sources/Models/RouteBuilder.swift
       - Sources/Models/ServiceAlerts.swift
       - Sources/Models/Fares.swift
       - Sources/Models/ModeStyle.swift
@@ -188,6 +189,8 @@ targets:
       - Sources/API
       - Sources/App/AppInfo.swift
       - Sources/Models/TransitModels.swift
+      # Routes built leg by leg are refreshed part by part (TripRefreshCoordinator).
+      - Sources/Models/RouteBuilder.swift
       - Sources/Models/ServiceAlerts.swift
       - Sources/Models/Fares.swift
       - Sources/Models/ModeStyle.swift
@@ -215,6 +218,7 @@ targets:
       - Sources/Models/CityGuide.swift
       - Sources/Models/WalkGuide.swift
       - Sources/Models/StationExits.swift
+      - Sources/Models/ExitAdvice.swift
       - Sources/Models/TripGuide.swift
       - Sources/Models/Coverage.swift
       - Sources/Models/CoverageAtlasData.swift
@@ -241,6 +245,9 @@ targets:
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         WKApplication: true
         WKCompanionAppBundleIdentifier: io.github.elija7580.publit
+        # A tap on the trip's Live Activity in the Smart Stack opens this app (on the trip) instead of "Open on iPhone".
+        WKSupportsLiveActivityLaunchAttributeTypes:
+          - TripActivityAttributes
         NSLocationWhenInUseUsageDescription: Publit uses your location to show departures near you.
         PublitContact: https://github.com/elija-7580/Publit
     settings:

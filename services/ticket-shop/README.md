@@ -36,31 +36,6 @@ Planned, each needs a contract and API access first: Wiener Linien ticket interf
 tickets), Samtrafiken Connect / BoB (Sweden), railways via OSDM, transport authorities using Masabi Justride.
 To add one, write a provider object as described in `src/providers/index.js` and list it there.
 
-## Open ticket-link layer (for any app)
-
-The cheap first step: no customer money and no personal data. An app sends the operators of a journey and the
-ticket links it already has; it gets back the best link per leg, sent through the shop's affiliate program when
-there is one. Works without Stripe or seller keys (only `PARTNER_TEMPLATES` for Publit's own programs).
-
-```sh
-curl -X POST https://<worker>/v1/links -H 'Content-Type: application/json' -d '{
-  "legs": [{ "index": 0, "operator": "FlixBus", "links": { "booking": "https://shop.flixbus.de/search?…" } },
-           { "index": 1, "operator": "ÖBB" }],
-  "partners": { "flixbus": "https://www.awin1.com/cread.php?awinmid=<advertiser>&awinaffid=<your id>&ued={url}" }
-}'
-```
-
-- `links` per leg: `booking`, `fares`, `website` (first valid one wins); without any, a known shop for the operator.
-- `partners` (optional, "bring your own ID"): your own tracking links per program (`db`, `flixbus`, `trainline`,
-  `omio`, `sncf`, `eurostar`). They must be https on the network's own host (Awin, Partnerize, Impact,
-  Tradedoubler) and contain `{url}` once. Legs without your ID use Publit's, which funds this service.
-- `app` (optional, "share"): an app without its own affiliate accounts sends its id (lower case, digits, dashes).
-  Its clicks on Publit's links carry that id as the network's sub-ID (Awin `clickref`, Partnerize `pubref`,
-  Impact `subId1`, Tradedoubler `epi`), so the network's report shows each app's commission for the agreed payout.
-- Answer: `{ links: [{ leg, operator, url, source, partner, via: "caller" | "publit" | null }] }`. CORS is open.
-- `GET /v1/partners` lists Publit's active programs. The Publit app loads it on start, so a new partner program
-  goes live by changing `PARTNER_TEMPLATES` in `wrangler.toml` and redeploying, without an app update.
-
 ## Setup
 
 1. Stripe: create an account, get the secret key (`sk_test_…` first). Apple Pay on Checkout needs the domain of
@@ -77,6 +52,39 @@ curl -X POST https://<worker>/v1/links -H 'Content-Type: application/json' -d '{
    ```
 4. Build the app with the build setting `TICKET_SHOP_URL` set to the worker's address (Info.plist key
    `PublitTicketShopURL`). Without it the app shows no "Buy tickets in Publit".
+
+## On your own server (without Cloudflare)
+
+The same code runs with Node 20 or newer; `src/node.js` replaces the Cloudflare runtime and keeps the rate limit
+in memory. No `npm install` is needed: the shop has no dependencies.
+
+```sh
+git clone https://github.com/elija-7580/Publit.git && cd Publit/services/ticket-shop
+cat > .env <<'ENV'
+TOKEN_SECRET=<openssl rand -hex 32>
+STRIPE_SECRET_KEY=sk_test_…
+DEMO_PROVIDER=on
+PORT=8787
+ENV
+chmod 600 .env
+node --env-file=.env src/node.js
+```
+
+To try it without any Stripe account, leave out `STRIPE_SECRET_KEY` and set `DEMO_PAYMENTS=on` together with
+`DEMO_PROVIDER=on`: a demo payment page (`/v1/demo-pay`) stands in for Stripe and charges nothing. It switches
+itself off as soon as a Stripe key or a real seller key is set.
+
+It listens on 127.0.0.1 only. Put a reverse proxy with HTTPS in front, for example Caddy:
+
+```
+shop.example.org {
+    reverse_proxy 127.0.0.1:8787
+}
+```
+
+To keep it running, a systemd unit with `WorkingDirectory=…/services/ticket-shop`,
+`ExecStart=/usr/bin/node --env-file=.env src/node.js` and `Restart=always` is enough. Optional variables:
+`DISTRIBUSION_API_KEY`, `DISTRIBUSION_BASE_URL`, `RATE_LIMIT` (requests per minute per IP, default 30), `HOST`.
 
 Before selling for real: a company, the sellers' contracts, terms and a privacy notice for the shop, and
 customer support for refunds and delays. Distribusion invoices ticket price minus commission monthly
