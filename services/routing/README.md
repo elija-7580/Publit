@@ -19,5 +19,22 @@ To add a feed after a publisher allows it in writing, list it in `permissions.js
 
 The key is `<region file>/<source name>` as in Transitous' `feeds/*.json`. Run the script again and redeploy.
 
-Server setup follows the Transitous docs (MOTIS 2 with their import scripts); point it at `out/feeds/` instead of
-Transitous' full list.
+## Running the server
+
+`build.sh` does everything with Docker (or `DOCKER=podman`):
+
+```sh
+REGIONS="at de ch" ./build.sh import   # allowed feeds + Geofabrik DACH map, then motis import
+./build.sh serve                        # MOTIS on 127.0.0.1:8080, put HTTPS in front (Caddy, nginx)
+```
+
+It clones Transitous for their unchanged tools (`fetch.py`, `generate-motis-config.py`, AGPL-3.0-or-later) and
+container recipe (CC0), swaps their feed list for the allowed one from `commercial_feeds.py`, and runs
+`own_config.py` on the generated config: our map, Publit as client, no map tiles, and no realtime or sharing URLs
+that go through Transitous' own servers (feed proxy, crowdsourcing). For all of Europe use
+`REGIONS="*" OSM_URL=https://download.geofabrik.de/europe-latest.osm.pbf`; that needs a machine with much more
+memory (measure on the first import). Run `import` again for timetable updates (e.g. nightly).
+
+Then point the apps (`ROUTER_URL` build setting) and the ticket shop (`ROUTER_URL`, for `/v1/journeys`) at it.
+
+`python3 -m unittest test_own_config` tests the config step (needs `ruamel.yaml`).

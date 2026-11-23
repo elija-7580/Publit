@@ -14,7 +14,25 @@ private struct ServerError: Decodable { let error: String }
 ///
 /// Usage policy: open-source, non-commercial, identifying User-Agent, visible attribution.
 final class TransitousClient: @unchecked Sendable {
-    static let shared = TransitousClient()
+    static let shared = TransitousClient(base: routerURL)
+
+    /// Transitous, the default router (non-commercial use only).
+    static let transitousURL = URL(string: "https://api.transitous.org")!
+
+    /// Publit's own MOTIS server when `PublitRouterURL` is set in Info.plist (see services/routing), else Transitous.
+    /// Same engine and API, and the same data set names, so saved stops and trips stay valid.
+    static var routerURL: URL {
+        let raw = (Bundle.main.object(forInfoDictionaryKey: "PublitRouterURL") as? String)?
+            .trimmingCharacters(in: .whitespaces)
+        return router(raw) ?? transitousURL
+    }
+
+    /// An own router address is used only when it is a complete https URL (an unset build setting stays "$(…)").
+    static func router(_ raw: String?) -> URL? {
+        guard let raw, !raw.isEmpty, !raw.hasPrefix("$("), let url = URL(string: raw),
+              url.scheme == "https", url.host?.isEmpty == false else { return nil }
+        return url
+    }
 
     private let base: URL
     /// Asked only while `base` cannot be reached or fails (see `ServerFailover`).
@@ -32,7 +50,7 @@ final class TransitousClient: @unchecked Sendable {
     /// sets and IDs as Transitous, run separately at TU Darmstadt. Saved stops and trips stay valid.
     static let backupServer = URL(string: "https://europe.motis-project.de")!
 
-    init(base: URL = URL(string: "https://api.transitous.org")!,
+    init(base: URL = TransitousClient.transitousURL,
          // No fallback by default: Transitous' policy allows apps only on api.transitous.org,
          // not on the servers behind it (*.motis-project.de). `backupServer` stays for tests.
          backups: [URL] = [],

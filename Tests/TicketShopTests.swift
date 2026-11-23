@@ -101,4 +101,14 @@ final class TicketShopTests: XCTestCase {
             XCTAssertEqual(model.phase, .ready)
         }
     }
+
+    func testOwnRouterIsUsedOnlyWithACompleteHttpsAddress() {
+        XCTAssertEqual(TransitousClient.router("https://route.example.org")?.host, "route.example.org")
+        XCTAssertNil(TransitousClient.router(nil))
+        XCTAssertNil(TransitousClient.router(""))
+        XCTAssertNil(TransitousClient.router("$(ROUTER_URL)"))
+        XCTAssertNil(TransitousClient.router("http://route.example.org"))
+        // The test bundle sets no router, so the app keeps using Transitous.
+        XCTAssertEqual(TransitousClient.routerURL, TransitousClient.transitousURL)
+    }
 }

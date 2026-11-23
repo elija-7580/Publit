@@ -13,12 +13,16 @@
 // Open ticket-link layer (any app, no keys needed, see links.js):
 //   GET  /v1/partners                                                         → { programs }
 //   POST /v1/links                   { legs, partners? }                      → { links }
+//
+// Router plus ticket (any app; needs an own router on ROUTER_URL, see journeys.js):
+//   POST /v1/journeys                { from, to, time?, … }                    → { journeys: [{ legs, offers, links, total }] }
 
 import { checkout, complete, findOffers, ShopError } from "./shop.js";
 import { stripe as stripeClient, StripeError } from "./stripe.js";
 import { ProviderError } from "./providers/errors.js";
 import { demoPayments, demoPaymentsActive } from "./demopay.js";
 import { findLinks, partners } from "./links.js";
+import { findJourneys } from "./journeys.js";
 
 let demoPay = null;
 
@@ -67,7 +71,7 @@ export default {
       if (url.pathname === "/v1/return" && request.method === "GET") return returnRedirect(url);
       const demo = deps.demoPay ?? (demoPaymentsActive(env) ? (demoPay ??= demoPayments()) : null);
       if (url.pathname === "/v1/demo-pay" && demo) return demo.page(request);
-      const isLinks = url.pathname === "/v1/links" || url.pathname === "/v1/partners";
+      const isLinks = ["/v1/links", "/v1/partners", "/v1/journeys"].includes(url.pathname);
       if (isLinks && request.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
       if (url.pathname === "/v1/partners" && request.method === "GET") {
         return json(partners(env), 200, { ...CORS, "Cache-Control": "public, max-age=3600" });
@@ -77,9 +81,11 @@ export default {
         const { success } = await env.RATE_LIMITER.limit({ key: request.headers.get("CF-Connecting-IP") ?? "unknown" });
         if (!success) return failure("rate_limited", "Too many requests", 429);
       }
-      if (url.pathname === "/v1/links") {
+      if (url.pathname === "/v1/links" || url.pathname === "/v1/journeys") {
         try {
-          return json(findLinks(await readJSON(request), env), 200, CORS);
+          const body = await readJSON(request);
+          if (url.pathname === "/v1/links") return json(findLinks(body, env), 200, CORS);
+          return json(await findJourneys(body, env, { fetchImpl, list: deps.providers }), 200, CORS);
         } catch (error) {
           if (error instanceof ShopError) return json({ error: error.code, message: error.message }, error.status, CORS);
           throw error;

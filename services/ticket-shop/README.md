@@ -61,6 +61,23 @@ curl -X POST https://<worker>/v1/links -H 'Content-Type: application/json' -d '{
 - `GET /v1/partners` lists Publit's active programs. The Publit app loads it on start, so a new partner program
   goes live by changing `PARTNER_TEMPLATES` in `wrangler.toml` and redeploying, without an app update.
 
+## Router plus ticket (`/v1/journeys`)
+
+One call for the whole trip: connections from Publit's own MOTIS server (`ROUTER_URL`, see `services/routing`)
+and, for every ride, the ticket this shop can sell (an `offer` with a signed token for `/v1/checkout`) or the best
+place to buy it elsewhere (a `link` from the link layer). `total` is set when every ride has an offer.
+
+```http
+POST /v1/journeys
+{ "from": { "lat": 48.185, "lon": 16.376 }, "to": { "stopId": "de-delfi_de:09262:2001" },
+  "time": "2026-12-01T08:00:00Z", "results": 3, "currency": "EUR", "app": "my-app" }
+→ { "journeys": [{ "departure", "arrival", "duration", "transfers", "legs": […], "offers": […], "links": […],
+                   "total": { "amount": 4790, "currency": "EUR" } | null }] }
+```
+
+Without `ROUTER_URL` the endpoint answers 503. Transitous' public API and the MOTIS servers behind it are refused
+on purpose: their terms do not allow commercial use.
+
 ## Setup
 
 1. Stripe: create an account, get the secret key (`sk_test_…` first). Apple Pay on Checkout needs the domain of

@@ -78,6 +78,8 @@ targets:
         PublitTicketShopURL: $(TICKET_SHOP_URL)
         # Optional ticket-link service (partner programs, /v1/partners). Empty: the ticket shop's address, else built-in list.
         PublitTicketLinksURL: $(TICKET_LINKS_URL)
+        # Optional own routing server (services/routing, MOTIS with commercially usable feeds). Empty: Transitous.
+        PublitRouterURL: $(ROUTER_URL)
     # Apple Health: read the walking speed for smart routing (read only).
     entitlements:
       path: Config/Publit.entitlements
@@ -167,6 +169,7 @@ targets:
       properties:
         CFBundleDisplayName: Publit
         PublitContact: https://github.com/elija-7580/Publit
+        PublitRouterURL: $(ROUTER_URL)
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         NSExtension:
@@ -243,6 +246,7 @@ targets:
         WKCompanionAppBundleIdentifier: io.github.elija7580.publit
         NSLocationWhenInUseUsageDescription: Publit uses your location to show departures near you.
         PublitContact: https://github.com/elija-7580/Publit
+        PublitRouterURL: $(ROUTER_URL)
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: io.github.elija7580.publit.watchkitapp
