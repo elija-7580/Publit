@@ -9,6 +9,11 @@ compatibility_date = "2024-10-01"
 DISTRIBUSION_BASE_URL = "https://api.demo.distribusion.com/retailers/v4"
 # "on" only for testing with Stripe test keys: made-up tickets for every leg.
 DEMO_PROVIDER = "off"
+# Publit's affiliate tracking links for the open link layer (/v1/links, /v1/partners), as JSON:
+# { "<program id>": "<tracking link with {url}>" }. Program ids: db, flixbus, trainline, omio, sncf, eurostar.
+# e.g. { "flixbus": "https://www.awin1.com/cread.php?awinmid=<advertiser>&awinaffid=<your id>&ued={url}" }
+# Empty = links stay as they are. Changing this needs no app update.
+PARTNER_TEMPLATES = "{}"
 
 # Secrets (wrangler secret put …): TOKEN_SECRET (32+ random characters), STRIPE_SECRET_KEY,
 # DISTRIBUSION_API_KEY. A provider without its key is skipped.
