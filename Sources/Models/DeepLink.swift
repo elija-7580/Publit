@@ -151,7 +151,8 @@ struct SharedRoute: Hashable, Sendable {
 
     init(_ it: Itinerary, fromName: String, toName: String) {
         let start = it.legs.first?.from, end = it.legs.last?.to
-        self.init(itineraryId: it.id.isEmpty ? nil : it.id,
+        // A route built leg by leg has no server ID of its own: its link carries the search (#145 will carry the legs).
+        self.init(itineraryId: it.id.isEmpty || it.builtFrom != nil ? nil : it.id,
                   fromName: fromName.isEmpty ? (start?.name ?? "") : fromName,
                   from: LatLon(lat: start?.lat ?? 0, lon: start?.lon ?? 0),
                   toName: toName.isEmpty ? (end?.name ?? "") : toName,

@@ -3,7 +3,7 @@
 > Nicht von Hand bearbeiten. Erzeugt von `scripts/feature_inventory.py` (CI: `features-doc.yml`).
 > Die ausführliche Beschreibung steht in [FUNKTIONEN.md](FUNKTIONEN.md).
 
-**207 Views, 5 App Intents, 3 Widgets in 80 Dateien.**
+**209 Views, 5 App Intents, 3 Widgets in 81 Dateien.**
 
 ## `Sources/App/DesignSamples.swift`
 - Views: `DesignSampleView`
@@ -138,10 +138,14 @@
 
 ## `Sources/Views/ItineraryDetailView.swift`
 - Views: `CompareMapView`, `ItineraryDetailView`, `RouteSummary`, `RouteMap`, `RouteMark`, `VehicleKindLine`, `LegRow`, `GetOffButton`, `StatusBanner`, `TimelineLegRow`, `TimelineEndRow`, `TimelineRail`, `LeaveHero`
-- Sichtbare Texte: Destination · Driving times are without traffic and parking. · Steps · Trip overview · Done · Route · Live · Cancelled · Rail replacement bus · Timetable · This trip is cancelled. · Pick up at %@ · Return at %@ · Rent in the provider's app · +%lld min · Platform %@ · Reminder set · Remind me to get off · We'll notify you at %@. · This stop is less than two minutes away. · Allow notifications for Publit in Settings. · On time · Line %@: all stops and map · Board at %@ · Get off at %@ · Service changes on this route · Arrive
+- Sichtbare Texte: Destination · Driving times are without traffic and parking. · Steps · Trip overview · Done · Route · Live · Cancelled · Rail replacement bus · Timetable · This trip is cancelled. · Pick up at %@ · Return at %@ · Rent in the provider's app · +%lld min · Platform %@ · Reminder set · Remind me to get off · We'll notify you at %@. · This stop is less than two minutes away. · Allow notifications for Publit in Settings. · On time · Line %@: all stops and map · Board at %@ · Get off at %@ · Service changes on this route · Go on another way · Arrive
 
 ## `Sources/Views/LaunchSplash.swift`
 - Views: `LaunchSplash`
+
+## `Sources/Views/LegChangeView.swift`
+- Views: `LegChangeView`, `LegChoiceRow`
+- Sichtbare Texte: The ways to go on could not be loaded. Check your connection and try again. · Try again · No other way to go on from here. · Later · From %@, after %@ · The way up to here stays as it is. Only ways you can still reach are listed. · Go on another way · Cancel · Live data · Your route · On foot
 
 ## `Sources/Views/LinesView.swift`
 - Views: `LinesView`, `LineRefRow`, `LineDetailView`, `LineMap`, `LineStopRow`, `LineTimetableView`

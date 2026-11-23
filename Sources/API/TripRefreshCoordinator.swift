@@ -24,4 +24,14 @@ actor TripRefreshCoordinator {
         recent[id] = (value, now)
         return value
     }
+
+    /// Fresh live times for a route. One built leg by leg (#91) is made of several planned routes:
+    /// each is refreshed on its own and the route is put together again from them.
+    func refresh(route: Itinerary, now: Date = .now) async throws -> Itinerary {
+        guard route.builtFrom != nil else { return try await refresh(route.id, now: now) }
+        var fresh: [String: Itinerary] = [:]
+        for id in RouteBuilder.refreshIds(of: route) { fresh[id] = try await refresh(id, now: now) }
+        guard let built = RouteBuilder.refreshed(route, with: fresh) else { throw RouteBuilder.NoLongerTheSame() }
+        return built
+    }
 }

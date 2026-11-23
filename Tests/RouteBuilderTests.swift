@@ -156,4 +156,44 @@ final class RouteBuilderTests: XCTestCase {
         XCTAssertNil(old.builtFrom)
         XCTAssertEqual(old.legs.count, 4)
     }
+
+    // MARK: Part 2 (#142): change one leg
+
+    func testChoicesKeepTheLegsBeforeAndLeaveOutWhatCannotBeReached() throws {
+        let a = try planned()
+        let same = route("A2", [try leg("TRAM", 2, 3, start: 20, end: 30), try leg("WALK", 3, 4, start: 30, end: 34)])
+        let later = route("B", [try leg("SUBWAY", 2, 4, start: 25, end: 33)])
+        let again = route("B2", [try leg("SUBWAY", 2, 4, start: 25, end: 33)])   // the same ride, found twice
+        let tooEarly = route("C", [try leg("SUBWAY", 2, 4, start: 15, end: 23)])
+        let choices = RouteBuilder.choices(for: a, at: 2, from: [same, later, again, tooEarly])
+        XCTAssertEqual(choices.map { $0.legs.map(\.mode) }, [["WALK", "BUS", "SUBWAY"], ["WALK", "BUS", "TRAM", "WALK"]])
+        XCTAssertEqual(choices.map(\.endTime), [time(33), time(34)])
+        XCTAssertTrue(choices.allSatisfy { $0.legs.prefix(2).map(\.tripId) == a.legs.prefix(2).map(\.tripId) })
+        XCTAssertEqual(choices[1].routeKey, a.routeKey, "the route as it is stays recognisable")
+    }
+
+    func testABuiltRouteIsRefreshedThroughEachOfItsParts() async throws {
+        let a = try planned()
+        let b = route("B", [try leg("SUBWAY", 2, 4, start: 25, end: 33)])
+        let built = try XCTUnwrap(RouteBuilder.splice(a, at: 2, with: b))
+        XCTAssertEqual(RouteBuilder.refreshIds(of: built), ["A", "B"])
+        XCTAssertEqual(RouteBuilder.refreshIds(of: a), ["A"])
+
+        let lateBus = route("A'", [try leg("WALK", 0, 1, start: 0, end: 5), try leg("BUS", 1, 2, start: 6, end: 16, delay: 2),
+                                   try leg("TRAM", 2, 3, start: 20, end: 30), try leg("WALK", 3, 4, start: 30, end: 34)])
+        let coordinator = TripRefreshCoordinator { id in
+            switch id {
+            case "A": return lateBus
+            case "B": return b
+            default: throw URLError(.badURL)
+            }
+        }
+        let fresh = try await coordinator.refresh(route: built)
+        XCTAssertEqual(fresh.legs[1].endTime, time(18))
+        XCTAssertEqual(fresh.legs.map(\.mode), ["WALK", "BUS", "SUBWAY"])
+        XCTAssertEqual(fresh.builtFrom?.map(\.itineraryId), ["A'", "B"])
+        // A planned route goes the usual way.
+        let plain = try await coordinator.refresh(route: a)
+        XCTAssertEqual(plain.id, "A'")
+    }
 }

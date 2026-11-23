@@ -84,6 +84,9 @@ struct CompareMapView: View, Equatable {
     }
 }
 
+/// A leg of the route, by its place in it, as a sheet item.
+private struct LegIndex: Identifiable { let id: Int }
+
 struct ItineraryDetailView: View {
     @Environment(TripStore.self) private var trips
     /// False once this screen is popped or dismissed (still true while a child screen is pushed).
@@ -99,6 +102,9 @@ struct ItineraryDetailView: View {
     @State private var mapReady = false
     /// Ride whose vehicle trip is open (all stops, map, line), by its index in the trip.
     @State private var openedLeg: Int?
+    /// Build your own connection (#142): the leg whose ways to go on are listed, and the route built from the choice.
+    @State private var changedLeg: LegIndex?
+    @State private var built: BuiltRoute?
     /// The screen opens with the top (time, lines) at once; changes, actions and steps follow a
     /// moment later, so a long trip never leaves the tap without an answer.
     @State private var showsAll = false
@@ -107,6 +113,12 @@ struct ItineraryDetailView: View {
     private var isBikeOrCar: Bool {
         let m = StreetComparison.streetMode(itinerary)
         return m == "BIKE" || m == "CAR"
+    }
+
+    /// A ride of a route you are still choosing can be swapped for another way to go on. A saved
+    /// or running trip keeps its legs (its reminders and Live Activity follow them).
+    private func canChange(_ leg: Leg) -> Bool {
+        leg.isTransit && statusAt == nil && !isBikeOrCar && trips.saved(itinerary) == nil
     }
 
     private var resolvedFrom: String { fromName.isEmpty ? Self.placeName(itinerary.legs.first?.from) : fromName }
@@ -199,7 +211,8 @@ struct ItineraryDetailView: View {
                     }
                     // Cycling or driving the whole way: the start is named, like the destination below.
                     TimelineLegRow(leg: leg, startName: index == 0 && isBikeOrCar ? resolvedFrom : nil,
-                                   onOpenTrip: leg.tripId == nil ? nil : { openedLeg = index })
+                                   onOpenTrip: leg.tripId == nil ? nil : { openedLeg = index },
+                                   onChange: canChange(leg) ? { changedLeg = LegIndex(id: index) } : nil)
                 }
                 TimelineEndRow(time: itinerary.endTime, tz: itinerary.legs.last?.to.tz, name: resolvedTo)
             }
@@ -241,6 +254,15 @@ struct ItineraryDetailView: View {
         }
         .navigationDestination(item: $openedLeg) { i in
             if let leg = itinerary.legs[safe: i], let trip = TripView(leg: leg) { trip }
+        }
+        .sheet(item: $changedLeg) { i in
+            NavigationStack {
+                LegChangeView(route: itinerary, index: i.id) { built = BuiltRoute(itinerary: $0) }
+            }
+        }
+        // The built route is a route like any other: start it, save it, change it again.
+        .navigationDestination(item: $built) { route in
+            ItineraryDetailView(itinerary: route.itinerary, fromName: fromName, toName: toName)
         }
         .navigationTitle("Route")
         .wideMapScene(.route(itinerary))
@@ -747,6 +769,8 @@ struct TimelineLegRow: View {
     var startName: String? = nil
     /// Opens the vehicle's whole trip (every stop, map, line); nil where there is none.
     var onOpenTrip: (() -> Void)? = nil
+    /// Lists other ways to go on from where this ride starts (#142); nil where the legs are fixed.
+    var onChange: (() -> Void)? = nil
     /// Rides open to their stops, notes and the get-off alarm; closed they say where to get on and off.
     @State private var expanded = false
 
@@ -860,6 +884,14 @@ struct TimelineLegRow: View {
                     }
                     .buttonStyle(.borderless)
                     .accessibilityIdentifier("openLegTripRow")
+                }
+                if let onChange {
+                    Button(action: onChange) {
+                        Label(L10n.t("Go on another way"), systemImage: "arrow.triangle.branch")
+                            .font(.subheadline.weight(.semibold))
+                    }
+                    .buttonStyle(.borderless)
+                    .accessibilityIdentifier("changeLeg")
                 }
                 GetOffButton(leg: leg)
             }

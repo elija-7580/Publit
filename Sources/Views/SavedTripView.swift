@@ -71,7 +71,7 @@ struct SavedTripView: View {
     @discardableResult
     static func refresh(_ t: SavedTrip, in trips: TripStore) async -> Bool {
         do {
-            let fresh = try await TripRefreshCoordinator.shared.refresh(t.itinerary.id)
+            let fresh = try await TripRefreshCoordinator.shared.refresh(route: t.itinerary)
             try Task.checkCancellation()
             trips.update(t.id, with: fresh)
             if let updated = trips.trip(t.id) {

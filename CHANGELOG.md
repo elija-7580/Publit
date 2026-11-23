@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased – build your own connection
+
+- **Route details** (`LegChangeView`, `RouteBuilder.choices`, #142, with the core of #141): an opened ride has "Go on another way". It lists the ways to go on from where that ride starts, not before the legs in front of it arrive; the choice becomes a route of its own that can be started and saved. Live times of such a route are refreshed part by part (`TripRefreshCoordinator.refresh(route:)`).
+
 ## 0.1.1 (build 97) – walking as a real choice, without long-distance trains, departures along a trip
 
 - **Walking** (`StreetComparison.walkIsAChoice`, #110): the walk is listed first among the routes when no ride gets there sooner door to door (waiting counts), also on the watch. Before, only its duration was compared with the fastest ride's.
