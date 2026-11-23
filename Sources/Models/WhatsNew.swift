@@ -20,6 +20,14 @@ enum WhatsNew {
 
     /// Newest first.
     static let entries: [WhatsNewEntry] = [
+        WhatsNewEntry(build: 98, items: [
+            WhatsNewItem(symbol: "point.topleft.down.to.point.bottomright.curvepath", title: "Plan in sections",
+                         text: "Add stops in between and choose for each section how you travel and which departure you take."),
+            WhatsNewItem(symbol: "door.left.hand.open", title: "Your way out",
+                         text: "For metro and train rides Publit says where to board and which exit to take; you can also pick your own exit."),
+            WhatsNewItem(symbol: "moon.stars", title: "Last connection",
+                         text: "In Plan, the new time option “Last” shows the latest connections that still get you there tonight."),
+        ]),
         WhatsNewEntry(build: 97, items: [
             WhatsNewItem(symbol: "arrow.triangle.branch", title: "Go on another way",
                          text: "Open a ride in a route and choose another way to go on from there; the way up to it stays."),

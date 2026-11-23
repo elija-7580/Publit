@@ -1,7 +1,10 @@
 # Changelog
 
-## Unreleased
+## 0.1.1 (build 98) – plan in sections, your way out, last connection, your trip on the watch
 
+- **Boarding position and exit** (`ExitAdvice`, #162): for metro and train rides that end in a station, the route, the live trip, the Live Activity and the watch say where to board and which exit to take; "Choose exit" remembers your own exit per station and destination.
+- **Last connection** (#161): Plan has a third time option "Last" next to Depart and Arrive; it lists the last connections that still arrive in the night after the chosen day and marks the one that leaves last. Home, Work and saved places have "Last connection" as an action.
+- **Apple Watch and Live Activity** (`WatchAutoOpen`, #160): a started trip opens by itself on the watch; the Live Activity and the Dynamic Island show the step, a labelled countdown, the vehicle with line, direction and platform, and a progress bar.
 - **Plan in sections** (`SectionPlanView`, `SectionPlanModel`, `RouteBuilder.chain`, #144): Plan has "Plan in sections": places in order with stops in between, for each section how to travel (public transport, on foot, by bike, by car) and which departure, and a stay at each stop. The sections chain by time and become one route that can be started and saved; only its public transport parts are asked for live times.
 - **Share links** (`SharedRoute.parts`, `RouteBuilder.assemble`, #145): the link of a route built leg by leg carries its parts and opens with the same legs; older versions get the search as before.
 
