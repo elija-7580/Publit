@@ -17,7 +17,10 @@ struct LiveTripBar: View {
     var body: some View {
         // Minute clock: countdowns are in whole minutes, so one redraw a minute is enough.
         let now = Ticker.minute.now
-        let current = trips.current(now: now).flatMap { $0.id == hiddenId ? nil : $0 }
+        // A started trip always shows: hidden before it was started, it used to stay out of the bar
+        // while it ran (Live Activity on, "Active trip" in Nearby), with no way to end it from here
+        // (feedback on build 98: "I tapped the X and the trip is still active").
+        let current = trips.current(now: now).flatMap { $0.id == hiddenId && trips.activeTripId != $0.id ? nil : $0 }
         Group {
             if let trip = current {
                 bar(trip, now: now)
@@ -68,7 +71,16 @@ struct LiveTripBar: View {
             .buttonStyle(.plain)
             .accessibilityElement(children: .combine)
             .accessibilityIdentifier("liveTripBar")
-            if !started {
+            if started {
+                // Ends the trip, not only the bar: reminders, Live Activity and watch stop with it.
+                Button { hiddenId = trip.id; Task { await TripSession.stop(trip, in: trips) } } label: {
+                    Image(systemName: "xmark").font(.caption.weight(.bold)).foregroundStyle(Color.onInk.opacity(0.7))
+                        .frame(width: 28, height: 32).contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(Text("End trip"))
+                .accessibilityIdentifier("liveTripBarEnd")
+            } else {
                 if status.phase != .arrived && status.phase != .cancelled {
                     // Like starting a workout: one tap and the trip screen guides you.
                     Button { Task { await start(trip) } } label: {

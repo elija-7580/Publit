@@ -111,7 +111,7 @@
 
 ## `Sources/Views/Components/LiveTripBar.swift`
 - Views: `LiveTripBar`
-- Sichtbare Texte: Start trip · Hide · Open trip · Live trip · min
+- Sichtbare Texte: End trip · Start trip · Hide · Open trip · Live trip · min
 
 ## `Sources/Views/Components/LogoLoader.swift`
 - Views: `LogoLoader`
