@@ -15,6 +15,9 @@ enum RouteBuilder {
         let earliest: Date
     }
 
+    /// A refresh came back with other rides than the route was built from.
+    struct NoLongerTheSame: Error {}
+
     /// The rest of a built route must start where the kept legs end, within this many metres
     /// (the router may hand back the stop's other platform or the point on the street).
     static let joinRadius: Double = 400
@@ -42,6 +45,46 @@ enum RouteBuilder {
         return make(legs: kept + rest.legs, parts: prefix(parts(of: route), legs: index) + parts(of: rest))
     }
 
+    /// The ways to go on from leg `index`, out of what a search from `restart(_:at:)` found: each
+    /// one as the whole route, the kept legs first. What cannot be reached is left out, the same
+    /// rides are listed once, earliest arrival first. The route as it is can be among them.
+    static func choices(for route: Itinerary, at index: Int, from found: [Itinerary]) -> [Itinerary] {
+        var seen = Set<String>()
+        return found.compactMap { splice(route, at: index, with: $0) }
+            .filter { seen.insert($0.routeKey).inserted }
+            .sorted { ($0.endTime, $0.startTime) < ($1.endTime, $1.startTime) }
+    }
+
+    /// The IDs to ask the server about for fresh live times, each once.
+    /// A part on foot, by bike or by car has no live times and is not asked about.
+    static func refreshIds(of route: Itinerary) -> [String] {
+        guard route.builtFrom != nil else { return [route.id] }
+        var seen = Set<String>()
+        return partLegs(of: route).filter { $0.legs.contains(where: \.isTransit) }
+            .map(\.part.itineraryId).filter { seen.insert($0).inserted }
+    }
+
+    /// Each part with the legs it holds in the route as it is now.
+    private static func partLegs(of route: Itinerary) -> [(part: RoutePart, legs: [Leg])] {
+        var at = 0
+        return parts(of: route).map { part in
+            let end = min(route.legs.count, at + max(0, part.legCount))
+            defer { at = end }
+            return (part, Array(route.legs[min(at, end) ..< end]))
+        }
+    }
+
+    /// Planned section by section (#144): the sections one after the other as one route. Nil when
+    /// one of them leaves before the one in front of it arrives, or starts somewhere else.
+    static func chain(_ sections: [Itinerary]) -> Itinerary? {
+        var legs: [Leg] = []
+        for section in sections {
+            guard fits(section, after: legs) else { return nil }
+            legs += section.legs
+        }
+        return make(legs: legs, parts: sections.flatMap(parts(of:)))
+    }
+
     /// The planned routes a route is made of: its own parts when it was built, else itself.
     static func parts(of route: Itinerary) -> [RoutePart] {
         route.builtFrom ?? [RoutePart(itineraryId: route.id, firstLeg: 0, legCount: route.legs.count)]
@@ -54,7 +97,13 @@ enum RouteBuilder {
         guard let parts = route.builtFrom, !parts.isEmpty else { return nil }
         var legs: [Leg] = []
         var updated: [RoutePart] = []
-        for part in parts {
+        for (part, current) in partLegs(of: route) {
+            // On foot, by bike or by car: nothing to refresh, the part stays as it is.
+            if fresh[part.itineraryId] == nil, !current.isEmpty, !current.contains(where: \.isTransit) {
+                legs += current
+                updated.append(part)
+                continue
+            }
             guard let source = fresh[part.itineraryId], part.firstLeg >= 0, part.legCount > 0,
                   source.legs.count >= part.firstLeg + part.legCount else { return nil }
             legs += source.legs[part.firstLeg ..< part.firstLeg + part.legCount]
@@ -62,6 +111,23 @@ enum RouteBuilder {
             updated.append(RoutePart(itineraryId: source.id, firstLeg: part.firstLeg, legCount: part.legCount))
         }
         guard legs.map(identity) == route.legs.map(identity) else { return nil }
+        return make(legs: legs, parts: updated)
+    }
+
+    /// A built route from a link (#145): its parts, each cut out of the planned route fetched by
+    /// the part's ID. Nil when one is missing, too short, or the parts no longer meet.
+    static func assemble(_ parts: [RoutePart], from fetched: [String: Itinerary]) -> Itinerary? {
+        var legs: [Leg] = []
+        var updated: [RoutePart] = []
+        for part in parts {
+            guard let source = fetched[part.itineraryId], part.firstLeg >= 0, part.legCount > 0,
+                  source.legs.count >= part.firstLeg + part.legCount else { return nil }
+            let cut = Array(source.legs[part.firstLeg ..< part.firstLeg + part.legCount])
+            if let last = legs.last, let first = cut.first,
+               last.to.coordinate.distance(to: first.from.coordinate) > joinRadius { return nil }
+            legs += cut
+            updated.append(RoutePart(itineraryId: source.id, firstLeg: part.firstLeg, legCount: part.legCount))
+        }
         return make(legs: legs, parts: updated)
     }
 

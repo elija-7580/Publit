@@ -20,6 +20,22 @@ enum WhatsNew {
 
     /// Newest first.
     static let entries: [WhatsNewEntry] = [
+        WhatsNewEntry(build: 98, items: [
+            WhatsNewItem(symbol: "point.topleft.down.to.point.bottomright.curvepath", title: "Plan in sections",
+                         text: "Add stops in between and choose for each section how you travel and which departure you take."),
+            WhatsNewItem(symbol: "door.left.hand.open", title: "Your way out",
+                         text: "For metro and train rides Publit says where to board and which exit to take; you can also pick your own exit."),
+            WhatsNewItem(symbol: "moon.stars", title: "Last connection",
+                         text: "In Plan, the new time option “Last” shows the latest connections that still get you there tonight."),
+        ]),
+        WhatsNewEntry(build: 97, items: [
+            WhatsNewItem(symbol: "arrow.triangle.branch", title: "Go on another way",
+                         text: "Open a ride in a route and choose another way to go on from there; the way up to it stays."),
+            WhatsNewItem(symbol: "calendar.badge.clock", title: "Appointments as destinations",
+                         text: "Turn on calendar suggestions and Publit offers routes to your next events that arrive a few minutes early."),
+            WhatsNewItem(symbol: "train.side.rear.car", title: "Without long-distance trains",
+                         text: "A new switch in Route options leaves out high-speed, intercity and night trains."),
+        ]),
         WhatsNewEntry(build: 95, items: [
             WhatsNewItem(symbol: "location.fill", title: "Your position, as before",
                          text: "The blue dot shows the way you face with a soft beam again, on every map."),

@@ -17,13 +17,18 @@ struct RouteTagLine: View {
     }
 
     private var line: Text {
-        let others = badges.filter { $0 != .recommended }.map(\.title)
+        let others = badges.filter { $0 != .recommended && $0 != .lastConnection }.map(\.title)
         var line = Text(verbatim: "")
         var first = true
         func add(_ t: Text) { line = first ? t : line + Text(verbatim: "  ·  ").foregroundStyle(.tertiary) + t; first = false }
         if let dayNote {
             add(Text(Image(systemName: "calendar")).foregroundStyle(Color.delay)
                 + Text(verbatim: " " + dayNote).foregroundStyle(Color.delay))
+        }
+        // "Last connection" first: on that route it is what matters.
+        if badges.contains(.lastConnection) {
+            add(Text(Image(systemName: SmartRouting.Badge.lastConnection.symbol)).foregroundStyle(Color.ink)
+                + Text(verbatim: " " + L10n.t("Last connection")).foregroundStyle(Color.ink))
         }
         if badges.contains(.recommended) {
             var t = Text(Image(systemName: "sparkles")).foregroundStyle(Color.ink)

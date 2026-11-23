@@ -39,14 +39,26 @@ enum TimeMode: String, Codable, CaseIterable, Identifiable, Sendable {
     case now = "Now"
     case departAt = "Depart"
     case arriveBy = "Arrive"
+    /// The last connection of the day: routes that still arrive tonight (see `LastConnection`).
+    case lastConnection = "Last"
     var id: String { rawValue }
+    /// Searched backwards from an arrival time, so later pages are earlier routes.
+    var searchesBackwards: Bool { self == .arriveBy || self == .lastConnection }
 }
 
 @MainActor
 @Observable
 final class PlanModel {
     var from: Endpoint = .currentLocation
-    var to: Endpoint? { didSet { if to == nil { searchStarted = false } } }
+    var to: Endpoint? {
+        didSet {
+            if to == nil { searchStarted = false }
+            // Another destination: the calendar event no longer belongs to the search.
+            if let a = appointment, to?.key != CalendarTrips.placePrefix + a.id { appointment = nil }
+        }
+    }
+    /// The calendar event the destination came from: the routes say when to leave to be there on time.
+    var appointment: CalendarAppointment?
     /// Plan tab: routes load after "Search routes"; from then on, changes search again by themselves.
     /// Clearing the destination starts over.
     var searchStarted = false
@@ -101,6 +113,7 @@ final class PlanModel {
         return Self.timetableOrder(list, arriveBy: timeMode == .arriveBy)
     }
 
+
     /// Departure order when searching by departure, arrival order when searching "Arrive by":
     /// the time the user asked about is the one that always grows down the list. Ties fall back to
     /// the other time, then to the server's order.
@@ -119,7 +132,8 @@ final class PlanModel {
 
     /// Changes whenever a new search is needed.
     var queryKey: String {
-        let t = isLive ? "now" : String(Int(date.timeIntervalSince1970 / 60))
+        let t = timeMode == .lastConnection ? LastConnection.dayKey(for: date)
+            : isLive ? "now" : String(Int(date.timeIntervalSince1970 / 60))
         return "\(from.key)|\(to?.key ?? "-")|\(timeMode.rawValue)|\(t)|\(options.key)"
     }
 
@@ -127,7 +141,7 @@ final class PlanModel {
     private func offerForLearning() {
         SmartRouting.offered = itineraries
         if SmartRouting.isEnabled { DelayHistoryStore.shared.refresh(for: itineraries) }
-        SmartRouting.offeredArriveBy = timeMode == .arriveBy
+        SmartRouting.offeredArriveBy = timeMode.searchesBackwards
     }
 
     func swap() {
@@ -164,8 +178,9 @@ final class PlanModel {
         defer { if token == myToken { isLoading = false } }
         errorMessage = nil
         if !silent { walkNote = nil }
-        let time: Date? = isLive ? nil : date
-        let arriveBy = timeMode == .arriveBy
+        let lastMode = timeMode == .lastConnection
+        let time: Date? = lastMode ? LastConnection.deadline(for: date) : isLive ? nil : date
+        let arriveBy = timeMode.searchesBackwards
         let options = options
         let stops = PlanStops(from: from.stopId, to: to.stopId)
         do {
@@ -231,7 +246,8 @@ final class PlanModel {
             if case .currentLocation = searchedFrom { transit = Reach.boardingHere(transit, here: f) }
             // After dropping the walk, the short- and long-walk copies of a ride are identical: list it once.
             transit = transit.uniqueRides
-            itineraries = Self.merge(transit: transit, direct: res.direct)
+            // Last connection: only what has not left yet; walking the whole way is not a connection.
+            itineraries = lastMode ? LastConnection.upcoming(transit) : Self.merge(transit: transit, direct: res.direct)
             offerForLearning()
             walkNote = parkAndRide && options.firstMile != .car ? ParkAndRide.fallbackNote
                 : maxWalk > RouteOptions.defaultWalkMinutes * 60 ? Reach.longWalkNote(res.itineraries) : nil
@@ -245,7 +261,9 @@ final class PlanModel {
             lastRequest = (f, t, time, arriveBy, maxWalk, stops.forFirstMile(used.firstMile))
             lastOptions = used
             if !silent { history.record(from: searchedFrom, to: to, mode: searchedMode, date: searchedDate, source: source) }
-            if itineraries.isEmpty {
+            if itineraries.isEmpty, lastMode, !transit.isEmpty {
+                errorMessage = L10n.t("The last connection there has already left. Choose another day.")
+            } else if itineraries.isEmpty {
                 errorMessage = options.isDefault ? L10n.t("No connections found.")
                     : !options.tickets.isEmpty ? L10n.t("No connection is fully covered by your tickets. Change them in Route options to see all.")
                     : options.maxWalkMinutes < RouteOptions.defaultWalkMinutes ? Reach.ownLimitNote(minutes: options.maxWalkMinutes)
@@ -376,6 +394,7 @@ final class PlanModel {
             if lastOptions.firstMile == .car {
                 fresh = ParkAndRide.nearStations(ParkAndRide.sensible(fresh), nearest: parkAndRideNearest)
             }
+            if timeMode == .lastConnection { fresh = LastConnection.upcoming(fresh.filter { !$0.isDirect }) }
             itineraries = Self.timetableOrder(itineraries + fresh, arriveBy: req.arriveBy)
             offerForLearning()
             nextCursor = req.arriveBy ? res.previousPageCursor : res.nextPageCursor
@@ -384,14 +403,13 @@ final class PlanModel {
         }
     }
 
-    /// Walking there is listed first when it is about as fast as the best ride, or the only way.
+    /// Walking there is listed first when it is a real choice (`StreetComparison.walkIsAChoice`):
+    /// about as fast as the best ride, the only way, or there before any ride door to door.
     nonisolated static func merge(transit: [Itinerary], direct: [Itinerary]) -> [Itinerary] {
         // Only walking joins the list; cycling and driving are shown as a comparison.
-        let walking = direct.filter { let m = StreetComparison.streetMode($0); return m != "BIKE" && m != "CAR" }
-        guard let walk = walking.min(by: { $0.duration < $1.duration }) else { return transit }
-        guard let best = transit.map(\.duration).min() else { return [walk] }
-        let worthIt = Double(walk.duration) <= Double(best) * 1.25 || walk.duration <= 10 * 60
-        return worthIt ? [walk] + transit : transit
+        guard let walk = StreetComparison.walk(in: direct) else { return transit }
+        guard !transit.isEmpty else { return [walk] }
+        return StreetComparison.walkIsAChoice(walk, transit: transit) ? [walk] + transit : transit
     }
 
     /// Street modes to compare. Walking is left out when it is already in the list of routes.
@@ -526,6 +544,21 @@ final class AppState {
         plan.searchStarted = true
     }
 
+    /// A calendar event as the destination: the Plan tab from here, arriving a few minutes before it
+    /// starts, with the routes searched at once. The routes then say when to leave.
+    func route(to appointment: CalendarAppointment, place: SavedPlace, now: Date = .now) {
+        dismissToken &+= 1
+        showGoNow = false
+        plan.from = .currentLocation
+        plan.to = .place(place)
+        plan.appointment = appointment
+        plan.source = .calendar
+        plan.timeMode = .arriveBy
+        plan.date = max(appointment.arriveBy, now.addingTimeInterval(60))
+        plan.searchStarted = true
+        tab = .plan
+    }
+
     /// Routes from the current location to `place`, leaving now (Nearby → "Where to now?").
     func goNow(to place: SavedPlace, source: RecentSearch.Source = .map) {
         goNow.from = .currentLocation
@@ -550,6 +583,14 @@ final class AppState {
         plan.to = .place(place)
         plan.source = source
         tab = .plan
+    }
+
+    /// Plan tab with tonight's last connection to `place`, from here.
+    func lastConnection(to place: SavedPlace, source: RecentSearch.Source = .favorite) {
+        route(to: place, source: source)
+        plan.timeMode = .lastConnection
+        plan.date = .now
+        plan.searchStarted = true
     }
 
     /// Plan tab from one stop to another (a stop picked on a line's trip).

@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.1.2 (build 98) – plan in sections, your way out, last connection, your trip on the watch
+
+- **Version 0.1.2**: Apple closed 0.1.1 for new builds once it was approved for the App Store (upload of build 97 refused, error 90186), so build 97 never reached TestFlight and its changes below arrive with this build.
+- **Boarding position and exit** (`ExitAdvice`, #162): for metro and train rides that end in a station, the route, the live trip, the Live Activity and the watch say where to board and which exit to take; "Choose exit" remembers your own exit per station and destination.
+- **Last connection** (#161): Plan has a third time option "Last" next to Depart and Arrive; it lists the last connections that still arrive in the night after the chosen day and marks the one that leaves last. Home, Work and saved places have "Last connection" as an action.
+- **Apple Watch and Live Activity** (`WatchAutoOpen`, #160): a started trip opens by itself on the watch; the Live Activity and the Dynamic Island show the step, a labelled countdown, the vehicle with line, direction and platform, and a progress bar.
+- **Plan in sections** (`SectionPlanView`, `SectionPlanModel`, `RouteBuilder.chain`, #144): Plan has "Plan in sections": places in order with stops in between, for each section how to travel (public transport, on foot, by bike, by car) and which departure, and a stay at each stop. The sections chain by time and become one route that can be started and saved; only its public transport parts are asked for live times.
+- **Share links** (`SharedRoute.parts`, `RouteBuilder.assemble`, #145): the link of a route built leg by leg carries its parts and opens with the same legs; older versions get the search as before.
+
+## 0.1.1 (build 97) – go on another way, appointments as destinations, without long-distance trains, steadier maps
+
+- **Walking** (`StreetComparison.walkIsAChoice`, #110): the walk is listed first among the routes when no ride gets there sooner door to door (waiting counts), also on the watch. Before, only its duration was compared with the fastest ride's.
+- **Route options** (`RouteOptions.regionalOnly`, #119): "Without long-distance trains" leaves out high-speed, intercity and night trains, by mode in the search and by name or operator in the answer.
+- **Trip** (`TripView`, #130): the menu on a stop of a trip has "Departures", which opens that stop's departure board.
+- **Saved addresses** (#122): addresses that share an ID no longer replace or remove each other.
+- **Onboarding** (#140): "routes wherever you go" instead of "across Europe".
+- **Route details** (`LegChangeView`, `RouteBuilder.choices`, #142, with the core of #141): an opened ride has "Go on another way". It lists the ways to go on from where that ride starts, not before the legs in front of it arrive; the choice becomes a route of its own that can be started and saved. Live times of such a route are refreshed part by part (`TripRefreshCoordinator.refresh(route:)`).
+- **Calendar** (`CalendarTrips`, `CalendarSuggestions`, #159): appointments with a place are offered as destinations in Plan, the place search and Nearby; off by default, access is asked for when it is turned on.
+- **Stability** (`MapHero`, diagnostics of build 96): the app froze for 5.8 s in the map renderer on the way back from Tickets to Nearby, after iOS had warned about memory. The maps at the top of Nearby, Go now, a route, a trip and a line stayed alive under other screens and tabs; a covered map is now let go after 20 s, and at once in the background or on a memory warning, and built anew when its screen comes back.
+- **Diagnostics** (`CrashReports`, `HangLog`): a memory warning notes how much memory Publit itself uses. A request that iOS froze with the app and that timed out in the background stays a step and is no longer an error entry.
+- **Data** (#135): the feed has no bus 240 Krems → St. Pölten; recorded in `docs/DATA-SOURCES.md`.
+
 ## 0.1.1 (build 96) – no crash on first launch on a Mac
 
 - **Onboarding** (`RootView`): the iPad app on a Mac ("Designed for iPad") crashed half a second after the first launch: the onboarding cover was presented in the very first render pass, and `OnboardingView` found no `LocationManager` in its environment (crash report build 67, macOS 27.2). The cover now opens from `onAppear`, and `LocationManager` and `FavoritesStore` are passed to it explicitly.
