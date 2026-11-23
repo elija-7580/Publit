@@ -1,7 +1,8 @@
 # Changelog
 
-## 0.1.1 (build 98) – plan in sections, your way out, last connection, your trip on the watch
+## 0.1.2 (build 98) – plan in sections, your way out, last connection, your trip on the watch
 
+- **Version 0.1.2**: Apple closed 0.1.1 for new builds once it was approved for the App Store (upload of build 97 refused, error 90186), so build 97 never reached TestFlight and its changes below arrive with this build.
 - **Boarding position and exit** (`ExitAdvice`, #162): for metro and train rides that end in a station, the route, the live trip, the Live Activity and the watch say where to board and which exit to take; "Choose exit" remembers your own exit per station and destination.
 - **Last connection** (#161): Plan has a third time option "Last" next to Depart and Arrive; it lists the last connections that still arrive in the night after the chosen day and marks the one that leaves last. Home, Work and saved places have "Last connection" as an action.
 - **Apple Watch and Live Activity** (`WatchAutoOpen`, #160): a started trip opens by itself on the watch; the Live Activity and the Dynamic Island show the step, a labelled countdown, the vehicle with line, direction and platform, and a progress bar.
