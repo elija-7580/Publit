@@ -188,6 +188,12 @@ struct WatchSnapshot: Codable, Sendable {
     var otherPlaces: [SavedPlace] { places.filter { !$0.isStop && $0.role == nil } }
     var pinned: [SavedPlace] { PlaceRole.allCases.compactMap { role in places.first { $0.role == role } } }
 
+    /// How many saved stops the watch's first screen lists; all of them are under Saved.
+    static let homeStopLimit = 4
+    /// The saved stops on the watch's first screen, one tap from their departures (#123):
+    /// the first ones in the order chosen on the iPhone.
+    var homeStops: [SavedPlace] { Array(stops.prefix(Self.homeStopLimit)) }
+
     // MARK: Changes made on the watch
 
     /// The snapshot with requests the iPhone has not confirmed yet, so the watch answers at once.
