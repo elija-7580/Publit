@@ -44,8 +44,10 @@ final class StationExits: @unchecked Sendable {
     private var loading: Set<String> = []
     private var failed: [String: Date] = [:]
     private let session: URLSession
+    private let defaults: UserDefaults
 
-    init(session: URLSession? = nil) {
+    init(session: URLSession? = nil, defaults: UserDefaults = .standard) {
+        self.defaults = defaults
         if let session {
             self.session = session
         } else {
@@ -144,6 +146,47 @@ final class StationExits: @unchecked Sendable {
         lock.lock(); defer { lock.unlock() }
         areas = [:]; walks = [:]; failed = [:]
     }
+
+    // MARK: The user's own exit
+
+    /// Exits the user picked, per station and destination ("Always use exit B2" when going home, another
+    /// one to work): `preferenceKey` → "<OSM id>|<sign>".
+    static let preferredKey = "preferredStationExits"
+
+    /// The station (about 100 m) and where the walk goes (about 1 km): the same exit fits the same trip.
+    static func preferenceKey(_ walk: Leg) -> String {
+        areaKey(walk.from.coordinate) + ">" + String(format: "%.2f,%.2f", walk.to.coordinate.lat, walk.to.coordinate.lon)
+    }
+
+    /// Signed exits of the station this walk leaves, one per sign, in sign order: the ones to choose from.
+    func choices(for walk: Leg) -> [StationEntrance] {
+        var seen: Set<String> = []
+        return (entrances(for: walk) ?? [])
+            .filter { e in e.label.map { seen.insert($0).inserted } ?? false }
+            .sorted { ($0.label ?? "").localizedStandardCompare($1.label ?? "") == .orderedAscending }
+    }
+
+    /// The exit the user picked for this walk's station and destination, if it is still there.
+    func preferred(for walk: Leg) -> StationEntrance? {
+        guard let saved = (defaults.dictionary(forKey: Self.preferredKey) as? [String: String])?[Self.preferenceKey(walk)],
+              let entrances = entrances(for: walk) else { return nil }
+        let parts = saved.split(separator: "|", maxSplits: 1).map(String.init)
+        if let id = parts.first.flatMap(Int64.init), let e = entrances.first(where: { $0.id == id }) { return e }
+        // Same sign, another node (the map was edited).
+        guard parts.count == 2 else { return nil }
+        return entrances.first { $0.label == parts[1] }
+    }
+
+    /// Remembers `entrance` for this walk's station and destination; nil goes back to the automatic choice.
+    func setPreferred(_ entrance: StationEntrance?, for walk: Leg) {
+        var all = defaults.dictionary(forKey: Self.preferredKey) as? [String: String] ?? [:]
+        all[Self.preferenceKey(walk)] = entrance.map { "\($0.id)|\($0.label ?? "")" }
+        defaults.set(all, forKey: Self.preferredKey)
+        NotificationCenter.default.post(name: Self.preferenceChanged, object: self)
+    }
+
+    /// Posted when the user picks an exit: routes and live trips show the new one.
+    static let preferenceChanged = Notification.Name("StationExits.preferenceChanged")
 
     // MARK: Overpass
 

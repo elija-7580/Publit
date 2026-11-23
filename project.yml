@@ -218,6 +218,7 @@ targets:
       - Sources/Models/CityGuide.swift
       - Sources/Models/WalkGuide.swift
       - Sources/Models/StationExits.swift
+      - Sources/Models/ExitAdvice.swift
       - Sources/Models/TripGuide.swift
       - Sources/Models/Coverage.swift
       - Sources/Models/CoverageAtlasData.swift

@@ -111,6 +111,8 @@ struct ItineraryDetailView: View {
     /// The screen opens with the top (time, lines) at once; changes, actions and steps follow a
     /// moment later, so a long trip never leaves the tap without an answer.
     @State private var showsAll = false
+    /// Counts exit numbers arriving and exits picked: the advice under the rides is worked out again.
+    @State private var exitsChanged = 0
     @Environment(WideMapState.self) private var wideMap: WideMapState?
 
     private var isBikeOrCar: Bool {
@@ -208,6 +210,8 @@ struct ItineraryDetailView: View {
 
             // 3. The way, step by step, as a timeline: times on the left, the line in its colour.
             Section("Steps") {
+                // Where to ride and which way out of each station (`exitsChanged` redraws it).
+                let advice: [Int: ExitAdvice] = exitsChanged >= 0 && !isBikeOrCar ? ExitAdvice.all(itinerary.legs) : [:]
                 ForEach(Array(itinerary.legs.enumerated()), id: \.offset) { index, leg in
                     if let transfer = TransferInfo(before: index, in: itinerary) {
                         TransferCard(info: transfer)
@@ -215,7 +219,8 @@ struct ItineraryDetailView: View {
                     // Cycling or driving the whole way: the start is named, like the destination below.
                     TimelineLegRow(leg: leg, startName: index == 0 && isBikeOrCar ? resolvedFrom : nil,
                                    onOpenTrip: leg.tripId == nil ? nil : { openedLeg = index },
-                                   onChange: canChange(leg) ? { changedLeg = LegIndex(id: index) } : nil)
+                                   onChange: canChange(leg) ? { changedLeg = LegIndex(id: index) } : nil,
+                                   exitAdvice: advice[index], exitWalk: exitWalk(after: index))
                 }
                 TimelineEndRow(time: itinerary.endTime, tz: itinerary.legs.last?.to.tz, name: resolvedTo)
             }
@@ -237,6 +242,12 @@ struct ItineraryDetailView: View {
                 if mapReady { RouteMap(itinerary: itinerary, isPreview: true, previewInsets: insets).transition(.opacity) }
             }
         }
+        // Exit numbers of the stations the trip leaves on foot ("Take exit B2"), from OpenStreetMap.
+        .task(id: itinerary.id) {
+            guard !isBikeOrCar else { return }
+            if await StationExits.shared.load(itinerary) { exitsChanged += 1 }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: StationExits.preferenceChanged)) { _ in exitsChanged += 1 }
         .task {
             guard !mapReady || !showsAll else { return }
             try? await Task.sleep(for: .milliseconds(60))
@@ -277,6 +288,13 @@ struct ItineraryDetailView: View {
         // A trip unsaved here is only deleted when the screen closes, not when a detail is pushed.
         .onDisappear { if !isPresented { trips.discardPendingRemovalsLater() } }
         .onChange(of: isPresented) { _, presented in if !presented { trips.discardPendingRemovalsLater() } }
+    }
+}
+
+extension ItineraryDetailView {
+    /// The walk out of a station after the ride at `index`, where its exit can be picked.
+    func exitWalk(after index: Int) -> Leg? {
+        StationExits.leavesStation(itinerary.legs, at: index + 1) ? itinerary.legs[index + 1] : nil
     }
 }
 
@@ -774,6 +792,10 @@ struct TimelineLegRow: View {
     var onOpenTrip: (() -> Void)? = nil
     /// Lists other ways to go on from where this ride starts (#142); nil where the legs are fixed.
     var onChange: (() -> Void)? = nil
+    /// Where to ride and which way out of the station (see `ExitAdvice`).
+    var exitAdvice: ExitAdvice? = nil
+    /// The walk out of the station after this ride: its exit can be picked here.
+    var exitWalk: Leg? = nil
     /// Rides open to their stops, notes and the get-off alarm; closed they say where to get on and off.
     @State private var expanded = false
 
@@ -857,6 +879,14 @@ struct TimelineLegRow: View {
             }
             if leg.cancelled == true {
                 Text("This trip is cancelled.").font(.footnote.weight(.semibold)).foregroundStyle(Color.danger)
+            }
+            if let exitAdvice {
+                let choices = exitWalk.map { StationExits.shared.choices(for: $0) } ?? []
+                let walk = exitWalk
+                ExitAdviceRow(advice: exitAdvice, choices: choices,
+                              onPick: walk == nil ? nil : { (e: StationEntrance?) in
+                                  if let walk { StationExits.shared.setPreferred(e, for: walk) }
+                              })
             }
             TrainDivisionNotice(leg: leg)
             if expanded {

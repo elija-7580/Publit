@@ -53,6 +53,11 @@ enum LiveTripActivity {
         state.destination = trip.toName
         // On board with location: the next stop and stops to go, from where the phone really is.
         if s.phase == .riding, let note = GetOffAlerts.rideNote(trip.id) { state.detail = note }
+        // On board: the end of the train nearest the exit or the next train ("Front of the train · Exit B2").
+        if s.phase == .riding, let i = legs.firstIndex(where: { $0.isTransit && $0.endTime > now }),
+           let short = ExitAdvice.forRide(i, in: legs)?.short {
+            state.detail = state.detail.isEmpty ? short : short + " · " + state.detail
+        }
         if let departing, s.phase != .cancelled, s.phase != .arrived {
             state.platform = TransitLabels.clean(departing.from.track).map { L10n.f("Pl. %@", $0) }
             state.platformChanged = departing.from.platformChange != nil ? true : nil
