@@ -69,6 +69,11 @@ targets:
             CFBundleTypeRole: Viewer
             LSHandlerRank: Alternate
             LSItemContentTypes: [public.image]
+          # Apple Wallet passes (#20): shared from Wallet, Mail or a website.
+          - CFBundleTypeName: Wallet pass
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: Alternate
+            LSItemContentTypes: [com.apple.pkpass]
         ITSAppUsesNonExemptEncryption: false
         # Contact sent in the User-Agent, required by the Transitous usage policy.
         PublitContact: https://github.com/elija-7580/Publit
