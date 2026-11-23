@@ -6,7 +6,7 @@ The watch app (target `PublitWatch`, watchOS 10) carries what you need to take a
 
 | Screen | What it does |
 |---|---|
-| Home | Tickets valid now (one tap opens the code), "Tickets", the live tile of the trip under way, Where to?, Nearby, Saved |
+| Home | Tickets valid now (one tap opens the code), "Tickets", the live tile of the trip under way, Where to?, Nearby, the first four saved stops (one tap opens their departures; in the order set on the iPhone under Saved), Saved |
 | Tickets | Grouped as on the iPhone (valid now, upcoming, without dates, expired). A ticket shows its code on a white plate at full width, then the details (validity, route, passenger, reference) |
 | Trip | Vertical pages (Digital Crown): **Overview** first, then one page for every ride and longer walk. A trip under way opens on the leg you are on and follows the clock |
 | Trip, overview | "Not reliable here" card first where data is missing, then times, status, **Tickets** button, **Map** button, Start/End trip, Save trip |

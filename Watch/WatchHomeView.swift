@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// The first screen: tickets above all, then the trip under way, then the ways in (where to, nearby, saved).
+/// The first screen: tickets above all, then the trip under way, then the ways in (where to, nearby,
+/// the first saved stops, saved).
 struct WatchHomeView: View {
     @Environment(WatchLibrary.self) private var library
 
@@ -21,6 +22,10 @@ struct WatchHomeView: View {
                 }
                 NavigationLink(value: WatchRoute.nearby) {
                     Label("Nearby", systemImage: "location.fill")
+                }
+                // Saved stops one tap from their departures (#123); the whole list is under Saved.
+                ForEach(snap.homeStops) { place in
+                    NavigationLink(value: WatchRoute.stop(place)) { WatchPlaceRow(place: place) }
                 }
                 NavigationLink(value: WatchRoute.saved) {
                     Label("Saved", systemImage: "star.fill")

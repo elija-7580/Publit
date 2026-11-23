@@ -354,7 +354,7 @@ Beispielphrasen: „Nächste Abfahrten in Publit“, „Bring mich nach Hause mi
 
 | Screen | Inhalt |
 |---|---|
-| Home (`WatchHomeView`) | jetzt gültige Tickets (ein Tipp → Code), Tickets, Live-Kachel der laufenden Fahrt, Where to?, Nearby, Saved |
+| Home (`WatchHomeView`) | jetzt gültige Tickets (ein Tipp → Code), Tickets, Live-Kachel der laufenden Fahrt, Where to?, Nearby, die ersten vier gespeicherten Haltestellen (ein Tipp → Abfahrten; Reihenfolge wie am iPhone unter „Saved“ festgelegt, `WatchSnapshot.homeStops`, Issue #123), Saved |
 | Tickets (`WatchTicketsView`) | gruppiert wie iPhone; Code auf weißer Fläche in voller Breite, danach Details |
 | Fahrt (`WatchTripView`) | Seiten per Digital Crown: Übersicht (Abdeckungshinweis, Zeiten, Status, Tickets, Map, Start/End trip, Save trip/Remove), dann je Fahrt/Fußweg eine Seite (Linie, Richtung, Zeiten, Gleis/„Platform changed“, Halte, Störungen, Map) |
 | Ganze Fahrt einer Linie (`WatchVehicleTripView`) | Aus einer Fahrt-Etappe (Linien-Symbol oder „Line …: all stops and map“): alle Halte des Fahrzeugs mit Zeiten, Verspätung, Gleis, auch vor dem Einstieg; Ein-/Ausstieg fett, passierte Halte grau, Status („At …“, „Between … and …“), Map |
