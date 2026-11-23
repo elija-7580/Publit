@@ -36,6 +36,16 @@ final class PlaceSearchRankingTests: XCTestCase {
         XCTAssertEqual(hits.map(\.id), ["m|s1"])
     }
 
+    /// #115: the street "Utendorfgasse" was not offered because a bus stop has the same name.
+    func testAStreetNamedLikeAStopStaysInTheList() throws {
+        let transit = [try match("s1", "Utendorfgasse")]
+        let apple = [suggestion("Utendorfgasse", "1140 Wien", address: true)]
+        let all = PlaceSearchRanking.order(transit: transit, suggestions: apple, query: "Utendorfgasse", scope: .all)
+        XCTAssertEqual(all.map(\.id), ["m|s1", "s|Utendorfgasse|1140 Wien"], "the stop first, the street right after it")
+        let addresses = PlaceSearchRanking.order(transit: transit, suggestions: apple, query: "Utendorfgasse", scope: .addresses)
+        XCTAssertEqual(addresses.map(\.id), ["s|Utendorfgasse|1140 Wien"])
+    }
+
     func testStopsScopeHasOnlyStops() throws {
         let transit = [try match("s1", "Karlsplatz"), try match("a1", "Karlsplatz 1", type: "ADDRESS")]
         let hits = PlaceSearchRanking.order(transit: transit, suggestions: [suggestion("Karlskirche")], query: "Karlsplatz", scope: .stops)

@@ -133,13 +133,16 @@ extension GeocodeMatch {
 
     /// Search hits from two sources in one list: the transit geocoder first (it knows the stops),
     /// then other places that are not the same place under the same name (within 150 m).
+    /// A street or address is never the same place as the stop named after it: both stay
+    /// ("Utendorfgasse" in Vienna, the bus stop and the street, #115).
     static func merged(_ primary: [GeocodeMatch], _ extra: [GeocodeMatch], limit: Int = 15) -> [GeocodeMatch] {
         var out = primary
         for m in extra {
             let name = StopGrouping.normalizedName(m.name)
             let here = LatLon(lat: m.lat, lon: m.lon)
             let duplicate = out.contains {
-                StopGrouping.normalizedName($0.name) == name && LatLon(lat: $0.lat, lon: $0.lon).distance(to: here) < 150
+                if $0.isStop, m.type == "ADDRESS" { return false }
+                return StopGrouping.normalizedName($0.name) == name && LatLon(lat: $0.lat, lon: $0.lon).distance(to: here) < 150
             }
             if !duplicate { out.append(m) }
         }
