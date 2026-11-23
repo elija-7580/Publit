@@ -192,7 +192,7 @@
 
 ## `Sources/Views/RouteOptionsView.swift`
 - Views: `RouteOptionsView`, `RouteOptionsButton`, `StreetComparisonSection`, `FirstMilePicker`, `OwnTicketsView`
-- Sichtbare Texte: Transport modes · Routes only use the modes that are switched on. · None · My tickets · Routes only use rides your tickets cover, e.g. no ICE with the Deutschlandticket. · Your %@ is saved in Tickets. · To the first stop · Changes · Walk to and from stops · %lld min · Step-free (wheelchair) · Shared bikes and e-scooters · Compare with walking, cycling and driving · Driving times are without traffic and parking. · Route options · Reset · Done · All modes · Other ways · About as fast · %@ faster · %@ slower · Park & Ride searches take longer. · %@ · %@ · Saved in Tickets
+- Sichtbare Texte: Without long-distance trains · Transport modes · Routes only use the modes that are switched on. · Long-distance trains are high-speed, intercity and night trains (ICE, TGV, Railjet …). · None · My tickets · Routes only use rides your tickets cover, e.g. no ICE with the Deutschlandticket. · Your %@ is saved in Tickets. · To the first stop · Changes · Walk to and from stops · %lld min · Step-free (wheelchair) · Shared bikes and e-scooters · Compare with walking, cycling and driving · Driving times are without traffic and parking. · Route options · Reset · Done · All modes · Other ways · About as fast · %@ faster · %@ slower · Park & Ride searches take longer. · %@ · %@ · Saved in Tickets
 
 ## `Sources/Views/SavedTripView.swift`
 - Views: `SavedTripView`, `SavedTripRow`

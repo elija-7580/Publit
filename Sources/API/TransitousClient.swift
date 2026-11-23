@@ -118,7 +118,7 @@ final class TransitousClient: @unchecked Sendable {
                       cache: CachePolicy(maxAge: time == nil ? 20 : 60, persist: true),
                       timeout: options.isSlowSearch ? 45 : nil)
         // Own tickets: rides they do not cover (an IC filed as plain RAIL, a train abroad) come out here.
-        return options.tickets.isEmpty ? res : res.replacingItineraries(res.itineraries.filter(options.allows))
+        return options.filtersRides ? res.replacingItineraries(res.itineraries.filter(options.allows)) : res
     }
 
     static func planQuery(from: LatLon, to: LatLon, time: Date?, arriveBy: Bool,

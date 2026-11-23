@@ -131,6 +131,43 @@ final class OwnTicketTests: XCTestCase {
         XCTAssertEqual(back.tickets, o.tickets)
     }
 
+    // MARK: Without long-distance trains (#119)
+
+    func testRegionalOnlyLeavesOutLongDistanceTrains() throws {
+        var o = RouteOptions()
+        XCTAssertFalse(o.filtersRides)
+        o.regionalOnly = true
+        XCTAssertTrue(o.filtersRides)
+        XCTAssertFalse(o.isDefault)
+        XCTAssertEqual(o.activeCount, 1)
+        XCTAssertNotEqual(o.key, RouteOptions().key)
+        XCTAssertNotNil(o.summary)
+        let modes = Set(try XCTUnwrap(o.transitModesValue).split(separator: ",").map(String.init))
+        XCTAssertTrue(modes.isSuperset(of: ["REGIONAL_RAIL", "REGIONAL_FAST_RAIL", "SUBURBAN", "BUS", "COACH", "TRAM", "SUBWAY", "FERRY"]))
+        XCTAssertTrue(modes.isDisjoint(with: ["RAIL", "HIGHSPEED_RAIL", "LONG_DISTANCE", "NIGHT_RAIL"]))
+        // Ride by ride: by mode, and by name for feeds that file an IC as a plain train.
+        XCTAssertTrue(o.allows(trip([leg("REGIONAL_RAIL", "RE 5"), leg("BUS", "100")])))
+        XCTAssertTrue(o.allows(trip([leg("WALK")])))
+        XCTAssertFalse(o.allows(trip([leg("REGIONAL_RAIL", "RE 5"), leg("HIGHSPEED_RAIL", "ICE 512")])))
+        XCTAssertFalse(o.allows(trip([leg("RAIL", "IC 2012")])))
+        XCTAssertFalse(o.allows(trip([leg("NIGHT_RAIL", "NJ 40")])))
+        // Switched off, and together with other choices.
+        XCTAssertTrue(RouteOptions().allows(trip([leg("HIGHSPEED_RAIL", "ICE 512")])))
+        o.modes.set(.bus, on: false)
+        XCTAssertFalse(try XCTUnwrap(o.transitModesValue).contains("BUS"))
+        o.tickets = [.klimaticket]
+        XCTAssertFalse(try XCTUnwrap(o.transitModesValue).contains("HIGHSPEED_RAIL"), "the switch wins over a ticket that covers them")
+    }
+
+    func testRegionalOnlyIsStoredAndOldOptionsLoadWithoutIt() throws {
+        let old = try JSONDecoder().decode(RouteOptions.self, from: Data(#"{"wheelchair":true}"#.utf8))
+        XCTAssertFalse(old.regionalOnly)
+        var o = RouteOptions(); o.regionalOnly = true
+        let back = try JSONDecoder().decode(RouteOptions.self, from: JSONEncoder().encode(o))
+        XCTAssertTrue(back.regionalOnly)
+        XCTAssertEqual(back, o)
+    }
+
     func testRecognisesSavedTickets() {
         XCTAssertEqual(OwnTicket.recognise("Deutschland-Ticket Job"), .deutschlandticket)
         XCTAssertEqual(OwnTicket.recognise("D-Ticket"), .deutschlandticket)
