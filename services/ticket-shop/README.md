@@ -53,6 +53,35 @@ To add one, write a provider object as described in `src/providers/index.js` and
 4. Build the app with the build setting `TICKET_SHOP_URL` set to the worker's address (Info.plist key
    `PublitTicketShopURL`). Without it the app shows no "Buy tickets in Publit".
 
+## On your own server (without Cloudflare)
+
+The same code runs with Node 20 or newer; `src/node.js` replaces the Cloudflare runtime and keeps the rate limit
+in memory. No `npm install` is needed: the shop has no dependencies.
+
+```sh
+git clone https://github.com/elija-7580/Publit.git && cd Publit/services/ticket-shop
+cat > .env <<'ENV'
+TOKEN_SECRET=<openssl rand -hex 32>
+STRIPE_SECRET_KEY=sk_test_…
+DEMO_PROVIDER=on
+PORT=8787
+ENV
+chmod 600 .env
+node --env-file=.env src/node.js
+```
+
+It listens on 127.0.0.1 only. Put a reverse proxy with HTTPS in front, for example Caddy:
+
+```
+shop.example.org {
+    reverse_proxy 127.0.0.1:8787
+}
+```
+
+To keep it running, a systemd unit with `WorkingDirectory=…/services/ticket-shop`,
+`ExecStart=/usr/bin/node --env-file=.env src/node.js` and `Restart=always` is enough. Optional variables:
+`DISTRIBUSION_API_KEY`, `DISTRIBUSION_BASE_URL`, `RATE_LIMIT` (requests per minute per IP, default 30), `HOST`.
+
 Before selling for real: a company, the sellers' contracts, terms and a privacy notice for the shop, and
 customer support for refunds and delays. Distribusion invoices ticket price minus commission monthly
 (`execute_payment=false`, payment method `demand_note`).
