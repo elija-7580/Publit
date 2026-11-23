@@ -1,0 +1,21 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-FileCopyrightText: 2026 Elija Samuel Friedrich-Ulrich
+name = "publit-ticket-shop"
+main = "src/index.js"
+compatibility_date = "2024-10-01"
+
+[vars]
+# Production: https://api.distribusion.com/retailers/v4 (default is the demo environment).
+DISTRIBUSION_BASE_URL = "https://api.demo.distribusion.com/retailers/v4"
+# "on" only for testing with Stripe test keys: made-up tickets for every leg.
+DEMO_PROVIDER = "off"
+
+# Secrets (wrangler secret put …): TOKEN_SECRET (32+ random characters), STRIPE_SECRET_KEY,
+# DISTRIBUSION_API_KEY. A provider without its key is skipped.
+
+# Basic abuse protection: requests per minute per client IP (Cloudflare Rate Limiting binding).
+[[unsafe.bindings]]
+name = "RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "1002"
+simple = { limit = 30, period = 60 }

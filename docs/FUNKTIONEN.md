@@ -258,6 +258,17 @@ Karte, „Show original“ (PDF/Bild zoombar, `ZoomableDocumentView`), Notizen, 
 ### Tickets in Fahrten (`TripPassesView`, `TripPassSection`)
 Tickets, die zur Fahrtzeit gültig sind (Tages-/Wochen-/Jahreskarten automatisch), „Default ticket“, „All tickets“, „Add ticket for this trip“, Schnellzugriff in Toolbar/Live Activity/Watch („Show ticket“).
 
+### Tickets kaufen (`TicketShopSection`, `CheckoutView`, `CheckoutModel`)
+- Im Routendetail (nicht bei reinen Fuß-/Rad-/Autorouten) erscheint ein Bereich „Tickets“, sobald es **etwas zu kaufen** gibt:
+  - **„Buy tickets in Publit“**, nur wenn die App mit `PublitTicketShopURL` (Build-Setting `TICKET_SHOP_URL`) gebaut ist. Öffnet das Blatt „Buy tickets“:
+    - „Your journey“: jeder Verkehrsmittel-Abschnitt mit Von → Nach, Linie, Betreiber, Abfahrt und Preis; „Checking prices …“ beim Laden. Abschnitte ohne Angebot zeigen „Not in Publit“ und den Ticket-Link des Betreibers; Fußnote „Publit cannot sell every part of this route yet. Buy the rest from the operator.“
+    - „Adults: n“ (1–9, lädt die Preise neu).
+    - „Ticket holder“: First name, Last name, E-mail (nur auf dem Gerät gemerkt). Toggle „I accept the conditions of carriage and the ticket conditions of the sellers.“, „Total“, Knopf **„Pay …“**.
+    - Bezahlen auf der sicheren Zahlungsseite von Stripe (Karte, Apple Pay …) in einem Systemblatt; zurück per `publit://shop/return`. Danach werden alle Abschnitte gebucht und nur gebuchte berechnet; die Tickets (PDF und/oder Code) landen als Pässe im Tab „Tickets“, mit der Fahrt verknüpft, Notiz „Bought in Publit.“
+    - Ergebnis: „Your tickets are in the Tickets tab.“, Teilbuchung „Some parts could not be booked …“, „A ticket is not ready yet …“ mit „Try again“, oder „No ticket could be booked. You were not charged.“ Fehler mit „Try again“.
+  - **Partnerlinks**: Ticket-Links zu Shops mit Partnerprogramm (`PartnerLinks.programs`: DB, FlixBus, Trainline, Omio, SNCF Connect, Eurostar; aktiv erst mit eingetragener Partner-Vorlage) laufen über den Partnerlink; Fußnote „Some ticket links are partner links: Publit may get a small commission. The price stays the same, and Publit sends nothing about you.“ Selbst verknüpfte Ticket-Apps werden nie verändert.
+- Server: `services/ticket-shop` (Anbieter Distribusion für Fernbus/Bahn/Fähre, Demo-Anbieter für Tests; Stripe Checkout mit nachträglicher Abbuchung).
+
 ### Ältere Ticket-Funktionen (`TicketsView`, `Features.tickets = false`)
 Screenshot-/Link-Tickets („My tickets“, „Add ticket“, Typ, „Expires“) und **„Ticket apps per operator“** (`LinkedTicketAppsView`: eigene Ticket-App/Shop je Betreiber verknüpfen – wird in Routen als „Tickets“-Link verwendet). Alte Tickets werden beim Start in Passes umgewandelt.
 
@@ -363,7 +374,7 @@ Ab 680 pt Breite (regular): Karte bildschirmfüllend, Inhalte in einem schwebend
 - **Abdeckungsatlas** (`Coverage`, siehe [COVERAGE.md](COVERAGE.md)): weltweit aus allen Transitous-Quellen, von publit.eu jede Woche neu berechnet; App und Watch laden ihn höchstens einmal am Tag (`CoverageAtlasStore`, https://publit.eu/abdeckung/data/atlas.txt) und nutzen sonst die eingebaute Kopie. Zeigt die Stationskarte in einem Gebiet „No timetable data“/„Very little timetable data“ mindestens 8 laufende Lokallinien (Bus, Tram, Metro, Fähre; Züge zählen nicht), ist der Atlas veraltet: Der Hinweis über der Karte entfällt, und die App lädt den Atlas sofort neu (höchstens einmal pro Stunde). „Missing: …“-Hinweise bleiben. Neue Gebiete erscheinen so ohne App-Update; die Kartenebene „Data gaps“ zeichnet sich bei einem neuen Atlas neu. Stufen „No timetable data“, „Very little timetable data“, „Missing: …“ (Lokalbusse, Stadtbusse, Metro, Tram, Fähren, S-Bahn). Anzeige in Plan, Routendetail, Nearby, Ortssuche, Karte, Watch; Link zur Abdeckungskarte publit.eu/abdeckung.
 - **Offline** (`ResponseCache`): Speicher-Cache 15–60 s, Datei-Cache: Live-Antworten bis 24 h, Suche/Karte bis 7 Tage; Nearby-Fallback nur innerhalb 400 m; Anzeige mit Zeitstempel; keine Offline-Neuberechnung von Routen.
 - **Ausgänge** von U-Bahn-Stationen und Bahnhöfen aus OpenStreetMap über Overpass (`StationExits`, §13); gesendet wird nur die Position der Station, aus der der Fußweg führt.
-- Fahrpreise aus MOTIS (`withFares`), streng geprüft (§12). Ticket-Links je Betreiber (`TicketLinks`: verknüpfte App → Feed-Link → Tarifseite → Website).
+- Fahrpreise aus MOTIS (`withFares`), streng geprüft (§12). Ticket-Links je Betreiber (`TicketLinks`: verknüpfte App → Feed-Link → Tarifseite → Website; Shops mit Partnerprogramm über `PartnerLinks`). Ticketkauf über `services/ticket-shop` (§14).
 - Darstellung: Linienfarben vom Betreiber (Kontrast 4,5:1), Ersatzfarbe je Verkehrsmittel, Richtung immer als „Towards“, Ringlinien-Sonderfall. Paris: Metro „3B“/„7B“ heißen „3bis“/„7bis“; RER-Missionscodes als Ziel („ZEMA“, „NEGE“) werden durch die Endstation der Fahrt ersetzt (`TransitLabels`). Zugnamen werden je Feed vereinheitlicht (`TransitLabels.trainName`): DB-interne Liniennummern („29“) weichen der Zuggattung („ICE“, daneben „ICE 1006“), MÁV-Namen wie „xpress 66“ werden mit der Gattung aus dem langen Routennamen zu „RJX 66“.
 
 ## 24. Datenschutz, Diagnose, Datenexport
@@ -396,6 +407,7 @@ Kleinere Bausteine, die in den Abschnitten oben nicht namentlich vorkommen:
 | `PassArchiveButton` | Zugang zum Ticket-Archiv im Wallet (§14) |
 | `TicketAttachmentView`, `TicketSummaryCard`, `AddTicketView`, `TicketDisplayView`, `ShowTicketButton` | ältere Screenshot/Link-Tickets (§14, abgeschaltet) |
 | `TicketSection`, `TicketCardButton` | Ticket-Bereich in den Fahrt-Aktionen (§12) |
+| `TicketShopSection`, `CheckoutView` | Tickets kaufen im Routendetail und Kaufblatt (§14) |
 | `NearbyMap` | Karte hinter dem Nearby-Panel auf dem iPhone (§3) |
 | `TripPanel` | Panel zum Hochziehen über einer Karte: Live-Fahrt (§13) und Nearby (§3) |
 | `CoverageMapNote` | Abdeckungs-Hinweiskarte über der Stationskarte (§7, §23) |

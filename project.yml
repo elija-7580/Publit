@@ -73,6 +73,9 @@ targets:
         PublitContact: https://github.com/elija-7580/Publit
         # Optional Google Places key for release builds (set GOOGLE_API_KEY as a build setting; empty otherwise).
         GoogleAPIKey: $(GOOGLE_API_KEY)
+        # Optional ticket shop (services/ticket-shop), e.g. https://shop.example.org. Empty: no "Buy tickets in Publit".
+        # In an .xcconfig write the URL as https:/$()/shop.example.org, since // starts a comment there.
+        PublitTicketShopURL: $(TICKET_SHOP_URL)
     # Apple Health: read the walking speed for smart routing (read only).
     entitlements:
       path: Config/Publit.entitlements
