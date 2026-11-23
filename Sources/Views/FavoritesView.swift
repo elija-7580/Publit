@@ -20,6 +20,8 @@ struct FavoritesView: View {
                             Button(role: .destructive) { favorites.clear(role) } label: { Label("Remove", systemImage: "trash") }.tint(Color.danger)
                             Button { settingRole = role } label: { Label("Change", systemImage: "pencil") }
                         }
+                        .swipeActions(edge: .leading) { lastConnectionButton(p) }
+                        .contextMenu { lastConnectionButton(p) }
                         .accessibilityHint("Plans a route to \(role.title)")
                     } else {
                         Button { settingRole = role } label: {
@@ -84,7 +86,9 @@ struct FavoritesView: View {
                         .swipeActions(edge: .leading) {
                             Button { favorites.set(p, as: .home) } label: { Label("Home", systemImage: "house") }.tint(Color.inkAction)
                             Button { favorites.set(p, as: .work) } label: { Label("Work", systemImage: "briefcase") }.tint(Color.inkAction)
+                            lastConnectionButton(p)
                         }
+                        .contextMenu { lastConnectionButton(p) }
                     }
                     .onDelete { idx in favorites.remove(idx.map { favorites.places[$0].id }) }
                     .onMove { favorites.movePlaces(fromOffsets: $0, toOffset: $1) }
@@ -138,6 +142,15 @@ struct FavoritesView: View {
                 Text("Save a route to see it here, add it to your calendar and get a reminder when to leave.")
             }
         }
+    }
+
+    /// Tonight's last connection from here to a saved place.
+    private func lastConnectionButton(_ p: SavedPlace) -> some View {
+        Button { app.lastConnection(to: p) } label: {
+            Label("Last connection", systemImage: SmartRouting.Badge.lastConnection.symbol)
+        }
+        .tint(Color.inkAction)
+        .accessibilityIdentifier("lastConnection")
     }
 }
 

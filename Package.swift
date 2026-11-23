@@ -42,6 +42,7 @@ let core = [
     "Models/WatchTrip.swift",
     "Models/WatchSync.swift",
     "Models/Coverage.swift",
+    "Models/LastConnection.swift",
     "Models/CoverageAtlasData.swift",
     "Util/Polyline.swift",
     "Util/LineColors.swift",
