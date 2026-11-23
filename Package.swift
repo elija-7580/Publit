@@ -53,6 +53,7 @@ let core = [
     "Stores/StopGrouping.swift",
     "Stores/FavoritesStore.swift",
     "Stores/PlanModel.swift",
+    "Stores/SectionPlanModel.swift",
     "Stores/JSONFileStore.swift",
     "Stores/TripStore.swift",
     "Stores/SearchHistoryStore.swift",

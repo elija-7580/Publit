@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- **Plan in sections** (`SectionPlanView`, `SectionPlanModel`, `RouteBuilder.chain`, #144): Plan has "Plan in sections": places in order with stops in between, for each section how to travel (public transport, on foot, by bike, by car) and which departure, and a stay at each stop. The sections chain by time and become one route that can be started and saved; only its public transport parts are asked for live times.
+
 ## 0.1.1 (build 97) – go on another way, appointments as destinations, without long-distance trains, steadier maps
 
 - **Walking** (`StreetComparison.walkIsAChoice`, #110): the walk is listed first among the routes when no ride gets there sooner door to door (waiting counts), also on the watch. Before, only its duration was compared with the fastest ride's.

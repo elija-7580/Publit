@@ -83,6 +83,15 @@ struct PlanView: View {
                 .listRowSeparator(.hidden)
                 RouteOptionsButton(compact: true)
                     .listRowSeparator(.hidden)
+                // Stops in between, each section its own way to travel (#144).
+                NavigationLink {
+                    SectionPlanView(from: plan.from, to: plan.to, date: plan.timeMode == .arriveBy ? .now : plan.date)
+                } label: {
+                    Label("Plan in sections", systemImage: "point.topleft.down.to.point.bottomright.curvepath.fill")
+                        .font(.subheadline.weight(.semibold))
+                }
+                .accessibilityIdentifier("planInSections")
+                .listRowSeparator(.hidden)
                 // One wide search key under the whole form (as in the ÖBB app), instead of a small
                 // round icon squeezed next to the destination.
                 Button { startSearch() } label: {

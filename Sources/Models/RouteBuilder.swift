@@ -56,9 +56,33 @@ enum RouteBuilder {
     }
 
     /// The IDs to ask the server about for fresh live times, each once.
+    /// A part on foot, by bike or by car has no live times and is not asked about.
     static func refreshIds(of route: Itinerary) -> [String] {
+        guard route.builtFrom != nil else { return [route.id] }
         var seen = Set<String>()
-        return parts(of: route).map(\.itineraryId).filter { seen.insert($0).inserted }
+        return partLegs(of: route).filter { $0.legs.contains(where: \.isTransit) }
+            .map(\.part.itineraryId).filter { seen.insert($0).inserted }
+    }
+
+    /// Each part with the legs it holds in the route as it is now.
+    private static func partLegs(of route: Itinerary) -> [(part: RoutePart, legs: [Leg])] {
+        var at = 0
+        return parts(of: route).map { part in
+            let end = min(route.legs.count, at + max(0, part.legCount))
+            defer { at = end }
+            return (part, Array(route.legs[min(at, end) ..< end]))
+        }
+    }
+
+    /// Planned section by section (#144): the sections one after the other as one route. Nil when
+    /// one of them leaves before the one in front of it arrives, or starts somewhere else.
+    static func chain(_ sections: [Itinerary]) -> Itinerary? {
+        var legs: [Leg] = []
+        for section in sections {
+            guard fits(section, after: legs) else { return nil }
+            legs += section.legs
+        }
+        return make(legs: legs, parts: sections.flatMap(parts(of:)))
     }
 
     /// The planned routes a route is made of: its own parts when it was built, else itself.
@@ -73,7 +97,13 @@ enum RouteBuilder {
         guard let parts = route.builtFrom, !parts.isEmpty else { return nil }
         var legs: [Leg] = []
         var updated: [RoutePart] = []
-        for part in parts {
+        for (part, current) in partLegs(of: route) {
+            // On foot, by bike or by car: nothing to refresh, the part stays as it is.
+            if fresh[part.itineraryId] == nil, !current.isEmpty, !current.contains(where: \.isTransit) {
+                legs += current
+                updated.append(part)
+                continue
+            }
             guard let source = fresh[part.itineraryId], part.firstLeg >= 0, part.legCount > 0,
                   source.legs.count >= part.firstLeg + part.legCount else { return nil }
             legs += source.legs[part.firstLeg ..< part.firstLeg + part.legCount]

@@ -98,6 +98,9 @@ struct ItineraryDetailView: View {
     /// Only the banner redraws on that timer, not the map and the steps.
     var statusAt: ((Date) -> TripStatus)? = nil
     var refreshedAt: Date? = nil
+    /// False for a journey planned section by section: going on another way from a ride would
+    /// plan through to the destination and drop the places in between.
+    var allowsLegChange = true
     @State private var showsMap = false
     @State private var mapReady = false
     /// Ride whose vehicle trip is open (all stops, map, line), by its index in the trip.
@@ -118,7 +121,7 @@ struct ItineraryDetailView: View {
     /// A ride of a route you are still choosing can be swapped for another way to go on. A saved
     /// or running trip keeps its legs (its reminders and Live Activity follow them).
     private func canChange(_ leg: Leg) -> Bool {
-        leg.isTransit && statusAt == nil && !isBikeOrCar && trips.saved(itinerary) == nil
+        allowsLegChange && leg.isTransit && statusAt == nil && !isBikeOrCar && trips.saved(itinerary) == nil
     }
 
     private var resolvedFrom: String { fromName.isEmpty ? Self.placeName(itinerary.legs.first?.from) : fromName }
