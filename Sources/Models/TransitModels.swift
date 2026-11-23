@@ -193,6 +193,14 @@ struct StepInstruction: Codable, Sendable {
     var toOsmNode: Int64? = nil
 }
 
+/// One planned route's share of a route built leg by leg (#91): the server's ID of that route
+/// (live times are refreshed through it) and which of its legs are used.
+struct RoutePart: Codable, Hashable, Sendable {
+    var itineraryId: String
+    var firstLeg: Int
+    var legCount: Int
+}
+
 struct Itinerary: Codable, Identifiable, Sendable {
     let id: String
     var duration: Int
@@ -201,6 +209,9 @@ struct Itinerary: Codable, Identifiable, Sendable {
     let transfers: Int
     var legs: [Leg]
     var fareTransfers: [FareTransfer]? = nil
+    /// Only for a route built leg by leg (#91, `RouteBuilder`): the planned routes it is made of,
+    /// in order. Routes from the server, saved trips and older versions have none.
+    var builtFrom: [RoutePart]? = nil
 
     var transitLegs: [Leg] { legs.filter(\.isTransit) }
     var firstTransitLeg: Leg? { legs.first(where: \.isTransit) }

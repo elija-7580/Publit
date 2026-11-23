@@ -54,7 +54,7 @@
 Animiertes Logo, mindestens 0,7 s, höchstens 2 s; endet früher, sobald die erste Abfahrtstafel geladen ist.
 
 ### Onboarding (`OnboardingView`, nur beim ersten Start, Vollbild, Seiten mit Punkten, „Skip“)
-1. **„Public transport, without the noise.“** – Abfahrten in der Nähe, Routen durch Europa, Begleitung bis zum Aussteigen; kein Konto, keine Werbung, kein Tracking.
+1. **„Public transport, without the noise.“** – Abfahrten in der Nähe, Routen „wherever you go“ (nicht mehr „across Europe“: Publit läuft überall, wo es offene Fahrplandaten gibt), Begleitung bis zum Aussteigen; kein Konto, keine Werbung, kein Tracking.
 2. **„Departures where you are“** – Erklärung der Standortnutzung (nur mit Suche gesendet, nie gespeichert). Button „Continue“; beim Verlassen des Schritts (Button oder Wischen) kommt immer die Systemabfrage, kein „Not now“ (App Review 5.1.1(iv)).
 3. **„Home and Work“** – Zuhause und Arbeit festlegen (Felder „Not set“ → Ortssuche); später unter „Gespeichert“ änderbar.
 4. **„On the way“** – Erklärung Live-Fahrt, Umstiege, Aussteige-Hinweis, Sperrbildschirm, Widget. Button „Get started“.
@@ -159,7 +159,7 @@ Bewegung reduzieren zeigt jede Demo im Endzustand. Schließen, „Continue“ od
 ## 9. Ortssuche – `PlaceSearchView`
 
 - Tippsuche wie in Apple Karten (`PlaceSearchModel`, auch auf der Stationskarte): **Haltestellen von Transitous**, **Adressen und Orte aus Apples Autovervollständigung** (`MKLocalSearchCompleter`: jede Straße und Hausnummer schon beim Tippen, ca. 60 km um den Standort bevorzugt; erst beim Antippen wird der Ort nachgeschlagen) oder optional **Google Places** (dann ohne Apple); Apples Vorschläge stehen nach 0,6 s schon da, wenn Transitous länger braucht. „Current location“; Abschnitt „Saved“; „Recently searched“ (max. 20 Start/Ziel-Paare, einzeln entfernbar, „Clear history“; alte Suchen werden mit aktuellen Abfahrten neu ausgeführt). Das Suchfeld ist beim Öffnen gleich aktiv.
-- Suche nach Ort gewichtet nach Standort; steht ein Komma in der Suche („Corso Buenos Aires, Milano“), ohne Standort-Gewichtung. Trägt kein Treffer alle Suchwörter, wird zusätzlich ohne Standort gesucht. Reihung (`PlaceSearchRanking`): Haltestellen, die alle Suchwörter tragen, zuerst (bis zu drei), dann Apples Adressen und Orte, dann die übrigen; mit Hausnummer („Hauptstraße 12“) die Adressen zuerst. Ein Vorschlag mit dem Namen einer gelisteten Haltestelle kommt nur einmal (als Haltestelle). Ohne Vorschläge (offline, Apple kennt nichts) einmal Apples volle Suche, sonst Transitous' Adressen. Fällt Transitous aus, kommen Apples Adressen und Orte trotzdem.
+- Suche nach Ort gewichtet nach Standort; steht ein Komma in der Suche („Corso Buenos Aires, Milano“), ohne Standort-Gewichtung. Trägt kein Treffer alle Suchwörter, wird zusätzlich ohne Standort gesucht. Reihung (`PlaceSearchRanking`): Haltestellen, die alle Suchwörter tragen, zuerst (bis zu drei), dann Apples Adressen und Orte, dann die übrigen; mit Hausnummer („Hauptstraße 12“) die Adressen zuerst. Ein Vorschlag mit dem Namen einer gelisteten Haltestelle kommt nur einmal (als Haltestelle). Ohne Vorschläge (offline, Apple kennt nichts) einmal Apples volle Suche, sonst Transitous' Adressen. Fällt Transitous aus, kommen Apples Adressen und Orte trotzdem. Eine Straße bleibt neben der gleichnamigen Haltestelle in der Liste (Haltestelle zuerst, Straße danach; „Utendorfgasse“ in Wien, Issue #115): Nur Vorschläge, die keine Adresse sind, gelten als Dublette einer gleichnamigen Haltestelle.
 - Kategorie-Symbole (`CategoryIcon`), orangefarbenes Warndreieck bei Orten in Gebieten mit Datenlücken, „Save“ eines Treffers, „No matches.“, „Place from the link“ (aus geteiltem Kartenlink).
 - **„Choose on map“** (`ChooseOnMapView`, nur in den Feldern From/To von Plan und Go Now): Karte mit Stecknadel in der Mitte (schwarzer Kopf mit gelbem Punkt; hebt sich beim Verschieben, setzt beim Stoppen ab); Karte verschieben setzt die Nadel, Zoomen wie in jeder Karte (Pinch, Doppeltippen, Zwei-Finger-Tippen), unten die Straße unter der Nadel („Finding the address…“), **„Confirm location“** übernimmt den Punkt ins Feld (benannt nach der Straße, sonst „Dropped pin“). Das andere Feld, Zeit und Routenoptionen bleiben unverändert.
 
@@ -199,6 +199,7 @@ Bewegung reduzieren zeigt jede Demo im Endzustand. Schließen, „Continue“ od
 - Smart-Routing-Abschnitt (§11), Abdeckungskarten für Start, Umstiegsorte, Ziel.
 - **Aktionen** (`TripActionsSection`): „Start trip“, „Save trip“/„Saved“, **„Leave reminder“** (5 min vor Losgehen), **„Add to Calendar“** (Eintrag verlinkt zurück auf die Fahrt), „Share trip“, „Share arrival“ (drei Aktionen in einer Reihe, vier als 2 × 2), Tickets (§14: „Show ticket“, „Add ticket for this trip“; Hinweis, wenn der Betreiber keinen Ticket-Link hat).
 - Haftungshinweis „All information without guarantee …“.
+- **Verbindung selbst zusammenstellen, Grundlage** (`RouteBuilder`, Issue #91, noch ohne Oberfläche): Eine Route lässt sich an einem Abschnitt teilen; die Abschnitte davor bleiben, der Rest wird ab dem Beginn dieses Abschnitts neu geplant, frühestens zur Ankunft der behaltenen Abschnitte (`restart`). Behaltene Abschnitte und neuer Rest werden eine Route mit eigenen Zeiten, Dauer und Umstiegen (`splice`); ein Rest, der zu früh abfährt oder mehr als 400 m entfernt beginnt, wird abgelehnt. Eine so gebaute Route merkt sich in `Itinerary.builtFrom`, aus welchen geplanten Routen sie besteht, und wird Teil für Teil mit Live-Zeiten aufgefrischt (`refreshed`); `firstBrokenLeg` nennt den ersten Abschnitt, der nach einer Verspätung nicht mehr erreicht wird. Routen vom Server und früher gespeicherte Fahrten haben kein `builtFrom` und bleiben unverändert.
 
 ## 13. Gespeicherte Fahrt, Fahrt starten, Live-Fahrt (Guide)
 
@@ -274,9 +275,10 @@ Screenshot-/Link-Tickets („My tickets“, „Add ticket“, Typ, „Expires“
 
 - **Home and Work**: festlegen („Set Home/Work“), „Change“, „Remove“; Ein-Tipp-Route. Zuhause und Arbeit sind eigene Plätze: Liefert die Suche für beide dieselbe ID (z. B. Adressen in verschiedenen Ländern), ersetzt das Setzen des einen nicht mehr den anderen.
 - **Upcoming trips** (`SavedTripRow`, im Stil der Routen in Plan): Ziel und „Leave in x min“ (sonst Datum), Ab–An und Dauer, die farbige Zeitleiste der Linien (`TimelineBar`, statt gequetschter Linien-Badges), „from … · n changes“; leer: Hinweis „Save a route to see it here, add it to your calendar and get a reminder when to leave.“
-- **Lines** (gespeicherte Linie an Haltestelle, „At …“, nächste Abfahrten), **Stops**, **Places** („Add“ / „Save a place“ via Ortssuche).
+- **Lines** (gespeicherte Linie an Haltestelle, „At …“, nächste Abfahrten), **Stops**, **Places** („Add“ / „Save a place“ via Ortssuche). Adressen gelten nur am selben Ort (unter 30 m) als derselbe Platz: Liefert die Suche für zwei verschiedene Adressen dieselbe ID, bleiben beide gespeichert, jede unter einer eigenen ID; Speichern, Entfernen und das Setzen von Home/Work ändern nie einen anderen gespeicherten Platz (auch auf der Watch). Haltestellen werden weiter an ihrer ID erkannt.
 - **Past trips** (`PastTripsView`): „Plan again“, „Remove“.
 - Leer: „Nothing else saved yet“.
+- **Eigene Reihenfolge** (Issue #124): Linien, Haltestellen und Orte lassen sich in ihrer Liste per Ziehen (lange drücken) verschieben (`FavoritesStore.moveStops/movePlaces/moveLines`). Die Reihenfolge wird gespeichert, übersteht den Neustart und gilt überall, wo die Liste erscheint (Ortssuche, Start-Tab „A saved stop“, Apple Watch). Neue Einträge kommen weiter ans Ende; Home und Work behalten ihre festen Plätze.
 
 **Karten wie Nearby (Build 86):** Die eingebetteten Karten bei einer Abfahrt (`TripView`/`TripMap`), „Track vehicle“ (`VehicleTrackingView`), einer Linie (`LineMap`), der Bahnsteigkarte (`PlatformMapSection`) und der Umstiegshilfe (`ChangeGuideCard`) zeigen wie die Nearby-Karte deine Position mit Lichtkegel in Blickrichtung (`YouAreHere`, Kompass läuft nur solange die Karte sichtbar ist), die Halte mit Namen, soweit Platz ist, den Standort-Knopf und den Kompass; verschieb- und zoombar. Die Routenkarte im Routendetail hat ebenfalls den Standort-Knopf.
 
@@ -361,6 +363,8 @@ Beispielphrasen: „Nächste Abfahrten in Publit“, „Bring mich nach Hause mi
 | Nearby (`WatchNearbyView`) | nächste Haltestellen mit Abfahrten |
 | Saved (`WatchSavedView`) | kommende Fahrten, Home/Work, Haltestellen (Abfahrten, Route here), Orte, vergangene Fahrten |
 Sync per WatchConnectivity (`WatchSyncHub`): bis 8 Fahrten, Orte, bis 12 Tickets (nur Code-Bild, vom iPhone gezeichnet). Änderungen auf der Uhr gehen als Anfragen ans iPhone.
+
+**Gespeicherte Haltestellen auf Home** (Issue #123): `WatchHomeView` zeigt zwischen „Nearby“ und „Saved“ die ersten vier gespeicherten Haltestellen (`WatchSnapshot.homeStops`); ein Tipp öffnet ihre Abfahrten (`WatchStopView`). Die Reihenfolge ist die am iPhone unter „Saved“ festgelegte; alle Haltestellen stehen weiter unter „Saved“, Home und Work werden hier nicht wiederholt.
 
 ## 22. iPad / breites Layout (`Wide/WideLayout`)
 

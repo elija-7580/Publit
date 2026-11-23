@@ -72,6 +72,23 @@ final class ReachTests: XCTestCase {
         XCTAssertEqual(saved.lat, point.lat)
     }
 
+    /// #115: the street "Utendorfgasse" was missing from the search because the bus stop of the
+    /// same name is a few metres away and the street counted as its duplicate.
+    func testAStreetIsNotADuplicateOfTheStopNamedAfterIt() {
+        let stop = GeocodeMatch(type: "STOP", name: "Utendorfgasse", id: "at-1", lat: 48.19560, lon: 16.26720,
+                                street: nil, houseNumber: nil, country: "AT", areas: [], category: nil)
+        let street = GeocodeMatch(type: "ADDRESS", name: "Utendorfgasse", id: "pick|48.19600,16.26750", lat: 48.19600, lon: 16.26750,
+                                  street: "Utendorfgasse", houseNumber: nil, country: "AT", areas: [], category: nil)
+        let merged = GeocodeMatch.merged([stop], [street])
+        XCTAssertEqual(merged.map(\.type), ["STOP", "ADDRESS"], "the stop first, the street after it")
+        // The same address from both sources is still listed once.
+        let twice = GeocodeMatch.merged([street], [street])
+        XCTAssertEqual(twice.count, 1)
+        // And a point of interest that is the stop itself still goes.
+        let poi = GeocodeMatch.picked(name: "Utendorfgasse", at: LatLon(lat: 48.1957, lon: 16.2673))
+        XCTAssertEqual(GeocodeMatch.merged([stop], [poi]).count, 1)
+    }
+
     func testMergedSearchKeepsStopsFirstAndDropsDuplicates() {
         let stop = GeocodeMatch(type: "STOP", name: "Punta Sabbioni", id: "it-5108", lat: 45.44734, lon: 12.42433,
                                 street: nil, houseNumber: nil, country: "IT", areas: [], category: nil)

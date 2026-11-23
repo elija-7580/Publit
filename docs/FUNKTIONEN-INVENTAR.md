@@ -173,7 +173,7 @@
 
 ## `Sources/Views/OnboardingView.swift`
 - Views: `OnboardingView`
-- Sichtbare Texte: Skip · Public transport, without the noise. · Departures near you, routes across Europe and a guide until you get off. No ads, no account, no tracking. · Departures where you are · On the way · Get started · Continue · Home and Work · One tap to get home or to work, from anywhere. You can change them any time in Saved. · Not set
+- Sichtbare Texte: Skip · Public transport, without the noise. · Departures near you, routes wherever you go and a guide until you get off. No ads, no account, no tracking. · Departures where you are · On the way · Get started · Continue · Home and Work · One tap to get home or to work, from anywhere. You can change them any time in Saved. · Not set
 
 ## `Sources/Views/PlaceSearchView.swift`
 - Views: `PlaceSearchView`, `PlaceHitRow`, `PlaceLabel`, `CategoryIcon`

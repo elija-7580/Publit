@@ -8,6 +8,7 @@
 //   POST /v1/checkout                { offers: [token], customer, termsAccepted } → { order, paymentURL, amount, currency }
 //   GET  /v1/return                  Stripe returns here; redirects to publit://shop/return?…
 //   POST /v1/orders/{order}/complete                                          → { status, amountCharged, items }
+//   GET/POST /v1/demo-pay            only with DEMO_PAYMENTS="on": a payment page that charges nothing
 //
 // Open ticket-link layer (any app, no keys needed, see links.js):
 //   GET  /v1/partners                                                         → { programs }
@@ -16,7 +17,10 @@
 import { checkout, complete, findOffers, ShopError } from "./shop.js";
 import { stripe as stripeClient, StripeError } from "./stripe.js";
 import { ProviderError } from "./providers/errors.js";
+import { demoPayments, demoPaymentsActive } from "./demopay.js";
 import { findLinks, partners } from "./links.js";
+
+let demoPay = null;
 
 const MAX_BODY = 64 * 1024;
 
@@ -61,6 +65,8 @@ export default {
     const fetchImpl = deps.fetch ?? fetch;
     try {
       if (url.pathname === "/v1/return" && request.method === "GET") return returnRedirect(url);
+      const demo = deps.demoPay ?? (demoPaymentsActive(env) ? (demoPay ??= demoPayments()) : null);
+      if (url.pathname === "/v1/demo-pay" && demo) return demo.page(request);
       const isLinks = url.pathname === "/v1/links" || url.pathname === "/v1/partners";
       if (isLinks && request.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
       if (url.pathname === "/v1/partners" && request.method === "GET") {
@@ -80,7 +86,7 @@ export default {
         }
       }
       if (!env.TOKEN_SECRET) return failure("not_configured", "Shop not configured", 503);
-      const stripe = deps.stripe ?? (env.STRIPE_SECRET_KEY ? stripeClient(env.STRIPE_SECRET_KEY, fetchImpl) : null);
+      const stripe = deps.stripe ?? (env.STRIPE_SECRET_KEY ? stripeClient(env.STRIPE_SECRET_KEY, fetchImpl) : demo);
 
       if (url.pathname === "/v1/offers") {
         return json(await findOffers(await readJSON(request), env, { fetchImpl }));
