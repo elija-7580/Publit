@@ -35,6 +35,8 @@ export function envFromProcess(source = process.env) {
     DISTRIBUSION_BASE_URL: source.DISTRIBUSION_BASE_URL ?? "https://api.demo.distribusion.com/retailers/v4",
     DEMO_PROVIDER: source.DEMO_PROVIDER ?? "off",
     DEMO_PAYMENTS: source.DEMO_PAYMENTS ?? "off",
+    PARTNER_TEMPLATES: source.PARTNER_TEMPLATES ?? "{}",
+    ROUTER_URL: source.ROUTER_URL,
     RATE_LIMITER: memoryRateLimiter(Number(source.RATE_LIMIT ?? 30), 60),
   };
 }
