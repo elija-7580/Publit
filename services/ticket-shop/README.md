@@ -54,6 +54,9 @@ curl -X POST https://<worker>/v1/links -H 'Content-Type: application/json' -d '{
 - `partners` (optional, "bring your own ID"): your own tracking links per program (`db`, `flixbus`, `trainline`,
   `omio`, `sncf`, `eurostar`). They must be https on the network's own host (Awin, Partnerize, Impact,
   Tradedoubler) and contain `{url}` once. Legs without your ID use Publit's, which funds this service.
+- `app` (optional, "share"): an app without its own affiliate accounts sends its id (lower case, digits, dashes).
+  Its clicks on Publit's links carry that id as the network's sub-ID (Awin `clickref`, Partnerize `pubref`,
+  Impact `subId1`, Tradedoubler `epi`), so the network's report shows each app's commission for the agreed payout.
 - Answer: `{ links: [{ leg, operator, url, source, partner, via: "caller" | "publit" | null }] }`. CORS is open.
 - `GET /v1/partners` lists Publit's active programs. The Publit app loads it on start, so a new partner program
   goes live by changing `PARTNER_TEMPLATES` in `wrangler.toml` and redeploying, without an app update.
