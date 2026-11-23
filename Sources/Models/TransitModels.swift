@@ -154,6 +154,8 @@ struct Leg: Codable, Sendable, RouteStyled {
     var wheelchairAccessible: String? = nil
     /// Last stop of the vehicle's trip.
     var tripTo: SegmentStop? = nil
+    /// Where to ride and which way out, worked out on the iPhone for the watch (nil elsewhere).
+    var exitAdvice: ExitAdvice? = nil
 
     var directionName: String? { TransitLabels.direction(headsign: headsign, tripEnd: tripTo?.name) }
     var isTransit: Bool { ModeStyle.isTransit(mode) }
@@ -433,6 +435,23 @@ struct GeocodeMatch: Decodable, Identifiable, Hashable, Sendable {
         if let country { parts.append(country) }
         return parts.joined(separator: ", ")
     }
+}
+
+/// Where to ride in the train and which way out, for a ride that ends in a station (see `ExitAdvice.swift`).
+/// Kept on the ride when the trip goes to the watch, which gets no walking directions to work it out.
+struct ExitAdvice: Codable, Equatable, Sendable {
+    /// Part of the train nearest the way out.
+    enum Part: String, Codable, Sendable { case front, middle, back }
+
+    var part: Part?
+    /// The station door to take (its sign: "B2", "Nord"), when the walk after the ride leaves the station.
+    var door: String? = nil
+    /// The user chose this door (remembered for the station and destination).
+    var doorSaved: Bool = false
+    /// The part aims at the next train (a change in the station) rather than the way out.
+    var forChange: Bool = false
+
+    var isEmpty: Bool { part == nil && door == nil }
 }
 
 /// A stop on the station map (`/api/v6/map/stops`).

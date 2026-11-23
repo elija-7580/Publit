@@ -3,7 +3,7 @@
 > Nicht von Hand bearbeiten. Erzeugt von `scripts/feature_inventory.py` (CI: `features-doc.yml`).
 > Die ausführliche Beschreibung steht in [FUNKTIONEN.md](FUNKTIONEN.md).
 
-**207 Views, 5 App Intents, 3 Widgets in 80 Dateien.**
+**210 Views, 5 App Intents, 3 Widgets in 81 Dateien.**
 
 ## `Sources/App/DesignSamples.swift`
 - Views: `DesignSampleView`
@@ -123,6 +123,10 @@
 ## `Sources/Views/ConnectionGuideView.swift`
 - Views: `ConnectionGuideView`, `ConnectionSymbols`, `ConnectionLegendRow`
 - Sichtbare Texte: All rows use the same clock. Later departures start farther right. · The coloured blocks are rides. Thin grey sections are walking; dotted gaps are waiting between legs. · This is a comparison, not live progress. Check the departure times, line names and change warnings. · How to read connections · Ride · Walk · Wait · Time axis · Done
+
+## `Sources/Views/ExitAdviceViews.swift`
+- Views: `ExitAdviceRow`, `ExitAdviceLine`, `TrainPartGlyph`
+- Sichtbare Texte: Take exit %@ · Your exit · Publit remembers this exit for this station and destination. · Choose automatically · Exit %@
 
 ## `Sources/Views/FareSection.swift`
 - Views: `FareSection`, `RegionTicketRow`
@@ -298,7 +302,7 @@
 
 ## `Watch/WatchTripView.swift`
 - Views: `WatchTripView`, `WatchTripOverview`, `WatchLegPage`
-- Sichtbare Texte: Map · Tickets · Trip overview · End trip · Start trip · Remove · Save trip · Line %@: all stops and map · Cancelled · Live · Walk %@ · +%lld min · Pl. %@ · Platform changed
+- Sichtbare Texte: Map · Tickets · Trip overview · End trip · Start trip · Remove · Save trip · Line %@: all stops and map · Cancelled · Live · Take exit %@ · Walk %@ · +%lld min · Pl. %@ · Platform changed
 
 ## `Watch/WatchVehicleTripView.swift`
 - Views: `WatchVehicleTripView`

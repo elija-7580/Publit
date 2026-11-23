@@ -241,6 +241,8 @@ struct WatchLegPage: View {
                 stop(leg.from, time: leg.startTime, scheduled: leg.scheduledStartTime, fallback: from, departing: true)
                 between(leg)
                 stop(leg.to, time: leg.endTime, scheduled: leg.scheduledEndTime, fallback: to, departing: false)
+                // Where to ride for the exit or the next train, worked out on the iPhone.
+                if let advice = ExitAdvice.forRide(index, in: itinerary.legs) { exitAdvice(advice) }
                 note(leg)
                 if leg.isTransit, leg.tripId != nil {
                     // The vehicle's whole trip: every stop, also before boarding (TripView on the iPhone).
@@ -281,6 +283,18 @@ struct WatchLegPage: View {
             }
             DirectionLabel(direction: leg.shownDirection, circular: leg.isCircular, font: .footnote).lineLimit(2)
         }
+    }
+
+    private func exitAdvice(_ advice: ExitAdvice) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            if let board = advice.boardText {
+                Label(board, systemImage: "train.side.front.car").font(.footnote.weight(.semibold))
+            }
+            if let door = advice.door {
+                Label(L10n.f("Take exit %@", door), systemImage: "door.left.hand.open").font(.footnote)
+            }
+        }
+        .accessibilityElement(children: .combine)
     }
 
     private func walkHeader(_ leg: Leg) -> some View {

@@ -26,6 +26,7 @@ let core = [
     "Models/TripProgress.swift",
     "Models/WalkGuide.swift",
     "Models/StationExits.swift",
+    "Models/ExitAdvice.swift",
     "Models/TripGuide.swift",
     "Models/GetOffWatch.swift",
     "Models/TripTrace.swift",
