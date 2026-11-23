@@ -77,3 +77,18 @@ test("apps sharing Publit's links are told apart by the network's sub-ID", () =>
   assert.equal(new URL(own).searchParams.get("clickref"), null);
   assert.throws(() => findLinks({ ...body, app: "Bad App!" }, env), ShopError);
 });
+
+test("DB legs get a bahn.de search with start, destination and local departure time", () => {
+  const { links } = findLinks({ legs: [
+    { index: 0, operator: "DB Fernverkehr AG", from: "München Hbf", to: "Nürnberg Hbf", departure: "2026-11-25T07:00:00Z",
+      links: { website: "https://www.bahn.de" } },
+    { index: 1, operator: "DB Regio", from: "A", to: "B" },
+  ] }, {});
+  assert.equal(links[0].source, "search");
+  assert.ok(links[0].url.startsWith("https://www.bahn.de/buchung/fahrplan/suche#sts=true&"), links[0].url);
+  assert.ok(links[0].url.includes("so=M%C3%BCnchen%20Hbf"), links[0].url);
+  assert.ok(links[0].url.includes("soid=A%3D1%40O%3DM%C3%BCnchen%20Hbf%40"), links[0].url);
+  assert.ok(links[0].url.includes("hd=2026-11-25T08:00:00"), links[0].url);
+  // Without a departure time the leg falls back to the known shop.
+  assert.equal(links[1].source, "fares");
+});

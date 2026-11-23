@@ -14,6 +14,8 @@ struct TicketLink: Hashable, Identifiable, Sendable {
     let source: Source
     /// The link goes through a partner program (Publit may get a commission).
     var isPartner = false
+    /// A shop search with start, destination and date; `url` is the shop's start page until it is resolved.
+    var search: ShopSearch? = nil
 
     var id: String { operatorName + "|" + url.absoluteString }
     var title: String {
@@ -70,10 +72,16 @@ enum TicketLinks {
         return u
     }
 
-    static func link(for leg: Leg, userLinked: [String: String] = [:]) -> TicketLink? {
+    /// `to`: where the user leaves this operator (the last stop of its last ride), for a search over several rides.
+    static func link(for leg: Leg, userLinked: [String: String] = [:], to: Place? = nil) -> TicketLink? {
         guard leg.isTransit else { return nil }
         let name = leg.agencyName?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty ?? leg.lineName
         if let u = url(userLink(for: name, in: userLinked)) { return TicketLink(operatorName: name, url: u, source: .userLinked) }
+        if let search = ShopSearch(operatorName: name, from: leg.from, to: to ?? leg.to, departure: leg.scheduledStartTime) {
+            var link = shop(name, search.dbURL ?? search.startPage, .booking)
+            link.search = search
+            return link
+        }
         if let u = webURL(leg.ticketUrls?.ios) ?? webURL(leg.ticketUrls?.web) {
             return shop(name, u, .booking)
         }
@@ -93,9 +101,27 @@ enum TicketLinks {
     /// One link per operator, in the order the operators are used.
     static func links(for itinerary: Itinerary, userLinked: [String: String] = [:]) -> [TicketLink] {
         var seen = Set<String>()
-        return itinerary.legs.compactMap { link(for: $0, userLinked: userLinked) }.filter {
-            seen.insert(operatorKey($0.operatorName)).inserted
+        let legs = itinerary.transitLegs
+        return legs.compactMap { leg -> TicketLink? in
+            let key = operatorKey(operatorName(leg))
+            guard !seen.contains(key) else { return nil }
+            let last = legs.last { operatorKey(operatorName($0)) == key }
+            guard let l = link(for: leg, userLinked: userLinked, to: last?.to) else { return nil }
+            seen.insert(operatorKey(l.operatorName))
+            return l
         }
+    }
+
+    private static func operatorName(_ leg: Leg) -> String {
+        leg.agencyName?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty ?? leg.lineName
+    }
+
+    /// The link to open: for a shop search the finished search (through the partner program when there is one),
+    /// else the link itself. Falls back to the shop's start page when the search cannot be built.
+    static func resolve(_ link: TicketLink, session: URLSession = .shared) async -> URL {
+        guard let search = link.search, search.shop != .db else { return link.url }
+        guard let u = await search.resolve(session: session) else { return link.url }
+        return PartnerLinks.wrap(u) ?? u
     }
 
     /// Operators of a route that have no link at all (shown so the user can link an app).

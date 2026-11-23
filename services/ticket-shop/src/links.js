@@ -6,7 +6,8 @@
 // here: the app sends operator names and the links it already has, and gets links back.
 //
 //   GET  /v1/partners   → { programs: [{ id, name, hosts, template }] }   Publit's active programs (for the app)
-//   POST /v1/links      { legs: [{ index, operator, mode?, links?: { booking?, fares?, website? } }],
+//   POST /v1/links      { legs: [{ index, operator, mode?, links?: { booking?, fares?, website? },
+//                                  from?, to?, departure?, timeZone? }],
 //                         partners?: { <program id>: <your own tracking template> }, app?: "<your app id>" }
 //                       → { links: [{ leg, operator, url, source, partner, via }] }
 //
@@ -68,6 +69,38 @@ export function withSubId(network, link, app) {
   const url = new URL(link);
   url.searchParams.set(field, app);
   return url.toString();
+}
+
+// Shops whose connection search can be opened with start, destination and time filled in.
+// bahn.de takes station names (checked by hand in November 2026).
+export function isDB(operator) {
+  const key = operatorKey(operator);
+  return key.split(" ").includes("db") || key.includes("deutsche bahn");
+}
+
+/** Local "YYYY-MM-DDTHH:mm" of an instant in a time zone, or null. */
+export function localTime(date, timeZone) {
+  try {
+    const parts = Object.fromEntries(new Intl.DateTimeFormat("en-GB", {
+      timeZone, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23",
+    }).formatToParts(date).map((p) => [p.type, p.value]));
+    return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}`;
+  } catch {
+    return null;
+  }
+}
+
+/** bahn.de connection search from `from` to `to`, connections from the departure on, 1 adult, 2nd class. */
+export function dbSearch(from, to, departure, timeZone = "Europe/Berlin") {
+  const time = localTime(departure, timeZone);
+  if (!from || !to || !time) return null;
+  const enc = encodeURIComponent;
+  const fragment = [
+    "sts=true", `so=${enc(from)}`, `zo=${enc(to)}`, "kl=2", "r=13:16:KLASSENLOS:1",
+    `soid=${enc(`A=1@O=${from}@`)}`, `zoid=${enc(`A=1@O=${to}@`)}`, "sot=ST", "zot=ST",
+    `hd=${time}:00`, "hza=D", "ar=false", "s=false", "d=false", "fm=false", "bp=false",
+  ].join("&");
+  return new URL(`https://www.bahn.de/buchung/fahrplan/suche#${fragment}`);
 }
 
 const APP_ID = /^[a-z0-9][a-z0-9-]{0,39}$/;
@@ -147,7 +180,14 @@ export function parseLinkRequest(body) {
     const operator = typeof leg.operator === "string" ? leg.operator.trim().slice(0, 200) : "";
     const links = {};
     for (const s of SOURCES) links[s] = webURL(leg.links?.[s]);
-    return { index: Number.isInteger(leg.index) ? leg.index : i, operator, links };
+    const text = (v) => (typeof v === "string" ? v.trim().slice(0, 120) : "");
+    const departure = typeof leg.departure === "string" ? new Date(leg.departure) : null;
+    return {
+      index: Number.isInteger(leg.index) ? leg.index : i, operator, links,
+      from: text(leg.from), to: text(leg.to),
+      departure: departure && !Number.isNaN(departure.getTime()) ? departure : null,
+      timeZone: text(leg.timeZone) || "Europe/Berlin",
+    };
   });
   const own = {};
   if (body.partners && typeof body.partners === "object") {
@@ -168,7 +208,8 @@ export function parseLinkRequest(body) {
   return { legs, partners: own, app };
 }
 
-/** One link per leg: the feed's booking link, fare page or website, else a known shop; wrapped when possible. */
+/** One link per leg: a prefilled DB search, the feed's booking link, fare page or website, else a known shop;
+ *  wrapped when possible. */
 export function findLinks(body, env) {
   const request = parseLinkRequest(body);
   const publit = publitTemplates(env);
@@ -176,7 +217,12 @@ export function findLinks(body, env) {
   for (const leg of request.legs) {
     let url = null;
     let source = null;
+    if (isDB(leg.operator) && leg.departure) {
+      url = dbSearch(leg.from, leg.to, leg.departure, leg.timeZone);
+      if (url) source = "search";
+    }
     for (const s of SOURCES) {
+      if (url) break;
       if (leg.links[s]) {
         url = leg.links[s];
         source = s;
