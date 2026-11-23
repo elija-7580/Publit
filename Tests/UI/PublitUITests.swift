@@ -571,9 +571,9 @@ final class PublitUITests: XCTestCase {
         snap("nearby")
 
         let all = app.buttons["All departures"].firstMatch
-        XCTAssertTrue(reveal(all, in: app), "no link to all departures")
+        XCTAssertTrue(bringUp(all, in: app), "no link to all departures")   // clear of the live trip bar, see F13
         all.tap()
-        XCTAssertTrue(app.buttons["Save"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["Save"].waitForExistence(timeout: 10), "stop screen did not open")
         snap("stop")
         app.buttons["Save"].tap()
         app.tab(3).tap()
@@ -760,15 +760,11 @@ final class PublitUITests: XCTestCase {
         app.buttons["modeChip-all"].tap()
 
         let all = app.buttons["All departures"].firstMatch
-        XCTAssertTrue(reveal(all, in: app), "no departure board loaded")
+        // Into the clear first: with a trip in the live bar, the link can sit under the bar, and the
+        // tap opens that trip's route instead of the stop (CI, 2026-11-23, twice at this line).
+        XCTAssertTrue(bringUp(all, in: app), "no departure board loaded")
         all.tap()
-        if !app.buttons["Save"].waitForExistence(timeout: 10) {
-            // On CI the stop screen did not open here (2026-11-23). Most likely the list is laid
-            // out anew after the switch back to "All" and the tap misses the link: try once more.
-            let again = app.buttons["All departures"].firstMatch
-            if reveal(again, in: app) { again.tap() }
-        }
-        XCTAssertTrue(app.buttons["Save"].waitForExistence(timeout: 15), "stop screen did not open")
+        XCTAssertTrue(app.buttons["Save"].waitForExistence(timeout: 10), "stop screen did not open")
         app.segmentedControls.buttons["Lines"].tap()
         // Lazy list: the rows exist only once scrolled near (the board starts with actions and filters).
         XCTAssertTrue(reveal(app.descendants(matching: .any)["lineAtStop"].firstMatch, in: app), "no lines at the station")
@@ -870,7 +866,7 @@ final class PublitUITests: XCTestCase {
 
         app.tab(0).tap()
         let all = app.buttons["All departures"].firstMatch
-        XCTAssertTrue(reveal(all, in: app), "no link to all departures")
+        XCTAssertTrue(bringUp(all, in: app), "no link to all departures")   // clear of the live trip bar, see F13
         all.tap()
         XCTAssertTrue(app.buttons["routeHere"].waitForExistence(timeout: 10), "no labelled Route here action")
         XCTAssertTrue(app.buttons["routeFromHere"].exists, "no labelled Route from here action")
