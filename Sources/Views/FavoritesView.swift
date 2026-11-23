@@ -45,6 +45,7 @@ struct FavoritesView: View {
                         }
                     }
                     .onDelete { idx in favorites.removeLines(idx.map { favorites.lines[$0].id }) }
+                    .onMove { favorites.moveLines(fromOffsets: $0, toOffset: $1) }
                 }
             }
             if favorites.stops.isEmpty && favorites.places.isEmpty && favorites.lines.isEmpty {
@@ -67,6 +68,7 @@ struct FavoritesView: View {
                         }
                     }
                     .onDelete { idx in favorites.remove(idx.map { favorites.stops[$0].id }) }
+                    .onMove { favorites.moveStops(fromOffsets: $0, toOffset: $1) }
                 }
             }
             if !favorites.places.isEmpty {
@@ -85,6 +87,7 @@ struct FavoritesView: View {
                         }
                     }
                     .onDelete { idx in favorites.remove(idx.map { favorites.places[$0].id }) }
+                    .onMove { favorites.movePlaces(fromOffsets: $0, toOffset: $1) }
                 }
             }
         }
