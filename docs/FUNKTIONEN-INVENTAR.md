@@ -3,7 +3,7 @@
 > Nicht von Hand bearbeiten. Erzeugt von `scripts/feature_inventory.py` (CI: `features-doc.yml`).
 > Die ausführliche Beschreibung steht in [FUNKTIONEN.md](FUNKTIONEN.md).
 
-**224 Views, 5 App Intents, 3 Widgets in 84 Dateien.**
+**226 Views, 5 App Intents, 3 Widgets in 85 Dateien.**
 
 ## `Sources/App/DesignSamples.swift`
 - Views: `DesignSampleView`
@@ -87,6 +87,10 @@
 ## `Sources/Views/ChooseOnMapView.swift`
 - Views: `ChooseOnMapView`, `CenterPin`
 - Sichtbare Texte: Choose on map · Finding the address… · Move the map to place the pin · Confirm location · Dropped pin
+
+## `Sources/Views/CompareRoutesMapView.swift`
+- Views: `CompareRoutesMapView`
+- Sichtbare Texte: Done · Show route
 
 ## `Sources/Views/Components/CoverageBanner.swift`
 - Views: `CoverageBanner`, `CoverageMapNote`, `CoverageMark`
@@ -193,7 +197,7 @@
 
 ## `Sources/Views/PlanView.swift`
 - Views: `PlanView`, `EndpointConnector`, `ItineraryRow`, `TimelineBar`
-- Sichtbare Texte: Swap · Depart · Arrive · Last · When · Arrive by · Day · Depart at · Now · The latest you can leave and still get there tonight. · Plan in sections · Search routes · Last connection: %@ · Recommended: %@ · Plan · Where to? · not set · Earlier connections · Later connections · Updated %@ · Cancelled · Change at %@ may be tight · Change at %@: %lld %% chance · Service changes on this route · Live data
+- Sichtbare Texte: Swap · Depart · Arrive · Last · When · Arrive by · Day · Depart at · Now · The latest you can leave and still get there tonight. · Plan in sections · Search routes · Last connection: %@ · Recommended: %@ · Map · Routes · Plan · Where to? · not set · Earlier connections · Later connections · Updated %@ · Cancelled · Change at %@ may be tight · Change at %@: %lld %% chance · Service changes on this route · Live data
 
 ## `Sources/Views/PublitLogo.swift`
 - Views: `PublitLogo`, `PublitAppIcon`
@@ -215,8 +219,8 @@
 - Sichtbare Texte: Trip not found · It was removed from this device. · Live status unavailable. Showing saved times. · from %@
 
 ## `Sources/Views/SectionPlanView.swift`
-- Views: `SectionPlanView`, `SectionLines`, `SectionChoiceView`
-- Sichtbare Texte: Add a stop in between · Each section starts when the one before has arrived, plus the time you stay. · Depart at · Now · Depart · Plan in sections · Stay · No stay · Remove stop · Stay: %@ · How · This section could not be loaded. · Try again · No way found for this section. Try another way to travel or another time. · Choose another departure · Show route · Selected · The sections after this one are planned again from when you arrive. · Choose a departure · Cancel
+- Views: `SectionPlanView`, `SectionSummary`, `SectionLines`, `SectionChoiceView`
+- Sichtbare Texte: Add a stop in between · Each section starts when the one before has arrived, plus the time you stay. · Hold a place and drag it to change the order. · Depart at · Now · Depart · Plan in sections · Stay · No stay · Remove stop · Stay: %@ · How · This section could not be loaded. · Try again · No way found for this section. Try another way to travel or another time. · Choose another departure · Show route · Selected · The sections after this one are planned again from when you arrive. · Choose a departure · Cancel
 
 ## `Sources/Views/ServiceAlertsView.swift`
 - Views: `ServiceAlertRow`, `ServiceAlertsView`
@@ -231,7 +235,7 @@
 
 ## `Sources/Views/SmartRoutingViews.swift`
 - Views: `RouteTagLine`, `SmartChangesSection`, `ChangeChanceRow`, `SmartRoutingSettingsSection`
-- Sichtbare Texte: Last connection · Recommended · No change: nothing to miss · Smart routing · Feels like %@: waiting, walking and changes count more than riding. · Based on %lld past trips · Estimate · Same vehicle continues · Stay on board · Safe change · Change should work · Risky change · %@ to spare · Very tight change · Change at %@ · Arrive %@ · still makes the next change · If missed: %@ at %@ · No backup found if you miss it. · Changes · Faster · Fewer changes · A change counts like %lld extra minutes. · Extra time for changes · None · +%lld min · Use my walking speed · From Apple Health · Your walking speed · From the step counter · Not enough walking measured yet. · Avoid steep walks · Learn from my choices · Learn from my trips · Learned from %lld changes. Stays on this iPhone. · How long your changes take, from your started trips. Stays on this iPhone. · Change alerts · Reset learned preferences
+- Sichtbare Texte: Last connection · Recommended · No change: nothing to miss · Smart routing · Changes · Feels like %@: waiting, walking and changes count more than riding. · Based on %lld past trips · Estimate · Same vehicle continues · Stay on board · Safe change · Change should work · Risky change · %@ to spare · Very tight change · Change at %@ · Arrive %@ · still makes the next change · If missed: %@ at %@ · No backup found if you miss it. · Faster · Fewer changes · A change counts like %lld extra minutes. · Extra time for changes · None · +%lld min · Use my walking speed · From Apple Health · Your walking speed · From the step counter · Not enough walking measured yet. · Avoid steep walks · Learn from my choices · Learn from my trips · Learned from %lld changes. Stays on this iPhone. · How long your changes take, from your started trips. Stays on this iPhone. · Change alerts · Reset learned preferences
 
 ## `Sources/Views/StationMapView.swift`
 - Views: `StationMapView`, `MapLayersSheet`, `MapPlaceView`, `MapSelectionView`, `RentalDetailView`, `VehicleTripView`

@@ -10,6 +10,9 @@ struct PlanView: View {
     @State private var opened: OpenedRoute?
     /// Route rows on screen, to offer a jump to the recommended one while it is out of sight.
     @State private var visibleRows: Set<String> = []
+    /// iPhone: all routes on one map (iPad has them on the big map next to the list).
+    @State private var comparing = false
+    @Environment(WideMapState.self) private var wideMap: WideMapState?
 
     /// Live refresh interval while planning for "now".
     static var refreshInterval: Duration { Energy.duration(60) }
@@ -188,6 +191,24 @@ struct PlanView: View {
             }
         }
         .navigationDestination(item: $opened) { route in detail(route.itinerary) }
+        .toolbar {
+            if wideMap == nil, plan.searchStarted, plan.to != nil, !pick.list.isEmpty {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { comparing = true } label: { Image(systemName: "map") }
+                        .accessibilityLabel(Text("Map"))
+                        .accessibilityIdentifier("compareRoutesMap")
+                }
+            }
+        }
+        .fullScreenCover(isPresented: $comparing) {
+            CompareRoutesMapView(itineraries: pick.list, selected: pick.key, title: plan.to?.title ?? L10n.t("Routes")) { it in
+                // After the map has slid away: a push while it is still going is dropped.
+                Task { @MainActor in
+                    try? await Task.sleep(for: .milliseconds(400))
+                    opened = OpenedRoute(itinerary: it)
+                }
+            }
+        }
         .navigationTitle("Plan")
         // iPad: every route found on the big map, the recommended one strong.
         .wideMapScene(plan.searchStarted && plan.to != nil && !pick.list.isEmpty ? .routes(pick.list, selected: pick.key) : .explore)
@@ -412,7 +433,6 @@ struct EndpointConnector: View {
 /// One route in the comparison list. All rows share one time axis so routes can be compared at a glance.
 struct ItineraryRow: View {
     @AppStorage("routeTimelines") private var showTimeline = true
-    @AppStorage(SmartRouting.enabledKey) private var smartRouting = true
     let itinerary: Itinerary
     let windowStart: Date
     let windowEnd: Date
@@ -436,7 +456,8 @@ struct ItineraryRow: View {
     var body: some View {
         let warnings = TransferRisk.warnings(for: itinerary)
         // The weakest change, when it is not sure to work (the warnings above already cover broken ones).
-        let shaky = smartRouting && warnings.isEmpty
+        // With smart routing off too: how likely a change works is part of the route (feedback on build 98).
+        let shaky = warnings.isEmpty
             ? SmartRouting.changes(itinerary).filter { $0.chance < 0.8 }.min { $0.chance < $1.chance } : nil
         let overnight = Fmt.dayOffset(from: itinerary.startTime, to: itinerary.endTime, tz: itinerary.legs.last?.to.tz)
         // One calm card per route: label line, times, the bar, one line of facts, at most one note.

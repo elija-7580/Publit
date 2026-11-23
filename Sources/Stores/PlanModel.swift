@@ -140,7 +140,8 @@ final class PlanModel {
     /// What was offered, to learn from the route that gets saved (smart routing).
     private func offerForLearning() {
         SmartRouting.offered = itineraries
-        if SmartRouting.isEnabled { DelayHistoryStore.shared.refresh(for: itineraries) }
+        // Past delays give the chance of each change, which a route shows with smart routing off too.
+        DelayHistoryStore.shared.refresh(for: itineraries)
         SmartRouting.offeredArriveBy = timeMode.searchesBackwards
     }
 

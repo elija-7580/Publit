@@ -24,7 +24,7 @@ struct VehicleTrackingView: View {
 
     var body: some View {
         let progress = TripProgress.at(now, stops: stops)
-        let vehicle = TripProgress.position(progress, stops: stops)
+        let vehicle = TripProgress.position(progress, stops: stops, path: shape)
         let source = VehiclePositionSource.of(progress, realTime: leg?.realTime ?? false)
         map(vehicle: vehicle)
             .safeAreaInset(edge: .bottom) { panel(progress: progress, source: source) }
@@ -88,7 +88,7 @@ struct VehicleTrackingView: View {
     private func followButton(enabled: Bool) -> some View {
         Button {
             follow.toggle()
-            if follow, let v = TripProgress.position(TripProgress.at(now, stops: stops), stops: stops) {
+            if follow, let v = TripProgress.position(TripProgress.at(now, stops: stops), stops: stops, path: shape) {
                 withAnimation { camera = Self.centered(on: v) }
             }
         } label: {

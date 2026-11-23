@@ -27,12 +27,20 @@ struct SectionPlanView: View {
     var body: some View {
         List {
             Section {
+                // One row per place with the section that leaves it, so a place can be held and
+                // dragged to another position (or moved with the handles after "Edit").
                 ForEach(Array(model.stops.enumerated()), id: \.element.id) { index, stop in
-                    stopRow(index, stop)
-                    if index < model.sections.count {
-                        sectionRow(index, model.sections[index])
+                    VStack(alignment: .leading, spacing: 6) {
+                        stopRow(index, stop)
+                        if index < model.sections.count {
+                            sectionRow(index, model.sections[index])
+                        }
                     }
+                    .listRowSeparator(.hidden)
+                    .deleteDisabled(index == 0 || index == model.stops.count - 1)
                 }
+                .onMove { model.moveStops(from: $0, to: $1) }
+                .onDelete { offsets in offsets.sorted(by: >).forEach { model.removeStop(at: $0) } }
                 if model.canAddStop {
                     Button { model.addStop(); picking = StopIndex(id: model.stops.count - 2) } label: {
                         Label("Add a stop in between", systemImage: "plus.circle.fill")
@@ -43,6 +51,7 @@ struct SectionPlanView: View {
                 }
             } footer: {
                 Text("Each section starts when the one before has arrived, plus the time you stay.")
+                    + Text(verbatim: " ") + Text("Hold a place and drag it to change the order.")
             }
             .inkCard()
 
@@ -68,6 +77,7 @@ struct SectionPlanView: View {
         .safeAreaInset(edge: .bottom, spacing: 0) { summary }
         .navigationTitle("Plan in sections")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar { ToolbarItem(placement: .topBarTrailing) { EditButton().accessibilityIdentifier("sectionReorder") } }
         .screenTrail("Plan in sections")
         .task(id: searchKey) {
             guard model.isComplete else { return }
@@ -184,19 +194,8 @@ struct SectionPlanView: View {
         case .found:
             if let route = section.route {
                 Button { choosing = StopIndex(id: index) } label: {
-                    HStack(alignment: .firstTextBaseline, spacing: 6) {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("\(Fmt.time(route.startTime, tz: route.legs.first?.from.tz)) – \(Fmt.time(route.endTime, tz: route.legs.last?.to.tz))")
-                                .font(.subheadline.weight(.semibold).monospacedDigit())
-                            SectionLines(route: route, mode: section.mode)
-                        }
-                        Spacer(minLength: 4)
-                        Text(verbatim: Fmt.duration(seconds: route.duration)).font(.footnote).foregroundStyle(.secondary)
-                        if section.options.count > 1 {
-                            Image(systemName: "chevron.up.chevron.down").font(.caption.weight(.bold)).foregroundStyle(.tertiary)
-                        }
-                    }
-                    .contentShape(Rectangle())
+                    SectionSummary(route: route, mode: section.mode, canChoose: section.options.count > 1)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .disabled(section.options.count < 2)
@@ -230,7 +229,38 @@ struct SectionPlanView: View {
     }
 }
 
-/// The lines of a section, or its way on the street.
+/// One section's way: times and duration on one line, its lines below. The times and the
+/// duration never get cut off, and the lines wrap onto a second row instead of being squeezed
+/// into narrow badges one letter wide (feedback on build 98: "F E", "12 h 51 mi").
+private struct SectionSummary: View {
+    let route: Itinerary
+    let mode: SectionMode
+    var canChoose = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                Text("\(Fmt.time(route.startTime, tz: route.legs.first?.from.tz)) – \(Fmt.time(route.endTime, tz: route.legs.last?.to.tz))")
+                    .font(.subheadline.weight(.semibold).monospacedDigit())
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+                    .layoutPriority(1)
+                Spacer(minLength: 4)
+                Text(verbatim: Fmt.duration(seconds: route.duration))
+                    .font(.footnote.monospacedDigit()).foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .fixedSize()
+                if canChoose {
+                    Image(systemName: "chevron.up.chevron.down").font(.caption.weight(.bold)).foregroundStyle(.tertiary)
+                        .accessibilityHidden(true)
+                }
+            }
+            SectionLines(route: route, mode: mode)
+        }
+    }
+}
+
+/// The lines of a section, or its way on the street. Every ride, wrapping onto more rows.
 private struct SectionLines: View {
     let route: Itinerary
     let mode: SectionMode
@@ -240,12 +270,15 @@ private struct SectionLines: View {
         if rides.isEmpty {
             Label(mode.title, systemImage: mode.symbol).font(.footnote).foregroundStyle(.secondary)
         } else {
-            HStack(spacing: 4) {
-                ForEach(Array(rides.prefix(5).enumerated()), id: \.offset) { i, leg in
-                    if i > 0 {
-                        Image(systemName: "chevron.right").font(.caption2.weight(.bold)).foregroundStyle(.tertiary)
+            FlowRow(spacing: 4) {
+                ForEach(Array(rides.enumerated()), id: \.offset) { i, leg in
+                    HStack(spacing: 4) {
+                        if i > 0 {
+                            Image(systemName: "chevron.right").font(.caption2.weight(.bold)).foregroundStyle(.tertiary)
+                                .accessibilityHidden(true)
+                        }
+                        LineBadge(leg, compact: true).fixedSize()
                     }
-                    LineBadge(leg)
                 }
             }
         }
@@ -267,13 +300,7 @@ private struct SectionChoiceView: View {
                     ForEach(Array(section.options.enumerated()), id: \.offset) { index, option in
                         Button { onChoose(index); dismiss() } label: {
                             HStack(alignment: .firstTextBaseline, spacing: 6) {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text("\(Fmt.time(option.startTime, tz: option.legs.first?.from.tz)) – \(Fmt.time(option.endTime, tz: option.legs.last?.to.tz))")
-                                        .font(.headline.monospacedDigit())
-                                    SectionLines(route: option, mode: section.mode)
-                                }
-                                Spacer(minLength: 4)
-                                Text(verbatim: Fmt.duration(seconds: option.duration)).font(.footnote).foregroundStyle(.secondary)
+                                SectionSummary(route: option, mode: section.mode)
                                 if index == section.chosen {
                                     Image(systemName: "checkmark").font(.subheadline.weight(.bold)).foregroundStyle(Color.ink)
                                         .accessibilityLabel(Text("Selected"))

@@ -115,6 +115,22 @@ final class SectionPlanModel {
         invalidate(from: index - 1)
     }
 
+    /// Moves places to another position, the start and the destination too (feedback on build 98:
+    /// "you must be able to move the single parts"). Each place keeps its stay; each section keeps
+    /// its way to travel by position; every section from the first one touched is searched again.
+    func moveStops(from offsets: IndexSet, to destination: Int) {
+        let moving = offsets.filter { stops.indices.contains($0) }.sorted()
+        guard !moving.isEmpty, (0...stops.count).contains(destination) else { return }
+        let picked = moving.map { stops[$0] }
+        var rest = stops.enumerated().filter { !moving.contains($0.offset) }.map(\.element)
+        let insertAt = destination - moving.filter { $0 < destination }.count
+        rest.insert(contentsOf: picked, at: min(max(0, insertAt), rest.count))
+        guard rest.map(\.id) != stops.map(\.id) else { return }
+        let first = zip(rest, stops).enumerated().first { $0.element.0.id != $0.element.1.id }?.offset ?? 0
+        stops = rest
+        invalidate(from: max(0, first - 1))
+    }
+
     func setPlace(_ place: Endpoint?, at index: Int) {
         guard stops.indices.contains(index) else { return }
         stops[index].place = place

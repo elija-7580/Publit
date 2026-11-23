@@ -134,4 +134,39 @@ final class SectionPlanTests: XCTestCase {
         XCTAssertNil(RouteBuilder.chain([a, elsewhere]))
         XCTAssertNil(RouteBuilder.chain([]))
     }
+
+    /// Places can be dragged into another order; each keeps its stay, and the route is searched again.
+    @MainActor
+    func testPlacesMoveIntoAnotherOrder() async throws {
+        let model = SectionPlanModel(from: place(0), to: place(4), date: time(3), search: Self.timetable)
+        model.leavesNow = false
+        model.addStop()
+        model.setPlace(place(1), at: 1)
+        model.setStay(30, at: 1)
+        model.addStop()
+        model.setPlace(place(2), at: 2)
+        await model.plan(current: nil, now: time(0))
+        XCTAssertNotNil(model.route)
+        let revision = model.revision
+
+        // S2 before S1 (drag the third place up to the second position).
+        model.moveStops(from: IndexSet(integer: 2), to: 1)
+        XCTAssertEqual(model.stops.map { $0.place?.title }, ["S0", "S2", "S1", "S4"])
+        XCTAssertEqual(model.stops[2].stay, 30, "a place keeps its stay")
+        XCTAssertGreaterThan(model.revision, revision)
+        XCTAssertEqual(model.sections.map(\.state), [.idle, .idle, .idle])
+        XCTAssertNil(model.route)
+        await model.plan(current: nil, now: time(0))
+        XCTAssertNotNil(model.route)
+
+        // Dropped where it already is: nothing changes.
+        let still = model.revision
+        model.moveStops(from: IndexSet(integer: 1), to: 2)
+        XCTAssertEqual(model.revision, still)
+
+        // The destination to the front.
+        model.moveStops(from: IndexSet(integer: 3), to: 0)
+        XCTAssertEqual(model.stops.map { $0.place?.title }, ["S4", "S0", "S2", "S1"])
+        XCTAssertEqual(model.sections.count, 3)
+    }
 }

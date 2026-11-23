@@ -166,7 +166,14 @@ private struct MapHeroOverList<M: View>: ViewModifier {
     }
 
     /// The map is fully out of sight: hidden, and the bar is solid again.
+    ///
+    /// With the list's own offset (iOS 18+) that offset decides alone. The hero row's rest is caught
+    /// once, the first time it reports; caught while a screen slides or a sheet rises (Route from a
+    /// live trip), every later place looked scrolled far up, and the row reports nothing while it is
+    /// off screen: the map stayed hidden for good, only the "Maps" mark showed at the top
+    /// (feedback on build 98: "the map disappears").
     private var gone: Bool {
+        if let offset { return offset < -(MapHero.height + 120) }
         if track.restGlobalY != nil, track.globalY == nil { return true }
         if track.restGlobalY == nil, offset == nil, rowGone { return true }
         guard let moved else { return false }
@@ -174,7 +181,7 @@ private struct MapHeroOverList<M: View>: ViewModifier {
     }
 
     private var scrolledAway: Bool {
-        gone || (moved ?? 0) < -MapHero.height * 0.6
+        gone || (offset ?? moved ?? 0) < -MapHero.height * 0.6
     }
 
     func body(content: Content) -> some View {

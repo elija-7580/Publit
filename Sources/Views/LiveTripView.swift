@@ -68,7 +68,7 @@ struct LiveTripView: View {
         // On board (your fix lies on the line): your own dot is the vehicle. A second, estimated
         // marker beside it (straight between stops, or from the timetable) only looks like another bus.
         let vehicle = step.kind == .ride && ride?.fromGPS != true
-            ? ride.flatMap { TripProgress.position($0.progress, stops: leg.allStops) } : nil
+            ? ride.flatMap { TripProgress.position($0.progress, stops: leg.allStops, path: leg.overviewPath) } : nil
         // Away from the planned walk (it started where the trip was planned): walk from where you are now.
         let detourTarget: LatLon? = index == live && step.kind == .walk && walkPos == nil && here != nil ? leg.to.coordinate : nil
         let detourRoute = detourTarget.flatMap { t in detour.route?.to == t ? detour.route : nil }

@@ -222,7 +222,7 @@ extension TripView {
             TripMap(generation: generation, shape: shape, stops: stops.map(\.coordinate),
                     stopNames: stops.map(\.name),
                     color: leg.lineStroke, textColor: leg.lineTextColor, mode: leg.mode,
-                    vehicle: TripProgress.position(TripProgress.at(now, stops: stops), stops: stops),
+                    vehicle: TripProgress.position(TripProgress.at(now, stops: stops), stops: stops, path: shape),
                     controls: controls)
                 .equatable()
         }

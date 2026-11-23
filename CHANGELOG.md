@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.2 (build 99) – fixes from build 98, sections in your order, all routes on one map
+
+- **Map at the top** (`MapHero`): whether the map has scrolled away is decided by the list's own scroll offset (iOS 18+), not by a rest position caught once; caught while a screen or sheet slid in, the map stayed hidden for good.
+- **Vehicle position** (`TripProgress.position(path:)`): between two stops the estimated vehicle follows the ride's shape instead of a straight line (a Vienna–Venice bus was drawn in the middle of Styria).
+- **Change chances** (`SmartChangesSection`, `ItineraryRow`): shown with smart routing off too; estimates show their percentage with "≈". Delay history is always loaded for the planned countries.
+- **Plan in sections** (`SectionPlanView`, `SectionPlanModel.moveStops`): places can be dragged into another order (or with "Edit"); times and durations no longer get cut off, line badges wrap instead of being squeezed one letter wide.
+- **All routes on one map** (`CompareRoutesMapView`): iPhone Plan has a map button with every route found, pick one and open it.
+- **Ticket shop** (`TicketShop.isTestBuild`): buying in Publit only in TestFlight and development builds, never in the App Store version.
+
 ## 0.1.2 (build 98) – plan in sections, your way out, last connection, your trip on the watch
 
 - **Version 0.1.2**: Apple closed 0.1.1 for new builds once it was approved for the App Store (upload of build 97 refused, error 90186), so build 97 never reached TestFlight and its changes below arrive with this build.
