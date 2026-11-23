@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.1 (build 97) – walking as a real choice, without long-distance trains, departures along a trip
+
+- **Walking** (`StreetComparison.walkIsAChoice`, #110): the walk is listed first among the routes when no ride gets there sooner door to door (waiting counts), also on the watch. Before, only its duration was compared with the fastest ride's.
+- **Route options** (`RouteOptions.regionalOnly`, #119): "Without long-distance trains" leaves out high-speed, intercity and night trains, by mode in the search and by name or operator in the answer.
+- **Trip** (`TripView`, #130): the menu on a stop of a trip has "Departures", which opens that stop's departure board.
+- **Saved addresses** (#122): addresses that share an ID no longer replace or remove each other.
+- **Onboarding** (#140): "routes wherever you go" instead of "across Europe".
+- **Data** (#135): the feed has no bus 240 Krems → St. Pölten; recorded in `docs/DATA-SOURCES.md`.
+
 ## 0.1.1 (build 96) – no crash on first launch on a Mac
 
 - **Onboarding** (`RootView`): the iPad app on a Mac ("Designed for iPad") crashed half a second after the first launch: the onboarding cover was presented in the very first render pass, and `OnboardingView` found no `LocationManager` in its environment (crash report build 67, macOS 27.2). The cover now opens from `onAppear`, and `LocationManager` and `FavoritesStore` are passed to it explicitly.
