@@ -97,17 +97,16 @@ final class FavoritesStore {
         for i in items.indices where items[i].role == role { items[i].role = nil }
         var p = place
         p.role = role
-        if let i = items.firstIndex(where: { $0.id == place.id }) {
-            if let other = items[i].role, other != role {
-                // The entry already holds the other role (same ID: same place, or an address ID the
-                // geocoder reuses in another country). Keep it and store this role separately,
-                // so setting Work never removes Home.
-                p.id = Self.slotID(role, for: place)
-                items.removeAll { $0.id == p.id }
-                items.append(p)
-            } else {
-                items[i] = p
-            }
+        if let i = items.firstIndex(where: { $0.id == place.id && $0.isSame(as: place) }), items[i].role == nil {
+            // The same saved place becomes Home or Work.
+            items[i] = p
+        } else if items.contains(where: { $0.id == place.id }) {
+            // The ID is taken: by the other role (same place, or an address ID the geocoder reuses
+            // in another country) or by another saved address. Keep that entry and store this role
+            // separately, so setting Work never removes Home or a saved place.
+            p.id = Self.slotID(role, for: place)
+            items.removeAll { $0.id == p.id }
+            items.append(p)
         } else {
             items.append(p)
         }
@@ -125,10 +124,17 @@ final class FavoritesStore {
     }
 
     func contains(_ id: String) -> Bool { items.contains { $0.id == id } }
-    func contains(_ place: SavedPlace) -> Bool { items.contains { $0.isSame(as: place) } }
+    func contains(_ place: SavedPlace) -> Bool { items.contains { place.isSaved(as: $0) } }
 
     func toggle(_ place: SavedPlace) {
-        if contains(place) { items.removeAll { $0.isSame(as: place) } } else { items.append(place) }
+        if contains(place) {
+            items.removeAll { place.isSaved(as: $0) }
+        } else {
+            var p = place
+            // Another address with this ID is saved already: both stay, each under its own ID.
+            if items.contains(where: { $0.id == p.id }) { p.id = place.ownID }
+            items.append(p)
+        }
         persist()
     }
 
