@@ -1,0 +1,64 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-only -->
+<!-- SPDX-FileCopyrightText: 2026 Elija Samuel Friedrich-Ulrich -->
+
+# Publit ticket shop
+
+Optional. Lets people buy tickets for a whole route inside Publit: one offer per leg from whichever seller sells
+it, **one payment** for all legs, then the tickets go straight into the app's Tickets tab. Legs no seller covers
+keep the operator's own ticket link.
+
+The seller API keys and the Stripe key stay on this Cloudflare Worker, never in the app. Nothing is stored or
+logged here: offers travel as signed tokens, and the order lives in the Stripe payment's metadata.
+
+## How a purchase works
+
+1. `POST /v1/offers` – the app sends the route's transit legs (places, times, mode, operator). Each active seller
+   that covers a leg is asked for a matching connection; the first offer wins. Each offer comes back as a signed
+   token (30 minutes), so the app cannot change seller, trip or price.
+2. `POST /v1/checkout` – the app sends the chosen tokens, the ticket holder's name and e-mail, and that the terms
+   were accepted. Every leg is reserved with its seller; if one fails, the others are released. Then one Stripe
+   Checkout page is created for all legs, with **manual capture**: the money is only authorised.
+3. The customer pays on Stripe's page (card, Apple Pay, Google Pay, …). Stripe returns to `GET /v1/return`, which
+   redirects to `publit://shop/return?order=…`.
+4. `POST /v1/orders/{order}/complete` – every reservation is confirmed with its seller, then **only the booked legs
+   are captured**. A leg that fails is released and not charged. If nothing could be booked, the authorisation is
+   cancelled. The tickets (PDF and/or code) are returned. Calling it again returns the tickets again without
+   charging twice. If the app never calls it, the authorisation lapses and the customer is not charged.
+
+## Sellers
+
+| Seller | Covers | Status | Switched on by |
+| --- | --- | --- | --- |
+| [Distribusion](https://docs.distribusion.com/dt/api) | Intercity bus, many railways, ferries, airport transfers | Implemented after the public API docs; test with the demo key | `DISTRIBUSION_API_KEY` |
+| Demo | Every transit leg, made-up price | For testing only; tickets say "DEMO – not a valid ticket" | `DEMO_PROVIDER = "on"` (never with live Stripe keys) |
+
+Planned, each needs a contract and API access first: Wiener Linien ticket interface (Vienna single, 24 h, 7 day
+tickets), Samtrafiken Connect / BoB (Sweden), railways via OSDM, transport authorities using Masabi Justride.
+To add one, write a provider object as described in `src/providers/index.js` and list it there.
+
+## Setup
+
+1. Stripe: create an account, get the secret key (`sk_test_…` first). Apple Pay on Checkout needs the domain of
+   this worker registered in Stripe (Settings → Payment methods → Apple Pay).
+2. Distribusion: ask partner@distribusion.com for a demo API key. The default base URL is the demo environment;
+   set `DISTRIBUSION_BASE_URL = "https://api.distribusion.com/retailers/v4"` in `wrangler.toml` for production.
+3. Deploy:
+   ```sh
+   npm install
+   openssl rand -hex 32 | npx wrangler secret put TOKEN_SECRET
+   npx wrangler secret put STRIPE_SECRET_KEY
+   npx wrangler secret put DISTRIBUSION_API_KEY
+   npm run deploy
+   ```
+4. Build the app with the build setting `TICKET_SHOP_URL` set to the worker's address (Info.plist key
+   `PublitTicketShopURL`). Without it the app shows no "Buy tickets in Publit".
+
+Before selling for real: a company, the sellers' contracts, terms and a privacy notice for the shop, and
+customer support for refunds and delays. Distribusion invoices ticket price minus commission monthly
+(`execute_payment=false`, payment method `demand_note`).
+
+## Test
+
+```sh
+node --test
+```

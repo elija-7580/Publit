@@ -3,7 +3,7 @@
 > Nicht von Hand bearbeiten. Erzeugt von `scripts/feature_inventory.py` (CI: `features-doc.yml`).
 > Die ausführliche Beschreibung steht in [FUNKTIONEN.md](FUNKTIONEN.md).
 
-**205 Views, 5 App Intents, 3 Widgets in 79 Dateien.**
+**207 Views, 5 App Intents, 3 Widgets in 80 Dateien.**
 
 ## `Sources/App/DesignSamples.swift`
 - Views: `DesignSampleView`
@@ -24,6 +24,10 @@
 ## `Sources/Shared/DirectionLabel.swift`
 - Views: `DirectionLabel`
 - Sichtbare Texte: Towards · Circle line · Direction unavailable
+
+## `Sources/Shop/CheckoutView.swift`
+- Views: `CheckoutView`, `TicketShopSection`
+- Sichtbare Texte: Buy tickets · Close · Checking prices … · Your journey · Publit cannot sell every part of this route yet. Buy the rest from the operator. · Adults: %@ · First name · Last name · E-mail · Ticket holder · I accept the conditions of carriage and the ticket conditions of the sellers. · Total · Pay %@ · You pay on a secure payment page (card, Apple Pay and more). You are only charged for tickets that are booked. · Try again · Not in Publit · Your tickets are in the Tickets tab. · No ticket could be booked. You were not charged. · Some parts could not be booked. You were only charged for the booked tickets. · A ticket is not ready yet. The seller also sends it by e-mail. · Done · Buy tickets in Publit · Tickets
 
 ## `Sources/Tickets/PassSamples.swift`
 - Views: `PassSampleView`
