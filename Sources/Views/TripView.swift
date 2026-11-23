@@ -37,6 +37,8 @@ struct TripView: View {
     @State private var generation = 0
     @State private var now = Date()
     @State private var showsMap = false
+    /// A stop of the trip whose departures were opened from its menu (#130).
+    @State private var departuresStop: Place?
 
     private var leg: Leg? { trip?.legs.first(where: \.isTransit) }
     private var savedLine: SavedLine {
@@ -81,6 +83,12 @@ struct TripView: View {
                             Button { app.route(from: Self.place(stop), source: .line) } label: {
                                 Label("Route from here", systemImage: "arrow.uturn.right")
                             }
+                            // The stop's own departure board; back returns to this trip.
+                            if (stop.parentId ?? stop.stopId) != nil {
+                                Button { departuresStop = stop } label: {
+                                    Label("Departures", systemImage: "clock")
+                                }
+                            }
                         } label: {
                             StopTimeRow(stop: stop, isFocus: focusStops.contains(i),
                                         isPast: isPast(i, progress: progress), realTime: leg.realTime)
@@ -118,6 +126,9 @@ struct TripView: View {
                         ToolbarItem(placement: .confirmationAction) { Button("Done") { showsMap = false } }
                     }
             }
+        }
+        .navigationDestination(item: $departuresStop) { stop in
+            StopDeparturesView(stopId: stop.parentId ?? stop.stopId ?? "", name: stop.name, coordinate: stop.coordinate)
         }
         .ticking(every: 15, now: $now)
         .navigationTitle(stopTime.lineName)
