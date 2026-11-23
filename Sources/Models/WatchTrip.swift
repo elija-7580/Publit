@@ -34,8 +34,9 @@ extension Leg {
 
 extension Itinerary {
     func forWatch() -> Itinerary {
-        var it = self
-        it.legs = legs.map { $0.forWatch() }
+        // Where to ride and which exit, worked out here while the walking directions are still there.
+        var it = withExitAdvice()
+        it.legs = it.legs.map { $0.forWatch() }
         it.fareTransfers = nil
         return it
     }

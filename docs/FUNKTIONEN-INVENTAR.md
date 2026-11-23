@@ -3,7 +3,7 @@
 > Nicht von Hand bearbeiten. Erzeugt von `scripts/feature_inventory.py` (CI: `features-doc.yml`).
 > Die ausführliche Beschreibung steht in [FUNKTIONEN.md](FUNKTIONEN.md).
 
-**213 Views, 5 App Intents, 3 Widgets in 82 Dateien.**
+**224 Views, 5 App Intents, 3 Widgets in 84 Dateien.**
 
 ## `Sources/App/DesignSamples.swift`
 - Views: `DesignSampleView`
@@ -128,13 +128,17 @@
 - Views: `ConnectionGuideView`, `ConnectionSymbols`, `ConnectionLegendRow`
 - Sichtbare Texte: All rows use the same clock. Later departures start farther right. · The coloured blocks are rides. Thin grey sections are walking; dotted gaps are waiting between legs. · This is a comparison, not live progress. Check the departure times, line names and change warnings. · How to read connections · Ride · Walk · Wait · Time axis · Done
 
+## `Sources/Views/ExitAdviceViews.swift`
+- Views: `ExitAdviceRow`, `ExitAdviceLine`, `TrainPartGlyph`
+- Sichtbare Texte: Take exit %@ · Your exit · Publit remembers this exit for this station and destination. · Choose automatically · Exit %@
+
 ## `Sources/Views/FareSection.swift`
 - Views: `FareSection`, `RegionTicketRow`
 - Sichtbare Texte: Fare estimate · Fare information · Fares and tickets: %@
 
 ## `Sources/Views/FavoritesView.swift`
 - Views: `FavoritesView`, `PastTripsView`
-- Sichtbare Texte: Home and Work · Remove · Change · Set %@ · Lines · At %@ · Nothing else saved yet · Save stops from their departure board, lines from a trip, or add places with +. · Stops · Places · Home · Work · Saved · Add · Past trips · Upcoming trips · Save a route to see it here, add it to your calendar and get a reminder when to leave. · Plan again
+- Sichtbare Texte: Home and Work · Remove · Change · Set %@ · Lines · At %@ · Nothing else saved yet · Save stops from their departure board, lines from a trip, or add places with +. · Stops · Places · Home · Work · Saved · Add · Past trips · Upcoming trips · Save a route to see it here, add it to your calendar and get a reminder when to leave. · Last connection · Plan again
 
 ## `Sources/Views/GoNowView.swift`
 - Views: `GoNowView`
@@ -189,7 +193,7 @@
 
 ## `Sources/Views/PlanView.swift`
 - Views: `PlanView`, `EndpointConnector`, `ItineraryRow`, `TimelineBar`
-- Sichtbare Texte: Swap · Depart · Arrive · When · Arrive by · Depart at · Now · Search routes · Recommended: %@ · Plan · Where to? · not set · Earlier connections · Later connections · Updated %@ · Cancelled · Change at %@ may be tight · Change at %@: %lld %% chance · Service changes on this route · Live data
+- Sichtbare Texte: Swap · Depart · Arrive · Last · When · Arrive by · Day · Depart at · Now · The latest you can leave and still get there tonight. · Plan in sections · Search routes · Last connection: %@ · Recommended: %@ · Plan · Where to? · not set · Earlier connections · Later connections · Updated %@ · Cancelled · Change at %@ may be tight · Change at %@: %lld %% chance · Service changes on this route · Live data
 
 ## `Sources/Views/PublitLogo.swift`
 - Views: `PublitLogo`, `PublitAppIcon`
@@ -210,6 +214,10 @@
 - Views: `SavedTripView`, `SavedTripRow`
 - Sichtbare Texte: Trip not found · It was removed from this device. · Live status unavailable. Showing saved times. · from %@
 
+## `Sources/Views/SectionPlanView.swift`
+- Views: `SectionPlanView`, `SectionLines`, `SectionChoiceView`
+- Sichtbare Texte: Add a stop in between · Each section starts when the one before has arrived, plus the time you stay. · Depart at · Now · Depart · Plan in sections · Stay · No stay · Remove stop · Stay: %@ · How · This section could not be loaded. · Try again · No way found for this section. Try another way to travel or another time. · Choose another departure · Show route · Selected · The sections after this one are planned again from when you arrive. · Choose a departure · Cancel
+
 ## `Sources/Views/ServiceAlertsView.swift`
 - Views: `ServiceAlertRow`, `ServiceAlertsView`
 
@@ -223,7 +231,7 @@
 
 ## `Sources/Views/SmartRoutingViews.swift`
 - Views: `RouteTagLine`, `SmartChangesSection`, `ChangeChanceRow`, `SmartRoutingSettingsSection`
-- Sichtbare Texte: Recommended · No change: nothing to miss · Smart routing · Feels like %@: waiting, walking and changes count more than riding. · Based on %lld past trips · Estimate · Same vehicle continues · Stay on board · Safe change · Change should work · Risky change · %@ to spare · Very tight change · Change at %@ · Arrive %@ · still makes the next change · If missed: %@ at %@ · No backup found if you miss it. · Changes · Faster · Fewer changes · A change counts like %lld extra minutes. · Extra time for changes · None · +%lld min · Use my walking speed · From Apple Health · Your walking speed · From the step counter · Not enough walking measured yet. · Avoid steep walks · Learn from my choices · Learn from my trips · Learned from %lld changes. Stays on this iPhone. · How long your changes take, from your started trips. Stays on this iPhone. · Change alerts · Reset learned preferences
+- Sichtbare Texte: Last connection · Recommended · No change: nothing to miss · Smart routing · Feels like %@: waiting, walking and changes count more than riding. · Based on %lld past trips · Estimate · Same vehicle continues · Stay on board · Safe change · Change should work · Risky change · %@ to spare · Very tight change · Change at %@ · Arrive %@ · still makes the next change · If missed: %@ at %@ · No backup found if you miss it. · Changes · Faster · Fewer changes · A change counts like %lld extra minutes. · Extra time for changes · None · +%lld min · Use my walking speed · From Apple Health · Your walking speed · From the step counter · Not enough walking measured yet. · Avoid steep walks · Learn from my choices · Learn from my trips · Learned from %lld changes. Stays on this iPhone. · How long your changes take, from your started trips. Stays on this iPhone. · Change alerts · Reset learned preferences
 
 ## `Sources/Views/StationMapView.swift`
 - Views: `StationMapView`, `MapLayersSheet`, `MapPlaceView`, `MapSelectionView`, `RentalDetailView`, `VehicleTripView`
@@ -306,7 +314,7 @@
 
 ## `Watch/WatchTripView.swift`
 - Views: `WatchTripView`, `WatchTripOverview`, `WatchLegPage`
-- Sichtbare Texte: Map · Tickets · Trip overview · End trip · Start trip · Remove · Save trip · Line %@: all stops and map · Cancelled · Live · Walk %@ · +%lld min · Pl. %@ · Platform changed
+- Sichtbare Texte: Map · Tickets · Trip overview · End trip · Start trip · Remove · Save trip · Line %@: all stops and map · Cancelled · Live · Take exit %@ · Walk %@ · +%lld min · Pl. %@ · Platform changed
 
 ## `Watch/WatchVehicleTripView.swift`
 - Views: `WatchVehicleTripView`
@@ -319,6 +327,6 @@
 - Sichtbare Texte: Choose a stop · No departures soon
 
 ## `Widgets/PublitWidgets.swift`
-- Views: `LineChip`, `PlatformChip`, `Countdown`, `FamilyAdaptiveView`, `SmallActivityView`, `ActivityContent`, `LockScreenView`
+- Views: `LineChip`, `PlatformChip`, `Countdown`, `FamilyAdaptiveView`, `SmallActivityView`, `StepIcon`, `CueLabel`, `DelayText`, `TripProgressBar`, `VehicleRow`, `ActivityContent`, `LockScreenView`
 - Widgets: `WatchTripLiveActivity`, `TripLiveActivity`
-- Sichtbare Texte: Show ticket
+- Sichtbare Texte: Leave in · Get off in · Arrive in · Departs in · Show ticket · from %@

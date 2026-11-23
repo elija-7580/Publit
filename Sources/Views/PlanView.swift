@@ -49,11 +49,15 @@ struct PlanView: View {
                 // Plan is for later (tonight, next week). "From here, now" lives in Nearby.
                 VStack(alignment: .leading, spacing: 12) {
                     BevelSegmented(selection: $plan.timeMode,
-                                   options: [(TimeMode.departAt, L10n.t("Depart")), (TimeMode.arriveBy, L10n.t("Arrive"))],
+                                   options: [(TimeMode.departAt, L10n.t("Depart")), (TimeMode.arriveBy, L10n.t("Arrive")),
+                                             (TimeMode.lastConnection, L10n.t("Last"))],
                                    large: true)
                         .accessibilityLabel(Text("When"))
                     HStack(spacing: 10) {
-                        DatePicker(plan.timeMode == .arriveBy ? L10n.t("Arrive by") : L10n.t("Depart at"), selection: $plan.date)
+                        // Last connection: only the day counts, the time is the end of its service.
+                        DatePicker(plan.timeMode == .arriveBy ? L10n.t("Arrive by") : plan.timeMode == .lastConnection ? L10n.t("Day")
+                                    : L10n.t("Depart at"), selection: $plan.date,
+                                   displayedComponents: plan.timeMode == .lastConnection ? [.date] : [.date, .hourAndMinute])
                             .labelsHidden()
                             .datePickerStyle(.compact)
                             .controlSize(.large)
@@ -81,8 +85,24 @@ struct PlanView: View {
                 }
                 .padding(.vertical, 6)
                 .listRowSeparator(.hidden)
+                if plan.timeMode == .lastConnection {
+                    Text("The latest you can leave and still get there tonight.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .listRowSeparator(.hidden)
+                        .accessibilityIdentifier("lastConnectionHint")
+                }
                 RouteOptionsButton(compact: true)
                     .listRowSeparator(.hidden)
+                // Stops in between, each section its own way to travel (#144).
+                NavigationLink {
+                    SectionPlanView(from: plan.from, to: plan.to, date: plan.timeMode == .arriveBy ? .now : plan.date)
+                } label: {
+                    Label("Plan in sections", systemImage: "point.topleft.down.to.point.bottomright.curvepath.fill")
+                        .font(.subheadline.weight(.semibold))
+                }
+                .accessibilityIdentifier("planInSections")
+                .listRowSeparator(.hidden)
                 // One wide search key under the whole form (as in the ÖBB app), instead of a small
                 // round icon squeezed next to the destination.
                 Button { startSearch() } label: {
@@ -131,8 +151,9 @@ struct PlanView: View {
                 Button {
                     withAnimation(.snappy) { proxy.scrollTo(key, anchor: .center) }
                 } label: {
-                    Label(L10n.f("Recommended: %@", "\(Fmt.time(it.startTime, tz: it.legs.first?.from.tz)) – \(Fmt.time(it.endTime, tz: it.legs.last?.to.tz))"),
-                          systemImage: "sparkles")
+                    let times = "\(Fmt.time(it.startTime, tz: it.legs.first?.from.tz)) – \(Fmt.time(it.endTime, tz: it.legs.last?.to.tz))"
+                    Label(pick.isLast ? L10n.f("Last connection: %@", times) : L10n.f("Recommended: %@", times),
+                          systemImage: pick.isLast ? SmartRouting.Badge.lastConnection.symbol : "sparkles")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(Color.ink)
                         .floatingCapsule()
@@ -229,13 +250,21 @@ struct PlanView: View {
         var badges: [String: [SmartRouting.Badge]] = [:]
         var key: String?
         var reason: String?
+        /// The picked route is the last connection, not the recommended one.
+        var isLast = false
     }
 
     /// Smart routing: the suggested route and the best in each respect, with the reason in a few words.
     private func smartPick(_ plan: PlanModel) -> Pick {
         guard plan.searchStarted, plan.to != nil else { return Pick() }
         let its = plan.sortedItineraries.uniqueRoutes
-        let badges = smartRouting ? SmartRouting.badges(its, arriveBy: plan.timeMode == .arriveBy) : [:]
+        var badges = smartRouting ? SmartRouting.badges(its, arriveBy: plan.timeMode.searchesBackwards) : [:]
+        // Last connection: the route that leaves last carries it, with or without smart routing.
+        // It is also the one picked out (map, jump to it): late at night that is the route that matters.
+        if plan.timeMode == .lastConnection, let last = LastConnection.last(its) {
+            badges[last.routeKey, default: []].insert(.lastConnection, at: 0)
+            return Pick(list: its, badges: badges, key: last.routeKey, reason: nil, isLast: true)
+        }
         let key = badges.first { $0.value.contains(.recommended) }?.key
         let reason = its.first { $0.routeKey == key }.flatMap { SmartRouting.reason(for: $0, in: its) }
         return Pick(list: its, badges: badges, key: key, reason: reason)
@@ -337,7 +366,7 @@ struct PlanView: View {
                     Task { await plan.loadMore() }
                 } label: {
                     HStack {
-                        Text(plan.timeMode == .arriveBy ? L10n.t("Earlier connections") : L10n.t("Later connections"))
+                        Text(plan.timeMode.searchesBackwards ? L10n.t("Earlier connections") : L10n.t("Later connections"))
                         if plan.isLoadingMore { Spacer(); LogoLoader(size: 24).frame(width: 48) }
                     }
                 }

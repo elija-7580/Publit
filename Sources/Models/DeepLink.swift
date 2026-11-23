@@ -139,8 +139,13 @@ struct SharedRoute: Hashable, Sendable {
     var toName: String
     var to: LatLon
     var departure: Date
+    /// A route built leg by leg (#145): the planned routes it is made of and which legs of each.
+    /// Older versions ignore it and offer to search the route again.
+    var parts: [RoutePart]? = nil
 
-    init(itineraryId: String?, fromName: String, from: LatLon, toName: String, to: LatLon, departure: Date) {
+    init(itineraryId: String?, fromName: String, from: LatLon, toName: String, to: LatLon, departure: Date,
+         parts: [RoutePart]? = nil) {
+        self.parts = parts
         self.itineraryId = itineraryId
         self.fromName = fromName
         self.from = from
@@ -151,14 +156,19 @@ struct SharedRoute: Hashable, Sendable {
 
     init(_ it: Itinerary, fromName: String, toName: String) {
         let start = it.legs.first?.from, end = it.legs.last?.to
-        // A route built leg by leg has no server ID of its own: its link carries the search (#145 will carry the legs).
+        // A route built leg by leg has no server ID of its own: its link carries its parts. One with
+        // a part on foot, by bike or by car (no ID to fetch it by) carries the search only.
+        let parts = it.builtFrom.flatMap { $0.allSatisfy { !$0.itineraryId.isEmpty } && $0.count <= Self.maxParts ? $0 : nil }
         self.init(itineraryId: it.id.isEmpty || it.builtFrom != nil ? nil : it.id,
                   fromName: fromName.isEmpty ? (start?.name ?? "") : fromName,
                   from: LatLon(lat: start?.lat ?? 0, lon: start?.lon ?? 0),
                   toName: toName.isEmpty ? (end?.name ?? "") : toName,
                   to: LatLon(lat: end?.lat ?? 0, lon: end?.lon ?? 0),
-                  departure: it.legs.first?.scheduledStartTime ?? it.startTime)
+                  departure: it.legs.first?.scheduledStartTime ?? it.startTime, parts: parts)
     }
+
+    /// More parts make the link too long to send.
+    static let maxParts = 6
 
     /// `i=…&f=…&fl=…&t=…&tl=…&d=…`, every value percent-encoded (no `+`, safe in a URL fragment too).
     var query: String {
@@ -166,6 +176,10 @@ struct SharedRoute: Hashable, Sendable {
         if let itineraryId { items.append(("i", ShareLinks.pack(itineraryId))) }
         items += [("f", fromName), ("fl", from.apiValue), ("t", toName), ("tl", to.apiValue),
                   ("d", String(Int64(departure.timeIntervalSince1970)))]
+        // `p0=<id>~<first leg>~<legs>`, `p1=…`: after the fields older versions read.
+        for (n, part) in (parts ?? []).enumerated() {
+            items.append(("p\(n)", "\(ShareLinks.pack(part.itineraryId))~\(part.firstLeg)~\(part.legCount)"))
+        }
         return items.map { "\($0)=\(ShareLinks.encode($1))" }.joined(separator: "&")
     }
 
@@ -178,8 +192,16 @@ struct SharedRoute: Hashable, Sendable {
         }
         guard let from = v["fl"].flatMap(LatLon.init(apiValue:)), let to = v["tl"].flatMap(LatLon.init(apiValue:)),
               let d = v["d"].flatMap(Double.init), d.isFinite else { return nil }
+        var parts: [RoutePart] = []
+        while parts.count < Self.maxParts, let raw = v["p\(parts.count)"] {
+            let fields = raw.split(separator: "~", omittingEmptySubsequences: false)
+            guard fields.count >= 3, let first = Int(fields[fields.count - 2]), let count = Int(fields[fields.count - 1]),
+                  first >= 0, count > 0, count < 100,
+                  let id = ShareLinks.unpack(fields.dropLast(2).joined(separator: "~")) else { parts = []; break }
+            parts.append(RoutePart(itineraryId: id, firstLeg: first, legCount: count))
+        }
         self.init(itineraryId: v["i"].flatMap(ShareLinks.unpack), fromName: v["f"] ?? "", from: from,
-                  toName: v["t"] ?? "", to: to, departure: Date(timeIntervalSince1970: d))
+                  toName: v["t"] ?? "", to: to, departure: Date(timeIntervalSince1970: d), parts: parts.isEmpty ? nil : parts)
     }
 }
 

@@ -177,6 +177,7 @@ struct LiveTripView: View {
         .task(id: detourKey) { await detour.update(from: here, to: detourTarget) }
         // Exit numbers of the underground stations on the way ("Take exit B2"), from OpenStreetMap.
         .task(id: it.id) { if await StationExits.shared.load(it) { now = Date() } }
+        .onReceive(NotificationCenter.default.publisher(for: StationExits.preferenceChanged)) { _ in now = Date() }
         // At the destination the trip ends by itself.
         .onChange(of: finished) { _, done in
             if done { Task { await TripSession.stop(trip, in: trips) } }
@@ -451,6 +452,8 @@ struct LiveTripView: View {
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(w.level == .missed ? Color.danger : Color.delay)
             }
+            // Where to stand on the platform: the part of the train nearest the way out or the next train.
+            if let advice = ExitAdvice.forRide(legIndex, in: it.legs) { ExitAdviceRow(advice: advice) }
             if let transfer = TransferInfo(before: legIndex, in: it) { TransferCard(info: transfer) }
             if changeGuide, let guide = ChangeGuideCard(before: legIndex, in: it) { guide }
             TrainDivisionNotice(leg: leg)
@@ -489,6 +492,8 @@ struct LiveTripView: View {
                 if let line = Self.whereNow(progress, stops: stops) {
                     Text(line).font(.subheadline).foregroundStyle(.secondary)
                 }
+                // Which end of the train to be at when the doors open, and the exit.
+                if let advice = ExitAdvice.forRide(index, in: it.legs) { ExitAdviceLine(advice: advice) }
                 InkProgress(value: value, tint: leg.lineStroke).padding(.top, 2)
                 Text(fromGPS ? L10n.t("Position from your location.") : leg.realTime
                      ? L10n.t("Position estimated from live stop times.") : L10n.t("Position estimated from the timetable."))

@@ -321,6 +321,8 @@ struct BevelSegmented<Value: Hashable>: View {
                     Text(verbatim: title)
                         .font((large ? Font.body : .subheadline).weight(selected ? .bold : .medium))
                         .foregroundStyle(selected ? Color.ink : Color.secondary)
+                        // Three keys in long languages ("Τελευταίο"): shrink a little, never wrap.
+                        .lineLimit(1).minimumScaleFactor(0.75)
                         .frame(maxWidth: .infinity, minHeight: large ? 40 : 32)
                         .background { if selected { Color.clear.raisedKey(radius: large ? 20 : 16) } }
                         .contentShape(Capsule())

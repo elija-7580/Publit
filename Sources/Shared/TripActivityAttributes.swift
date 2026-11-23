@@ -24,6 +24,18 @@ struct TripActivityAttributes: ActivityAttributes {
         var platformChanged: Bool? = nil
         /// During a ride: the next vehicle ("Then: U3 at 12:45").
         var then: String? = nil
+        /// Mode of the step under way (`WALK`, `BUS`, …): the icon in front of the headline.
+        var stepMode: String? = nil
+        /// Direction of the vehicle that matters now ("Wien Simmering").
+        var direction: String? = nil
+        /// Start of the trip: with `arrival` it draws the progress bar, which runs on its own without updates.
+        var tripStart: Date? = nil
+        /// Where the trip ends.
+        var destination: String? = nil
+        /// Waiting for the vehicle: the stop to get on at. Nil on board.
+        var boardAt: String? = nil
+        /// When the vehicle that matters leaves (waiting) or arrives (on board).
+        var legTime: Date? = nil
     }
 
     var tripId: String

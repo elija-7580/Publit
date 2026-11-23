@@ -34,4 +34,12 @@ actor TripRefreshCoordinator {
         guard let built = RouteBuilder.refreshed(route, with: fresh) else { throw RouteBuilder.NoLongerTheSame() }
         return built
     }
+
+    /// A built route from a link (#145): every part's planned route is fetched and the route put together.
+    func load(parts: [RoutePart], now: Date = .now) async throws -> Itinerary {
+        var fetched: [String: Itinerary] = [:]
+        for id in Set(parts.map(\.itineraryId)) { fetched[id] = try await refresh(id, now: now) }
+        guard let built = RouteBuilder.assemble(parts, from: fetched) else { throw RouteBuilder.NoLongerTheSame() }
+        return built
+    }
 }

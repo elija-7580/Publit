@@ -32,7 +32,8 @@ struct RecentSearch: Codable, Identifiable, Equatable, Sendable {
         plan.from = from
         plan.to = to
         plan.source = source ?? .search
-        plan.timeMode = mode == .now || date < now ? .now : mode
+        // "Last connection" stays what was asked: tonight's last one, not the routes leaving now.
+        plan.timeMode = mode == .lastConnection ? mode : mode == .now || date < now ? .now : mode
         plan.date = max(date, now)
     }
 }
