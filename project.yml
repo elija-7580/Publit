@@ -133,6 +133,8 @@ targets:
       - Sources/API
       - Sources/App/AppInfo.swift
       - Sources/Models/TransitModels.swift
+      # Routes built leg by leg are refreshed part by part (TripRefreshCoordinator).
+      - Sources/Models/RouteBuilder.swift
       - Sources/Models/ServiceAlerts.swift
       - Sources/Models/Fares.swift
       - Sources/Models/ModeStyle.swift
@@ -187,6 +189,8 @@ targets:
       - Sources/API
       - Sources/App/AppInfo.swift
       - Sources/Models/TransitModels.swift
+      # Routes built leg by leg are refreshed part by part (TripRefreshCoordinator).
+      - Sources/Models/RouteBuilder.swift
       - Sources/Models/ServiceAlerts.swift
       - Sources/Models/Fares.swift
       - Sources/Models/ModeStyle.swift
