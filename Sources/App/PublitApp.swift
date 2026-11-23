@@ -85,6 +85,7 @@ struct PublitApp: App {
                     WatchSyncHub.shared.attach(trips: trips, favorites: favorites, passes: passes)
                 }
                 .onChange(of: favorites.stops.count) { PublitShortcuts.updateAppShortcutParameters() }
+                .onChange(of: favorites.items.count) { PublitShortcuts.updateAppShortcutParameters() }
         }
         // Saved lines checked for disruptions while the app is closed (iOS decides when).
         .backgroundTask(.appRefresh(LineAlertMonitor.taskId)) {

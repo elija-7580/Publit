@@ -184,9 +184,10 @@ struct WatchSnapshot: Codable, Sendable {
     /// Already arrived, most recent first.
     func past(now: Date) -> [SavedTrip] { trips.filter { $0.endTime < now }.sorted { $0.startTime > $1.startTime } }
 
-    var stops: [SavedPlace] { places.filter { $0.isStop && $0.role == nil } }
-    var otherPlaces: [SavedPlace] { places.filter { !$0.isStop && $0.role == nil } }
-    var pinned: [SavedPlace] { PlaceRole.allCases.compactMap { role in places.first { $0.role == role } } }
+    var stops: [SavedPlace] { places.filter { $0.isStop && $0.role == nil && !$0.isShortcut } }
+    var otherPlaces: [SavedPlace] { places.filter { !$0.isStop && $0.role == nil && !$0.isShortcut } }
+    /// Home, Work and the own shortcuts (#22).
+    var pinned: [SavedPlace] { PlaceRole.allCases.compactMap { role in places.first { $0.role == role } } + places.filter(\.isShortcut) }
 
     /// How many saved stops the watch's first screen lists; all of them are under Saved.
     static let homeStopLimit = 4
@@ -307,7 +308,7 @@ enum WatchSyncPolicy {
     static func structure(_ s: WatchSnapshot) -> String {
         var parts: [String] = ["v\(s.version)", s.ticketsOn ? "t1" : "t0", "a:\(s.activeTripId ?? "-")"]
         parts += s.trips.map { "T:\($0.id):\($0.itinerary.routeKey):\($0.followLive == true ? 1 : 0)" }
-        parts += s.places.map { "P:\($0.id):\($0.role?.rawValue ?? "-")" }
+        parts += s.places.map { "P:\($0.id):\($0.role?.rawValue ?? ($0.isShortcut ? "s" : "-"))" }
         parts += s.tickets.map { "K:\($0.id):\(Int64($0.pass.updatedAt.timeIntervalSince1970)):\($0.code ?? "-")" }
         return parts.joined(separator: "\n")
     }

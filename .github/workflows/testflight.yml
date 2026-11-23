@@ -71,6 +71,7 @@ jobs:
           PROFILE_WIDGETS: ${{ secrets.PROFILE_WIDGETS }}
           PROFILE_WATCH: ${{ secrets.PROFILE_WATCH }}
           PROFILE_SHARE: ${{ secrets.PROFILE_SHARE }}
+          PROFILE_WATCH_WIDGETS: ${{ secrets.PROFILE_WATCH_WIDGETS }}
         run: |
           KC="$RUNNER_TEMP/build.keychain-db"
           echo "$P12" | base64 --decode > "$RUNNER_TEMP/dist.p12"
@@ -82,6 +83,15 @@ jobs:
           echo "$PROFILE_WIDGETS" | base64 --decode > "$RUNNER_TEMP/profiles/widgets.mobileprovision"
           echo "$PROFILE_WATCH" | base64 --decode > "$RUNNER_TEMP/profiles/watch.mobileprovision"
           echo "$PROFILE_SHARE" | base64 --decode > "$RUNNER_TEMP/profiles/share.mobileprovision"
+          # Watch complications: their own secret, else fetched or created with the API key. Without one
+          # the build ships without complications (scripts/ci-sign.py leaves them out).
+          if [ -n "$PROFILE_WATCH_WIDGETS" ]; then
+            echo "$PROFILE_WATCH_WIDGETS" | base64 --decode > "$RUNNER_TEMP/profiles/watchwidgets.mobileprovision"
+          else
+            python3 scripts/asc-profile.py "$KEY_ID" "$ISSUER_ID" "$RUNNER_TEMP/keys/AuthKey_$KEY_ID.p8" \
+              io.github.elija7580.publit.watchkitapp.widgets "Publit Watch Complications App Store" \
+              "$RUNNER_TEMP/profiles/watchwidgets.mobileprovision" || echo "::warning::No profile for the watch complications; shipping without them"
+          fi
           ID=$(security find-identity -v -p codesigning "$KC" | grep "Apple Distribution" | head -1 | awk '{print $2}')
           test -n "$ID" || { echo "::error::Distribution identity missing"; exit 1; }
           echo "SIGN_ID=$ID" >> "$GITHUB_ENV"

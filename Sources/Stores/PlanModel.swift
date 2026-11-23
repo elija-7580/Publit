@@ -586,6 +586,19 @@ final class AppState {
         tab = .plan
     }
 
+    /// A saved connection (#28): the Plan tab from its start to its destination, leaving now.
+    func route(_ connection: SavedConnection) {
+        dismissToken &+= 1
+        showGoNow = false
+        plan.from = .place(connection.from)
+        plan.to = .place(connection.to)
+        plan.source = .favorite
+        plan.timeMode = .now
+        plan.date = .now
+        plan.searchStarted = true
+        tab = .plan
+    }
+
     /// Plan tab with tonight's last connection to `place`, from here.
     func lastConnection(to place: SavedPlace, source: RecentSearch.Source = .favorite) {
         route(to: place, source: source)

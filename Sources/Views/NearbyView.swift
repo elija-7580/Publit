@@ -278,7 +278,7 @@ struct NearbyView: View {
             if search { whereToButton }
             ForEach(favorites.pinned) { p in
                 Button { go(.place(p)) } label: {
-                    PlaceKeyRow(symbol: p.role?.symbol ?? "mappin", title: p.role?.title ?? p.name, detail: p.name, routes: true)
+                    PlaceKeyRow(symbol: p.shownSymbol, title: p.keyTitle, detail: p.role == nil ? p.subtitle : p.name, routes: true)
                 }
                 .buttonStyle(.plain)
             }
@@ -601,7 +601,7 @@ struct StopDeparturesView: View {
                     }
                 case .lines:
                     ForEach(LineGrouping.lines(shown)) { line in
-                        let savedLine = SavedLine(stopTime: line.first, stopId: stopId, stopName: name, at: coordinate)
+                        let savedLine = SavedLine(stopTime: line.first, stopId: stopId, stopName: name, at: coordinate, direction: false)
                         NavigationLink {
                             LineDetailView(line: LineRef(saved: savedLine), initialDepartures: shown)
                         } label: { LineAtStopRow(line: line) }

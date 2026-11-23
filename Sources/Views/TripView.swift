@@ -365,7 +365,7 @@ struct LineDeparturesView: View {
                     .linkIndicatorHidden()
                 }
             } header: {
-                HStack { LineBadge(line); Text(L10n.f("At %@", line.stopName)).textCase(nil) }
+                HStack { LineBadge(line); Text(SavedLineRow.subtitle(line)).textCase(nil) }
             }
         }
         .readableWidth()

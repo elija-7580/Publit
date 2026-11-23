@@ -17,6 +17,8 @@ enum PublitWidgetsEntry {
 struct PublitWidgets: WidgetBundle {
     var body: some Widget {
         DeparturesWidget()
+        NearbyWidget()
+        ShortcutsWidget()
         TripLiveActivity()
     }
 }
@@ -25,6 +27,8 @@ struct PublitWidgets: WidgetBundle {
 struct PublitWidgetsWithWatch: WidgetBundle {
     var body: some Widget {
         DeparturesWidget()
+        NearbyWidget()
+        ShortcutsWidget()
         WatchTripLiveActivity()
     }
 }
