@@ -7,6 +7,8 @@
 - **Trip** (`TripView`, #130): the menu on a stop of a trip has "Departures", which opens that stop's departure board.
 - **Saved addresses** (#122): addresses that share an ID no longer replace or remove each other.
 - **Onboarding** (#140): "routes wherever you go" instead of "across Europe".
+- **Stability** (`MapHero`, diagnostics of build 96): the app froze for 5.8 s in the map renderer on the way back from Tickets to Nearby, after iOS had warned about memory. The maps at the top of Nearby, Go now, a route, a trip and a line stayed alive under other screens and tabs; a covered map is now let go after 20 s, and at once in the background or on a memory warning, and built anew when its screen comes back.
+- **Diagnostics** (`CrashReports`, `HangLog`): a memory warning notes how much memory Publit itself uses. A request that iOS froze with the app and that timed out in the background stays a step and is no longer an error entry.
 - **Data** (#135): the feed has no bus 240 Krems → St. Pölten; recorded in `docs/DATA-SOURCES.md`.
 
 ## 0.1.1 (build 96) – no crash on first launch on a Mac

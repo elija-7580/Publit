@@ -19,6 +19,13 @@ enum MapHero {
     /// Gap between the hero row and the first card (`listSectionSpacing`).
     static let gap: CGFloat = 12
     static let space = "mapHero"
+    /// A map whose screen is covered (another tab, a screen pushed over it) is let go after this
+    /// long, and at once in the background or when iOS warns about memory. Each live map holds
+    /// tiles and a render surface; several of them, kept under other screens, cost memory and froze
+    /// the app for seconds when iOS brought them all back at once (diagnostics of build 96:
+    /// 5.8 s in the map renderer on the way back from Tickets to Nearby). Coming back builds a
+    /// fresh map; a quick look at another tab keeps it.
+    static let releaseDelay: Duration = .seconds(20)
 }
 
 /// Where the hero row is in the list; nil while it is scrolled out of the list.
@@ -145,6 +152,11 @@ private struct MapHeroOverList<M: View>: ViewModifier {
     @State private var restY: CGFloat?
     @State private var rowGone = false
     @State private var track = MapHeroTrack()
+    /// This screen is the one on show (not covered by a pushed screen, not in another tab).
+    @State private var onScreen = true
+    /// False once a covered screen's map was let go (see `MapHero.releaseDelay`).
+    @State private var keepsMap = true
+    @Environment(\.scenePhase) private var scenePhase
 
     private var moved: CGFloat? {
         if let y = track.globalY, let rest = track.restGlobalY { return y - rest }
@@ -174,7 +186,7 @@ private struct MapHeroOverList<M: View>: ViewModifier {
             .modifier(ListOffset(offset: $offset))
             .overlay {
                 // Kept while scrolled away (only hidden), so the map keeps where you moved it.
-                if let moved {
+                if let moved, keepsMap {
                     MapHeroLayer(moved: max(moved, -(MapHero.height + 400)),
                                  rowTop: track.globalY.map { max($0, -(MapHero.height + 1000)) },
                                  map: map, onExpand: onExpand)
@@ -184,6 +196,19 @@ private struct MapHeroOverList<M: View>: ViewModifier {
                 }
             }
             .coordinateSpace(name: MapHero.space)
+            .onAppear { onScreen = true; keepsMap = true }
+            .onDisappear { onScreen = false }
+            .task(id: onScreen) {
+                guard !onScreen else { return }
+                try? await Task.sleep(for: MapHero.releaseDelay)
+                if !Task.isCancelled, !onScreen { keepsMap = false }
+            }
+            .onChange(of: scenePhase) { _, phase in
+                if phase == .background, !onScreen { keepsMap = false }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: UIApplication.didReceiveMemoryWarningNotification)) { _ in
+                if !onScreen { keepsMap = false }
+            }
             .onPreferenceChange(MapHeroFrameKey.self) { frame in
                 guard let frame else {
                     // The row left the list: the map is gone with it.

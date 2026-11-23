@@ -16,12 +16,27 @@ final class CrashReports: NSObject, MXMetricManagerSubscriber, @unchecked Sendab
         handle(MXMetricManager.shared.pastDiagnosticPayloads)
         let center = NotificationCenter.default
         center.addObserver(forName: UIApplication.didReceiveMemoryWarningNotification, object: nil, queue: nil) { _ in
-            HangLog.shared.report("MEMORY", "iOS warned that memory is low.")
+            // With the app's own share: tells a heavy Publit from a full iPhone.
+            let own = Self.footprintMB().map { " Publit uses \($0) MB." } ?? ""
+            HangLog.shared.report("MEMORY", "iOS warned that memory is low." + own)
         }
         center.addObserver(forName: ProcessInfo.thermalStateDidChangeNotification, object: nil, queue: nil) { _ in
             let names = ["nominal", "fair", "serious", "critical"]
             HangLog.shared.note("thermal \(names[min(ProcessInfo.processInfo.thermalState.rawValue, 3)])")
         }
+    }
+
+    /// The memory iOS counts against the app (what Xcode's gauge shows), in MB.
+    static func footprintMB() -> Int? {
+        var info = task_vm_info_data_t()
+        var count = mach_msg_type_number_t(MemoryLayout<task_vm_info_data_t>.size / MemoryLayout<integer_t>.size)
+        let result = withUnsafeMutablePointer(to: &info) {
+            $0.withMemoryRebound(to: integer_t.self, capacity: Int(count)) {
+                task_info(mach_task_self_, task_flavor_t(TASK_VM_INFO), $0, &count)
+            }
+        }
+        guard result == KERN_SUCCESS else { return nil }
+        return Int(info.phys_footprint / 1_048_576)
     }
 
     func didReceive(_ payloads: [MXDiagnosticPayload]) { handle(payloads) }

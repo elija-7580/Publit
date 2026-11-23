@@ -379,7 +379,7 @@ Ab 680 pt Breite (regular): Karte bildschirmfüllend, Inhalte in einem schwebend
 
 ## 24. Datenschutz, Diagnose, Datenexport
 
-- **Diagnose** (`HangLog`, `CrashReports`, `MainThreadSampler`): Hänger ≥ 2 s mit Stack, fehlgeschlagene Requests (nur Art), Abstürze (MetricKit), unerwartete Beendigungen – ohne Orte/Haltestellen/Tickets; bleibt auf dem Gerät bis „Share diagnostics“.
+- **Diagnose** (`HangLog`, `CrashReports`, `MainThreadSampler`): Hänger ≥ 2 s mit Stack, fehlgeschlagene Requests (nur Art), Abstürze (MetricKit), unerwartete Beendigungen – ohne Orte/Haltestellen/Tickets; bleibt auf dem Gerät bis „Share diagnostics“. Speicherwarnungen von iOS stehen mit dem eigenen Speicherverbrauch der App („Publit uses … MB“) im Protokoll; ein Timeout einer Anfrage, die iOS mit der App im Hintergrund eingefroren hat, bleibt ein Schritt und wird kein eigener Fehler-Eintrag.
 - **Overpass/OpenStreetMap** (`StationExits`): nur für Stationsausgänge, nur die Lage des Ausgangs, Ergebnis nur im Speicher; Schalter in Einstellungen → Data.
 - **Wunschliste** (`WishesClient`): nur auf der Wunsch-Seite; sendet Wunsch-Text, Sprache (de/en) und die zufällige Abstimmungs-ID.
 - **Datenexport** (`DataExport`): alle gespeicherten Daten (Orte, Linien, Fahrten, Suchverlauf, Tickets ohne Bilder) als JSON über Teilen-Dialog.
@@ -424,7 +424,7 @@ Kleinere Bausteine, die in den Abschnitten oben nicht namentlich vorkommen:
 | `PlaceHitRow` | Treffer der Ortssuche: Haltestelle, Adresse oder Ort, Apple-Vorschläge werden beim Antippen nachgeschlagen; „Save“ per Wischen (§9) |
 | `HeadingDot` | Dein Standort mit Lichtkegel in Blickrichtung auf allen Karten (SwiftUI über `YouAreHere`, Stationskarte über `UserHeadingView`) (§3) |
 | `ExitMark` | Tür-Markierung des gewählten Stationsausgangs auf der Karte der Live-Fahrt (§13) |
-| `MapHeroSpace` | Platz für die Karte oben (Nearby, Go Now, Routendetail, Fahrt, Linie) als erste Listenzeile; die Karte selbst (`MapHeroLayer`) liegt randlos über der Liste, reicht unter die Leiste, läuft über der ersten Karte aus und ist auch klein verschieb-/zoombar (Nearby: Stationen antippbar); Vergrößern-Taste öffnet die volle Karte (§3) |
+| `MapHeroSpace` | Platz für die Karte oben (Nearby, Go Now, Routendetail, Fahrt, Linie) als erste Listenzeile; die Karte selbst (`MapHeroLayer`) liegt randlos über der Liste, reicht unter die Leiste, läuft über der ersten Karte aus und ist auch klein verschieb-/zoombar (Nearby: Stationen antippbar); Vergrößern-Taste öffnet die volle Karte (§3) Ist der Screen verdeckt (anderer Tab, Screen darüber), wird die Karte nach 20 s freigegeben (`MapHero.releaseDelay`), im Hintergrund und bei einer Speicherwarnung sofort; beim Zurückkommen entsteht sie neu. |
 | `EndpointConnector` | Verbindungslinie zwischen Von/Nach im Planer (§8) |
 | `ServiceAlertRow` | eine aufklappbare Störungsmeldung (§3, §12) |
 | `SettingsButton` | Zahnrad, öffnet Einstellungen (§16) |
