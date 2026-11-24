@@ -71,12 +71,13 @@ enum CalendarTrips {
     /// IDs of places made from an event start with this.
     static let placePrefix = "calendar|"
 
-    /// Upcoming events worth a route, soonest first: not all-day, with a real place (no video call),
+    /// Upcoming events worth a route, soonest first: not all-day, with a clear place (see `destination`),
     /// starting within `lookahead`, and not where you are now.
     static func suggestions(_ events: [CalendarAppointment], now: Date, here: LatLon? = nil,
-                            limit: Int = 3) -> [CalendarAppointment] {
+                            saved: [SavedPlace] = [], limit: Int = 3) -> [CalendarAppointment] {
         var seen = Set<String>()
         return events
+            .compactMap { destination($0, saved: saved) }
             .filter { e in
                 guard !e.isAllDay,
                       e.start.timeIntervalSince(now) >= minimumLead,
@@ -108,6 +109,76 @@ enum CalendarTrips {
         let t = text.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         guard t.count >= 2 else { return false }
         return !onlineMarkers.contains { t.contains($0) }
+    }
+
+    /// The event with a place clear enough to route to, or nil (feedback 2026-11-24: a "staff meeting"
+    /// without a real place must not be offered). Clear is: a map pin in the event, a saved place it
+    /// names ("Work", "Büro", "Zuhause" or a saved place's own name; it then takes that place's
+    /// position), or a written address (street and number, postcode and town, or "name, town").
+    static func destination(_ e: CalendarAppointment, saved: [SavedPlace]) -> CalendarAppointment? {
+        guard isPhysicalPlace(e.location) else { return nil }
+        if e.coordinate != nil { return e }
+        if let p = savedPlace(named: e.location, in: saved) {
+            var out = e
+            out.lat = p.lat
+            out.lon = p.lon
+            return out
+        }
+        return looksLikeAddress(e.location) ? e : nil
+    }
+
+    /// Words for your workplace and your home, in the app's languages.
+    static let workWords: Set<String> = [
+        "arbeit", "work", "büro", "buero", "office", "firma", "job", "arbeitsplatz", "the office",
+        "bureau", "travail", "au bureau", "ufficio", "lavoro", "oficina", "trabajo", "escritório", "trabalho",
+        "kantoor", "werk", "biuro", "praca", "робота", "офіс", "birou", "serviciu", "kancelář", "práce",
+        "kontoret", "jobbet", "arbetet", "γραφείο", "δουλειά", "iroda", "munkahely", "ofis", "iş", "işyeri",
+    ]
+    static let homeWords: Set<String> = [
+        "zuhause", "zu hause", "daheim", "home", "at home", "maison", "chez moi", "à la maison", "casa", "a casa",
+        "en casa", "em casa", "thuis", "dom", "w domu", "вдома", "дім", "acasă", "acasa", "doma", "domov",
+        "hemma", "hem", "σπίτι", "otthon", "itthon", "ev", "evde",
+    ]
+
+    private static func normalized(_ text: String) -> String {
+        text.lowercased()
+            .components(separatedBy: CharacterSet.alphanumerics.union(.whitespaces).inverted).joined(separator: " ")
+            .split(separator: " ").joined(separator: " ")
+    }
+
+    /// The saved place the event's place names: Home or Work by a word for it, or any saved place by its name.
+    static func savedPlace(named text: String, in saved: [SavedPlace]) -> SavedPlace? {
+        let first = text.split(whereSeparator: \.isNewline).first.map(String.init) ?? text
+        let names = Set([normalized(text), normalized(first)].filter { !$0.isEmpty })
+        guard !names.isEmpty else { return nil }
+        if !names.isDisjoint(with: workWords), let p = saved.first(where: { $0.role == .work }) { return p }
+        if !names.isDisjoint(with: homeWords), let p = saved.first(where: { $0.role == .home }) { return p }
+        return saved.first { names.contains(normalized($0.name)) }
+    }
+
+    /// Parts of a building, not a place to travel to ("Raum 3", "2. Stock", "Meeting room B").
+    private static let roomWords: Set<String> = [
+        "raum", "room", "zimmer", "saal", "sala", "salle", "stock", "og", "eg", "ug", "etage", "floor",
+        "gebäude", "building", "besprechungsraum", "konferenzraum", "meetingraum", "aula", "hörsaal", "kantine",
+    ]
+
+    /// Written like an address: street and number ("Herrengasse 14", "12 rue de Rivoli"), a postcode
+    /// with its town ("1010 Wien"), or a name and a town ("Café Central, Wien"). Rooms and floors are not.
+    static func looksLikeAddress(_ text: String) -> Bool {
+        let t = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        let lower = t.lowercased()
+        let words = Set(normalized(t).split(separator: " ").map(String.init))
+        let postcode = lower.range(of: #"(^|[^\d])\d{4,5}\s+\p{L}{2,}"#, options: .regularExpression) != nil
+        if postcode { return true }
+        if !words.isDisjoint(with: roomWords) { return false }
+        let streetNumber = lower.range(of: #"\p{L}{3,}\.?\s+\d{1,4}\s?[a-z]?(\b|,|$)"#, options: .regularExpression) != nil
+        let numberStreet = lower.range(of: #"(^|\s)\d{1,4}[a-z]?,?\s+\p{L}{3,}"#, options: .regularExpression) != nil
+        if streetNumber || numberStreet { return true }
+        // "Name, Town": two parts that both read as words.
+        let parts = t.split(whereSeparator: { $0 == "," || $0.isNewline })
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { $0.range(of: #"\p{L}{3,}"#, options: .regularExpression) != nil }
+        return parts.count >= 2
     }
 
     /// The route to take to be there on time: the one leaving last that still arrives by `arriveBy`.

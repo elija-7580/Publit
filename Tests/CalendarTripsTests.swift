@@ -89,4 +89,42 @@ final class CalendarTripsTests: XCTestCase {
         plan.to = .place(SavedPlace(id: "other", name: "Other", subtitle: nil, lat: 48.2, lon: 16.3, stopId: nil))
         XCTAssertNil(plan.appointment)
     }
+
+    // MARK: Only events with a clear place (feedback 2026-11-24)
+
+    func testEventsWithoutAClearPlaceAreLeftOut() {
+        let list = CalendarTrips.suggestions([
+            event("meeting", inMinutes: 60, location: "Betriebsversammlung"),
+            event("room", inMinutes: 61, location: "Raum 3"),
+            event("roomCode", inMinutes: 61, location: "G1.E.S.20/21/22"),
+            event("floor", inMinutes: 62, location: "2. Stock, Besprechungsraum"),
+            event("street", inMinutes: 63, location: "Herrengasse 14"),
+            event("postcode", inMinutes: 64, location: "Wiener Straße\n1010 Wien"),
+            event("french", inMinutes: 65, location: "12 rue de Rivoli"),
+            event("nameTown", inMinutes: 66, location: "Café Central, Wien"),
+            event("pin", inMinutes: 67, location: "Café Central", lat: 48.21, lon: 16.37),
+        ], now: now, limit: 10)
+        XCTAssertEqual(list.map(\.id), ["street", "postcode", "french", "nameTown", "pin"])
+    }
+
+    func testWorkHomeAndSavedNamesGoToTheSavedPlace() {
+        var work = SavedPlace(id: "w", name: "Firma Huber", subtitle: nil, lat: 48.19, lon: 16.35, stopId: nil)
+        work.role = .work
+        var home = SavedPlace(id: "h", name: "Daheim", subtitle: nil, lat: 48.22, lon: 16.40, stopId: nil)
+        home.role = .home
+        let gym = SavedPlace(id: "g", name: "Fitinn Mitte", subtitle: nil, lat: 48.20, lon: 16.36, stopId: nil)
+        let saved = [work, home, gym]
+        let list = CalendarTrips.suggestions([
+            event("work", inMinutes: 60, location: "Büro"),
+            event("home", inMinutes: 61, location: "Zuhause"),
+            event("gym", inMinutes: 62, location: "fitinn mitte"),
+            event("unknown", inMinutes: 63, location: "Kantine"),
+        ], now: now, saved: saved, limit: 10)
+        XCTAssertEqual(list.map(\.id), ["work", "home", "gym"])
+        XCTAssertEqual(list[0].coordinate, work.coordinate)
+        XCTAssertEqual(list[1].coordinate, home.coordinate)
+        XCTAssertEqual(list[2].coordinate, gym.coordinate)
+        // Without a saved Work place, "Büro" alone is no clear place.
+        XCTAssertTrue(CalendarTrips.suggestions([event("work", inMinutes: 60, location: "Büro")], now: now).isEmpty)
+    }
 }
