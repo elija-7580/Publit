@@ -13,12 +13,6 @@ struct TicketScan: @unchecked Sendable {
     var suggestedColor: String?
 }
 
-struct TicketTextPiece: Identifiable, Sendable {
-    let id: Int
-    let text: String
-    /// Normalized to the upright page, origin top left (same convention as barcode regions).
-    let rect: CGRect
-}
 
 enum TicketRecognizer {
     enum Failure: LocalizedError {
@@ -49,14 +43,16 @@ enum TicketRecognizer {
         // If Vision cannot run (simulator without inference context, transient Neural Engine errors),
         // keep a text-only result so PDF imports do not hard-fail when the page already has enough text.
         var result: TicketScan
+        // Text is read from the picture too (#5): parts of many PDFs are images (a scanned page, a name or
+        // date drawn as graphics). Lines found that way are added after the exact embedded ones.
         do {
-            result = try await scan(image: image, recognizeText: embedded.count < 3)
+            result = try await scan(image: image, recognizeText: true)
         } catch {
             guard embedded.count >= 3 else { throw error }
             result = TicketScan(lines: embedded, barcodes: [], suggestedColor: nil)
         }
         try Task.checkCancellation()
-        if embedded.count >= 3 { result.lines = embedded }
+        if embedded.count >= 3 { result.lines = TicketTextPiece.mergedLines(embedded: embedded, recognized: result.lines) }
         return result
     }
 
@@ -116,7 +112,8 @@ enum TicketRecognizer {
         }.value
     }
 
-    /// Exact embedded PDF text with page-relative hit boxes. Raster-only/rotated PDFs use OCR.
+    /// Exact embedded PDF text with page-relative hit boxes. Raster-only/rotated PDFs use OCR, and
+    /// `TicketTextPiece.merging` adds OCR for the parts of a page that are pictures.
     /// Coordinates match renderPage's media-box thumbnail (upright, top-left origin).
     static func pieces(pdf data: Data, page number: Int) -> [TicketTextPiece] {
         guard let page = PDFDocument(data: data)?.page(at: number), page.rotation % 360 == 0 else { return [] }

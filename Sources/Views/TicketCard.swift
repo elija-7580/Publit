@@ -16,18 +16,18 @@ struct TicketSummaryCard: View {
                 Text(verbatim: ticket.name).font(.headline).foregroundStyle(.primary)
                     .fixedSize(horizontal: false, vertical: true)
                 Text(ticket.kind == .pass ? L10n.t("Pass") : L10n.t("Single trip"))
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.footnote).foregroundStyle(.secondary)
                 if let tripId = ticket.tripId, let trip = trips.trip(tripId) {
-                    Text(verbatim: trip.title).font(.caption).foregroundStyle(.secondary)
+                    Text(verbatim: trip.title).font(.footnote).foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 if let until = ticket.validUntil {
                     Text(ticket.isValid() ? L10n.f("Valid until %@", until.formatted(date: .abbreviated, time: .omitted)) : L10n.t("Expired"))
-                        .font(.caption).foregroundStyle(ticket.isValid() ? Color.secondary : Color.danger)
+                        .font(.footnote).foregroundStyle(ticket.isValid() ? Color.secondary : Color.danger)
                 }
                 Label(ticket.imageFile != nil ? L10n.t("Stored copy") : L10n.t("Open ticket app"),
                       systemImage: ticket.imageFile != nil ? "doc" : "arrow.up.forward.app")
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.footnote).foregroundStyle(.secondary)
             }
             Spacer(minLength: 0)
         }

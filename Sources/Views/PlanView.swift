@@ -3,6 +3,7 @@ import SwiftUI
 struct PlanView: View {
     @AppStorage(SmartRouting.enabledKey) private var smartRouting = true
     @Environment(AppState.self) private var app
+    @Environment(FavoritesStore.self) private var favorites
     @Environment(\.scenePhase) private var scenePhase
     @State private var isVisible = false
     @Environment(LocationManager.self) private var location
@@ -101,9 +102,22 @@ struct PlanView: View {
                 NavigationLink {
                     SectionPlanView(from: plan.from, to: plan.to, date: plan.timeMode == .arriveBy ? .now : plan.date)
                 } label: {
-                    Label("Plan in sections", systemImage: "point.topleft.down.to.point.bottomright.curvepath.fill")
-                        .font(.subheadline.weight(.semibold))
+                    // The same soft capsule row as "Route options" above (docs/design: one row type).
+                    HStack(spacing: 8) {
+                        Image(systemName: "point.topleft.down.to.point.bottomright.curvepath")
+                            .font(.subheadline.weight(.semibold)).foregroundStyle(Color.secondary)
+                            .accessibilityHidden(true)
+                        Text("Plan in sections").font(.subheadline.weight(.semibold)).foregroundStyle(.primary)
+                        Spacer(minLength: 8)
+                        Image(systemName: "chevron.right").font(.caption.weight(.semibold)).foregroundStyle(.tertiary)
+                            .accessibilityHidden(true)
+                    }
+                    .padding(.horizontal, 14)
+                    .frame(minHeight: 40)
+                    .background(Color.inkFill, in: Capsule())
+                    .contentShape(Capsule())
                 }
+                .linkIndicatorHidden()
                 .accessibilityIdentifier("planInSections")
                 .listRowSeparator(.hidden)
                 // One wide search key under the whole form (as in the ÖBB app), instead of a small
@@ -192,6 +206,17 @@ struct PlanView: View {
         }
         .navigationDestination(item: $opened) { route in detail(route.itinerary) }
         .toolbar {
+            // Save this connection (#28): both ends are places, not "here".
+            if case .place(let from) = plan.from, case .place(let to)? = plan.to, from.id != to.id {
+                let saved = favorites.containsConnection(from: from, to: to)
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { favorites.toggleConnection(from: from, to: to) } label: {
+                        Image(systemName: saved ? "star.fill" : "star")
+                    }
+                    .accessibilityLabel(Text(saved ? "Saved connection" : "Save connection"))
+                    .accessibilityIdentifier("saveConnection")
+                }
+            }
             if wideMap == nil, plan.searchStarted, plan.to != nil, !pick.list.isEmpty {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { comparing = true } label: { Image(systemName: "map") }

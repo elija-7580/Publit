@@ -6,10 +6,11 @@ struct FavoritesView: View {
     @Environment(TripStore.self) private var trips
     @State private var adding = false
     @State private var settingRole: PlaceRole?
+    @State private var addingShortcut = false
 
     var body: some View {
         List {
-            Section("Home and Work") {
+            Section {
                 ForEach(PlaceRole.allCases, id: \.self) { role in
                     if let p = favorites.place(for: role) {
                         Button { app.route(to: p, source: .favorite) } label: {
@@ -30,30 +31,84 @@ struct FavoritesView: View {
                         .buttonStyle(.plain)
                     }
                 }
+                // Own shortcuts next to Home and Work (#22): a gym, a school, someone's flat.
+                ForEach(favorites.shortcuts) { p in
+                    Button { app.route(to: p, source: .favorite) } label: {
+                        PlaceKeyRow(symbol: p.shownSymbol, title: p.name, detail: p.subtitle, routes: true)
+                    }
+                    .buttonStyle(.plain)
+                    .swipeActions {
+                        Button(role: .destructive) { favorites.removeShortcut(p.id) } label: {
+                            Label("Remove", systemImage: "trash")
+                        }.tint(Color.danger)
+                    }
+                    .swipeActions(edge: .leading) { lastConnectionButton(p) }
+                    .contextMenu {
+                        lastConnectionButton(p)
+                        ShortcutSymbolMenu(place: p)
+                        Button(role: .destructive) { favorites.removeShortcut(p.id) } label: {
+                            Label("Remove shortcut", systemImage: "minus.circle")
+                        }
+                    }
+                    .accessibilityHint(L10n.f("Plans a route to %@", p.name))
+                }
+                .onMove { favorites.moveShortcuts(fromOffsets: $0, toOffset: $1) }
+                Button { addingShortcut = true } label: {
+                    PlaceKeyRow(symbol: "plus", title: L10n.t("Add shortcut"))
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("addShortcut")
+            } header: {
+                Text("Home and Work")
+            } footer: {
+                Text("Shortcuts are also on the Nearby screen, in widgets and in the Shortcuts app.")
             }
 
             upcomingTrips
+
+            if !favorites.connections.isEmpty {
+                Section("Connections") {
+                    ForEach(favorites.connections) { c in
+                        Button { app.route(c) } label: { SavedConnectionRow(connection: c) }
+                            .buttonStyle(.plain)
+                            .swipeActions(edge: .leading) {
+                                Button { app.route(c.reversed) } label: {
+                                    Label("Way back", systemImage: "arrow.uturn.backward")
+                                }.tint(Color.inkAction)
+                            }
+                            .contextMenu {
+                                Button { app.route(c.reversed) } label: {
+                                    Label("Way back", systemImage: "arrow.uturn.backward")
+                                }
+                            }
+                    }
+                    .onDelete { idx in favorites.removeConnections(idx.map { favorites.connections[$0].id }) }
+                    .onMove { favorites.moveConnections(fromOffsets: $0, toOffset: $1) }
+                }
+            }
 
             if !favorites.lines.isEmpty {
                 Section("Lines") {
                     ForEach(favorites.lines) { line in
                         NavigationLink {
-                            LineDetailView(line: LineRef(saved: line))
-                        } label: {
-                            HStack(spacing: 10) {
-                                LineBadge(line)
-                                Text(L10n.f("At %@", line.stopName)).lineLimit(1)
+                            // One direction (#21): straight to its next departures there.
+                            if line.directionId != nil {
+                                LineDeparturesView(line: line)
+                            } else {
+                                LineDetailView(line: LineRef(saved: line))
                             }
+                        } label: {
+                            SavedLineRow(line: line)
                         }
                     }
                     .onDelete { idx in favorites.removeLines(idx.map { favorites.lines[$0].id }) }
                     .onMove { favorites.moveLines(fromOffsets: $0, toOffset: $1) }
                 }
             }
-            if favorites.stops.isEmpty && favorites.places.isEmpty && favorites.lines.isEmpty {
+            if favorites.stops.isEmpty && favorites.places.isEmpty && favorites.lines.isEmpty && favorites.connections.isEmpty {
                 Section {
                     EmptyState(title: L10n.t("Nothing else saved yet"), systemImage: "star",
-                               message: L10n.t("Save stops from their departure board, lines from a trip, or add places with +."))
+                               message: L10n.t("Save stops from their departure board, lines from a trip, connections from Plan, or add places with +."))
                 }
             }
             if !favorites.stops.isEmpty {
@@ -88,7 +143,10 @@ struct FavoritesView: View {
                             Button { favorites.set(p, as: .work) } label: { Label("Work", systemImage: "briefcase") }.tint(Color.inkAction)
                             lastConnectionButton(p)
                         }
-                        .contextMenu { lastConnectionButton(p) }
+                        .contextMenu {
+                            lastConnectionButton(p)
+                            Button { favorites.addShortcut(p) } label: { Label("Make a shortcut", systemImage: "star.circle") }
+                        }
                     }
                     .onDelete { idx in favorites.remove(idx.map { favorites.places[$0].id }) }
                     .onMove { favorites.movePlaces(fromOffsets: $0, toOffset: $1) }
@@ -108,6 +166,11 @@ struct FavoritesView: View {
         .sheet(isPresented: $adding) {
             PlaceSearchView(title: "Save a place", allowCurrentLocation: false) { endpoint in
                 if case .place(let p) = endpoint, !favorites.contains(p) { favorites.toggle(p) }
+            }
+        }
+        .sheet(isPresented: $addingShortcut) {
+            PlaceSearchView(title: "Add shortcut", allowCurrentLocation: false) { endpoint in
+                if case .place(let p) = endpoint { favorites.addShortcut(p) }
             }
         }
         .sheet(item: $settingRole) { role in
@@ -191,5 +254,99 @@ struct PastTripsView: View {
         app.plan.date = PlanView.nextOccurrence(of: t.startTime)
         app.plan.searchStarted = true
         app.tab = .plan
+    }
+}
+
+/// Picks the symbol of an own shortcut.
+struct ShortcutSymbolMenu: View {
+    let place: SavedPlace
+    @Environment(FavoritesStore.self) private var favorites
+
+    var body: some View {
+        Menu {
+            ForEach(SavedPlace.shortcutSymbols, id: \.self) { symbol in
+                Button { favorites.setSymbol(symbol, for: place.id) } label: { Image(systemName: symbol) }
+            }
+        } label: {
+            Label("Icon", systemImage: place.shownSymbol)
+        }
+    }
+}
+
+/// A saved line: badge, its direction (when saved for one) and stop, and the next times there.
+struct SavedLineRow: View {
+    let line: SavedLine
+    @State private var next: [StopTime] = []
+
+    var body: some View {
+        HStack(spacing: 10) {
+            LineBadge(line)
+            VStack(alignment: .leading, spacing: 1) {
+                if let h = line.headsign { Text(verbatim: "→ \(h)").font(.subheadline.weight(.semibold)).lineLimit(1) }
+                Text(L10n.f("At %@", line.stopName)).font(line.headsign == nil ? .body : .caption)
+                    .foregroundStyle(line.headsign == nil ? .primary : .secondary).lineLimit(1)
+            }
+            Spacer(minLength: 4)
+            if !next.isEmpty {
+                Text(verbatim: next.prefix(2).map { Fmt.time($0.departureTime, tz: $0.place.tz) }.joined(separator: " · "))
+                    .font(.subheadline.weight(.semibold)).monospacedDigit()
+                    .foregroundStyle(next.first?.realTime == true ? Color.live : .secondary)
+            }
+        }
+        .task(id: line.id) {
+            // Only for a line saved in one direction: the times say when to leave.
+            guard line.directionId != nil,
+                  let res = try? await TransitousClient.shared.departures(stopId: line.stopId, count: 60,
+                                                                          radius: StopDeparturesView.stationRadius) else { return }
+            next = Array(StopTime.upcoming(res.stopTimes).filter { line.matches($0) && !$0.isCancelled }.prefix(2))
+        }
+    }
+
+    /// "→ Destination · At Stop", or "At Stop" for every direction.
+    static func subtitle(_ line: SavedLine) -> String {
+        let at = L10n.f("At %@", line.stopName)
+        return line.headsign.map { "→ \($0) · \(at)" } ?? at
+    }
+}
+
+/// A saved connection: from → to, and when the next one leaves (with its first line).
+struct SavedConnectionRow: View {
+    let connection: SavedConnection
+    @State private var next: Itinerary?
+    @State private var loaded = false
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "arrow.triangle.swap")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Color.ink)
+                .frame(width: 34, height: 34)
+                .background(Color.inkFill, in: Circle())
+            VStack(alignment: .leading, spacing: 1) {
+                Text(verbatim: connection.from.name).font(.body.weight(.semibold)).lineLimit(1)
+                Text(verbatim: "→ " + connection.to.name).font(.subheadline).foregroundStyle(.secondary).lineLimit(1)
+            }
+            Spacer(minLength: 4)
+            if let next {
+                VStack(alignment: .trailing, spacing: 2) {
+                    if let leg = next.firstTransitLeg { LineBadge(leg) }
+                    Text(Fmt.time(next.firstDeparture ?? next.startTime))
+                        .font(.subheadline.weight(.semibold)).monospacedDigit()
+                        .foregroundStyle(next.hasRealtime ? Color.live : .primary)
+                }
+            } else if !loaded {
+                ProgressView().controlSize(.small)
+            }
+        }
+        .frame(minHeight: 46)
+        .contentShape(Rectangle())
+        .accessibilityElement(children: .combine)
+        .task(id: connection.id) {
+            let res = try? await TransitousClient.shared.plan(
+                from: connection.from.coordinate, to: connection.to.coordinate, time: nil, arriveBy: false,
+                stops: PlanStops(from: connection.from.stopId, to: connection.to.stopId))
+            next = res?.itineraries.first { !$0.isCancelled && ($0.firstDeparture ?? $0.startTime) > .now.addingTimeInterval(-60) }
+            loaded = true
+        }
     }
 }

@@ -25,7 +25,7 @@ struct WatchSavedView: View {
                     }
                 }
                 if !snap.pinned.isEmpty {
-                    Section("Home and Work") {
+                    Section(snap.pinned.contains(where: \.isShortcut) ? LocalizedStringKey("Shortcuts") : LocalizedStringKey("Home and Work")) {
                         ForEach(snap.pinned) { place in
                             NavigationLink(value: WatchRoute.planTo(place)) { WatchPlaceRow(place: place) }
                         }

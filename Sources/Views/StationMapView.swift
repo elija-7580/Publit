@@ -386,6 +386,22 @@ struct StationMapView: View {
                     }
                     .padding(.trailing, 12).padding(.bottom, 28)
                 }
+                // Back to the departures around you (#17): the board comes back up from the bottom.
+                .overlay(alignment: .bottom) {
+                    if !embedded, selection == nil {
+                        Button { dismiss() } label: {
+                            Label("Departures nearby", systemImage: "list.bullet")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(Color.ink)
+                                .padding(.horizontal, 16).frame(height: 44)
+                                .matteSurface(in: Capsule())
+                                .mapShadow()
+                        }
+                        .buttonStyle(.plain)
+                        .padding(.bottom, 28)
+                        .accessibilityIdentifier("mapBackToNearby")
+                    }
+                }
                 // Loading: the Publit mark in the middle of the map, small and out of the way of taps.
                 .overlay {
                     if model.isLoadingLive && !model.hasLive {

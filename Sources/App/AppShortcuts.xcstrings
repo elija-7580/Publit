@@ -760,6 +760,196 @@
      }
     }
    }
+  },
+  "Route to ${place} in ${applicationName}": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Route to ${place} in ${applicationName}"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Route nach ${place} in ${applicationName}"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Itinéraire vers ${place} dans ${applicationName}"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Percorso verso ${place} in ${applicationName}"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Ruta a ${place} en ${applicationName}"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Percurso para ${place} no ${applicationName}"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Route naar ${place} in ${applicationName}"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Trasa do ${place} w ${applicationName}"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Маршрут до ${place} у ${applicationName}"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Traseu spre ${place} în ${applicationName}"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Trasa do ${place} v ${applicationName}"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Rutt till ${place} i ${applicationName}"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Διαδρομή προς ${place} στο ${applicationName}"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Útvonal ide: ${place} – ${applicationName}"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "${applicationName} ile ${place} rotası"
+     }
+    }
+   }
+  },
+  "Take me to ${place} with ${applicationName}": {
+   "extractionState": "manual",
+   "localizations": {
+    "en": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Take me to ${place} with ${applicationName}"
+     }
+    },
+    "de": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Bring mich mit ${applicationName} nach ${place}"
+     }
+    },
+    "fr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Emmène-moi à ${place} avec ${applicationName}"
+     }
+    },
+    "it": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Portami a ${place} con ${applicationName}"
+     }
+    },
+    "es": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Llévame a ${place} con ${applicationName}"
+     }
+    },
+    "pt-PT": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Leva-me a ${place} com o ${applicationName}"
+     }
+    },
+    "nl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Breng me naar ${place} met ${applicationName}"
+     }
+    },
+    "pl": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Zabierz mnie do ${place} z ${applicationName}"
+     }
+    },
+    "uk": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Відвези мене до ${place} з ${applicationName}"
+     }
+    },
+    "ro": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Du-mă la ${place} cu ${applicationName}"
+     }
+    },
+    "cs": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Dovez mě do ${place} s ${applicationName}"
+     }
+    },
+    "sv": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Ta mig till ${place} med ${applicationName}"
+     }
+    },
+    "el": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Πήγαινέ με στο ${place} με το ${applicationName}"
+     }
+    },
+    "hu": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "Vigyél ide: ${place} a ${applicationName} appal"
+     }
+    },
+    "tr": {
+     "stringUnit": {
+      "state": "needs_review",
+      "value": "${applicationName} ile beni ${place} yerine götür"
+     }
+    }
+   }
   }
  },
  "version": "1.0"

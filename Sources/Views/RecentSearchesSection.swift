@@ -27,10 +27,10 @@ struct RecentSearchesSection: View {
                             .accessibilityHidden(true)
                         VStack(alignment: .leading, spacing: 4) {
                             Text(search.to.title).font(.subheadline.weight(.semibold)).foregroundStyle(.primary)
-                            Text(L10n.f("from %@", search.from.title)).font(.caption).foregroundStyle(.secondary)
+                            Text(L10n.f("from %@", search.from.title)).font(.footnote).foregroundStyle(.secondary)
                             // To the minute from the shared clock: a `.relative` date redraws every second.
                             Text(verbatim: Fmt.ago(search.searchedAt, now: Ticker.minute.now))
-                                .font(.caption2).foregroundStyle(.secondary)
+                                .font(.footnote).foregroundStyle(.secondary)
                         }
                         Spacer(minLength: 0)
                         }

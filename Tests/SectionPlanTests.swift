@@ -169,4 +169,55 @@ final class SectionPlanTests: XCTestCase {
         XCTAssertEqual(model.stops.map { $0.place?.title }, ["S4", "S0", "S2", "S1"])
         XCTAssertEqual(model.sections.count, 3)
     }
+
+    // MARK: Around a ticket (#24) and change points (#10)
+
+    @MainActor
+    func testAroundATicketTheWayThereArrivesInTimeForItsRide() async throws {
+        // Ticket S1 → S3 for the train at 10:40; from S0, on to S4.
+        let model = SectionPlanModel.aroundTicket(start: place(0), origin: place(1), destinationOfTicket: place(3),
+                                                  destination: place(4), departure: time(40), now: time(0), search: Self.timetable)
+        XCTAssertEqual(model.anchor, SectionPlanModel.Anchor(index: 1, time: time(40)))
+        XCTAssertEqual(model.stops.count, 4)
+        XCTAssertEqual(model.stops[1].stay, 0)
+        await model.plan(current: nil, now: time(0))
+        let there = try XCTUnwrap(model.sections[0].route)
+        // Trains from S0 leave at :00, :20, :40 and take 5 min to S1: the 10:20 is the latest in time.
+        XCTAssertEqual(there.startTime, time(20))
+        XCTAssertLessThanOrEqual(there.endTime, time(40))
+        let ride = try XCTUnwrap(model.sections[1].route)
+        XCTAssertEqual(ride.startTime, time(40))
+        XCTAssertNotNil(model.route)
+    }
+
+    @MainActor
+    func testATicketWithoutATimeIsPlannedFromNow() async {
+        let model = SectionPlanModel.aroundTicket(start: place(0), origin: place(1), destinationOfTicket: place(3),
+                                                  destination: nil, departure: nil, now: time(0), search: Self.timetable)
+        XCTAssertNil(model.anchor)
+        XCTAssertFalse(model.isComplete, "the destination after the ticket is still to be chosen")
+    }
+
+    @MainActor
+    func testSplittingASectionAtAChangePoint() async throws {
+        let model = SectionPlanModel(from: place(0), to: place(4), date: time(0), search: Self.timetable)
+        model.leavesNow = false
+        await model.plan(current: nil, now: time(0))
+        let route = try XCTUnwrap(model.sections[0].route)
+        let s2 = try XCTUnwrap(route.legs.first?.from)
+        model.split(0, at: s2)
+        XCTAssertEqual(model.stops.count, 3)
+        XCTAssertEqual(model.stops[1].place?.title, s2.name)
+        XCTAssertEqual(model.stops[1].stay, 0)
+        XCTAssertEqual(model.sections.count, 2)
+        XCTAssertEqual(model.sections.map(\.state), [.idle, .idle])
+    }
+
+    func testChangePointsAreTheStopsOnTheWay() throws {
+        let a = try Self.leg("RAIL", 0, 2, start: 0, end: 10)
+        let b = try Self.leg("RAIL", 2, 4, start: 15, end: 25)
+        let names = SectionPlanModel.changePoints(Self.route("x", [a, b])).map(\.name)
+        XCTAssertEqual(names, ["S2"], "the change, not the ends")
+        XCTAssertTrue(SectionPlanModel.changePoints(Self.route("y", [try Self.leg("WALK", 0, 1, start: 0, end: 5)])).isEmpty)
+    }
 }

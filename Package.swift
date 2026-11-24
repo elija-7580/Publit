@@ -65,6 +65,7 @@ let core = [
     "Models/PlaceRole.swift",
     "Models/TripStatus.swift",
     "Util/TicketLinks.swift",
+    "Util/ShopSearch.swift",
     "Shop/TicketShop.swift",
     "Shop/CheckoutModel.swift",
     "Stores/MapStations.swift",
@@ -95,6 +96,9 @@ let core = [
     "Util/HangLog.swift",
     "Util/MainThreadSampler.swift",
     "Util/Energy.swift",
+    "Shared/NearbyBoard.swift",
+    "Util/ZipReader.swift",
+    "Tickets/WalletPassImport.swift",
 ]
 
 let package = Package(

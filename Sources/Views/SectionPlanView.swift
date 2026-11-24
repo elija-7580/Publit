@@ -21,6 +21,11 @@ struct SectionPlanView: View {
         _model = State(initialValue: SectionPlanModel(from: from, to: to, date: date))
     }
 
+    /// A plan laid out beforehand, e.g. around a ticket (#24).
+    init(model: SectionPlanModel) {
+        _model = State(initialValue: model)
+    }
+
     /// Changes when anything that needs a new search changes.
     private var searchKey: String { "\(model.revision)|\(model.isComplete)" }
 
@@ -79,6 +84,12 @@ struct SectionPlanView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { ToolbarItem(placement: .topBarTrailing) { EditButton().accessibilityIdentifier("sectionReorder") } }
         .screenTrail("Plan in sections")
+        .task {
+            // Laid out around a ticket: the final destination is the one place still missing.
+            if let missing = model.stops.lastIndex(where: { $0.place == nil }), model.anchor != nil {
+                picking = StopIndex(id: missing)
+            }
+        }
         .task(id: searchKey) {
             guard model.isComplete else { return }
             await model.plan(current: location.coordinate)
@@ -201,6 +212,22 @@ struct SectionPlanView: View {
                 .disabled(section.options.count < 2)
                 .accessibilityHint(Text("Choose another departure"))
                 .accessibilityIdentifier("sectionRoute")
+                if model.anchor?.index == index {
+                    Label("The ride on your ticket", systemImage: "ticket").font(.footnote.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                }
+                // Choose the change point yourself (#10): split the section at a stop of this way.
+                let points = model.changePoints(of: index)
+                if !points.isEmpty, model.canAddStop {
+                    Menu {
+                        ForEach(Array(points.prefix(30).enumerated()), id: \.offset) { _, p in
+                            Button(p.name) { model.split(index, at: p) }
+                        }
+                    } label: {
+                        Label("Change at…", systemImage: "arrow.triangle.branch").font(.footnote.weight(.semibold))
+                    }
+                    .accessibilityIdentifier("sectionChangeAt")
+                }
             }
         }
     }

@@ -85,6 +85,7 @@ struct PublitApp: App {
                     WatchSyncHub.shared.attach(trips: trips, favorites: favorites, passes: passes)
                 }
                 .onChange(of: favorites.stops.count) { PublitShortcuts.updateAppShortcutParameters() }
+                .onChange(of: favorites.items.count) { PublitShortcuts.updateAppShortcutParameters() }
                 // Calendar events at "Work", "Zuhause" or a saved place's name route to that place.
                 .onChange(of: favorites.items, initial: true) { _, items in CalendarSuggestions.shared.useSavedPlaces(items) }
         }

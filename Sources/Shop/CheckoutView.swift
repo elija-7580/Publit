@@ -123,7 +123,7 @@ struct CheckoutView: View {
                 if let offer {
                     Text(verbatim: offer.title).font(.footnote).foregroundStyle(.secondary)
                 } else if model.phase == .ready, let link = TicketLinks.link(for: leg, userLinked: tickets.linkedApps) {
-                    Link(destination: link.url) { Text(link.title).font(.footnote.weight(.semibold)) }
+                    TicketLinkButton(link: link) { Text(link.title).font(.footnote.weight(.semibold)) }
                 }
             }
             Spacer()
@@ -192,7 +192,7 @@ struct TicketShopSection: View {
                     }
                 }
                 ForEach(partnerLinks) { link in
-                    Link(destination: link.url) { Label(link.title, systemImage: "cart") }
+                    TicketLinkButton(link: link) { Label(link.title, systemImage: "cart") }
                 }
             } header: {
                 Text("Tickets")

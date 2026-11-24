@@ -216,7 +216,8 @@ struct NearbyView: View {
             }
         }
         .readableWidth()
-        .inkList(hero: hero, onExpand: { showMap = true }) { insets in
+        // Pulled far down, the board gives way to the station map (#17).
+        .inkList(hero: hero, pullToExpand: true, onExpand: { showMap = true }) { insets in
             NearbyMap(here: location.coordinate, groups: groups, onOpenStation: { openedStop = StopTarget($0) }, preview: true,
                       heading: location.heading)
                 .safeAreaPadding(insets)
@@ -278,7 +279,7 @@ struct NearbyView: View {
             if search { whereToButton }
             ForEach(favorites.pinned) { p in
                 Button { go(.place(p)) } label: {
-                    PlaceKeyRow(symbol: p.role?.symbol ?? "mappin", title: p.role?.title ?? p.name, detail: p.name, routes: true)
+                    PlaceKeyRow(symbol: p.shownSymbol, title: p.keyTitle, detail: p.role == nil ? p.subtitle : p.name, routes: true)
                 }
                 .buttonStyle(.plain)
             }
@@ -601,7 +602,7 @@ struct StopDeparturesView: View {
                     }
                 case .lines:
                     ForEach(LineGrouping.lines(shown)) { line in
-                        let savedLine = SavedLine(stopTime: line.first, stopId: stopId, stopName: name, at: coordinate)
+                        let savedLine = SavedLine(stopTime: line.first, stopId: stopId, stopName: name, at: coordinate, direction: false)
                         NavigationLink {
                             LineDetailView(line: LineRef(saved: savedLine), initialDepartures: shown)
                         } label: { LineAtStopRow(line: line) }
@@ -697,7 +698,7 @@ struct LineAtStopRow: View {
                                             dir.departures.first.flatMap { TransitLabels.clean($0.place.track) }
                                                 .map { L10n.f("Platform %@", $0) }]
                                 .compactMap { $0 }.joined(separator: " · "))
-                                .font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                                .font(.footnote).foregroundStyle(.secondary).lineLimit(1)
                         }
                     }
                     Spacer(minLength: 8)
