@@ -152,7 +152,7 @@ enum PartnerLinks {
     /// The ticket-link service: `PublitTicketLinksURL`, else the ticket shop's address. Nil: built-in list only.
     static var serviceURL: URL? {
         let raw = (Bundle.main.object(forInfoDictionaryKey: "PublitTicketLinksURL") as? String)?.trimmingCharacters(in: .whitespaces)
-        return TicketShop.validURL(raw) ?? TicketShop.baseURL
+        return TicketShop.validURL(raw) ?? TicketShop.configuredURL
     }
 
     struct Response: Decodable { let programs: [PartnerProgram] }

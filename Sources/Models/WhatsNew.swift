@@ -20,6 +20,14 @@ enum WhatsNew {
 
     /// Newest first.
     static let entries: [WhatsNewEntry] = [
+        WhatsNewEntry(build: 99, items: [
+            WhatsNewItem(symbol: "arrow.up.arrow.down", title: "Sections in your order",
+                         text: "In Plan in sections, hold a place and drag it to put your stops in another order."),
+            WhatsNewItem(symbol: "percent", title: "Chances for every change",
+                         text: "Routes show how likely each change works, also with smart routing turned off."),
+            WhatsNewItem(symbol: "map", title: "All routes on one map",
+                         text: "In Plan, the map button shows every route found on one map, so you can compare where they go."),
+        ]),
         WhatsNewEntry(build: 98, items: [
             WhatsNewItem(symbol: "point.topleft.down.to.point.bottomright.curvepath", title: "Plan in sections",
                          text: "Add stops in between and choose for each section how you travel and which departure you take."),

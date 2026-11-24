@@ -391,6 +391,22 @@ final class TripProgressTests: XCTestCase {
         XCTAssertEqual(TripProgress.nextStopIndex(p, count: s.count), 1)
     }
 
+    /// A ride with two stops far apart follows its road, not the straight line between them.
+    func testPositionFollowsTheShape() throws {
+        func place(_ name: String, lat: Double, lon: Double) -> Place {
+            Place(name: name, stopId: name, parentId: nil, lat: lat, lon: lon, tz: nil, arrival: nil, departure: nil,
+                  scheduledArrival: nil, scheduledDeparture: nil, track: nil, scheduledTrack: nil, cancelled: nil, alerts: nil)
+        }
+        let a = place("A", lat: 48.0, lon: 16.0), b = place("B", lat: 48.0, lon: 16.2)
+        // A detour north: up, across, down.
+        let path = [LatLon(lat: 48.0, lon: 16.0), LatLon(lat: 48.1, lon: 16.0), LatLon(lat: 48.1, lon: 16.2), LatLon(lat: 48.0, lon: 16.2)]
+        let mid = try XCTUnwrap(TripProgress.position(.between(index: 0, fraction: 0.5), stops: [a, b], path: path))
+        XCTAssertEqual(mid.lat, 48.1, accuracy: 0.001)
+        XCTAssertEqual(mid.lon, 16.1, accuracy: 0.01)
+        let straight = try XCTUnwrap(TripProgress.position(.between(index: 0, fraction: 0.5), stops: [a, b]))
+        XCTAssertEqual(straight.lat, 48.0, accuracy: 1e-9)
+    }
+
     func testEmptyTrip() {
         XCTAssertEqual(TripProgress.at(Date(), stops: []), .notStarted)
         XCTAssertNil(TripProgress.position(.finished, stops: []))

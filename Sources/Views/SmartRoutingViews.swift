@@ -42,12 +42,15 @@ struct RouteTagLine: View {
 }
 
 /// On a route: each change with how likely it works and the vehicle that takes over if it does not.
+/// Shown with smart routing off too (feedback on build 98: "no probabilities with smart routing
+/// off"): the chance of a change is information about the route, smart routing only decides
+/// which route is suggested and in which order they are listed.
 struct SmartChangesSection: View {
     let itinerary: Itinerary
     @AppStorage(SmartRouting.enabledKey) private var enabled = true
 
     var body: some View {
-        if enabled, !itinerary.isDirect {
+        if !itinerary.isDirect {
             let changes = SmartRouting.changes(itinerary)
             let lastRide = itinerary.legs.lastIndex(where: \.isTransit)
             Section {
@@ -60,10 +63,12 @@ struct SmartChangesSection: View {
                     ChangeChanceRow(change: change, isLastRide: change.outgoingIndex == lastRide)
                 }
             } header: {
-                Text(L10n.t("Smart routing"))
+                Text(enabled ? L10n.t("Smart routing") : L10n.t("Changes"))
             } footer: {
-                Text(L10n.f("Feels like %@: waiting, walking and changes count more than riding.",
-                            Fmt.duration(seconds: Int(SmartRouting.feltMinutes(itinerary) * 60))))
+                if enabled {
+                    Text(L10n.f("Feels like %@: waiting, walking and changes count more than riding.",
+                                Fmt.duration(seconds: Int(SmartRouting.feltMinutes(itinerary) * 60))))
+                }
             }
         }
     }
@@ -108,8 +113,9 @@ struct ChangeChanceRow: View {
                     .foregroundStyle(tint)
                 Text(L10n.f("Change at %@", change.stopName)).font(.subheadline.weight(.semibold))
                 Spacer(minLength: 8)
-                if !change.isEstimate {
-                    Text(verbatim: "\(change.percent) %")
+                // Estimates too, marked "≈" (their source line below says "Estimate").
+                if change.source != .throughRun {
+                    Text(verbatim: "\(change.isEstimate ? "≈ " : "")\(change.percent) %")
                         .font(.subheadline.weight(.bold).monospacedDigit())
                         .foregroundStyle(tint)
                 }
