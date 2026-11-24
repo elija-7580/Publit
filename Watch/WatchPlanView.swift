@@ -15,7 +15,7 @@ enum WatchEndpoint: Hashable {
     var symbol: String {
         switch self {
         case .current: return "location.fill"
-        case .place(let p): return p.role?.symbol ?? (p.isStop ? "tram.fill" : "mappin")
+        case .place(let p): return p.role?.symbol ?? (p.isShortcut ? p.shownSymbol : p.isStop ? "tram.fill" : "mappin")
         }
     }
 
@@ -286,7 +286,7 @@ struct WatchPlaceRow: View {
 
     var body: some View {
         HStack(spacing: 6) {
-            Image(systemName: place.role?.symbol ?? (place.isStop ? "tram.fill" : "mappin"))
+            Image(systemName: place.role?.symbol ?? (place.isShortcut ? place.shownSymbol : place.isStop ? "tram.fill" : "mappin"))
                 .foregroundStyle(.secondary).frame(width: 18)
             VStack(alignment: .leading, spacing: 0) {
                 Text(verbatim: place.role?.title ?? place.name).font(.footnote.weight(.semibold)).lineLimit(2)

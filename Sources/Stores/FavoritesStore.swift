@@ -1,9 +1,10 @@
 import Foundation
 import Observation
 
-/// A saved line at one stop, e.g. "U6 at Marienplatz". Shows that line's next departures there.
+/// A saved line at one stop, e.g. "U6 at Marienplatz", optionally in one direction (#21):
+/// "U6 towards Klinikum Großhadern at Marienplatz". Shows that line's next departures there.
 struct SavedLine: Codable, Hashable, Identifiable, RouteStyled {
-    var id: String { "\(routeKey)@\(stopId)" }
+    var id: String { directionId.map { "\(routeKey)@\(stopId)>\($0)" } ?? "\(routeKey)@\(stopId)" }
     var routeKey: String
     var mode: String
     var routeShortName: String?
@@ -14,12 +15,20 @@ struct SavedLine: Codable, Hashable, Identifiable, RouteStyled {
     var stopName: String
     var lat: Double
     var lon: Double
+    /// One direction only (`LineDirection.groupId`), and the destination shown for it. Nil: every direction.
+    var directionId: String? = nil
+    var headsign: String? = nil
 
     var coordinate: LatLon { LatLon(lat: lat, lon: lon) }
     /// The key is the route ID when the feed has one.
     var routeId: String? { routeKey }
 
-    init(stopTime st: StopTime, stopId: String, stopName: String, at coordinate: LatLon) {
+    /// From a departure: that line in that departure's direction (`direction: false` for every direction).
+    init(stopTime st: StopTime, stopId: String, stopName: String, at coordinate: LatLon, direction: Bool = true) {
+        if direction {
+            directionId = LineDirection.groupId(st)
+            headsign = st.directionName ?? st.headsign
+        }
         routeKey = SavedLine.key(st)
         mode = st.mode
         routeShortName = st.routeShortName
@@ -32,7 +41,9 @@ struct SavedLine: Codable, Hashable, Identifiable, RouteStyled {
         lon = coordinate.lon
     }
 
-    init(line: LineRef) {
+    init(line: LineRef, direction: LineDirection? = nil) {
+        directionId = direction?.id
+        headsign = direction?.headsign
         routeKey = line.key
         mode = line.mode
         routeShortName = line.routeShortName
@@ -50,7 +61,41 @@ struct SavedLine: Codable, Hashable, Identifiable, RouteStyled {
         st.routeId ?? "\(st.agencyName ?? "")|\(st.lineName)"
     }
 
-    func matches(_ st: StopTime) -> Bool { SavedLine.key(st) == routeKey }
+    /// Same line, and the saved direction when there is one.
+    func matches(_ st: StopTime) -> Bool {
+        SavedLine.key(st) == routeKey && (directionId == nil || LineDirection.groupId(st) == directionId)
+    }
+
+    /// The same line at the same stop, whatever direction.
+    var lineAtStop: String { "\(routeKey)@\(stopId)" }
+}
+
+/// A connection saved as a favourite (#28): from one place to another, e.g. "Home → Westbahnhof".
+/// Opens the routes from there to there, leaving now, and shows when the next one leaves.
+struct SavedConnection: Codable, Hashable, Identifiable, Sendable {
+    var from: SavedPlace
+    var to: SavedPlace
+    var id: String { Self.id(from: from, to: to) }
+    var title: String { "\(from.name) → \(to.name)" }
+
+    init(from: SavedPlace, to: SavedPlace) {
+        // Only what is needed to plan it again, not Home's or a shortcut's role.
+        func plain(_ p: SavedPlace) -> SavedPlace {
+            var q = SavedPlace(id: p.id, name: p.name, subtitle: p.subtitle, lat: p.lat, lon: p.lon, stopId: p.stopId)
+            q.exact = p.exact
+            return q
+        }
+        self.from = plain(from)
+        self.to = plain(to)
+    }
+
+    static func id(from: SavedPlace, to: SavedPlace) -> String {
+        func key(_ p: SavedPlace) -> String { p.stopId ?? String(format: "%.4f,%.4f", p.lat, p.lon) }
+        return "\(key(from))>\(key(to))"
+    }
+
+    /// The same way back.
+    var reversed: SavedConnection { SavedConnection(from: to, to: from) }
 }
 
 @MainActor
@@ -58,8 +103,10 @@ struct SavedLine: Codable, Hashable, Identifiable, RouteStyled {
 final class FavoritesStore {
     private(set) var items: [SavedPlace] = []
     private(set) var lines: [SavedLine] = []
+    private(set) var connections: [SavedConnection] = []
     private let key = "publit.favorites.v1"
     private let linesKey = "publit.lines.v1"
+    private let connectionsKey = "publit.connections.v1"
     private let defaults: UserDefaults
 
     init(defaults: UserDefaults = .standard) {
@@ -72,6 +119,41 @@ final class FavoritesStore {
            let decoded = try? JSONDecoder().decode([SavedLine].self, from: data) {
             lines = decoded
         }
+        if let data = defaults.data(forKey: connectionsKey),
+           let decoded = try? JSONDecoder().decode([SavedConnection].self, from: data) {
+            connections = decoded
+        }
+    }
+
+    // MARK: Connections (#28)
+
+    func containsConnection(from: SavedPlace, to: SavedPlace) -> Bool {
+        let id = SavedConnection.id(from: from, to: to)
+        return connections.contains { $0.id == id }
+    }
+
+    func toggleConnection(from: SavedPlace, to: SavedPlace) {
+        let c = SavedConnection(from: from, to: to)
+        if connections.contains(where: { $0.id == c.id }) {
+            connections.removeAll { $0.id == c.id }
+        } else {
+            connections.append(c)
+        }
+        persistConnections()
+    }
+
+    func removeConnections(_ ids: [String]) {
+        connections.removeAll { ids.contains($0.id) }
+        persistConnections()
+    }
+
+    func moveConnections(fromOffsets offsets: IndexSet, toOffset destination: Int) {
+        connections = Self.moved(connections, fromOffsets: offsets, toOffset: destination) { _ in true }
+        persistConnections()
+    }
+
+    private func persistConnections() {
+        if let data = try? JSONEncoder().encode(connections) { defaults.set(data, forKey: connectionsKey) }
     }
 
     func containsLine(_ id: String) -> Bool { lines.contains { $0.id == id } }
@@ -86,9 +168,46 @@ final class FavoritesStore {
         if let data = try? JSONEncoder().encode(lines) { defaults.set(data, forKey: linesKey) }
     }
 
-    var stops: [SavedPlace] { items.filter { $0.isStop && $0.role == nil } }
-    var places: [SavedPlace] { items.filter { !$0.isStop && $0.role == nil } }
-    var pinned: [SavedPlace] { PlaceRole.allCases.compactMap(place(for:)) }
+    var stops: [SavedPlace] { items.filter { $0.isStop && $0.role == nil && !$0.isShortcut } }
+    var places: [SavedPlace] { items.filter { !$0.isStop && $0.role == nil && !$0.isShortcut } }
+    /// Own shortcuts next to Home and Work (#22), in their own order.
+    var shortcuts: [SavedPlace] { items.filter(\.isShortcut) }
+    /// Home, Work, then the own shortcuts: one tap away in Nearby and in the place search.
+    var pinned: [SavedPlace] { PlaceRole.allCases.compactMap(place(for:)) + shortcuts }
+
+    // MARK: Own shortcuts (#22)
+
+    /// Adds `place` as a shortcut (or turns a saved place into one) with `symbol`.
+    func addShortcut(_ place: SavedPlace, symbol: String? = nil) {
+        if let i = items.firstIndex(where: { place.isSaved(as: $0) && $0.role == nil }) {
+            items[i].shortcut = true
+            items[i].symbol = symbol ?? items[i].symbol
+        } else {
+            var p = place
+            p.role = nil
+            p.shortcut = true
+            p.symbol = symbol
+            if items.contains(where: { $0.id == p.id }) { p.id = place.ownID }
+            items.append(p)
+        }
+        persist()
+    }
+
+    /// No longer a shortcut: stays saved as a stop or place.
+    func removeShortcut(_ id: String) {
+        for i in items.indices where items[i].id == id { items[i].shortcut = nil }
+        persist()
+    }
+
+    func setSymbol(_ symbol: String, for id: String) {
+        for i in items.indices where items[i].id == id { items[i].symbol = symbol }
+        persist()
+    }
+
+    func moveShortcuts(fromOffsets offsets: IndexSet, toOffset destination: Int) {
+        items = Self.moved(items, fromOffsets: offsets, toOffset: destination) { $0.isShortcut }
+        persist()
+    }
 
     func place(for role: PlaceRole) -> SavedPlace? { items.first { $0.role == role } }
 
@@ -147,13 +266,13 @@ final class FavoritesStore {
 
     /// Moves saved stops as a list's drag does (`offsets` and `destination` count within `stops`).
     func moveStops(fromOffsets offsets: IndexSet, toOffset destination: Int) {
-        items = Self.moved(items, fromOffsets: offsets, toOffset: destination) { $0.isStop && $0.role == nil }
+        items = Self.moved(items, fromOffsets: offsets, toOffset: destination) { $0.isStop && $0.role == nil && !$0.isShortcut }
         persist()
     }
 
     /// Moves saved places as a list's drag does (`offsets` and `destination` count within `places`).
     func movePlaces(fromOffsets offsets: IndexSet, toOffset destination: Int) {
-        items = Self.moved(items, fromOffsets: offsets, toOffset: destination) { !$0.isStop && $0.role == nil }
+        items = Self.moved(items, fromOffsets: offsets, toOffset: destination) { !$0.isStop && $0.role == nil && !$0.isShortcut }
         persist()
     }
 

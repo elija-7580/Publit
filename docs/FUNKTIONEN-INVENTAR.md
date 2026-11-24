@@ -3,7 +3,7 @@
 > Nicht von Hand bearbeiten. Erzeugt von `scripts/feature_inventory.py` (CI: `features-doc.yml`).
 > Die ausführliche Beschreibung steht in [FUNKTIONEN.md](FUNKTIONEN.md).
 
-**229 Views, 5 App Intents, 3 Widgets in 87 Dateien.**
+**235 Views, 8 App Intents, 5 Widgets in 89 Dateien.**
 
 ## `Sources/App/DesignSamples.swift`
 - Views: `DesignSampleView`
@@ -18,7 +18,7 @@
 
 ## `Sources/Intents/PublitIntents.swift`
 - Views: `DeparturesSnippet`
-- App Intents: `NextDeparturesIntent`, `GoHomeIntent`, `GoToWorkIntent`, `ShowTicketIntent`
+- App Intents: `NextDeparturesIntent`, `GoHomeIntent`, `GoToWorkIntent`, `GoToPlaceIntent`, `ShowTicketIntent`
 - Sichtbare Texte: Offline. Showing data from %@. · No departures from %@ in the next hour. · %@ to %@ · %@ is cancelled · %@ now · %@ in %lld min · At %@: %@.
 
 ## `Sources/Shared/DirectionLabel.swift`
@@ -50,7 +50,7 @@
 
 ## `Sources/Tickets/Views/PassDetailView.swift`
 - Views: `PassDetailView`, `FullScreenCodeView`
-- Sichtbare Texte: Ticket deleted · Expired on %@ · Show original · Notes · Edit · Delete · More · Ticket image unavailable · Original ticket · Done · Delete this ticket? · Delete ticket · The copy and its original are removed from this iPhone. · %@ code
+- Sichtbare Texte: Ticket deleted · Expired on %@ · Show original · Plan around this ticket · Notes · Edit · Delete · More · Ticket image unavailable · Original ticket · Done · Delete this ticket? · Delete ticket · The copy and its original are removed from this iPhone. · %@ code
 
 ## `Sources/Tickets/Views/PassEditorView.swift`
 - Views: `PassEditorView`
@@ -58,7 +58,7 @@
 
 ## `Sources/Tickets/Views/PassImportView.swift`
 - Views: `PassImportView`, `PagePicker`, `PDFPageChoice`
-- Sichtbare Texte: Reading ticket… · This file could not be read. · Try another file · Cancel · The photo could not be loaded. · Photo or screenshot · PDF or image file · Scan a paper ticket · Add ticket · Which page is the ticket? · Choose page · Page %lld
+- Sichtbare Texte: Reading ticket… · This file could not be read. · Try another file · Cancel · The photo could not be loaded. · Photo or screenshot · PDF, image or Wallet pass · Scan a paper ticket · Add ticket · Which page is the ticket? · Choose page · Page %lld
 
 ## `Sources/Tickets/Views/PassWalletView.swift`
 - Views: `PassWalletView`, `PassCards`, `PassArchiveButton`
@@ -67,6 +67,10 @@
 ## `Sources/Tickets/Views/TicketFieldMapper.swift`
 - Views: `TicketFieldMapper`, `TicketFieldAssignSheet`
 - Sichtbare Texte: Tap a text on the ticket and choose what it is. · Reading ticket… · No text found on this page. · This file could not be read. · Assign fields on the ticket · Done · Text · Ticket · Cancel · No date found in this text.
+
+## `Sources/Tickets/Views/TicketRoutePlanView.swift`
+- Views: `TicketRoutePlanView`
+- Sichtbare Texte: Stations not found · Publit could not find the stations of this ticket. Check From and To on the ticket, or plan in sections yourself. · Finding the stations… · Plan around this ticket
 
 ## `Sources/Tickets/Views/TripPassesView.swift`
 - Views: `TripPassesView`, `TripPassSection`
@@ -141,8 +145,8 @@
 - Sichtbare Texte: Fare estimate · Fare information · Fares and tickets: %@
 
 ## `Sources/Views/FavoritesView.swift`
-- Views: `FavoritesView`, `PastTripsView`
-- Sichtbare Texte: Home and Work · Remove · Change · Set %@ · Lines · At %@ · Nothing else saved yet · Save stops from their departure board, lines from a trip, or add places with +. · Stops · Places · Home · Work · Saved · Add · Past trips · Upcoming trips · Save a route to see it here, add it to your calendar and get a reminder when to leave. · Last connection · Plan again
+- Views: `FavoritesView`, `PastTripsView`, `ShortcutSymbolMenu`, `SavedLineRow`, `SavedConnectionRow`
+- Sichtbare Texte: Remove · Change · Set %@ · Remove shortcut · Plans a route to %@ · Add shortcut · Home and Work · Shortcuts are also on the Nearby screen, in widgets and in the Shortcuts app. · Connections · Way back · Lines · Nothing else saved yet · Save stops from their departure board, lines from a trip, connections from Plan, or add places with +. · Stops · Places · Home · Work · Make a shortcut · Saved · Add · Past trips · Upcoming trips · Save a route to see it here, add it to your calendar and get a reminder when to leave. · Last connection · Plan again · Icon · At %@
 
 ## `Sources/Views/GoNowView.swift`
 - Views: `GoNowView`
@@ -224,7 +228,7 @@
 
 ## `Sources/Views/SectionPlanView.swift`
 - Views: `SectionPlanView`, `SectionSummary`, `SectionLines`, `SectionChoiceView`
-- Sichtbare Texte: Add a stop in between · Each section starts when the one before has arrived, plus the time you stay. · Hold a place and drag it to change the order. · Depart at · Now · Depart · Plan in sections · Stay · No stay · Remove stop · Stay: %@ · How · This section could not be loaded. · Try again · No way found for this section. Try another way to travel or another time. · Choose another departure · Show route · Selected · The sections after this one are planned again from when you arrive. · Choose a departure · Cancel
+- Sichtbare Texte: Add a stop in between · Each section starts when the one before has arrived, plus the time you stay. · Hold a place and drag it to change the order. · Depart at · Now · Depart · Plan in sections · Stay · No stay · Remove stop · Stay: %@ · How · This section could not be loaded. · Try again · No way found for this section. Try another way to travel or another time. · Choose another departure · The ride on your ticket · Change at… · Show route · Selected · The sections after this one are planned again from when you arrive. · Choose a departure · Cancel
 
 ## `Sources/Views/ServiceAlertsView.swift`
 - Views: `ServiceAlertRow`, `ServiceAlertsView`
@@ -246,7 +250,7 @@
 
 ## `Sources/Views/StationMapView.swift`
 - Views: `StationMapView`, `MapLayersSheet`, `MapPlaceView`, `MapSelectionView`, `RentalDetailView`, `VehicleTripView`
-- Sichtbare Texte: Stations could not be loaded. · Live layer unavailable. Stations still work. · My location · Updating live layer… · Stations · Search places, sights and stops · Done · Close · Search this area · Zoom in to see stations · Zoom in to see lines and vehicles · Map layers · Find nearby · All %@ in this area · No places found · Map · 3D terrain and buildings · Places of interest · Traffic · Lines · Vehicles · Bikes and scooters · Data gaps · On the map · Satellite maps load more data. In 3D, tilt the map with two fingers. · Distance · On foot · %lld min · Route here · Route from here · Provider · Available now · Open in the provider's app · Renting needs the provider's app and an account there. · Towards %@ · Live position · Position from the timetable · %lld min late · Next stops · Line %@: route and timetable
+- Sichtbare Texte: Stations could not be loaded. · Live layer unavailable. Stations still work. · My location · Departures nearby · Updating live layer… · Stations · Search places, sights and stops · Done · Close · Search this area · Zoom in to see stations · Zoom in to see lines and vehicles · Map layers · Find nearby · All %@ in this area · No places found · Map · 3D terrain and buildings · Places of interest · Traffic · Lines · Vehicles · Bikes and scooters · Data gaps · On the map · Satellite maps load more data. In 3D, tilt the map with two fingers. · Distance · On foot · %lld min · Route here · Route from here · Provider · Available now · Open in the provider's app · Renting needs the provider's app and an account there. · Towards %@ · Live position · Position from the timetable · %lld min late · Next stops · Line %@: route and timetable
 
 ## `Sources/Views/StationViews.swift`
 - Views: `PlatformMapSection`, `PlatformPin`, `PlatformSummaryRow`, `FlowLines`, `PlatformHeaderRow`, `ChangeGuideCard`
@@ -313,7 +317,7 @@
 
 ## `Watch/WatchSavedView.swift`
 - Views: `WatchSavedView`, `WatchSavedTripRow`, `WatchStopView`
-- Sichtbare Texte: Upcoming trips · Home and Work · Stops · Places · Past trips · Saved · Live · Try again · Route here · Updated %@ · Save
+- Sichtbare Texte: Upcoming trips · Stops · Places · Past trips · Saved · Live · Try again · Route here · Updated %@ · Save
 
 ## `Watch/WatchTicketsView.swift`
 - Views: `WatchTicketsView`, `WatchTicketRow`, `WatchTicketView`, `WatchCodeView`, `WatchTicketDetails`
@@ -341,3 +345,9 @@
 - Views: `LineChip`, `PlatformChip`, `Countdown`, `FamilyAdaptiveView`, `SmallActivityView`, `StepIcon`, `CueLabel`, `DelayText`, `TripProgressBar`, `VehicleRow`, `ActivityContent`, `LockScreenView`
 - Widgets: `WatchTripLiveActivity`, `TripLiveActivity`
 - Sichtbare Texte: Leave in · Get off in · Arrive in · Departs in · Show ticket · from %@
+
+## `Widgets/ShortcutsWidget.swift`
+- Views: `ShortcutsWidgetView`, `NearbyWidgetView`
+- App Intents: `ShortcutsProvider`, `NearbyProvider`
+- Widgets: `ShortcutsWidget`, `NearbyWidget`
+- Sichtbare Texte: Route to %@ · Routes from here · Location needed · Departures nearby

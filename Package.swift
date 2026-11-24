@@ -96,6 +96,9 @@ let core = [
     "Util/HangLog.swift",
     "Util/MainThreadSampler.swift",
     "Util/Energy.swift",
+    "Shared/NearbyBoard.swift",
+    "Util/ZipReader.swift",
+    "Tickets/WalletPassImport.swift",
 ]
 
 let package = Package(

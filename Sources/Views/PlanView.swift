@@ -3,6 +3,7 @@ import SwiftUI
 struct PlanView: View {
     @AppStorage(SmartRouting.enabledKey) private var smartRouting = true
     @Environment(AppState.self) private var app
+    @Environment(FavoritesStore.self) private var favorites
     @Environment(\.scenePhase) private var scenePhase
     @State private var isVisible = false
     @Environment(LocationManager.self) private var location
@@ -205,6 +206,17 @@ struct PlanView: View {
         }
         .navigationDestination(item: $opened) { route in detail(route.itinerary) }
         .toolbar {
+            // Save this connection (#28): both ends are places, not "here".
+            if case .place(let from) = plan.from, case .place(let to)? = plan.to, from.id != to.id {
+                let saved = favorites.containsConnection(from: from, to: to)
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { favorites.toggleConnection(from: from, to: to) } label: {
+                        Image(systemName: saved ? "star.fill" : "star")
+                    }
+                    .accessibilityLabel(Text(saved ? "Saved connection" : "Save connection"))
+                    .accessibilityIdentifier("saveConnection")
+                }
+            }
             if wideMap == nil, plan.searchStarted, plan.to != nil, !pick.list.isEmpty {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { comparing = true } label: { Image(systemName: "map") }
