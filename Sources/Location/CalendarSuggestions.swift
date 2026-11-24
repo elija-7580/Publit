@@ -22,6 +22,15 @@ final class CalendarSuggestions {
     @ObservationIgnored private var observer: NSObjectProtocol?
     @ObservationIgnored private var lastHere: LatLon?
     @ObservationIgnored private var lastRead: Date?
+    /// Saved places (Home, Work and the others), so an event at "Work" or "Büro" can go there.
+    @ObservationIgnored private var savedPlaces: [SavedPlace] = []
+
+    /// Called when the saved places change; an event may now name one of them.
+    func useSavedPlaces(_ places: [SavedPlace]) {
+        guard places != savedPlaces else { return }
+        savedPlaces = places
+        refresh(here: nil, force: true)
+    }
 
     /// Allowed and on: events are read.
     var isActive: Bool { enabled && status == .fullAccess }
@@ -82,7 +91,7 @@ final class CalendarSuggestions {
                                        location: location, lat: geo?.latitude, lon: geo?.longitude,
                                        isAllDay: e.isAllDay)
         }
-        let next = CalendarTrips.suggestions(events, now: now, here: lastHere)
+        let next = CalendarTrips.suggestions(events, now: now, here: lastHere, saved: savedPlaces)
         if next != appointments { appointments = next }
     }
 
