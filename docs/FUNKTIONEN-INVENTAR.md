@@ -3,7 +3,7 @@
 > Nicht von Hand bearbeiten. Erzeugt von `scripts/feature_inventory.py` (CI: `features-doc.yml`).
 > Die ausführliche Beschreibung steht in [FUNKTIONEN.md](FUNKTIONEN.md).
 
-**226 Views, 5 App Intents, 3 Widgets in 85 Dateien.**
+**228 Views, 5 App Intents, 3 Widgets in 85 Dateien.**
 
 ## `Sources/App/DesignSamples.swift`
 - Views: `DesignSampleView`
@@ -266,8 +266,8 @@
 - Sichtbare Texte: Change at %@ · Connection cancelled · Change at %@ no longer works · %@ to spare · Very tight change · Platform %@ · %@ walk · Live · Platform changed (was %@)
 
 ## `Sources/Views/TripActions.swift`
-- Views: `TripActionsSection`, `TicketSection`, `TicketCardButton`
-- Sichtbare Texte: End trip · Start walking navigation · Start trip · The calendar entry links back to this trip with its live status. · Saved · Save trip · Add to Calendar · Share arrival · Share trip · Reminder on · Leave reminder · Trip ended · Allow notifications for Publit in Settings. · This trip starts now. · We'll remind you at %@. · Follow it on the lock screen. · Live updates on the lock screen start 8 hours before. · Turn on Live Activities for Publit in Settings to follow it on the lock screen. · Add ticket for this trip · Tickets · The operator publishes no ticket link. Link your ticket app in Settings → Ticket apps.
+- Views: `TripActionsSection`, `TripActionBar`, `TripTicketSections`, `TicketSection`, `TicketCardButton`
+- Sichtbare Texte: End trip · Saved · Save trip · Add to Calendar · The calendar entry links back to this trip with its live status. · Share arrival · Share trip · Reminder on · Leave reminder · Trip ended · Allow notifications for Publit in Settings. · This trip starts now. · We'll remind you at %@. · Follow it on the lock screen. · Live updates on the lock screen start 8 hours before. · Turn on Live Activities for Publit in Settings to follow it on the lock screen. · Tickets · Add ticket for this trip · The operator publishes no ticket link. Link your ticket app in Settings → Ticket apps.
 
 ## `Sources/Views/TripView.swift`
 - Views: `TripView`, `TripMap`, `StopTimeRow`, `LineDeparturesView`

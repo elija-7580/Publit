@@ -113,6 +113,7 @@ struct ItineraryDetailView: View {
     @State private var showsAll = false
     /// Counts exit numbers arriving and exits picked: the advice under the rides is worked out again.
     @State private var exitsChanged = 0
+    @State private var addingTicket = false
     @Environment(WideMapState.self) private var wideMap: WideMapState?
 
     private var isBikeOrCar: Bool {
@@ -163,7 +164,6 @@ struct ItineraryDetailView: View {
                     RouteSummary(itinerary: itinerary, showsTimes: false)
                         .listRowSeparator(.hidden, edges: .top)
                 }
-                ForEach(TransitRegion.along(itinerary), id: \.network) { RegionTicketRow(region: $0) }
                 if let note = Fmt.foreignZoneNote(tz: itinerary.legs.first?.from.tz, at: itinerary.startTime) {
                     Label(note, systemImage: "clock").font(.footnote).foregroundStyle(.secondary)
                 }
@@ -202,11 +202,8 @@ struct ItineraryDetailView: View {
             // How sure each change is and what takes over if it breaks (smart routing).
             SmartChangesSection(itinerary: itinerary)
 
-            // 2. What you can do with it, right below: start, save, calendar, reminder.
-            // Cycling and driving are shown for comparison only: no trip, reminder or fares.
-            if !isBikeOrCar {
-                TripActionsSection(itinerary: itinerary, fromName: resolvedFrom, toName: resolvedTo)
-            }
+            // 2. What you can do with it (start, save, calendar, share, reminder) is the bar pinned to the
+            // bottom, so it never sits between the overview and the steps, however long the trip.
 
             // 3. The way, step by step, as a timeline: times on the left, the line in its colour.
             Section("Steps") {
@@ -225,7 +222,11 @@ struct ItineraryDetailView: View {
                 TimelineEndRow(time: itinerary.endTime, tz: itinerary.legs.last?.to.tz, name: resolvedTo)
             }
 
-            if !isBikeOrCar { FareSection(itinerary: itinerary) }
+            // 4. Tickets and fares for every network along the way, after the steps.
+            // Cycling and driving are shown for comparison only: no trip, reminder or fares.
+            if !isBikeOrCar {
+                TripTicketSections(itinerary: itinerary, fromName: resolvedFrom, toName: resolvedTo) { addingTicket = true }
+            }
 
             Section {
             } footer: {
@@ -235,6 +236,13 @@ struct ItineraryDetailView: View {
             }
         }
         .readableWidth()
+        // Start (or end) and the other actions stay one tap away while scrolling through long trips.
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if !isBikeOrCar && showsAll {
+                TripActionBar(itinerary: itinerary, fromName: resolvedFrom, toName: resolvedTo)
+            }
+        }
+        .sheet(isPresented: $addingTicket) { AddTicketView(tripId: trips.saved(itinerary)?.id) }
         .inkList(hero: wideMap == nil, onExpand: { showsMap = true }) { insets in
             ZStack {
                 Color.surface
@@ -352,7 +360,9 @@ struct RouteSummary: View {
 
     private var legChain: some View {
         // Short walks between platforms are noise in the overview; the steps list keeps them.
-        let legs = itinerary.legs.filter { $0.isTransit || $0.duration >= 120 }
+        // A long trip with many rides shows only the rides, so the chain stays one or two lines.
+        let rides = itinerary.legs.filter(\.isTransit).count
+        let legs = itinerary.legs.filter { $0.isTransit || (rides <= 4 && $0.duration >= 120) }
         return FlowRow(spacing: 6) {
             ForEach(Array(legs.enumerated()), id: \.offset) { _, leg in
                 // No arrows between them: once the chain wraps, a line starting with "›" read as noise.
