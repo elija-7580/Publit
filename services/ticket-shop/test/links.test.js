@@ -92,3 +92,9 @@ test("DB legs get a bahn.de search with start, destination and local departure t
   // Without a departure time the leg falls back to the known shop.
   assert.equal(links[1].source, "fares");
 });
+
+test("a local network's shop beats the DB search", () => {
+  const { links } = findLinks({ legs: [{ index: 0, operator: "DB Regio AG S-Bahn München", from: "A", to: "B",
+    departure: "2026-11-25T07:00:00Z" }] }, {});
+  assert.equal(links[0].url, "https://www.mvv-muenchen.de/");
+});

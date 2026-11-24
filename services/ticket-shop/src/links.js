@@ -217,7 +217,9 @@ export function findLinks(body, env) {
   for (const leg of request.legs) {
     let url = null;
     let source = null;
-    if (isDB(leg.operator) && leg.departure) {
+    // A local network's own shop (e.g. MVV for "DB Regio AG S-Bahn München") beats a DB search.
+    const local = knownShop(leg.operator);
+    if (isDB(leg.operator) && leg.departure && (!local || local === KNOWN_SHOPS.db)) {
       url = dbSearch(leg.from, leg.to, leg.departure, leg.timeZone);
       if (url) source = "search";
     }

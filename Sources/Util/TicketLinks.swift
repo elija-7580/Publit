@@ -77,7 +77,9 @@ enum TicketLinks {
         guard leg.isTransit else { return nil }
         let name = leg.agencyName?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty ?? leg.lineName
         if let u = url(userLink(for: name, in: userLinked)) { return TicketLink(operatorName: name, url: u, source: .userLinked) }
-        if let search = ShopSearch(operatorName: name, from: leg.from, to: to ?? leg.to, departure: leg.scheduledStartTime) {
+        // A local network's own shop (e.g. MVV for "DB Regio AG S-Bahn München") beats a DB search.
+        let local = userLink(for: name, in: knownShops).map { $0 != knownShops["db"] } ?? false
+        if !local, let search = ShopSearch(operatorName: name, from: leg.from, to: to ?? leg.to, departure: leg.scheduledStartTime) {
             var link = shop(name, search.dbURL ?? search.startPage, .booking)
             link.search = search
             return link
