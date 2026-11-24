@@ -108,6 +108,8 @@ struct ItineraryDetailView: View {
     /// Build your own connection (#142): the leg whose ways to go on are listed, and the route built from the choice.
     @State private var changedLeg: LegIndex?
     @State private var built: BuiltRoute?
+    /// The ride whose change is moved to another stop or place (#143).
+    @State private var changePoint: LegIndex?
     /// The screen opens with the top (time, lines) at once; changes, actions and steps follow a
     /// moment later, so a long trip never leaves the tap without an answer.
     @State private var showsAll = false
@@ -217,6 +219,7 @@ struct ItineraryDetailView: View {
                     TimelineLegRow(leg: leg, startName: index == 0 && isBikeOrCar ? resolvedFrom : nil,
                                    onOpenTrip: leg.tripId == nil ? nil : { openedLeg = index },
                                    onChange: canChange(leg) ? { changedLeg = LegIndex(id: index) } : nil,
+                                   onChangeAt: canChange(leg) ? { changePoint = LegIndex(id: index) } : nil,
                                    exitAdvice: advice[index], exitWalk: exitWalk(after: index))
                 }
                 TimelineEndRow(time: itinerary.endTime, tz: itinerary.legs.last?.to.tz, name: resolvedTo)
@@ -281,6 +284,11 @@ struct ItineraryDetailView: View {
         .sheet(item: $changedLeg) { i in
             NavigationStack {
                 LegChangeView(route: itinerary, index: i.id) { built = BuiltRoute(itinerary: $0) }
+            }
+        }
+        .sheet(item: $changePoint) { i in
+            NavigationStack {
+                ChangePointView(route: itinerary, index: i.id) { built = BuiltRoute(itinerary: $0) }
             }
         }
         // The built route is a route like any other: start it, save it, change it again.
@@ -803,6 +811,8 @@ struct TimelineLegRow: View {
     var onOpenTrip: (() -> Void)? = nil
     /// Lists other ways to go on from where this ride starts (#142); nil where the legs are fixed.
     var onChange: (() -> Void)? = nil
+    /// Moves the change after this ride to another stop or place (#143); nil where the legs are fixed.
+    var onChangeAt: (() -> Void)? = nil
     /// Where to ride and which way out of the station (see `ExitAdvice`).
     var exitAdvice: ExitAdvice? = nil
     /// The walk out of the station after this ride: its exit can be picked here.
@@ -936,6 +946,14 @@ struct TimelineLegRow: View {
                     }
                     .buttonStyle(.borderless)
                     .accessibilityIdentifier("changeLeg")
+                }
+                if let onChangeAt {
+                    Button(action: onChangeAt) {
+                        Label(L10n.t("Change somewhere else"), systemImage: "mappin.and.ellipse")
+                            .font(.subheadline.weight(.semibold))
+                    }
+                    .buttonStyle(.borderless)
+                    .accessibilityIdentifier("changeLegAt")
                 }
                 GetOffButton(leg: leg)
             }

@@ -3,7 +3,7 @@
 > Nicht von Hand bearbeiten. Erzeugt von `scripts/feature_inventory.py` (CI: `features-doc.yml`).
 > Die ausführliche Beschreibung steht in [FUNKTIONEN.md](FUNKTIONEN.md).
 
-**235 Views, 8 App Intents, 5 Widgets in 89 Dateien.**
+**237 Views, 8 App Intents, 5 Widgets in 90 Dateien.**
 
 ## `Sources/App/DesignSamples.swift`
 - Views: `DesignSampleView`
@@ -88,6 +88,10 @@
 - Views: `CalendarAppointmentRow`, `CalendarPlanSection`, `AppointmentBanner`, `CalendarSettingsSection`
 - Sichtbare Texte: No place found for “%@”. · Today · Shows routes that get you there on time · From your calendar · Your appointments as destinations · Turn on · Not now · Leave by %@ to arrive %lld min early · No connection arrives before %@ · Suggest appointments as destinations · Open Settings · Calendar · Calendar access is off for Publit. Turn it on in the Settings app.
 
+## `Sources/Views/ChangePointView.swift`
+- Views: `ChangePointView`, `ChangePointChoicesView`
+- Sichtbare Texte: Planned · %@: get off at · The way up to the ride stays as it is. From the new stop, Publit looks for the way on. · Another place, by search or on the map · Change somewhere else · Cancel · Try again · From %@, after %@ · The ride does not stop there in time, so another way there is shown.
+
 ## `Sources/Views/ChooseOnMapView.swift`
 - Views: `ChooseOnMapView`, `CenterPin`
 - Sichtbare Texte: Choose on map · Finding the address… · Move the map to place the pin · Confirm location · Dropped pin
@@ -154,7 +158,7 @@
 
 ## `Sources/Views/ItineraryDetailView.swift`
 - Views: `CompareMapView`, `ItineraryDetailView`, `RouteSummary`, `RouteMap`, `RouteMark`, `VehicleKindLine`, `LegRow`, `GetOffButton`, `StatusBanner`, `TimelineLegRow`, `TimelineEndRow`, `TimelineRail`, `LeaveHero`
-- Sichtbare Texte: Destination · Driving times are without traffic and parking. · Steps · Trip overview · Done · Route · Live · Cancelled · Rail replacement bus · Timetable · This trip is cancelled. · Pick up at %@ · Return at %@ · Rent in the provider's app · +%lld min · Platform %@ · Reminder set · Remind me to get off · We'll notify you at %@. · This stop is less than two minutes away. · Allow notifications for Publit in Settings. · On time · Line %@: all stops and map · Board at %@ · Get off at %@ · Service changes on this route · Go on another way · Arrive
+- Sichtbare Texte: Destination · Driving times are without traffic and parking. · Steps · Trip overview · Done · Route · Live · Cancelled · Rail replacement bus · Timetable · This trip is cancelled. · Pick up at %@ · Return at %@ · Rent in the provider's app · +%lld min · Platform %@ · Reminder set · Remind me to get off · We'll notify you at %@. · This stop is less than two minutes away. · Allow notifications for Publit in Settings. · On time · Line %@: all stops and map · Board at %@ · Get off at %@ · Service changes on this route · Go on another way · Change somewhere else · Arrive
 
 ## `Sources/Views/LaunchSplash.swift`
 - Views: `LaunchSplash`
