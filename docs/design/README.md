@@ -90,6 +90,7 @@ Every list row answers its question in the first line; the second line is one gr
 - **Route row** (`ItineraryRow`): times + duration; timeline; "Leave in 6 min · 1 change · U6 → Garching" (leave time in ink, within the hour); boarding line ("Board at …" unless the walk is 2 min or more).
 - **Saved trip** (`SavedTripRow`): destination and "Leave in 6 min" (else the date); times + line badges; "from …".
 - **Live trip**: the stage card says "Now" on the current stage only; no "3/8" counters (the timeline shows the stages).
+- Row ends: › opens a page (settings, options, plan in sections); → means "routes there" (Home, Work, an appointment). Nothing else at the end of a row.
 - No chevrons on rows that are links as a whole (`linkIndicatorHidden()`, iOS 26+). Action tiles: three in one row, four as two by two; the route screen uses the action bar instead.
 - At a stop (`Reach.atStopMeters`, 50 m) the distance reads "Here" and nothing says "1 min".
 

@@ -248,10 +248,11 @@ struct ChangeGuideCard: View {
             if let t = TransitLabels.clean(track) {
                 Text(verbatim: t).font(.caption2.weight(.bold))
                     .padding(.horizontal, 5).padding(.vertical, 1)
-                    .background(.regularMaterial, in: Capsule())
+                    // Matte white with a hairline on the map, no material (docs/design §1.2).
+                    .matteSurface(in: Capsule())
             }
         }
-        .shadow(color: .black.opacity(0.25), radius: 2, y: 1)
+        .mapShadow()
     }
 }
 
