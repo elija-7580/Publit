@@ -27,6 +27,8 @@ struct LiveTripView: View {
     @State private var overview = false
     /// The way on foot from where you are, when you are away from the planned walk.
     @State private var detour = WalkDetour()
+    /// Routes from where you are, looked up once per walk to a ride, to offer a clearly faster one (#110).
+    @State private var faster = FasterWay()
     @Environment(\.horizontalSizeClass) private var sizeClass
     @State private var screenWidth: CGFloat = 0
 
@@ -65,6 +67,11 @@ struct LiveTripView: View {
         // Searched from the stop of the shaky change at the time you get there, not from where you are now.
         let searchFrom: (point: LatLon, time: Date)? = risk.map { ($0.incoming.to.coordinate, $0.incoming.endTime) }
         let riskKey = risk.map { "\($0.stopName)|\($0.outgoing.tripId ?? $0.outgoing.lineName)" } ?? ""
+        // Nothing wrong and walking to a ride: one quiet look from here whether another stop or an
+        // earlier vehicle arrives clearly sooner. Shown only when one does.
+        let fasterKey = index == live && !wrong && here != nil && TripAlternative.worthLooking(step, it, at: now)
+            ? "\(trip.id)|\(step.id)" : ""
+        let fasterWays = !fasterKey.isEmpty && faster.key == fasterKey ? TripAlternative.faster(faster.options, than: it, at: now) : []
         // On board (your fix lies on the line): your own dot is the vehicle. A second, estimated
         // marker beside it (straight between stops, or from the timetable) only looks like another bus.
         let vehicle = step.kind == .ride && ride?.fromGPS != true
@@ -131,7 +138,7 @@ struct LiveTripView: View {
         .padding(.horizontal, 12)
         let panelDetails = details(it: it, steps: steps, step: step, leg: leg, index: index, live: live, here: here, walk: walk,
                 walkPos: walkPos, detour: detourRoute, ride: ride, check: check, wrong: wrong, wrongMessage: wrongMessage,
-                searchFrom: searchFrom)
+                searchFrom: searchFrom, fasterWays: fasterWays)
         Group {
             if WideLayout.isWide(width: screenWidth, sizeClass: sizeClass) {
                 // iPad and iPhone Duo unfolded: the map over the whole screen, the stages and details
@@ -186,6 +193,7 @@ struct LiveTripView: View {
             ToolbarItem(placement: .topBarTrailing) { tripMenu }
         }
         .task(id: detourKey) { await detour.update(from: here, to: detourTarget) }
+        .task(id: fasterKey) { await faster.look(key: fasterKey, from: here, trip: trip, options: app.routeOptions) }
         // Exit numbers of the underground stations on the way ("Take exit B2"), from OpenStreetMap.
         .task(id: it.id) { if await StationExits.shared.load(it) { now = Date() } }
         .onReceive(NotificationCenter.default.publisher(for: StationExits.preferenceChanged)) { _ in now = Date() }
@@ -232,12 +240,19 @@ struct LiveTripView: View {
                          walk: WalkRoute?, walkPos: WalkRoute.Position?, detour: WalkDetour.Route?,
                          ride: (progress: TripProgress, fromGPS: Bool)?,
                          check: TripGuide.Check, wrong: Bool, wrongMessage: String,
-                         searchFrom: (point: LatLon, time: Date)? = nil) -> some View {
+                         searchFrom: (point: LatLon, time: Date)? = nil, fasterWays: [Itinerary] = []) -> some View {
         List {
             if wrong {
                 Section {
                     AlternativeRow(trip: trip, from: searchFrom?.point ?? here, time: searchFrom?.time, message: wrongMessage)
                         .listRowBackground(NoticeBackground(tint: .danger, tinted: true))
+                }
+            } else if !fasterWays.isEmpty {
+                // Nothing is wrong, but from here another stop or an earlier vehicle arrives clearly sooner (#110).
+                Section {
+                    AlternativeRow(trip: trip, from: here, message: L10n.t("Faster"), offered: fasterWays)
+                        .listRowBackground(NoticeBackground(tint: .live, tinted: true))
+                        .accessibilityIdentifier("guideFasterWay")
                 }
             }
 
@@ -1162,6 +1177,9 @@ private struct AlternativeRow: View {
     /// When to leave `from`; nil = now.
     var time: Date? = nil
     let message: String
+    /// Faster ways found while nothing is wrong (a better stop on the walk): shown as they are,
+    /// without a search of its own, in the calm colour of a tip instead of a warning.
+    var offered: [Itinerary]? = nil
     @Environment(TripStore.self) private var trips
     @Environment(AppState.self) private var app
     @State private var choices: [Itinerary] = []
@@ -1175,11 +1193,13 @@ private struct AlternativeRow: View {
             Label {
                 Text(message).foregroundStyle(Color.ink)
             } icon: {
-                Image(systemName: "exclamationmark.circle.fill").foregroundStyle(Color.danger)
+                Image(systemName: offered == nil ? "exclamationmark.circle.fill" : "bolt.circle.fill")
+                    .foregroundStyle(offered == nil ? Color.danger : Color.live)
             }
             .font(.subheadline.weight(.semibold))
             Text(verbatim: L10n.f("Your trip: arrive %@", Fmt.time(trip.itinerary.endTime, tz: trip.itinerary.legs.last?.to.tz)))
                 .font(.footnote).foregroundStyle(.secondary)
+            let choices = offered ?? self.choices
             ForEach(Array((showAll ? choices : Array(choices.prefix(1))).enumerated()), id: \.element.routeKey) { i, option in
                 if i > 0 { Divider() }
                 choice(option, primary: i == 0)
@@ -1197,7 +1217,7 @@ private struct AlternativeRow: View {
                 }
                 .buttonStyle(.soft)
                 .accessibilityIdentifier("guideOtherConnections")
-            } else if !searching {
+            } else if !searching, offered == nil {
                 Button { Task { await search() } } label: {
                     Label("New route from here", systemImage: "arrow.triangle.turn.up.right.diamond")
                         .font(.subheadline.weight(.semibold))
@@ -1206,7 +1226,7 @@ private struct AlternativeRow: View {
             }
         }
         .padding(.vertical, 4)
-        .task(id: trip.itinerary.id) { await search() }
+        .task(id: trip.itinerary.id) { if offered == nil { await search() } }
     }
 
     @ViewBuilder private func choice(_ option: Itinerary, primary: Bool) -> some View {
@@ -1446,6 +1466,33 @@ private struct StageRow: View {
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(selected ? [.isButton, .isSelected] : .isButton)
+    }
+}
+
+/// One look per walk to a ride for a way that arrives clearly sooner (#110): the routes from where you
+/// are to the trip's destination, leaving now. Asked once per walk (`key`), not as you move; what is
+/// shown of them is decided on every redraw (`TripAlternative.faster`), so a route that has left or
+/// no longer beats the trip drops out by itself.
+@MainActor @Observable
+final class FasterWay {
+    private(set) var key = ""
+    private(set) var options: [Itinerary] = []
+
+    func look(key: String, from: LatLon?, trip: SavedTrip, options routeOptions: RouteOptions) async {
+        guard !key.isEmpty, key != self.key, let from, let dest = trip.itinerary.legs.last?.to else { return }
+        self.key = key
+        options = []
+        guard let res = try? await TransitousClient.shared.plan(from: from, to: dest.coordinate, time: nil, arriveBy: false,
+                                                                 options: routeOptions,
+                                                                 stops: PlanStops(from: nil, to: dest.stopId)),
+              !Task.isCancelled else {
+            // Not answered (offline, or the walk ended meanwhile): the next walk, or this one again, may ask anew.
+            if self.key == key { self.key = "" }
+            return
+        }
+        let enriched = await LiveOverlay.apply(res.itineraries, budget: 3)
+        guard self.key == key else { return }
+        options = enriched
     }
 }
 
