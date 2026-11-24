@@ -115,9 +115,15 @@ private struct FamilyAdaptiveView: View {
     var body: some View {
         switch family {
         case .small:
+            // The watch draws this card as in dark mode whatever the iPhone is set to. The iPhone's own
+            // background is white in light mode, so text and ground are fixed here: light on dark (#176).
             SmallActivityView(state: state).padding(8)
+                .foregroundStyle(.white)
+                .environment(\.colorScheme, .dark)
+                .activityBackgroundTint(Color(hexString: LineColors.smallActivitySurface.hex, fallback: .black))
         default:
             LockScreenView(attributes: attributes, state: state).padding(16)
+                .activityBackgroundTint(ActivityContent.lockScreenTint)
         }
     }
 }
@@ -229,14 +235,18 @@ private struct VehicleRow: View {
     }
 }
 
+/// The background is set per family (not once for all): the lock screen follows the iPhone's
+/// appearance, the small family has its own fixed dark ground.
 private struct ActivityContent: View {
     let attributes: TripActivityAttributes
     let state: TripActivityAttributes.ContentState
+    static let lockScreenTint = Color(.systemBackground).opacity(0.85)
     var body: some View {
         if #available(iOS 18.0, *) {
             FamilyAdaptiveView(attributes: attributes, state: state)
         } else {
             LockScreenView(attributes: attributes, state: state).padding(16)
+                .activityBackgroundTint(Self.lockScreenTint)
         }
     }
 }
@@ -245,7 +255,6 @@ struct TripLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: TripActivityAttributes.self) { context in
             ActivityContent(attributes: context.attributes, state: context.state)
-                .activityBackgroundTint(Color(.systemBackground).opacity(0.85))
                 .widgetURL(context.attributes.tripURL)
         } dynamicIsland: { context in
             DynamicIsland {
