@@ -75,7 +75,13 @@ struct TicketFieldMapper: View {
             image = UIImage(cgImage: cg)
             // Preserve the document even when Vision is temporarily unavailable.
             do {
-                pieces = embedded.isEmpty ? try await TicketRecognizer.pieces(image: cg) : embedded
+                // Text that is part of a picture in the PDF is read too (#5), next to the exact embedded text.
+                if embedded.isEmpty {
+                    pieces = try await TicketRecognizer.pieces(image: cg)
+                } else {
+                    let recognized = (try? await TicketRecognizer.pieces(image: cg)) ?? []
+                    pieces = TicketTextPiece.merging(embedded: embedded, recognized: recognized)
+                }
             }
             catch is CancellationError { throw CancellationError() }
             catch { self.error = error.localizedDescription }

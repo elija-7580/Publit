@@ -105,6 +105,26 @@ struct GoToWorkIntent: AppIntent {
     }
 }
 
+/// "Route to the gym": routes from here to Home, Work, an own shortcut or any place, leaving now (#22).
+struct GoToPlaceIntent: AppIntent {
+    static var title: LocalizedStringResource = "Route to a place"
+    static var description = IntentDescription("Shows the best ways from where you are to one of your saved places, leaving now.")
+    static var openAppWhenRun = true
+
+    @Parameter(title: "Place")
+    var place: ShortcutEntity
+
+    static var parameterSummary: some ParameterSummary {
+        Summary("Route to \(\.$place)")
+    }
+
+    @MainActor
+    func perform() async throws -> some IntentResult {
+        IntentBridge.open(place.deepLink)
+        return .result()
+    }
+}
+
 /// "Show my ticket": opens the valid pass full screen at maximum brightness.
 struct ShowTicketIntent: AppIntent {
     static var title: LocalizedStringResource = "Show ticket"
@@ -132,6 +152,10 @@ struct PublitShortcuts: AppShortcutsProvider {
         AppShortcut(intent: GoToWorkIntent(), phrases: [
             "Route to work in \(.applicationName)",
         ], shortTitle: "Route to work", systemImageName: "briefcase")
+        AppShortcut(intent: GoToPlaceIntent(), phrases: [
+            "Route to \(\.$place) in \(.applicationName)",
+            "Take me to \(\.$place) with \(.applicationName)",
+        ], shortTitle: "Route to a place", systemImageName: "star")
         // "Show ticket" returns with the ticket feature (Features.tickets).
     }
 }

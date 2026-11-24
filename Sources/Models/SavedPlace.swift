@@ -11,6 +11,20 @@ struct SavedPlace: Codable, Hashable, Identifiable, Sendable {
     var role: PlaceRole?
     /// One street stop only (one side of the road), not the whole station.
     var exact: Bool? = nil
+    /// An own shortcut next to Home and Work (#22), with the symbol picked for it.
+    var shortcut: Bool? = nil
+    var symbol: String? = nil
+
+    var isShortcut: Bool { shortcut == true && role == nil }
+    /// The symbol shown for it: Home's house, Work's briefcase, a shortcut's own, else a pin.
+    var shownSymbol: String { role?.symbol ?? (isShortcut ? (symbol ?? Self.shortcutSymbols[0]) : "mappin") }
+    /// Title of a key row: Home/Work, else the name.
+    var keyTitle: String { role?.title ?? name }
+
+    /// Symbols an own shortcut can have.
+    static let shortcutSymbols = ["star.fill", "heart.fill", "figure.run", "dumbbell.fill", "graduationcap.fill",
+                                  "cart.fill", "cup.and.saucer.fill", "fork.knife", "person.2.fill", "cross.case.fill",
+                                  "tram.fill", "airplane", "leaf.fill", "music.note", "book.fill", "pawprint.fill"]
 
     var isStop: Bool { stopId != nil }
 

@@ -8,7 +8,7 @@ Here each bundle gets an explicit designated requirement that names the team, no
 certificate's common name.
 
 Usage: ci-sign.py <Publit.app> <profiles dir> <identity SHA-1> <out.ipa>
-Profiles dir: app/widgets/watch/share .mobileprovision.
+Profiles dir: app/widgets/watch/share .mobileprovision, optionally watchwidgets (complications).
 """
 import os, plistlib, shutil, subprocess, sys, tempfile
 
@@ -68,7 +68,24 @@ def sign(bundle, name, extra=None):
     subprocess.run(["codesign", "--verify", "--strict", bundle], check=True)
     print(f"signed {bid}: {sorted(ent)}")
 
+def sign_watch_plugins(watch):
+    """The complications (an extension inside the watch app), signed first. Without their profile
+    (watchwidgets.mobileprovision) or when signing fails they are left out, so the build still ships."""
+    plugins = os.path.join(watch, "PlugIns")
+    for p in sorted(os.listdir(plugins)) if os.path.isdir(plugins) else []:
+        path = os.path.join(plugins, p)
+        try:
+            if not os.path.exists(os.path.join(profiles, "watchwidgets.mobileprovision")):
+                raise RuntimeError("no profile")
+            sign(path, "watchwidgets")
+        except Exception as e:
+            print(f"warning: leaving out {p} ({e})")
+            shutil.rmtree(path)
+    if os.path.isdir(plugins) and not os.listdir(plugins):
+        os.rmdir(plugins)
+
 for w in sorted(os.listdir(os.path.join(app, "Watch"))) if os.path.isdir(os.path.join(app, "Watch")) else []:
+    sign_watch_plugins(os.path.join(app, "Watch", w))
     sign(os.path.join(app, "Watch", w), "watch")
 plugins = os.path.join(app, "PlugIns")
 for p in sorted(os.listdir(plugins)) if os.path.isdir(plugins) else []:

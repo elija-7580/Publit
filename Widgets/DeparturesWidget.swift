@@ -11,42 +11,6 @@ struct DeparturesWidgetIntent: WidgetConfigurationIntent {
     var stop: StopEntity?
 }
 
-struct WidgetDeparture: Identifiable, Hashable, RouteStyled {
-    let id: String
-    let lineName: String
-    let mode: String
-    let background: String
-    let foreground: String
-    let service: String?
-    var routeShortName: String? { lineName }
-    var displayName: String? { service }
-    var routeColor: String? { background }
-    var routeTextColor: String? { foreground }
-    let headsign: String
-    let circular: Bool
-    let time: Date
-    let delayMinutes: Int
-    let realTime: Bool
-    let cancelled: Bool
-    let tz: String?
-
-    init(_ st: StopTime) {
-        id = st.id
-        lineName = st.lineName
-        mode = st.mode
-        background = st.lineColors.background
-        foreground = st.lineColors.text
-        service = st.serviceDetail
-        headsign = st.shownDirection ?? ""
-        circular = st.isCircular
-        time = st.departureTime
-        delayMinutes = st.delayMinutes
-        realTime = st.realTime
-        cancelled = st.isCancelled
-        tz = st.place.tz
-    }
-}
-
 struct DeparturesEntry: TimelineEntry {
     enum State { case ok, needsStop, failed }
     let date: Date

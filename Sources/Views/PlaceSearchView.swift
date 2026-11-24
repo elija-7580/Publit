@@ -56,6 +56,17 @@ struct PlaceSearchView: View {
                             .accessibilityIdentifier("pick-\(role.rawValue)")
                         }
                     }
+                    // Own shortcuts right after Home and Work (#22).
+                    ForEach(favorites.shortcuts) { p in
+                        Button { select(.place(p)) } label: {
+                            Label {
+                                VStack(alignment: .leading, spacing: 1) {
+                                    Text(verbatim: p.name).foregroundStyle(.primary).lineLimit(1)
+                                    if let sub = p.subtitle { Text(verbatim: sub).font(.caption).foregroundStyle(.secondary).lineLimit(1) }
+                                }
+                            } icon: { Image(systemName: p.shownSymbol) }
+                        }
+                    }
                     if allowCurrentLocation && !location.isDenied {
                         Button { select(.currentLocation) } label: {
                             Label("Current location", systemImage: "location.fill")

@@ -26,6 +26,9 @@ enum MapHero {
     /// 5.8 s in the map renderer on the way back from Tickets to Nearby). Coming back builds a
     /// fresh map; a quick look at another tab keeps it.
     static let releaseDelay: Duration = .seconds(20)
+    /// Pulled down this far (points), the list opens the full map where that is offered (#17):
+    /// well past the pull that refreshes, so a refresh does not open it by accident.
+    static let pullToExpand: CGFloat = 170
 }
 
 /// Where the hero row is in the list; nil while it is scrolled out of the list.
@@ -145,6 +148,9 @@ private struct MapHeroLayer<M: View>: View {
 private struct MapHeroOverList<M: View>: ViewModifier {
     let map: (EdgeInsets) -> M
     let onExpand: () -> Void
+    /// Pulling the list far down opens the full map (Nearby, #17), past the pull that refreshes.
+    var pullToExpand = false
+    @State private var pulledOpen = false
     /// iOS 18+: the list's offset from its rest (negative = scrolled up).
     @State private var offset: CGFloat?
     /// iOS 17: the hero row's place now and when the screen opened; nil while it is out of the list.
@@ -191,6 +197,15 @@ private struct MapHeroOverList<M: View>: ViewModifier {
             .contentMargins(.top, 0, for: .scrollContent)
             .background(Color.ground.ignoresSafeArea())
             .modifier(ListOffset(offset: $offset))
+            .onChange(of: offset) { _, now in
+                guard pullToExpand, let now else { return }
+                if now > MapHero.pullToExpand, !pulledOpen {
+                    pulledOpen = true
+                    onExpand()
+                } else if now < 20 {
+                    pulledOpen = false
+                }
+            }
             .overlay {
                 // Kept while scrolled away (only hidden), so the map keeps where you moved it.
                 if let moved, keepsMap {
@@ -252,9 +267,10 @@ extension View {
     /// `inkList()` with a map at its top (see `MapHero`); its first section must be `MapHeroSpace()`.
     /// With `hero` false it is the plain `inkList()`.
     @ViewBuilder
-    func inkList<M: View>(hero: Bool, onExpand: @escaping () -> Void, @ViewBuilder map: @escaping (EdgeInsets) -> M) -> some View {
+    func inkList<M: View>(hero: Bool, pullToExpand: Bool = false, onExpand: @escaping () -> Void,
+                          @ViewBuilder map: @escaping (EdgeInsets) -> M) -> some View {
         if hero {
-            modifier(MapHeroOverList(map: map, onExpand: onExpand))
+            modifier(MapHeroOverList(map: map, onExpand: onExpand, pullToExpand: pullToExpand))
                 .listSectionSpacing(MapHero.gap)
                 .liveBarPadding()
         } else {

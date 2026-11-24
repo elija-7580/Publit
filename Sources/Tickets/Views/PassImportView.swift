@@ -62,7 +62,7 @@ struct PassImportView: View {
         }
         .photosPicker(isPresented: $choosingPhoto, selection: $photo, matching: .images)
         .task { if let sharedURL { await open(sharedURL) } }
-        .fileImporter(isPresented: $choosingFile, allowedContentTypes: [.pdf, .image]) { result in
+        .fileImporter(isPresented: $choosingFile, allowedContentTypes: [.pdf, .image] + Self.walletTypes) { result in
             guard case .success(let url) = result else { return }
             readingTask?.cancel()
             readingTask = Task { await open(url) }
@@ -104,7 +104,7 @@ struct PassImportView: View {
                 }
                 .accessibilityIdentifier("importPhoto")
                 Button { choosingFile = true } label: {
-                    Label(L10n.t("PDF or image file"), systemImage: "doc")
+                    Label(L10n.t("PDF, image or Wallet pass"), systemImage: "doc")
                 }
                 .accessibilityIdentifier("importFile")
                 if VNDocumentCameraViewController.isSupported {
@@ -128,6 +128,10 @@ struct PassImportView: View {
         defer { if access { url.stopAccessingSecurityScopedResource() } }
         do {
             let type = UTType(filenameExtension: url.pathExtension)
+            if url.pathExtension.lowercased() == "pkpass" || Self.walletTypes.contains(where: { type?.conforms(to: $0) == true }) {
+                try await openWalletPass(url)
+                return
+            }
             guard type?.conforms(to: .pdf) == true || type?.conforms(to: .image) == true else {
                 throw TicketRecognizer.Failure.unreadable
             }
@@ -153,6 +157,27 @@ struct PassImportView: View {
         } catch is CancellationError {
             // Dismissing the import must never turn into a late save.
         } catch { stage = .failed(error.localizedDescription) }
+    }
+
+    /// Apple Wallet passes (#20), e.g. shared from Wallet, Mail or a rail operator's website.
+    static let walletTypes: [UTType] = [UTType("com.apple.pkpass") ?? UTType(filenameExtension: "pkpass")].compactMap { $0 }
+
+    /// A Wallet pass: its code exactly as issued and its details, on the check screen.
+    private func openWalletPass(_ url: URL) async throws {
+        let result = try await Task.detached(priority: .userInitiated) { () throws -> WalletPassImport.Result in
+            let size = try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
+            guard size <= PassStore.maxDocumentBytes else { throw PassStore.Failure.documentTooLarge }
+            return try WalletPassImport.read(pkpass: try Data(contentsOf: url))
+        }.value
+        try Task.checkCancellation()
+        var pass = result.pass
+        if let tripId { pass.tripId = tripId }
+        // The same pass again: its existing ticket, not a second one.
+        if let code = pass.barcode?.dedupeKey, let existing = store.passes.first(where: { $0.barcode?.dedupeKey == code }) {
+            stage = .review(.edit(existing))
+            return
+        }
+        stage = .review(.new(pass, document: nil, kind: nil, page: 0, codes: result.codes, colorFromTicket: result.color))
     }
 
     private func read(_ data: Data, pdf: Bool, page: Int) async {

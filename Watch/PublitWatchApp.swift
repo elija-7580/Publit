@@ -44,10 +44,16 @@ struct PublitWatchApp: App {
                 }
             }
             .onOpenURL { url in
-                // The Live Activity's link: publit://trip/<id>.
-                if case .trip(let id)? = DeepLink(url: url), library.snapshot.trip(id) != nil {
+                // The Live Activity's link: publit://trip/<id>; a complication's: publit://stop/<id>.
+                switch DeepLink(url: url) {
+                case .trip(let id)? where library.snapshot.trip(id) != nil:
                     path = [.trip(id)]
                     autoOpened = id
+                case .stop(let id, let name, let lat, let lon)?:
+                    // A complication's nearest stop (#18): its departures.
+                    path = [.stop(SavedPlace(id: id, name: name, subtitle: nil, lat: lat, lon: lon, stopId: id))]
+                default:
+                    break
                 }
             }
             // Same weekly map of data gaps as on the iPhone (one small file a day at most).
