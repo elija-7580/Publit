@@ -145,7 +145,8 @@ export async function findJourneys(body, env, { fetchImpl = fetch, list } = {}) 
       const sold = new Set(offers.map((o) => o.leg));
       const rest = transit.filter((l) => !sold.has(l.index));
       const links = rest.length === 0 ? [] : findLinks({
-        legs: rest.map((l) => ({ index: l.index, operator: l.operator ?? "", mode: l.mode, links: l.links })),
+        legs: rest.map((l) => ({ index: l.index, operator: l.operator ?? "", mode: l.mode, links: l.links,
+          from: l.from?.name, to: l.to?.name, departure: l.departure, timeZone: l.from?.tz ?? undefined })),
         ...(request.app ? { app: request.app } : {}),
       }, env).links;
       return { ...journey, offers, links, total: total(journey, offers) };
