@@ -96,6 +96,7 @@ final class CalendarTripsTests: XCTestCase {
         let list = CalendarTrips.suggestions([
             event("meeting", inMinutes: 60, location: "Betriebsversammlung"),
             event("room", inMinutes: 61, location: "Raum 3"),
+            event("roomCode", inMinutes: 61, location: "G1.E.S.20/21/22"),
             event("floor", inMinutes: 62, location: "2. Stock, Besprechungsraum"),
             event("street", inMinutes: 63, location: "Herrengasse 14"),
             event("postcode", inMinutes: 64, location: "Wiener Straße\n1010 Wien"),
