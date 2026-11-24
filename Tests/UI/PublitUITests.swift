@@ -734,7 +734,7 @@ final class PublitUITests: XCTestCase {
         for _ in 0..<6 where !save.isHittable { app.swipeUp() }
         XCTAssertTrue(save.exists, "Save trip missing")
         save.tap()
-        XCTAssertTrue(app.collectionViews.buttons["Saved"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "identifier == 'saveTrip' AND label == 'Saved'")).firstMatch.waitForExistence(timeout: 5))
         snap("tripactions")
         // Tickets for the trip: the add flow opens with the trip attached.
         // Saving shows the live trip bar over the lower screen: bring the row above it.

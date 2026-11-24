@@ -236,18 +236,19 @@ struct ItineraryDetailView: View {
             }
         }
         .readableWidth()
-        // Start (or end) and the other actions stay one tap away while scrolling through long trips.
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            if !isBikeOrCar && showsAll {
-                TripActionBar(itinerary: itinerary, fromName: resolvedFrom, toName: resolvedTo)
-            }
-        }
         .sheet(isPresented: $addingTicket) { AddTicketView(tripId: trips.saved(itinerary)?.id) }
         .inkList(hero: wideMap == nil, onExpand: { showsMap = true }) { insets in
             ZStack {
                 Color.surface
                 // Drawn a moment after the screen opens: building a map with a long route made the push wait.
                 if mapReady { RouteMap(itinerary: itinerary, isPreview: true, previewInsets: insets).transition(.opacity) }
+            }
+        }
+        // Start (or end) and the other actions stay one tap away while scrolling through long trips.
+        // Outside the map hero: its overlay spans the whole list and would cover the bar.
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if !isBikeOrCar && showsAll {
+                TripActionBar(itinerary: itinerary, fromName: resolvedFrom, toName: resolvedTo)
             }
         }
         // Exit numbers of the stations the trip leaves on foot ("Take exit B2"), from OpenStreetMap.
