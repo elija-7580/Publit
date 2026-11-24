@@ -90,7 +90,7 @@ Every list row answers its question in the first line; the second line is one gr
 - **Route row** (`ItineraryRow`): times + duration; timeline; "Leave in 6 min · 1 change · U6 → Garching" (leave time in ink, within the hour); boarding line ("Board at …" unless the walk is 2 min or more).
 - **Saved trip** (`SavedTripRow`): destination and "Leave in 6 min" (else the date); times + line badges; "from …".
 - **Live trip**: the stage card says "Now" on the current stage only; no "3/8" counters (the strip above shows the stages).
-- No chevrons on rows that are links as a whole (`linkIndicatorHidden()`, iOS 26+). Three actions sit in one row, four as two by two.
+- No chevrons on rows that are links as a whole (`linkIndicatorHidden()`, iOS 26+). Action tiles: three in one row, four as two by two; the route screen uses the action bar instead.
 - At a stop (`Reach.atStopMeters`, 50 m) the distance reads "Here" and nothing says "1 min".
 
 ### Floating capsules
@@ -116,12 +116,12 @@ route list. A floating capsule never covers the thing it points to: it hides onc
 - Results: network header ("Venice · ACTV"), route rows, "Later connections", footer with "Updated …". Floating "Recommended" capsule when that row is out of sight.
 - "Other ways" (walk, bike, car) only when realistic; each opens in the chosen maps app.
 
-### Route detail
-1. Overview: map preview, live status, leave card, line chain, network and ticket line, time-zone and driving notes.
+### Route detail (layout A, Nov 2026)
+1. Overview: map preview, live status, leave card, line chain (more than four rides: lines only, no walks), time-zone and driving notes.
 2. Warnings, smart changes.
-3. Actions (Start, Save, Calendar, Reminder).
-4. Steps: a timeline; each ride shows where to get on and off and opens for its stops, live source, notes and the get-off alarm.
-5. Fares, then the "All information without guarantee" footnote.
+3. Steps: a timeline; each ride shows where to get on and off and opens for its stops, live source, notes and the get-off alarm.
+4. Tickets: one network line per network along the way ("Venice · ACTV"), fares, ticket links; then the "All information without guarantee" footnote.
+- Actions are a bar pinned to the bottom (`TripActionBar`): flat surface with a hairline on top; Save, Calendar, Share, Reminder as 46-pt soft square keys (symbol only, labelled for VoiceOver), Start trip as the ink button filling the rest. While the trip runs: Share and a red "End trip" (destructive). At accessibility text sizes the start button shows its symbol only.
 
 ### Live trip
 - Map with the current leg in full detail, the rest thinned; floating "Back to now / Trip overview" capsule top leading.

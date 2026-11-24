@@ -40,6 +40,7 @@ struct TripActionBar: View {
     @State private var calendarTrip: SavedTrip?
     @State private var reminderOn = false
     @State private var note: String?
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     private var saved: SavedTrip? { trips.saved(itinerary) }
     /// Unsaved here, but kept until this screen closes.
@@ -60,7 +61,7 @@ struct TripActionBar: View {
             HStack(spacing: 8) {
                 if let saved, running {
                     shareButton
-                    Button { Task { await stopTrip(saved) } } label: {
+                    Button(role: .destructive) { Task { await stopTrip(saved) } } label: {
                         Label("End trip", systemImage: "stop.circle.fill")
                             .labelStyle(.titleAndIcon)
                             .frame(maxWidth: .infinity)
@@ -82,8 +83,9 @@ struct TripActionBar: View {
         .padding(.bottom, pinned ? 8 : 4)
         .background {
             if pinned {
+                // Flat surface with a hairline, no shadow or material (docs/design §1).
                 Color.surface.ignoresSafeArea(edges: .bottom)
-                    .overlay(alignment: .top) { Divider() }
+                    .overlay(alignment: .top) { Rectangle().fill(Color.ink.opacity(0.09)).frame(height: 1) }
             }
         }
         .sheet(item: $calendarTrip) { trip in CalendarEventSheet(trip: trip).ignoresSafeArea() }
@@ -93,27 +95,19 @@ struct TripActionBar: View {
     }
 
     private func startButton(disabled: Bool) -> some View {
-        Button { Task { await startTrip() } } label: {
-            // The longest label that fits next to the small buttons; the icon alone at the largest text sizes.
-            ViewThatFits(in: .horizontal) {
-                startLabel(short: false).labelStyle(.titleOnly)
-                startLabel(short: true).labelStyle(.titleAndIcon)
-                startLabel(short: true).labelStyle(.iconOnly)
-            }
-            .lineLimit(1)
-            .frame(maxWidth: .infinity)
+        let walking = TripStatus.startsOnFoot(itinerary, now: .now)
+        return Button { Task { await startTrip() } } label: {
+            // Chosen by text size, not ViewThatFits (docs/design §7). Starting on foot: the walking symbol says
+            // so and the button opens the walk turn by turn; at the largest sizes only the symbol.
+            Label(walking ? LocalizedStringKey("Start") : LocalizedStringKey("Start trip"), systemImage: walking ? "figure.walk" : "play.fill")
+                .labelStyle(typeSize.isAccessibilitySize ? AnyLabelStyle(.iconOnly) : walking ? AnyLabelStyle(.titleAndIcon) : AnyLabelStyle(.titleOnly))
+                .lineLimit(1).minimumScaleFactor(0.8)
+                .frame(maxWidth: .infinity)
         }
         .buttonStyle(.ink)
         .disabled(disabled)
-        .accessibilityLabel(Text(L10n.t(TripStatus.startsOnFoot(itinerary, now: .now) ? "Start walking navigation" : "Start trip")))
+        .accessibilityLabel(Text(L10n.t(walking ? "Start walking navigation" : "Start trip")))
         .accessibilityIdentifier("startTrip")
-    }
-
-    /// Starting on foot: the button says so and opens the walk turn by turn.
-    private func startLabel(short: Bool) -> some View {
-        let walking = TripStatus.startsOnFoot(itinerary, now: .now)
-        let title: LocalizedStringKey = walking ? (short ? "Walk" : "Start walking navigation") : (short ? "Start" : "Start trip")
-        return Label(title, systemImage: walking ? "figure.walk" : "play.fill")
     }
 
     private var saveButton: some View {
@@ -409,4 +403,11 @@ extension TripStore {
         }
         return save(itinerary, from: from, to: to)
     }
+}
+
+/// A label style picked at run time (text size decides, not the space).
+struct AnyLabelStyle: LabelStyle {
+    private let make: (Configuration) -> AnyView
+    init<S: LabelStyle>(_ style: S) { make = { AnyView(Label($0).labelStyle(style)) } }
+    func makeBody(configuration: Configuration) -> some View { make(configuration) }
 }
