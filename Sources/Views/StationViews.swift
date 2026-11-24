@@ -103,7 +103,7 @@ struct PlatformSummaryRow: View {
                 } icon: {
                     Image(systemName: "arrow.turn.down.right")
                 }
-                .font(.caption).foregroundStyle(.secondary)
+                .font(.footnote).foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
             }
         }
@@ -138,7 +138,7 @@ struct PlatformHeaderRow: View {
             Text(verbatim: group.title).font(.headline)
             ForEach(Array(group.ways.enumerated()), id: \.offset) { _, way in
                 Text(verbatim: L10n.f("Next: %@", way.joined(separator: " → ")))
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.footnote).foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }

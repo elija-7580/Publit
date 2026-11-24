@@ -49,7 +49,7 @@ struct PlaceSearchView: View {
                                 Label {
                                     VStack(alignment: .leading, spacing: 1) {
                                         Text(role.title).foregroundStyle(.primary)
-                                        Text(verbatim: p.name).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                                        Text(verbatim: p.name).font(.footnote).foregroundStyle(.secondary).lineLimit(1)
                                     }
                                 } icon: { Image(systemName: role.symbol) }
                             }
@@ -148,7 +148,7 @@ struct PlaceSearchView: View {
                                 .font(.title3).foregroundStyle(.secondary)
                             VStack(alignment: .leading, spacing: 1) {
                                 Text(search.to.title).foregroundStyle(.primary).lineLimit(1)
-                                Text(L10n.f("from %@", search.from.title)).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                                Text(L10n.f("from %@", search.from.title)).font(.footnote).foregroundStyle(.secondary).lineLimit(1)
                             }
                         }
                     }
@@ -248,7 +248,7 @@ struct PlaceLabel: View {
             VStack(alignment: .leading, spacing: 1) {
                 Text(name).foregroundStyle(.primary).lineLimit(1)
                 if let subtitle, !subtitle.isEmpty {
-                    Text(subtitle).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                    Text(subtitle).font(.footnote).foregroundStyle(.secondary).lineLimit(1)
                 }
             }
         }

@@ -106,7 +106,7 @@ struct AddTicketView: View {
                     TextField("Link to ticket app or shop", text: $appLink)
                         .keyboardType(.URL).textInputAutocapitalization(.never).autocorrectionDisabled()
                     if !linkIsValid {
-                        Text("This is not a valid link.").font(.caption).foregroundStyle(Color.danger)
+                        Text("This is not a valid link.").font(.footnote).foregroundStyle(Color.danger)
                     }
                 } header: {
                     Text("Open app")
@@ -283,7 +283,7 @@ struct LinkedTicketAppsView: View {
                 ForEach(store.linkedApps.keys.sorted(), id: \.self) { key in
                     VStack(alignment: .leading, spacing: 2) {
                         Text(key.capitalized)
-                        Text(store.linkedApps[key] ?? "").font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                        Text(store.linkedApps[key] ?? "").font(.footnote).foregroundStyle(.secondary).lineLimit(1)
                     }
                 }
                 .onDelete { idx in

@@ -697,7 +697,7 @@ struct LineAtStopRow: View {
                                             dir.departures.first.flatMap { TransitLabels.clean($0.place.track) }
                                                 .map { L10n.f("Platform %@", $0) }]
                                 .compactMap { $0 }.joined(separator: " · "))
-                                .font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                                .font(.footnote).foregroundStyle(.secondary).lineLimit(1)
                         }
                     }
                     Spacer(minLength: 8)
