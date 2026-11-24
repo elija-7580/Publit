@@ -272,6 +272,37 @@ enum TripAlternative {
             .prefix(limit))
     }
 
+    /// A better stop is only worth a word when it gets you there at least this much earlier.
+    static let fasterMustSave: TimeInterval = 3 * 60
+    /// In the last minutes before the vehicle leaves nobody turns round for another stop.
+    static let fasterNeedsSlack: TimeInterval = 3 * 60
+
+    /// Nothing is wrong and you are walking to a ride: worth one look whether another stop, or an
+    /// earlier vehicle, gets you there sooner from where you are (#110). Not on the walk at the end,
+    /// and not before the walk is due: a trip planned for later is not slow because one could leave now.
+    static func worthLooking(_ step: GuideStep, _ it: Itinerary, at now: Date) -> Bool {
+        guard step.kind == .walk, let walk = it.legs[safe: step.legIndex], now >= walk.startTime.addingTimeInterval(-60),
+              let next = it.legs[safe: step.legIndex + 1], next.isTransit, next.cancelled != true else { return false }
+        return next.startTime.timeIntervalSince(now) >= fasterNeedsSlack
+    }
+
+    /// Routes from where you are that you can still catch and that arrive clearly earlier than the
+    /// trip as it stands, the earliest first. The same vehicles as the trip ahead are not another way,
+    /// even when a fresher live time makes them look a few minutes earlier.
+    static func faster(_ options: [Itinerary], than trip: Itinerary, at now: Date, limit: Int = 3) -> [Itinerary] {
+        let ahead = rides(trip.legs.filter { $0.endTime > now })
+        return Array(choices(options, at: now, limit: .max)
+            .filter { trip.endTime.timeIntervalSince($0.endTime) >= fasterMustSave && rides($0.legs) != ahead }
+            .prefix(limit))
+    }
+
+    /// The vehicles of these legs, in order (the run, or line, direction and scheduled departure).
+    private static func rides(_ legs: [Leg]) -> [String] {
+        legs.filter(\.isTransit).map { leg in
+            leg.tripId ?? "\(leg.routeShortName ?? "")>\(leg.headsign ?? "")~\(Int64(leg.scheduledStartTime.timeIntervalSince1970))"
+        }
+    }
+
     /// Minutes a new route arrives after (+) or before (−) the trip as it stands.
     static func minutesLater(_ option: Itinerary, than trip: Itinerary) -> Int {
         Int((option.endTime.timeIntervalSince(trip.endTime) / 60).rounded())
