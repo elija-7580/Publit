@@ -102,9 +102,22 @@ struct PlanView: View {
                 NavigationLink {
                     SectionPlanView(from: plan.from, to: plan.to, date: plan.timeMode == .arriveBy ? .now : plan.date)
                 } label: {
-                    Label("Plan in sections", systemImage: "point.topleft.down.to.point.bottomright.curvepath.fill")
-                        .font(.subheadline.weight(.semibold))
+                    // The same soft capsule row as "Route options" above (docs/design: one row type).
+                    HStack(spacing: 8) {
+                        Image(systemName: "point.topleft.down.to.point.bottomright.curvepath")
+                            .font(.subheadline.weight(.semibold)).foregroundStyle(Color.secondary)
+                            .accessibilityHidden(true)
+                        Text("Plan in sections").font(.subheadline.weight(.semibold)).foregroundStyle(.primary)
+                        Spacer(minLength: 8)
+                        Image(systemName: "chevron.right").font(.caption.weight(.semibold)).foregroundStyle(.tertiary)
+                            .accessibilityHidden(true)
+                    }
+                    .padding(.horizontal, 14)
+                    .frame(minHeight: 40)
+                    .background(Color.inkFill, in: Capsule())
+                    .contentShape(Capsule())
                 }
+                .linkIndicatorHidden()
                 .accessibilityIdentifier("planInSections")
                 .listRowSeparator(.hidden)
                 // One wide search key under the whole form (as in the ÖBB app), instead of a small

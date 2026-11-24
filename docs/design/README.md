@@ -89,8 +89,9 @@ Every list row answers its question in the first line; the second line is one gr
 - **Departure row** (`DepartureRow`): line 1 = line badge + destination (body semibold, one line, "…" at the end; no "Towards"), the minutes on the right (title2 bold; orange when late; "now"; clock time from 60 min). Line 2 = "Pl. 51 · 11:24 · +2 min". Live or timetable is a small symbol in front of the minutes (green radio waves / grey calendar), never the word on every row. Notes (alerts, replacement bus) only when there is one.
 - **Route row** (`ItineraryRow`): times + duration; timeline; "Leave in 6 min · 1 change · U6 → Garching" (leave time in ink, within the hour); boarding line ("Board at …" unless the walk is 2 min or more).
 - **Saved trip** (`SavedTripRow`): destination and "Leave in 6 min" (else the date); times + line badges; "from …".
-- **Live trip**: the stage card says "Now" on the current stage only; no "3/8" counters (the strip above shows the stages).
-- No chevrons on rows that are links as a whole (`linkIndicatorHidden()`, iOS 26+). Three actions sit in one row, four as two by two.
+- **Live trip**: the stage card says "Now" on the current stage only; no "3/8" counters (the timeline shows the stages).
+- Row ends: › opens a page (settings, options, plan in sections); → means "routes there" (Home, Work, an appointment). Nothing else at the end of a row.
+- No chevrons on rows that are links as a whole (`linkIndicatorHidden()`, iOS 26+). Action tiles: three in one row, four as two by two; the route screen uses the action bar instead.
 - At a stop (`Reach.atStopMeters`, 50 m) the distance reads "Here" and nothing says "1 min".
 
 ### Floating capsules
@@ -116,17 +117,23 @@ route list. A floating capsule never covers the thing it points to: it hides onc
 - Results: network header ("Venice · ACTV"), route rows, "Later connections", footer with "Updated …". Floating "Recommended" capsule when that row is out of sight.
 - "Other ways" (walk, bike, car) only when realistic; each opens in the chosen maps app.
 
-### Route detail
-1. Overview: map preview, live status, leave card, line chain, network and ticket line, time-zone and driving notes.
+### Route detail (layout A, Nov 2026)
+1. Overview: map preview, live status, leave card, line chain (more than four rides: lines only, no walks), time-zone and driving notes.
 2. Warnings, smart changes.
-3. Actions (Start, Save, Calendar, Reminder).
-4. Steps: a timeline; each ride shows where to get on and off and opens for its stops, live source, notes and the get-off alarm.
-5. Fares, then the "All information without guarantee" footnote.
+3. Steps: a timeline; each ride shows where to get on and off and opens for its stops, live source, notes and the get-off alarm.
+4. Tickets: one network line per network along the way ("Venice · ACTV"), fares, ticket links; then the "All information without guarantee" footnote.
+- Actions are a bar pinned to the bottom (`TripActionBar`): flat surface with a hairline on top; Save, Calendar, Share, Reminder as 46-pt soft square keys (symbol only, labelled for VoiceOver), Start trip as the ink button filling the rest. While the trip runs: Share and a red "End trip" (destructive). At accessibility text sizes the start button shows its symbol only.
 
-### Live trip
+### Live trip (layout A, Nov 2026)
+- Panel down: two cards, always in view: the stage card (what to do now, the minutes; swipe for other stages) and the next change (`NextChangeCard`: "Change at …", minutes to spare large, platforms, line, how sure, exit). No stage strip.
+- Panel up: the shown stage in detail, then "Trip overview" as a timeline: every stage, each change as its own row, the exit under the last ride. Tapping a row shows that stage.
 - Map with the current leg in full detail, the rest thinned; floating "Back to now / Trip overview" capsule top leading.
 - Alternatives compare with the trip ("8 min later than your trip"); primary "Switch to this connection", soft "Other connections".
 - The live bar reserves its height at the bottom of every tab (`safeAreaPadding`), so nothing hides behind it.
+
+### Settings (layout A, Nov 2026)
+- Start page: search field always visible, the community group, then one group of categories (symbol in a 28-pt soft tile with radius 8, name in ink, current value in secondary). Each category is a short page of its own; the search finds every single setting and opens its page.
+- Long explanations stay as section footers on the category pages, never on the start page.
 
 ## 5. Motion
 - `.snappy(duration: 0.2–0.25)` for toggles, expands and segment changes; capsules move in from the bottom with opacity.

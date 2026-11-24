@@ -121,18 +121,18 @@ struct ChangeChanceRow: View {
                 }
             }
             Text(verbatim: "\(verdict) · \(spare)")
-                .font(.caption).foregroundStyle(.secondary)
+                .font(.footnote).foregroundStyle(.secondary)
             Text(Self.sourceText(change.source))
-                .font(.caption2).foregroundStyle(.tertiary)
+                .font(.footnote).foregroundStyle(.secondary)
             if let backup = SmartRouting.backup(for: change.outgoing) {
                 let then = isLastRide ? L10n.f("Arrive %@", Fmt.time(backup.arrival, tz: change.outgoing.to.tz))
                     : L10n.t("still makes the next change")
                 Label(L10n.f("If missed: %@ at %@", backup.leg.lineName, Fmt.time(backup.leg.startTime, tz: backup.leg.from.tz)) + " · " + then,
                       systemImage: "arrow.uturn.forward")
-                    .font(.caption.weight(.semibold))
+                    .font(.footnote.weight(.semibold))
                     .foregroundStyle(Color.ink)
             } else if change.level != .safe {
-                Text(L10n.t("No backup found if you miss it.")).font(.caption).foregroundStyle(.secondary)
+                Text(L10n.t("No backup found if you miss it.")).font(.footnote).foregroundStyle(.secondary)
             }
         }
         .padding(.vertical, 2)

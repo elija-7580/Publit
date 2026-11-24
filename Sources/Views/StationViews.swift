@@ -103,7 +103,7 @@ struct PlatformSummaryRow: View {
                 } icon: {
                     Image(systemName: "arrow.turn.down.right")
                 }
-                .font(.caption).foregroundStyle(.secondary)
+                .font(.footnote).foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
             }
         }
@@ -138,7 +138,7 @@ struct PlatformHeaderRow: View {
             Text(verbatim: group.title).font(.headline)
             ForEach(Array(group.ways.enumerated()), id: \.offset) { _, way in
                 Text(verbatim: L10n.f("Next: %@", way.joined(separator: " → ")))
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.footnote).foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
@@ -248,10 +248,11 @@ struct ChangeGuideCard: View {
             if let t = TransitLabels.clean(track) {
                 Text(verbatim: t).font(.caption2.weight(.bold))
                     .padding(.horizontal, 5).padding(.vertical, 1)
-                    .background(.regularMaterial, in: Capsule())
+                    // Matte white with a hairline on the map, no material (docs/design §1.2).
+                    .matteSurface(in: Capsule())
             }
         }
-        .shadow(color: .black.opacity(0.25), radius: 2, y: 1)
+        .mapShadow()
     }
 }
 

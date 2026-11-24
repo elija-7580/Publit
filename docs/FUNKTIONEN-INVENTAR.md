@@ -3,7 +3,7 @@
 > Nicht von Hand bearbeiten. Erzeugt von `scripts/feature_inventory.py` (CI: `features-doc.yml`).
 > Die ausführliche Beschreibung steht in [FUNKTIONEN.md](FUNKTIONEN.md).
 
-**232 Views, 8 App Intents, 5 Widgets in 87 Dateien.**
+**235 Views, 8 App Intents, 5 Widgets in 89 Dateien.**
 
 ## `Sources/App/DesignSamples.swift`
 - Views: `DesignSampleView`
@@ -171,8 +171,12 @@
 - Views: `LiveSourcesView`
 - Sichtbare Texte: Europe and beyond · Routes, timetables and live times where operators publish them · Vienna · Live departures, disruptions, lifts out of service · Austria · Trains, and buses and trams where reported: delays, cancellations, construction work · Switzerland · Delays, cancellations and track changes of trains, trams, buses and boats · North Rhine-Westphalia · Live times of buses, trams and trains where Transitous has none · Berlin and Brandenburg · Hesse · Lower Saxony and Bremen · Schleswig-Holstein · Rhineland-Palatinate · Venice · Live times of waterbuses and buses · Stockholm · Live departures and disruptions · London · Line status and disruptions (Powered by TfL Open Data) · The extra operators only get the stop, line and time of a ride, never your location or account. · Live data sources
 
+## `Sources/Views/LiveTripChanges.swift`
+- Views: `NextChangeCard`, `LiveChangeRow`
+- Sichtbare Texte: Pl. %@ · Stay on board · Safe change · Change should work · Risky change · Connection cancelled · Change at %@ no longer works · %@ to spare · Very tight change · Change at %@
+
 ## `Sources/Views/LiveTripView.swift`
-- Views: `LiveTripView`, `StageStrip`, `GuideStopRow`, `ExitMark`, `GuideMap`, `TurnCard`, `HeadingRow`, `PlatformChangeLabel`, `AlternativeRow`, `StagePager`, `StageRow`
+- Views: `LiveTripView`, `GuideStopRow`, `ExitMark`, `GuideMap`, `TurnCard`, `HeadingRow`, `PlatformChangeLabel`, `AlternativeRow`, `StagePager`, `StageRow`
 - Sichtbare Texte: You seem to be off the route. · Missed it? · Connection cancelled · Done · Back to now · Trip overview · Route details · Walk to %@ · Board here · Platform %@ · Walk faster to make it. · In %@ · Directions · Get off at %@ · +%lld min · On time · Rail replacement bus · This trip is cancelled. · Next stop · in %@ · Position from your location. · Position estimated from live stop times. · Position estimated from the timetable. · Line %@: all stops and map · Stops · You have arrived · Arrive at %@ · Destination in %@ · End trip · Show ticket · Map style · 3D terrain and buildings · More · Turn off spoken directions · Turn on spoken directions · Backup: %@ at %@ · Your change at %@ may not work. · Your change at %@ may not work (%lld %%). · Departs in %lld min · Departs now · Departed %@ · Board at %@ · Now at %@ · Next: %@ · Take %@ towards %@ · Take %@ · Get off here · Pl. %@ · Stop turning the map · Turn the map with you · Follow my location · Take exit %@ · No compass: the arrow has north at the top. · Platform changed (was %@) · Your trip: arrive %@ · Looking for the next connection… · No other connection found right now. · Fewer connections · Other connections · New route from here · Walk · Arrive %@ · Switch · Switch to this connection · now
 
 ## `Sources/Views/Map/GoogleMapView.swift`
@@ -229,9 +233,12 @@
 ## `Sources/Views/ServiceAlertsView.swift`
 - Views: `ServiceAlertRow`, `ServiceAlertsView`
 
+## `Sources/Views/SettingsCategory.swift`
+- Sichtbare Texte: General · Travel preferences · Map · Stations · Search · Tickets · Apple Watch · Notifications · Data · Diagnostics · About
+
 ## `Sources/Views/SettingsView.swift`
 - Views: `SettingsView`, `SettingsButton`
-- Sichtbare Texte: Public transport, without the noise. · What's new in Publit · Community · Start screen · Nearby · Plan · A saved stop · Stop · General · Save a stop with the star on its departures first. · Publit opens with this stop's departures; Done goes on to Nearby. · Get-off alert · Started trips · Travel preferences · Show connection timelines · How to read connections · Map · Platform map · Departures by platform · Change guide · Stations · Map provider · Map style · Points of interest · Lines · Vehicles · Bikes and scooters · Open directions in · Google Maps uses the Google API key under Search, with “Maps SDK for iOS” enabled. Without a key, Apple Maps is shown. · Place search · Google API key · Search · Tickets · My tickets · Ticket apps per operator · Tickets on Apple Watch · Apple Watch · Disruptions on saved lines · Notifications · Live data from more operators · Exit numbers from OpenStreetMap · Live data sources · Export my data · Data · Times marked live come from the operator's real-time feed; all others are timetable times. · Freezes · Failed requests · Crashes and unexpected exits · No problems recorded · Share diagnostics · Report a problem · Delete diagnostics · Diagnostics · Version · About · Publit is open source (MIT). No account, no ads, no tracking. Saved places, trips and tickets stay on this device. · Publit is open source (MIT). No account, no ads, no tracking. Saved places and trips stay on this device. · Settings · Done
+- Sichtbare Texte: What's new in Publit · Community · No settings match your search. · Search settings · Settings · Done · Plan · Nearby · Start screen · A saved stop · Stop · General · Save a stop with the star on its departures first. · Publit opens with this stop's departures; Done goes on to Nearby. · Get-off alert · Started trips · Travel preferences · Show connection timelines · How to read connections · Map · Map provider · Map style · Points of interest · Lines · Vehicles · Bikes and scooters · Open directions in · Google Maps uses the Google API key under Search, with “Maps SDK for iOS” enabled. Without a key, Apple Maps is shown. · Platform map · Departures by platform · Change guide · Stations · Place search · Google API key · Search · Tickets · My tickets · Ticket apps per operator · Tickets on Apple Watch · Apple Watch · Disruptions on saved lines · Notifications · Live data from more operators · Exit numbers from OpenStreetMap · Live data sources · Export my data · Data · Times marked live come from the operator's real-time feed; all others are timetable times. · Freezes · Failed requests · Crashes and unexpected exits · No problems recorded · Share diagnostics · Report a problem · Delete diagnostics · Diagnostics · Public transport, without the noise. · Version · About · Publit is open source (MIT). No account, no ads, no tracking. Saved places, trips and tickets stay on this device. · Publit is open source (MIT). No account, no ads, no tracking. Saved places and trips stay on this device.
 
 ## `Sources/Views/SharedRouteView.swift`
 - Views: `SharedRouteView`
@@ -270,8 +277,8 @@
 - Sichtbare Texte: Change at %@ · Connection cancelled · Change at %@ no longer works · %@ to spare · Very tight change · Platform %@ · %@ walk · Live · Platform changed (was %@)
 
 ## `Sources/Views/TripActions.swift`
-- Views: `TripActionsSection`, `TicketSection`, `TicketCardButton`
-- Sichtbare Texte: End trip · Start walking navigation · Start trip · The calendar entry links back to this trip with its live status. · Saved · Save trip · Add to Calendar · Share arrival · Share trip · Reminder on · Leave reminder · Trip ended · Allow notifications for Publit in Settings. · This trip starts now. · We'll remind you at %@. · Follow it on the lock screen. · Live updates on the lock screen start 8 hours before. · Turn on Live Activities for Publit in Settings to follow it on the lock screen. · Add ticket for this trip · Tickets · The operator publishes no ticket link. Link your ticket app in Settings → Ticket apps.
+- Views: `TripActionsSection`, `TripActionBar`, `TripTicketSections`, `TicketSection`, `TicketCardButton`
+- Sichtbare Texte: End trip · Saved · Save trip · Add to Calendar · The calendar entry links back to this trip with its live status. · Share arrival · Share trip · Reminder on · Leave reminder · Trip ended · Allow notifications for Publit in Settings. · This trip starts now. · We'll remind you at %@. · Follow it on the lock screen. · Live updates on the lock screen start 8 hours before. · Turn on Live Activities for Publit in Settings to follow it on the lock screen. · Tickets · Add ticket for this trip · The operator publishes no ticket link. Link your ticket app in Settings → Ticket apps.
 
 ## `Sources/Views/TripView.swift`
 - Views: `TripView`, `TripMap`, `StopTimeRow`, `LineDeparturesView`
