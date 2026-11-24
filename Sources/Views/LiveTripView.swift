@@ -103,17 +103,28 @@ struct LiveTripView: View {
                      if away { picked = nil; overview = false } else { overview = true }
                  }
              })
-        let stages = VStack(spacing: 10) {
-            StageStrip(steps: steps, itinerary: it, destination: trip.toName, live: live, shown: overview ? nil : index) { tapped in
-                overview = false
-                picked = tapped == live ? nil : steps[tapped].id
-            }
+        // Layout A (Nov 2026): what to do now (the stage card, swipe for the others) and the next change
+        // under it, always in view; the whole trip as a timeline in the panel. The stage strip is gone:
+        // the timeline below shows every stage, change and exit.
+        let changeTarget = overview ? LiveChanges.target(for: steps[live], in: it) : LiveChanges.target(for: step, in: it)
+        let nextChange = changeTarget.flatMap { t in TransferInfo(before: t, in: it).map { (index: t, info: $0) } }
+        let peek = TripPanelMetrics.peek - 48 + (nextChange != nil ? NextChangeCard.height + 8 : 0)
+        let stages = VStack(spacing: 8) {
             StagePager(steps: steps, itinerary: it, destination: trip.toName, live: live, now: now, shown: overview ? nil : index) { shown in
                 if let shown {
                     overview = false
                     picked = shown == live ? nil : steps[shown].id
                 } else {
                     overview = true
+                }
+            }
+            if let nextChange {
+                NextChangeCard(info: nextChange.info, chance: LiveChanges.chance(into: nextChange.index, in: it),
+                               exit: LiveChanges.exit(before: nextChange.index, in: it)) {
+                    // Open the change itself: the wait for the next vehicle, with platforms and the change guide.
+                    if let i = steps.firstIndex(where: { $0.kind == .wait && $0.legIndex == nextChange.index }) {
+                        withAnimation(.snappy) { overview = false; picked = i == live ? nil : steps[i].id }
+                    }
                 }
             }
         }
@@ -150,9 +161,9 @@ struct LiveTripView: View {
                 ZStack(alignment: .bottom) {
                     map
                         // Frame the route in the part of the map the panel leaves free.
-                        .safeAreaPadding(.bottom, TripPanelMetrics.peek + 24)
+                        .safeAreaPadding(.bottom, peek + 24)
                         .ignoresSafeArea(edges: .bottom)
-                    TripPanel { stages } content: { panelDetails }
+                    TripPanel(peek: peek) { stages } content: { panelDetails }
                 }
             }
         }
@@ -215,7 +226,7 @@ struct LiveTripView: View {
         }
     }
 
-    /// What the panel shows under the stages: the live stage in detail, then the trip actions.
+    /// What the panel shows under the stage card: the shown stage in detail, then the whole trip as a timeline.
     @ViewBuilder
     private func details(it: Itinerary, steps: [GuideStep], step: GuideStep, leg: Leg, index: Int, live: Int, here: LatLon?,
                          walk: WalkRoute?, walkPos: WalkRoute.Position?, detour: WalkDetour.Route?,
@@ -253,18 +264,42 @@ struct LiveTripView: View {
                 .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
             }
 
-            if overview {
-                // The whole trip, stage by stage; a tap opens that stage.
-                Section("Trip overview") {
-                    ForEach(steps.indices, id: \.self) { i in stageButton(i, steps: steps, it: it, index: index, live: live) }
-                }
-            } else {
+            if !overview {
                 // Only the stage in front: the others are the cards above and the route details.
                 switch step.kind {
                 case .walk: walkSections(leg, index: step.legIndex, in: it, route: walk!, position: walkPos, detour: detour, check: check, isLive: index == live)
                 case .wait: waitSection(leg, index: step.legIndex, in: it)
                 case .ride: rideSections(leg, index: step.legIndex, in: it, progress: ride?.progress ?? .notStarted, fromGPS: ride?.fromGPS ?? false, check: check)
                 case .arrive: arriveSection(it, here: here)
+                }
+            }
+
+            // The whole trip as a timeline: every stage, each change as its own row (platforms, time to spare,
+            // how sure, exit) and the exit under each ride. A tap opens that stage in detail.
+            Section("Trip overview") {
+                ForEach(steps.indices, id: \.self) { i in
+                    let s = steps[i]
+                    if s.kind == .wait, let info = TransferInfo(before: s.legIndex, in: it) {
+                        Button {
+                            withAnimation(.snappy) { overview = false; picked = i == live ? nil : s.id }
+                        } label: {
+                            LiveChangeRow(info: info, chance: LiveChanges.chance(into: s.legIndex, in: it),
+                                          exit: LiveChanges.exit(before: s.legIndex, in: it), done: i < live)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("liveChangeRow")
+                    }
+                    stageButton(i, steps: steps, it: it, index: index, live: live)
+                    // Where to stand and which way out, under the ride it belongs to (not again before a change,
+                    // whose row already says it).
+                    if s.kind == .ride, TransferInfo(before: it.legs.indices.first { $0 > s.legIndex && it.legs[$0].isTransit } ?? -1, in: it) == nil,
+                       let advice = ExitAdvice.forRide(s.legIndex, in: it.legs), advice.short != nil {
+                        ExitAdviceLine(advice: advice)
+                            .font(.footnote)
+                            .padding(.leading, 44)
+                            .opacity(i < live ? 0.5 : 1)
+                            .listRowBackground(!overview && i == index ? Color.inkFill : Color.surface)
+                    }
                 }
             }
 
@@ -668,68 +703,9 @@ struct LiveTripView: View {
     }
 }
 
-/// The stages as a row of chips: done, now (yellow dot), ahead. Tap one to look at it.
-private struct StageStrip: View {
-    let steps: [GuideStep]
-    let itinerary: Itinerary
-    let destination: String
-    let live: Int
-    /// The stage on the map; nil while the whole trip is shown.
-    let shown: Int?
-    let onTap: (Int) -> Void
-
-    var body: some View {
-        ScrollViewReader { proxy in
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 6) {
-                    ForEach(Array(steps.enumerated()), id: \.element.id) { i, step in
-                        if i > 0 {
-                            Image(systemName: "chevron.compact.right").font(.caption).foregroundStyle(.tertiary)
-                        }
-                        Button { onTap(i) } label: { chip(step, index: i) }
-                            .buttonStyle(.plain)
-                            .id(step.id)
-                    }
-                }
-                .padding(.vertical, 2)
-            }
-            .frame(height: 38)
-            .onAppear { if let s = shown, let id = steps[safe: s]?.id { proxy.scrollTo(id, anchor: .center) } }
-            .onChange(of: shown) { _, s in
-                guard let s, let id = steps[safe: s]?.id else { return }
-                withAnimation { proxy.scrollTo(id, anchor: .center) }
-            }
-        }
-    }
-
-    @ViewBuilder
-    private func chip(_ step: GuideStep, index: Int) -> some View {
-        let leg = itinerary.legs[step.legIndex]
-        let selected = index == shown
-        HStack(spacing: 4) {
-            switch step.kind {
-            case .walk:
-                Image(systemName: leg.rental.map { $0.kind.symbol } ?? ModeStyle.symbol(leg.mode))
-                Text(verbatim: "\(max(1, leg.duration / 60))")
-            case .wait:
-                Image(systemName: "clock")
-                Text(Fmt.time(leg.startTime, tz: leg.from.tz)).monospacedDigit()
-            case .ride:
-                LineBadge(leg, compact: true)
-            case .arrive:
-                Image(systemName: "flag.checkered")
-            }
-            if index == live { SignatureDot(size: 7) }
-        }
-        .font(.caption.weight(.semibold))
-        .padding(.horizontal, 8).padding(.vertical, 6)
-        .background(selected ? Color.inkFill : Color.clear, in: Capsule())
-        .overlay(Capsule().strokeBorder(selected ? Color.ink.opacity(0.5) : Color.primary.opacity(0.1)))
-        .opacity(index < live ? 0.5 : 1)
-        .accessibilityLabel(Text(Self.label(step, in: itinerary, destination: destination)))
-        .accessibilityAddTraits(selected ? .isSelected : [])
-    }
-
+/// The words for a stage, shared by the stage cards and the timeline. (The stage strip that once showed
+/// them above the cards gave way to the timeline in layout A.)
+private enum StageStrip {
     /// What the stage is about, with a place: where to walk to, which line, where to get off.
     fileprivate static func label(_ step: GuideStep, in it: Itinerary, destination: String) -> String {
         let leg = it.legs[step.legIndex]
