@@ -114,7 +114,7 @@ struct LegChangeView: View {
 }
 
 /// One way to go on: its lines, when it leaves the stop and when the whole route arrives.
-private struct LegChoiceRow: View {
+struct LegChoiceRow: View {
     let choice: Itinerary
     /// Index of the first leg that is new.
     let from: Int

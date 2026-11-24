@@ -137,6 +137,55 @@ enum RouteBuilder {
         route.legs.indices.dropFirst().first { route.legs[$0].startTime < route.legs[$0 - 1].endTime }
     }
 
+    // MARK: Choose where to change (#143)
+
+    /// Where the ride of a leg can be left: every stop after the one it is boarded at. From the
+    /// vehicle's whole trip when it is known, so also stops after the planned one; else the leg's
+    /// own stops. Cancelled stops are left out.
+    static func exitStops(of leg: Leg, trip: Leg?) -> [Place] {
+        var stops = (leg.intermediateStops ?? []) + [leg.to]
+        if let trip, let at = trip.allStops.firstIndex(where: { samePlace($0, leg.from) }) {
+            let after = Array(trip.allStops.dropFirst(at + 1))
+            if !after.isEmpty { stops = after }
+        }
+        return stops.filter { $0.cancelled != true }
+    }
+
+    /// The same stop: by ID, else by name within a few hundred metres.
+    static func samePlace(_ a: Place, _ b: Place) -> Bool {
+        if let x = a.stopId, let y = b.stopId, x == y { return true }
+        return a.name == b.name && a.coordinate.distance(to: b.coordinate) <= joinRadius
+    }
+
+    /// Out of a search from where leg `index` starts to the new change point: the way there that
+    /// can follow the kept legs. The same vehicle (`tripId`) comes first, so moving the change to a
+    /// stop of the ride keeps the ride; any other way only when the vehicle is not among them.
+    static func wayToChange(_ route: Itinerary, at index: Int, tripId: String?, from found: [Itinerary]) -> Itinerary? {
+        guard route.legs.indices.contains(index) else { return nil }
+        let kept = Array(route.legs[..<index])
+        let usable = found.filter { fits($0, after: kept) }
+        if let tripId, let same = usable.first(where: { way in
+            let rides = way.legs.filter(\.isTransit)
+            return rides.count == 1 && rides[0].tripId == tripId
+        }) { return same }
+        return usable.min { ($0.endTime, $0.startTime) < ($1.endTime, $1.startTime) }
+    }
+
+    /// The route with its change moved (#143): the legs before `index`, then `way` to the new
+    /// change point, then `rest` on to the destination. Nil when the pieces do not meet in time.
+    static func changeAt(_ route: Itinerary, at index: Int, way: Itinerary, rest: Itinerary) -> Itinerary? {
+        guard let first = splice(route, at: index, with: way), fits(rest, after: first.legs) else { return nil }
+        return make(legs: first.legs + rest.legs, parts: parts(of: first) + parts(of: rest))
+    }
+
+    /// The ways on from the new change point, each as the whole route; as `choices(for:at:from:)`.
+    static func choices(for route: Itinerary, at index: Int, way: Itinerary, from found: [Itinerary]) -> [Itinerary] {
+        var seen = Set<String>()
+        return found.compactMap { changeAt(route, at: index, way: way, rest: $0) }
+            .filter { seen.insert($0.routeKey).inserted }
+            .sorted { ($0.endTime, $0.startTime) < ($1.endTime, $1.startTime) }
+    }
+
     // MARK: Internals
 
     private static func identity(_ leg: Leg) -> String {
