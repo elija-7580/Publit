@@ -301,25 +301,21 @@ Screenshot-/Link-Tickets („My tickets“, „Add ticket“, Typ, „Expires“
 
 ## 16. Einstellungen – `SettingsView` (Zahnrad in den Tabs)
 
-| Bereich | Einstellungen |
+**Aufbau (Layout A, Nov 2026, `SettingsCategory`):** Startseite mit Suchfeld „Search settings“ (immer sichtbar), darunter die Community-Gruppe und eine Gruppe mit zehn Kategorien als Zeilen (Symbol in weicher Kachel, Name, rechts der aktuelle Wert wo sinnvoll: Start-Tab, Ortssuche, Version). Jede Kategorie öffnet eine kurze eigene Seite mit den Abschnitten unten. Die Suche findet jede einzelne Einstellung (auch über den Seitennamen; Groß-/Kleinschreibung und Akzente egal); ein Treffer zeigt Name und Seite und öffnet die Seite; ohne Treffer „No settings match your search.“.
+
+| Seite | Einstellungen |
 |---|---|
-| Kopf | Logo, „Public transport, without the noise.“ |
-| Community | `CommunityCard` ganz oben als normale Listenzeile (`boxed: false`, eine gemeinsame Gruppe mit „What's new“): gelbe Community-Kachel mit „Publit is a community project“ und Erklärtext, darunter zwei gleich große Kacheln nebeneinander (`CommunityTile`): „Suggest features and vote“ (schwarz/weiß, Hauptaktion) → Wunschliste (§16a) und „Support Publit“ (Herz) → Unterstützen (§16b); darunter die Zeile „What's new in Publit“ (Funkeln in kleiner Kachel, Pfeil) → die neueste „What's new“-Story im Vollbild (§2) |
+| Startseite | Suche; Community: `CommunityCard` als normale Listenzeile (`boxed: false`, eine gemeinsame Gruppe mit „What's new“): gelbe Community-Kachel mit „Publit is a community project“ und Erklärtext, darunter zwei gleich große Kacheln nebeneinander (`CommunityTile`): „Suggest features and vote“ (schwarz/weiß, Hauptaktion) → Wunschliste (§16a) und „Support Publit“ (Herz) → Unterstützen (§16b); darunter die Zeile „What's new in Publit“ (Funkeln in kleiner Kachel, Pfeil) → die neueste „What's new“-Story im Vollbild (§2); dann die Kategorien |
 | General | Start screen: Nearby / Plan / A saved stop (+ Stop-Auswahl) |
-| Started trips | „Get-off alert“: wann der Aussteige-Hinweis kommt (eine/zwei Stationen vorher, kurz vor der Station, nur nach Uhrzeit), Fußnote zum Standort |
-| Travel preferences | Routenoptionen-Zusammenfassung, „Show connection timelines“, „How to read connections“ (`ConnectionGuideView`: Ride/Walk/Wait/Time axis) |
-| Nearby | „Map“ (Standard an): Karte als Bild oben, Liste scrollt darüber (iPhone), siehe §3 |
+| Travel preferences | „Started trips“: „Get-off alert“ (eine/zwei Stationen vorher, kurz vor der Station, nur nach Uhrzeit), Fußnote zum Standort; Routenoptionen-Zusammenfassung, „Show connection timelines“, „How to read connections“ (`ConnectionGuideView`: Ride/Walk/Wait/Time axis); Smart routing (§11); Calendar: „Suggest appointments as destinations“ (Standard aus, fragt beim Einschalten nach Kalenderzugriff), bei verweigertem Zugriff „Open Settings“ (§8a) |
+| Map | Nearby → „Map“ (Standard an): Karte als Bild oben (§3); Map provider (Apple/Google), Map style, Points of interest, Lines, Vehicles, Bikes and scooters, „Open directions in“ (Apple Maps, Google Maps, Citymapper) |
 | Stations | „Platform map“ (Standard an), „Departures by platform“ (Standard aus), „Change guide“ (Standard an), Erklärtext; siehe §4 und §13 |
-| Smart routing | siehe §11 |
-| Calendar | „Suggest appointments as destinations“ (Standard aus, fragt beim Einschalten nach Kalenderzugriff), Erklärtext; bei verweigertem Zugriff „Open Settings“; siehe §8a |
-| Map | Map provider (Apple/Google), Map style, Points of interest, Lines, Vehicles, Bikes and scooters, „Open directions in“ (Apple Maps, Google Maps, Citymapper) |
 | Search | Place search („OpenStreetMap and Apple Maps“ / Google), Google API key |
-| Tickets | My tickets, Ticket apps per operator (wenn alte Ticketfunktion aktiv) |
-| Apple Watch | „Tickets on Apple Watch“ (Standard an) |
+| Tickets bzw. Apple Watch | My tickets, Ticket apps per operator (wenn alte Ticketfunktion aktiv); „Tickets on Apple Watch“ (Standard an). Seite nur, wenn eins davon im Build ist |
 | Notifications | „Disruptions on saved lines“ |
-| Data | „Live data from more operators“, „Exit numbers from OpenStreetMap“ (Standard an), „Live data sources“ (`LiveSourcesView`, Liste der Quellen pro Region), „Export my data“, Hinweise zu Live-/Fahrplanzeiten und Haftung |
+| Data | Quellen-Links, „Live data from more operators“, „Exit numbers from OpenStreetMap“ (Standard an), „Live data sources“ (`LiveSourcesView`, Liste der Quellen pro Region), „Export my data“, Hinweise zu Live-/Fahrplanzeiten und Haftung |
 | Diagnostics | Zähler Freezes / Failed requests / Crashes, „Share diagnostics“, „Report a problem“, „Delete diagnostics“ |
-| About | Version, Open-Source-/Datenschutz-Text |
+| About | Kopf mit Logo und „Public transport, without the noise.“, Quellcode, Datenschutz, Version, Open-Source-Text |
 
 ### 16a. Wunschliste – `WishesView`
 - Dieselbe Liste wie publit.eu/wuensche (`WishesClient`, `https://publit.eu/api/wishes`).

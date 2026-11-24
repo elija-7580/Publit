@@ -34,6 +34,8 @@ struct SettingsView: View {
     @State private var showSupport = false
     /// The latest "What's new" story, again on request.
     @State private var showStory = false
+    /// Text in the settings search.
+    @State private var query = ""
 
     /// A new GitHub issue with version, device and counts filled in; the diagnostics file is attached by hand.
     private var issueURL: URL {
@@ -61,283 +63,58 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section {
-                    HStack(spacing: 14) {
-                        PublitAppIcon(size: 56)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(verbatim: "Publit").font(.title2.bold())
-                            Text("Public transport, without the noise.")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    .padding(.vertical, 4)
-                    .accessibilityElement(children: .combine)
-                }
-                // Publit is a community project: what comes next is voted on, so this comes first.
-                Section {
-                    // A normal row: card and "What's new" share one rounded group.
-                    CommunityCard(open: { showWishes = true }, support: { showSupport = true }, boxed: false)
-                        .padding(.vertical, 6)
-                    if ReleaseStory.all.first != nil {
-                        Button { showStory = true } label: {
-                            HStack(spacing: 12) {
-                                Image(systemName: "sparkles")
-                                    .font(.subheadline.weight(.semibold))
-                                    .foregroundStyle(Color.signature)
-                                    .frame(width: 28, height: 28)
-                                    .background(Color.inkFill, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-                                    .accessibilityHidden(true)
-                                Text(L10n.t("What's new in Publit")).foregroundStyle(Color.ink)
-                                Spacer(minLength: 0)
-                                Image(systemName: "chevron.right")
-                                    .font(.footnote.weight(.semibold)).foregroundStyle(.tertiary)
-                                    .accessibilityHidden(true)
-                            }
-                        }
-                        .alignmentGuide(.listRowSeparatorLeading) { _ in 0 }
-                        .accessibilityIdentifier("settingsWhatsNew")
-                    }
-                } header: {
-                    Text(L10n.t("Community"))
-                }
-                Section {
-                    Picker(L10n.t("Start screen"), selection: $startTab) {
-                        Text("Nearby").tag(StartTab.nearby.rawValue)
-                        Text("Plan").tag(StartTab.plan.rawValue)
-                        Text("A saved stop").tag(StartTab.stop.rawValue)
-                    }
-                    .accessibilityIdentifier("startTab")
-                    if startTab == StartTab.stop.rawValue, !savedStops.isEmpty {
-                        Picker(L10n.t("Stop"), selection: $startStop) {
-                            ForEach(savedStops) { Text(verbatim: $0.name).tag($0.id) }
-                        }
-                        .accessibilityIdentifier("startStop")
-                    }
-                } header: {
-                    Text(L10n.t("General"))
-                } footer: {
-                    if startTab == StartTab.stop.rawValue {
-                        if savedStops.isEmpty {
-                            Text("Save a stop with the star on its departures first.")
-                        } else {
-                            Text("Publit opens with this stop's departures; Done goes on to Nearby.")
-                        }
-                    }
-                }
-                .onChange(of: startTab) { _, tab in
-                    // Picking "A saved stop" chooses the first one; the picker above changes it.
-                    if tab == StartTab.stop.rawValue, !savedStops.contains(where: { $0.id == startStop }) {
-                        startStop = savedStops.first?.id ?? ""
-                    }
-                }
-                Section {
-                    Picker(L10n.t("Get-off alert"), selection: $getOffAlert) {
-                        ForEach(GetOffAlert.allCases) { a in Text(verbatim: a.title).tag(a.rawValue) }
-                    }
-                    .accessibilityIdentifier("settingGetOffAlert")
-                } header: {
-                    Text(L10n.t("Started trips"))
-                } footer: {
-                    Text(L10n.t("Uses your location during the ride, also with the screen locked, so the alert comes on time even when the vehicle is early or late. Without a reliable location it comes about two minutes before the arrival. The location stays on your iPhone."))
-                }
-                Section(L10n.t("Travel preferences")) {
-                    RouteOptionsButton()
-                    Toggle(L10n.t("Show connection timelines"), isOn: $routeTimelines)
-                    NavigationLink { ConnectionGuideView() } label: { Label(L10n.t("How to read connections"), systemImage: "questionmark.circle") }
-                }
-                Section {
-                    Toggle(L10n.t("Map"), isOn: $nearbyMap)
-                        .accessibilityIdentifier("settingNearbyMap")
-                } header: {
-                    Text(L10n.t("Nearby"))
-                } footer: {
-                    Text(L10n.t("The map fills the screen and the departures sit in a panel you pull up, with “Where to now?” always on top. Off: just the list."))
-                }
-                Section {
-                    Toggle(L10n.t("Platform map"), isOn: $platformMap)
-                        .accessibilityIdentifier("settingPlatformMap")
-                    Toggle(L10n.t("Departures by platform"), isOn: $byPlatform)
-                        .accessibilityIdentifier("settingByPlatform")
-                    Toggle(L10n.t("Change guide"), isOn: $changeGuide)
-                        .accessibilityIdentifier("settingChangeGuide")
-                } header: {
-                    Text(L10n.t("Stations"))
-                } footer: {
-                    Text(L10n.t("Platform map: where each platform of a station is, with its lines and next stops. Departures by platform: the stop board grouped by platform, with where the vehicles go next. Change guide: during a trip, a map from platform to platform with stairs, lifts and exits."))
-                }
-                SmartRoutingSettingsSection()
-                CalendarSettingsSection()
-                Section {
-                    if MapProvider.googleAvailable {
-                        Picker(L10n.t("Map provider"), selection: $mapProvider) {
-                            ForEach(MapProvider.allCases) { Text($0.title).tag($0.rawValue) }
-                        }
-                        .accessibilityIdentifier("mapProvider")
-                    }
-                    Picker(L10n.t("Map style"), selection: $mapBase) {
-                        ForEach(MapBase.allCases) { Text($0.title).tag($0.rawValue) }
-                    }
-                    Toggle(L10n.t("Points of interest"), isOn: $mapPOI)
-                    Toggle(L10n.t("Lines"), isOn: $mapLines)
-                    Toggle(L10n.t("Vehicles"), isOn: $mapVehicles)
-                    Toggle(L10n.t("Bikes and scooters"), isOn: $mapSharing)
-                    Picker(L10n.t("Open directions in"), selection: $directionsApp) {
-                        ForEach(DirectionsApp.allCases) { Text($0.title).tag($0.rawValue) }
-                    }
-                    .accessibilityIdentifier("directionsApp")
-                } header: {
-                    Text(L10n.t("Map"))
-                } footer: {
-                    if mapProvider == MapProvider.google.rawValue {
-                        Text(L10n.t("Google Maps uses the Google API key under Search, with “Maps SDK for iOS” enabled. Without a key, Apple Maps is shown."))
-                    }
-                }
-                Section {
-                    Picker(L10n.t("Place search"), selection: $searchProvider) {
-                        ForEach(SearchProvider.allCases) { Text($0.title).tag($0.rawValue) }
-                    }
-                    .accessibilityIdentifier("searchProvider")
-                    if searchProvider == SearchProvider.google.rawValue || mapProvider == MapProvider.google.rawValue {
-                        SecureField(L10n.t("Google API key"), text: $googleKey)
-                            .textInputAutocapitalization(.never)
-                            .autocorrectionDisabled()
-                    }
-                } header: {
-                    Text(L10n.t("Search"))
-                } footer: {
-                    Text(L10n.t(searchProvider == SearchProvider.google.rawValue
-                                ? "Shops, restaurants and sights come from Google; stops still come from Transitous. What you type and your approximate location go to Google."
-                                : "Stops from Transitous. Addresses and places from OpenStreetMap and Apple Maps, so house numbers are found too. What you type and the area around you go to Apple, as for the map."))
-                }
-                if Features.tickets {
-                    Section("Tickets") {
-                        NavigationLink {
-                            TicketsView()
-                        } label: {
-                            LabeledContent {
-                                Text("\(tickets.tickets.count)")
-                            } label: {
-                                Label("My tickets", systemImage: "ticket")
-                            }
-                        }
-                        NavigationLink {
-                            LinkedTicketAppsView()
-                        } label: {
-                            LabeledContent {
-                                Text("\(tickets.linkedApps.count)")
-                            } label: {
-                                Label("Ticket apps per operator", systemImage: "arrow.up.forward.app")
-                            }
-                        }
-                    }
-                }
-                if Features.passes {
+                if query.trimmingCharacters(in: .whitespaces).isEmpty {
+                    // Publit is a community project: what comes next is voted on, so this comes first.
                     Section {
-                        Toggle(L10n.t("Tickets on Apple Watch"), isOn: $watchTickets)
-                            .accessibilityIdentifier("watchTicketsToggle")
-                            .onChange(of: watchTickets) { WatchSyncHub.shared.settingsChanged() }
+                        // A normal row: card and "What's new" share one rounded group.
+                        CommunityCard(open: { showWishes = true }, support: { showSupport = true }, boxed: false)
+                            .padding(.vertical, 6)
+                        if ReleaseStory.all.first != nil {
+                            Button { showStory = true } label: {
+                                HStack(spacing: 12) {
+                                    Image(systemName: "sparkles")
+                                        .font(.subheadline.weight(.semibold))
+                                        .foregroundStyle(Color.signature)
+                                        .frame(width: 28, height: 28)
+                                        .background(Color.inkFill, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                                        .accessibilityHidden(true)
+                                    Text(L10n.t("What's new in Publit")).foregroundStyle(Color.ink)
+                                    Spacer(minLength: 0)
+                                    Image(systemName: "chevron.right")
+                                        .font(.footnote.weight(.semibold)).foregroundStyle(.tertiary)
+                                        .accessibilityHidden(true)
+                                }
+                            }
+                            .alignmentGuide(.listRowSeparatorLeading) { _ in 0 }
+                            .accessibilityIdentifier("settingsWhatsNew")
+                        }
                     } header: {
-                        Text(L10n.t("Apple Watch"))
-                    } footer: {
-                        Text(L10n.t("Your tickets go to your paired Apple Watch only, so you can show the code on your wrist. Turn this off to keep them on the iPhone."))
+                        Text(L10n.t("Community"))
                     }
-                }
-                Section {
-                    Toggle(isOn: Binding(get: { lineAlerts }, set: { on in
-                        lineAlerts = on
-                        if on { Task { if !(await LineAlertMonitor.requestPermission()) { lineAlerts = false } } }
-                    })) {
-                        Label("Disruptions on saved lines", systemImage: "exclamationmark.bubble")
+                    Section {
+                        ForEach(SettingsCategory.allCases.filter(\.isShown)) { c in categoryLink(c) }
                     }
-                    .accessibilityIdentifier("lineAlertsToggle")
-                } header: {
-                    Text("Notifications")
-                } footer: {
-                    Text("Publit checks your saved lines when you open it and from time to time in the background (iOS decides when), and tells you about alerts and cancelled departures.")
-                }
-                Section {
-                    Link("Routing and timetables: Transitous and its data sources", destination: AppInfo.sourcesURL)
-                    Link("Map data © OpenStreetMap contributors", destination: AppInfo.osmCopyrightURL)
-                    Toggle(isOn: $extraLive) {
-                        Label("Live data from more operators", systemImage: "dot.radiowaves.left.and.right")
-                    }
-                    .accessibilityIdentifier("extraLiveToggle")
-                    Toggle(isOn: $exitNumbers) {
-                        Label("Exit numbers from OpenStreetMap", systemImage: "door.right.hand.open")
-                    }
-                    .accessibilityIdentifier("exitNumbersToggle")
-                    NavigationLink { LiveSourcesView() } label: {
-                        Label("Live data sources", systemImage: "antenna.radiowaves.left.and.right")
-                    }
-                    .accessibilityIdentifier("liveSources")
-                    if let exportURL {
-                        ShareLink(item: exportURL) {
-                            Label("Export my data", systemImage: "square.and.arrow.up.on.square")
+                } else {
+                    // Every single setting can be found: a match opens the page it is on.
+                    let hits = SettingsCategory.search(query)
+                    Section {
+                        if hits.isEmpty {
+                            Text("No settings match your search.").foregroundStyle(.secondary)
                         }
-                        .accessibilityIdentifier("exportData")
-                    }
-                } header: {
-                    Text("Data")
-                } footer: {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Times marked live come from the operator's real-time feed; all others are timetable times.")
-                        Text("Where Transitous has no live times, Publit also asks ÖBB, Wiener Linien, search.ch (Switzerland), regional networks in Germany (VRR, VBB, RMV, VBN, NAH.SH, VRN), ACTV (Venice), SL (Stockholm) and TfL (London, Powered by TfL Open Data) about delays, cancellations and disruptions. They only get the stop, line and time of a ride.")
-                        Text("For walks out of a station, Publit asks OpenStreetMap (Overpass) for the number of the exit. It only gets the exit's location.")
-                        Text("All information without guarantee. Times, platforms and prices come from the operators' open data and can change at short notice.")
-                            .accessibilityIdentifier("noGuaranteeSettings")
-                    }
-                }
-                Section {
-                    if let summary, summary.total > 0 {
-                        if summary.freezes > 0 { LabeledContent(L10n.t("Freezes"), value: "\(summary.freezes)") }
-                        if summary.errors > 0 { LabeledContent(L10n.t("Failed requests"), value: "\(summary.errors)") }
-                        if summary.crashes + summary.exits > 0 {
-                            LabeledContent(L10n.t("Crashes and unexpected exits"), value: "\(summary.crashes + summary.exits)")
+                        ForEach(hits, id: \.title) { hit in
+                            NavigationLink { page(hit.category) } label: {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(verbatim: hit.title).foregroundStyle(Color.ink)
+                                    Text(verbatim: hit.category.title).font(.footnote).foregroundStyle(.secondary)
+                                }
+                            }
                         }
-                    } else if summary != nil {
-                        Text("No problems recorded").foregroundStyle(.secondary)
-                    }
-                    if let reportURL {
-                        ShareLink(item: reportURL) {
-                            Label("Share diagnostics", systemImage: "square.and.arrow.up")
-                        }
-                        .accessibilityIdentifier("shareFreezeLog")
-                    }
-                    Link(destination: issueURL) {
-                        Label("Report a problem", systemImage: "exclamationmark.bubble")
-                    }
-                    if summary?.total ?? 0 > 0 {
-                        Button(role: .destructive) {
-                            HangLog.shared.clear()
-                            summary = HangLog.Summary()
-                        } label: {
-                            Label("Delete diagnostics", systemImage: "trash")
-                        }
-                    }
-                } header: {
-                    Text("Diagnostics")
-                } footer: {
-                    Text("Publit notes freezes of 2 seconds or more, crashes, unexpected exits and failed requests (only their kind), each with the screens opened just before. Places, stops and tickets are not recorded, and nothing leaves this device unless you share it.")
-                }
-                Section {
-                    Link("Source code and feedback", destination: AppInfo.repositoryURL)
-                    Link("Privacy policy", destination: AppInfo.privacyURL)
-                    LabeledContent("Version", value: "\(AppInfo.version) (\(AppInfo.build))").accessibilityIdentifier("installedBuild")
-                } header: {
-                    Text("About")
-                } footer: {
-                    // Licence changed from MIT to AGPL-3.0 (see LICENSING.md). The catalog key keeps the
-                    // old wording so all translations stay; only the licence name is swapped at runtime.
-                    if Features.tickets {
-                        Text(verbatim: L10n.t("Publit is open source (MIT). No account, no ads, no tracking. Saved places, trips and tickets stay on this device.").replacingOccurrences(of: "MIT", with: "AGPL-3.0"))
-                    } else {
-                        Text(verbatim: L10n.t("Publit is open source (MIT). No account, no ads, no tracking. Saved places and trips stay on this device.").replacingOccurrences(of: "MIT", with: "AGPL-3.0"))
                     }
                 }
             }
             .readableWidth()
             .inkList()
+            .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always), prompt: Text("Search settings"))
             // Once per opening, on the list: on the section it ran again each time the section scrolled
             // back in, and rows appearing and disappearing made the screen jump back and forth.
             .task {
@@ -365,6 +142,349 @@ struct SettingsView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } }
+            }
+        }
+    }
+    /// One category on the start page: a symbol in a soft tile, the name, and its current value where there is one.
+    private func categoryLink(_ c: SettingsCategory) -> some View {
+        NavigationLink { page(c) } label: {
+            HStack(spacing: 12) {
+                Image(systemName: c.symbol)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Color.ink)
+                    .frame(width: 28, height: 28)
+                    .background(Color.inkFill, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                    .accessibilityHidden(true)
+                Text(verbatim: c.title).foregroundStyle(Color.ink)
+                Spacer(minLength: 8)
+                if let value = value(of: c) {
+                    Text(verbatim: value).foregroundStyle(.secondary).lineLimit(1)
+                }
+            }
+        }
+        .accessibilityIdentifier("settings-\(c.rawValue)")
+    }
+
+    /// The value next to a category: what is set without opening it.
+    private func value(of c: SettingsCategory) -> String? {
+        switch c {
+        case .general:
+            switch startTab {
+            case StartTab.plan.rawValue: return L10n.t("Plan")
+            case StartTab.stop.rawValue: return savedStops.first { $0.id == startStop }?.name ?? L10n.t("Nearby")
+            default: return L10n.t("Nearby")
+            }
+        case .search: return SearchProvider(rawValue: searchProvider)?.title
+        case .about: return AppInfo.version
+        default: return nil
+        }
+    }
+
+    /// The page of one category: its sections as before, in one short list.
+    private func page(_ c: SettingsCategory) -> some View {
+        List {
+            switch c {
+            case .general: generalSections
+            case .travel: travelSections
+            case .map: mapSections
+            case .stations: stationSections
+            case .search: searchSections
+            case .tickets: ticketSections
+            case .notifications: notificationSections
+            case .data: dataSections
+            case .diagnostics: diagnosticSections
+            case .about: aboutSections
+            }
+        }
+        .readableWidth()
+        .inkList()
+        .navigationTitle(Text(verbatim: c.title))
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    @ViewBuilder
+    private var generalSections: some View {
+        Section {
+            Picker(L10n.t("Start screen"), selection: $startTab) {
+                Text("Nearby").tag(StartTab.nearby.rawValue)
+                Text("Plan").tag(StartTab.plan.rawValue)
+                Text("A saved stop").tag(StartTab.stop.rawValue)
+            }
+            .accessibilityIdentifier("startTab")
+            if startTab == StartTab.stop.rawValue, !savedStops.isEmpty {
+                Picker(L10n.t("Stop"), selection: $startStop) {
+                    ForEach(savedStops) { Text(verbatim: $0.name).tag($0.id) }
+                }
+                .accessibilityIdentifier("startStop")
+            }
+        } header: {
+            Text(L10n.t("General"))
+        } footer: {
+            if startTab == StartTab.stop.rawValue {
+                if savedStops.isEmpty {
+                    Text("Save a stop with the star on its departures first.")
+                } else {
+                    Text("Publit opens with this stop's departures; Done goes on to Nearby.")
+                }
+            }
+        }
+        .onChange(of: startTab) { _, tab in
+            // Picking "A saved stop" chooses the first one; the picker above changes it.
+            if tab == StartTab.stop.rawValue, !savedStops.contains(where: { $0.id == startStop }) {
+                startStop = savedStops.first?.id ?? ""
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var travelSections: some View {
+        Section {
+            Picker(L10n.t("Get-off alert"), selection: $getOffAlert) {
+                ForEach(GetOffAlert.allCases) { a in Text(verbatim: a.title).tag(a.rawValue) }
+            }
+            .accessibilityIdentifier("settingGetOffAlert")
+        } header: {
+            Text(L10n.t("Started trips"))
+        } footer: {
+            Text(L10n.t("Uses your location during the ride, also with the screen locked, so the alert comes on time even when the vehicle is early or late. Without a reliable location it comes about two minutes before the arrival. The location stays on your iPhone."))
+        }
+        Section(L10n.t("Travel preferences")) {
+            RouteOptionsButton()
+            Toggle(L10n.t("Show connection timelines"), isOn: $routeTimelines)
+            NavigationLink { ConnectionGuideView() } label: { Label(L10n.t("How to read connections"), systemImage: "questionmark.circle") }
+        }
+        SmartRoutingSettingsSection()
+        CalendarSettingsSection()
+    }
+
+    @ViewBuilder
+    private var mapSections: some View {
+        Section {
+            Toggle(L10n.t("Map"), isOn: $nearbyMap)
+                .accessibilityIdentifier("settingNearbyMap")
+        } header: {
+            Text(L10n.t("Nearby"))
+        } footer: {
+            Text(L10n.t("The map fills the screen and the departures sit in a panel you pull up, with “Where to now?” always on top. Off: just the list."))
+        }
+        Section {
+            if MapProvider.googleAvailable {
+                Picker(L10n.t("Map provider"), selection: $mapProvider) {
+                    ForEach(MapProvider.allCases) { Text($0.title).tag($0.rawValue) }
+                }
+                .accessibilityIdentifier("mapProvider")
+            }
+            Picker(L10n.t("Map style"), selection: $mapBase) {
+                ForEach(MapBase.allCases) { Text($0.title).tag($0.rawValue) }
+            }
+            Toggle(L10n.t("Points of interest"), isOn: $mapPOI)
+            Toggle(L10n.t("Lines"), isOn: $mapLines)
+            Toggle(L10n.t("Vehicles"), isOn: $mapVehicles)
+            Toggle(L10n.t("Bikes and scooters"), isOn: $mapSharing)
+            Picker(L10n.t("Open directions in"), selection: $directionsApp) {
+                ForEach(DirectionsApp.allCases) { Text($0.title).tag($0.rawValue) }
+            }
+            .accessibilityIdentifier("directionsApp")
+        } header: {
+            Text(L10n.t("Map"))
+        } footer: {
+            if mapProvider == MapProvider.google.rawValue {
+                Text(L10n.t("Google Maps uses the Google API key under Search, with “Maps SDK for iOS” enabled. Without a key, Apple Maps is shown."))
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var stationSections: some View {
+        Section {
+            Toggle(L10n.t("Platform map"), isOn: $platformMap)
+                .accessibilityIdentifier("settingPlatformMap")
+            Toggle(L10n.t("Departures by platform"), isOn: $byPlatform)
+                .accessibilityIdentifier("settingByPlatform")
+            Toggle(L10n.t("Change guide"), isOn: $changeGuide)
+                .accessibilityIdentifier("settingChangeGuide")
+        } header: {
+            Text(L10n.t("Stations"))
+        } footer: {
+            Text(L10n.t("Platform map: where each platform of a station is, with its lines and next stops. Departures by platform: the stop board grouped by platform, with where the vehicles go next. Change guide: during a trip, a map from platform to platform with stairs, lifts and exits."))
+        }
+    }
+
+    @ViewBuilder
+    private var searchSections: some View {
+        Section {
+            Picker(L10n.t("Place search"), selection: $searchProvider) {
+                ForEach(SearchProvider.allCases) { Text($0.title).tag($0.rawValue) }
+            }
+            .accessibilityIdentifier("searchProvider")
+            if searchProvider == SearchProvider.google.rawValue || mapProvider == MapProvider.google.rawValue {
+                SecureField(L10n.t("Google API key"), text: $googleKey)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+            }
+        } header: {
+            Text(L10n.t("Search"))
+        } footer: {
+            Text(L10n.t(searchProvider == SearchProvider.google.rawValue
+                        ? "Shops, restaurants and sights come from Google; stops still come from Transitous. What you type and your approximate location go to Google."
+                        : "Stops from Transitous. Addresses and places from OpenStreetMap and Apple Maps, so house numbers are found too. What you type and the area around you go to Apple, as for the map."))
+        }
+    }
+
+    @ViewBuilder
+    private var ticketSections: some View {
+        if Features.tickets {
+            Section("Tickets") {
+                NavigationLink {
+                    TicketsView()
+                } label: {
+                    LabeledContent {
+                        Text("\(tickets.tickets.count)")
+                    } label: {
+                        Label("My tickets", systemImage: "ticket")
+                    }
+                }
+                NavigationLink {
+                    LinkedTicketAppsView()
+                } label: {
+                    LabeledContent {
+                        Text("\(tickets.linkedApps.count)")
+                    } label: {
+                        Label("Ticket apps per operator", systemImage: "arrow.up.forward.app")
+                    }
+                }
+            }
+        }
+        if Features.passes {
+            Section {
+                Toggle(L10n.t("Tickets on Apple Watch"), isOn: $watchTickets)
+                    .accessibilityIdentifier("watchTicketsToggle")
+                    .onChange(of: watchTickets) { WatchSyncHub.shared.settingsChanged() }
+            } header: {
+                Text(L10n.t("Apple Watch"))
+            } footer: {
+                Text(L10n.t("Your tickets go to your paired Apple Watch only, so you can show the code on your wrist. Turn this off to keep them on the iPhone."))
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var notificationSections: some View {
+        Section {
+            Toggle(isOn: Binding(get: { lineAlerts }, set: { on in
+                lineAlerts = on
+                if on { Task { if !(await LineAlertMonitor.requestPermission()) { lineAlerts = false } } }
+            })) {
+                Label("Disruptions on saved lines", systemImage: "exclamationmark.bubble")
+            }
+            .accessibilityIdentifier("lineAlertsToggle")
+        } header: {
+            Text("Notifications")
+        } footer: {
+            Text("Publit checks your saved lines when you open it and from time to time in the background (iOS decides when), and tells you about alerts and cancelled departures.")
+        }
+    }
+
+    @ViewBuilder
+    private var dataSections: some View {
+        Section {
+            Link("Routing and timetables: Transitous and its data sources", destination: AppInfo.sourcesURL)
+            Link("Map data © OpenStreetMap contributors", destination: AppInfo.osmCopyrightURL)
+            Toggle(isOn: $extraLive) {
+                Label("Live data from more operators", systemImage: "dot.radiowaves.left.and.right")
+            }
+            .accessibilityIdentifier("extraLiveToggle")
+            Toggle(isOn: $exitNumbers) {
+                Label("Exit numbers from OpenStreetMap", systemImage: "door.right.hand.open")
+            }
+            .accessibilityIdentifier("exitNumbersToggle")
+            NavigationLink { LiveSourcesView() } label: {
+                Label("Live data sources", systemImage: "antenna.radiowaves.left.and.right")
+            }
+            .accessibilityIdentifier("liveSources")
+            if let exportURL {
+                ShareLink(item: exportURL) {
+                    Label("Export my data", systemImage: "square.and.arrow.up.on.square")
+                }
+                .accessibilityIdentifier("exportData")
+            }
+        } header: {
+            Text("Data")
+        } footer: {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Times marked live come from the operator's real-time feed; all others are timetable times.")
+                Text("Where Transitous has no live times, Publit also asks ÖBB, Wiener Linien, search.ch (Switzerland), regional networks in Germany (VRR, VBB, RMV, VBN, NAH.SH, VRN), ACTV (Venice), SL (Stockholm) and TfL (London, Powered by TfL Open Data) about delays, cancellations and disruptions. They only get the stop, line and time of a ride.")
+                Text("For walks out of a station, Publit asks OpenStreetMap (Overpass) for the number of the exit. It only gets the exit's location.")
+                Text("All information without guarantee. Times, platforms and prices come from the operators' open data and can change at short notice.")
+                    .accessibilityIdentifier("noGuaranteeSettings")
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var diagnosticSections: some View {
+        Section {
+            if let summary, summary.total > 0 {
+                if summary.freezes > 0 { LabeledContent(L10n.t("Freezes"), value: "\(summary.freezes)") }
+                if summary.errors > 0 { LabeledContent(L10n.t("Failed requests"), value: "\(summary.errors)") }
+                if summary.crashes + summary.exits > 0 {
+                    LabeledContent(L10n.t("Crashes and unexpected exits"), value: "\(summary.crashes + summary.exits)")
+                }
+            } else if summary != nil {
+                Text("No problems recorded").foregroundStyle(.secondary)
+            }
+            if let reportURL {
+                ShareLink(item: reportURL) {
+                    Label("Share diagnostics", systemImage: "square.and.arrow.up")
+                }
+                .accessibilityIdentifier("shareFreezeLog")
+            }
+            Link(destination: issueURL) {
+                Label("Report a problem", systemImage: "exclamationmark.bubble")
+            }
+            if summary?.total ?? 0 > 0 {
+                Button(role: .destructive) {
+                    HangLog.shared.clear()
+                    summary = HangLog.Summary()
+                } label: {
+                    Label("Delete diagnostics", systemImage: "trash")
+                }
+            }
+        } header: {
+            Text("Diagnostics")
+        } footer: {
+            Text("Publit notes freezes of 2 seconds or more, crashes, unexpected exits and failed requests (only their kind), each with the screens opened just before. Places, stops and tickets are not recorded, and nothing leaves this device unless you share it.")
+        }
+    }
+
+    @ViewBuilder
+    private var aboutSections: some View {
+        Section {
+            HStack(spacing: 14) {
+                PublitAppIcon(size: 56)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(verbatim: "Publit").font(.title2.bold())
+                    Text("Public transport, without the noise.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .padding(.vertical, 4)
+            .accessibilityElement(children: .combine)
+        }
+        Section {
+            Link("Source code and feedback", destination: AppInfo.repositoryURL)
+            Link("Privacy policy", destination: AppInfo.privacyURL)
+            LabeledContent("Version", value: "\(AppInfo.version) (\(AppInfo.build))").accessibilityIdentifier("installedBuild")
+        } header: {
+            Text("About")
+        } footer: {
+            // Licence changed from MIT to AGPL-3.0 (see LICENSING.md). The catalog key keeps the
+            // old wording so all translations stay; only the licence name is swapped at runtime.
+            if Features.tickets {
+                Text(verbatim: L10n.t("Publit is open source (MIT). No account, no ads, no tracking. Saved places, trips and tickets stay on this device.").replacingOccurrences(of: "MIT", with: "AGPL-3.0"))
+            } else {
+                Text(verbatim: L10n.t("Publit is open source (MIT). No account, no ads, no tracking. Saved places and trips stay on this device.").replacingOccurrences(of: "MIT", with: "AGPL-3.0"))
             }
         }
     }

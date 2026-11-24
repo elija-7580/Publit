@@ -170,8 +170,15 @@ final class PublitUITests: XCTestCase {
         snap("de-plan")
         app.buttons["Einstellungen"].tap()
         XCTAssertTrue(app.navigationBars["Einstellungen"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", "Öffentlicher Verkehr ohne Ablenkung.")).firstMatch.exists)
         snap("de-settings")
+        // Settings in categories (layout A): the app's line is on the About page.
+        let about = app.buttons["settings-about"]
+        for _ in 0..<4 where !about.isHittable { app.swipeUp() }
+        about.tap()
+        XCTAssertTrue(app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", "Öffentlicher Verkehr ohne Ablenkung.")).firstMatch.waitForExistence(timeout: 5))
+        snap("de-settings-about")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(app.buttons["Fertig"].waitForExistence(timeout: 5))
         app.buttons["Fertig"].tap()
         app.tab(0).tap()
         XCTAssertTrue(app.navigationBars["In der Nähe"].waitForExistence(timeout: 5))

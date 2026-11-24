@@ -130,6 +130,10 @@ route list. A floating capsule never covers the thing it points to: it hides onc
 - Alternatives compare with the trip ("8 min later than your trip"); primary "Switch to this connection", soft "Other connections".
 - The live bar reserves its height at the bottom of every tab (`safeAreaPadding`), so nothing hides behind it.
 
+### Settings (layout A, Nov 2026)
+- Start page: search field always visible, the community group, then one group of categories (symbol in a 28-pt soft tile with radius 8, name in ink, current value in secondary). Each category is a short page of its own; the search finds every single setting and opens its page.
+- Long explanations stay as section footers on the category pages, never on the start page.
+
 ## 5. Motion
 - `.snappy(duration: 0.2–0.25)` for toggles, expands and segment changes; capsules move in from the bottom with opacity.
 - Respect Reduce Motion: the logo loader is static, countdowns change without animation.

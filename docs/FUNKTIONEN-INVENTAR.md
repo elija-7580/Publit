@@ -3,7 +3,7 @@
 > Nicht von Hand bearbeiten. Erzeugt von `scripts/feature_inventory.py` (CI: `features-doc.yml`).
 > Die ausführliche Beschreibung steht in [FUNKTIONEN.md](FUNKTIONEN.md).
 
-**229 Views, 5 App Intents, 3 Widgets in 86 Dateien.**
+**229 Views, 5 App Intents, 3 Widgets in 87 Dateien.**
 
 ## `Sources/App/DesignSamples.swift`
 - Views: `DesignSampleView`
@@ -229,9 +229,12 @@
 ## `Sources/Views/ServiceAlertsView.swift`
 - Views: `ServiceAlertRow`, `ServiceAlertsView`
 
+## `Sources/Views/SettingsCategory.swift`
+- Sichtbare Texte: General · Travel preferences · Map · Stations · Search · Tickets · Apple Watch · Notifications · Data · Diagnostics · About
+
 ## `Sources/Views/SettingsView.swift`
 - Views: `SettingsView`, `SettingsButton`
-- Sichtbare Texte: Public transport, without the noise. · What's new in Publit · Community · Start screen · Nearby · Plan · A saved stop · Stop · General · Save a stop with the star on its departures first. · Publit opens with this stop's departures; Done goes on to Nearby. · Get-off alert · Started trips · Travel preferences · Show connection timelines · How to read connections · Map · Platform map · Departures by platform · Change guide · Stations · Map provider · Map style · Points of interest · Lines · Vehicles · Bikes and scooters · Open directions in · Google Maps uses the Google API key under Search, with “Maps SDK for iOS” enabled. Without a key, Apple Maps is shown. · Place search · Google API key · Search · Tickets · My tickets · Ticket apps per operator · Tickets on Apple Watch · Apple Watch · Disruptions on saved lines · Notifications · Live data from more operators · Exit numbers from OpenStreetMap · Live data sources · Export my data · Data · Times marked live come from the operator's real-time feed; all others are timetable times. · Freezes · Failed requests · Crashes and unexpected exits · No problems recorded · Share diagnostics · Report a problem · Delete diagnostics · Diagnostics · Version · About · Publit is open source (MIT). No account, no ads, no tracking. Saved places, trips and tickets stay on this device. · Publit is open source (MIT). No account, no ads, no tracking. Saved places and trips stay on this device. · Settings · Done
+- Sichtbare Texte: What's new in Publit · Community · No settings match your search. · Search settings · Settings · Done · Plan · Nearby · Start screen · A saved stop · Stop · General · Save a stop with the star on its departures first. · Publit opens with this stop's departures; Done goes on to Nearby. · Get-off alert · Started trips · Travel preferences · Show connection timelines · How to read connections · Map · Map provider · Map style · Points of interest · Lines · Vehicles · Bikes and scooters · Open directions in · Google Maps uses the Google API key under Search, with “Maps SDK for iOS” enabled. Without a key, Apple Maps is shown. · Platform map · Departures by platform · Change guide · Stations · Place search · Google API key · Search · Tickets · My tickets · Ticket apps per operator · Tickets on Apple Watch · Apple Watch · Disruptions on saved lines · Notifications · Live data from more operators · Exit numbers from OpenStreetMap · Live data sources · Export my data · Data · Times marked live come from the operator's real-time feed; all others are timetable times. · Freezes · Failed requests · Crashes and unexpected exits · No problems recorded · Share diagnostics · Report a problem · Delete diagnostics · Diagnostics · Public transport, without the noise. · Version · About · Publit is open source (MIT). No account, no ads, no tracking. Saved places, trips and tickets stay on this device. · Publit is open source (MIT). No account, no ads, no tracking. Saved places and trips stay on this device.
 
 ## `Sources/Views/SharedRouteView.swift`
 - Views: `SharedRouteView`
