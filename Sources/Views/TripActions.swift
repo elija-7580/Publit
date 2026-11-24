@@ -301,7 +301,7 @@ struct TicketSection: View {
                     TicketCardButton(ticket: ticket)
                 }
                 ForEach(links) { l in
-                    Link(destination: l.url) {
+                    TicketLinkButton(link: l) {
                         Label(l.title, systemImage: l.source == .userLinked ? "arrow.up.forward.app" : "cart")
                     }
                 }
@@ -313,6 +313,36 @@ struct TicketSection: View {
             } footer: {
                 if links.isEmpty {
                     Text("The operator publishes no ticket link. Link your ticket app in Settings → Ticket apps.")
+                }
+            }
+        }
+    }
+}
+
+/// Opens a ticket link. A FlixBus search first looks up the two cities (only on tap), then opens the shop on
+/// the user's connection; DB searches and all other links open at once.
+struct TicketLinkButton<Content: View>: View {
+    let link: TicketLink
+    @ViewBuilder let label: () -> Content
+    @Environment(\.openURL) private var openURL
+    @State private var opening = false
+
+    var body: some View {
+        if link.search == nil || link.search?.shop == .db {
+            Link(destination: link.url, label: label)
+        } else {
+            Button {
+                guard !opening else { return }
+                opening = true
+                Task {
+                    let url = await TicketLinks.resolve(link)
+                    opening = false
+                    openURL(url)
+                }
+            } label: {
+                HStack {
+                    label()
+                    if opening { Spacer(); ProgressView() }
                 }
             }
         }

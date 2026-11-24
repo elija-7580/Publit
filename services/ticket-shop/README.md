@@ -51,6 +51,8 @@ curl -X POST https://<worker>/v1/links -H 'Content-Type: application/json' -d '{
 ```
 
 - `links` per leg: `booking`, `fares`, `website` (first valid one wins); without any, a known shop for the operator.
+- `from`, `to`, `departure` (ISO time) and `timeZone` (IANA, default `Europe/Berlin`) per leg, optional: for DB legs
+  the answer is bahn.de's connection search with start, destination and time filled in (`source: "search"`).
 - `partners` (optional, "bring your own ID"): your own tracking links per program (`db`, `flixbus`, `trainline`,
   `omio`, `sncf`, `eurostar`). They must be https on the network's own host (Awin, Partnerize, Impact,
   Tradedoubler) and contain `{url}` once. Legs without your ID use Publit's, which funds this service.

@@ -65,6 +65,7 @@ let core = [
     "Models/PlaceRole.swift",
     "Models/TripStatus.swift",
     "Util/TicketLinks.swift",
+    "Util/ShopSearch.swift",
     "Shop/TicketShop.swift",
     "Shop/CheckoutModel.swift",
     "Stores/MapStations.swift",
