@@ -157,6 +157,9 @@ private struct MapHeroOverList<M: View>: ViewModifier {
     /// opening it in the middle of the pull, with the list still under the finger, felt slow and buggy).
     @State private var armed = false
     @State private var pulledOpen = false
+    /// The finger is on the list (iOS 18 scroll phases) and whether this device reports phases at all.
+    @State private var touching = false
+    @State private var phaseSeen = false
     /// iOS 18+: the list's offset from its rest (negative = scrolled up).
     @State private var offset: CGFloat?
     /// iOS 17: the hero row's place now and when the screen opened; nil while it is out of the list.
@@ -196,6 +199,13 @@ private struct MapHeroOverList<M: View>: ViewModifier {
         gone || (offset ?? moved ?? 0) < -MapHero.height * 0.6
     }
 
+    private func openPulled() {
+        guard !pulledOpen else { return }
+        pulledOpen = true
+        armed = false
+        onExpand()
+    }
+
     func body(content: Content) -> some View {
         content
             .environment(track)
@@ -206,18 +216,25 @@ private struct MapHeroOverList<M: View>: ViewModifier {
             .onChange(of: offset) { _, now in
                 guard pullToExpand, let now else { return }
                 if now > MapHero.pullToExpand {
-                    if !armed { armed = true }
-                } else if now < MapHero.pullToExpand * 0.7, armed, !pulledOpen {
+                    if !armed {
+                        armed = true
+                        // No finger reported on the list (no scroll phases on this device, or none for this
+                        // pull): open at the mark, as before build 102, rather than never.
+                        if !phaseSeen || !touching { openPulled() }
+                    }
+                } else if now < MapHero.pullToExpand * 0.7, armed, !pulledOpen, touching {
                     armed = false   // pulled back before letting go: nothing opens
                 }
                 if now < 20 { pulledOpen = false }
             }
             .sensoryFeedback(.impact(weight: .medium), trigger: armed) { _, now in now }
-            .modifier(ReleasePull(enabled: pullToExpand) {
-                guard armed, !pulledOpen else { return }
-                pulledOpen = true
-                armed = false
-                onExpand()
+            .modifier(PullPhase(enabled: pullToExpand) { isTouching in
+                phaseSeen = true
+                touching = isTouching
+                // Let go (or the list moves on by itself): an armed pull opens the map. The list bounces
+                // back in the same moment; armed only drops while the finger is still on the list, so the
+                // bounce can no longer disarm it first (build 102: the map did not open at all).
+                if !isTouching, armed { openPulled() }
             })
             .overlay {
                 // Kept while scrolled away (only hidden), so the map keeps where you moved it.
@@ -260,16 +277,16 @@ private struct MapHeroOverList<M: View>: ViewModifier {
     }
 }
 
-/// Calls `action` when the finger lets go of the list (iOS 18); iOS 17 has no scroll phases, there it
-/// opens as soon as the pull passes the mark, as before.
-private struct ReleasePull: ViewModifier {
+/// Reports whether the finger is on the list (iOS 18 scroll phases: tracking or interacting). iOS 17 has
+/// no scroll phases and no list offset; there the pull does not open the map.
+private struct PullPhase: ViewModifier {
     let enabled: Bool
-    let action: () -> Void
+    let touching: (Bool) -> Void
 
     func body(content: Content) -> some View {
         if #available(iOS 18.0, *), enabled {
-            content.onScrollPhaseChange { old, new in
-                if old == .interacting, new != .interacting { action() }
+            content.onScrollPhaseChange { _, new in
+                touching(new == .interacting || new == .tracking)
             }
         } else {
             content
