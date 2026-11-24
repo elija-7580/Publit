@@ -532,4 +532,25 @@ final class PassStoreTests: XCTestCase {
         XCTAssertEqual(pass.document?.kind, .image)
         XCTAssertEqual(try Data(contentsOf: XCTUnwrap(store.documentURL(pass))), Data([1, 2, 3]))
     }
+
+    /// A KlimaTicket from the first ticket version came back on every launch after its pass was deleted.
+    func testDeletedLegacyTicketStaysDeleted() async throws {
+        let dir = directory()
+        let images = dir.appendingPathComponent("tickets", isDirectory: true)
+        try FileManager.default.createDirectory(at: images, withIntermediateDirectories: true)
+        let legacy = Ticket(id: "k", name: "KlimaTicket Ö", kind: .pass, imageFile: nil, appLink: nil,
+                            validUntil: nil, tripId: nil, addedAt: Date(timeIntervalSince1970: 0))
+        let store = PassStore(directory: dir)
+        var removedLegacy: [String] = []
+        store.onRemoveLegacy = { removedLegacy.append($0) }
+        XCTAssertEqual(store.importLegacy([legacy], imageDirectory: images), 1)
+        store.remove(try XCTUnwrap(store.passes.first).id)
+        XCTAssertEqual(removedLegacy, ["k"])
+        XCTAssertEqual(store.importLegacy([legacy], imageDirectory: images), 0)
+        JSONPersistence.flush()
+        // Next launch or update: a fresh store still knows the ticket was taken over.
+        let relaunched = PassStore(directory: dir)
+        XCTAssertEqual(relaunched.importLegacy([legacy], imageDirectory: images), 0)
+        XCTAssertTrue(relaunched.passes.isEmpty)
+    }
 }

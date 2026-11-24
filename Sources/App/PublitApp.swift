@@ -77,6 +77,8 @@ struct PublitApp: App {
                     // First launch: the onboarding asks for the location with a reason first.
                     if !OnboardingView.needed { location.start() }
                     // Tickets of the first ticket version become passes (once per ticket).
+                    // A deleted pass takes its first-version ticket with it, so it is not imported again.
+                    passes.onRemoveLegacy = { [tickets] id in tickets.remove(id) }
                     passes.importLegacy(tickets.tickets, imageDirectory: tickets.imageDirectory)
                     NotificationRouter.shared.open = { [app] url in app.open(url) }
                     IntentBridge.connect { [app] url in app.open(url) }

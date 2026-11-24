@@ -11,6 +11,12 @@ final class PassStore {
     @ObservationIgnored let documentDirectory: URL
     @ObservationIgnored private var commitTail: Task<Void, Never>?
     @ObservationIgnored private var revision = 0
+    /// IDs of first-version tickets already taken over, also when their pass was deleted later,
+    /// so a deleted ticket does not come back on the next launch or update.
+    @ObservationIgnored private let importedLegacyFile: JSONFile<[String]>
+    @ObservationIgnored private var importedLegacyIds: Set<String> = []
+    /// Called with the old ticket's ID when its pass is deleted, so the first-version copy goes too.
+    @ObservationIgnored var onRemoveLegacy: ((String) -> Void)?
 
     /// Documents above this size are rejected; tickets are a few pages at most.
     static let maxDocumentBytes = 25 * 1024 * 1024
@@ -26,6 +32,8 @@ final class PassStore {
         documentDirectory = dir.appendingPathComponent("passes", isDirectory: true)
         try? FileManager.default.createDirectory(at: documentDirectory, withIntermediateDirectories: true)
         passes = file.load() ?? []
+        importedLegacyFile = JSONFile(name: "imported-legacy-tickets.json", directory: dir)
+        importedLegacyIds = Set(importedLegacyFile.load() ?? []).union(passes.compactMap(\.legacyId))
     }
 
     func pass(_ id: String) -> TicketPass? { passes.first { $0.id == id } }
@@ -179,19 +187,25 @@ final class PassStore {
     }
 
     func remove(_ id: String) {
+        let legacyId = pass(id)?.legacyId
         if let p = pass(id) {
             if let url = documentURL(p) { try? FileManager.default.removeItem(at: url) }
             if let url = logoURL(p) { try? FileManager.default.removeItem(at: url) }
         }
         passes.removeAll { $0.id == id }
         persist()
+        if let legacyId {
+            rememberImported([legacyId])
+            onRemoveLegacy?(legacyId)
+        }
     }
 
-    /// Takes over tickets from the first ticket version (screenshot + name + validity). Runs once per ticket.
+    /// Takes over tickets from the first ticket version (screenshot + name + validity). Runs once per ticket:
+    /// a ticket deleted after the takeover stays deleted.
     @discardableResult
     func importLegacy(_ tickets: [Ticket], imageDirectory: URL, now: Date = .now) -> Int {
         var count = 0
-        for t in tickets where !passes.contains(where: { $0.legacyId == t.id }) {
+        for t in tickets where !importedLegacyIds.contains(t.id) && !passes.contains(where: { $0.legacyId == t.id }) {
             var pass = TicketPass(title: t.name, category: t.kind == .pass ? .period : .single, validUntil: t.validUntil,
                                   tripId: t.tripId, legacyId: t.id, createdAt: t.addedAt, updatedAt: now)
             if let file = t.imageFile {
@@ -206,7 +220,14 @@ final class PassStore {
             count += 1
         }
         if count > 0 { persist() }
+        rememberImported(tickets.map(\.id))
         return count
+    }
+
+    private func rememberImported(_ ids: [String]) {
+        let before = importedLegacyIds.count
+        importedLegacyIds.formUnion(ids)
+        if importedLegacyIds.count != before { importedLegacyFile.saveInBackground(importedLegacyIds.sorted()) }
     }
 
     private func persist() { revision += 1; file.saveInBackground(passes) }

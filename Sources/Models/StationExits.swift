@@ -34,7 +34,12 @@ final class StationExits: @unchecked Sendable {
     static let nearPath = 20.0
     /// The main Overpass instance is often busy (504); the second one answers then.
     static let endpoints = [URL(string: "https://overpass-api.de/api/interpreter")!,
-                            URL(string: "https://overpass.kumi.systems/api/interpreter")!]
+                            URL(string: "https://overpass.kumi.systems/api/interpreter")!,
+                            URL(string: "https://overpass.private.coffee/api/interpreter")!]
+    /// No door on the way: the signed one at most this much out of the way towards where the walk heads.
+    static let maxDetour = 150.0
+    /// Where the walk heads, for that: this far along it (or its end).
+    static let headingAhead = 300.0
 
     private let lock = NSLock()
     /// Entrances per station (rounded place where you get off).
@@ -237,7 +242,7 @@ final class StationExits: @unchecked Sendable {
             let tags = e.tags ?? [:]
             // A closed or staff-only door is no way out.
             if tags["access"] == "private" || tags["access"] == "no" || tags["entrance"] == "emergency" { return nil }
-            return StationEntrance(id: e.id, ref: tags["ref"].flatMap(Self.clean),
+            return StationEntrance(id: e.id, ref: (tags["ref"] ?? tags["local_ref"]).flatMap(Self.clean),
                                    name: tags["name"].flatMap(Self.cleanName), coordinate: point)
         }
     }
@@ -249,6 +254,9 @@ final class StationExits: @unchecked Sendable {
         for word in ["Ausgang", "Eingang", "Zugang", "Exit", "Entrance", "Uscita", "Sortie", "Salida", "Wyjście", "Výstup"] {
             if s.count > word.count + 1, s.lowercased().hasPrefix(word.lowercased() + " ") {
                 s = String(s.dropFirst(word.count + 1)).trimmingCharacters(in: .whitespaces)
+            } else if let r = s.range(of: " " + word + " ", options: .caseInsensitive), r.upperBound < s.endIndex {
+                // "Stephansplatz, Ausgang Graben" or "Karlsplatz – Ausgang 3": the station's name is not the sign.
+                s = String(s[r.upperBound...]).trimmingCharacters(in: .whitespaces)
             }
         }
         guard !s.isEmpty, s.count <= 24, !s.contains(";") else { return nil }
@@ -280,7 +288,16 @@ final class StationExits: @unchecked Sendable {
            near.coordinate.distance(to: exit.point) <= nearExit {
             return near
         }
-        return entrances.compactMap { e in along(e).flatMap { $0.offset <= nearPath && $0.along <= limit ? (e, $0.along) : nil } }
-            .min { $0.1 < $1.1 }?.0
+        if let onTheWay = entrances.compactMap({ e in along(e).flatMap { $0.offset <= nearPath && $0.along <= limit ? (e, $0.along) : nil } })
+            .min(by: { $0.1 < $1.1 })?.0 {
+            return onTheWay
+        }
+        // No door on the way (the walk's path is rough or starts beside the station): the signed door least out
+        // of the way towards where the walk heads, so the number still shows.
+        guard let start = path.first, let ahead = PathGeometry.point(at: min(PathGeometry.length(path), headingAhead), on: path),
+              start.distance(to: ahead) > nearExit else { return nil }
+        let straight = start.distance(to: ahead)
+        func detour(_ e: StationEntrance) -> Double { start.distance(to: e.coordinate) + e.coordinate.distance(to: ahead) - straight }
+        return entrances.filter { $0.label != nil && detour($0) <= maxDetour }.min { detour($0) < detour($1) }
     }
 }
