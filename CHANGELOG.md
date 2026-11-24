@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.2 (build 102) – smoother way into the station map
+
+- **Pull to open the station map** (`MapHero`, `NearbyView`, feedback on build 100): the map opens when the finger lets go, not in the middle of the pull; a light tap is felt when the pull is far enough, pulling back before letting go opens nothing. On iOS 18 the station map grows out of the map at the top (zoom transition) instead of sliding up, and the pull no longer also reloads the departures under the opening map.
+
 ## 0.1.2 (build 100) – widgets and complications, saved connections and lines, Wallet passes, plan around your ticket
 
 - **Widgets** (`ShortcutsWidget`, `NearbyWidget`, #6, #19): "Shortcuts" opens the routes to Home, Work or your own places with one tap (Home Screen and Lock Screen); "Departures nearby" shows the stops closest to you, favourite stops first when you are near them.
