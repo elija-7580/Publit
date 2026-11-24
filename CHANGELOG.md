@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.2 (build 104) – exit numbers more often, deleted tickets stay deleted
+
+- Station exits: when no door lies on the walk's path, Publit takes the signed exit with the smallest detour towards where the walk goes, so the exit number shows more often (also `local_ref`, exit names after the station's name, a third Overpass server).
+- Tickets: a ticket from the first ticket version that was deleted no longer comes back on the next launch or update.
+
+## 0.1.2 (build 103) – the station map opens again
+
+- **Pull to open the station map** (`MapHero`, feedback on build 102): in build 102 the pull no longer opened the map. The list bounced back in the same moment the finger let go, and that bounce took the pull back before the release was seen. Now only a pull back while the finger is still on the list cancels; any end of the touch (tracking or interacting ends) opens an armed pull. A device that reports no scroll phases opens at the mark as before build 102.
+
 ## 0.1.2 (build 102) – smoother way into the station map
 
 - **Pull to open the station map** (`MapHero`, `NearbyView`, feedback on build 100): the map opens when the finger lets go, not in the middle of the pull; a light tap is felt when the pull is far enough, pulling back before letting go opens nothing. On iOS 18 the station map grows out of the map at the top (zoom transition) instead of sliding up, and the pull no longer also reloads the departures under the opening map.

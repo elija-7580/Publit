@@ -20,11 +20,15 @@ enum WhatsNew {
 
     /// Newest first.
     static let entries: [WhatsNewEntry] = [
-        WhatsNewEntry(build: 103, items: [
+        WhatsNewEntry(build: 104, items: [
             WhatsNewItem(symbol: "door.left.hand.open", title: "Exit numbers more often",
                          text: "Routes and live trips now show the exit number of metro stations more often, also when the walk only passes near the exit."),
             WhatsNewItem(symbol: "ticket", title: "Deleted tickets stay deleted",
                          text: "A ticket you deleted no longer comes back after an update."),
+        ]),
+        WhatsNewEntry(build: 103, items: [
+            WhatsNewItem(symbol: "map", title: "Station map opens again",
+                         text: "Pull the list in Nearby far down and let go: the station map opens again, as it should."),
         ]),
         WhatsNewEntry(build: 102, items: [
             WhatsNewItem(symbol: "map", title: "Smoother station map",
