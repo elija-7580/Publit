@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.2 (build 106) – the Dynamic Island opens on a long press
+
+- **Live Activity in the Dynamic Island** (`TripLiveActivity`, feedback on build 105): a long press on the island did nothing. The expanded view had grown to up to seven rows (two-line sentence, vehicle, "Then", next stop, progress, destination) and so went over the height iOS allows (about 160 pt), and iOS then does not open it at all. It now has a short top row (step icon, sentence in a smaller font, labelled countdown) and below it one line (on board: next stop and stops to go; otherwise the vehicle), the progress bar and the destination with "Show ticket". "Then: …" stays on the lock screen.
+
 ## 0.1.2 (build 105) – a faster way while you walk to a ride, Live Activity readable on the watch
 
 - **Live trip** (`TripAlternative.faster`, `FasterWay`, `LiveTripView`, #110): while a trip goes to plan and you walk to a ride, Publit looks once per walk from where you are to the destination. When another stop, an earlier vehicle or another line arrives at least 3 minutes earlier, a green card "Faster" shows it; "Switch to this connection" takes it.

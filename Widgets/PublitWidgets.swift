@@ -257,32 +257,30 @@ struct TripLiveActivity: Widget {
             ActivityContent(attributes: context.attributes, state: context.state)
                 .widgetURL(context.attributes.tripURL)
         } dynamicIsland: { context in
+            // Long press opens this. iOS gives it at most about 160 pt of height; anything taller and the
+            // island does not open at all, so it stays to a short top row and two lines below.
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-                    StepIcon(state: context.state, size: 34).padding(.leading, 4)
+                    StepIcon(state: context.state, size: 30).padding(.leading, 4)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
                     VStack(alignment: .trailing, spacing: 0) {
                         CueLabel(state: context.state).font(.caption2).foregroundStyle(.secondary).lineLimit(1)
-                        Countdown(state: context.state).font(.title3.weight(.semibold))
+                        Countdown(state: context.state).font(.title3.weight(.semibold)).lineLimit(1)
                     }
-                    .frame(maxWidth: 100, alignment: .trailing)
+                    .frame(maxWidth: 96, alignment: .trailing)
                 }
                 DynamicIslandExpandedRegion(.center) {
-                    Text(context.state.headline).font(.headline).lineLimit(2).minimumScaleFactor(0.8)
+                    Text(context.state.headline).font(.subheadline.weight(.semibold))
+                        .lineLimit(2).minimumScaleFactor(0.75)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
                     VStack(alignment: .leading, spacing: 4) {
-                        VehicleRow(state: context.state)
-                        if context.state.phase == "riding", let then = context.state.then {
-                            HStack(spacing: 6) {
-                                Text(then).font(.caption.weight(.semibold)).lineLimit(1)
-                                PlatformChip(state: context.state)
-                            }
-                        }
-                        // On board: next stop and stops to go (with location), else when the vehicle arrives.
+                        // On board: next stop and stops to go; otherwise the vehicle to catch.
                         if context.state.phase == "riding", !context.state.detail.isEmpty {
                             Text(context.state.detail).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                        } else {
+                            VehicleRow(state: context.state)
                         }
                         TripProgressBar(state: context.state)
                         HStack(spacing: 6) {
@@ -292,7 +290,7 @@ struct TripLiveActivity: Widget {
                             Spacer(minLength: 4)
                             if context.attributes.hasTicket {
                                 Link(destination: context.attributes.ticketsURL) {
-                                    Label("Show ticket", systemImage: "ticket").font(.caption.weight(.semibold))
+                                    Label("Show ticket", systemImage: "ticket").font(.caption.weight(.semibold)).lineLimit(1)
                                 }
                             }
                         }
