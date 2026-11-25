@@ -258,6 +258,7 @@ Erscheint für die gestartete Fahrt (egal wie weit voraus sie losfährt, auch an
 
 ### Wallet (`PassWalletView`, `PassCards`)
 - Tickets gruppiert: **gültig jetzt, kommend, ohne Datum, abgelaufen** (eingeklappt). „No current tickets“ / „No tickets yet“.
+- Leerzustand „No tickets yet“: „Add a ticket from a PDF, a photo or a screenshot. Publit reads the details on your iPhone and keeps the code ready for ticket inspections.“ (DE: „… hält den Code für die Kontrolle bereit.“; bewusst Kontrolle statt Sperre/Gate, in AT/DE gibt es meist keine Ticketsperren).
 - Pass-Karte (`PassCardView`): Betreiber + Logo, Titel, Gültigkeits-Badge („Valid now“, „From …“, „Expired“), Strecke (From/Via/To), Details (Typ, Passagier, Klasse, Preis), Perforation, **Code** (QR, Aztec, PDF417, Data Matrix, Code 128 …).
 - Tippen auf Code → **Vollbild auf Weiß, Helligkeit 100 %** (`FullScreenCodeView`, `BrightnessBoost`), zurück beim Verlassen.
 - Kontextmenü: „Move to archive“ / „Move back to tickets“.
