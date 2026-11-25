@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.2 (build 105) – a faster way while you walk to a ride, Live Activity readable on the watch
+
+- **Live trip** (`TripAlternative.faster`, `FasterWay`, `LiveTripView`, #110): while a trip goes to plan and you walk to a ride, Publit looks once per walk from where you are to the destination. When another stop, an earlier vehicle or another line arrives at least 3 minutes earlier, a green card "Faster" shows it; "Switch to this connection" takes it.
+- **Live Activity on Apple Watch** (#176): in the Smart Stack the trip's card has its own fixed dark ground and light text; before, it took the iPhone's background colour and could hardly be read while the iPhone was in light mode. Lock screen and Dynamic Island are unchanged.
+
 ## 0.1.2 (build 104) – exit numbers more often, deleted tickets stay deleted
 
 - Station exits: when no door lies on the walk's path, Publit takes the signed exit with the smallest detour towards where the walk goes, so the exit number shows more often (also `local_ref`, exit names after the station's name, a third Overpass server).
