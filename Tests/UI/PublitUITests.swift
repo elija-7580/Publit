@@ -135,6 +135,19 @@ final class PublitUITests: XCTestCase {
         if element.isHittable { element.tap() } else { element.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap() }
     }
 
+    /// Taps a button that opens a sheet and waits for the sheet. A tap that lands while the list is
+    /// still moving only stops the scrolling: on CI (2026-11-26, F13, twice at the same line) Plan
+    /// was back at the top with "Route options" in plain view and no sheet. So the tap is repeated,
+    /// but only while the button can still be hit (under an open sheet it cannot).
+    private func openSheet(_ button: XCUIElement, sheet: XCUIElement) -> Bool {
+        for _ in 0..<3 {
+            guard button.waitForExistence(timeout: 5) else { return false }
+            if button.isHittable { button.tap() }
+            if sheet.waitForExistence(timeout: 5) { return true }
+        }
+        return false
+    }
+
     /// Screenshot plus the element tree, for a test that is about to fail on CI.
     private func dump(_ app: XCUIApplication, _ name: String) {
         snap(name)
@@ -799,8 +812,8 @@ final class PublitUITests: XCTestCase {
         sleep(1)
         snap("plan-compare")
         for _ in 0..<6 where !plan.buttons["routeOptions"].isHittable { plan.swipeDown() }
-        plan.buttons["routeOptions"].tap()
-        XCTAssertTrue(plan.navigationBars["Route options"].waitForExistence(timeout: 5))
+        sleep(1)   // let the list come to rest: a tap on a moving list is swallowed
+        XCTAssertTrue(openSheet(plan.buttons["routeOptions"], sheet: plan.navigationBars["Route options"]), "route options did not open")
         let bus = plan.switches["routeMode-bus"]
         XCTAssertTrue(bus.waitForExistence(timeout: 5))
         bus.coordinate(withNormalizedOffset: CGVector(dx: 0.93, dy: 0.5)).tap()
@@ -810,8 +823,7 @@ final class PublitUITests: XCTestCase {
         XCTAssertTrue(routes.firstMatch.waitForExistence(timeout: timeout), "no routes without buses")
         XCTAssertTrue(plan.buttons["routeOptions"].label.contains("Without Bus"), "filter summary missing")
         // Leave the defaults for the next run.
-        plan.buttons["routeOptions"].tap()
-        XCTAssertTrue(plan.navigationBars["Route options"].waitForExistence(timeout: 5))
+        XCTAssertTrue(openSheet(plan.buttons["routeOptions"], sheet: plan.navigationBars["Route options"]), "route options did not open again")
         plan.buttons["Reset"].tap()
         plan.buttons["routeOptionsDone"].tap()
     }
@@ -871,6 +883,17 @@ final class PublitUITests: XCTestCase {
         let add = app.buttons["addPass"]
         XCTAssertTrue(add.waitForExistence(timeout: 5))
         snap("tickets-tab")
+        // An empty page keeps clear of the live trip bar (#134): with a trip in the bar (an earlier
+        // test saves one) and no tickets, the whole empty state stays above it.
+        let bar = app.descendants(matching: .any)["liveTripBar"].firstMatch
+        let emptyText = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "Add a ticket from a PDF")).firstMatch
+        if bar.exists, emptyText.exists {
+            let top = bar.frame.minY
+            XCTAssertLessThanOrEqual(emptyText.frame.maxY, top, "the live trip bar covers the empty page's text")
+            for button in app.buttons.matching(NSPredicate(format: "label == %@", "Add ticket")).allElementsBoundByIndex {
+                XCTAssertLessThanOrEqual(button.frame.maxY, top, "the live trip bar covers the empty page's button")
+            }
+        }
         add.tap()
         XCTAssertTrue(app.buttons["importFile"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["importPhoto"].exists)
