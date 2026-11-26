@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.2 (build 107) – "Arrive by" lists only routes in your direction
+
+- **Plan, "Arrive by"** (`Itinerary.runsBackwards`, `TransitousClient.usable`, #188): with smart routing on, a search by arrival time could list routes that start at the destination and end at the start (the bus in the wrong direction, walks with the lengths of the reversed route). The server answers that way when slower direct rides are asked for together with "Arrive by"; such routes are now dropped from every route search.
+
 ## 0.1.2 (build 106) – the Dynamic Island opens on a long press
 
 - **Live Activity in the Dynamic Island** (`TripLiveActivity`, feedback on build 105): a long press on the island did nothing. The expanded view had grown to up to seven rows (two-line sentence, vehicle, "Then", next stop, progress, destination) and so went over the height iOS allows (about 160 pt), and iOS then does not open it at all. It now has a short top row (step icon, sentence in a smaller font, labelled countdown) and below it one line (on board: next stop and stops to go; otherwise the vehicle), the progress bar and the destination with "Show ticket". "Then: …" stays on the lock screen.
