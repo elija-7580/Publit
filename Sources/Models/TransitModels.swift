@@ -56,6 +56,15 @@ struct EncodedPolyline: Codable, Sendable {
         mapPoints = Polyline.simplify(coordinates)
     }
 
+    /// A shape worked out on the phone, e.g. part of a vehicle's ride (`OnBoardPlan`).
+    init(coordinates: [LatLon], precision: Int = 6) {
+        self.precision = precision
+        self.coordinates = coordinates
+        points = Polyline.encode(coordinates, precision: precision)
+        length = coordinates.count
+        mapPoints = Polyline.simplify(coordinates)
+    }
+
     func encode(to encoder: Encoder) throws {
         var c = encoder.container(keyedBy: CodingKeys.self)
         try c.encode(points, forKey: .points)
@@ -113,10 +122,10 @@ struct Leg: Codable, Sendable, RouteStyled {
     var duration: Int
     var startTime: Date
     var endTime: Date
-    let scheduledStartTime: Date
-    let scheduledEndTime: Date
+    var scheduledStartTime: Date
+    var scheduledEndTime: Date
     var realTime: Bool
-    let distance: Double?
+    var distance: Double?
     let headsign: String?
     let routeColor: String?
     let routeTextColor: String?

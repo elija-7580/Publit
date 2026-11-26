@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.2 (build 108) – plan from the vehicle you are on
+
+- **Plan from this vehicle** (`OnBoardPlan`, `OnBoardPlanView`; in a vehicle's trip and in the map's vehicle sheet): you are already on a tram, bus or train and want to go somewhere else. Pick the destination; the search starts at the vehicle's next stop at its live arrival time, and a route that stays on the same vehicle becomes one ride from where you are. Routes that arrive later without fewer changes (get off and wait for the next tram the same way) are left out. A saved or started route refreshes its ride from the vehicle's trip (part ID `ride:<from>:<to>:<tripId>`, `TripRefreshCoordinator.fetch`) and the rest from the planned route.
+- **Credit:** the idea comes from **BudapestGO**, the app of BKK (Centre for Budapest Transport), which introduced "On-board Journey Planning" in 2022. Thank you, BKK!
+
 ## 0.1.2 (build 107) – "Arrive by" lists only routes in your direction
 
 - **Plan, "Arrive by"** (`Itinerary.runsBackwards`, `TransitousClient.usable`, #188): with smart routing on, a search by arrival time could list routes that start at the destination and end at the start (the bus in the wrong direction, walks with the lengths of the reversed route). The server answers that way when slower direct rides are asked for together with "Arrive by"; such routes are now dropped from every route search.

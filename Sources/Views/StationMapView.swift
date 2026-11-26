@@ -939,6 +939,7 @@ struct RentalDetailView: View {
 struct VehicleTripView: View {
     let vehicle: LiveVehicle
     @State private var leg: Leg?
+    @State private var showsOnBoard = false
     @State private var errorMessage: String?
     @State private var now = Date()
 
@@ -961,6 +962,15 @@ struct VehicleTripView: View {
                 let stops = leg.allStops
                 let progress = TripProgress.at(now, stops: stops)
                 let next = TripProgress.nextStopIndex(progress, count: stops.count) ?? stops.count
+                // Tap the vehicle you are in and plan on from it (idea: BudapestGO, BKK).
+                if progress != .finished {
+                    Section {
+                        Button { showsOnBoard = true } label: {
+                            Label("Plan from this vehicle", systemImage: "arrow.triangle.branch")
+                        }
+                        .accessibilityIdentifier("planFromVehicle")
+                    }
+                }
                 Section("Next stops") {
                     ForEach(Array(stops.enumerated()).filter { $0.offset >= next }, id: \.offset) { _, stop in
                         HStack {
@@ -989,6 +999,9 @@ struct VehicleTripView: View {
         .ticking(every: 15, now: $now)
         .navigationTitle(vehicle.lineName)
         .screenTrail("Map vehicle")
+        .sheet(isPresented: $showsOnBoard) {
+            if let leg { OnBoardPlanView(trip: leg, lineName: vehicle.lineName) }
+        }
         .navigationBarTitleDisplayMode(.inline)
         .task {
             do {

@@ -14,6 +14,7 @@ let core = [
     "App/AppInfo.swift",
     "Models/TransitModels.swift",
     "Models/RouteBuilder.swift",
+    "Models/OnBoardPlan.swift",
     "Models/ServiceAlerts.swift",
     "Models/Fares.swift",
     "Models/ModeStyle.swift",
