@@ -3,7 +3,7 @@
 > Nicht von Hand bearbeiten. Erzeugt von `scripts/feature_inventory.py` (CI: `features-doc.yml`).
 > Die ausführliche Beschreibung steht in [FUNKTIONEN.md](FUNKTIONEN.md).
 
-**237 Views, 8 App Intents, 5 Widgets in 90 Dateien.**
+**238 Views, 8 App Intents, 5 Widgets in 91 Dateien.**
 
 ## `Sources/App/DesignSamples.swift`
 - Views: `DesignSampleView`
@@ -199,6 +199,10 @@
 - Views: `NearbyView`, `StopGroupHeader`, `StopDeparturesView`, `LineAtStopRow`
 - Sichtbare Texte: Nearby · Station map · Location is off · Allow location access in Settings to see departures near you. Trip planning works without it. · Departures unavailable · No departures for these modes · Show all modes · No departures nearby · No departures within 5 km. The station map shows stops further away. · Couldn't refresh. Times may be out of date. · Route here · All departures · Active trip · Where to now? Route from your location · Next trip: %@ · Next appointment: %@ · Here · %lld min · Alerts · Towards %@ · Route from here · Share departures · View · Departures · Lines · Platforms · No upcoming departures. · Saved line · Save line · Save · Direction unavailable · Next: %@ · Platform %@ · now
 
+## `Sources/Views/OnBoardPlanView.swift`
+- Views: `OnBoardPlanView`
+- Sichtbare Texte: Where to? · Routes start with this ride: stay on, or change at a stop still ahead. Idea: BudapestGO (BKK Budapest). · Plan from this vehicle · Done · On board %@ · Now at %@ · Next stop: %@, in %lld min · This ride has ended. · No connections found.
+
 ## `Sources/Views/OnboardingView.swift`
 - Views: `OnboardingView`
 - Sichtbare Texte: Skip · Public transport, without the noise. · Departures near you, routes wherever you go and a guide until you get off. No ads, no account, no tracking. · Departures where you are · On the way · Get started · Continue · Home and Work · One tap to get home or to work, from anywhere. You can change them any time in Saved. · Not set
@@ -254,7 +258,7 @@
 
 ## `Sources/Views/StationMapView.swift`
 - Views: `StationMapView`, `MapLayersSheet`, `MapPlaceView`, `MapSelectionView`, `RentalDetailView`, `VehicleTripView`
-- Sichtbare Texte: Stations could not be loaded. · Live layer unavailable. Stations still work. · My location · Departures nearby · Updating live layer… · Stations · Search places, sights and stops · Done · Close · Search this area · Zoom in to see stations · Zoom in to see lines and vehicles · Map layers · Find nearby · All %@ in this area · No places found · Map · 3D terrain and buildings · Places of interest · Traffic · Lines · Vehicles · Bikes and scooters · Data gaps · On the map · Satellite maps load more data. In 3D, tilt the map with two fingers. · Distance · On foot · %lld min · Route here · Route from here · Provider · Available now · Open in the provider's app · Renting needs the provider's app and an account there. · Towards %@ · Live position · Position from the timetable · %lld min late · Next stops · Line %@: route and timetable
+- Sichtbare Texte: Stations could not be loaded. · Live layer unavailable. Stations still work. · My location · Departures nearby · Updating live layer… · Stations · Search places, sights and stops · Done · Close · Search this area · Zoom in to see stations · Zoom in to see lines and vehicles · Map layers · Find nearby · All %@ in this area · No places found · Map · 3D terrain and buildings · Places of interest · Traffic · Lines · Vehicles · Bikes and scooters · Data gaps · On the map · Satellite maps load more data. In 3D, tilt the map with two fingers. · Distance · On foot · %lld min · Route here · Route from here · Provider · Available now · Open in the provider's app · Renting needs the provider's app and an account there. · Towards %@ · Live position · Position from the timetable · %lld min late · Plan from this vehicle · Next stops · Line %@: route and timetable
 
 ## `Sources/Views/StationViews.swift`
 - Views: `PlatformMapSection`, `PlatformPin`, `PlatformSummaryRow`, `FlowLines`, `PlatformHeaderRow`, `ChangeGuideCard`
@@ -286,7 +290,7 @@
 
 ## `Sources/Views/TripView.swift`
 - Views: `TripView`, `TripMap`, `StopTimeRow`, `LineDeparturesView`
-- Sichtbare Texte: Track vehicle · Stops · From %@ to here · Route here · Route from here · Departures · Line %@: route and timetable · Done · Saved line · Save line · Not departed yet · Arrived at %@ · At %@ · Between %@ and %@ · No live data for this trip. Position estimated from the timetable. · Position estimated from live stop times. · Estimated vehicle position
+- Sichtbare Texte: Track vehicle · Plan from this vehicle · Stops · From %@ to here · Route here · Route from here · Departures · Line %@: route and timetable · Done · Saved line · Save line · Not departed yet · Arrived at %@ · At %@ · Between %@ and %@ · No live data for this trip. Position estimated from the timetable. · Position estimated from live stop times. · Estimated vehicle position
 
 ## `Sources/Views/VehicleTrackingView.swift`
 - Views: `VehicleTrackingView`

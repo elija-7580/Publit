@@ -11,7 +11,7 @@ settings:
   base:
     SWIFT_VERSION: "5.0"
     MARKETING_VERSION: "0.1.2"
-    CURRENT_PROJECT_VERSION: "107"
+    CURRENT_PROJECT_VERSION: "108"
     # Personal Team — Automatic Signing for local device installs.
     DEVELOPMENT_TEAM: "3D6S8GFSGK"
 packages:
@@ -144,6 +144,9 @@ targets:
       - Sources/Models/TransitModels.swift
       # Routes built leg by leg are refreshed part by part (TripRefreshCoordinator).
       - Sources/Models/RouteBuilder.swift
+      # Rides planned from a vehicle are refreshed from its trip (TripRefreshCoordinator).
+      - Sources/Models/OnBoardPlan.swift
+      - Sources/Models/TripProgress.swift
       - Sources/Models/ServiceAlerts.swift
       - Sources/Models/Fares.swift
       - Sources/Models/ModeStyle.swift
@@ -204,6 +207,8 @@ targets:
       - Sources/Models/TransitModels.swift
       # Routes built leg by leg are refreshed part by part (TripRefreshCoordinator).
       - Sources/Models/RouteBuilder.swift
+      # Rides planned from a vehicle are refreshed from its trip (TripRefreshCoordinator).
+      - Sources/Models/OnBoardPlan.swift
       - Sources/Models/ServiceAlerts.swift
       - Sources/Models/Fares.swift
       - Sources/Models/ModeStyle.swift
@@ -298,6 +303,9 @@ targets:
       - Sources/App/AppInfo.swift
       - Sources/Models/TransitModels.swift
       - Sources/Models/RouteBuilder.swift
+      # Rides planned from a vehicle are refreshed from its trip (TripRefreshCoordinator).
+      - Sources/Models/OnBoardPlan.swift
+      - Sources/Models/TripProgress.swift
       - Sources/Models/ServiceAlerts.swift
       - Sources/Models/Fares.swift
       - Sources/Models/ModeStyle.swift

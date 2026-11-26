@@ -41,6 +41,27 @@ enum Polyline {
         return coords
     }
 
+    /// Google polyline encoding, the reverse of `decode`.
+    static func encode(_ points: [LatLon], precision: Int) -> String {
+        let factor = pow(10.0, Double(precision))
+        var out = [UInt8]()
+        var lastLat: Int64 = 0, lastLon: Int64 = 0
+        func put(_ value: Int64) {
+            var v = UInt64(bitPattern: value < 0 ? ~(value << 1) : value << 1)
+            while v >= 0x20 {
+                out.append(UInt8((0x20 | (v & 0x1f)) + 63))
+                v >>= 5
+            }
+            out.append(UInt8(v + 63))
+        }
+        for p in points {
+            let lat = Int64((p.lat * factor).rounded()), lon = Int64((p.lon * factor).rounded())
+            put(lat - lastLat); put(lon - lastLon)
+            lastLat = lat; lastLon = lon
+        }
+        return String(decoding: out, as: UTF8.self)
+    }
+
     /// Fewer points for drawing on a map (Douglas-Peucker). A route is drawn with a few hundred
     /// points instead of thousands; nothing visible changes at street zoom.
     static func simplify(_ points: [LatLon], toleranceMeters: Double = 4) -> [LatLon] {

@@ -1,6 +1,6 @@
 # Publit iOS – Funktionen und Screens (vollständige Übersicht)
 
-> Stand: Version 0.1.2 (Build 107). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
+> Stand: Version 0.1.2 (Build 108). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
 > **Pflege:** Jede Änderung an `Sources/`, `Watch/`, `Widgets/` oder `Share/` muss diese Datei im selben Commit/PR mitändern (siehe Abschnitt „Aktualisierung“ ganz unten). Die maschinell erzeugte Liste aller Views steht in [`FUNKTIONEN-INVENTAR.md`](FUNKTIONEN-INVENTAR.md) und wird von der CI automatisch aktualisiert.
 
 ## Inhalt
@@ -123,6 +123,7 @@ Bewegung reduzieren zeigt jede Demo im Endzustand. Schließen, „Continue“ od
 - Karte (`TripMap`) **oben als Bild wie bei Nearby und Route** (`MapHeroSpace`, reicht unter die Leiste, klein verschieb-/zoombar, ohne Knöpfe; Vergrößern-Taste → Vollbildkarte mit Standort-Knopf und Kompass, „Done“) mit **geschätzter Fahrzeugposition** („Estimated vehicle position“; zwischen zwei Halten entlang der Streckenform, nicht in gerader Linie), Status „Not departed yet“, „Between A and B“, „At …“, „Arrived at …“; ohne Live-Daten aus dem Fahrplan geschätzt.
 - **„Track vehicle“** (`VehicleTrackingView`): die Fahrt dieser Abfahrt auf einer großen Karte (Linienverlauf, Halte, Fahrzeug, eigener Standort), aktualisiert sich alle 15 s selbst; **„Follow vehicle“** hält das Fahrzeug in der Mitte (Verschieben von Hand beendet das). Darunter die Positionsquelle (`VehiclePositionSource`): „Position estimated from live stop times.“, „…estimated from the timetable.“ oder „Vehicle position unavailable right now.“ (vor Abfahrt am ersten Halt / nach Ankunft) – nie „GPS“, weil Transitous keine Fahrzeug-GPS-Positionen liefert – und die nächsten Halte mit Zeiten. Ohne Position bleiben Linie und Halte sichtbar.
 - Aktionen pro Halt: „Route here“, „Route from here“; „From … to here“; **„Departures“** (Issue #130) öffnet die Abfahrtstafel dieses Halts (`StopDeparturesView`), Zurück führt wieder zur Fahrt; nur bei Halten mit Haltestellen-ID. Linie speichern.
+- **„Plan from this vehicle“** (`OnBoardPlanView`, `OnBoardPlan`, Build 108; Idee von BudapestGO, der App der BKK Budapest, dort „On-board Journey Planning“): solange die Fahrt nicht zu Ende ist. Man sitzt schon im Fahrzeug und plant von dort weiter: Blatt mit „On board <Linie>“ und „Next stop: X, in n min“ (bzw. „Now at X“), Ziel über „Where to?“ (Ortssuche öffnet sich gleich). Gesucht wird ab dem nächsten Halt zur Echtzeit-Ankunft dort; bleibt die Route im selben Fahrzeug, wird daraus **eine** Fahrt ab dem zuletzt passierten Halt, sonst endet die Fahrt am nächsten Halt und es geht von dort weiter. Liste nach Ankunft, dann Umstiegen; Routen, die später ankommen und nicht weniger Umstiege haben (z. B. aussteigen und auf die nächste Tram derselben Richtung warten), fallen weg. Tipp → Routendetail (`ItineraryDetailView`, Start „On board <Linie>“), dort speichern/starten wie jede Route; die Live-Zeiten der eigenen Fahrt kommen aus der Fahrt des Fahrzeugs (Teil-ID `ride:<von>:<bis>:<tripId>`), der Rest aus der geplanten Route. Fußzeile: „Routes start with this ride: stay on, or change at a stop still ahead. Idea: BudapestGO (BKK Budapest).“ Fehler: „This ride has ended.“, „No connections found.“
 - Liste weiterer Abfahrten derselben Linie.
 - „Line …: route and timetable“ öffnet das Linien-Detail (Richtung, Verlauf, Fahrplan).
 - Auch aus einer geplanten oder laufenden Fahrt erreichbar (Linie einer Etappe antippen): dann mit allen Halten der Fahrt, auch denen vor dem Einstieg; Einstiegs- und Ausstiegshalt fett.
@@ -135,7 +136,7 @@ Bewegung reduzieren zeigt jede Demo im Endzustand. Schließen, „Continue“ od
 - Linien auf der Karte stammen aus Fahrt-Abschnitten (`LiveMap`). Ein langer, gerader Abschnitt ohne Streckenverlauf auf einer Fahrt, deren übrige Abschnitte den Gleisen folgen (Metro/Tram/Bus, > 2,5 km), wird nicht gezeichnet: Linien, die von A nach B und zurück fahren, sahen sonst wie ein geschlossener Ring aus.
 - **Ebenen** (`MapLayersSheet`, „Map layers“): Kartenstil (Standard, Transit/gedämpft, Satellite, Satellite ohne Namen), 3D-Gelände und Gebäude, Places of interest, Traffic, Lines, Vehicles, Bikes and scooters, **Data gaps** (Abdeckungslücken orange; gefüllt = keine Daten, gestrichelt = teilweise).
 - **Auswahl** (`MapSelectionView`): Station → nächste Abfahrten, „Route here/from here“; Ort/Pin (`MapPlaceView`, auch „Dropped pin“ per langem Drücken ab 0,5 s; das Loslassen schließt den Pin nicht wieder) → Distanz, Gehzeit, Routen.
-- **Fahrzeug** (`VehicleTripView`): Live-Position oder aus Fahrplan, „x min late“, „Next stops“, „Line …: route and timetable“.
+- **Fahrzeug** (`VehicleTripView`): Live-Position oder aus Fahrplan, „x min late“, **„Plan from this vehicle“** (wie §6: im Fahrzeug sitzen und von dort weiterplanen), „Next stops“, „Line …: route and timetable“.
 - **Leihräder/E-Scooter** (`RentalDetailView`, GBFS): Anbieter, „Available now“, Fahrzeuge, Distanz, „Open in the provider's app“ (Mieten nur in der Anbieter-App).
 - Kartenanbieter Apple Maps oder Google Maps (mit Key); Fehlerzustände „Stations could not be loaded.“, „Live layer unavailable. Stations still work.“
 
@@ -466,6 +467,7 @@ Kleinere Bausteine, die in den Abschnitten oben nicht namentlich vorkommen:
 | `ChooseOnMapView` | „Choose on map“: Punkt auf der Karte als Start/Ziel wählen (§9) |
 | `CenterPin` | Stecknadel in der Mitte von „Choose on map“, hebt sich beim Verschieben (§9) |
 | `TurnCard` | Nächste Abbiegung über der Karte des Fußwegs in der Live-Fahrt (§13) |
+| `OnBoardPlanView` | „Plan from this vehicle“: vom Fahrzeug aus weiterplanen (§6, §7) |
 | `VehicleTrackingView` | „Track vehicle“: Fahrzeug einer Abfahrt auf großer Karte verfolgen (§6) |
 | `PlaceHitRow` | Treffer der Ortssuche: Haltestelle, Adresse oder Ort, Apple-Vorschläge werden beim Antippen nachgeschlagen; „Save“ per Wischen (§9) |
 | `HeadingDot` | Dein Standort mit Lichtkegel in Blickrichtung auf allen Karten (SwiftUI über `YouAreHere`, Stationskarte über `UserHeadingView`) (§3) |
