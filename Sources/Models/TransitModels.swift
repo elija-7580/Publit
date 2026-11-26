@@ -254,9 +254,25 @@ extension Itinerary {
     }
 }
 
+extension Itinerary {
+    /// A route the server planned the wrong way round: it starts at the destination and ends at the
+    /// start. Transitous answers "Arrive by" searches that also ask for slower direct rides
+    /// (`slowDirect`, smart routing) that way (#188, Saarbrücken, 2026-11-26: 4 of 9 routes rode from
+    /// the university back into town, their last leg ending at "END" on the start's coordinates).
+    /// Start and destination next to each other: nothing to judge.
+    func runsBackwards(from: LatLon, to: LatLon) -> Bool {
+        guard from.distance(to: to) >= 200, let first = legs.first, let last = legs.last else { return false }
+        let start = first.from.coordinate, end = last.to.coordinate
+        return start.distance(to: to) < start.distance(to: from) && end.distance(to: from) < end.distance(to: to)
+    }
+}
+
 extension Array where Element == Itinerary {
     /// Without routes that pass the destination and ride on, or ride out and back (`isDetour`).
     var withoutDetours: [Itinerary] { filter { !$0.isDetour } }
+
+    /// Without routes that run from the destination to the start (`runsBackwards`).
+    func facing(from: LatLon, to: LatLon) -> [Itinerary] { filter { !$0.runsBackwards(from: from, to: to) } }
 
     /// One row per route: a page loaded twice or a refresh must not repeat an identity in a list.
     var uniqueRoutes: [Itinerary] {
