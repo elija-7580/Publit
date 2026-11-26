@@ -135,8 +135,17 @@ final class TransitousClient: @unchecked Sendable {
                                                      pageCursor: pageCursor, maxWalk: maxWalk, options: options, stops: stops),
                       cache: CachePolicy(maxAge: time == nil ? 20 : 60, persist: true),
                       timeout: options.isSlowSearch ? 45 : nil)
+        // "Arrive by" with slower direct rides: the server adds routes from the destination to the start (#188).
         // Own tickets: rides they do not cover (an IC filed as plain RAIL, a train abroad) come out here.
-        return options.filtersRides ? res.replacingItineraries(res.itineraries.filter(options.allows)) : res
+        return Self.usable(res, from: from, to: to, options: options)
+    }
+
+    /// The server's answer without what must never be listed: routes that run the wrong way round
+    /// (`Itinerary.runsBackwards`) and, with own tickets, rides they do not cover. Paging cursors stay.
+    static func usable(_ res: PlanResponse, from: LatLon, to: LatLon, options: RouteOptions = RouteOptions()) -> PlanResponse {
+        var list = res.itineraries.facing(from: from, to: to)
+        if options.filtersRides { list = list.filter(options.allows) }
+        return list.count == res.itineraries.count ? res : res.replacingItineraries(list)
     }
 
     static func planQuery(from: LatLon, to: LatLon, time: Date?, arriveBy: Bool,
