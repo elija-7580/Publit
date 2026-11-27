@@ -352,7 +352,28 @@ final class PlanModel {
             let enriched = await LiveOverlay.apply(snapshot, budget: 5)
             guard let self, self.token == myToken else { return }
             self.itineraries = LiveOverlay.replace(self.itineraries, with: enriched)
+            await self.addEarlierWays(token: myToken)
         }
+    }
+
+    /// Live times broke a change on a route that has not started yet: the earlier way that still
+    /// catches the same connection joins the list (`CatchEarlier`). The server never lists it by
+    /// itself: it leaves earlier and arrives at the same time, so it looks like the worse route.
+    private func addEarlierWays(token myToken: UUID) async {
+        guard timeMode != .lastConnection else { return }
+        let now = Date()
+        let broken = itineraries.filter { CatchEarlier.target($0, changes: SmartRouting.changes($0, at: now), at: now) != nil }
+        guard !broken.isEmpty else { return }
+        var found: [Itinerary] = []
+        // A couple of searches at most; the plan cache answers the same ones on the next refresh.
+        for it in broken.prefix(2) {
+            if let rescue = await CatchEarlier.search(it, at: now, options: lastOptions) { found.append(rescue.route) }
+            guard token == myToken else { return }
+        }
+        var known = Set(itineraries.map(\.rideKey))
+        let fresh = found.filter { known.insert($0.rideKey).inserted }
+        guard !fresh.isEmpty else { return }
+        itineraries = Self.timetableOrder(itineraries + fresh, arriveBy: lastRequest?.arriveBy ?? false)
     }
 
     /// One request per mode, side by side: cycling comes back in about a second, driving

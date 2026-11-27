@@ -116,6 +116,8 @@ struct ItineraryDetailView: View {
     /// Counts exit numbers arriving and exits picked: the advice under the rides is worked out again.
     @State private var exitsChanged = 0
     @State private var addingTicket = false
+    /// A change no longer works: leaving earlier still catches the same connection (`CatchEarlier`).
+    @State private var earlier: CatchEarlier.Rescue?
     @Environment(WideMapState.self) private var wideMap: WideMapState?
 
     private var isBikeOrCar: Bool {
@@ -127,6 +129,13 @@ struct ItineraryDetailView: View {
     /// or running trip keeps its legs (its reminders and Live Activity follow them).
     private func canChange(_ leg: Leg) -> Bool {
         allowsLegChange && leg.isTransit && statusAt == nil && !isBikeOrCar && trips.saved(itinerary) == nil
+    }
+
+    /// The rides and their live times: a new delay looks for an earlier way again.
+    private var liveTimesKey: String {
+        itinerary.legs.map { leg -> String in
+            "\(leg.mode)~\(leg.tripId ?? "")~\(Int(leg.startTime.timeIntervalSince1970))~\(Int(leg.endTime.timeIntervalSince1970))"
+        }.joined(separator: "|")
     }
 
     private var resolvedFrom: String { fromName.isEmpty ? Self.placeName(itinerary.legs.first?.from) : fromName }
@@ -201,6 +210,13 @@ struct ItineraryDetailView: View {
                 }
             }
 
+            // Leave earlier and still catch the same train: the way there, then the route as it was.
+            if let earlier {
+                Section {
+                    CatchEarlierRow(rescue: earlier) { built = BuiltRoute(itinerary: earlier.route) }
+                }
+            }
+
             // How sure each change is and what takes over if it breaks (smart routing).
             SmartChangesSection(itinerary: itinerary)
 
@@ -253,6 +269,11 @@ struct ItineraryDetailView: View {
             if !isBikeOrCar && showsAll {
                 TripActionBar(itinerary: itinerary, fromName: resolvedFrom, toName: resolvedTo)
             }
+        }
+        // A broken or unlikely change before the trip has started: look for an earlier way to the same connection.
+        .task(id: liveTimesKey) {
+            guard allowsLegChange, !isBikeOrCar else { earlier = nil; return }
+            earlier = await CatchEarlier.search(itinerary, options: RouteOptions.load())
         }
         // Exit numbers of the stations the trip leaves on foot ("Take exit B2"), from OpenStreetMap.
         .task(id: itinerary.id) {
