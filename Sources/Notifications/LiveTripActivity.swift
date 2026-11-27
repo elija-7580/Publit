@@ -110,10 +110,18 @@ enum LiveTripActivity {
     /// App goes to the background: each running activity ends now, with its last state, and
     /// disappears by itself shortly after the arrival. Its countdown keeps running on the lock screen.
     /// Activities of removed trips and of trips already over go at once.
-    static func handOver(_ lookup: (String) -> SavedTrip?, now: Date = .now) async {
+    /// - Parameter keeping: the trip the app goes on following in the background (the location follows
+    ///   it, see `LocationManager.setTripTracking`). Its activity stays a running one: an ended activity
+    ///   leaves the Dynamic Island and can no longer be updated, so delays, platforms and "next stop"
+    ///   froze at the moment the phone was locked. It is handed over once the following ends.
+    static func handOver(_ lookup: (String) -> SavedTrip?, keeping: String? = nil, now: Date = .now) async {
         for a in Activity<TripActivityAttributes>.activities where a.activityState == .active || a.activityState == .stale {
             guard let trip = lookup(a.attributes.tripId), !isOver(trip, now: now) else {
                 await a.end(nil, dismissalPolicy: .immediate)
+                continue
+            }
+            if trip.id == keeping {
+                await update(trip, now: now)
                 continue
             }
             let gone = trip.endTime.addingTimeInterval(now >= trip.endTime ? afterArrival : backgroundGrace)

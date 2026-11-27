@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.2 (build 112) – lock screen and get-off alert while the phone is locked
+
+Second part of the stability review (27 Nov 2026). These change behaviour in the background and were not run on a device: see "to test on an iPhone" in the pull request.
+
+- **Live Activity stays live while Publit follows the trip** (`LiveTripActivity.handOver(keeping:)`, `TripSession.refreshIfDue`): on going to the background every Live Activity was ended (it stays on the lock screen but leaves the Dynamic Island and can no longer be updated). The started trip that the location goes on following now keeps a running activity: live times every two minutes, boarding/riding/arrived and "next stop" as they change. It is handed over as before when the following ends, and ended after the arrival even when no fix comes any more. All other activities are handed over as before.
+- **Location-based get-off alert** (`GetOffAlerts.wantsTracking`, `TripStatus.isBetweenRides`): the location followed each ride only from 2 minutes before it. With the phone locked earlier, or during a change of more than about 12 minutes, tracking was off, iOS suspended the app and the alert never came. It now follows a started trip from 20 minutes before the first ride until 10 minutes after the last one, without a gap.
+- **Nearby widget and watch complication**: up to 10 departures per stop are loaded (4 before), and the Nearby widget has a timeline entry after each departure, so a train that has left drops off without a new load.
+
 ## 0.1.2 (build 111) – stability review
 
 Review of the whole app before the first talks with operators (27 Nov 2026). Fixed:

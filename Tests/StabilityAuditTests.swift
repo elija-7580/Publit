@@ -239,4 +239,22 @@ final class StabilityAuditTests: XCTestCase {
         XCTAssertNil(SharedRoute(query: "fl=48.2,16.3&tl=48.1,16.2&d=1e30"))
         XCTAssertNil(SharedRoute(query: "fl=48.2,16.3&tl=48.1,16.2&d=-1e30"))
     }
+
+    // MARK: Following a started trip without a gap
+
+    func testLocationFollowsFromBeforeTheFirstRideToAfterTheLastWithoutAGap() throws {
+        let legs = "[\(legJSON("WALK", start: 0, end: 5)),\(legJSON("SUBWAY", start: 5, end: 15, trip: "a")),\(legJSON("WALK", start: 15, end: 40)),\(legJSON("BUS", start: 40, end: 60, trip: "b"))]"
+        let json = """
+        {"id":"x","duration":3600,"startTime":"\(iso(0))","endTime":"\(iso(60))","transfers":1,"legs":\(legs)}
+        """
+        let it = try TransitousClient.makeDecoder().decode(Itinerary.self, from: Data(json.utf8))
+        func follows(_ m: Double) -> Bool { TripStatus.isBetweenRides(it, at: date(m), lead: 20 * 60, after: 10 * 60) }
+        XCTAssertFalse(follows(-21))
+        XCTAssertTrue(follows(-15), "phone locked a quarter of an hour before boarding")
+        XCTAssertTrue(follows(28), "in the middle of a 25-minute change")
+        XCTAssertTrue(follows(69))
+        XCTAssertFalse(follows(71))
+        let walk = try route("walk", mode: "WALK", start: 0, end: 50)
+        XCTAssertFalse(TripStatus.isBetweenRides(walk, at: date(10), lead: 20 * 60, after: 10 * 60))
+    }
 }
