@@ -148,6 +148,23 @@ final class PublitUITests: XCTestCase {
         return false
     }
 
+    /// Opens a route from the list in Plan and waits for its screen. Since build 111 the row
+    /// "Earlier connections" sits above the routes, so on the CI iPhone the first route starts
+    /// behind the tab bar. When it is not the recommended one, the pill "Recommended: …" floats
+    /// there as well, and a tap on the row's centre lands on the pill or the tab bar: on CI
+    /// (2026-11-27, F07, twice at the same line) Plan stayed at the top and no route opened. So
+    /// the row is first brought up clear of the bars, and the tap is repeated while the list is
+    /// still in front (routes added after the live times can move the row under the tap).
+    private func openRoute(_ row: XCUIElement, in app: XCUIApplication) -> Bool {
+        let route = app.navigationBars["Route"]
+        for _ in 0..<3 where !route.exists {
+            guard bringUp(row, in: app) else { continue }
+            row.tap()
+            if route.waitForExistence(timeout: 10) { return true }
+        }
+        return route.exists
+    }
+
     /// Screenshot plus the element tree, for a test that is about to fail on CI.
     private func dump(_ app: XCUIApplication, _ name: String) {
         snap(name)
@@ -624,9 +641,7 @@ final class PublitUITests: XCTestCase {
         }
 
         // The routes list has no map toggle any more: open the first route directly.
-        let details = routes.firstMatch
-        details.tap()
-        XCTAssertTrue(app.navigationBars["Route"].waitForExistence(timeout: 10))
+        XCTAssertTrue(openRoute(routes.firstMatch, in: app), "the first route did not open")
         sleep(3)
         snap("detail")
         // In the steps: the reminder sits in the unfolded ride, like its stops.
@@ -741,8 +756,7 @@ final class PublitUITests: XCTestCase {
         let app = launch(["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "plan"])
         let routes = app.buttons.matching(identifier: "routeRow")
         XCTAssertTrue(routes.firstMatch.waitForExistence(timeout: timeout), "no routes found")
-        routes.firstMatch.tap()
-        XCTAssertTrue(app.navigationBars["Route"].waitForExistence(timeout: 10))
+        XCTAssertTrue(openRoute(routes.firstMatch, in: app), "the first route did not open")
         let save = app.buttons["Save trip"]
         for _ in 0..<6 where !save.isHittable { app.swipeUp() }
         XCTAssertTrue(save.exists, "Save trip missing")
