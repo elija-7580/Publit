@@ -309,17 +309,14 @@ struct RootView: View {
             // Each fix on board: the get-off alert by location (#69); off again after the ride.
             location.onFix = { [trips, location] fix in
                 // The following ends (trip over or ended): in the background its Live Activity is handed over now.
-                func stopFollowing() {
+                let trip = trips.activeTrip
+                let getOff = GetOffAlerts.wantsTracking(trip), learn = TripLearningSession.wantsTracking(trip)
+                guard let trip, getOff || learn else {
                     let was = location.tripTracking
                     location.setTripTracking(false)
                     guard was, UIApplication.shared.applicationState != .active else { return }
                     location.pause()
                     Task { await LiveTripActivity.handOver { trips.trip($0) } }
-                }
-                guard let trip = trips.activeTrip else { stopFollowing(); return }
-                let getOff = GetOffAlerts.wantsTracking(trip), learn = TripLearningSession.wantsTracking(trip)
-                guard getOff || learn else {
-                    stopFollowing()
                     return
                 }
                 if getOff { Task { await GetOffAlerts.handle(fix, trip: trip) } }
