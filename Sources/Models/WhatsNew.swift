@@ -20,6 +20,14 @@ enum WhatsNew {
 
     /// Newest first.
     static let entries: [WhatsNewEntry] = [
+        WhatsNewEntry(build: 112, items: [
+            WhatsNewItem(symbol: "lock.iphone", title: "Lock screen stays live on board",
+                         text: "While Publit follows your started trip, the lock screen and Dynamic Island keep showing delays, platforms and the next stop."),
+            WhatsNewItem(symbol: "bell.badge", title: "Get-off alert you can rely on",
+                         text: "The alert by location now also works when you lock the phone well before boarding or have a longer change."),
+            WhatsNewItem(symbol: "arrow.left.arrow.right", title: "Live times from the right direction",
+                         text: "A ride no longer takes the delay of the same line going the other way, and reminders follow new live times with the screen locked too."),
+        ]),
         WhatsNewEntry(build: 111, items: [
             WhatsNewItem(symbol: "chevron.up", title: "Earlier connections",
                          text: "Tap “Earlier connections” above the routes to see the trains before the time you searched for."),

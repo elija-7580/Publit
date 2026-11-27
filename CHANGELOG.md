@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.1.2 (build 112) – lock screen and get-off alert while the phone is locked
+
+Second part of the stability review (27 Nov 2026). These change behaviour in the background and were not run on a device: see "to test on an iPhone" in the pull request.
+
+- **Live Activity stays live while Publit follows the trip** (`LiveTripActivity.handOver(keeping:)`, `TripSession.refreshIfDue`): on going to the background every Live Activity was ended (it stays on the lock screen but leaves the Dynamic Island and can no longer be updated). The started trip that the location goes on following now keeps a running activity: live times every two minutes, boarding/riding/arrived and "next stop" as they change. It is handed over as before when the following ends, and ended after the arrival even when no fix comes any more. All other activities are handed over as before.
+- **Location-based get-off alert** (`GetOffAlerts.wantsTracking`, `TripStatus.isBetweenRides`): the location followed each ride only from 2 minutes before it. With the phone locked earlier, or during a change of more than about 12 minutes, tracking was off, iOS suspended the app and the alert never came. It now follows a started trip from 20 minutes before the first ride until 10 minutes after the last one, without a gap.
+- **Nearby widget and watch complication**: up to 10 departures per stop are loaded (4 before), and the Nearby widget has a timeline entry after each departure, so a train that has left drops off without a new load.
+
+## 0.1.2 (build 112) – stability review
+
+Review of the whole app before the first talks with operators (27 Nov 2026). Fixed:
+
+- **Live times from the other direction** (`LiveMatch.towards`): a station board lists both directions of a line, often due in the same minute. The extra live sources (Wiener Linien, ÖBB, search.ch, VRR …) matched a ride by line and timetable time only, so a ride could take the delay or cancellation of the train going the other way. The ride's headsign now picks the departures going its way; with no resemblance at all, everything is as before.
+- **"Later connections" vanished on refresh** (`PlanModel.laterPages`): the minute refresh of a "now" search (and pull to refresh) put the first page back and dropped the pages loaded with "Later connections". They stay now, paging continues where it was, and a page that arrives during a refresh is no longer thrown away.
+- **Reminders did not follow delays with the screen locked** (`TripSession.follow`): background refreshes stored the new times without moving the leave and get-off reminders or announcing a platform change or cancellation; in the app nothing differed any more afterwards, so they were never moved. One failed background refresh also ended the background checks for the trip.
+- **A late answer undid "Switch to this connection"** (`TripStore.update(_:with:replacing:)`): a live refresh asked for the old route and answered after the switch wrote the old route back.
+- **Saved trips and tickets could be lost** (`JSONFile.loadList`, `JSONFileRescue`): one unreadable entry (or a file the iPhone could not read yet) made the store start empty, and its next save replaced the file. Lists are now read entry by entry, and the file as it was is kept as "….unreadable" before anything is written over it.
+- **One odd ride failed the whole answer** (`LossyList`): a route or departure missing a field the API promises is skipped instead of showing "Unexpected response from the routing service".
+- **Crashes on outside input**: a Wallet pass with a number field too large for a whole number; a shared-route link with an absurd time (`d=1e30`); absurd countdowns and delays from operator boards.
+- **Smaller**: an overall time limit for requests that trickle in (90 s, live sources 20 s); the Apple Watch no longer waits for a location forever (20 s); a notification tapped to launch the app is opened once the app is ready instead of being dropped; the get-off alert is posted once when two fixes arrive together; trip tracking switches off when the location permission was taken away; the Departures widget keeps all loaded departures and reloads before a busy stop runs out; the Live Activity countdown reads the clock once.
+
 ## 0.1.2 (build 111) – earlier connections above the routes
 
 - **Earlier connections** (`PlanModel.loadEarlier`, `PlanView`): "Now" and "Depart" searches only offered later connections below the list. A button "Earlier connections" above the first route now loads the page before it (the router's previous-page cursor), including trains that already left. A live refresh keeps the earlier routes loaded by hand above the refreshed ones (`PlanModel.keepingEarlier`). Asked for on 27 Nov 2026.

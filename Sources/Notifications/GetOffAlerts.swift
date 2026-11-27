@@ -12,11 +12,16 @@ enum GetOffAlerts {
     static let maxAccuracy: CLLocationAccuracy = 100
     private static let deliveredKey = "getOffDelivered"
 
-    /// Location is needed only while a started trip is on (or about to board) a ride, and only when
-    /// the alert uses location at all.
+    /// How long before the first ride the location starts to follow a started trip.
+    static let trackingLead: TimeInterval = 20 * 60
+
+    /// Location follows a started trip from shortly before its first ride until after its last one,
+    /// without a gap, and only when the alert uses location at all. It used to follow each ride from
+    /// two minutes before it: with the phone locked earlier than that, or during a longer change,
+    /// tracking was off, iOS suspended the app, and nothing woke it for the ride: no alert.
     static func wantsTracking(_ trip: SavedTrip?, now: Date = .now) -> Bool {
         guard let trip, GetOffAlert.current.usesLocation else { return false }
-        return trip.itinerary.transitLegs.contains { $0.startTime.addingTimeInterval(-120) <= now && $0.endTime.addingTimeInterval(10 * 60) >= now }
+        return TripStatus.isBetweenRides(trip.itinerary, at: now, lead: trackingLead, after: 10 * 60)
     }
 
     /// A ride whose alert has gone out (by location or by the clock): no second one.
@@ -61,9 +66,10 @@ enum GetOffAlerts {
                                 metresToExit: here.distance(to: leg.to.coordinate)) else { return }
         // The clock-based reminder may already have fired: then this would be a second one.
         let id = GetOffReminder.identifier(for: leg)
-        let delivered = await UNUserNotificationCenter.current().deliveredNotifications()
-        if delivered.contains(where: { $0.request.identifier == id }) { markDelivered(leg); return }
+        // Marked before waiting: the next fix arrives a second later and must not post the alert again.
         markDelivered(leg)
+        let delivered = await UNUserNotificationCenter.current().deliveredNotifications()
+        if delivered.contains(where: { $0.request.identifier == id }) { return }
         await post(leg, stopsLeft: TripGuide.stopsLeft(ride.progress, count: stops.count))
     }
 

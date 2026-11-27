@@ -66,7 +66,9 @@ struct NearbyFavorite: Hashable, Sendable {
 enum NearbyBoard {
     /// A favourite stop within this many metres comes first (a few minutes on foot).
     static let favoriteRadius = 600.0
-    static let perStop = 4
+    /// More than a widget shows at once: its timeline moves on through them between two loads
+    /// (with four, a busy stop was through them in minutes and the widget showed trains long gone).
+    static let perStop = 10
 
     /// Which favourites are close enough to go first, nearest first.
     static func closeFavorites(_ favorites: [NearbyFavorite], at here: LatLon) -> [NearbyFavorite] {

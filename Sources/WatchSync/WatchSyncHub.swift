@@ -220,7 +220,7 @@ final class WatchSyncHub: NSObject, WCSessionDelegate {
             // The watch sends the trip without walking directions: a fresh copy brings them back.
             Task { [weak self] in
                 guard let fresh = try? await TripRefreshCoordinator.shared.refresh(route: saved.itinerary) else { return }
-                self?.trips?.update(saved.id, with: fresh)
+                self?.trips?.update(saved.id, with: fresh, replacing: saved.itinerary)
             }
         case .removeTrip:
             guard let id = intent.tripId, let trip = trips.trip(id) else { break }

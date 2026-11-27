@@ -31,7 +31,7 @@ final class PassStore {
         file = JSONFile(name: "passes.json", directory: dir)
         documentDirectory = dir.appendingPathComponent("passes", isDirectory: true)
         try? FileManager.default.createDirectory(at: documentDirectory, withIntermediateDirectories: true)
-        passes = file.load() ?? []
+        passes = file.loadList() ?? []
         importedLegacyFile = JSONFile(name: "imported-legacy-tickets.json", directory: dir)
         importedLegacyIds = Set(importedLegacyFile.load() ?? []).union(passes.compactMap(\.legacyId))
     }

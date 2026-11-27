@@ -28,6 +28,15 @@ final class WatchLocator: NSObject, CLLocationManagerDelegate {
         await withCheckedContinuation { c in
             waiting.append(c)
             guard waiting.count == 1 else { return }
+            // No answer at all (the permission question left open, no fix indoors): give up after a
+            // while, or Nearby stays on "Waiting for your location…" and "Try again" does nothing.
+            round += 1
+            let mine = round
+            Task { [weak self] in
+                try? await Task.sleep(for: .seconds(20))
+                guard let self, self.round == mine, !self.waiting.isEmpty else { return }
+                self.deliver(nil)
+            }
             switch manager.authorizationStatus {
             case .notDetermined: manager.requestWhenInUseAuthorization()
             case .denied, .restricted: deliver(nil)
@@ -36,7 +45,11 @@ final class WatchLocator: NSObject, CLLocationManagerDelegate {
         }
     }
 
+    /// Counts location requests, so a timeout only ends the request it was started for.
+    private var round = 0
+
     private func deliver(_ position: LatLon?) {
+        round += 1
         if let position { last = position }
         let all = waiting
         waiting = []

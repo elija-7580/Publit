@@ -36,7 +36,7 @@ struct NextDepartureProvider: TimelineProvider {
             let first = await load(now: now)
             // One entry per departure, so the next one moves up without a new request; asked again after 15 min.
             var entries = [first]
-            for d in first.upcoming.prefix(3) where d.time > now {
+            for d in first.upcoming.prefix(8) where d.time > now {
                 entries.append(NextDepartureEntry(date: d.time.addingTimeInterval(30), stop: first.stop))
             }
             completion(Timeline(entries: entries, policy: .after(now.addingTimeInterval(15 * 60))))

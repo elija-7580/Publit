@@ -129,8 +129,10 @@ enum LiveMatch {
 
     /// The departure that is this ride: same line, timetable time within `tolerance`. Without a
     /// timetable time (some boards only count down), the nearest live time not long before it.
+    /// A station board lists both directions of a line, often due in the same minute: where the
+    /// ride's direction is known, only departures that way count (`towards`).
     static func best(for ride: LiveRide, in list: [LiveDeparture], tolerance: TimeInterval = 90) -> LiveDeparture? {
-        let same = list.filter { sameLine(ride.lines, $0.lines) }
+        let same = towards(ride.headsign, list.filter { sameLine(ride.lines, $0.lines) })
         let timed = same.compactMap { d -> (LiveDeparture, TimeInterval)? in
             guard let s = d.scheduled else { return nil }
             let gap = abs(s.timeIntervalSince(ride.scheduled))
@@ -143,6 +145,40 @@ enum LiveMatch {
             return late >= -tolerance && late <= 20 * 60 ? (d, abs(late)) : nil
         }
         return counted.min(by: { $0.1 < $1.1 })?.0
+    }
+
+    /// The departures going the ride's way. The U4 to Hütteldorf and the one to Heiligenstadt leave
+    /// the same station in the same minute; without this the other direction's delay (or
+    /// cancellation) landed on the ride. Operators spell destinations differently ("Wien Hütteldorf",
+    /// "HÜTTELDORF"), so the best agreement wins; when no departure's destination resembles the
+    /// headsign at all (or one of them is unknown), all stay.
+    static func towards(_ headsign: String?, _ list: [LiveDeparture]) -> [LiveDeparture] {
+        guard let headsign, list.count > 1 else { return list }
+        let scores = list.map { direction(headsign, $0.destination) }
+        guard let top = scores.max(), top > 0 else { return list }
+        return zip(list, scores).filter { $0.1 == top }.map(\.0)
+    }
+
+    /// Place words that say nothing about the direction.
+    private static let commonWords: Set<String> = ["bahnhof", "hauptbahnhof", "station", "platz", "strasse", "wien", "zentrum",
+                                                   "centre", "central", "stazione", "gare", "nord", "west"]
+
+    /// How well a destination fits a headsign: 3 the same name, 2 one contains the other,
+    /// 1 they share a telling word, 0 nothing in common or unknown.
+    static func direction(_ headsign: String, _ destination: String?) -> Int {
+        func words(_ s: String) -> [String] {
+            s.lowercased().replacingOccurrences(of: "ß", with: "ss")
+                .folding(options: .diacriticInsensitive, locale: Locale(identifier: "en_US_POSIX"))
+                .components(separatedBy: CharacterSet.alphanumerics.inverted).filter { !$0.isEmpty }
+        }
+        guard let destination else { return 0 }
+        let a = words(headsign), b = words(destination)
+        guard !a.isEmpty, !b.isEmpty else { return 0 }
+        let (ja, jb) = (a.joined(), b.joined())
+        if ja == jb { return 3 }
+        if ja.count >= 4, jb.count >= 4, ja.contains(jb) || jb.contains(ja) { return 2 }
+        let telling = Set(a.filter { $0.count >= 4 && !commonWords.contains($0) })
+        return b.contains(where: telling.contains) ? 1 : 0
     }
 
     static func fix(_ d: LiveDeparture, source: String) -> LiveFix {
@@ -426,6 +462,8 @@ enum LiveHTTP {
     static let session: URLSession = {
         let cfg = URLSessionConfiguration.default
         cfg.timeoutIntervalForRequest = 6
+        // An operator's server that sends a byte now and then must not hold a refresh for minutes.
+        cfg.timeoutIntervalForResource = 20
         cfg.requestCachePolicy = .reloadIgnoringLocalCacheData
         cfg.urlCache = nil
         return URLSession(configuration: cfg)
