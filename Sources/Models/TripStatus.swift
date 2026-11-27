@@ -144,6 +144,16 @@ enum LiveRefresh {
 }
 
 extension TripStatus {
+    /// From `lead` before the first ride until `after` the last one ends, changes and walks in between
+    /// included. False for a route without a ride.
+    static func isBetweenRides(_ it: Itinerary, at now: Date, lead: TimeInterval, after: TimeInterval) -> Bool {
+        let rides = it.transitLegs
+        guard let first = rides.map(\.startTime).min(), let last = rides.map(\.endTime).max() else { return false }
+        return first.addingTimeInterval(-lead) <= now && last.addingTimeInterval(after) >= now
+    }
+}
+
+extension TripStatus {
     /// Why a route cannot be started, or nil when it can.
     /// The trip begins on foot and soon (within the hour, or already under way): the start button says
     /// "Start walking navigation" and opens the guide on that walk, turn by turn.

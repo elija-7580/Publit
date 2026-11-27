@@ -106,10 +106,16 @@ struct PublitApp: App {
     private func followTripsInBackground() async {
         let now = Date()
         for trip in trips.upcoming(now: now.addingTimeInterval(-15 * 60)) where trips.activeTripId == trip.id || LiveTripActivity.isRunning(trip.id) {
-            guard let fresh = try? await TripRefreshCoordinator.shared.refresh(route: trip.itinerary) else { continue }
-            trips.update(trip.id, with: fresh)
-            if let updated = trips.trip(trip.id) { await ChangeRiskNotifier.follow(updated) }
+            // Asked for before the request: one failed refresh (a tunnel) must not end the checks for this trip.
             LineAlertMonitor.scheduleBackgroundCheck(forTrips: true)
+            guard let fresh = try? await TripRefreshCoordinator.shared.refresh(route: trip.itinerary),
+                  trips.update(trip.id, with: fresh, replacing: trip.itinerary) else { continue }
+            if let updated = trips.trip(trip.id) {
+                // The reminders and change alerts move with the new times here too: once stored, the next
+                // refresh in the app sees no difference any more and would never move them.
+                await TripSession.follow(trip, to: updated)
+                await ChangeRiskNotifier.follow(updated)
+            }
         }
     }
 }
@@ -281,7 +287,20 @@ struct RootView: View {
                 location.setTripTracking(GetOffAlerts.wantsTracking(trips.activeTrip) || TripLearningSession.wantsTracking(trips.activeTrip))
                 location.pause()
                 // Nothing updates a Live Activity without the app: it goes by itself after the arrival.
-                await LiveTripActivity.handOver { trips.trip($0) }
+                // Except for the started trip the location goes on following: the app keeps running for
+                // it, so its activity stays live (Dynamic Island, delays, next stop).
+                let followed = location.tripTracking ? trips.activeTripId : nil
+                await LiveTripActivity.handOver({ trips.trip($0) }, keeping: followed)
+                if let followed, let trip = trips.trip(followed) {
+                    // No fix may come at the end (underground, phone lying still): the activity is ended
+                    // after the arrival all the same, so a finished trip never stays on the lock screen.
+                    let wait = max(5, trip.endTime.addingTimeInterval(LiveTripActivity.afterArrival + 5).timeIntervalSinceNow)
+                    Task { @MainActor [trips] in
+                        try? await Task.sleep(for: .seconds(wait))
+                        guard UIApplication.shared.applicationState != .active else { return }
+                        await LiveTripActivity.handOver { trips.trip($0) }
+                    }
+                }
             }
             // Keep running Live Activities current while the app is open.
             guard scenePhase == .active else { return }
@@ -289,13 +308,22 @@ struct RootView: View {
             Task.detached(priority: .utility) { await PartnerLinks.refresh() }
             // Each fix on board: the get-off alert by location (#69); off again after the ride.
             location.onFix = { [trips, location] fix in
-                guard let trip = trips.activeTrip else { location.setTripTracking(false); return }
+                // The following ends (trip over or ended): in the background its Live Activity is handed over now.
+                let trip = trips.activeTrip
                 let getOff = GetOffAlerts.wantsTracking(trip), learn = TripLearningSession.wantsTracking(trip)
-                guard getOff || learn else {
+                guard let trip, getOff || learn else {
+                    let was = location.tripTracking
                     location.setTripTracking(false)
+                    guard was, UIApplication.shared.applicationState != .active else { return }
+                    location.pause()
+                    Task { await LiveTripActivity.handOver { trips.trip($0) } }
                     return
                 }
                 if getOff { Task { await GetOffAlerts.handle(fix, trip: trip) } }
+                // With the screen locked nothing else refreshes the trip (learning does it itself below).
+                if getOff, !learn, UIApplication.shared.applicationState != .active {
+                    Task { await TripSession.refreshIfDue(trip, in: trips) }
+                }
                 // Learn from my trips and change alerts on foot (on the device only).
                 if learn { Task { await TripLearningSession.handle(fix, trip: trip, trips: trips) } }
             }
@@ -356,8 +384,8 @@ struct RootView: View {
     private func refreshLiveTrips() async -> TimeInterval {
         let now = Date()
         for trip in trips.upcoming(now: now.addingTimeInterval(-15 * 60)) where LiveTripActivity.isRunning(trip.id) || trips.activeTripId == trip.id {
-            if let fresh = try? await TripRefreshCoordinator.shared.refresh(route: trip.itinerary) {
-                trips.update(trip.id, with: fresh)
+            if let fresh = try? await TripRefreshCoordinator.shared.refresh(route: trip.itinerary),
+               trips.update(trip.id, with: fresh, replacing: trip.itinerary) {
                 if let updated = trips.trip(trip.id) {
                     await LeaveReminder.follow(trip, to: updated)
                     await GetOffReminder.follow(from: trip.itinerary, to: updated.itinerary)

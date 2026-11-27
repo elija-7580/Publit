@@ -100,7 +100,9 @@ final class LocationManager: NSObject, CLLocationManagerDelegate {
     @ObservationIgnored private(set) var tripTracking = false
 
     func setTripTracking(_ on: Bool) {
-        guard on != tripTracking, !isDenied else { return }
+        // Switching off always goes through: with the permission taken away meanwhile, background
+        // updates must not stay requested.
+        guard on != tripTracking, !(on && isDenied) else { return }
         tripTracking = on
         manager.allowsBackgroundLocationUpdates = on
         manager.showsBackgroundLocationIndicator = on

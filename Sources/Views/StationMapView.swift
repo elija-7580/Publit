@@ -301,7 +301,9 @@ final class TransitMapModel {
     }
 
     static func zoom(_ r: MKCoordinateRegion) -> Int {
-        Int((log2(360 / max(r.span.longitudeDelta, 0.0001))).rounded())
+        // A map without a size yet reports a span that is not a number.
+        guard r.span.longitudeDelta.isFinite else { return 14 }
+        return Int((log2(360 / min(max(r.span.longitudeDelta, 0.0001), 360))).rounded())
     }
 }
 

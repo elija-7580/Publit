@@ -102,6 +102,8 @@ final class PlanModel {
     /// Drive to the nearest station in the last Park & Ride search: later pages keep to the same stations.
     @ObservationIgnored private var parkAndRideNearest: Int?
     @ObservationIgnored private var token = UUID()
+    /// "Later connections" were added to the routes on screen (`loadMore`).
+    @ObservationIgnored private var loadedMore = false
     @ObservationIgnored private var resultsKey: String?
     @ObservationIgnored private var completedAt: Date?
     /// Cycling and driving the whole way for `streetKey`, fetched after the routes.
@@ -258,6 +260,11 @@ final class PlanModel {
             if silent, isLive, !lastMode { transit = LateTrains.carry(transit, previous: itineraries, now: Date()) }
             // Earlier connections the user loaded stay on a live refresh (it only searches from the set time).
             if silent, keepsEarlier { transit = Self.keepingEarlier(transit, previous: itineraries) }
+            // "Later connections" already loaded stay through a refresh of the same search: the list
+            // must not snap back to its first page under the reader.
+            let laterPages = silent && loadedMore && resultsKey == queryKey && !lastMode
+                ? Self.laterPages(of: itineraries, after: transit, arriveBy: arriveBy) : []
+            transit += laterPages
             // Last connection: only what has not left yet; walking the whole way is not a connection.
             itineraries = lastMode ? LastConnection.upcoming(transit) : Self.merge(transit: transit, direct: res.direct)
             offerForLearning()
@@ -269,7 +276,11 @@ final class PlanModel {
             resultsKey = queryKey
             completedAt = Date()
             updatedAt = completedAt
-            nextCursor = arriveBy ? res.previousPageCursor : res.nextPageCursor
+            // With later pages kept, paging goes on from where it was.
+            if laterPages.isEmpty {
+                nextCursor = arriveBy ? res.previousPageCursor : res.nextPageCursor
+                loadedMore = false
+            }
             if !(silent && keepsEarlier) { earlierCursor = arriveBy ? nil : res.previousPageCursor }
             lastRequest = (f, t, time, arriveBy, maxWalk, stops.forFirstMile(used.firstMile))
             lastOptions = used
@@ -433,15 +444,17 @@ final class PlanModel {
 
     func loadMore() async {
         guard let req = lastRequest, let cursor = nextCursor, !isLoadingMore else { return }
-        let myToken = token
+        // The search these results belong to. A refresh of the same search meanwhile (every minute
+        // for "now") is no reason to drop the page the user just asked for.
+        let key = resultsKey
         isLoadingMore = true
         defer { isLoadingMore = false }
         do {
             let res = try await TransitousClient.shared.plan(from: req.from, to: req.to, time: req.time,
                                                              arriveBy: req.arriveBy, pageCursor: cursor, maxWalk: req.maxWalk,
                                                              options: lastOptions, stops: req.stops)
-            // A new search started meanwhile: these results belong to the old query.
-            guard token == myToken else { return }
+            // Another search started meanwhile: these results belong to the old query.
+            guard resultsKey == key, queryKey == key else { return }
             let known = Set(itineraries.map(\.id))
             let knownRides = Set(itineraries.map(\.rideKey))
             var fresh = res.itineraries.withoutDetours.uniqueRides
@@ -453,9 +466,24 @@ final class PlanModel {
             itineraries = Self.timetableOrder(itineraries + fresh, arriveBy: req.arriveBy)
             offerForLearning()
             nextCursor = req.arriveBy ? res.previousPageCursor : res.nextPageCursor
+            loadedMore = true
         } catch {
             if !Self.isCancellation(error) { errorMessage = error.localizedDescription }
         }
+    }
+
+    /// Routes from further pages ("Later connections") that a refresh of the first page does not bring
+    /// again: the rides beyond the fresh page's last one (searching by departure: leaving later;
+    /// "Arrive by": arriving earlier). Walks and rides the fresh page lists are left out.
+    nonisolated static func laterPages(of previous: [Itinerary], after fresh: [Itinerary], arriveBy: Bool) -> [Itinerary] {
+        let rides = fresh.filter { !$0.isDirect }
+        var known = Set(fresh.map(\.rideKey))
+        if arriveBy {
+            guard let edge = rides.map(\.endTime).min() else { return [] }
+            return previous.filter { !$0.isDirect && $0.endTime < edge && known.insert($0.rideKey).inserted }
+        }
+        guard let edge = rides.map(\.startTime).max() else { return [] }
+        return previous.filter { !$0.isDirect && $0.startTime > edge && known.insert($0.rideKey).inserted }
     }
 
     /// Loads the page before the first route ("Earlier connections", departure searches only): trains

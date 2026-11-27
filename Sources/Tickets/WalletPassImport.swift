@@ -38,7 +38,8 @@ enum WalletPassImport {
             var text: String {
                 switch self {
                 case .text(let s): return s
-                case .number(let n): return n.rounded() == n ? String(Int(n)) : String(n)
+                // `Int(exactly:)`: a 20-digit ticket number is a whole number no Int holds (the app closed on opening such a pass).
+                case .number(let n): return Int(exactly: n).map { String($0) } ?? String(n)
                 }
             }
         }

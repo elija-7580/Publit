@@ -159,7 +159,12 @@ struct NearbyProvider: AppIntentTimelineProvider {
         let entry = await load(configuration, family: context.family)
         // On the move the nearest stop changes: ask again soon (WidgetKit decides the real interval).
         let wait: TimeInterval = entry.state == .ok ? 10 * 60 : 15 * 60
-        return Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(wait)))
+        // One entry after each departure, so a train that has left drops off the list without a new
+        // load (WidgetKit often waits much longer than asked).
+        let now = entry.date
+        let times = Set(entry.stops.flatMap { $0.departures.map(\.time) }).filter { $0 > now }.sorted().prefix(24)
+        let later = times.map { NearbyEntry(date: $0.addingTimeInterval(30), stops: entry.stops, state: entry.state) }
+        return Timeline(entries: [entry] + later, policy: .after(now.addingTimeInterval(wait)))
     }
 
     private func load(_ configuration: NearbyWidgetIntent, family: WidgetFamily) async -> NearbyEntry {
@@ -204,6 +209,11 @@ struct NearbyWidgetView: View {
         }
     }
 
+    /// Departures still ahead at this entry's time (the timeline has an entry after each one).
+    private func ahead(_ stop: NearbyBoardStop) -> [WidgetDeparture] {
+        stop.departures.filter { $0.time > entry.date.addingTimeInterval(-30) }
+    }
+
     var body: some View {
         switch entry.state {
         case .noLocation:
@@ -216,7 +226,7 @@ struct NearbyWidgetView: View {
             } else if family == .accessoryRectangular, let stop = entry.stops.first {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(verbatim: stop.name).font(.caption.weight(.semibold)).lineLimit(1)
-                    if let d = stop.departures.first {
+                    if let d = ahead(stop).first {
                         HStack(spacing: 4) {
                             Text(verbatim: d.serviceDetail ?? d.lineName).font(.caption.weight(.bold))
                             Text(Fmt.time(d.time, tz: d.tz)).font(.caption.monospacedDigit()).strikethrough(d.cancelled)
@@ -246,7 +256,7 @@ struct NearbyWidgetView: View {
                     Text(verbatim: Fmt.distance(meters: d)).font(.caption2).foregroundStyle(.secondary).lineLimit(1).fixedSize()
                 }
             }
-            ForEach(stop.departures.prefix(perStop)) { d in
+            ForEach(ahead(stop).prefix(perStop)) { d in
                 HStack(spacing: 6) {
                     LineBadge(d, compact: true)
                     DirectionLabel(direction: d.headsign, circular: d.circular, font: .caption).lineLimit(1)

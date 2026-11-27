@@ -73,7 +73,8 @@ struct SavedTripView: View {
         do {
             let fresh = try await TripRefreshCoordinator.shared.refresh(route: t.itinerary)
             try Task.checkCancellation()
-            trips.update(t.id, with: fresh)
+            // Switched to another connection meanwhile: the answer is for the old route.
+            guard trips.update(t.id, with: fresh, replacing: t.itinerary) else { return true }
             if let updated = trips.trip(t.id) {
                 await LiveTripActivity.update(updated)
                 await LeaveReminder.follow(t, to: updated)

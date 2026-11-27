@@ -88,8 +88,10 @@ private struct PlatformChip: View {
 private struct Countdown: View {
     let state: TripActivityAttributes.ContentState
     var body: some View {
-        if state.nextEvent > .now {
-            Text(timerInterval: Date.now...state.nextEvent, countsDown: true)
+        // One reading of the clock: with two, the event could fall between them and the range trap.
+        let now = Date.now
+        if state.nextEvent > now {
+            Text(timerInterval: now...state.nextEvent, countsDown: true)
                 .monospacedDigit()
         } else {
             Text(state.nextEvent, style: .time)

@@ -42,7 +42,7 @@ final class TicketStore {
         appsFile = JSONFile(name: "ticket-apps.json", directory: dir)
         imageDirectory = dir.appendingPathComponent("tickets", isDirectory: true)
         try? FileManager.default.createDirectory(at: imageDirectory, withIntermediateDirectories: true)
-        tickets = file.load() ?? []
+        tickets = file.loadList() ?? []
         linkedApps = appsFile.load() ?? [:]
     }
 

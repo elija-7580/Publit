@@ -62,12 +62,16 @@ final class TransitousClient: @unchecked Sendable {
         self.cache = cache
         let cfg = URLSessionConfiguration.default
         cfg.timeoutIntervalForRequest = 20
+        // The idle timeout alone never ends an answer that trickles in (hotel Wi-Fi, a train's hotspot):
+        // the spinner would stay for as long as a byte arrives now and then.
+        cfg.timeoutIntervalForResource = 90
         cfg.requestCachePolicy = .reloadIgnoringLocalCacheData
         // Responses are kept by `ResponseCache`; a second copy in URLCache would only cost memory and disk.
         cfg.urlCache = nil
         session = URLSession(configuration: cfg)
         let slow = cfg.copy() as! URLSessionConfiguration
         slow.timeoutIntervalForRequest = 45
+        slow.timeoutIntervalForResource = 150
         slowSession = URLSession(configuration: slow)
         decoder = TransitousClient.makeDecoder()
     }

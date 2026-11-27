@@ -7,7 +7,6 @@ import CoreLocation
 enum TripLearningSession {
     private static var recorders: [String: TripLearning.Recorder] = [:]
     private static var lastFollow: [String: Date] = [:]
-    private static var lastRefresh: [String: Date] = [:]
 
     /// Location is wanted from shortly before the first ride until shortly after the last one,
     /// when learning is on (the walks between rides are what it learns from).
@@ -23,13 +22,8 @@ enum TripLearningSession {
         let here = LatLon(lat: fix.coordinate.latitude, lon: fix.coordinate.longitude)
         var current = trip
         // In the background nothing else refreshes the trip: at most every 2 minutes here.
-        if lastRefresh[trip.id].map({ now.timeIntervalSince($0) > 120 }) ?? true {
-            lastRefresh[trip.id] = now
-            if let fresh = try? await TripRefreshCoordinator.shared.refresh(route: trip.itinerary) {
-                trips.update(trip.id, with: fresh)
-                if let t = trips.trip(trip.id) { current = t }
-            }
-        }
+        // (Reminders, change alerts and the Live Activity follow the new times, see `TripSession.refreshIfDue`.)
+        current = await TripSession.refreshIfDue(trip, in: trips, now: now)
         if TripLearning.isEnabled {
             var rec = recorders[trip.id] ?? TripLearning.Recorder()
             let found = rec.observe(here, accuracy: fix.horizontalAccuracy, at: now, itinerary: current.itinerary)
@@ -45,6 +39,6 @@ enum TripLearningSession {
     }
 
     static func forget(_ tripId: String) {
-        recorders[tripId] = nil; lastFollow[tripId] = nil; lastRefresh[tripId] = nil
+        recorders[tripId] = nil; lastFollow[tripId] = nil; TripSession.forgetRefresh(tripId)
     }
 }
