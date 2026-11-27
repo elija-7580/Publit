@@ -247,6 +247,9 @@ final class PlanModel {
             if case .currentLocation = searchedFrom { transit = Reach.boardingHere(transit, here: f) }
             // After dropping the walk, the short- and long-walk copies of a ride are identical: list it once.
             transit = transit.uniqueRides
+            // A live refresh keeps the delays already on screen until the live times come in again, and a
+            // late train the server no longer lists stays while it has not left (`LateTrains`).
+            if silent, isLive, !lastMode { transit = LateTrains.carry(transit, previous: itineraries, now: Date()) }
             // Last connection: only what has not left yet; walking the whole way is not a connection.
             itineraries = lastMode ? LastConnection.upcoming(transit) : Self.merge(transit: transit, direct: res.direct)
             offerForLearning()
@@ -353,7 +356,28 @@ final class PlanModel {
             guard let self, self.token == myToken else { return }
             self.itineraries = LiveOverlay.replace(self.itineraries, with: enriched)
             await self.addEarlierWays(token: myToken)
+            await self.addLateTrains(token: myToken)
         }
+    }
+
+    /// Trains due before the searched time that run late enough to be caught: the server plans with the
+    /// timetable here and leaves them out, so a second search starts `LateTrains.lookback` earlier and
+    /// keeps those that, with live times, have not left yet. Not for "Arrive by" and "Last".
+    private func addLateTrains(token myToken: UUID) async {
+        guard let req = lastRequest, !req.arriveBy, timeMode != .lastConnection else { return }
+        let now = Date()
+        let base = req.time ?? now
+        guard let res = try? await TransitousClient.shared.plan(from: req.from, to: req.to, time: base.addingTimeInterval(-LateTrains.lookback),
+                                                                arriveBy: false, maxWalk: req.maxWalk, options: lastOptions, stops: req.stops),
+              token == myToken else { return }
+        let candidates = LateTrains.candidates(res.itineraries.withoutDetours.uniqueRides, base: base,
+                                               known: Set(itineraries.map(\.rideKey)))
+        guard !candidates.isEmpty else { return }
+        let enriched = await LiveOverlay.apply(candidates, budget: 4)
+        guard token == myToken else { return }
+        let late = LateTrains.stillReachable(enriched, base: base, now: Date(), known: Set(itineraries.map(\.rideKey)))
+        guard !late.isEmpty else { return }
+        itineraries = Self.timetableOrder(itineraries + late, arriveBy: false)
     }
 
     /// Live times broke a change on a route that has not started yet: the earlier way that still

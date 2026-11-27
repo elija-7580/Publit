@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.2 (build 110) – late trains stay in the list
+
+- **Late trains in "now" searches** (`LateTrains`, `PlanModel.addLateTrains`): live delays for Austria and other regions come from other operators after the router answered (`LiveOverlay`), so a train whose timetable time had passed was missing although it ran late and could still be caught. A second search from 30 min before the searched time adds the routes whose first ride is due before it but, with live times, has not left yet.
+- **No flip back to "on time" on refresh** (`LateTrains.carry`): a live refresh keeps the delays already on screen until the overlay has them again, and keeps a late train the server no longer lists until it has left. Reported on 27 Nov 2026.
+
 ## 0.1.2 (build 109) – leave earlier, still catch the train
 
 - **Still catch the connection** (`CatchEarlier`, `CatchEarlierRow`, `RouteBuilder.lead`): Transitous plans Austria and other regions on the timetable; live delays from Wiener Linien, ÖBB and others arrive afterwards (`LiveOverlay`). When such a delay breaks a change on a route that has not started (or makes it unlikely, under 50 %), Publit now searches a way from the start to the connection's platform that arrives at least 2 minutes before it leaves, with live times, and joins it with the rest of the route. The latest way whose changes are safe (70 % or more) wins. Route details show "Still catch <line> · Leave x min earlier, at HH:MM", and the route list gets the rescued route too. The router never lists it itself: it leaves earlier for the same arrival, so it counts as dominated. Reported on 27 Nov 2026 (U1 → U4 → REX to Krems, U4 late at Wien Heiligenstadt, "no backup found").
