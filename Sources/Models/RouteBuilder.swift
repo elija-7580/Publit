@@ -45,6 +45,15 @@ enum RouteBuilder {
         return make(legs: kept + rest.legs, parts: prefix(parts(of: route), legs: index) + parts(of: rest))
     }
 
+    /// Leave earlier (`CatchEarlier`): `way` to where leg `index` starts, then the route from that leg
+    /// on as it is. Nil when `way` arrives after the leg leaves or ends somewhere else.
+    static func lead(_ way: Itinerary, into route: Itinerary, at index: Int) -> Itinerary? {
+        guard index > 0, route.legs.indices.contains(index), let end = way.legs.last else { return nil }
+        let rest = Array(route.legs[index...])
+        guard rest[0].startTime >= end.endTime, end.to.coordinate.distance(to: rest[0].from.coordinate) <= joinRadius else { return nil }
+        return make(legs: way.legs + rest, parts: parts(of: way) + suffix(parts(of: route), from: index))
+    }
+
     /// The ways to go on from leg `index`, out of what a search from `restart(_:at:)` found: each
     /// one as the whole route, the kept legs first. What cannot be reached is left out, the same
     /// rides are listed once, earliest arrival first. The route as it is can be among them.
@@ -199,6 +208,19 @@ enum RouteBuilder {
             let take = min(part.legCount, left)
             out.append(RoutePart(itineraryId: part.itineraryId, firstLeg: part.firstLeg, legCount: take))
             left -= take
+        }
+        return out
+    }
+
+    /// The parts from leg `index` on: the ones before are dropped, the one it falls in is cut.
+    private static func suffix(_ parts: [RoutePart], from index: Int) -> [RoutePart] {
+        var skip = index
+        var out: [RoutePart] = []
+        for part in parts {
+            let count = max(0, part.legCount)
+            if skip >= count { skip -= count; continue }
+            out.append(RoutePart(itineraryId: part.itineraryId, firstLeg: part.firstLeg + skip, legCount: count - skip))
+            skip = 0
         }
         return out
     }

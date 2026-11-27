@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.2 (build 109) – leave earlier, still catch the train
+
+- **Still catch the connection** (`CatchEarlier`, `CatchEarlierRow`, `RouteBuilder.lead`): Transitous plans Austria and other regions on the timetable; live delays from Wiener Linien, ÖBB and others arrive afterwards (`LiveOverlay`). When such a delay breaks a change on a route that has not started (or makes it unlikely, under 50 %), Publit now searches a way from the start to the connection's platform that arrives at least 2 minutes before it leaves, with live times, and joins it with the rest of the route. The latest way whose changes are safe (70 % or more) wins. Route details show "Still catch <line> · Leave x min earlier, at HH:MM", and the route list gets the rescued route too. The router never lists it itself: it leaves earlier for the same arrival, so it counts as dominated. Reported on 27 Nov 2026 (U1 → U4 → REX to Krems, U4 late at Wien Heiligenstadt, "no backup found").
+
 ## 0.1.2 (build 108) – plan from the vehicle you are on
 
 - **Plan from this vehicle** (`OnBoardPlan`, `OnBoardPlanView`; in a vehicle's trip and in the map's vehicle sheet): you are already on a tram, bus or train and want to go somewhere else. Pick the destination; the search starts at the vehicle's next stop at its live arrival time, and a route that stays on the same vehicle becomes one ride from where you are. Routes that arrive later without fewer changes (get off and wait for the next tram the same way) are left out. A saved or started route refreshes its ride from the vehicle's trip (part ID `ride:<from>:<to>:<tripId>`, `TripRefreshCoordinator.fetch`) and the rest from the planned route.

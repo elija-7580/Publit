@@ -20,6 +20,10 @@ enum WhatsNew {
 
     /// Newest first.
     static let entries: [WhatsNewEntry] = [
+        WhatsNewEntry(build: 109, items: [
+            WhatsNewItem(symbol: "clock.arrow.circlepath", title: "Leave earlier, still catch it",
+                         text: "If a delay breaks a change before you leave, Publit shows an earlier way that still catches the same train."),
+        ]),
         WhatsNewEntry(build: 108, items: [
             WhatsNewItem(symbol: "arrow.triangle.branch", title: "Plan from your vehicle",
                          text: "Already on a tram, bus or train? Open it and tap “Plan from this vehicle”: stay on or change at a stop ahead, with live times (idea: BudapestGO)."),

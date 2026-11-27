@@ -3,7 +3,7 @@
 > Nicht von Hand bearbeiten. Erzeugt von `scripts/feature_inventory.py` (CI: `features-doc.yml`).
 > Die ausführliche Beschreibung steht in [FUNKTIONEN.md](FUNKTIONEN.md).
 
-**238 Views, 8 App Intents, 5 Widgets in 91 Dateien.**
+**239 Views, 8 App Intents, 5 Widgets in 92 Dateien.**
 
 ## `Sources/App/DesignSamples.swift`
 - Views: `DesignSampleView`
@@ -87,6 +87,10 @@
 ## `Sources/Views/CalendarSuggestionViews.swift`
 - Views: `CalendarAppointmentRow`, `CalendarPlanSection`, `AppointmentBanner`, `CalendarSettingsSection`
 - Sichtbare Texte: No place found for “%@”. · Today · Shows routes that get you there on time · From your calendar · Your appointments as destinations · Turn on · Not now · Leave by %@ to arrive %lld min early · No connection arrives before %@ · Suggest appointments as destinations · Open Settings · Calendar · Calendar access is off for Publit. Turn it on in the Settings app.
+
+## `Sources/Views/CatchEarlierRow.swift`
+- Views: `CatchEarlierRow`
+- Sichtbare Texte: Still catch %@ · Leave %@ earlier, at %@ · Leave at %@ · %@ at %@
 
 ## `Sources/Views/ChangePointView.swift`
 - Views: `ChangePointView`, `ChangePointChoicesView`
