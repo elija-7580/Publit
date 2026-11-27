@@ -406,7 +406,7 @@ Sync per WatchConnectivity (`WatchSyncHub`): bis 8 Fahrten, Orte, bis 12 Tickets
 
 ## 22. iPad / breites Layout (`Wide/WideLayout`)
 
-Ab 680 pt Breite (regular): Karte bildschirmfüllend, Inhalte in einem schwebenden Panel links (340–420 pt) wie Apple Maps auf dem iPad; die Panel-Views sind die iPhone-Views und steuern die große Karte (Routen, Stationen).
+Ab 680 pt Breite (regular): Karte bildschirmfüllend, Inhalte in einem schwebenden Panel links (340–420 pt) wie Apple Maps auf dem iPad; die Panel-Views sind die iPhone-Views und steuern die große Karte (Routen, Stationen). Die Stationskarte hinter dem Panel (`StationMapView(embedded:)`) reicht auch oben bis an den Bildschirmrand, unter Statusleiste und Tab-Leiste; vorher blieb dort ein Streifen in der Hintergrundfarbe (Issue #120). Filter-Chips und Karten-Knöpfe bleiben im sicheren Bereich.
 
 ## 23. Datenquellen, Abdeckung, Offline
 
