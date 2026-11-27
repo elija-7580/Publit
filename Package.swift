@@ -15,6 +15,7 @@ let core = [
     "Models/TransitModels.swift",
     "Models/RouteBuilder.swift",
     "Models/CatchEarlier.swift",
+    "Models/LateTrains.swift",
     "Models/OnBoardPlan.swift",
     "Models/ServiceAlerts.swift",
     "Models/Fares.swift",
