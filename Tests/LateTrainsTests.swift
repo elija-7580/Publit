@@ -64,4 +64,15 @@ final class LateTrainsTests: XCTestCase {
         XCTAssertEqual(reachable.map(\.id), ["late"])
         XCTAssertTrue(LateTrains.stillReachable(found, base: base, now: base, known: [found[0].rideKey]).isEmpty)
     }
+
+    /// "Earlier connections" loaded by hand stay above the routes when the list refreshes live.
+    func testEarlierConnectionsStayOnARefresh() throws {
+        func train(_ id: String, _ start: Int) throws -> Itinerary { route(id, [try leg("REGIONAL_RAIL", 1, 2, start: start, end: start + 30)]) }
+        let earlier = [try train("E1", -20), try train("E2", -10)]
+        let fresh = [try train("A", 0), try train("B", 10)]
+        let kept = PlanModel.keepingEarlier(fresh, previous: earlier + fresh)
+        XCTAssertEqual(kept.map(\.id), ["E1", "E2", "A", "B"])
+        // Nothing earlier on screen: the refresh is as it was.
+        XCTAssertEqual(PlanModel.keepingEarlier(fresh, previous: fresh).map(\.id), ["A", "B"])
+    }
 }

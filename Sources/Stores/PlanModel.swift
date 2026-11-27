@@ -93,6 +93,10 @@ final class PlanModel {
     private(set) var walkNote: String?
 
     private var nextCursor: String?
+    /// The page before the first route (departure searches): "Earlier connections" above the list.
+    private var earlierCursor: String?
+    /// Earlier routes were loaded: a live refresh keeps them instead of starting at the searched time again.
+    @ObservationIgnored private var keepsEarlier = false
     @ObservationIgnored private var lastRequest: (from: LatLon, to: LatLon, time: Date?, arriveBy: Bool, maxWalk: Int, stops: PlanStops)?
     @ObservationIgnored private var lastOptions = RouteOptions()
     /// Drive to the nearest station in the last Park & Ride search: later pages keep to the same stations.
@@ -131,6 +135,7 @@ final class PlanModel {
     }
 
     var canLoadMore: Bool { nextCursor != nil && !itineraries.isEmpty }
+    var canLoadEarlier: Bool { earlierCursor != nil && !itineraries.isEmpty && !timeMode.searchesBackwards }
 
     /// Changes whenever a new search is needed.
     var queryKey: String {
@@ -169,7 +174,8 @@ final class PlanModel {
            let completedAt, Date().timeIntervalSince(completedAt) < 45,
            let lastRequest, f.distance(to: lastRequest.from) < 150 { return }
         // Results of another query (new destination or time) must not stay on screen without a spinner.
-        if !silent, resultsKey != queryKey { itineraries = []; comparisons = []; nextCursor = nil }
+        if !silent, resultsKey != queryKey { itineraries = []; comparisons = []; nextCursor = nil; earlierCursor = nil }
+        if !silent { keepsEarlier = false }
         // Following the clock: the picker shows the time the routes are for.
         if timeMode == .departAt, dateFollowsNow, abs(date.timeIntervalSinceNow) > 30 { date = .now }
         let searchedFrom = from
@@ -252,6 +258,8 @@ final class PlanModel {
             // A live refresh keeps the delays already on screen until the live times come in again, and a
             // late train the server no longer lists stays while it has not left (`LateTrains`).
             if silent, isLive, !lastMode { transit = LateTrains.carry(transit, previous: itineraries, now: Date()) }
+            // Earlier connections the user loaded stay on a live refresh (it only searches from the set time).
+            if silent, keepsEarlier { transit = Self.keepingEarlier(transit, previous: itineraries) }
             // "Later connections" already loaded stay through a refresh of the same search: the list
             // must not snap back to its first page under the reader.
             let laterPages = silent && loadedMore && resultsKey == queryKey && !lastMode
@@ -273,6 +281,7 @@ final class PlanModel {
                 nextCursor = arriveBy ? res.previousPageCursor : res.nextPageCursor
                 loadedMore = false
             }
+            if !(silent && keepsEarlier) { earlierCursor = arriveBy ? nil : res.previousPageCursor }
             lastRequest = (f, t, time, arriveBy, maxWalk, stops.forFirstMile(used.firstMile))
             lastOptions = used
             if !silent { history.record(from: searchedFrom, to: to, mode: searchedMode, date: searchedDate, source: source) }
@@ -475,6 +484,42 @@ final class PlanModel {
         }
         guard let edge = rides.map(\.startTime).max() else { return [] }
         return previous.filter { !$0.isDirect && $0.startTime > edge && known.insert($0.rideKey).inserted }
+    }
+
+    /// Loads the page before the first route ("Earlier connections", departure searches only): trains
+    /// that left before the searched time, or that the user may still prefer.
+    func loadEarlier() async {
+        guard let req = lastRequest, !req.arriveBy, let cursor = earlierCursor, !isLoadingMore else { return }
+        let myToken = token
+        isLoadingMore = true
+        defer { isLoadingMore = false }
+        do {
+            let res = try await TransitousClient.shared.plan(from: req.from, to: req.to, time: req.time,
+                                                             arriveBy: false, pageCursor: cursor, maxWalk: req.maxWalk,
+                                                             options: lastOptions, stops: req.stops)
+            guard token == myToken else { return }
+            let known = Set(itineraries.map(\.id))
+            let knownRides = Set(itineraries.map(\.rideKey))
+            var fresh = res.itineraries.withoutDetours.uniqueRides
+                .filter { !known.contains($0.id) && !knownRides.contains($0.rideKey) && !$0.isDirect }
+            if lastOptions.firstMile == .car {
+                fresh = ParkAndRide.nearStations(ParkAndRide.sensible(fresh), nearest: parkAndRideNearest)
+            }
+            itineraries = Self.timetableOrder(itineraries + fresh, arriveBy: false)
+            keepsEarlier = true
+            offerForLearning()
+            earlierCursor = res.previousPageCursor
+        } catch {
+            if !Self.isCancellation(error) { errorMessage = error.localizedDescription }
+        }
+    }
+
+    /// A live refresh after "Earlier connections": the earlier routes already on screen stay above the
+    /// refreshed ones (the refresh itself starts at the searched time).
+    nonisolated static func keepingEarlier(_ fresh: [Itinerary], previous: [Itinerary]) -> [Itinerary] {
+        guard let first = fresh.filter({ !$0.isDirect }).map(\.startTime).min() else { return fresh }
+        let known = Set(fresh.map(\.rideKey))
+        return previous.filter { !$0.isDirect && $0.startTime < first && !known.contains($0.rideKey) } + fresh
     }
 
     /// Walking there is listed first when it is a real choice (`StreetComparison.walkIsAChoice`):

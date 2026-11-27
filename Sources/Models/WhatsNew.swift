@@ -25,12 +25,12 @@ enum WhatsNew {
                          text: "While Publit follows your started trip, the lock screen and Dynamic Island keep showing delays, platforms and the next stop."),
             WhatsNewItem(symbol: "bell.badge", title: "Get-off alert you can rely on",
                          text: "The alert by location now also works when you lock the phone well before boarding or have a longer change."),
-        ]),
-        WhatsNewEntry(build: 111, items: [
             WhatsNewItem(symbol: "arrow.left.arrow.right", title: "Live times from the right direction",
                          text: "A ride no longer takes the delay of the same line going the other way, and reminders follow new live times with the screen locked too."),
-            WhatsNewItem(symbol: "list.bullet.below.rectangle", title: "Later connections stay",
-                         text: "Connections you loaded with “Later connections” no longer vanish when the list refreshes."),
+        ]),
+        WhatsNewEntry(build: 111, items: [
+            WhatsNewItem(symbol: "chevron.up", title: "Earlier connections",
+                         text: "Tap “Earlier connections” above the routes to see the trains before the time you searched for."),
         ]),
         WhatsNewEntry(build: 110, items: [
             WhatsNewItem(symbol: "clock.badge.exclamationmark", title: "Late trains stay in the list",

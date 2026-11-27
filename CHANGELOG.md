@@ -8,7 +8,7 @@ Second part of the stability review (27 Nov 2026). These change behaviour in the
 - **Location-based get-off alert** (`GetOffAlerts.wantsTracking`, `TripStatus.isBetweenRides`): the location followed each ride only from 2 minutes before it. With the phone locked earlier, or during a change of more than about 12 minutes, tracking was off, iOS suspended the app and the alert never came. It now follows a started trip from 20 minutes before the first ride until 10 minutes after the last one, without a gap.
 - **Nearby widget and watch complication**: up to 10 departures per stop are loaded (4 before), and the Nearby widget has a timeline entry after each departure, so a train that has left drops off without a new load.
 
-## 0.1.2 (build 111) – stability review
+## 0.1.2 (build 112) – stability review
 
 Review of the whole app before the first talks with operators (27 Nov 2026). Fixed:
 
@@ -20,6 +20,10 @@ Review of the whole app before the first talks with operators (27 Nov 2026). Fix
 - **One odd ride failed the whole answer** (`LossyList`): a route or departure missing a field the API promises is skipped instead of showing "Unexpected response from the routing service".
 - **Crashes on outside input**: a Wallet pass with a number field too large for a whole number; a shared-route link with an absurd time (`d=1e30`); absurd countdowns and delays from operator boards.
 - **Smaller**: an overall time limit for requests that trickle in (90 s, live sources 20 s); the Apple Watch no longer waits for a location forever (20 s); a notification tapped to launch the app is opened once the app is ready instead of being dropped; the get-off alert is posted once when two fixes arrive together; trip tracking switches off when the location permission was taken away; the Departures widget keeps all loaded departures and reloads before a busy stop runs out; the Live Activity countdown reads the clock once.
+
+## 0.1.2 (build 111) – earlier connections above the routes
+
+- **Earlier connections** (`PlanModel.loadEarlier`, `PlanView`): "Now" and "Depart" searches only offered later connections below the list. A button "Earlier connections" above the first route now loads the page before it (the router's previous-page cursor), including trains that already left. A live refresh keeps the earlier routes loaded by hand above the refreshed ones (`PlanModel.keepingEarlier`). Asked for on 27 Nov 2026.
 
 ## 0.1.2 (build 110) – late trains stay in the list
 

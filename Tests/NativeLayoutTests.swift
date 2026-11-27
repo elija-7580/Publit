@@ -14,6 +14,14 @@ final class NativeLayoutTests: XCTestCase {
         _ = DurationFigure(seconds: 4 * 60, size: 20)
     }
 
+    /// #120: behind the panel of the iPad layout the station map reaches to the top of the screen;
+    /// with only the bottom ignored a black band stayed above it. As a screen of its own (iPhone) it
+    /// stays below the navigation bar.
+    func testStationMapBehindThePanelFillsTheScreen() {
+        XCTAssertEqual(StationMapView.mapEdges(embedded: true), .all)
+        XCTAssertEqual(StationMapView.mapEdges(embedded: false), .bottom)
+    }
+
     func testPDFTextMappingUsesEmbeddedTextAndNormalizedBoxes() throws {
         let renderer = UIGraphicsPDFRenderer(bounds: CGRect(x: 0, y: 0, width: 360, height: 480))
         let data = renderer.pdfData { context in
