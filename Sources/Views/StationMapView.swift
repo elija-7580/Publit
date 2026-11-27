@@ -357,6 +357,10 @@ struct StationMapView: View {
         MapLook(base: MapBase(storageValue: storedBase), realistic3D: realistic3D, pointsOfInterest: pointsOfInterest, traffic: traffic)
     }
 
+    /// The safe-area edges the map itself reaches over: all of them behind the panel of the iPad
+    /// layout, only the bottom when it is a screen of its own with a navigation bar (#120).
+    static func mapEdges(embedded: Bool) -> Edge.Set { embedded ? .all : .bottom }
+
     var body: some View {
         NavigationStack {
             TransitMapView(content: model.content, initialCenter: center ?? location.coordinate,
@@ -369,8 +373,12 @@ struct StationMapView: View {
                            recenter: recenter,
                            places: categoryHits, placesVersion: categoryVersion,
                            heading: location.heading)
-                .ignoresSafeArea(edges: .bottom)
-                // Floating over the map, no bar behind it. The map does not reach under the
+                // Behind the panel of the iPad layout the map fills the whole screen, also under the
+                // status bar and the tab bar at the top: with only the bottom ignored, a band in the
+                // background colour stayed above the map (#120). What lies over the map below keeps
+                // to the safe area either way.
+                .ignoresSafeArea(edges: Self.mapEdges(embedded: embedded))
+                // Floating over the map, no bar behind it. On iPhone the map does not reach under the
                 // navigation bar at the top, so the chips always stay visible below it.
                 .overlay(alignment: .top) { header.padding(.top, 8).padding(.leading, leadingInset) }
                 // Map controls in one white column at the edge: layers, then my location.

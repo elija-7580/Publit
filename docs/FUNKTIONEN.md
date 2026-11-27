@@ -1,6 +1,6 @@
 # Publit iOS – Funktionen und Screens (vollständige Übersicht)
 
-> Stand: Version 0.1.2 (Build 110). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
+> Stand: Version 0.1.2 (Build 111). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
 > **Pflege:** Jede Änderung an `Sources/`, `Watch/`, `Widgets/` oder `Share/` muss diese Datei im selben Commit/PR mitändern (siehe Abschnitt „Aktualisierung“ ganz unten). Die maschinell erzeugte Liste aller Views steht in [`FUNKTIONEN-INVENTAR.md`](FUNKTIONEN-INVENTAR.md) und wird von der CI automatisch aktualisiert.
 
 ## Inhalt
@@ -154,7 +154,7 @@ Bewegung reduzieren zeigt jede Demo im Endzustand. Schließen, „Continue“ od
 - **Sprung zur Empfehlung**: liegt die empfohlene Verbindung außerhalb der Sicht, springt eine Kapsel „Recommended: …“ am unteren Rand zu ihr; die Liste scrollt frei unter ihr, sie verdeckt keine Zeilen oder Hinweise.
 - **Server ausgelastet** (HTTP 429): eine Wiederholung nach 2 s; bleibt Transitous ausgelastet, erscheint „Transitous is busy right now. Try again in a moment.“, bereits angezeigte Verbindungen derselben Suche bleiben stehen.
 - Herunterziehen sucht die Routen neu; der Ladekreis verschwindet, sobald die neuen Routen da sind (Live-Quellen und Rad-/Auto-Vergleich kommen danach, ohne die Liste festzuhalten).
-- „Earlier connections“ / „Later connections“, „Updated HH:MM“, Abdeckungswarnung für Start/Ziel („From · Kärnten“).
+- **Frühere und spätere Verbindungen**: bei „Now“ und „Depart“ steht über der ersten Route „Earlier connections“ (lädt die Seite davor, auch schon abgefahrene Züge; Build 111), unter der letzten „Later connections“; bei „Arrive“ und „Last“ unten „Earlier connections“. Geladene frühere Verbindungen bleiben bei der minütlichen Aktualisierung über den neuen Routen stehen (`PlanModel.keepingEarlier`). „Updated HH:MM“, Abdeckungswarnung für Start/Ziel („From · Kärnten“).
 - **Routenoptionen-Knopf** (`RouteOptionsButton`) mit Kurz-Zusammenfassung („All modes“, „Direct only“, „Step-free“, „With sharing“ …).
 - **Go Now** (`GoNowView`, Schnellroute vom Standort): Zeile „From … Change“ – Start ist der Standort, lässt sich aber über die Ortssuche auf jeden anderen Ort ändern (Überschrift dann „from …“); „Leave now“ / „Leave in x min“, „Walk all the way“, „Later connections“.
 - **Park & Ride statt zwei Stunden Fußweg**: findet die Suche mit 30 und 45 min Fußweg nichts, wird vor dem 2-h-Fußweg eine Autofahrt zum nächsten Bahnhof versucht (max. 15 min Fahrt, bei weiter entferntem nächsten Bahnhof wie unten bis nächster Bahnhof + 10 min); Hinweis „No stop within walking distance: these routes start with a drive to the station (Park & Ride).“
@@ -407,7 +407,7 @@ Sync per WatchConnectivity (`WatchSyncHub`): bis 8 Fahrten, Orte, bis 12 Tickets
 
 ## 22. iPad / breites Layout (`Wide/WideLayout`)
 
-Ab 680 pt Breite (regular): Karte bildschirmfüllend, Inhalte in einem schwebenden Panel links (340–420 pt) wie Apple Maps auf dem iPad; die Panel-Views sind die iPhone-Views und steuern die große Karte (Routen, Stationen).
+Ab 680 pt Breite (regular): Karte bildschirmfüllend, Inhalte in einem schwebenden Panel links (340–420 pt) wie Apple Maps auf dem iPad; die Panel-Views sind die iPhone-Views und steuern die große Karte (Routen, Stationen). Die Stationskarte hinter dem Panel (`StationMapView(embedded:)`) reicht auch oben bis an den Bildschirmrand, unter Statusleiste und Tab-Leiste; vorher blieb dort ein Streifen in der Hintergrundfarbe (Issue #120). Filter-Chips und Karten-Knöpfe bleiben im sicheren Bereich.
 
 ## 23. Datenquellen, Abdeckung, Offline
 

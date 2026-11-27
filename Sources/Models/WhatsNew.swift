@@ -20,6 +20,10 @@ enum WhatsNew {
 
     /// Newest first.
     static let entries: [WhatsNewEntry] = [
+        WhatsNewEntry(build: 111, items: [
+            WhatsNewItem(symbol: "chevron.up", title: "Earlier connections",
+                         text: "Tap “Earlier connections” above the routes to see the trains before the time you searched for."),
+        ]),
         WhatsNewEntry(build: 110, items: [
             WhatsNewItem(symbol: "clock.badge.exclamationmark", title: "Late trains stay in the list",
                          text: "A late train you can still catch now shows up with its delay, and a refresh no longer shows it on time for a moment."),

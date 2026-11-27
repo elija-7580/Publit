@@ -28,6 +28,7 @@ class ToFile(unittest.TestCase):
 class Body(unittest.TestCase):
     def test_defang(self):
         self.assertEqual(wi.defang("ping @elija and see #12, url/#3"), "ping @​elija and see #​12, url/#3")
+        self.assertIsNone(wi.MARKER.search(wi.issue_body({"id": 7, "body": "<!-- publit-wish:3 -->"}).split("Wish #7")[0]))
 
     def test_marker_and_quote(self):
         b = wi.issue_body(wish(7, body="line one\n\n@someone"))
