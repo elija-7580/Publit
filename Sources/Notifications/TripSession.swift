@@ -23,6 +23,18 @@ enum TripSession {
         return note
     }
 
+    /// New live times were stored for a trip outside its own screen (background refresh, on board with
+    /// the screen locked): the leave and get-off reminders move with them, and a new platform, a
+    /// cancellation or a later arrival is announced. Without this the stored times were already the new
+    /// ones when the app came back, nothing differed any more, and a get-off reminder rang at the old time.
+    static func follow(_ old: SavedTrip, to updated: SavedTrip) async {
+        await LiveTripActivity.update(updated)
+        await LeaveReminder.follow(old, to: updated)
+        await GetOffReminder.follow(from: old.itinerary, to: updated.itinerary)
+        await TripChangeAlert.follow(old.id, from: old.itinerary, to: updated.itinerary)
+        await ArrivalUpdates.follow(updated)
+    }
+
     /// Switches a running trip to a new connection: reminders and the Live Activity follow.
     static func reroute(_ trip: SavedTrip, to itinerary: Itinerary, in trips: TripStore) async {
         LeaveReminder.cancel(trip.id)

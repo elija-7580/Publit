@@ -20,6 +20,12 @@ enum WhatsNew {
 
     /// Newest first.
     static let entries: [WhatsNewEntry] = [
+        WhatsNewEntry(build: 111, items: [
+            WhatsNewItem(symbol: "arrow.left.arrow.right", title: "Live times from the right direction",
+                         text: "A ride no longer takes the delay of the same line going the other way, and reminders follow new live times with the screen locked too."),
+            WhatsNewItem(symbol: "list.bullet.below.rectangle", title: "Later connections stay",
+                         text: "Connections you loaded with “Later connections” no longer vanish when the list refreshes."),
+        ]),
         WhatsNewEntry(build: 110, items: [
             WhatsNewItem(symbol: "clock.badge.exclamationmark", title: "Late trains stay in the list",
                          text: "A late train you can still catch now shows up with its delay, and a refresh no longer shows it on time for a moment."),

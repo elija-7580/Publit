@@ -46,13 +46,18 @@ struct DeparturesProvider: AppIntentTimelineProvider {
         let entries = (0..<20).map { i in
             DeparturesEntry(date: now.addingTimeInterval(Double(i) * 60), stop: stop, departures: first.departures, savedDataFrom: first.savedDataFrom)
         }
-        return Timeline(entries: entries, policy: .after(now.addingTimeInterval(15 * 60)))
+        // A busy stop is through its departures in a few minutes: ask again before fewer than a
+        // handful are left, or the widget says "No departures soon" while trains keep coming.
+        let times = first.departures.map(\.time).sorted()
+        let runsLow = times.count > 6 ? times[times.count - 6] : now.addingTimeInterval(15 * 60)
+        let reload = min(now.addingTimeInterval(15 * 60), max(runsLow, now.addingTimeInterval(3 * 60)))
+        return Timeline(entries: entries.filter { $0.date <= reload }, policy: .after(reload))
     }
 
     private func load(_ stop: StopEntity, now: Date) async -> DeparturesEntry {
         do {
             let res = try await TransitousClient.shared.departures(stopId: stop.stopId, count: 30, radius: 150)
-            let list = StopTime.upcoming(res.stopTimes, now: now).prefix(12).map(WidgetDeparture.init)
+            let list = StopTime.upcoming(res.stopTimes, now: now).prefix(30).map(WidgetDeparture.init)
             let from = await Connectivity.shared.offlineDataFrom
             return DeparturesEntry(date: now, stop: stop, departures: Array(list), savedDataFrom: from)
         } catch {

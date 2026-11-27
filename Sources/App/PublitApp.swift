@@ -106,10 +106,16 @@ struct PublitApp: App {
     private func followTripsInBackground() async {
         let now = Date()
         for trip in trips.upcoming(now: now.addingTimeInterval(-15 * 60)) where trips.activeTripId == trip.id || LiveTripActivity.isRunning(trip.id) {
-            guard let fresh = try? await TripRefreshCoordinator.shared.refresh(route: trip.itinerary) else { continue }
-            trips.update(trip.id, with: fresh)
-            if let updated = trips.trip(trip.id) { await ChangeRiskNotifier.follow(updated) }
+            // Asked for before the request: one failed refresh (a tunnel) must not end the checks for this trip.
             LineAlertMonitor.scheduleBackgroundCheck(forTrips: true)
+            guard let fresh = try? await TripRefreshCoordinator.shared.refresh(route: trip.itinerary),
+                  trips.update(trip.id, with: fresh, replacing: trip.itinerary) else { continue }
+            if let updated = trips.trip(trip.id) {
+                // The reminders and change alerts move with the new times here too: once stored, the next
+                // refresh in the app sees no difference any more and would never move them.
+                await TripSession.follow(trip, to: updated)
+                await ChangeRiskNotifier.follow(updated)
+            }
         }
     }
 }
@@ -356,8 +362,8 @@ struct RootView: View {
     private func refreshLiveTrips() async -> TimeInterval {
         let now = Date()
         for trip in trips.upcoming(now: now.addingTimeInterval(-15 * 60)) where LiveTripActivity.isRunning(trip.id) || trips.activeTripId == trip.id {
-            if let fresh = try? await TripRefreshCoordinator.shared.refresh(route: trip.itinerary) {
-                trips.update(trip.id, with: fresh)
+            if let fresh = try? await TripRefreshCoordinator.shared.refresh(route: trip.itinerary),
+               trips.update(trip.id, with: fresh, replacing: trip.itinerary) {
                 if let updated = trips.trip(trip.id) {
                     await LeaveReminder.follow(trip, to: updated)
                     await GetOffReminder.follow(from: trip.itinerary, to: updated.itinerary)

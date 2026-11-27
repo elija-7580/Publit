@@ -191,7 +191,8 @@ struct SharedRoute: Hashable, Sendable {
             v[kv[0]] = value
         }
         guard let from = v["fl"].flatMap(LatLon.init(apiValue:)), let to = v["tl"].flatMap(LatLon.init(apiValue:)),
-              let d = v["d"].flatMap(Double.init), d.isFinite else { return nil }
+              // A time between 1970 and 2100: "d=1e30" in a link is finite, and closed the app where the time is used as a whole number.
+              let d = v["d"].flatMap(Double.init), d.isFinite, d >= 0, d < 4_102_444_800 else { return nil }
         var parts: [RoutePart] = []
         while parts.count < Self.maxParts, let raw = v["p\(parts.count)"] {
             let fields = raw.split(separator: "~", omittingEmptySubsequences: false)

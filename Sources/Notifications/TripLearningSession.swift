@@ -25,9 +25,13 @@ enum TripLearningSession {
         // In the background nothing else refreshes the trip: at most every 2 minutes here.
         if lastRefresh[trip.id].map({ now.timeIntervalSince($0) > 120 }) ?? true {
             lastRefresh[trip.id] = now
-            if let fresh = try? await TripRefreshCoordinator.shared.refresh(route: trip.itinerary) {
-                trips.update(trip.id, with: fresh)
-                if let t = trips.trip(trip.id) { current = t }
+            if let fresh = try? await TripRefreshCoordinator.shared.refresh(route: trip.itinerary),
+               trips.update(trip.id, with: fresh, replacing: trip.itinerary) {
+                if let t = trips.trip(trip.id) {
+                    current = t
+                    // Reminders and change alerts follow the new times (see `TripSession.follow`).
+                    await TripSession.follow(trip, to: t)
+                }
             }
         }
         if TripLearning.isEnabled {

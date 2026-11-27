@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.1.2 (build 111) – stability review
+
+Review of the whole app before the first talks with operators (27 Nov 2026). Fixed:
+
+- **Live times from the other direction** (`LiveMatch.towards`): a station board lists both directions of a line, often due in the same minute. The extra live sources (Wiener Linien, ÖBB, search.ch, VRR …) matched a ride by line and timetable time only, so a ride could take the delay or cancellation of the train going the other way. The ride's headsign now picks the departures going its way; with no resemblance at all, everything is as before.
+- **"Later connections" vanished on refresh** (`PlanModel.laterPages`): the minute refresh of a "now" search (and pull to refresh) put the first page back and dropped the pages loaded with "Later connections". They stay now, paging continues where it was, and a page that arrives during a refresh is no longer thrown away.
+- **Reminders did not follow delays with the screen locked** (`TripSession.follow`): background refreshes stored the new times without moving the leave and get-off reminders or announcing a platform change or cancellation; in the app nothing differed any more afterwards, so they were never moved. One failed background refresh also ended the background checks for the trip.
+- **A late answer undid "Switch to this connection"** (`TripStore.update(_:with:replacing:)`): a live refresh asked for the old route and answered after the switch wrote the old route back.
+- **Saved trips and tickets could be lost** (`JSONFile.loadList`, `JSONFileRescue`): one unreadable entry (or a file the iPhone could not read yet) made the store start empty, and its next save replaced the file. Lists are now read entry by entry, and the file as it was is kept as "….unreadable" before anything is written over it.
+- **One odd ride failed the whole answer** (`LossyList`): a route or departure missing a field the API promises is skipped instead of showing "Unexpected response from the routing service".
+- **Crashes on outside input**: a Wallet pass with a number field too large for a whole number; a shared-route link with an absurd time (`d=1e30`); absurd countdowns and delays from operator boards.
+- **Smaller**: an overall time limit for requests that trickle in (90 s, live sources 20 s); the Apple Watch no longer waits for a location forever (20 s); a notification tapped to launch the app is opened once the app is ready instead of being dropped; the get-off alert is posted once when two fixes arrive together; trip tracking switches off when the location permission was taken away; the Departures widget keeps all loaded departures and reloads before a busy stop runs out; the Live Activity countdown reads the clock once.
+
 ## 0.1.2 (build 110) – late trains stay in the list
 
 - **Late trains in "now" searches** (`LateTrains`, `PlanModel.addLateTrains`): live delays for Austria and other regions come from other operators after the router answered (`LiveOverlay`), so a train whose timetable time had passed was missing although it ran late and could still be caught. A second search from 30 min before the searched time adds the routes whose first ride is due before it but, with live times, has not left yet.

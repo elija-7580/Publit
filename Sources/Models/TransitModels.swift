@@ -340,6 +340,60 @@ struct PlanResponse: Decodable, Sendable {
     }
 }
 
+/// A list read entry by entry: one the app cannot read (a feed leaves out a field the API promises)
+/// is skipped instead of failing the whole answer. One odd ride must not turn a list of routes or a
+/// departure board into "Unexpected response".
+struct LossyList<Element: Decodable>: Decodable {
+    private(set) var items: [Element] = []
+    private(set) var skipped = 0
+
+    private struct Anything: Decodable { init(from decoder: Decoder) throws {} }
+
+    init(from decoder: Decoder) throws {
+        var c = try decoder.unkeyedContainer()
+        while !c.isAtEnd {
+            let index = c.currentIndex
+            if let item = try? c.decode(Element.self) {
+                items.append(item)
+            } else {
+                skipped += 1
+                if (try? c.decodeNil()) != true { _ = try? c.decode(Anything.self) }
+            }
+            // Never spin on an entry that cannot even be stepped over.
+            if c.currentIndex == index { break }
+        }
+    }
+}
+
+extension PlanResponse {
+    private enum CodingKeys: String, CodingKey { case direct, itineraries, previousPageCursor, nextPageCursor }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        let routes = try c.decode(LossyList<Itinerary>.self, forKey: .itineraries)
+        let street = try c.decodeIfPresent(LossyList<Itinerary>.self, forKey: .direct)
+        itineraries = routes.items
+        direct = street?.items ?? []
+        previousPageCursor = try? c.decodeIfPresent(String.self, forKey: .previousPageCursor)
+        nextPageCursor = try? c.decodeIfPresent(String.self, forKey: .nextPageCursor)
+        let skipped = routes.skipped + (street?.skipped ?? 0)
+        if skipped > 0 { HangLog.shared.note("plan: \(skipped) unreadable route(s) skipped") }
+    }
+}
+
+extension StopTimesResponse {
+    private enum CodingKeys: String, CodingKey { case stopTimes, place, nextPageCursor }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        let list = try c.decode(LossyList<StopTime>.self, forKey: .stopTimes)
+        stopTimes = list.items
+        place = try? c.decodeIfPresent(Place.self, forKey: .place)
+        nextPageCursor = try? c.decodeIfPresent(String.self, forKey: .nextPageCursor)
+        if list.skipped > 0 { HangLog.shared.note("stoptimes: \(list.skipped) unreadable departure(s) skipped") }
+    }
+}
+
 struct StopTime: Decodable, Identifiable, Sendable, RouteStyled {
     var place: Place
     let mode: String

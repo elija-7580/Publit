@@ -61,9 +61,10 @@ enum GetOffAlerts {
                                 metresToExit: here.distance(to: leg.to.coordinate)) else { return }
         // The clock-based reminder may already have fired: then this would be a second one.
         let id = GetOffReminder.identifier(for: leg)
-        let delivered = await UNUserNotificationCenter.current().deliveredNotifications()
-        if delivered.contains(where: { $0.request.identifier == id }) { markDelivered(leg); return }
+        // Marked before waiting: the next fix arrives a second later and must not post the alert again.
         markDelivered(leg)
+        let delivered = await UNUserNotificationCenter.current().deliveredNotifications()
+        if delivered.contains(where: { $0.request.identifier == id }) { return }
         await post(leg, stopsLeft: TripGuide.stopsLeft(ride.progress, count: stops.count))
     }
 
