@@ -142,10 +142,11 @@ final class TransitousClient: @unchecked Sendable {
 
     /// The server's answer without what must never be listed: routes that run the wrong way round
     /// (`Itinerary.runsBackwards`) and, with own tickets, rides they do not cover. Paging cursors stay.
+    /// The line of each ride comes without the server's detours over other tracks (`LegShape`, #114).
     static func usable(_ res: PlanResponse, from: LatLon, to: LatLon, options: RouteOptions = RouteOptions()) -> PlanResponse {
         var list = res.itineraries.facing(from: from, to: to)
         if options.filtersRides { list = list.filter(options.allows) }
-        return list.count == res.itineraries.count ? res : res.replacingItineraries(list)
+        return res.replacingItineraries(list.map { $0.tidyingShapes() })
     }
 
     static func planQuery(from: LatLon, to: LatLon, time: Date?, arriveBy: Bool,
@@ -211,7 +212,7 @@ final class TransitousClient: @unchecked Sendable {
         let fresh: Itinerary = try await get("/api/v6/refresh-itinerary", [URLQueryItem(name: "itineraryId", value: itineraryId),
                                                                             URLQueryItem(name: "withFares", value: "false")], cache: .noStore)
         // Where the feed has no live times (Austria, Venice, Stockholm …), other operators' data.
-        return await LiveOverlay.apply(fresh, budget: 3)
+        return await LiveOverlay.apply(fresh.tidyingShapes(), budget: 3)
     }
 
     /// Stops inside a map rectangle, for the interactive station map.
@@ -305,7 +306,8 @@ final class TransitousClient: @unchecked Sendable {
 
     /// The whole trip of one vehicle, with all stops and real-time times.
     func trip(id: String) async throws -> Itinerary {
-        try await get("/api/v6/trip", [URLQueryItem(name: "tripId", value: id)], cache: CachePolicy(maxAge: 15, persist: true))
+        let trip: Itinerary = try await get("/api/v6/trip", [URLQueryItem(name: "tripId", value: id)], cache: CachePolicy(maxAge: 15, persist: true))
+        return trip.tidyingShapes()
     }
 
     // MARK: Transport

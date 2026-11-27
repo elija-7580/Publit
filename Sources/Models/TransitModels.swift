@@ -263,7 +263,83 @@ extension Itinerary {
     }
 }
 
+/// A ride's line without the server's detours. Transitous draws a ride along the tracks of
+/// OpenStreetMap; around large stations that line can leave the route between two stops in a row,
+/// run along other tracks and come back (#114, Paris, checked on 2026-11-27: RER A from Châtelet
+/// to Auber, 1.7 km apart, came with 14 km of line reaching 5 km away; métro 5 and 7 around Gare
+/// de l'Est likewise). The map then drew branches the ride never takes.
+enum LegShape {
+    /// Stops closer than this prove nothing (platforms of one station, a loop back to its start).
+    static let minStopGap = 150.0
+    /// The line between two stops in a row counts as wrong when it is this many times as long as
+    /// the straight way and at least `minExtra` metres longer. Real tracks stay below: the spirals
+    /// of the Albula line between Bergün and Preda are 12.6 km for 4 km (3.1).
+    static let maxRatio = 3.5
+    static let minExtra = 1_000.0
+    /// Rail only: a road with hairpins or a ferry around a headland can be several times the
+    /// straight way, and nothing wrong has been seen there.
+    static let railBound: Set<String> = VehicleKind.railModes.union(["SUBWAY", "METRO", "TRAM"])
+
+    /// `path` with each such detour replaced by the straight way between its two stops; nil when
+    /// there is none (the usual case, decided by adding up the path once).
+    static func withoutDetours(_ path: [LatLon], stops: [LatLon]) -> [LatLon]? {
+        guard path.count > 2, stops.count > 1 else { return nil }
+        // No detour of `minExtra` fits into a line about as long as the way from stop to stop.
+        guard PathGeometry.length(path) - PathGeometry.length(stops) >= minExtra else { return nil }
+        // Where each stop lies on the line: the closest point at or after the stop before it.
+        var at: [Int] = []
+        var start = 0
+        for stop in stops {
+            let kx = cos(stop.lat * .pi / 180)
+            var best = start, bestDistance = Double.infinity
+            for i in start..<path.count {
+                let dx = (path[i].lon - stop.lon) * kx, dy = path[i].lat - stop.lat
+                let d = dx * dx + dy * dy
+                if d < bestDistance { best = i; bestDistance = d }
+            }
+            at.append(best)
+            start = best
+        }
+        var out = Array(path[...at[0]])
+        var changed = false
+        for k in 0..<(stops.count - 1) {
+            let i = at[k], j = at[k + 1]
+            guard j > i else { continue }
+            let straight = stops[k].distance(to: stops[k + 1])
+            let length = PathGeometry.length(Array(path[i...j]))
+            if straight >= minStopGap, length >= maxRatio * straight, length - straight >= minExtra {
+                out.append(path[j])
+                changed = true
+            } else {
+                out.append(contentsOf: path[(i + 1)...j])
+            }
+        }
+        out.append(contentsOf: path[(at[at.count - 1] + 1)...])
+        return changed ? out : nil
+    }
+}
+
+extension Leg {
+    /// This ride with its line tidied (`LegShape`), also in the rides that can replace it.
+    func tidyingShape() -> Leg {
+        var leg = self
+        if LegShape.railBound.contains(mode),
+           let path = LegShape.withoutDetours(legGeometry.coordinates, stops: allStops.map(\.coordinate)) {
+            leg.legGeometry = EncodedPolyline(coordinates: path, precision: legGeometry.precision)
+        }
+        if let alternatives { leg.alternatives = alternatives.map { $0.map { $0.tidyingShape() } } }
+        return leg
+    }
+}
+
 extension Itinerary {
+    /// This route with the line of every ride tidied (`LegShape`).
+    func tidyingShapes() -> Itinerary {
+        var route = self
+        route.legs = legs.map { $0.tidyingShape() }
+        return route
+    }
+
     /// A route the server planned the wrong way round: it starts at the destination and ends at the
     /// start. Transitous answers "Arrive by" searches that also ask for slower direct rides
     /// (`slowDirect`, smart routing) that way (#188, Saarbrücken, 2026-11-26: 4 of 9 routes rode from
