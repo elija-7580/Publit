@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.2 (build 111) – earlier connections above the routes
+
+- **Earlier connections** (`PlanModel.loadEarlier`, `PlanView`): "Now" and "Depart" searches only offered later connections below the list. A button "Earlier connections" above the first route now loads the page before it (the router's previous-page cursor), including trains that already left. A live refresh keeps the earlier routes loaded by hand above the refreshed ones (`PlanModel.keepingEarlier`). Asked for on 27 Nov 2026.
+
 ## 0.1.2 (build 110) – late trains stay in the list
 
 - **Late trains in "now" searches** (`LateTrains`, `PlanModel.addLateTrains`): live delays for Austria and other regions come from other operators after the router answered (`LiveOverlay`), so a train whose timetable time had passed was missing although it ran late and could still be caught. A second search from 30 min before the searched time adds the routes whose first ride is due before it but, with live times, has not left yet.

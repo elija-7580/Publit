@@ -390,6 +390,18 @@ struct PlanView: View {
                     .accessibilityIdentifier("longWalkNote")
             }
 
+            if plan.canLoadEarlier {
+                Button {
+                    Task { await plan.loadEarlier() }
+                } label: {
+                    HStack {
+                        Label(L10n.t("Earlier connections"), systemImage: "chevron.up")
+                        if plan.isLoadingMore { Spacer(); LogoLoader(size: 24).frame(width: 48) }
+                    }
+                }
+                .accessibilityIdentifier("earlierConnections")
+            }
+
             ForEach(its, id: \.routeKey) { it in
                 Button { opened = OpenedRoute(itinerary: it) } label: {
                     HStack(spacing: 8) {
