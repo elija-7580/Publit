@@ -10,6 +10,8 @@ final class TransitMapModel {
     var content = TransitMapContent()
     var stationsHidden = false
     var liveHidden = false
+    /// Zoomed out past the detail view: only trains, as dots on thin lines (see `maxOverviewSpan`).
+    var liveOverview = false
     var isLoadingLive = false
     var liveError: String?
     var stationsError: String?
@@ -53,11 +55,17 @@ final class TransitMapModel {
     /// Spans (degrees latitude) above which a layer is not loaded: too much to show or download.
     static let maxStationSpan = 0.08
     static let maxLiveSpan = 0.06
+    /// Up to this span (about a region, 300 km) trains stay on the map, as dots on thin lines.
+    /// The server sends only rail at that zoom: one answer of a few hundred KB a minute.
+    static let maxOverviewSpan = 3.0
     static let maxRentalSpan = 0.03
     /// Vehicles are asked for this far ahead; the first request also draws the lines.
     static let firstWindow: TimeInterval = 5 * 60
     static let refreshWindow: TimeInterval = 4 * 60
     static var refreshEvery: TimeInterval { Energy.interval(30) }
+    /// Zoomed out a dot moves a pixel in minutes: fetch less often, it saves battery and data.
+    static var overviewRefreshEvery: TimeInterval { Energy.interval(60) }
+    private var liveRefreshEvery: TimeInterval { liveOverview ? Self.overviewRefreshEvery : Self.refreshEvery }
     static var tickSeconds: TimeInterval { Energy.interval(2) }
 
     func regionChanged(_ r: MKCoordinateRegion) {
@@ -117,7 +125,7 @@ final class TransitMapModel {
             self.liveRetryAt = nil
             liveTask = Task { await loadLive(force: true) }
         }
-        if let box = liveBox, !isLoadingLive, Date().timeIntervalSince(box.at) >= Self.refreshEvery {
+        if let box = liveBox, !isLoadingLive, Date().timeIntervalSince(box.at) >= liveRefreshEvery {
             liveTask = Task { await loadLive(force: true) }
         }
         if showSharing, let box = rentalBox, Date().timeIntervalSince(box.at) >= 60 { await loadRentals(force: true) }
@@ -188,12 +196,23 @@ final class TransitMapModel {
 
     private func loadLive(force: Bool) async {
         guard active, !Task.isCancelled, !isLoadingLive, let r = region else { return }
-        guard r.span.latitudeDelta <= Self.maxLiveSpan else {
+        guard r.span.latitudeDelta <= Self.maxOverviewSpan else {
             liveHidden = true
             localLines = 0
             tracks = []
             if !content.shapes.isEmpty { content.shapes = []; content.shapesVersion += 1 }
             return
+        }
+        // Between detail and overview the answers differ (all modes and fine shapes, or trains only
+        // and coarse ones): start over instead of mixing them.
+        let overview = r.span.latitudeDelta > Self.maxLiveSpan
+        if overview != liveOverview {
+            liveOverview = overview
+            liveBox = nil
+            segments = []
+            tracks = []
+            shapes = [:]
+            publishShapes()
         }
         let wasHidden = liveHidden
         liveHidden = false
@@ -202,12 +221,13 @@ final class TransitMapModel {
         let (vlo, vhi) = Self.box(r, grow: 0)
         // Small pans stay inside the last (larger) box: no new request.
         if !force, let b = liveBox, vlo.lat >= b.min.lat, vlo.lon >= b.min.lon, vhi.lat <= b.max.lat, vhi.lon <= b.max.lon,
-           Date().timeIntervalSince(b.at) < Self.refreshEvery { return }
+           Date().timeIntervalSince(b.at) < liveRefreshEvery { return }
         let (lo, hi) = Self.box(r, grow: 0.25)
         let first = liveBox == nil || shapes.isEmpty
         // The server leaves buses, trams and ferries out below zoom 14 (only trains): at the widest
         // view that still shows lines, ask as if zoomed in, so every line that runs there is drawn.
-        let zoom = max(14, Self.zoom(r))
+        // Zoomed out, a low zoom keeps the answer to trains (and coaches, dropped here).
+        let zoom = overview ? min(8, Self.zoom(r)) : max(14, Self.zoom(r))
         let now = Date()
         liveBox = (lo, hi, now)
         isLoadingLive = true
@@ -226,9 +246,9 @@ final class TransitMapModel {
         liveError = nil; liveRetryAt = nil
         hasLive = true
         segments = segs
-        localLines = CoverageGuide.localLines(segs)
+        localLines = overview ? 0 : CoverageGuide.localLines(segs)
         // Lines running where the atlas says there is next to no data: the atlas is out of date.
-        if let notice = CoverageGuide.notice(at: LatLon(lat: r.center.latitude, lon: r.center.longitude)),
+        if !overview, let notice = CoverageGuide.notice(at: LatLon(lat: r.center.latitude, lon: r.center.longitude)),
            CoverageGuide.isContradicted(notice, localLines: localLines) {
             Task.detached(priority: .utility) { await CoverageAtlasStore.shared.recheck() }
         }
@@ -240,12 +260,13 @@ final class TransitMapModel {
     private func rebuildLive() {
         let generation = UUID()
         buildGeneration = generation
-        let segs = segments, f = filter, precision = segmentPrecision
+        let segs = segments, f = filter, precision = segmentPrecision, overview = liveOverview
         let tolerance = LiveMap.tolerance(spanMeters: (region?.span.latitudeDelta ?? 0.02) * 111_000)
         Task {
             let snap = await Task.detached(priority: .userInitiated) {
-                LiveMap.build(segs, filter: f, precision: precision, tolerance: tolerance)
+                LiveMap.build(segs, filter: f, precision: precision, tolerance: tolerance, overview: overview)
             }.value
+            guard overview == liveOverview else { return }
             guard active, buildGeneration == generation, !Task.isCancelled else { return }
             tracks = snap.tracks
             // Lines stay drawn after their vehicles have passed; a new filter starts over.
@@ -264,6 +285,7 @@ final class TransitMapModel {
         content.shapes = showLines && !liveHidden
             ? shapes.values.sorted { LiveMap.rank($0.mode) != LiveMap.rank($1.mode) ? LiveMap.rank($0.mode) < LiveMap.rank($1.mode) : $0.id < $1.id }
             : []
+        content.overview = liveOverview
         content.shapesVersion += 1
     }
 
@@ -960,6 +982,11 @@ struct VehicleTripView: View {
                     LineBadge(vehicle)
                     VStack(alignment: .leading, spacing: 2) {
                         if let to = leg?.shownDirection { Text(L10n.f("Towards %@", to)).font(.subheadline.weight(.semibold)) }
+                        // The whole run, first to last stop: on long trains "towards" alone says little.
+                        if let from = leg?.tripFrom?.name, let to = leg?.tripTo?.name,
+                           TransitLabels.identity(from) != TransitLabels.identity(to) {
+                            Text(verbatim: "\(from) → \(to)").font(.caption).foregroundStyle(.secondary)
+                        }
                         Text(vehicle.realTime ? L10n.t("Live position") : L10n.t("Position from the timetable"))
                             .font(.caption).foregroundStyle(.secondary)
                     }
@@ -1007,7 +1034,7 @@ struct VehicleTripView: View {
         }
         .inkList()
         .ticking(every: 15, now: $now)
-        .navigationTitle(vehicle.lineName)
+        .navigationTitle(leg?.tripNumber.map { "\(vehicle.lineName) · \($0)" } ?? vehicle.lineName)
         .screenTrail("Map vehicle")
         .sheet(isPresented: $showsOnBoard) {
             if let leg { OnBoardPlanView(trip: leg, lineName: vehicle.lineName) }

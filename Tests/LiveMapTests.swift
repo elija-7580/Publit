@@ -131,7 +131,7 @@ final class LiveMapTests: XCTestCase {
         XCTAssertEqual(LiveMap.colorHex("#ee1c25", mode: "BUS"), "EE1C25")
         XCTAssertEqual(LiveMap.colorHex("zz", mode: "BUS"), ModeStyle.defaultHex("BUS"))
         XCTAssertEqual(LiveMap.tolerance(spanMeters: 100), 2)
-        XCTAssertEqual(LiveMap.tolerance(spanMeters: 1_000_000), 40)
+        XCTAssertEqual(LiveMap.tolerance(spanMeters: 1_000_000), 500, "zoomed out over a region (trains only)")
     }
 
     // MARK: Lines
