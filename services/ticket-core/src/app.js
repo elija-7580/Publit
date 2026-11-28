@@ -25,7 +25,13 @@
 //   POST /v1/operator/tickets/{id}/revoke refund       POST /v1/operator/inspections   reports from devices
 //   GET  /v1/operator/statement           sales, commission, payout
 // Publit (Authorization: Bearer <ADMIN_TOKEN>):
+//   GET  /v1/admin/operators              every operator with its check format (never the secret)
+//   POST /v1/admin/operators              add an operator directly, already approved → API key
 //   POST /v1/admin/operators/{id}/approve | /suspend
+//   GET  /v1/admin/formats                the check formats Publit can issue
+//   POST /v1/admin/operators/{id}/format  { type, config, secret }  how this operator's tickets are coded
+//   POST /v1/admin/operators/{id}/format/test   a sample code to hold under the operator's device
+//   POST /v1/admin/verify                 { code }  did Publit issue this code, and is it still good
 // Demo only (DEMO=on):
 //   GET  /v1/demo   keys for the demo console      GET /v1/demo/journeys?from=&to=     POST /v1/demo/reset
 
@@ -36,6 +42,8 @@ import { createOrder, issueTicket, recordInspections, revokeTicket, statement } 
 import { rootKey, signedTrustList, trustList } from "./trust.js";
 import { recognise } from "./recognize.js";
 import { importGtfsFares } from "./gtfsfares.js";
+import { FORMATS, formatView, hashCode, issueCode, setFormat, verifyCode } from "./formats.js";
+import { vaultKey } from "./vault.js";
 import { parseTicket, verifyTicketSignature } from "./core/token.js";
 import { checkTicket } from "./core/validate.js";
 import { coverJourney, coverLeg, needsTicket, routerModes, sameStop } from "./core/coverage.js";
@@ -60,8 +68,9 @@ function same(a, b) {
   return x.length === y.length && timingSafeEqual(x, y);
 }
 
-export function createApp({ store, env = {}, now = () => Date.now() }) {
+export function createApp({ store, env = {}, now = () => Date.now(), fetch = globalThis.fetch }) {
   const demo = env.DEMO === "on";
+  const secretsKey = vaultKey(env.SECRETS_KEY);
   let ready = null;
   const prepare = async () => {
     await rootKey(store, env);
@@ -87,6 +96,8 @@ export function createApp({ store, env = {}, now = () => Date.now() }) {
       name: version.name, operatorId: ticket.operatorId, operator: store.data.operators[ticket.operatorId].name,
       validFrom: new Date(ticket.validFrom).toISOString(), validUntil: new Date(ticket.validUntil).toISOString(),
       amount: ticket.amount, currency: ticket.currency, live: ticket.live, od: ticket.od,
+      // What the operator's checking device reads. For Publit's own format that is the token itself.
+      format: ticket.format ?? "publit", code: ticket.code ?? ticket.token, codeEncoding: ticket.codeEncoding ?? "text", symbology: ticket.symbology ?? "qr",
       description: describe(version, { window: { from: ticket.validFrom, until: ticket.validUntil }, od: ticket.od }),
     };
   }
@@ -106,6 +117,30 @@ export function createApp({ store, env = {}, now = () => Date.now() }) {
   function requireAdmin(request) {
     const token = bearer(request);
     if (!env.ADMIN_TOKEN || !token || !same(token, env.ADMIN_TOKEN)) throw new ApiError(401, "unauthorized", "the admin token is needed");
+  }
+
+  // Publit's word for a code: it is in the ledger exactly as issued, carries what the operator's format
+  // demands, has not been refunded and is within its time. Works for every format, also for codes only the
+  // operator's own system can read.
+  function guarantee(code) {
+    const text = typeof code === "string" ? code.trim() : "";
+    const checks = [];
+    let ticket = null;
+    if (text.startsWith("PT1.")) {
+      const parsed = parseTicket(text.split("~")[0]);
+      ticket = (parsed && store.data.tickets[parsed.payload.id]) ?? null;
+      if (ticket && ticket.token !== text.split("~")[0]) ticket = null;
+    } else if (text) ticket = store.data.tickets[(store.data.codes ?? {})[hashCode(text)]] ?? null;
+    checks.push({ name: "ledger", ok: Boolean(ticket), code: ticket ? "issued_by_publit" : "not_issued" });
+    if (!ticket) return { level: "invalid", code: "not_issued", checks, ticket: null };
+    const format = ticket.code ? verifyCode(store.data.operators[ticket.operatorId], ticket, secretsKey) : true;
+    checks.push({ name: "format", ok: format !== false, code: format === true ? "format_ok" : format === null ? "format_operator" : "format_bad" });
+    const revoked = ticket.status === "revoked";
+    checks.push({ name: "revocation", ok: !revoked, code: revoked ? "revoked" : "not_revoked" });
+    const time = now() < ticket.validFrom - 30000 ? "not_yet_valid" : now() > ticket.validUntil + 30000 ? "expired" : "in_time";
+    checks.push({ name: "time", ok: time === "in_time", code: time });
+    const reason = format === false ? "format_bad" : revoked ? "revoked" : time !== "in_time" ? time : "issued";
+    return { level: reason === "issued" ? "valid" : "invalid", code: reason, checks, ticket };
   }
 
   // Tickets someone holds, from signed codes or from a recognised photo, as the coverage engine wants them.
@@ -195,7 +230,7 @@ export function createApp({ store, env = {}, now = () => Date.now() }) {
       if (!order || typeof secret !== "string" || !same(secret, order.secret)) throw new ApiError(404, "not_found", "no such order");
       if (method === "POST" && m[2]) {
         if (env.DEMO_PAYMENTS !== "on" && !demo) throw new ApiError(503, "no_payment", "no payment provider is configured");
-        const ticket = await issueTicket(store, order, now());
+        const ticket = await issueTicket(store, order, now(), { key: secretsKey, fetch });
         return json({ order: { id: order.id, status: order.status }, ticket: ticketOut(ticket) });
       }
       if (method === "GET" && !m[2]) {
@@ -209,6 +244,14 @@ export function createApp({ store, env = {}, now = () => Date.now() }) {
     if (method === "GET" && path === "/v1/trust/root") {
       const root = await rootKey(store, env);
       return json({ kid: root.kid, jwk: root.publicJwk });
+    }
+    if (method === "POST" && path === "/v1/validate" && typeof body.code === "string" && !body.code.trim().startsWith("PT1.")) {
+      // A code in an operator's own format. On board the operator's device decides; this is Publit's record.
+      const result = guarantee(body.code);
+      const found = result.ticket && findVersion(store, result.ticket.productId, result.ticket.version);
+      return json({ level: result.level, code: result.code, checks: result.checks, ledger: true, ticketId: result.ticket?.id ?? null, format: result.ticket?.format ?? null,
+        operator: result.ticket ? store.data.operators[result.ticket.operatorId].name : null, name: found?.version.name ?? null,
+        description: found ? describe(found.version, { window: { from: result.ticket.validFrom, until: result.ticket.validUntil }, od: result.ticket.od }) : null });
     }
     if (method === "POST" && path === "/v1/validate") {
       const result = await checkTicket(body.code, trustList(store, now()), { now: now(), context: body.context ?? null });
@@ -269,6 +312,49 @@ export function createApp({ store, env = {}, now = () => Date.now() }) {
       requireAdmin(request);
       const operator = m[2] === "approve" ? await approveOperator(store, m[1], now()) : setStatus(store, m[1], "suspended");
       return json({ operator: publicOperator(operator) });
+    }
+    if (path === "/v1/admin/operators") {
+      requireAdmin(request);
+      if (method === "GET") {
+        const sold = {};
+        for (const ticket of Object.values(store.data.tickets)) sold[ticket.operatorId] = (sold[ticket.operatorId] ?? 0) + 1;
+        return json({ operators: operatorList().map((o) => ({ ...publicOperator(o), contact: o.contact, commissionBps: o.commissionBps, format: formatView(o), tickets: sold[o.id] ?? 0 })) });
+      }
+      if (method === "POST") {
+        const { operator, apiKey } = applyOperator(store, { ...body, demo: false }, now());
+        await approveOperator(store, operator.id, now());
+        if (body.format) await setFormat(store, operator, body.format, { key: secretsKey, now: now() });
+        if (demo) { store.data.demo.operatorKeys[operator.id] = apiKey; store.save(); }
+        return json({ operator: { ...publicOperator(operator), format: formatView(operator) }, apiKey }, 201);
+      }
+    }
+    if (path === "/v1/admin/formats" && method === "GET") {
+      requireAdmin(request);
+      return json({ formats: FORMATS, placeholders: ["id", "product", "operator", "from", "until", "fromIso", "untilIso", "n", "class"], secretsReady: Boolean(secretsKey) });
+    }
+    if ((m = /^\/v1\/admin\/operators\/([a-z0-9-]+)\/format(\/test)?$/.exec(path)) && method === "POST") {
+      requireAdmin(request);
+      const operator = store.data.operators[m[1]];
+      if (!operator) throw new ApiError(404, "not_found", "no such operator");
+      if (!m[2]) {
+        await setFormat(store, operator, body, { key: secretsKey, now: now() });
+        return json({ operator: { ...publicOperator(operator), format: formatView(operator) } });
+      }
+      if (!operator.format) throw new ApiError(409, "publit_format", "this operator uses Publit's own code; buy a demo ticket to see one");
+      const sample = { id: "TEST0000001", productId: `${operator.id}.test`, operatorId: operator.id, name: "Testticket", validFrom: now(), validUntil: now() + 3600000,
+        travellers: 1, class: 2, od: null, holder: null, issuedAt: now(), price: null, test: true };
+      const issued = await issueCode(operator, sample, { key: secretsKey, fetch });
+      return json({ test: true, format: operator.format.type, ...issued, check: verifyCode(operator, { format: operator.format.type, code: issued.code }, secretsKey) });
+    }
+    if (path === "/v1/admin/verify" && method === "POST") {
+      requireAdmin(request);
+      const result = guarantee(body.code);
+      const ticket = result.ticket;
+      const found = ticket && findVersion(store, ticket.productId, ticket.version);
+      return json({ guaranteed: result.level === "valid", code: result.code, checks: result.checks,
+        ticket: ticket ? { id: ticket.id, orderId: ticket.orderId, operatorId: ticket.operatorId, operator: store.data.operators[ticket.operatorId].name, productId: ticket.productId,
+          name: found.version.name, format: ticket.format ?? "publit", reference: ticket.reference ?? null, status: ticket.status, issuedAt: new Date(ticket.issuedAt).toISOString(),
+          validFrom: new Date(ticket.validFrom).toISOString(), validUntil: new Date(ticket.validUntil).toISOString(), amount: ticket.amount, currency: ticket.currency } : null });
     }
     if (path === "/v1/operator" && method === "GET") {
       const operator = requireOperator(request);

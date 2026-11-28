@@ -17,6 +17,7 @@ import { signTicket } from "./core/token.js";
 import { resolveWindow } from "./core/time.js";
 import { ApiError } from "./operators.js";
 import { currentVersion } from "./products.js";
+import { hashCode, issueCode } from "./formats.js";
 
 const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
@@ -83,7 +84,7 @@ export function createOrder(store, input, now = Date.now()) {
  * In this prototype the payment is a demo step; the real one is Stripe with a split payout to the operator
  * (already built in services/ticket-shop).
  */
-export async function issueTicket(store, order, now = Date.now()) {
+export async function issueTicket(store, order, now = Date.now(), options = {}) {
   if (order.status === "paid") return store.data.tickets[order.ticketId];
   if (order.status !== "pending_payment") throw new ApiError(409, "order_closed", "this order cannot be paid any more");
   const product = store.data.products[order.productId];
@@ -101,12 +102,21 @@ export async function issueTicket(store, order, now = Date.now()) {
   if (order.holder) { payload.hn = order.holder.name; payload.hb = order.holder.birthYear; }
   if (order.deviceKey) payload.dk = order.deviceKey;
   const commission = Math.round((order.amount * operator.commissionBps) / 10000);
+  // The code the conductor's device reads, in the operator's own format. If the operator's system has to issue
+  // it and does not answer, this throws and nothing is sold.
+  const own = await issueCode(operator, {
+    id: payload.id, productId: product.id, operatorId: operator.id, name: version.name.de ?? version.name.en, validFrom: window.from, validUntil: window.until,
+    travellers: order.travellers, class: version.validity.class, od: order.od ?? null, holder: order.holder ?? null, issuedAt: now, timeZone: version.validity.timeZone,
+    price: `${order.currency} ${(order.amount / 100).toFixed(2).replace(".", ",")}`,
+  }, options);
   const ticket = {
     id: payload.id, orderId: order.id, operatorId: operator.id, productId: product.id, version: version.version,
     token: await signTicket(payload, key.privateJwk), validFrom: window.from, validUntil: window.until,
     amount: order.amount, currency: order.currency, commission, issuedAt: now, status: "valid", od: order.od ?? null,
-    live: Boolean(order.deviceKey),
+    live: Boolean(order.deviceKey), travellers: order.travellers,
+    format: own ? operator.format.type : "publit", code: own?.code ?? null, codeEncoding: own?.encoding ?? null, symbology: own?.symbology ?? "qr", reference: own?.reference ?? null,
   };
+  if (own) (store.data.codes ??= {})[hashCode(own.code)] = ticket.id;
   store.data.tickets[ticket.id] = ticket;
   order.status = "paid";
   order.ticketId = ticket.id;

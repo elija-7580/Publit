@@ -57,7 +57,7 @@ function text(value, max, field, required = true) {
 export function publicOperator(operator) {
   return {
     id: operator.id, name: operator.name, country: operator.country, status: operator.status, level: operator.level,
-    modes: operator.modes, aliases: operator.aliases, demo: operator.demo ?? false,
+    modes: operator.modes, aliases: operator.aliases, demo: operator.demo ?? false, format: operator.format?.type ?? "publit",
     keys: operator.keys.map((k) => ({ kid: k.kid, from: k.from, until: k.until, status: k.status, hosted: Boolean(k.privateJwk) })),
   };
 }
@@ -122,7 +122,7 @@ export async function approveOperator(store, id, now = Date.now()) {
   return operator;
 }
 
-async function addHostedKey(operator, now) {
+export async function addHostedKey(operator, now) {
   const pair = await generateKeyPair();
   operator.keys.push({
     kid: `${operator.id}-${operator.keys.length + 1}`, jwk: pair.publicJwk, privateJwk: pair.privateJwk,

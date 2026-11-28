@@ -55,6 +55,12 @@ const TEXT = {
     apiTitle: "API", apiLead: "Alles in dieser Demo läuft über dieselbe offene HTTP-Schnittstelle, die Apps und Betreiber nutzen. Die vollständige Beschreibung steht in der README im Repository.",
     footer: "Publit Ticket Core, Prototyp. Quelloffen unter AGPL-3.0. Demo-Daten, keine echten Tickets.",
     error: "Das hat nicht geklappt", offlineNoApi: "Offline-Modus ist an.",
+    fmH: "3. Prüfformat des Unternehmens (nur Publit)", fmLead: "Jedes Unternehmen hat schon eine Prüfsoftware, und die liest nur ihr eigenes Format. Hier legt Publit fest, in welchem Format die Tickets dieses Unternehmens ausgestellt werden, und hinterlegt den Schlüssel dazu. Schlüssel werden verschlüsselt gespeichert und nie wieder angezeigt.",
+    fmType: "Format", fmSave: "Speichern", fmTest: "Testcode erzeugen", fmNow: "Aktuell", fmSecretSet: "Schlüssel hinterlegt", fmSecretNone: "kein Schlüssel nötig oder hinterlegt",
+    fmSecretKeep: "leer lassen = unverändert", fmSaved: "Gespeichert. Neue Tickets dieses Unternehmens tragen ab jetzt diesen Code.", fmPublic: "Öffentlicher Schlüssel für das Unternehmen (in dessen Schlüsselliste eintragen)",
+    fmTestNote: "Testcode zum Vorhalten an ein Prüfgerät des Unternehmens. Kein Ticket.", fmSelfOk: "Gegenprobe im Backend stimmt.", fmSelfOperator: "Nur das System des Unternehmens kann diesen Code prüfen.",
+    fmPlace: "Platzhalter", opCode: "Code im Format des Unternehmens", useOperator: "Betreiber-Code",
+    ledgerNote: "Das ist Publits Nachweis. Im Fahrzeug prüft das Gerät des Unternehmens den Code wie jedes eigene Ticket.",
   },
   en: {
     demoChip: "Demo", tabOverview: "Overview", tabOperator: "Operators", tabBuy: "Buy", tabCheck: "Inspection", tabScan: "Scan a ticket", tabApi: "API",
@@ -97,6 +103,12 @@ const TEXT = {
     apiTitle: "API", apiLead: "Everything in this demo runs on the same open HTTP interface that apps and operators use. The full description is in the README in the repository.",
     footer: "Publit Ticket Core, prototype. Open source under AGPL-3.0. Demo data, no real tickets.",
     error: "That did not work", offlineNoApi: "Offline mode is on.",
+    fmH: "3. The operator's check format (Publit only)", fmLead: "Every operator already has checking software, and it only reads its own format. Here Publit sets the format this operator's tickets are issued in and stores the key for it. Keys are stored encrypted and never shown again.",
+    fmType: "Format", fmSave: "Save", fmTest: "Create a test code", fmNow: "Current", fmSecretSet: "key stored", fmSecretNone: "no key needed or stored",
+    fmSecretKeep: "leave empty = unchanged", fmSaved: "Saved. New tickets of this operator carry this code from now on.", fmPublic: "Public key for the operator (to be added to its key list)",
+    fmTestNote: "Test code to hold under one of the operator's devices. Not a ticket.", fmSelfOk: "Cross-check in the backend passes.", fmSelfOperator: "Only the operator's system can check this code.",
+    fmPlace: "Placeholders", opCode: "Code in the operator's format", useOperator: "operator code",
+    ledgerNote: "This is Publit's record. On board, the operator's device checks the code like any ticket of its own.",
   },
 };
 
@@ -108,7 +120,8 @@ const VERDICT = {
     unknown_issuer: "Aussteller unbekannt.", issuer_suspended: "Aussteller gesperrt.", key_not_valid: "Signaturschlüssel war bei Ausstellung nicht gültig.",
     signature_bad: "Signatur falsch: Ticket verändert oder gefälscht.", product_unknown: "Produkt oder Geltungsbereich passt nicht zum Aussteller.",
     revoked: "Ticket wurde erstattet oder gesperrt.", live_missing: "Kein Live-Code: vermutlich ein Screenshot.", live_bad: "Live-Code stammt nicht vom Gerät des Käufers.",
-    live_stale: "Live-Code ist zu alt: vermutlich ein Screenshot.", not_yet_valid: "Ticket gilt noch nicht.", expired: "Ticket ist abgelaufen." },
+    live_stale: "Live-Code ist zu alt: vermutlich ein Screenshot.", not_yet_valid: "Ticket gilt noch nicht.", expired: "Ticket ist abgelaufen.",
+    issued: "Von Publit ausgestellt und gültig.", not_issued: "Diesen Code hat Publit nicht ausgestellt.", format_bad: "Code passt nicht zum Format des Unternehmens." },
   en: { valid: "Ticket is valid.", check_id: "Personal ticket: compare with ID.", scope_operator_unknown: "Operator not in the directory: check by hand.",
     scope_area_unknown: "Stop position unknown: check by hand.", scope_route_between: "Route ticket: is this stop on the route?",
     scope_area: "Not valid here: outside the area.", scope_operator: "Not valid with this operator.", scope_mode: "Not valid on this type of transport.",
@@ -116,11 +129,12 @@ const VERDICT = {
     unknown_issuer: "Unknown issuer.", issuer_suspended: "Issuer suspended.", key_not_valid: "Signing key was not valid when the ticket was issued.",
     signature_bad: "Wrong signature: ticket changed or forged.", product_unknown: "Product or scope does not match the issuer.",
     revoked: "Ticket was refunded or blocked.", live_missing: "No live code: probably a screenshot.", live_bad: "Live code is not from the buyer's device.",
-    live_stale: "Live code is too old: probably a screenshot.", not_yet_valid: "Ticket is not valid yet.", expired: "Ticket has expired." },
+    live_stale: "Live code is too old: probably a screenshot.", not_yet_valid: "Ticket is not valid yet.", expired: "Ticket has expired.",
+    issued: "Issued by Publit and valid.", not_issued: "Publit did not issue this code.", format_bad: "Code does not match the operator's format." },
 };
 const CHECKS = {
-  de: { issuer: "Aussteller bekannt", signature: "Signatur stimmt", product: "Produkt und Geltungsbereich unverändert", revocation: "Nicht gesperrt", live: "Live-Code vom Gerät des Käufers", time: "Im Gültigkeitszeitraum", scope: "Gilt in diesem Fahrzeug" },
-  en: { issuer: "Issuer known", signature: "Signature correct", product: "Product and scope unchanged", revocation: "Not revoked", live: "Live code from the buyer's device", time: "Within the period of validity", scope: "Valid on this vehicle" },
+  de: { issuer: "Aussteller bekannt", signature: "Signatur stimmt", product: "Produkt und Geltungsbereich unverändert", revocation: "Nicht gesperrt", live: "Live-Code vom Gerät des Käufers", time: "Im Gültigkeitszeitraum", scope: "Gilt in diesem Fahrzeug", ledger: "Von Publit genau so ausgestellt", format: "Entspricht dem Format des Unternehmens" },
+  en: { issuer: "Issuer known", signature: "Signature correct", product: "Product and scope unchanged", revocation: "Not revoked", live: "Live code from the buyer's device", time: "Within the period of validity", scope: "Valid on this vehicle", ledger: "Issued by Publit exactly like this", format: "Matches the operator's format" },
 };
 const MODES = { BUS: ["Bus", "Bus"], TRAM: ["Straßenbahn", "Tram"], SUBWAY: ["U-Bahn", "Underground"], SUBURBAN: ["S-Bahn", "Suburban rail"],
   REGIONAL_RAIL: ["Regionalzug", "Regional train"], REGIONAL_FAST_RAIL: ["Regionalexpress", "Regional express"], LONG_DISTANCE: ["Fernzug", "Long-distance train"],
@@ -138,7 +152,7 @@ const ROUTES = [["wien", "salzburg"], ["wien", "flughafen"], ["wien", "muenchen"
 const state = {
   lang: localStorage.getItem("ptc-lang") ?? ((navigator.language ?? "de").startsWith("de") ? "de" : "en"),
   demo: null, operators: [], products: [], templates: [], wallet: JSON.parse(localStorage.getItem("ptc-wallet") ?? "[]"),
-  trust: null, root: null, scanned: null, journeys: null,
+  trust: null, root: null, scanned: null, journeys: null, formats: [], admin: [],
 };
 const t = (key, ...args) => { const v = TEXT[state.lang][key]; return typeof v === "function" ? v(...args) : v ?? key; };
 const pick = (value) => (value && typeof value === "object" ? value[state.lang] ?? value.de : value);
@@ -184,7 +198,79 @@ async function reload() {
     api("GET", "/v1/operators").then((r) => r.operators), api("GET", "/v1/products").then((r) => r.products),
     api("GET", "/v1/templates").then((r) => r.templates), api("GET", "/v1/demo").catch(() => ({ operatorKeys: {}, places: [], adminToken: null })),
   ]);
+  if (state.demo.adminToken) {
+    [state.formats, state.admin] = await Promise.all([api("GET", "/v1/admin/formats", undefined, state.demo.adminToken).then((r) => r.formats),
+      api("GET", "/v1/admin/operators", undefined, state.demo.adminToken).then((r) => r.operators)]).catch(() => [[], []]);
+  }
   renderAll();
+}
+
+// ---- check format per operator (Publit only) -----------------------------------------------------------------
+let barcodeScript = null;
+const BCID = { qr: "qrcode", aztec: "azteccode", datamatrix: "datamatrix", pdf417: "pdf417", code128: "code128" };
+// Draws a code the way the operator's device expects it. QR text uses the small library already loaded;
+// everything else (Aztec, binary content) loads bwip-js on first use.
+async function drawCode(holder, code, encoding, symbology) {
+  if (symbology === "qr" && encoding !== "base64" && typeof qrcode === "function") { holder.innerHTML = qrSvg(code); return; }
+  try {
+    barcodeScript ??= new Promise((resolve, reject) => {
+      const s = document.createElement("script");
+      s.src = "https://cdn.jsdelivr.net/npm/bwip-js@4.5.1/dist/bwip-js-min.js";
+      s.onload = resolve; s.onerror = reject;
+      document.head.append(s);
+    });
+    await barcodeScript;
+    const canvas = document.createElement("canvas");
+    bwipjs.toCanvas(canvas, { bcid: BCID[symbology] ?? "qrcode", text: encoding === "base64" ? atob(code) : code, binarytext: encoding === "base64", scale: 3, ...(symbology === "code128" ? { height: 14 } : {}) });
+    holder.replaceChildren(canvas);
+  } catch {
+    barcodeScript = null;
+    holder.innerHTML = `<span class="raw" style="line-height:1.4">${esc(code.slice(0, 400))}</span>`;
+  }
+}
+function renderFormat() {
+  $("fmt-card").hidden = !state.demo?.adminToken;
+  if (!state.demo?.adminToken) return;
+  const joined = state.admin.filter((o) => o.status !== "listed");
+  const current = $("fm-operator").value;
+  $("fm-operator").innerHTML = joined.map((o) => `<option value="${esc(o.id)}">${esc(o.name)}</option>`).join("");
+  if (joined.some((o) => o.id === current)) $("fm-operator").value = current;
+  const operator = joined.find((o) => o.id === $("fm-operator").value);
+  const type = $("fm-type").dataset.for === operator?.id && $("fm-type").value ? $("fm-type").value : operator?.format.type ?? "publit";
+  $("fm-type").innerHTML = state.formats.map((f) => `<option value="${f.type}">${esc(pick(f.name))}</option>`).join("");
+  $("fm-type").value = type;
+  $("fm-type").dataset.for = operator?.id ?? "";
+  const spec = state.formats.find((f) => f.type === type);
+  if (!spec || !operator) { $("fm-fields").innerHTML = ""; $("fm-state").innerHTML = ""; return; }
+  const saved = operator.format.type === type ? operator.format.config : {};
+  $("fm-about").textContent = pick(spec.about);
+  $("fm-fields").innerHTML = spec.fields.map((f) => `<label><span>${esc(pick(f.label))}</span>${f.options
+    ? `<select data-c="${f.id}">${f.options.map((o) => `<option ${saved[f.id] === o ? "selected" : ""}>${o}</option>`).join("")}</select>`
+    : `<input data-c="${f.id}" value="${esc(saved[f.id] ?? "")}" placeholder="${esc(f.example ?? "")}">`}</label>`).join("")
+    + (type === "shared-secret" ? `<p class="small">${esc(t("fmPlace"))}: <code>{id}</code> <code>{product}</code> <code>{from}</code> <code>{until}</code> <code>{fromIso}</code> <code>{untilIso}</code> <code>{n}</code> <code>{class}</code></p>` : "")
+    + (spec.secret === "none" ? "" : `<label><span>${esc(pick(spec.secretLabel))}${operator.format.type === type && operator.format.hasSecret ? ` (${esc(t("fmSecretKeep"))})` : ""}</span><textarea id="fm-secret" rows="2" autocomplete="off" spellcheck="false"></textarea></label>`);
+  const now = state.formats.find((f) => f.type === operator.format.type);
+  $("fm-state").innerHTML = `<div class="item"><span>${esc(t("fmNow"))}: <strong>${esc(pick(now.name))}</strong></span><span class="chip ${operator.format.hasSecret ? "ok" : ""}">${esc(operator.format.hasSecret ? t("fmSecretSet") : t("fmSecretNone"))}</span></div>
+    ${operator.format.config.publicKeyPem ? `<details><summary>${esc(t("fmPublic"))}</summary><pre>${esc(operator.format.config.publicKeyPem)}</pre></details>` : ""}`;
+  $("fm-test").disabled = operator.format.type === "publit";
+}
+async function saveFormat() {
+  const id = $("fm-operator").value;
+  const config = Object.fromEntries([...document.querySelectorAll("#fm-fields [data-c]")].map((el) => [el.dataset.c, el.value.trim()]));
+  try {
+    await api("POST", `/v1/admin/operators/${id}/format`, { type: $("fm-type").value, config, secret: $("fm-secret")?.value ?? "" }, state.demo.adminToken);
+    await reload();
+    $("fm-result").innerHTML = `<div class="box ok">${esc(t("fmSaved"))}</div>`;
+    syncTrust();
+  } catch (error) { fail($("fm-result"), error); }
+}
+async function testFormat() {
+  try {
+    const sample = await api("POST", `/v1/admin/operators/${$("fm-operator").value}/format/test`, {}, state.demo.adminToken);
+    $("fm-result").innerHTML = `<div class="box"><div class="codebox"></div><p class="small">${esc(t("fmTestNote"))} ${esc(sample.check === true ? t("fmSelfOk") : sample.check === null ? t("fmSelfOperator") : "")}</p>
+      <details><summary>${esc(sample.symbology)} · ${esc(sample.encoding)}</summary><pre>${esc(sample.code)}</pre></details></div>`;
+    drawCode($("fm-result").querySelector(".codebox"), sample.code, sample.encoding, sample.symbology);
+  } catch (error) { fail($("fm-result"), error); }
 }
 
 function renderOperators() {
@@ -303,19 +389,22 @@ function qrSvg(text) {
 async function refreshCodes() {
   for (const el of document.querySelectorAll("[data-qr]")) {
     const ticket = state.wallet.find((x) => x.id === el.dataset.qr);
-    if (ticket && typeof qrcode === "function") el.innerHTML = qrSvg(await shown(ticket));
+    if (!ticket) continue;
+    // A ticket in an operator's own format shows that code: it is what the operator's device reads.
+    if (ticket.format && ticket.format !== "publit") { if (!el.dataset.drawn) { el.dataset.drawn = "1"; drawCode(el, ticket.code, ticket.codeEncoding, ticket.symbology); } }
+    else if (typeof qrcode === "function") el.innerHTML = qrSvg(await shown(ticket));
   }
 }
 function renderWallet() {
   $("wallet").innerHTML = state.wallet.length ? state.wallet.map((x) => `<div class="ticket ${x.status === "revoked" ? "revoked" : ""}">
       <div class="head"><strong>${esc(pick(x.name))}</strong><span>${esc(x.operator)}</span></div>
-      <div class="body"><div class="qr" data-qr="${esc(x.id)}"></div>${x.live ? `<div class="live">${esc(t("liveNote"))}</div>` : ""}
+      <div class="body"><div class="qr" data-qr="${esc(x.id)}"></div>${x.format && x.format !== "publit" ? `<div class="small" style="text-align:center">${esc(t("opCode"))}: ${esc(x.format)}</div>` : x.live ? `<div class="live">${esc(t("liveNote"))}</div>` : ""}
         ${scopeList(x.description[state.lang], x.holder)}
         <div class="small">${esc(x.id)} · ${money(x.amount, x.currency)}${x.status === "revoked" ? ` · <span class="chip bad">${esc(t("revoked"))}</span>` : ""}</div>
         <div class="row"><button class="primary" data-show="${esc(x.id)}">${esc(t("show"))}</button>${x.status !== "revoked" && keyFor(x.operatorId) ? `<button data-refund="${esc(x.id)}">${esc(t("refund"))}</button>` : ""}</div>
       </div></div>`).join("") : `<p class="small">${esc(t("walletEmpty"))}</p>`;
   $("check-wallet").innerHTML = state.wallet.map((x) => `<div class="item"><span>${esc(pick(x.name))}<br><span class="small">${esc(x.id)}</span></span>
-      <span><button class="ghost" data-use="${esc(x.id)}" data-how="show">${esc(t("useShow"))}</button> ${x.live ? `<button class="ghost" data-use="${esc(x.id)}" data-how="shot">${esc(t("useShot"))}</button> ` : ""}<button class="ghost" data-use="${esc(x.id)}" data-how="forged">${esc(t("useForged"))}</button></span></div>`).join("") || `<p class="small">${esc(t("walletEmpty"))}</p>`;
+      <span>${x.format && x.format !== "publit" ? `<button class="ghost" data-use="${esc(x.id)}" data-how="operator">${esc(t("useOperator"))}</button> ` : ""}<button class="ghost" data-use="${esc(x.id)}" data-how="show">${esc(t("useShow"))}</button> ${x.live ? `<button class="ghost" data-use="${esc(x.id)}" data-how="shot">${esc(t("useShot"))}</button> ` : ""}<button class="ghost" data-use="${esc(x.id)}" data-how="forged">${esc(t("useForged"))}</button></span></div>`).join("") || `<p class="small">${esc(t("walletEmpty"))}</p>`;
   const held = $("held").value;
   $("held").innerHTML = `<option value="">${esc(t("noTicket"))}</option>${state.scanned ? `<option value="scan">${esc(t("scanned"))}: ${esc(pick(state.scanned.name))}</option>` : ""}${state.wallet.filter((x) => x.status !== "revoked").map((x) => `<option value="${esc(x.id)}">${esc(t("bought"))}: ${esc(pick(x.name))}</option>`).join("")}`;
   $("held").value = [...$("held").options].some((o) => o.value === held) ? held : state.scanned ? "scan" : "";
@@ -363,8 +452,26 @@ async function syncTrust() {
   renderOperators();
 }
 
+// A code in an operator's own format: only that operator's device can read it on board. What Publit can
+// state is whether it issued exactly this code and whether it is still good.
+async function checkLedger(code) {
+  const box = $("verdict");
+  try {
+    const result = await api("POST", "/v1/validate", { code });
+    box.className = "verdict";
+    void box.offsetWidth;
+    box.className = `verdict ${result.level}`;
+    box.innerHTML = `<div class="big">${esc(result.level === "valid" ? t("vValid") : t("vInvalid"))}</div><div class="why">${esc(VERDICT[state.lang][result.code] ?? result.code)}</div>
+      ${result.name ? `<strong>${esc(pick(result.name))}</strong> <span class="small">${esc(result.ticketId)} · ${esc(result.operator)} · ${esc(result.format)}</span>` : ""}
+      ${result.description ? scopeList(result.description[state.lang]) : ""}
+      <ul class="checks">${result.checks.map((c) => `<li class="${c.ok ? "" : "no"}">${esc(CHECKS[state.lang][c.name])}</li>`).join("")}</ul>
+      <p class="small">${esc(t("ledgerNote"))}</p>`;
+  } catch (error) { alertBox(error); }
+}
+
 async function check(code) {
   const box = $("verdict");
+  if (code.trim() && !code.trim().startsWith("PT1.")) return checkLedger(code.trim());
   if (!state.trust) { box.className = "verdict idle"; box.innerHTML = `<p>${esc(t("trustNone"))}</p>`; return; }
   const stop = STOPS[$("ctx-stop").value] ?? null;
   const context = { operatorId: $("ctx-operator").value, mode: $("ctx-mode").value, ...(stop ? { stop } : {}) };
@@ -388,7 +495,7 @@ async function check(code) {
 
 async function useTicket(id, how) {
   const ticket = state.wallet.find((x) => x.id === id);
-  let code = await shown(ticket);
+  let code = how === "operator" ? ticket.code : await shown(ticket);
   if (how === "shot") code = await shown(ticket, Math.floor(Date.now() / 1000) - 600);
   if (how === "forged") {
     const parsed = parseTicket(ticket.token);
@@ -548,6 +655,8 @@ const API = [
   ["POST", "/v1/recognize", "Text und Barcode eines fotografierten Tickets → erkanntes Ticket", "Text and barcode of a photographed ticket → recognised ticket"],
   ["POST", "/v1/coverage", "Verbindungen (MOTIS-Format) gegen vorhandene Tickets prüfen und filtern", "Check and filter connections (MOTIS format) against tickets held"],
   ["POST", "/v1/operators/apply", "Betreiber meldet sich an", "An operator applies"],
+  ["POST", "/v1/admin/operators/{id}/format", "Nur Publit: Prüfformat und Schlüssel eines Unternehmens festlegen", "Publit only: set an operator's check format and key"],
+  ["POST", "/v1/admin/verify", "Nur Publit: hat Publit diesen Code ausgestellt, und gilt er noch", "Publit only: did Publit issue this code, and is it still good"],
   ["POST", "/v1/operator/products", "Ticket aus Vorlage anlegen oder neue Version veröffentlichen", "Create a ticket from a template or publish a new version"],
   ["POST", "/v1/operator/import/gtfs-fares", "Tarife aus GTFS-Fares v2 als Entwürfe übernehmen", "Import fares from GTFS-Fares v2 as drafts"],
   ["POST", "/v1/operator/tickets/{id}/revoke", "Erstattung: Ticket kommt auf die Sperrliste", "Refund: the ticket goes on the revocation list"],
@@ -560,6 +669,7 @@ function renderApi() {
 
 function renderAll() {
   renderOperators();
+  renderFormat();
   renderCatalog();
   renderWallet();
   renderSamples();
@@ -587,6 +697,10 @@ document.addEventListener("toggle", (event) => { if (event.target.dataset?.map &
 $("lang").addEventListener("click", () => { state.lang = state.lang === "de" ? "en" : "de"; localStorage.setItem("ptc-lang", state.lang); applyLanguage(); });
 $("op-apply").addEventListener("click", applyOperator);
 $("pr-save").addEventListener("click", saveProduct);
+$("fm-save").addEventListener("click", saveFormat);
+$("fm-test").addEventListener("click", testFormat);
+$("fm-operator").addEventListener("change", () => { $("fm-type").dataset.for = ""; $("fm-result").innerHTML = ""; renderFormat(); });
+$("fm-type").addEventListener("change", renderFormat);
 $("pr-operator").addEventListener("change", renderOperatorProducts);
 $("pr-template").addEventListener("change", () => { $("pr-hours-wrap").hidden = $("pr-template").value !== "hours"; });
 $("trust-sync").addEventListener("click", syncTrust);

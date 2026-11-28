@@ -59,3 +59,29 @@ test("server: rate limit per address and minute", () => {
   now = 61000;
   assert.equal(allowed("a"), true);
 });
+
+test("server: PRIVATE=on lets nobody in without the admin token, pages included", async () => {
+  assert.throws(() => createCoreServer({ PRIVATE: "on", ADMIN_TOKEN: "short" }), /ADMIN_TOKEN/);
+  const token = "a-long-private-token-0123456789";
+  await withServer({ DEMO: "on", PRIVATE: "on", ADMIN_TOKEN: token }, async (base) => {
+    assert.equal((await fetch(`${base}/health`)).status, 200);
+    for (const path of ["/", "/app.js", "/core/validate.js", "/v1/products", "/v1/trust", "/v1/demo"]) {
+      const response = await fetch(`${base}${path}`);
+      assert.equal(response.status, 401, path);
+      assert.match(response.headers.get("www-authenticate"), /^Basic/);
+    }
+    assert.equal((await fetch(`${base}/v1/products`, { headers: { authorization: "Bearer wrong-token-0123456789-abcdef" } })).status, 401);
+    assert.equal((await fetch(`${base}/v1/operators/apply`, { method: "POST", body: "{}" })).status, 401);
+    assert.equal((await fetch(`${base}/v1/products`, { headers: { authorization: `Bearer ${token}` } })).status, 200);
+    // What a browser does: sign in once with the password, then carry the cookie while the console sends other keys.
+    const page = await fetch(`${base}/`, { headers: { authorization: `Basic ${Buffer.from(`elija:${token}`).toString("base64")}` } });
+    assert.equal(page.status, 200);
+    const cookie = page.headers.get("set-cookie");
+    assert.match(cookie, /^ptc_access=[a-f0-9]{64}; Path=\/; HttpOnly; SameSite=Strict/);
+    assert.ok(!cookie.includes(token));
+    const withCookie = await fetch(`${base}/v1/operator`, { headers: { cookie: cookie.split(";")[0], authorization: "Bearer ptc_not-a-real-key" } });
+    assert.equal(withCookie.status, 401, "past the gate, the API still asks for its own key");
+    assert.equal((await withCookie.json()).error, "unauthorized");
+    assert.equal((await fetch(`${base}/v1/products`, { headers: { cookie: "ptc_access=" + "0".repeat(64) } })).status, 401);
+  });
+});

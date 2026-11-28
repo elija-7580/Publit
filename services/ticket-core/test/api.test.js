@@ -7,11 +7,13 @@ import { createStore } from "../src/store.js";
 import { generateKeyPair, signTicket, present, deviceKeyFromJwk, parseTicket } from "../src/core/token.js";
 import { openTrustList, checkTicket } from "../src/core/validate.js";
 import { b64u, encoder } from "../src/core/bytes.js";
+import { createHmac } from "node:crypto";
+import { decodeUic918 } from "../src/formats/uic918.js";
 
-function setup({ demo = false, start = Date.parse("2026-12-01T08:00:00Z") } = {}) {
+function setup({ demo = false, start = Date.parse("2026-12-01T08:00:00Z"), fetch, secretsKey = "a-long-test-key-for-the-vault-0123" } = {}) {
   const clock = { now: start };
   const store = createStore();
-  const app = createApp({ store, env: { DEMO: demo ? "on" : "off", ADMIN_TOKEN: "admin-secret", DEMO_PAYMENTS: "on" }, now: () => clock.now });
+  const app = createApp({ store, env: { DEMO: demo ? "on" : "off", ADMIN_TOKEN: "admin-secret", DEMO_PAYMENTS: "on", SECRETS_KEY: secretsKey }, now: () => clock.now, fetch });
   const call = async (method, path, body, key) => {
     const response = await app(new Request(`http://core${path}`, {
       method, headers: { "content-type": "application/json", ...(key ? { authorization: `Bearer ${key}` } : {}) },
@@ -335,4 +337,134 @@ test("outside demo mode there is no demo console and no free payment", async () 
   assert.equal(Object.keys(store.data.operators).length, 0);
   assert.equal(await get("/health"), 200);
   assert.equal((await app(new Request("http://core/v1/products", { method: "OPTIONS" }))).status, 204);
+});
+
+// ---- check formats: the code each operator's own devices read ---------------------------------------------------
+
+async function withDayTicket(call) {
+  const operator = await onboard(call);
+  const created = await call("POST", "/v1/operator/products", { name: "Tageskarte", template: "day", price: { amount: 900, currency: "EUR" } }, operator.key);
+  assert.equal(created.status, 201);
+  return { ...operator, productId: created.body.product.id };
+}
+
+test("format: only Publit sets it, and the secret never comes back out", async () => {
+  const { call, store } = setup();
+  const operator = await withDayTicket(call);
+  const format = { type: "shared-secret", config: { template: "{id}|{from}|{until}", length: 16 }, secret: "the-operators-own-secret-123" };
+  assert.equal((await call("POST", `/v1/admin/operators/${operator.id}/format`, format)).status, 401);
+  assert.equal((await call("POST", `/v1/admin/operators/${operator.id}/format`, format, operator.key)).status, 401);
+  assert.equal((await call("GET", "/v1/admin/operators", undefined, operator.key)).status, 401);
+  assert.equal((await call("POST", "/v1/admin/verify", { code: "x" })).status, 401);
+  const set = await call("POST", `/v1/admin/operators/${operator.id}/format`, format, "admin-secret");
+  assert.equal(set.status, 200, JSON.stringify(set.body));
+  assert.deepEqual({ type: set.body.operator.format.type, hasSecret: set.body.operator.format.hasSecret }, { type: "shared-secret", hasSecret: true });
+  const everything = JSON.stringify([set.body, (await call("GET", "/v1/admin/operators", undefined, "admin-secret")).body, (await call("GET", "/v1/operators")).body, (await call("GET", "/v1/operator", undefined, operator.key)).body]);
+  assert.ok(!everything.includes("the-operators-own-secret-123"));
+  assert.ok(!JSON.stringify(store.data).includes("the-operators-own-secret-123"), "the store holds the secret only encrypted");
+  // Changing the layout without sending the secret again keeps the secret.
+  const again = await call("POST", `/v1/admin/operators/${operator.id}/format`, { type: "shared-secret", config: { template: "{id}|{until}" } }, "admin-secret");
+  assert.equal(again.body.operator.format.hasSecret, true);
+  for (const bad of [{ type: "nope" }, { type: "shared-secret", config: { template: "no id" }, secret: "the-operators-own-secret-123" }, { type: "operator-api", config: { endpoint: "http://insecure.example/x" }, secret: "tok" },
+    { type: "uic-918-3", config: { rics: "12" } }, { type: "uic-918-3", config: { rics: "1234" }, secret: "not a key" }]) {
+    assert.equal((await call("POST", `/v1/admin/operators/${operator.id}/format`, bad, "admin-secret")).status, 400, JSON.stringify(bad));
+  }
+});
+
+test("format shared-secret: the ticket carries the checksum the operator's devices compute", async () => {
+  const { call, clock } = setup();
+  const operator = await withDayTicket(call);
+  const secret = "the-operators-own-secret-123";
+  await call("POST", `/v1/admin/operators/${operator.id}/format`, { type: "shared-secret", config: { template: "{id}|{from}|{until}|{n}", length: 16 }, secret }, "admin-secret");
+  const { ticket } = await buy(call, operator.productId);
+  assert.equal(ticket.format, "shared-secret");
+  // What the operator's device does, written independently of the server code.
+  const cut = ticket.code.lastIndexOf("|");
+  assert.equal(ticket.code.slice(cut + 1), createHmac("sha256", secret).update(ticket.code.slice(0, cut)).digest("hex").slice(0, 16));
+  assert.ok(ticket.code.startsWith(`${ticket.id}|`));
+  assert.match(ticket.token, /^PT1\./, "Publit's own signed record exists as well");
+
+  const good = await call("POST", "/v1/admin/verify", { code: ticket.code }, "admin-secret");
+  assert.equal(good.body.guaranteed, true, JSON.stringify(good.body));
+  assert.equal(good.body.ticket.id, ticket.id);
+  assert.equal((await call("POST", "/v1/admin/verify", { code: ticket.token }, "admin-secret")).body.guaranteed, true);
+  const forged = await call("POST", "/v1/admin/verify", { code: ticket.code.replace(/.$/, (c) => (c === "0" ? "1" : "0")) }, "admin-secret");
+  assert.deepEqual([forged.body.guaranteed, forged.body.code], [false, "not_issued"]);
+  assert.equal((await call("POST", "/v1/validate", { code: ticket.code })).body.level, "valid");
+
+  await call("POST", `/v1/operator/tickets/${ticket.id}/revoke`, { reason: "refund" }, operator.key);
+  assert.equal((await call("POST", "/v1/admin/verify", { code: ticket.code }, "admin-secret")).body.code, "revoked");
+  const second = (await buy(call, operator.productId)).ticket;
+  clock.now += 3 * 86400000;
+  assert.equal((await call("POST", "/v1/admin/verify", { code: second.code }, "admin-secret")).body.code, "expired");
+});
+
+test("format uic-918-3: a signed rail barcode; the public key is what the operator gets", async () => {
+  const { call } = setup();
+  const operator = await withDayTicket(call);
+  const set = await call("POST", `/v1/admin/operators/${operator.id}/format`, { type: "uic-918-3", config: { rics: "9999", keyId: "7" } }, "admin-secret");
+  assert.equal(set.status, 200, JSON.stringify(set.body));
+  const publicKey = set.body.operator.format.config.publicKeyPem;
+  assert.match(publicKey, /BEGIN PUBLIC KEY/);
+  assert.ok(!JSON.stringify(set.body).includes("PRIVATE KEY"));
+  const { ticket } = await buy(call, operator.productId);
+  assert.deepEqual([ticket.format, ticket.symbology, ticket.codeEncoding], ["uic-918-3", "aztec", "base64"]);
+  const bytes = Buffer.from(ticket.code, "base64");
+  assert.equal(bytes.subarray(0, 14).toString("latin1"), "#UT01999900007");
+  const read = decodeUic918(bytes, publicKey);
+  assert.equal(read.signed, true);
+  assert.equal(read.ticketId, ticket.id);
+  assert.ok(read.fields.some((f) => f.text === "Tageskarte"));
+  // One changed byte in the signed part: the signature no longer fits.
+  const changed = Buffer.from(bytes);
+  changed[20] ^= 1;
+  assert.notEqual(decodeUic918(changed, publicKey)?.signed, true);
+  assert.equal((await call("POST", "/v1/admin/verify", { code: ticket.code }, "admin-secret")).body.guaranteed, true);
+  const sample = await call("POST", `/v1/admin/operators/${operator.id}/format/test`, {}, "admin-secret");
+  assert.deepEqual([sample.body.test, sample.body.check, sample.body.symbology], [true, true, "aztec"]);
+  assert.equal((await call("POST", "/v1/admin/verify", { code: sample.body.code }, "admin-secret")).body.guaranteed, false, "a test code is not a ticket");
+});
+
+test("format operator-api: the operator's system issues the code; if it does not answer nothing is sold", async () => {
+  const seen = [];
+  let up = true;
+  const fetch = async (url, init) => {
+    seen.push({ url, auth: init.headers.authorization, body: JSON.parse(init.body) });
+    return up ? Response.json({ code: `OPERATOR-${seen.length}-ORIGINAL`, reference: "B-4711" }) : new Response("down", { status: 503 });
+  };
+  const { call, store } = setup({ fetch });
+  const added = await call("POST", "/v1/admin/operators", { name: "Seebahn AG", country: "AT", contactEmail: "it@seebahn.example", level: "api",
+    format: { type: "operator-api", config: { endpoint: "https://sales.seebahn.example/tickets", symbology: "aztec" }, secret: "their-api-token-xyz" } }, "admin-secret");
+  assert.equal(added.status, 201, JSON.stringify(added.body));
+  assert.equal(added.body.operator.status, "active");
+  const created = await call("POST", "/v1/operator/products", { name: "Tageskarte", template: "day", price: { amount: 900, currency: "EUR" } }, added.body.apiKey);
+  const { ticket } = await buy(call, created.body.product.id);
+  assert.equal(ticket.code, "OPERATOR-1-ORIGINAL");
+  assert.deepEqual([seen[0].url, seen[0].auth, seen[0].body.reference], ["https://sales.seebahn.example/tickets", "Bearer their-api-token-xyz", ticket.id]);
+  const verified = await call("POST", "/v1/admin/verify", { code: "OPERATOR-1-ORIGINAL" }, "admin-secret");
+  assert.deepEqual([verified.body.guaranteed, verified.body.ticket.reference], [true, "B-4711"]);
+  assert.equal(verified.body.checks.find((c) => c.name === "format").code, "format_operator");
+
+  up = false;
+  const order = await call("POST", "/v1/orders", { productId: created.body.product.id });
+  const paid = await call("POST", `/v1/orders/${order.body.order.id}/pay`, { secret: order.body.order.secret });
+  assert.deepEqual([paid.status, paid.body.error], [502, "operator_system"]);
+  assert.equal(store.data.orders[order.body.order.id].status, "pending_payment");
+  assert.equal(Object.keys(store.data.tickets).length, 1);
+});
+
+test("vault: without the right SECRETS_KEY a stored secret opens nothing", async () => {
+  const none = setup({ secretsKey: "" });
+  const operator = await withDayTicket(none.call);
+  const refused = await none.call("POST", `/v1/admin/operators/${operator.id}/format`, { type: "shared-secret", secret: "the-operators-own-secret-123" }, "admin-secret");
+  assert.deepEqual([refused.status, refused.body.error], [503, "no_secrets_key"]);
+
+  const first = setup();
+  const op = await withDayTicket(first.call);
+  await first.call("POST", `/v1/admin/operators/${op.id}/format`, { type: "shared-secret", secret: "the-operators-own-secret-123" }, "admin-secret");
+  // The same data file under another key, as after a stolen copy.
+  const other = createApp({ store: first.store, env: { ADMIN_TOKEN: "admin-secret", DEMO_PAYMENTS: "on", SECRETS_KEY: "another-key-entirely-0123456789" }, now: () => first.clock.now });
+  const order = await first.call("POST", "/v1/orders", { productId: op.productId });
+  const response = await other(new Request(`http://core/v1/orders/${order.body.order.id}/pay`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ secret: order.body.order.secret }) }));
+  assert.deepEqual([response.status, (await response.json()).error], [409, "secret_unreadable"]);
 });

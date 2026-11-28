@@ -90,6 +90,28 @@ to issue real UIC barcodes with the same content so existing scanners read them.
 Issuer and key known, signature, product and scope hash, revocation, live proof, time, and, when the device
 knows where it is, the scope. Verdict `valid`, `check` (needs a human: ID, unknown operator) or `invalid`.
 
+### The operator's own check format (`src/formats.js`, `src/vault.js`)
+
+Every operator already has checking software, and it only accepts codes in its own format. So the code a
+ticket shows is set per operator, by Publit only (admin token):
+
+| Format | The conductor's device sees | What Publit needs from the operator |
+| --- | --- | --- |
+| `publit` | Publit's signed code (PT1) | nothing; checked with the web check |
+| `operator-api` | the operator's original code, issued by its own sales system when the ticket is paid | API address and access token |
+| `shared-secret` | a text with a keyed checksum (HMAC) in the operator's layout | the secret and the layout |
+| `uic-918-3` | the Aztec code of European rail tickets (`#UT`, U_HEAD + U_TLAY, DSA signature) | its company code; it adds Publit's public key to its key list, or hands over a signing key |
+
+Secrets are stored encrypted (AES-256-GCM, key from `SECRETS_KEY`, never in the data file) and no endpoint
+returns them. `POST /v1/admin/operators/{id}/format/test` gives a sample code to hold under a real device
+before anything is sold. Whatever the format, Publit keeps its own signed record of every ticket, so
+`POST /v1/admin/verify` answers for any code: issued by Publit exactly like this, fits the operator's format,
+not refunded, within its time.
+
+The UIC 918.3 output is read back by an independent open-source decoder (npm `uic-918-3`, checked by hand,
+not a dependency). Whether a given operator's devices accept it depends on that operator: its key list, and
+which records it expects (many use U_FLEX or their own records today). That has to be tried with each one.
+
 ### A ticket someone already holds (`src/recognize.js`, `POST /v1/coverage`)
 
 The app sends the text and barcodes it read. Our own code is verified and exact; other tickets are matched by
@@ -112,11 +134,15 @@ All JSON. CORS is open. The full list with bodies is at the top of `src/app.js`.
 | `POST /v1/operators/apply` | an operator applies |
 | `/v1/operator/…` (Bearer API key) | products, publish, retire, GTFS import, key change, refunds, inspections, statement |
 | `/v1/admin/operators/{id}/approve`, `/suspend` (Bearer `ADMIN_TOKEN`) | Publit's side of onboarding |
+| `GET/POST /v1/admin/operators`, `GET /v1/admin/formats` | all operators with their format; add one directly |
+| `POST /v1/admin/operators/{id}/format`, `…/format/test` | set an operator's check format and key; sample code |
+| `POST /v1/admin/verify` | did Publit issue this code, and is it still good |
 
 ## What is not built
 
 - Real payment. `pay` is a demo step; `services/ticket-shop` has the Stripe checkout this would plug into.
-- Adapters for level `api` (OSDM, Distribusion) and real UIC or VDV barcodes.
+- Adapters for OSDM and Distribusion (`operator-api` is a plain JSON call), UIC U_FLEX / dynamic barcodes, VDV-KA.
+- Acceptance tests on real checking devices: no operator has tried a code from here yet.
 - A database and a key service: state is one JSON file, hosted private keys lie in it.
 - Splitting a ride at a border or zone edge (today a ride is covered whole or not).
 - Legal: selling long-distance tickets needs a travel agency licence in Austria; contracts with operators.
@@ -124,7 +150,10 @@ All JSON. CORS is open. The full list with bodies is at the top of `src/app.js`.
 ## Configuration
 
 `DEMO=on` loads demo data and opens `/v1/demo` (never in production), `DATA_FILE`, `ADMIN_TOKEN`,
-`ROOT_KEY_JWK`, `PORT`, `HOST`, `RATE_LIMIT`. See `src/node.js`.
+`ROOT_KEY_JWK`, `SECRETS_KEY`, `PORT`, `HOST`, `RATE_LIMIT`. See `src/node.js`.
 
-The demo console loads four libraries from jsDelivr: qrcode-generator (MIT), jsQR (Apache-2.0), Leaflet
-(BSD-2-Clause) and tesseract.js (Apache-2.0). Map tiles © OpenStreetMap contributors.
+`PRIVATE=on` closes the whole service, pages included, to anyone without `ADMIN_TOKEN` (Bearer token, or the
+password when the browser asks). Use it wherever real operator keys are stored.
+
+The demo console loads five libraries from jsDelivr: qrcode-generator (MIT), jsQR (Apache-2.0), Leaflet
+(BSD-2-Clause), tesseract.js (Apache-2.0) and bwip-js (MIT, for Aztec codes). Map tiles © OpenStreetMap contributors.

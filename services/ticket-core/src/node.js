@@ -9,10 +9,14 @@
 //   DATA_FILE       where the state is kept; without it everything is in memory
 //   ADMIN_TOKEN     Publit's own key for approving operators (in demo mode one is made up at start)
 //   ROOT_KEY_JWK    the root key that signs the trust list; without it one is created and kept in the store
+//   SECRETS_KEY     encrypts what operators hand over (secrets, tokens, signing keys); at least 24 characters.
+//                   Keep it outside the data file. In demo mode one is made up at start (and lost at restart).
+//   PRIVATE         "on" closes everything, pages included, to anyone without ADMIN_TOKEN: as a Bearer token,
+//                   or as the password when the browser asks (any user name). /health stays open.
 //   RATE_LIMIT      requests per minute and address (default 240)
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
-import { randomBytes } from "node:crypto";
+import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { dirname, join, normalize, extname } from "node:path";
 import { createApp } from "./app.js";
@@ -50,9 +54,32 @@ async function staticFile(path) {
   }
 }
 
+const same = (a, b) => {
+  const x = Buffer.from(String(a));
+  const y = Buffer.from(String(b));
+  return x.length === y.length && timingSafeEqual(x, y);
+};
+
+/** PRIVATE=on: who may come in. → "header" (send the cookie along), "cookie", or null. */
+export function accessBy(headers, token) {
+  const pass = createHash("sha256").update(`ptc-access:${token}`).digest("hex");
+  const auth = headers.authorization ?? "";
+  if (auth.startsWith("Bearer ") && same(auth.slice(7).trim(), token)) return "header";
+  if (auth.startsWith("Basic ")) {
+    const text = Buffer.from(auth.slice(6), "base64").toString("utf8");
+    if (same(text.slice(text.indexOf(":") + 1), token)) return "header";
+  }
+  // The console sends operator keys in the Authorization header, so the browser's own sign-in rides in a cookie.
+  const cookie = /(?:^|;\s*)ptc_access=([a-f0-9]{64})(?:;|$)/.exec(headers.cookie ?? "");
+  return cookie && same(cookie[1], pass) ? "cookie" : null;
+}
+
 export function createCoreServer(env = process.env, store = createStore(env.DATA_FILE ?? null)) {
   const settings = { ...env };
+  const closed = settings.PRIVATE === "on";
+  if (closed && (settings.ADMIN_TOKEN ?? "").length < 24) throw new Error("PRIVATE=on needs an ADMIN_TOKEN of at least 24 characters");
   if (settings.DEMO === "on" && !settings.ADMIN_TOKEN) settings.ADMIN_TOKEN = randomBytes(18).toString("base64url");
+  if (settings.DEMO === "on" && !settings.SECRETS_KEY) settings.SECRETS_KEY = randomBytes(32).toString("base64url");
   const app = createApp({ store, env: settings });
   const allowed = memoryRateLimiter(Number(settings.RATE_LIMIT ?? 240));
   const server = createServer(async (req, res) => {
@@ -61,6 +88,15 @@ export function createCoreServer(env = process.env, store = createStore(env.DATA
       // client sent and must not decide the rate limit.
       const ip = (req.headers["x-forwarded-for"] ?? req.socket.remoteAddress ?? "unknown").split(",").at(-1).trim();
       const path = new URL(req.url, "http://localhost").pathname;
+      if (closed && path !== "/health") {
+        if (!allowed(`gate:${ip}`)) { res.writeHead(429).end(); return; }
+        const by = accessBy(req.headers, settings.ADMIN_TOKEN);
+        if (!by) { res.writeHead(401, { "www-authenticate": 'Basic realm="Publit Ticket Core", charset="UTF-8"', "cache-control": "no-store" }).end("Not authorised"); return; }
+        if (by === "header") {
+          const secure = (req.headers["x-forwarded-proto"] ?? "").split(",")[0].trim() === "https" ? "; Secure" : "";
+          res.setHeader("set-cookie", `ptc_access=${createHash("sha256").update(`ptc-access:${settings.ADMIN_TOKEN}`).digest("hex")}; Path=/; HttpOnly; SameSite=Strict; Max-Age=2592000${secure}`);
+        }
+      }
       if (req.method === "GET" && !path.startsWith("/v1/") && path !== "/health") {
         const file = await staticFile(path);
         if (!file) { res.writeHead(404).end("Not found"); return; }
