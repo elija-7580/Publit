@@ -44,6 +44,8 @@ jobs:
         run: node --test
       - working-directory: services/ticket-shop
         run: node --test
+      - working-directory: services/ticket-core
+        run: node --test
 
   ios:
     name: iOS build, unit and UI tests

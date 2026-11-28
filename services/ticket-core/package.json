@@ -1,0 +1,13 @@
+{
+  "name": "publit-ticket-core",
+  "private": true,
+  "type": "module",
+  "license": "AGPL-3.0-only",
+  "description": "Ticket platform for public transport operators: onboarding, products with a machine-readable scope, signed tickets that conductors check offline, and connection search limited to a ticket someone already holds.",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "test": "node --test",
+    "start": "node src/node.js",
+    "demo": "DEMO=on node src/node.js"
+  }
+}
