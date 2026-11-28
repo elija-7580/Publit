@@ -159,6 +159,7 @@ test("a ticket keeps the scope it was sold under when the product changes", asyn
   const trust = await offlineTrust(call);
   const at = (id) => ({ agencyName: "Seebus Linien", mode: "BUS", stop: { stopId: id } });
   assert.equal((await checkTicket(ticket.token, trust, { now: clock.now, context: at("s2") })).level, "valid", "the old ticket still covers s2");
+  assert.equal((await checkTicket(ticket.token, trust, { now: clock.now, context: { agencyName: "Seebus Linien", mode: "BUS" } })).level, "valid", "no stop known: the area is left open");
   const fresh = await buy(call, "seebus-linien.zonenticket");
   assert.equal((await checkTicket(fresh.ticket.token, trust, { now: clock.now, context: at("s2") })).code, "scope_area");
   const mine = (await call("GET", "/v1/operator/products", undefined, operator.key)).body.products[0];

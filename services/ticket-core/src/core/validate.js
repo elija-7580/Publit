@@ -91,8 +91,9 @@ export async function checkTicket(text, trust, { now = Date.now(), context = nul
       mode: context.mode, operatorId: context.operatorId, agencyName: context.agencyName, routeShortName: context.line,
       from: context.stop ?? {}, to: context.stop ?? {}, startTime: new Date(now).toISOString(),
     };
-    scope = coverLeg(leg, entitlement, { operators: trust.operators }, Boolean(route));
-    if (scope.covered === true && route && !atEnd) scope = { ...scope, covered: null, reason: "route_between" };
+    // A device that does not know its stop checks operator, vehicle and exceptions, and leaves the area open.
+    scope = coverLeg(leg, entitlement, { operators: trust.operators }, Boolean(route) || !context.stop);
+    if (scope.covered === true && route && context.stop && !atEnd) scope = { ...scope, covered: null, reason: "route_between" };
     checks.push({ name: "scope", ok: scope.covered === true, code: scope.reason });
     if (scope.covered === false) { level = "invalid"; code = `scope_${scope.reason}`; }
     else if (scope.covered === null) { level = "check"; code = `scope_${scope.reason}`; }
