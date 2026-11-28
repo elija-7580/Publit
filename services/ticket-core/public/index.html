@@ -1,0 +1,193 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: AGPL-3.0-only -->
+<!-- SPDX-FileCopyrightText: 2026 Elija Samuel Friedrich-Ulrich -->
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Publit Ticket Core – Demo</title>
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="dot"></span><strong>Publit</strong> Ticket Core <span class="chip demo" data-t="demoChip"></span></div>
+  <nav id="tabs">
+    <button data-tab="overview" data-t="tabOverview"></button>
+    <button data-tab="operator" data-t="tabOperator"></button>
+    <button data-tab="buy" data-t="tabBuy"></button>
+    <button data-tab="check" data-t="tabCheck"></button>
+    <button data-tab="scan" data-t="tabScan"></button>
+    <button data-tab="api" data-t="tabApi"></button>
+  </nav>
+  <button id="lang" class="ghost" aria-label="Sprache / Language">EN</button>
+</header>
+
+<main>
+<section id="overview" class="tab">
+  <div class="hero">
+    <h1 data-t="heroTitle"></h1>
+    <p class="lead" data-t="heroLead"></p>
+  </div>
+  <div class="steps">
+    <a class="card step" data-go="operator"><span class="num">1</span><h3 data-t="s1h"></h3><p data-t="s1p"></p></a>
+    <a class="card step" data-go="buy"><span class="num">2</span><h3 data-t="s2h"></h3><p data-t="s2p"></p></a>
+    <a class="card step" data-go="check"><span class="num">3</span><h3 data-t="s3h"></h3><p data-t="s3p"></p></a>
+    <a class="card step" data-go="scan"><span class="num">4</span><h3 data-t="s4h"></h3><p data-t="s4p"></p></a>
+  </div>
+  <p class="note" data-t="demoNote"></p>
+</section>
+
+<section id="operator" class="tab">
+  <h2 data-t="opTitle"></h2>
+  <p class="lead" data-t="opLead"></p>
+  <div class="cols">
+    <div class="card">
+      <h3 data-t="opApplyH"></h3>
+      <label><span data-t="fName"></span><input id="op-name" placeholder="Seebus Linien GmbH"></label>
+      <div class="row">
+        <label><span data-t="fCountry"></span><input id="op-country" value="AT" maxlength="2" size="3"></label>
+        <label class="grow"><span data-t="fEmail"></span><input id="op-email" type="email" placeholder="vertrieb@beispiel.at"></label>
+      </div>
+      <label><span data-t="fLevel"></span>
+        <select id="op-level">
+          <option value="hosted" data-t="lvHosted"></option>
+          <option value="link" data-t="lvLink"></option>
+          <option value="api" data-t="lvApi"></option>
+        </select>
+      </label>
+      <button id="op-apply" class="primary" data-t="opApply"></button>
+      <div id="op-result" class="result"></div>
+      <h3 data-t="opDirH" class="gap"></h3>
+      <div id="op-directory" class="list small"></div>
+    </div>
+    <div class="card">
+      <h3 data-t="prH"></h3>
+      <label><span data-t="fOperator"></span><select id="pr-operator"></select></label>
+      <label><span data-t="fTemplate"></span><select id="pr-template"></select></label>
+      <div class="row">
+        <label class="grow"><span data-t="fProductName"></span><input id="pr-name" placeholder="Tageskarte"></label>
+        <label><span data-t="fPrice"></span><input id="pr-price" inputmode="decimal" value="9,90" size="6"></label>
+      </div>
+      <div class="row">
+        <label id="pr-hours-wrap"><span data-t="fHours"></span><select id="pr-hours"><option>24</option><option>48</option><option>72</option></select></label>
+        <label class="grow"><span data-t="fArea"></span>
+          <select id="pr-area">
+            <option value="network" data-t="arNetwork"></option>
+            <option value="country" data-t="arCountry"></option>
+            <option value="zone" data-t="arZone"></option>
+          </select>
+        </label>
+      </div>
+      <button id="pr-save" class="primary" data-t="prSave"></button>
+      <div id="pr-result" class="result"></div>
+      <h3 data-t="stH" class="gap"></h3>
+      <div id="statement" class="small"></div>
+    </div>
+    <div class="card wide" id="fmt-card">
+      <h3 data-t="fmH"></h3>
+      <p class="small" data-t="fmLead"></p>
+      <div class="cols inner">
+        <div>
+          <label><span data-t="fOperator"></span><select id="fm-operator"></select></label>
+          <label><span data-t="fmType"></span><select id="fm-type"></select></label>
+          <p id="fm-about" class="small"></p>
+          <div id="fm-fields"></div>
+          <div class="row">
+            <button id="fm-save" class="primary" data-t="fmSave"></button>
+            <button id="fm-test" data-t="fmTest"></button>
+          </div>
+        </div>
+        <div><div id="fm-state" class="small"></div><div id="fm-result" class="result"></div></div>
+      </div>
+    </div>
+    <div class="card wide">
+      <h3 data-t="prListH"></h3>
+      <div id="pr-list" class="list"></div>
+    </div>
+  </div>
+</section>
+
+<section id="buy" class="tab">
+  <h2 data-t="buyTitle"></h2>
+  <p class="lead" data-t="buyLead"></p>
+  <div class="cols">
+    <div class="card wide"><h3 data-t="buyCatalog"></h3><div id="catalog" class="grid"></div></div>
+    <div class="card wide"><h3 data-t="buyWallet"></h3><div id="wallet" class="grid"></div></div>
+  </div>
+</section>
+
+<section id="check" class="tab">
+  <h2 data-t="chkTitle"></h2>
+  <p class="lead" data-t="chkLead"></p>
+  <div class="cols">
+    <div class="card">
+      <h3 data-t="chkWhere"></h3>
+      <label><span data-t="fOperator"></span><select id="ctx-operator"></select></label>
+      <div class="row">
+        <label class="grow"><span data-t="fMode"></span><select id="ctx-mode"></select></label>
+        <label class="grow"><span data-t="fStop"></span><select id="ctx-stop"></select></label>
+      </div>
+      <div class="trust">
+        <div id="trust-state" class="small"></div>
+        <div class="row">
+          <button id="trust-sync" data-t="chkSync"></button>
+          <label class="check"><input type="checkbox" id="offline"><span data-t="chkOffline"></span></label>
+        </div>
+      </div>
+      <h3 data-t="chkScan" class="gap"></h3>
+      <button id="cam-start" data-t="chkCamera"></button>
+      <video id="cam" playsinline hidden></video>
+      <textarea id="code" rows="3" placeholder="PT1.…"></textarea>
+      <button id="code-check" class="primary" data-t="chkCheck"></button>
+      <h3 data-t="chkWallet" class="gap"></h3>
+      <div id="check-wallet" class="list small"></div>
+    </div>
+    <div class="card wide"><div id="verdict" class="verdict idle"><p data-t="chkIdle"></p></div></div>
+  </div>
+</section>
+
+<section id="scan" class="tab">
+  <h2 data-t="scTitle"></h2>
+  <p class="lead" data-t="scLead"></p>
+  <div class="cols">
+    <div class="card">
+      <h3 data-t="scPhoto"></h3>
+      <div id="samples" class="samples"></div>
+      <label class="file"><input type="file" id="photo" accept="image/*" capture="environment"><span data-t="scUpload"></span></label>
+      <canvas id="photo-view" hidden></canvas>
+      <div id="ocr-state" class="small"></div>
+      <label><span data-t="scText"></span><textarea id="ocr-text" rows="5"></textarea></label>
+      <button id="recognise" class="primary" data-t="scRecognise"></button>
+      <div id="recognised" class="result"></div>
+    </div>
+    <div class="card wide">
+      <h3 data-t="scSearch"></h3>
+      <div class="row">
+        <label class="grow"><span data-t="fRoute"></span><select id="route"></select></label>
+        <label class="grow"><span data-t="fTicket"></span><select id="held"></select></label>
+      </div>
+      <div class="row">
+        <button id="search" class="primary" data-t="scGo"></button>
+        <label class="check"><input type="checkbox" id="only"><span data-t="scOnly"></span></label>
+      </div>
+      <div id="journeys" class="list"></div>
+    </div>
+  </div>
+</section>
+
+<section id="api" class="tab">
+  <h2 data-t="apiTitle"></h2>
+  <p class="lead" data-t="apiLead"></p>
+  <div class="card wide"><div id="api-list"></div></div>
+</section>
+</main>
+
+<footer><span data-t="footer"></span></footer>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<script type="module" src="/app.js"></script>
+</body>
+</html>
