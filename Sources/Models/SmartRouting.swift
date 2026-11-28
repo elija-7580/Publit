@@ -99,14 +99,21 @@ enum SmartRouting {
 
     /// Drops routes that another one beats on everything: leaves no earlier, arrives no later,
     /// with no more changes and not more walking. Walking the whole way is never dropped.
+    /// A few more minutes on foot don't save a route that arrives clearly later for it: when the
+    /// other one gets there at least 10 min earlier and walks no longer than it saves, it wins
+    /// (Krems, 2026-11-28: the same two buses at 19:41 twice, once walking 23 min to arrive 22:06,
+    /// once changing again to arrive 22:32).
     static func pruned(_ list: [Itinerary]) -> [Itinerary] {
         let walks = list.map { Double(RouteSort.walkSeconds($0)) }
         return list.enumerated().filter { i, a in
             guard !a.isDirect else { return true }
             return !list.enumerated().contains { j, b in
                 guard j != i, !b.isDirect, !b.isCancelled else { return false }
+                let saved = a.endTime.timeIntervalSince(b.endTime)
+                let walkOK = walks[j] <= walks[i] + 60
+                    || (saved >= Reach.longWalkMustSave && walks[j] - walks[i] <= saved)
                 let noWorse = b.startTime >= a.startTime && b.endTime <= a.endTime
-                    && transitChanges(b) <= transitChanges(a) && walks[j] <= walks[i] + 60
+                    && transitChanges(b) <= transitChanges(a) && walkOK
                 let better = b.startTime > a.startTime || b.endTime < a.endTime || transitChanges(b) < transitChanges(a)
                 return noWorse && better
             }

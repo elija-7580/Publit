@@ -36,6 +36,60 @@ struct BoardingLine: View {
     }
 }
 
+/// The two facts under a route's bar, each with its own symbol: where you get on, with the walk
+/// there ("🚶 6 min  Unter-Meisling Ort · Pl. 3"), and on the right how often you change.
+/// Replaces one run of text joined by dots ("2 changes · Walk to … · 6 min", feedback on build 113).
+struct RouteFacts: View {
+    let itinerary: Itinerary
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 12) {
+            if let leg = itinerary.firstTransitLeg {
+                let walk = itinerary.legs.prefix { !$0.isTransit }.reduce(0) { $0 + $1.duration }
+                let walks = walk >= BoardingLine.walkWorthSaying
+                HStack(alignment: .firstTextBaseline, spacing: 5) {
+                    Image(systemName: walks ? "figure.walk" : "mappin.and.ellipse").imageScale(.small)
+                    if walks {
+                        Text(verbatim: Fmt.duration(seconds: walk)).fontWeight(.semibold).monospacedDigit()
+                    }
+                    Text(verbatim: Self.stop(leg)).lineLimit(1).truncationMode(.tail)
+                }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(BoardingLine.text(leg: leg, walkSeconds: walk))
+                .accessibilityIdentifier("boardingLine")
+            } else {
+                let meters = itinerary.legs.compactMap(\.distance).reduce(0, +)
+                HStack(alignment: .firstTextBaseline, spacing: 5) {
+                    Image(systemName: "figure.walk").imageScale(.small)
+                    Text(verbatim: meters > 0 ? Fmt.distance(meters: meters) : Fmt.duration(seconds: itinerary.duration))
+                }
+                .accessibilityElement(children: .combine)
+                .accessibilityIdentifier("boardingLine")
+            }
+            Spacer(minLength: 0)
+            if !itinerary.isDirect {
+                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                    Image(systemName: itinerary.transfers == 0 ? "arrow.right" : "arrow.triangle.swap").imageScale(.small)
+                    Text(verbatim: Fmt.changes(itinerary.transfers))
+                }
+                .fixedSize()
+                .layoutPriority(1)
+                .accessibilityElement(children: .combine)
+                .accessibilityIdentifier("changesLine")
+            }
+        }
+        .font(.footnote)
+        .foregroundStyle(.secondary)
+    }
+
+    /// "Unter-Meisling Ort · Pl. 3": the stop where the first ride starts, with its platform.
+    static func stop(_ leg: Leg) -> String {
+        var parts = [leg.from.name]
+        if let track = TransitLabels.clean(leg.from.track) { parts.append(L10n.f("Pl. %@", track)) }
+        return parts.joined(separator: " · ")
+    }
+}
+
 /// Every boarding and the final stop in a few lines (route detail, above the full steps):
 /// time, line, stop and platform, direction.
 struct BoardingSteps: View {

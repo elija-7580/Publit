@@ -72,6 +72,27 @@ final class SmartRoutingTests: XCTestCase {
         XCTAssertEqual(kept.map(\.routeKey), [later.routeKey, walk.routeKey])
     }
 
+    func testALaterArrivalWithAnExtraChangeGoesWhenTheWalkSavesMoreThanItCosts() throws {
+        // Krems, 2026-11-28: the same two buses, then 23 min on foot (arrive 145) or another bus (arrive 171).
+        let walkOn = itinerary([try leg("WALK", "Home", "A", start: 0, end: 6),
+                                try leg("BUS", "A", "B", start: 6, end: 53),
+                                try leg("BUS", "B", "C", start: 70, end: 121),
+                                try leg("WALK", "C", "D", start: 122, end: 145)])
+        let rideOn = itinerary([try leg("WALK", "Home", "A", start: 0, end: 6),
+                                try leg("BUS", "A", "B", start: 6, end: 53),
+                                try leg("BUS", "B", "C", start: 70, end: 121),
+                                try leg("BUS", "C", "D", start: 165, end: 169),
+                                try leg("WALK", "D", "D", start: 169, end: 171)])
+        XCTAssertEqual(SmartRouting.pruned([walkOn, rideOn]).map(\.routeKey), [walkOn.routeKey])
+        // Arriving only 5 min earlier for 20 min more walking: both stay.
+        let close = itinerary([try leg("WALK", "Home", "A", start: 0, end: 6),
+                               try leg("BUS", "A", "B", start: 6, end: 53),
+                               try leg("BUS", "B", "C", start: 70, end: 121),
+                               try leg("BUS", "C", "D", start: 140, end: 148),
+                               try leg("WALK", "D", "D", start: 148, end: 150)])
+        XCTAssertEqual(SmartRouting.pruned([walkOn, close]).count, 2)
+    }
+
     func testBackupIsTheNextVehicleThatStillWorks() throws {
         var ride = try leg("BUS", "B", "C", start: 20, end: 30)
         let earlier = [try leg("WALK", "B", "B", start: 14, end: 15), try leg("BUS", "B", "C", start: 15, end: 25), try leg("WALK", "C", "C", start: 25, end: 26)]
