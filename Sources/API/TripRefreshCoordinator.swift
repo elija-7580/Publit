@@ -8,9 +8,18 @@ actor TripRefreshCoordinator {
     private var recent: [String: (Itinerary, Date)] = [:]
     private let load: @Sendable (String) async throws -> Itinerary
 
-    init(load: @escaping @Sendable (String) async throws -> Itinerary = {
-        try await TransitousClient.shared.refresh(itineraryId: $0)
-    }) { self.load = load }
+    init(load: @escaping @Sendable (String) async throws -> Itinerary = { try await TripRefreshCoordinator.fetch($0) }) { self.load = load }
+
+    /// A planned route by its server ID; a ride from the vehicle you are on (`OnBoardPlan`) from
+    /// that vehicle's trip.
+    static func fetch(_ id: String) async throws -> Itinerary {
+        if let ride = OnBoardPlan.parseRide(id) {
+            let trip = try await TransitousClient.shared.trip(id: ride.tripId)
+            guard let cut = OnBoardPlan.refreshed(id, trip: trip) else { throw RouteBuilder.NoLongerTheSame() }
+            return cut
+        }
+        return try await TransitousClient.shared.refresh(itineraryId: id)
+    }
 
     func refresh(_ id: String, now: Date = .now) async throws -> Itinerary {
         if let task = inFlight[id] { return try await task.value }
@@ -32,6 +41,14 @@ actor TripRefreshCoordinator {
         var fresh: [String: Itinerary] = [:]
         for id in RouteBuilder.refreshIds(of: route) { fresh[id] = try await refresh(id, now: now) }
         guard let built = RouteBuilder.refreshed(route, with: fresh) else { throw RouteBuilder.NoLongerTheSame() }
+        return built
+    }
+
+    /// A built route from a link (#145): every part's planned route is fetched and the route put together.
+    func load(parts: [RoutePart], now: Date = .now) async throws -> Itinerary {
+        var fetched: [String: Itinerary] = [:]
+        for id in Set(parts.map(\.itineraryId)) { fetched[id] = try await refresh(id, now: now) }
+        guard let built = RouteBuilder.assemble(parts, from: fetched) else { throw RouteBuilder.NoLongerTheSame() }
         return built
     }
 }

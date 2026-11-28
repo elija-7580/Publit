@@ -12,6 +12,8 @@ struct NearbyView: View {
     @State private var searching = false
     @State private var openedStop: StopTarget?
     @State private var showMap = false
+    /// The station map grows out of the map at the top (iOS 18).
+    @Namespace private var mapZoom
     @AppStorage(NearbyMap.defaultsKey) private var showNearbyMap = true
     /// The iPad layout has its own big map behind the panel: there the board stays a plain list.
     @Environment(WideMapState.self) private var wideMap: WideMapState?
@@ -82,10 +84,15 @@ struct NearbyView: View {
         .navigationDestination(for: TripTarget.self) { t in
             TripView(stopTime: t.stopTime, stationId: t.stationId, stationName: t.stationName, stationCoordinate: t.coordinate)
         }
-        .fullScreenCover(isPresented: $showMap) { StationMapView() }
+        .fullScreenCover(isPresented: $showMap) { StationMapView().modifier(MapZoomDestination(zoom: mapLayout ? mapZoom : nil)) }
         // "Route here/from here" on a map stop switches to Plan: the map closes so Plan is visible.
         .onChange(of: app.tab) { if app.tab != .nearby { showMap = false } }
-        .refreshable { await load(force: true) }
+        .refreshable {
+            // A pull far enough to open the station map is no refresh: reloading under the opening map made it stutter.
+            try? await Task.sleep(for: .milliseconds(80))
+            guard !showMap else { return }
+            await load(force: true)
+        }
         .onChange(of: storedModes) {
             // Show the matching part of the current board at once, then ask the server for more.
             if let c = lastCenter { regroup(lastStopTimes, around: c) }
@@ -216,7 +223,8 @@ struct NearbyView: View {
             }
         }
         .readableWidth()
-        .inkList(hero: hero, onExpand: { showMap = true }) { insets in
+        // Pulled far down, the board gives way to the station map (#17).
+        .inkList(hero: hero, pullToExpand: true, zoom: mapZoom, onExpand: { showMap = true }) { insets in
             NearbyMap(here: location.coordinate, groups: groups, onOpenStation: { openedStop = StopTarget($0) }, preview: true,
                       heading: location.heading)
                 .safeAreaPadding(insets)
@@ -278,7 +286,7 @@ struct NearbyView: View {
             if search { whereToButton }
             ForEach(favorites.pinned) { p in
                 Button { go(.place(p)) } label: {
-                    PlaceKeyRow(symbol: p.role?.symbol ?? "mappin", title: p.role?.title ?? p.name, detail: p.name, routes: true)
+                    PlaceKeyRow(symbol: p.shownSymbol, title: p.keyTitle, detail: p.role == nil ? p.subtitle : p.name, routes: true)
                 }
                 .buttonStyle(.plain)
             }
@@ -601,7 +609,7 @@ struct StopDeparturesView: View {
                     }
                 case .lines:
                     ForEach(LineGrouping.lines(shown)) { line in
-                        let savedLine = SavedLine(stopTime: line.first, stopId: stopId, stopName: name, at: coordinate)
+                        let savedLine = SavedLine(stopTime: line.first, stopId: stopId, stopName: name, at: coordinate, direction: false)
                         NavigationLink {
                             LineDetailView(line: LineRef(saved: savedLine), initialDepartures: shown)
                         } label: { LineAtStopRow(line: line) }
@@ -697,7 +705,7 @@ struct LineAtStopRow: View {
                                             dir.departures.first.flatMap { TransitLabels.clean($0.place.track) }
                                                 .map { L10n.f("Platform %@", $0) }]
                                 .compactMap { $0 }.joined(separator: " · "))
-                                .font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                                .font(.footnote).foregroundStyle(.secondary).lineLimit(1)
                         }
                     }
                     Spacer(minLength: 8)

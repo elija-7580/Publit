@@ -179,6 +179,25 @@ final class WatchSyncTests: XCTestCase {
         XCTAssertEqual(snap.trip(for: refreshed)?.id, "a")
     }
 
+    func testTheWatchOpensATripStartedOnThePhoneByItself() throws {
+        let it = try XCTUnwrap(plan("plan_muc").itineraries.first)
+        let a = trip("a", it)
+        var snap = WatchSnapshot(sentAt: .now, trips: [a])
+        let riding = it.startTime.addingTimeInterval(60)
+        XCTAssertNil(WatchAutoOpen.trip(in: snap, now: riding, onHome: true, opened: nil), "a saved trip nobody started stays a tile")
+        snap.activeTripId = "a"
+        XCTAssertEqual(WatchAutoOpen.trip(in: snap, now: riding, onHome: true, opened: nil), "a")
+        XCTAssertEqual(WatchAutoOpen.trip(in: snap, now: it.startTime.addingTimeInterval(-10 * 60), onHome: true, opened: nil), "a",
+                       "also while walking to the first stop")
+        XCTAssertNil(WatchAutoOpen.trip(in: snap, now: riding, onHome: false, opened: nil), "what the user opened stays")
+        XCTAssertNil(WatchAutoOpen.trip(in: snap, now: riding, onHome: true, opened: "a"), "back on the first screen it stays there")
+        XCTAssertNil(WatchAutoOpen.trip(in: snap, now: it.endTime.addingTimeInterval(60), onHome: true, opened: nil), "not after arriving")
+        XCTAssertNil(WatchAutoOpen.trip(in: snap, now: it.startTime.addingTimeInterval(-4 * 3600), onHome: true, opened: nil),
+                     "not hours before it leaves")
+        snap.activeTripId = "gone"
+        XCTAssertNil(WatchAutoOpen.trip(in: snap, now: riding, onHome: true, opened: nil))
+    }
+
     // MARK: Requests from the watch
 
     func testRequestsShowAtOnceOnTheWatch() throws {

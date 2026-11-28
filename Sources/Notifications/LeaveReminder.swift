@@ -65,7 +65,16 @@ enum LeaveReminder {
 /// Opens `publit://` links attached to notifications and shows banners while the app is open.
 final class NotificationRouter: NSObject, UNUserNotificationCenterDelegate, @unchecked Sendable {
     static let shared = NotificationRouter()
-    var open: (@MainActor (URL) -> Void)?
+    /// Set once the app's first screen is there. A notification tapped to launch the app can be
+    /// delivered before that: its link waits in `pending` instead of being dropped.
+    var open: (@MainActor (URL) -> Void)? {
+        didSet {
+            guard let open, let url = pending else { return }
+            pending = nil
+            DispatchQueue.main.async { MainActor.assumeIsolated { open(url) } }
+        }
+    }
+    private var pending: URL?
 
     // Completion-handler versions on purpose: with the async ones, iOS finished the tap on a
     // background thread and UIKit aborted the app (crash when opening a reminder).
@@ -78,7 +87,9 @@ final class NotificationRouter: NSObject, UNUserNotificationCenterDelegate, @unc
                                 withCompletionHandler completionHandler: @escaping () -> Void) {
         let url = (response.notification.request.content.userInfo["url"] as? String).flatMap(URL.init(string:))
         DispatchQueue.main.async {
-            if let url { MainActor.assumeIsolated { self.open?(url) } }
+            if let url {
+                if let open = self.open { MainActor.assumeIsolated { open(url) } } else { self.pending = url }
+            }
             completionHandler()
         }
     }

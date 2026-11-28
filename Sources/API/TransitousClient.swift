@@ -14,7 +14,25 @@ private struct ServerError: Decodable { let error: String }
 ///
 /// Usage policy: open-source, non-commercial, identifying User-Agent, visible attribution.
 final class TransitousClient: @unchecked Sendable {
-    static let shared = TransitousClient()
+    static let shared = TransitousClient(base: routerURL)
+
+    /// Transitous, the default router (non-commercial use only).
+    static let transitousURL = URL(string: "https://api.transitous.org")!
+
+    /// Publit's own MOTIS server when `PublitRouterURL` is set in Info.plist (see services/routing), else Transitous.
+    /// Same engine and API, and the same data set names, so saved stops and trips stay valid.
+    static var routerURL: URL {
+        let raw = (Bundle.main.object(forInfoDictionaryKey: "PublitRouterURL") as? String)?
+            .trimmingCharacters(in: .whitespaces)
+        return router(raw) ?? transitousURL
+    }
+
+    /// An own router address is used only when it is a complete https URL (an unset build setting stays "$(…)").
+    static func router(_ raw: String?) -> URL? {
+        guard let raw, !raw.isEmpty, !raw.hasPrefix("$("), let url = URL(string: raw),
+              url.scheme == "https", url.host?.isEmpty == false else { return nil }
+        return url
+    }
 
     private let base: URL
     /// Asked only while `base` cannot be reached or fails (see `ServerFailover`).
@@ -32,7 +50,7 @@ final class TransitousClient: @unchecked Sendable {
     /// sets and IDs as Transitous, run separately at TU Darmstadt. Saved stops and trips stay valid.
     static let backupServer = URL(string: "https://europe.motis-project.de")!
 
-    init(base: URL = URL(string: "https://api.transitous.org")!,
+    init(base: URL = TransitousClient.transitousURL,
          // No fallback by default: Transitous' policy allows apps only on api.transitous.org,
          // not on the servers behind it (*.motis-project.de). `backupServer` stays for tests.
          backups: [URL] = [],
@@ -44,12 +62,16 @@ final class TransitousClient: @unchecked Sendable {
         self.cache = cache
         let cfg = URLSessionConfiguration.default
         cfg.timeoutIntervalForRequest = 20
+        // The idle timeout alone never ends an answer that trickles in (hotel Wi-Fi, a train's hotspot):
+        // the spinner would stay for as long as a byte arrives now and then.
+        cfg.timeoutIntervalForResource = 90
         cfg.requestCachePolicy = .reloadIgnoringLocalCacheData
         // Responses are kept by `ResponseCache`; a second copy in URLCache would only cost memory and disk.
         cfg.urlCache = nil
         session = URLSession(configuration: cfg)
         let slow = cfg.copy() as! URLSessionConfiguration
         slow.timeoutIntervalForRequest = 45
+        slow.timeoutIntervalForResource = 150
         slowSession = URLSession(configuration: slow)
         decoder = TransitousClient.makeDecoder()
     }
@@ -117,8 +139,18 @@ final class TransitousClient: @unchecked Sendable {
                                                      pageCursor: pageCursor, maxWalk: maxWalk, options: options, stops: stops),
                       cache: CachePolicy(maxAge: time == nil ? 20 : 60, persist: true),
                       timeout: options.isSlowSearch ? 45 : nil)
+        // "Arrive by" with slower direct rides: the server adds routes from the destination to the start (#188).
         // Own tickets: rides they do not cover (an IC filed as plain RAIL, a train abroad) come out here.
-        return options.filtersRides ? res.replacingItineraries(res.itineraries.filter(options.allows)) : res
+        return Self.usable(res, from: from, to: to, options: options)
+    }
+
+    /// The server's answer without what must never be listed: routes that run the wrong way round
+    /// (`Itinerary.runsBackwards`) and, with own tickets, rides they do not cover. Paging cursors stay.
+    /// The line of each ride comes without the server's detours over other tracks (`LegShape`, #114).
+    static func usable(_ res: PlanResponse, from: LatLon, to: LatLon, options: RouteOptions = RouteOptions()) -> PlanResponse {
+        var list = res.itineraries.facing(from: from, to: to)
+        if options.filtersRides { list = list.filter(options.allows) }
+        return res.replacingItineraries(list.map { $0.tidyingShapes() })
     }
 
     static func planQuery(from: LatLon, to: LatLon, time: Date?, arriveBy: Bool,
@@ -184,7 +216,7 @@ final class TransitousClient: @unchecked Sendable {
         let fresh: Itinerary = try await get("/api/v6/refresh-itinerary", [URLQueryItem(name: "itineraryId", value: itineraryId),
                                                                             URLQueryItem(name: "withFares", value: "false")], cache: .noStore)
         // Where the feed has no live times (Austria, Venice, Stockholm …), other operators' data.
-        return await LiveOverlay.apply(fresh, budget: 3)
+        return await LiveOverlay.apply(fresh.tidyingShapes(), budget: 3)
     }
 
     /// Stops inside a map rectangle, for the interactive station map.
@@ -278,7 +310,8 @@ final class TransitousClient: @unchecked Sendable {
 
     /// The whole trip of one vehicle, with all stops and real-time times.
     func trip(id: String) async throws -> Itinerary {
-        try await get("/api/v6/trip", [URLQueryItem(name: "tripId", value: id)], cache: CachePolicy(maxAge: 15, persist: true))
+        let trip: Itinerary = try await get("/api/v6/trip", [URLQueryItem(name: "tripId", value: id)], cache: CachePolicy(maxAge: 15, persist: true))
+        return trip.tidyingShapes()
     }
 
     // MARK: Transport

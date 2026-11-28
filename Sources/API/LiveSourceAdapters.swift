@@ -335,7 +335,7 @@ struct ACTVSource: LiveSource {
     /// "6'" → in 6 minutes.
     static func countdown(_ s: String, now: Date) -> Date? {
         let t = s.trimmingCharacters(in: .whitespaces)
-        guard t.hasSuffix("'"), let m = Int(t.dropLast()) else { return nil }
+        guard t.hasSuffix("'"), let m = Int(t.dropLast()), (0...1440).contains(m) else { return nil }
         return now.addingTimeInterval(TimeInterval(m * 60))
     }
 
@@ -550,7 +550,8 @@ struct SearchChSource: LiveSource {
             guard !lines.isEmpty else { return nil }
             let delay = J.str(c["dep_delay"])?.trimmingCharacters(in: .whitespaces)
             let cancelled = delay?.uppercased() == "X"
-            let minutes = delay.flatMap { Int($0.replacingOccurrences(of: "+", with: "")) }
+            // Within a day either way: a number no clock shows is not a delay (and must not overflow).
+            let minutes = delay.flatMap { Int($0.replacingOccurrences(of: "+", with: "")) }.flatMap { abs($0) <= 1440 ? $0 : nil }
             let track = J.str(c["track"])?.replacingOccurrences(of: "!", with: "")
             return LiveDeparture(lines: lines, destination: J.str(J.dict(c["terminal"])["name"]), scheduled: scheduled,
                                  expected: minutes.map { scheduled.addingTimeInterval(TimeInterval($0 * 60)) },

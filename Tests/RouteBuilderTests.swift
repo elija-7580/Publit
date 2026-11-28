@@ -196,4 +196,86 @@ final class RouteBuilderTests: XCTestCase {
         let plain = try await coordinator.refresh(route: a)
         XCTAssertEqual(plain.id, "A'")
     }
+
+    // MARK: Part 6 (#145): share links
+
+    func testABuiltRouteTravelsInALinkAndIsPutTogetherAgain() throws {
+        let a = try planned()
+        let b = route("B", [try leg("SUBWAY", 2, 4, start: 25, end: 33)])
+        let built = try XCTUnwrap(RouteBuilder.splice(a, at: 2, with: b))
+        let link = SharedRoute(built, fromName: "Home", toName: "Work")
+        XCTAssertNil(link.itineraryId, "a built route has no server ID of its own")
+        XCTAssertEqual(link.parts, built.builtFrom)
+
+        let read = try XCTUnwrap(SharedRoute(query: link.query))
+        XCTAssertEqual(read.parts, built.builtFrom)
+        XCTAssertEqual(read.fromName, "Home")
+        let again = try XCTUnwrap(RouteBuilder.assemble(try XCTUnwrap(read.parts), from: ["A": a, "B": b]))
+        XCTAssertEqual(again.routeKey, built.routeKey)
+        XCTAssertEqual(again.endTime, built.endTime)
+        XCTAssertNil(RouteBuilder.assemble(try XCTUnwrap(read.parts), from: ["A": a]), "a part that is gone")
+
+        // What older versions read is unchanged: places and departure, in the same fields.
+        let plain = SharedRoute(a, fromName: "Home", toName: "Work")
+        XCTAssertNil(plain.parts)
+        XCTAssertFalse(plain.query.contains("p0="))
+        XCTAssertTrue(link.query.contains("f=Home") && link.query.contains("t=Work") && link.query.contains("&d="))
+    }
+
+    func testABuiltRouteWithAPartOnTheStreetSharesTheSearchOnly() throws {
+        let drive = route("", [try leg("WALK", 0, 2, start: 0, end: 20)])
+        let b = route("B", [try leg("SUBWAY", 2, 4, start: 25, end: 33)])
+        let built = try XCTUnwrap(RouteBuilder.chain([drive, b]))
+        XCTAssertNil(SharedRoute(built, fromName: "", toName: "").parts)
+    }
+
+    func testABrokenPartInALinkIsIgnored() throws {
+        let read = try XCTUnwrap(SharedRoute(query: "f=A&fl=48.0,16.0&t=B&tl=48.1,16.0&d=1791360000&p0=sA~x~2"))
+        XCTAssertNil(read.parts)
+    }
+
+    // MARK: Choose where to change (#143)
+
+    func testTheChangeMovesToAnotherStopOfTheRide() throws {
+        let a = try planned()
+        // The bus (trip "B1") goes on past S2: get off at S3 instead and walk on to S4.
+        let bus = try leg("BUS", 1, 3, start: 6, end: 20, trip: "BUS-1-6")
+        let other = route("X", [try leg("TRAM", 1, 3, start: 7, end: 19)])
+        let sameRide = route("Y", [bus])
+        let way = try XCTUnwrap(RouteBuilder.wayToChange(a, at: 1, tripId: "BUS-1-6", from: [other, sameRide]))
+        XCTAssertEqual(way.id, "Y", "the ride's own vehicle comes first, even when another way arrives earlier")
+        let rest = route("Z", [try leg("WALK", 3, 4, start: 21, end: 25)])
+        let built = try XCTUnwrap(RouteBuilder.changeAt(a, at: 1, way: way, rest: rest))
+        XCTAssertEqual(built.legs.map(\.mode), ["WALK", "BUS", "WALK"])
+        XCTAssertEqual(built.legs[1].to.name, "S3")
+        XCTAssertEqual(built.endTime, time(25))
+        XCTAssertEqual(built.builtFrom, [RoutePart(itineraryId: "A", firstLeg: 0, legCount: 1),
+                                         RoutePart(itineraryId: "Y", firstLeg: 0, legCount: 1),
+                                         RoutePart(itineraryId: "Z", firstLeg: 0, legCount: 1)])
+        // Without the vehicle among the results, the earliest arrival is taken.
+        XCTAssertEqual(RouteBuilder.wayToChange(a, at: 1, tripId: "gone", from: [sameRide, other])?.id, "X")
+    }
+
+    func testAWayOnThatLeavesBeforeArrivingIsLeftOut() throws {
+        let a = try planned()
+        let way = route("Y", [try leg("BUS", 1, 3, start: 6, end: 20)])
+        let early = route("E", [try leg("WALK", 3, 4, start: 18, end: 22)])
+        let late = route("L", [try leg("WALK", 3, 4, start: 22, end: 26)])
+        XCTAssertNil(RouteBuilder.changeAt(a, at: 1, way: way, rest: early))
+        let choices = RouteBuilder.choices(for: a, at: 1, way: way, from: [early, late, late])
+        XCTAssertEqual(choices.count, 1)
+        XCTAssertEqual(choices.first?.endTime, time(26))
+        // A way there that leaves before the kept walk arrives cannot be used.
+        let tooEarly = route("T", [try leg("BUS", 1, 3, start: 2, end: 12)])
+        XCTAssertNil(RouteBuilder.wayToChange(a, at: 1, tripId: nil, from: [tooEarly]))
+    }
+
+    func testTheStopsToGetOffAreThoseAfterBoarding() throws {
+        let ride = try leg("BUS", 1, 3, start: 6, end: 20)
+        XCTAssertEqual(RouteBuilder.exitStops(of: ride, trip: nil).map(\.name), ["S3"])
+        let whole = try leg("BUS", 0, 5, start: 0, end: 30)
+        var trip = whole
+        trip.intermediateStops = [ride.from, try leg("BUS", 2, 3, start: 0, end: 1).from, ride.to, try leg("BUS", 4, 5, start: 0, end: 1).from]
+        XCTAssertEqual(RouteBuilder.exitStops(of: ride, trip: trip).map(\.name), ["S2", "S3", "S4", "S5"])
+    }
 }

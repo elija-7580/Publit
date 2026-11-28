@@ -98,6 +98,9 @@ struct ItineraryDetailView: View {
     /// Only the banner redraws on that timer, not the map and the steps.
     var statusAt: ((Date) -> TripStatus)? = nil
     var refreshedAt: Date? = nil
+    /// False for a journey planned section by section: going on another way from a ride would
+    /// plan through to the destination and drop the places in between.
+    var allowsLegChange = true
     @State private var showsMap = false
     @State private var mapReady = false
     /// Ride whose vehicle trip is open (all stops, map, line), by its index in the trip.
@@ -105,9 +108,16 @@ struct ItineraryDetailView: View {
     /// Build your own connection (#142): the leg whose ways to go on are listed, and the route built from the choice.
     @State private var changedLeg: LegIndex?
     @State private var built: BuiltRoute?
+    /// The ride whose change is moved to another stop or place (#143).
+    @State private var changePoint: LegIndex?
     /// The screen opens with the top (time, lines) at once; changes, actions and steps follow a
     /// moment later, so a long trip never leaves the tap without an answer.
     @State private var showsAll = false
+    /// Counts exit numbers arriving and exits picked: the advice under the rides is worked out again.
+    @State private var exitsChanged = 0
+    @State private var addingTicket = false
+    /// A change no longer works: leaving earlier still catches the same connection (`CatchEarlier`).
+    @State private var earlier: CatchEarlier.Rescue?
     @Environment(WideMapState.self) private var wideMap: WideMapState?
 
     private var isBikeOrCar: Bool {
@@ -118,7 +128,14 @@ struct ItineraryDetailView: View {
     /// A ride of a route you are still choosing can be swapped for another way to go on. A saved
     /// or running trip keeps its legs (its reminders and Live Activity follow them).
     private func canChange(_ leg: Leg) -> Bool {
-        leg.isTransit && statusAt == nil && !isBikeOrCar && trips.saved(itinerary) == nil
+        allowsLegChange && leg.isTransit && statusAt == nil && !isBikeOrCar && trips.saved(itinerary) == nil
+    }
+
+    /// The rides and their live times: a new delay looks for an earlier way again.
+    private var liveTimesKey: String {
+        itinerary.legs.map { leg -> String in
+            "\(leg.mode)~\(leg.tripId ?? "")~\(Int(leg.startTime.timeIntervalSince1970))~\(Int(leg.endTime.timeIntervalSince1970))"
+        }.joined(separator: "|")
     }
 
     private var resolvedFrom: String { fromName.isEmpty ? Self.placeName(itinerary.legs.first?.from) : fromName }
@@ -158,7 +175,6 @@ struct ItineraryDetailView: View {
                     RouteSummary(itinerary: itinerary, showsTimes: false)
                         .listRowSeparator(.hidden, edges: .top)
                 }
-                ForEach(TransitRegion.along(itinerary), id: \.network) { RegionTicketRow(region: $0) }
                 if let note = Fmt.foreignZoneNote(tz: itinerary.legs.first?.from.tz, at: itinerary.startTime) {
                     Label(note, systemImage: "clock").font(.footnote).foregroundStyle(.secondary)
                 }
@@ -194,17 +210,23 @@ struct ItineraryDetailView: View {
                 }
             }
 
+            // Leave earlier and still catch the same train: the way there, then the route as it was.
+            if let earlier {
+                Section {
+                    CatchEarlierRow(rescue: earlier) { built = BuiltRoute(itinerary: earlier.route) }
+                }
+            }
+
             // How sure each change is and what takes over if it breaks (smart routing).
             SmartChangesSection(itinerary: itinerary)
 
-            // 2. What you can do with it, right below: start, save, calendar, reminder.
-            // Cycling and driving are shown for comparison only: no trip, reminder or fares.
-            if !isBikeOrCar {
-                TripActionsSection(itinerary: itinerary, fromName: resolvedFrom, toName: resolvedTo)
-            }
+            // 2. What you can do with it (start, save, calendar, share, reminder) is the bar pinned to the
+            // bottom, so it never sits between the overview and the steps, however long the trip.
 
             // 3. The way, step by step, as a timeline: times on the left, the line in its colour.
             Section("Steps") {
+                // Where to ride and which way out of each station (`exitsChanged` redraws it).
+                let advice: [Int: ExitAdvice] = exitsChanged >= 0 && !isBikeOrCar ? ExitAdvice.all(itinerary.legs) : [:]
                 ForEach(Array(itinerary.legs.enumerated()), id: \.offset) { index, leg in
                     if let transfer = TransferInfo(before: index, in: itinerary) {
                         TransferCard(info: transfer)
@@ -212,12 +234,18 @@ struct ItineraryDetailView: View {
                     // Cycling or driving the whole way: the start is named, like the destination below.
                     TimelineLegRow(leg: leg, startName: index == 0 && isBikeOrCar ? resolvedFrom : nil,
                                    onOpenTrip: leg.tripId == nil ? nil : { openedLeg = index },
-                                   onChange: canChange(leg) ? { changedLeg = LegIndex(id: index) } : nil)
+                                   onChange: canChange(leg) ? { changedLeg = LegIndex(id: index) } : nil,
+                                   onChangeAt: canChange(leg) ? { changePoint = LegIndex(id: index) } : nil,
+                                   exitAdvice: advice[index], exitWalk: exitWalk(after: index))
                 }
                 TimelineEndRow(time: itinerary.endTime, tz: itinerary.legs.last?.to.tz, name: resolvedTo)
             }
 
-            if !isBikeOrCar { FareSection(itinerary: itinerary) }
+            // 4. Tickets and fares for every network along the way, after the steps.
+            // Cycling and driving are shown for comparison only: no trip, reminder or fares.
+            if !isBikeOrCar {
+                TripTicketSections(itinerary: itinerary, fromName: resolvedFrom, toName: resolvedTo) { addingTicket = true }
+            }
 
             Section {
             } footer: {
@@ -227,6 +255,7 @@ struct ItineraryDetailView: View {
             }
         }
         .readableWidth()
+        .sheet(isPresented: $addingTicket) { AddTicketView(tripId: trips.saved(itinerary)?.id) }
         .inkList(hero: wideMap == nil, onExpand: { showsMap = true }) { insets in
             ZStack {
                 Color.surface
@@ -234,6 +263,24 @@ struct ItineraryDetailView: View {
                 if mapReady { RouteMap(itinerary: itinerary, isPreview: true, previewInsets: insets).transition(.opacity) }
             }
         }
+        // Start (or end) and the other actions stay one tap away while scrolling through long trips.
+        // Outside the map hero: its overlay spans the whole list and would cover the bar.
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if !isBikeOrCar && showsAll {
+                TripActionBar(itinerary: itinerary, fromName: resolvedFrom, toName: resolvedTo)
+            }
+        }
+        // A broken or unlikely change before the trip has started: look for an earlier way to the same connection.
+        .task(id: liveTimesKey) {
+            guard allowsLegChange, !isBikeOrCar else { earlier = nil; return }
+            earlier = await CatchEarlier.search(itinerary, options: RouteOptions.load())
+        }
+        // Exit numbers of the stations the trip leaves on foot ("Take exit B2"), from OpenStreetMap.
+        .task(id: itinerary.id) {
+            guard !isBikeOrCar else { return }
+            if await StationExits.shared.load(itinerary) { exitsChanged += 1 }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: StationExits.preferenceChanged)) { _ in exitsChanged += 1 }
         .task {
             guard !mapReady || !showsAll else { return }
             try? await Task.sleep(for: .milliseconds(60))
@@ -260,6 +307,11 @@ struct ItineraryDetailView: View {
                 LegChangeView(route: itinerary, index: i.id) { built = BuiltRoute(itinerary: $0) }
             }
         }
+        .sheet(item: $changePoint) { i in
+            NavigationStack {
+                ChangePointView(route: itinerary, index: i.id) { built = BuiltRoute(itinerary: $0) }
+            }
+        }
         // The built route is a route like any other: start it, save it, change it again.
         .navigationDestination(item: $built) { route in
             ItineraryDetailView(itinerary: route.itinerary, fromName: fromName, toName: toName)
@@ -274,6 +326,13 @@ struct ItineraryDetailView: View {
         // A trip unsaved here is only deleted when the screen closes, not when a detail is pushed.
         .onDisappear { if !isPresented { trips.discardPendingRemovalsLater() } }
         .onChange(of: isPresented) { _, presented in if !presented { trips.discardPendingRemovalsLater() } }
+    }
+}
+
+extension ItineraryDetailView {
+    /// The walk out of a station after the ride at `index`, where its exit can be picked.
+    func exitWalk(after index: Int) -> Leg? {
+        StationExits.leavesStation(itinerary.legs, at: index + 1) ? itinerary.legs[index + 1] : nil
     }
 }
 
@@ -331,7 +390,9 @@ struct RouteSummary: View {
 
     private var legChain: some View {
         // Short walks between platforms are noise in the overview; the steps list keeps them.
-        let legs = itinerary.legs.filter { $0.isTransit || $0.duration >= 120 }
+        // A long trip with many rides shows only the rides, so the chain stays one or two lines.
+        let rides = itinerary.legs.filter(\.isTransit).count
+        let legs = itinerary.legs.filter { $0.isTransit || (rides <= 4 && $0.duration >= 120) }
         return FlowRow(spacing: 6) {
             ForEach(Array(legs.enumerated()), id: \.offset) { _, leg in
                 // No arrows between them: once the chain wraps, a line starting with "›" read as noise.
@@ -771,6 +832,12 @@ struct TimelineLegRow: View {
     var onOpenTrip: (() -> Void)? = nil
     /// Lists other ways to go on from where this ride starts (#142); nil where the legs are fixed.
     var onChange: (() -> Void)? = nil
+    /// Moves the change after this ride to another stop or place (#143); nil where the legs are fixed.
+    var onChangeAt: (() -> Void)? = nil
+    /// Where to ride and which way out of the station (see `ExitAdvice`).
+    var exitAdvice: ExitAdvice? = nil
+    /// The walk out of the station after this ride: its exit can be picked here.
+    var exitWalk: Leg? = nil
     /// Rides open to their stops, notes and the get-off alarm; closed they say where to get on and off.
     @State private var expanded = false
 
@@ -855,6 +922,14 @@ struct TimelineLegRow: View {
             if leg.cancelled == true {
                 Text("This trip is cancelled.").font(.footnote.weight(.semibold)).foregroundStyle(Color.danger)
             }
+            if let exitAdvice {
+                let choices = exitWalk.map { StationExits.shared.choices(for: $0) } ?? []
+                let walk = exitWalk
+                ExitAdviceRow(advice: exitAdvice, choices: choices,
+                              onPick: walk == nil ? nil : { (e: StationEntrance?) in
+                                  if let walk { StationExits.shared.setPreferred(e, for: walk) }
+                              })
+            }
             TrainDivisionNotice(leg: leg)
             if expanded {
                 if leg.isReplacementBus {
@@ -892,6 +967,14 @@ struct TimelineLegRow: View {
                     }
                     .buttonStyle(.borderless)
                     .accessibilityIdentifier("changeLeg")
+                }
+                if let onChangeAt {
+                    Button(action: onChangeAt) {
+                        Label(L10n.t("Change somewhere else"), systemImage: "mappin.and.ellipse")
+                            .font(.subheadline.weight(.semibold))
+                    }
+                    .buttonStyle(.borderless)
+                    .accessibilityIdentifier("changeLegAt")
                 }
                 GetOffButton(leg: leg)
             }

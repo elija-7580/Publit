@@ -141,6 +141,19 @@ final class LineContrastTests: XCTestCase {
         XCTAssertFalse(LineColors.blendsIn(nil, dark: true))
         XCTAssertEqual(LineColors.RGB(r: 1, g: 0, b: 0.5).hex, "FF0080")
     }
+
+    func testSmallLiveActivityGroundIsDarkEnoughForLightText() {
+        // #176: Apple Watch draws the Live Activity's text light whatever the iPhone is set to, so
+        // its ground is one fixed dark colour and never the iPhone's (white in light mode).
+        let ground = LineColors.smallActivitySurface
+        XCTAssertGreaterThanOrEqual(LineColors.contrast(LineColors.white, ground), 7, "headline and countdown")
+        // Secondary text ("Get off in", the direction) is white at about 60 %.
+        let a = 0.6
+        let secondary = LineColors.RGB(r: a + (1 - a) * ground.r, g: a + (1 - a) * ground.g, b: a + (1 - a) * ground.b)
+        XCTAssertGreaterThanOrEqual(LineColors.contrast(secondary, ground), LineColors.minimumOperatorContrast)
+        // A near-black line on it still gets its edge, as on every dark card.
+        XCTAssertLessThan(LineColors.contrast(LineColors.RGB(hex: "2D2B29")!, ground), LineColors.minimumSurfaceContrast)
+    }
 }
 
 final class CoverageGapTests: XCTestCase {

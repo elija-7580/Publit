@@ -26,6 +26,10 @@ enum MapHero {
     /// 5.8 s in the map renderer on the way back from Tickets to Nearby). Coming back builds a
     /// fresh map; a quick look at another tab keeps it.
     static let releaseDelay: Duration = .seconds(20)
+    /// Pulled down this far (points), the list opens the full map where that is offered (#17):
+    /// well past the pull that refreshes, so a refresh does not open it by accident.
+    static let pullToExpand: CGFloat = 170
+    static let zoomID = "mapHeroZoom"
 }
 
 /// Where the hero row is in the list; nil while it is scrolled out of the list.
@@ -145,6 +149,17 @@ private struct MapHeroLayer<M: View>: View {
 private struct MapHeroOverList<M: View>: ViewModifier {
     let map: (EdgeInsets) -> M
     let onExpand: () -> Void
+    /// Pulling the list far down opens the full map (Nearby, #17), past the pull that refreshes.
+    var pullToExpand = false
+    /// The full map grows out of this map (iOS 18 zoom), when the screen shows it with the same namespace.
+    var zoom: Namespace.ID? = nil
+    /// Pulled past `MapHero.pullToExpand`: the map opens when the finger lets go (feedback on build 100:
+    /// opening it in the middle of the pull, with the list still under the finger, felt slow and buggy).
+    @State private var armed = false
+    @State private var pulledOpen = false
+    /// The finger is on the list (iOS 18 scroll phases) and whether this device reports phases at all.
+    @State private var touching = false
+    @State private var phaseSeen = false
     /// iOS 18+: the list's offset from its rest (negative = scrolled up).
     @State private var offset: CGFloat?
     /// iOS 17: the hero row's place now and when the screen opened; nil while it is out of the list.
@@ -166,7 +181,14 @@ private struct MapHeroOverList<M: View>: ViewModifier {
     }
 
     /// The map is fully out of sight: hidden, and the bar is solid again.
+    ///
+    /// With the list's own offset (iOS 18+) that offset decides alone. The hero row's rest is caught
+    /// once, the first time it reports; caught while a screen slides or a sheet rises (Route from a
+    /// live trip), every later place looked scrolled far up, and the row reports nothing while it is
+    /// off screen: the map stayed hidden for good, only the "Maps" mark showed at the top
+    /// (feedback on build 98: "the map disappears").
     private var gone: Bool {
+        if let offset { return offset < -(MapHero.height + 120) }
         if track.restGlobalY != nil, track.globalY == nil { return true }
         if track.restGlobalY == nil, offset == nil, rowGone { return true }
         guard let moved else { return false }
@@ -174,7 +196,14 @@ private struct MapHeroOverList<M: View>: ViewModifier {
     }
 
     private var scrolledAway: Bool {
-        gone || (moved ?? 0) < -MapHero.height * 0.6
+        gone || (offset ?? moved ?? 0) < -MapHero.height * 0.6
+    }
+
+    private func openPulled() {
+        guard !pulledOpen else { return }
+        pulledOpen = true
+        armed = false
+        onExpand()
     }
 
     func body(content: Content) -> some View {
@@ -184,12 +213,36 @@ private struct MapHeroOverList<M: View>: ViewModifier {
             .contentMargins(.top, 0, for: .scrollContent)
             .background(Color.ground.ignoresSafeArea())
             .modifier(ListOffset(offset: $offset))
+            .onChange(of: offset) { _, now in
+                guard pullToExpand, let now else { return }
+                if now > MapHero.pullToExpand {
+                    if !armed {
+                        armed = true
+                        // No finger reported on the list (no scroll phases on this device, or none for this
+                        // pull): open at the mark, as before build 102, rather than never.
+                        if !phaseSeen || !touching { openPulled() }
+                    }
+                } else if now < MapHero.pullToExpand * 0.7, armed, !pulledOpen, touching {
+                    armed = false   // pulled back before letting go: nothing opens
+                }
+                if now < 20 { pulledOpen = false }
+            }
+            .sensoryFeedback(.impact(weight: .medium), trigger: armed) { _, now in now }
+            .modifier(PullPhase(enabled: pullToExpand) { isTouching in
+                phaseSeen = true
+                touching = isTouching
+                // Let go (or the list moves on by itself): an armed pull opens the map. The list bounces
+                // back in the same moment; armed only drops while the finger is still on the list, so the
+                // bounce can no longer disarm it first (build 102: the map did not open at all).
+                if !isTouching, armed { openPulled() }
+            })
             .overlay {
                 // Kept while scrolled away (only hidden), so the map keeps where you moved it.
                 if let moved, keepsMap {
                     MapHeroLayer(moved: max(moved, -(MapHero.height + 400)),
                                  rowTop: track.globalY.map { max($0, -(MapHero.height + 1000)) },
                                  map: map, onExpand: onExpand)
+                        .modifier(MapZoomSource(zoom: zoom))
                         .opacity(gone ? 0 : 1)
                         .allowsHitTesting(!gone)
                         .accessibilityHidden(gone)
@@ -224,6 +277,49 @@ private struct MapHeroOverList<M: View>: ViewModifier {
     }
 }
 
+/// Reports whether the finger is on the list (iOS 18 scroll phases: tracking or interacting). iOS 17 has
+/// no scroll phases and no list offset; there the pull does not open the map.
+private struct PullPhase: ViewModifier {
+    let enabled: Bool
+    let touching: (Bool) -> Void
+
+    func body(content: Content) -> some View {
+        if #available(iOS 18.0, *), enabled {
+            content.onScrollPhaseChange { _, new in
+                touching(new == .interacting || new == .tracking)
+            }
+        } else {
+            content
+        }
+    }
+}
+
+/// The hero map as the source the full map zooms out of (iOS 18).
+struct MapZoomSource: ViewModifier {
+    let zoom: Namespace.ID?
+
+    func body(content: Content) -> some View {
+        if #available(iOS 18.0, *), let zoom {
+            content.matchedTransitionSource(id: MapHero.zoomID, in: zoom)
+        } else {
+            content
+        }
+    }
+}
+
+/// The full map grows out of the hero map (iOS 18), instead of sliding up from the bottom.
+struct MapZoomDestination: ViewModifier {
+    let zoom: Namespace.ID?
+
+    func body(content: Content) -> some View {
+        if #available(iOS 18.0, *), let zoom {
+            content.navigationTransition(.zoom(sourceID: MapHero.zoomID, in: zoom))
+        } else {
+            content
+        }
+    }
+}
+
 /// The list's scroll offset from its rest (0 at rest, negative scrolled up, positive pulled down), iOS 18+.
 private struct ListOffset: ViewModifier {
     @Binding var offset: CGFloat?
@@ -245,9 +341,10 @@ extension View {
     /// `inkList()` with a map at its top (see `MapHero`); its first section must be `MapHeroSpace()`.
     /// With `hero` false it is the plain `inkList()`.
     @ViewBuilder
-    func inkList<M: View>(hero: Bool, onExpand: @escaping () -> Void, @ViewBuilder map: @escaping (EdgeInsets) -> M) -> some View {
+    func inkList<M: View>(hero: Bool, pullToExpand: Bool = false, zoom: Namespace.ID? = nil, onExpand: @escaping () -> Void,
+                          @ViewBuilder map: @escaping (EdgeInsets) -> M) -> some View {
         if hero {
-            modifier(MapHeroOverList(map: map, onExpand: onExpand))
+            modifier(MapHeroOverList(map: map, onExpand: onExpand, pullToExpand: pullToExpand, zoom: zoom))
                 .listSectionSpacing(MapHero.gap)
                 .liveBarPadding()
         } else {

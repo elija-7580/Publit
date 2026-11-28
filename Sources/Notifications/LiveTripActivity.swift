@@ -43,8 +43,21 @@ enum LiveTripActivity {
             phase: s.phase.rawValue, headline: s.headline, detail: s.detail, nextEvent: s.nextEvent,
             delayMinutes: s.delayMinutes, arrival: trip.endTime, lineName: leg?.lineName,
             lineColor: leg?.lineColors.background, lineTextColor: leg?.lineColors.text, updatedAt: now)
+        state.stepMode = (legs.first { now < $0.endTime } ?? legs.first)?.mode
+        state.direction = leg?.directionName
+        if let leg, s.phase != .arrived, s.phase != .cancelled {
+            state.legTime = riding ? leg.endTime : leg.startTime
+            state.boardAt = riding ? nil : leg.from.name
+        }
+        state.tripStart = trip.startTime
+        state.destination = trip.toName
         // On board with location: the next stop and stops to go, from where the phone really is.
         if s.phase == .riding, let note = GetOffAlerts.rideNote(trip.id) { state.detail = note }
+        // On board: the end of the train nearest the exit or the next train ("Front of the train · Exit B2").
+        if s.phase == .riding, let i = legs.firstIndex(where: { $0.isTransit && $0.endTime > now }),
+           let short = ExitAdvice.forRide(i, in: legs)?.short {
+            state.detail = state.detail.isEmpty ? short : short + " · " + state.detail
+        }
         if let departing, s.phase != .cancelled, s.phase != .arrived {
             state.platform = TransitLabels.clean(departing.from.track).map { L10n.f("Pl. %@", $0) }
             state.platformChanged = departing.from.platformChange != nil ? true : nil
@@ -97,10 +110,18 @@ enum LiveTripActivity {
     /// App goes to the background: each running activity ends now, with its last state, and
     /// disappears by itself shortly after the arrival. Its countdown keeps running on the lock screen.
     /// Activities of removed trips and of trips already over go at once.
-    static func handOver(_ lookup: (String) -> SavedTrip?, now: Date = .now) async {
+    /// - Parameter keeping: the trip the app goes on following in the background (the location follows
+    ///   it, see `LocationManager.setTripTracking`). Its activity stays a running one: an ended activity
+    ///   leaves the Dynamic Island and can no longer be updated, so delays, platforms and "next stop"
+    ///   froze at the moment the phone was locked. It is handed over once the following ends.
+    static func handOver(_ lookup: (String) -> SavedTrip?, keeping: String? = nil, now: Date = .now) async {
         for a in Activity<TripActivityAttributes>.activities where a.activityState == .active || a.activityState == .stale {
             guard let trip = lookup(a.attributes.tripId), !isOver(trip, now: now) else {
                 await a.end(nil, dismissalPolicy: .immediate)
+                continue
+            }
+            if trip.id == keeping {
+                await update(trip, now: now)
                 continue
             }
             let gone = trip.endTime.addingTimeInterval(now >= trip.endTime ? afterArrival : backgroundGrace)

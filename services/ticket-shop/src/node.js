@@ -35,6 +35,8 @@ export function envFromProcess(source = process.env) {
     DISTRIBUSION_BASE_URL: source.DISTRIBUSION_BASE_URL ?? "https://api.demo.distribusion.com/retailers/v4",
     DEMO_PROVIDER: source.DEMO_PROVIDER ?? "off",
     DEMO_PAYMENTS: source.DEMO_PAYMENTS ?? "off",
+    PARTNER_TEMPLATES: source.PARTNER_TEMPLATES ?? "{}",
+    ROUTER_URL: source.ROUTER_URL,
     RATE_LIMITER: memoryRateLimiter(Number(source.RATE_LIMIT ?? 30), 60),
   };
 }
@@ -51,7 +53,9 @@ export function createShopServer(env = envFromProcess(), handler = worker) {
       }
       const proto = (req.headers["x-forwarded-proto"] ?? "http").split(",")[0].trim();
       const url = `${proto}://${req.headers.host ?? "localhost"}${req.url}`;
-      const ip = (req.headers["x-forwarded-for"] ?? req.socket.remoteAddress ?? "unknown").split(",")[0].trim();
+      // The reverse proxy appends the address it saw as the last entry; earlier entries are whatever the
+      // client sent and must not decide the rate limit.
+      const ip = (req.headers["x-forwarded-for"] ?? req.socket.remoteAddress ?? "unknown").split(",").at(-1).trim();
       const headers = new Headers();
       for (const [k, v] of Object.entries(req.headers)) if (typeof v === "string") headers.set(k, v);
       headers.set("CF-Connecting-IP", ip);

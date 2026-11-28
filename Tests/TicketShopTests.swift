@@ -24,7 +24,22 @@ final class PartnerLinkTests: XCTestCase {
     }
 
     func testNoProgramIsActiveUntilFilledIn() {
-        XCTAssertTrue(PartnerLinks.programs.allSatisfy { $0.template.isEmpty || $0.template.hasPrefix("https://") })
+        XCTAssertTrue(PartnerLinks.builtIn.allSatisfy { $0.template.isEmpty || $0.template.hasPrefix("https://") })
+    }
+
+    func testProgramsFromTheLinkServiceReplaceTheBuiltInList() throws {
+        let json = """
+        {"programs":[{"id":"flixbus","name":"FlixBus","hosts":["flixbus.de"],"template":"https://www.awin1.com/cread.php?awinmid=1&awinaffid=2&ued={url}"},
+                     {"id":"x","name":"Bad","hosts":["x.de"],"template":"http://x.de/{url}"},
+                     {"id":"y","name":"Twice","hosts":["y.de"],"template":"https://y.de/{url}{url}"}]}
+        """
+        let list = try XCTUnwrap(PartnerLinks.decode(Data(json.utf8)))
+        XCTAssertEqual(list.map(\.name), ["FlixBus"])
+        XCTAssertNil(PartnerLinks.decode(Data("nope".utf8)))
+        PartnerLinks.set(list)
+        defer { PartnerLinks.set(nil) }
+        XCTAssertEqual(PartnerLinks.wrap(URL(string: "https://shop.flixbus.de/x")!)?.host, "www.awin1.com")
+        XCTAssertNil(PartnerLinks.wrap(URL(string: "https://int.bahn.de")!))
     }
 }
 
@@ -85,5 +100,71 @@ final class TicketShopTests: XCTestCase {
             XCTAssertFalse(model.paymentReturned(nil))
             XCTAssertEqual(model.phase, .ready)
         }
+    }
+
+    func testOwnRouterIsUsedOnlyWithACompleteHttpsAddress() {
+        XCTAssertEqual(TransitousClient.router("https://route.example.org")?.host, "route.example.org")
+        XCTAssertNil(TransitousClient.router(nil))
+        XCTAssertNil(TransitousClient.router(""))
+        XCTAssertNil(TransitousClient.router("$(ROUTER_URL)"))
+        XCTAssertNil(TransitousClient.router("http://route.example.org"))
+        // The test bundle sets no router, so the app keeps using Transitous.
+        XCTAssertEqual(TransitousClient.routerURL, TransitousClient.transitousURL)
+    }
+}
+
+final class ShopSearchTests: XCTestCase {
+    private func place(_ name: String, _ lat: Double, _ lon: Double) -> Place {
+        Place(name: name, stopId: nil, parentId: nil, lat: lat, lon: lon, tz: "Europe/Berlin",
+              scheduledArrival: nil, scheduledDeparture: nil, scheduledTrack: nil)
+    }
+
+    func testOperatorsWithASearchableShop() {
+        XCTAssertEqual(ShopSearch.shop(for: "DB Fernverkehr AG"), .db)
+        XCTAssertEqual(ShopSearch.shop(for: "Deutsche Bahn"), .db)
+        XCTAssertEqual(ShopSearch.shop(for: "FlixBus"), .flix)
+        XCTAssertEqual(ShopSearch.shop(for: "FlixTrain GmbH"), .flix)
+        XCTAssertNil(ShopSearch.shop(for: "ÖBB-Personenverkehr AG"))
+        XCTAssertNil(ShopSearch.shop(for: "Wiener Linien"))
+    }
+
+    func testDBSearchHasStartDestinationAndLocalDepartureTime() throws {
+        // 2026-11-25 07:00 UTC = 08:00 in Munich.
+        let departure = Date(timeIntervalSince1970: 1_795_590_000)
+        let search = try XCTUnwrap(ShopSearch(operatorName: "DB Fernverkehr AG", from: place("München Hbf", 48.14, 11.56),
+                                              to: place("Nürnberg Hbf", 49.45, 11.08), departure: departure))
+        let url = try XCTUnwrap(search.dbURL).absoluteString
+        XCTAssertTrue(url.hasPrefix("https://www.bahn.de/buchung/fahrplan/suche#sts=true&"), url)
+        XCTAssertTrue(url.contains("so=M%C3%BCnchen%20Hbf"), url)
+        XCTAssertTrue(url.contains("zo=N%C3%BCrnberg%20Hbf"), url)
+        XCTAssertTrue(url.contains("soid=A%3D1%40O%3DM%C3%BCnchen%20Hbf%40"), url)
+        XCTAssertTrue(url.contains("hd=2026-11-25T08:00:00"), url)
+    }
+
+    func testFlixSearchUsesCityIDsAndShopDate() throws {
+        let departure = Date(timeIntervalSince1970: 1_795_590_000)
+        let search = try XCTUnwrap(ShopSearch(operatorName: "FlixBus", from: place("Wien Erdberg (VIB)", 48.19, 16.41),
+                                              to: place("Graz Hbf", 47.07, 15.42), departure: departure))
+        XCTAssertNil(search.dbURL)
+        let url = try XCTUnwrap(search.flixURL(fromCity: "a", toCity: "b"))
+        let items = Dictionary(uniqueKeysWithValues: (URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? [])
+            .map { ($0.name, $0.value ?? "") })
+        XCTAssertEqual(url.host, "shop.flixbus.com")
+        XCTAssertEqual(items["departureCity"], "a")
+        XCTAssertEqual(items["arrivalCity"], "b")
+        XCTAssertEqual(items["rideDate"], "25.11.2026")
+    }
+
+    func testFlixCityIsTheNearestMatchWithin50Km() throws {
+        XCTAssertEqual(FlixCities.queries(for: "Wien Erdberg (VIB)"), ["Wien Erdberg", "Wien"])
+        XCTAssertEqual(FlixCities.queries(for: "Graz"), ["Graz"])
+        let json = """
+        [{"id":"far","name":"Wien","location":{"lat":52.5,"lon":13.4}},
+         {"id":"vie","name":"Wien","location":{"lat":48.2,"lon":16.37}},
+         {"id":"air","name":"Flughafen Wien","location":{"lat":48.11,"lon":16.56}}]
+        """
+        let cities = try JSONDecoder().decode([FlixCities.City].self, from: Data(json.utf8))
+        XCTAssertEqual(FlixCities.nearest(cities, to: LatLon(lat: 48.19, lon: 16.41))?.id, "vie")
+        XCTAssertNil(FlixCities.nearest(cities, to: LatLon(lat: 40.4, lon: -3.7)))
     }
 }

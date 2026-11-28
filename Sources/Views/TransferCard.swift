@@ -22,14 +22,14 @@ struct TransferCard: View {
             }
             if info.changesStation {
                 Label(L10n.transfer("Station change") + " · " + info.departureStop.name, systemImage: "figure.walk")
-                    .font(.caption.weight(.semibold)).foregroundStyle(Color.delay)
+                    .font(.footnote.weight(.semibold)).foregroundStyle(Color.delay)
             }
             Text(verbatim: "\(endpoint(info.arrivalTime, stop: info.arrivalStop))  →  \(endpoint(info.departureTime, stop: info.departureStop))")
                 .font(.subheadline.weight(.medium).monospacedDigit())
                 .fixedSize(horizontal: false, vertical: true)
             platformChange(info.arrivalStop)
             platformChange(info.departureStop)
-            Text(verbatim: details).font(.caption).foregroundStyle(.secondary)
+            Text(verbatim: details).font(.footnote).foregroundStyle(.secondary)
             if info.isCancelled {
                 Label("Connection cancelled", systemImage: "xmark.circle.fill")
                     .font(.subheadline.weight(.semibold)).foregroundStyle(Color.danger)
@@ -79,7 +79,7 @@ struct TransferCard: View {
     private func platformChange(_ stop: Place) -> some View {
         if TransitLabels.clean(stop.track) != nil, let change = stop.platformChange {
             Label(L10n.f("Platform changed (was %@)", change.scheduled), systemImage: "exclamationmark.triangle.fill")
-                .font(.caption.weight(.semibold)).foregroundStyle(Color.delay)
+                .font(.footnote.weight(.semibold)).foregroundStyle(Color.delay)
         }
     }
 }
@@ -103,7 +103,7 @@ struct TrainDivisionNotice: View {
                     }
                 }
                 Text(verbatim: L10n.transfer("Check the destination of your train section. Carriage allocation is not available in Publit."))
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.footnote).foregroundStyle(.secondary)
             }
             .fixedSize(horizontal: false, vertical: true)
             .padding(.vertical, 4)

@@ -106,4 +106,27 @@ final class StationExitsTests: XCTestCase {
         let signed = StationEntrance(id: 2, ref: "A", coordinate: LatLon(lat: 48.0005, lon: 11.0))
         XCTAssertEqual(StationExits.pick([plain, signed], path: path, exit: nil, nodes: [])?.ref, "A")
     }
+
+    /// The exit number showed nowhere when the walk's path passed no door (wish: "show the optimal exit").
+    func testSignedDoorTowardsTheWalkWhenNoneIsOnTheWay() {
+        // The walk heads 300 m north; doors 40 m beside the platform, one north-east, one south.
+        let path = [LatLon(lat: 48.0, lon: 11.0), LatLon(lat: 48.0027, lon: 11.0)]
+        let north = StationEntrance(id: 1, ref: "3", coordinate: LatLon(lat: 48.0003, lon: 11.0005))
+        let south = StationEntrance(id: 2, ref: "1", coordinate: LatLon(lat: 47.9997, lon: 11.0005))
+        let unsigned = StationEntrance(id: 3, ref: nil, coordinate: LatLon(lat: 48.0004, lon: 11.0004))
+        XCTAssertEqual(StationExits.pick([south, unsigned, north], path: path, exit: nil, nodes: [])?.ref, "3")
+        // Far off to the side: not a door of this walk.
+        let far = StationEntrance(id: 4, ref: "9", coordinate: LatLon(lat: 48.0, lon: 11.003))
+        XCTAssertNil(StationExits.pick([far], path: path, exit: nil, nodes: []))
+    }
+
+    func testExitNamesWithTheStationInFront() throws {
+        XCTAssertEqual(StationExits.cleanName("Stephansplatz, Ausgang Graben"), "Graben")
+        XCTAssertEqual(StationExits.cleanName("Karlsplatz - Ausgang 3"), "3")
+        XCTAssertEqual(StationExits.cleanName("Ausgang Nord"), "Nord")
+        let json = """
+        {"elements":[{"type":"node","id":21,"lat":48.2,"lon":16.37,"tags":{"railway":"subway_entrance","local_ref":"4"}}]}
+        """
+        XCTAssertEqual(try StationExits.parse(Data(json.utf8)).first?.ref, "4")
+    }
 }

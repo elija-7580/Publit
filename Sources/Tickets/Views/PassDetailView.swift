@@ -43,6 +43,15 @@ struct PassDetailView: View {
                         .buttonStyle(.soft)
                         .accessibilityIdentifier("showOriginal")
                     }
+                    // Plan around this ticket (#24): the way to its first station in time, and on from its last.
+                    if pass.hasRoute, !pass.isArchived() {
+                        NavigationLink { TicketRoutePlanView(pass: pass) } label: {
+                            Label(L10n.t("Plan around this ticket"), systemImage: "point.topleft.down.to.point.bottomright.curvepath")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.soft)
+                        .accessibilityIdentifier("planAroundTicket")
+                    }
                     if WalletPassConfig.current != nil, pass.barcode?.walletReady == true {
                         AddToWalletButton(pass: pass, logo: PassLogoCache.image(pass, store: store))
                     }

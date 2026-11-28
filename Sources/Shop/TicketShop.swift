@@ -8,15 +8,33 @@ import FoundationNetworking
 
 /// Buying tickets inside Publit through the Publit ticket shop (services/ticket-shop).
 /// The shop holds the sellers' API keys and the payment key; the app only sends the journey and gets back
-/// offers, a payment page and finally the tickets. Off until `PublitTicketShopURL` is set in Info.plist.
+/// offers, a payment page and finally the tickets. Off until `PublitTicketShopURL` is set in Info.plist,
+/// and off in the App Store version: buying is a demo for TestFlight and development builds only
+/// (Elija, feedback on build 98: "ticket buying goes out of the release version").
 enum TicketShop {
-    static var baseURL: URL? {
+    /// The shop's address from Info.plist, in every build (the ticket-link service lives there too).
+    static var configuredURL: URL? {
         let raw = (Bundle.main.object(forInfoDictionaryKey: "PublitTicketShopURL") as? String)?
             .trimmingCharacters(in: .whitespaces)
         return validURL(raw)
     }
 
+    /// Where tickets are bought: only in a TestFlight or development build.
+    static var baseURL: URL? { isTestBuild ? configuredURL : nil }
+
     static var isAvailable: Bool { baseURL != nil }
+
+    /// A development build, or one installed from TestFlight (its receipt is a sandbox receipt).
+    /// The App Store version has a production receipt and never shows the shop.
+    static let isTestBuild: Bool = {
+        #if DEBUG
+        return true
+        #elseif canImport(Darwin)
+        return Bundle.main.appStoreReceiptURL?.lastPathComponent == "sandboxReceipt"
+        #else
+        return false
+        #endif
+    }()
 
     static func validURL(_ raw: String?) -> URL? {
         guard let raw, !raw.isEmpty, !raw.hasPrefix("$("), let url = URL(string: raw),

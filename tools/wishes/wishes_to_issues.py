@@ -13,7 +13,7 @@ To keep spam out of the tracker a wish is filed only when it
   - is at least WISHES_ISSUE_MIN_HOURS old (default 24: time to hide it on the wish server),
   - has at least WISHES_ISSUE_MIN_VOTES votes (default 2: the author's own plus one more),
 and at most WISHES_ISSUE_MAX_PER_RUN (default 5) per run. @mentions and #123 references in the
-wish text are defused. publit-site's wishes sync finds the issues by their marker and links them,
+wish text are defused, and so are HTML comments (a wish cannot forge another wish's marker). publit-site's wishes sync finds the issues by their marker and links them,
 so the wish's status on publit.eu follows the issue (labels planned, in progress, released).
 
 Run: GITHUB_TOKEN=… GITHUB_REPOSITORY=elija-7580/Publit python3 tools/wishes/wishes_to_issues.py [--dry-run]
@@ -46,6 +46,7 @@ def call(url, method="GET", data=None):
 def defang(text):
     """Wish text is written by anyone: no @mentions and no #123 cross-references in the tracker."""
     text = re.sub(r"@(?=\w)", "@​", text or "")
+    text = text.replace("<!--", "<​!--")          # no hidden comments, so no forged publit-wish marker
     return re.sub(r"(?<![\w/])#(?=\d)", "#​", text)
 
 

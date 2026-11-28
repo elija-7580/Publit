@@ -20,6 +20,92 @@ enum WhatsNew {
 
     /// Newest first.
     static let entries: [WhatsNewEntry] = [
+        WhatsNewEntry(build: 113, items: [
+            WhatsNewItem(symbol: "map", title: "Map line follows your ride",
+                         text: "Around large stations, the line on the map no longer runs over tracks your train never takes."),
+            WhatsNewItem(symbol: "ipad.landscape", title: "iPad: map reaches the top",
+                         text: "On the iPad, the map now reaches the top edge instead of leaving a black band."),
+        ]),
+        WhatsNewEntry(build: 112, items: [
+            WhatsNewItem(symbol: "lock.iphone", title: "Lock screen stays live on board",
+                         text: "While Publit follows your started trip, the lock screen and Dynamic Island keep showing delays, platforms and the next stop."),
+            WhatsNewItem(symbol: "bell.badge", title: "Get-off alert you can rely on",
+                         text: "The alert by location now also works when you lock the phone well before boarding or have a longer change."),
+            WhatsNewItem(symbol: "arrow.left.arrow.right", title: "Live times from the right direction",
+                         text: "A ride no longer takes the delay of the same line going the other way, and reminders follow new live times with the screen locked too."),
+        ]),
+        WhatsNewEntry(build: 111, items: [
+            WhatsNewItem(symbol: "chevron.up", title: "Earlier connections",
+                         text: "Tap “Earlier connections” above the routes to see the trains before the time you searched for."),
+        ]),
+        WhatsNewEntry(build: 110, items: [
+            WhatsNewItem(symbol: "clock.badge.exclamationmark", title: "Late trains stay in the list",
+                         text: "A late train you can still catch now shows up with its delay, and a refresh no longer shows it on time for a moment."),
+        ]),
+        WhatsNewEntry(build: 109, items: [
+            WhatsNewItem(symbol: "clock.arrow.circlepath", title: "Leave earlier, still catch it",
+                         text: "If a delay breaks a change before you leave, Publit shows an earlier way that still catches the same train."),
+        ]),
+        WhatsNewEntry(build: 108, items: [
+            WhatsNewItem(symbol: "arrow.triangle.branch", title: "Plan from your vehicle",
+                         text: "Already on a tram, bus or train? Open it and tap “Plan from this vehicle”: stay on or change at a stop ahead, with live times (idea: BudapestGO)."),
+        ]),
+        WhatsNewEntry(build: 107, items: [
+            WhatsNewItem(symbol: "arrow.triangle.turn.up.right.diamond", title: "Arrive by: only routes your way",
+                         text: "With “Arrive by”, Plan no longer lists a route that runs from your destination back to your start."),
+        ]),
+        WhatsNewEntry(build: 106, items: [
+            WhatsNewItem(symbol: "capsule.portrait", title: "Dynamic Island opens again",
+                         text: "Hold the Dynamic Island during a trip to see the next step, your vehicle and when you arrive."),
+        ]),
+        WhatsNewEntry(build: 105, items: [
+            WhatsNewItem(symbol: "figure.walk", title: "Faster way while you walk",
+                         text: "On the walk to your stop, Publit shows another way that arrives earlier."),
+            WhatsNewItem(symbol: "applewatch", title: "Readable on Apple Watch",
+                         text: "Your trip on the Apple Watch now has light text on a dark card."),
+        ]),
+        WhatsNewEntry(build: 104, items: [
+            WhatsNewItem(symbol: "door.left.hand.open", title: "Exit numbers more often",
+                         text: "Routes and live trips now show the exit number of metro stations more often, also when the walk only passes near the exit."),
+            WhatsNewItem(symbol: "ticket", title: "Deleted tickets stay deleted",
+                         text: "A ticket you deleted no longer comes back after an update."),
+        ]),
+        WhatsNewEntry(build: 103, items: [
+            WhatsNewItem(symbol: "map", title: "Station map opens again",
+                         text: "Pull the list in Nearby far down and let go: the station map opens again, as it should."),
+        ]),
+        WhatsNewEntry(build: 102, items: [
+            WhatsNewItem(symbol: "map", title: "Smoother station map",
+                         text: "Pull the list in Nearby far down and let go: the station map opens right out of the map at the top."),
+        ]),
+        WhatsNewEntry(build: 101, items: [
+            WhatsNewItem(symbol: "mappin.and.ellipse", title: "Change where you want",
+                         text: "Open a ride in a route and choose another stop or any place to change; Publit plans the way on from there."),
+        ]),
+        WhatsNewEntry(build: 100, items: [
+            WhatsNewItem(symbol: "square.grid.2x2", title: "Widgets and complications",
+                         text: "Home, Work, your own shortcuts and departures near you, on the Home Screen and on the Apple Watch face."),
+            WhatsNewItem(symbol: "star", title: "Save connections and lines",
+                         text: "Save a connection or a line in one direction, and see right away when the next one leaves."),
+            WhatsNewItem(symbol: "ticket", title: "Wallet passes and your own ticket",
+                         text: "Add tickets from Wallet pass files, and plan your journey around a ticket you already have."),
+        ]),
+        WhatsNewEntry(build: 99, items: [
+            WhatsNewItem(symbol: "arrow.up.arrow.down", title: "Sections in your order",
+                         text: "In Plan in sections, hold a place and drag it to put your stops in another order."),
+            WhatsNewItem(symbol: "percent", title: "Chances for every change",
+                         text: "Routes show how likely each change works, also with smart routing turned off."),
+            WhatsNewItem(symbol: "map", title: "All routes on one map",
+                         text: "In Plan, the map button shows every route found on one map, so you can compare where they go."),
+        ]),
+        WhatsNewEntry(build: 98, items: [
+            WhatsNewItem(symbol: "point.topleft.down.to.point.bottomright.curvepath", title: "Plan in sections",
+                         text: "Add stops in between and choose for each section how you travel and which departure you take."),
+            WhatsNewItem(symbol: "door.left.hand.open", title: "Your way out",
+                         text: "For metro and train rides Publit says where to board and which exit to take; you can also pick your own exit."),
+            WhatsNewItem(symbol: "moon.stars", title: "Last connection",
+                         text: "In Plan, the new time option “Last” shows the latest connections that still get you there tonight."),
+        ]),
         WhatsNewEntry(build: 97, items: [
             WhatsNewItem(symbol: "arrow.triangle.branch", title: "Go on another way",
                          text: "Open a ride in a route and choose another way to go on from there; the way up to it stays."),

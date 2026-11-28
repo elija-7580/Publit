@@ -164,7 +164,8 @@ struct LineDetailView: View {
 
     private var direction: LineDirection? { directions.first { $0.id == directionId } ?? directions.first }
     private var leg: Leg? { direction.flatMap { legs[$0.id] } }
-    private var savedLine: SavedLine { SavedLine(line: line) }
+    /// Saved in the direction shown when the line runs both ways here (#21).
+    private var savedLine: SavedLine { SavedLine(line: line, direction: directions.count > 1 ? direction : nil) }
 
     var body: some View {
         List {

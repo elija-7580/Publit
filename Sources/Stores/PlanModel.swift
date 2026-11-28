@@ -39,7 +39,11 @@ enum TimeMode: String, Codable, CaseIterable, Identifiable, Sendable {
     case now = "Now"
     case departAt = "Depart"
     case arriveBy = "Arrive"
+    /// The last connection of the day: routes that still arrive tonight (see `LastConnection`).
+    case lastConnection = "Last"
     var id: String { rawValue }
+    /// Searched backwards from an arrival time, so later pages are earlier routes.
+    var searchesBackwards: Bool { self == .arriveBy || self == .lastConnection }
 }
 
 @MainActor
@@ -89,11 +93,17 @@ final class PlanModel {
     private(set) var walkNote: String?
 
     private var nextCursor: String?
+    /// The page before the first route (departure searches): "Earlier connections" above the list.
+    private var earlierCursor: String?
+    /// Earlier routes were loaded: a live refresh keeps them instead of starting at the searched time again.
+    @ObservationIgnored private var keepsEarlier = false
     @ObservationIgnored private var lastRequest: (from: LatLon, to: LatLon, time: Date?, arriveBy: Bool, maxWalk: Int, stops: PlanStops)?
     @ObservationIgnored private var lastOptions = RouteOptions()
     /// Drive to the nearest station in the last Park & Ride search: later pages keep to the same stations.
     @ObservationIgnored private var parkAndRideNearest: Int?
     @ObservationIgnored private var token = UUID()
+    /// "Later connections" were added to the routes on screen (`loadMore`).
+    @ObservationIgnored private var loadedMore = false
     @ObservationIgnored private var resultsKey: String?
     @ObservationIgnored private var completedAt: Date?
     /// Cycling and driving the whole way for `streetKey`, fetched after the routes.
@@ -108,6 +118,7 @@ final class PlanModel {
         let list = SmartRouting.isEnabled ? SmartRouting.pruned(itineraries) : itineraries
         return Self.timetableOrder(list, arriveBy: timeMode == .arriveBy)
     }
+
 
     /// Departure order when searching by departure, arrival order when searching "Arrive by":
     /// the time the user asked about is the one that always grows down the list. Ties fall back to
@@ -124,18 +135,21 @@ final class PlanModel {
     }
 
     var canLoadMore: Bool { nextCursor != nil && !itineraries.isEmpty }
+    var canLoadEarlier: Bool { earlierCursor != nil && !itineraries.isEmpty && !timeMode.searchesBackwards }
 
     /// Changes whenever a new search is needed.
     var queryKey: String {
-        let t = isLive ? "now" : String(Int(date.timeIntervalSince1970 / 60))
+        let t = timeMode == .lastConnection ? LastConnection.dayKey(for: date)
+            : isLive ? "now" : String(Int(date.timeIntervalSince1970 / 60))
         return "\(from.key)|\(to?.key ?? "-")|\(timeMode.rawValue)|\(t)|\(options.key)"
     }
 
     /// What was offered, to learn from the route that gets saved (smart routing).
     private func offerForLearning() {
         SmartRouting.offered = itineraries
-        if SmartRouting.isEnabled { DelayHistoryStore.shared.refresh(for: itineraries) }
-        SmartRouting.offeredArriveBy = timeMode == .arriveBy
+        // Past delays give the chance of each change, which a route shows with smart routing off too.
+        DelayHistoryStore.shared.refresh(for: itineraries)
+        SmartRouting.offeredArriveBy = timeMode.searchesBackwards
     }
 
     func swap() {
@@ -160,7 +174,8 @@ final class PlanModel {
            let completedAt, Date().timeIntervalSince(completedAt) < 45,
            let lastRequest, f.distance(to: lastRequest.from) < 150 { return }
         // Results of another query (new destination or time) must not stay on screen without a spinner.
-        if !silent, resultsKey != queryKey { itineraries = []; comparisons = []; nextCursor = nil }
+        if !silent, resultsKey != queryKey { itineraries = []; comparisons = []; nextCursor = nil; earlierCursor = nil }
+        if !silent { keepsEarlier = false }
         // Following the clock: the picker shows the time the routes are for.
         if timeMode == .departAt, dateFollowsNow, abs(date.timeIntervalSinceNow) > 30 { date = .now }
         let searchedFrom = from
@@ -172,8 +187,9 @@ final class PlanModel {
         defer { if token == myToken { isLoading = false } }
         errorMessage = nil
         if !silent { walkNote = nil }
-        let time: Date? = isLive ? nil : date
-        let arriveBy = timeMode == .arriveBy
+        let lastMode = timeMode == .lastConnection
+        let time: Date? = lastMode ? LastConnection.deadline(for: date) : isLive ? nil : date
+        let arriveBy = timeMode.searchesBackwards
         let options = options
         let stops = PlanStops(from: from.stopId, to: to.stopId)
         do {
@@ -239,7 +255,18 @@ final class PlanModel {
             if case .currentLocation = searchedFrom { transit = Reach.boardingHere(transit, here: f) }
             // After dropping the walk, the short- and long-walk copies of a ride are identical: list it once.
             transit = transit.uniqueRides
-            itineraries = Self.merge(transit: transit, direct: res.direct)
+            // A live refresh keeps the delays already on screen until the live times come in again, and a
+            // late train the server no longer lists stays while it has not left (`LateTrains`).
+            if silent, isLive, !lastMode { transit = LateTrains.carry(transit, previous: itineraries, now: Date()) }
+            // Earlier connections the user loaded stay on a live refresh (it only searches from the set time).
+            if silent, keepsEarlier { transit = Self.keepingEarlier(transit, previous: itineraries) }
+            // "Later connections" already loaded stay through a refresh of the same search: the list
+            // must not snap back to its first page under the reader.
+            let laterPages = silent && loadedMore && resultsKey == queryKey && !lastMode
+                ? Self.laterPages(of: itineraries, after: transit, arriveBy: arriveBy) : []
+            transit += laterPages
+            // Last connection: only what has not left yet; walking the whole way is not a connection.
+            itineraries = lastMode ? LastConnection.upcoming(transit) : Self.merge(transit: transit, direct: res.direct)
             offerForLearning()
             walkNote = parkAndRide && options.firstMile != .car ? ParkAndRide.fallbackNote
                 : maxWalk > RouteOptions.defaultWalkMinutes * 60 ? Reach.longWalkNote(res.itineraries) : nil
@@ -249,11 +276,18 @@ final class PlanModel {
             resultsKey = queryKey
             completedAt = Date()
             updatedAt = completedAt
-            nextCursor = arriveBy ? res.previousPageCursor : res.nextPageCursor
+            // With later pages kept, paging goes on from where it was.
+            if laterPages.isEmpty {
+                nextCursor = arriveBy ? res.previousPageCursor : res.nextPageCursor
+                loadedMore = false
+            }
+            if !(silent && keepsEarlier) { earlierCursor = arriveBy ? nil : res.previousPageCursor }
             lastRequest = (f, t, time, arriveBy, maxWalk, stops.forFirstMile(used.firstMile))
             lastOptions = used
             if !silent { history.record(from: searchedFrom, to: to, mode: searchedMode, date: searchedDate, source: source) }
-            if itineraries.isEmpty {
+            if itineraries.isEmpty, lastMode, !transit.isEmpty {
+                errorMessage = L10n.t("The last connection there has already left. Choose another day.")
+            } else if itineraries.isEmpty {
                 errorMessage = options.isDefault ? L10n.t("No connections found.")
                     : !options.tickets.isEmpty ? L10n.t("No connection is fully covered by your tickets. Change them in Route options to see all.")
                     : options.maxWalkMinutes < RouteOptions.defaultWalkMinutes ? Reach.ownLimitNote(minutes: options.maxWalkMinutes)
@@ -341,7 +375,49 @@ final class PlanModel {
             let enriched = await LiveOverlay.apply(snapshot, budget: 5)
             guard let self, self.token == myToken else { return }
             self.itineraries = LiveOverlay.replace(self.itineraries, with: enriched)
+            await self.addEarlierWays(token: myToken)
+            await self.addLateTrains(token: myToken)
         }
+    }
+
+    /// Trains due before the searched time that run late enough to be caught: the server plans with the
+    /// timetable here and leaves them out, so a second search starts `LateTrains.lookback` earlier and
+    /// keeps those that, with live times, have not left yet. Not for "Arrive by" and "Last".
+    private func addLateTrains(token myToken: UUID) async {
+        guard let req = lastRequest, !req.arriveBy, timeMode != .lastConnection else { return }
+        let now = Date()
+        let base = req.time ?? now
+        guard let res = try? await TransitousClient.shared.plan(from: req.from, to: req.to, time: base.addingTimeInterval(-LateTrains.lookback),
+                                                                arriveBy: false, maxWalk: req.maxWalk, options: lastOptions, stops: req.stops),
+              token == myToken else { return }
+        let candidates = LateTrains.candidates(res.itineraries.withoutDetours.uniqueRides, base: base,
+                                               known: Set(itineraries.map(\.rideKey)))
+        guard !candidates.isEmpty else { return }
+        let enriched = await LiveOverlay.apply(candidates, budget: 4)
+        guard token == myToken else { return }
+        let late = LateTrains.stillReachable(enriched, base: base, now: Date(), known: Set(itineraries.map(\.rideKey)))
+        guard !late.isEmpty else { return }
+        itineraries = Self.timetableOrder(itineraries + late, arriveBy: false)
+    }
+
+    /// Live times broke a change on a route that has not started yet: the earlier way that still
+    /// catches the same connection joins the list (`CatchEarlier`). The server never lists it by
+    /// itself: it leaves earlier and arrives at the same time, so it looks like the worse route.
+    private func addEarlierWays(token myToken: UUID) async {
+        guard timeMode != .lastConnection else { return }
+        let now = Date()
+        let broken = itineraries.filter { CatchEarlier.target($0, changes: SmartRouting.changes($0, at: now), at: now) != nil }
+        guard !broken.isEmpty else { return }
+        var found: [Itinerary] = []
+        // A couple of searches at most; the plan cache answers the same ones on the next refresh.
+        for it in broken.prefix(2) {
+            if let rescue = await CatchEarlier.search(it, at: now, options: lastOptions) { found.append(rescue.route) }
+            guard token == myToken else { return }
+        }
+        var known = Set(itineraries.map(\.rideKey))
+        let fresh = found.filter { known.insert($0.rideKey).inserted }
+        guard !fresh.isEmpty else { return }
+        itineraries = Self.timetableOrder(itineraries + fresh, arriveBy: lastRequest?.arriveBy ?? false)
     }
 
     /// One request per mode, side by side: cycling comes back in about a second, driving
@@ -368,15 +444,17 @@ final class PlanModel {
 
     func loadMore() async {
         guard let req = lastRequest, let cursor = nextCursor, !isLoadingMore else { return }
-        let myToken = token
+        // The search these results belong to. A refresh of the same search meanwhile (every minute
+        // for "now") is no reason to drop the page the user just asked for.
+        let key = resultsKey
         isLoadingMore = true
         defer { isLoadingMore = false }
         do {
             let res = try await TransitousClient.shared.plan(from: req.from, to: req.to, time: req.time,
                                                              arriveBy: req.arriveBy, pageCursor: cursor, maxWalk: req.maxWalk,
                                                              options: lastOptions, stops: req.stops)
-            // A new search started meanwhile: these results belong to the old query.
-            guard token == myToken else { return }
+            // Another search started meanwhile: these results belong to the old query.
+            guard resultsKey == key, queryKey == key else { return }
             let known = Set(itineraries.map(\.id))
             let knownRides = Set(itineraries.map(\.rideKey))
             var fresh = res.itineraries.withoutDetours.uniqueRides
@@ -384,12 +462,64 @@ final class PlanModel {
             if lastOptions.firstMile == .car {
                 fresh = ParkAndRide.nearStations(ParkAndRide.sensible(fresh), nearest: parkAndRideNearest)
             }
+            if timeMode == .lastConnection { fresh = LastConnection.upcoming(fresh.filter { !$0.isDirect }) }
             itineraries = Self.timetableOrder(itineraries + fresh, arriveBy: req.arriveBy)
             offerForLearning()
             nextCursor = req.arriveBy ? res.previousPageCursor : res.nextPageCursor
+            loadedMore = true
         } catch {
             if !Self.isCancellation(error) { errorMessage = error.localizedDescription }
         }
+    }
+
+    /// Routes from further pages ("Later connections") that a refresh of the first page does not bring
+    /// again: the rides beyond the fresh page's last one (searching by departure: leaving later;
+    /// "Arrive by": arriving earlier). Walks and rides the fresh page lists are left out.
+    nonisolated static func laterPages(of previous: [Itinerary], after fresh: [Itinerary], arriveBy: Bool) -> [Itinerary] {
+        let rides = fresh.filter { !$0.isDirect }
+        var known = Set(fresh.map(\.rideKey))
+        if arriveBy {
+            guard let edge = rides.map(\.endTime).min() else { return [] }
+            return previous.filter { !$0.isDirect && $0.endTime < edge && known.insert($0.rideKey).inserted }
+        }
+        guard let edge = rides.map(\.startTime).max() else { return [] }
+        return previous.filter { !$0.isDirect && $0.startTime > edge && known.insert($0.rideKey).inserted }
+    }
+
+    /// Loads the page before the first route ("Earlier connections", departure searches only): trains
+    /// that left before the searched time, or that the user may still prefer.
+    func loadEarlier() async {
+        guard let req = lastRequest, !req.arriveBy, let cursor = earlierCursor, !isLoadingMore else { return }
+        let myToken = token
+        isLoadingMore = true
+        defer { isLoadingMore = false }
+        do {
+            let res = try await TransitousClient.shared.plan(from: req.from, to: req.to, time: req.time,
+                                                             arriveBy: false, pageCursor: cursor, maxWalk: req.maxWalk,
+                                                             options: lastOptions, stops: req.stops)
+            guard token == myToken else { return }
+            let known = Set(itineraries.map(\.id))
+            let knownRides = Set(itineraries.map(\.rideKey))
+            var fresh = res.itineraries.withoutDetours.uniqueRides
+                .filter { !known.contains($0.id) && !knownRides.contains($0.rideKey) && !$0.isDirect }
+            if lastOptions.firstMile == .car {
+                fresh = ParkAndRide.nearStations(ParkAndRide.sensible(fresh), nearest: parkAndRideNearest)
+            }
+            itineraries = Self.timetableOrder(itineraries + fresh, arriveBy: false)
+            keepsEarlier = true
+            offerForLearning()
+            earlierCursor = res.previousPageCursor
+        } catch {
+            if !Self.isCancellation(error) { errorMessage = error.localizedDescription }
+        }
+    }
+
+    /// A live refresh after "Earlier connections": the earlier routes already on screen stay above the
+    /// refreshed ones (the refresh itself starts at the searched time).
+    nonisolated static func keepingEarlier(_ fresh: [Itinerary], previous: [Itinerary]) -> [Itinerary] {
+        guard let first = fresh.filter({ !$0.isDirect }).map(\.startTime).min() else { return fresh }
+        let known = Set(fresh.map(\.rideKey))
+        return previous.filter { !$0.isDirect && $0.startTime < first && !known.contains($0.rideKey) } + fresh
     }
 
     /// Walking there is listed first when it is a real choice (`StreetComparison.walkIsAChoice`):
@@ -572,6 +702,27 @@ final class AppState {
         plan.to = .place(place)
         plan.source = source
         tab = .plan
+    }
+
+    /// A saved connection (#28): the Plan tab from its start to its destination, leaving now.
+    func route(_ connection: SavedConnection) {
+        dismissToken &+= 1
+        showGoNow = false
+        plan.from = .place(connection.from)
+        plan.to = .place(connection.to)
+        plan.source = .favorite
+        plan.timeMode = .now
+        plan.date = .now
+        plan.searchStarted = true
+        tab = .plan
+    }
+
+    /// Plan tab with tonight's last connection to `place`, from here.
+    func lastConnection(to place: SavedPlace, source: RecentSearch.Source = .favorite) {
+        route(to: place, source: source)
+        plan.timeMode = .lastConnection
+        plan.date = .now
+        plan.searchStarted = true
     }
 
     /// Plan tab from one stop to another (a stop picked on a line's trip).

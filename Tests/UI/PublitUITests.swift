@@ -135,6 +135,36 @@ final class PublitUITests: XCTestCase {
         if element.isHittable { element.tap() } else { element.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap() }
     }
 
+    /// Taps a button that opens a sheet and waits for the sheet. A tap that lands while the list is
+    /// still moving only stops the scrolling: on CI (2026-11-26, F13, twice at the same line) Plan
+    /// was back at the top with "Route options" in plain view and no sheet. So the tap is repeated,
+    /// but only while the button can still be hit (under an open sheet it cannot).
+    private func openSheet(_ button: XCUIElement, sheet: XCUIElement) -> Bool {
+        for _ in 0..<3 {
+            guard button.waitForExistence(timeout: 5) else { return false }
+            if button.isHittable { button.tap() }
+            if sheet.waitForExistence(timeout: 5) { return true }
+        }
+        return false
+    }
+
+    /// Opens a route from the list in Plan and waits for its screen. Since build 111 the row
+    /// "Earlier connections" sits above the routes, so on the CI iPhone the first route starts
+    /// behind the tab bar. When it is not the recommended one, the pill "Recommended: …" floats
+    /// there as well, and a tap on the row's centre lands on the pill or the tab bar: on CI
+    /// (2026-11-27, F07, twice at the same line) Plan stayed at the top and no route opened. So
+    /// the row is first brought up clear of the bars, and the tap is repeated while the list is
+    /// still in front (routes added after the live times can move the row under the tap).
+    private func openRoute(_ row: XCUIElement, in app: XCUIApplication) -> Bool {
+        let route = app.navigationBars["Route"]
+        for _ in 0..<3 where !route.exists {
+            guard bringUp(row, in: app) else { continue }
+            row.tap()
+            if route.waitForExistence(timeout: 10) { return true }
+        }
+        return route.exists
+    }
+
     /// Screenshot plus the element tree, for a test that is about to fail on CI.
     private func dump(_ app: XCUIApplication, _ name: String) {
         snap(name)
@@ -170,8 +200,15 @@ final class PublitUITests: XCTestCase {
         snap("de-plan")
         app.buttons["Einstellungen"].tap()
         XCTAssertTrue(app.navigationBars["Einstellungen"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", "Öffentlicher Verkehr ohne Ablenkung.")).firstMatch.exists)
         snap("de-settings")
+        // Settings in categories (layout A): the app's line is on the About page.
+        let about = app.buttons["settings-about"]
+        for _ in 0..<4 where !about.isHittable { app.swipeUp() }
+        about.tap()
+        XCTAssertTrue(app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", "Öffentlicher Verkehr ohne Ablenkung.")).firstMatch.waitForExistence(timeout: 5))
+        snap("de-settings-about")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(app.buttons["Fertig"].waitForExistence(timeout: 5))
         app.buttons["Fertig"].tap()
         app.tab(0).tap()
         XCTAssertTrue(app.navigationBars["In der Nähe"].waitForExistence(timeout: 5))
@@ -604,9 +641,7 @@ final class PublitUITests: XCTestCase {
         }
 
         // The routes list has no map toggle any more: open the first route directly.
-        let details = routes.firstMatch
-        details.tap()
-        XCTAssertTrue(app.navigationBars["Route"].waitForExistence(timeout: 10))
+        XCTAssertTrue(openRoute(routes.firstMatch, in: app), "the first route did not open")
         sleep(3)
         snap("detail")
         // In the steps: the reminder sits in the unfolded ride, like its stops.
@@ -721,13 +756,12 @@ final class PublitUITests: XCTestCase {
         let app = launch(["PUBLIT_DEMO": "munich", "PUBLIT_TAB": "plan"])
         let routes = app.buttons.matching(identifier: "routeRow")
         XCTAssertTrue(routes.firstMatch.waitForExistence(timeout: timeout), "no routes found")
-        routes.firstMatch.tap()
-        XCTAssertTrue(app.navigationBars["Route"].waitForExistence(timeout: 10))
+        XCTAssertTrue(openRoute(routes.firstMatch, in: app), "the first route did not open")
         let save = app.buttons["Save trip"]
         for _ in 0..<6 where !save.isHittable { app.swipeUp() }
         XCTAssertTrue(save.exists, "Save trip missing")
         save.tap()
-        XCTAssertTrue(app.collectionViews.buttons["Saved"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "identifier == 'saveTrip' AND label == 'Saved'")).firstMatch.waitForExistence(timeout: 5))
         snap("tripactions")
         // Tickets for the trip: the add flow opens with the trip attached.
         // Saving shows the live trip bar over the lower screen: bring the row above it.
@@ -792,8 +826,8 @@ final class PublitUITests: XCTestCase {
         sleep(1)
         snap("plan-compare")
         for _ in 0..<6 where !plan.buttons["routeOptions"].isHittable { plan.swipeDown() }
-        plan.buttons["routeOptions"].tap()
-        XCTAssertTrue(plan.navigationBars["Route options"].waitForExistence(timeout: 5))
+        sleep(1)   // let the list come to rest: a tap on a moving list is swallowed
+        XCTAssertTrue(openSheet(plan.buttons["routeOptions"], sheet: plan.navigationBars["Route options"]), "route options did not open")
         let bus = plan.switches["routeMode-bus"]
         XCTAssertTrue(bus.waitForExistence(timeout: 5))
         bus.coordinate(withNormalizedOffset: CGVector(dx: 0.93, dy: 0.5)).tap()
@@ -803,8 +837,7 @@ final class PublitUITests: XCTestCase {
         XCTAssertTrue(routes.firstMatch.waitForExistence(timeout: timeout), "no routes without buses")
         XCTAssertTrue(plan.buttons["routeOptions"].label.contains("Without Bus"), "filter summary missing")
         // Leave the defaults for the next run.
-        plan.buttons["routeOptions"].tap()
-        XCTAssertTrue(plan.navigationBars["Route options"].waitForExistence(timeout: 5))
+        XCTAssertTrue(openSheet(plan.buttons["routeOptions"], sheet: plan.navigationBars["Route options"]), "route options did not open again")
         plan.buttons["Reset"].tap()
         plan.buttons["routeOptionsDone"].tap()
     }
@@ -864,6 +897,17 @@ final class PublitUITests: XCTestCase {
         let add = app.buttons["addPass"]
         XCTAssertTrue(add.waitForExistence(timeout: 5))
         snap("tickets-tab")
+        // An empty page keeps clear of the live trip bar (#134): with a trip in the bar (an earlier
+        // test saves one) and no tickets, the whole empty state stays above it.
+        let bar = app.descendants(matching: .any)["liveTripBar"].firstMatch
+        let emptyText = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "Add a ticket from a PDF")).firstMatch
+        if bar.exists, emptyText.exists {
+            let top = bar.frame.minY
+            XCTAssertLessThanOrEqual(emptyText.frame.maxY, top, "the live trip bar covers the empty page's text")
+            for button in app.buttons.matching(NSPredicate(format: "label == %@", "Add ticket")).allElementsBoundByIndex {
+                XCTAssertLessThanOrEqual(button.frame.maxY, top, "the live trip bar covers the empty page's button")
+            }
+        }
         add.tap()
         XCTAssertTrue(app.buttons["importFile"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["importPhoto"].exists)

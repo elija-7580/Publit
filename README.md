@@ -71,7 +71,7 @@ This part covers the code: architecture, build, tests and CI. Every feature and 
 
 ### Status
 
-`v0.1.1`, build 97. `0.1.0` (build 64) was the first App Store release; earlier builds were TestFlight only. Changes per build: [CHANGELOG.md](CHANGELOG.md).
+`v0.1.2`, build 98. `0.1.1` (builds 66 to 96) is in the App Store, so Apple takes no more builds for it. `0.1.0` (build 64) was the first App Store release; earlier builds were TestFlight only. Changes per build: [CHANGELOG.md](CHANGELOG.md).
 
 ### Architecture
 

@@ -191,7 +191,9 @@ struct WalkRoute: Sendable {
         let exitAt = Self.markExit(&out, startLevel: marks.first?.step.fromLevel, start: leg.from.coordinate)
         if let entrances = exits.entrances(for: leg) {
             let nodes = Set((leg.steps ?? []).flatMap { [$0.fromOsmNode, $0.toOsmNode] }.compactMap { $0 })
-            if let e = StationExits.pick(entrances, path: path, exit: exitAt.map { (out[$0].coordinate, out[$0].along) }, nodes: nodes) {
+            // The user's own exit for this station and destination comes first.
+            if let e = exits.preferred(for: leg)
+                ?? StationExits.pick(entrances, path: path, exit: exitAt.map { (out[$0].coordinate, out[$0].along) }, nodes: nodes) {
                 out[exitAt ?? 0].exitRef = e.label
                 out[exitAt ?? 0].exitPoint = e.coordinate
             }

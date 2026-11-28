@@ -17,13 +17,18 @@ struct RouteTagLine: View {
     }
 
     private var line: Text {
-        let others = badges.filter { $0 != .recommended }.map(\.title)
+        let others = badges.filter { $0 != .recommended && $0 != .lastConnection }.map(\.title)
         var line = Text(verbatim: "")
         var first = true
         func add(_ t: Text) { line = first ? t : line + Text(verbatim: "  ·  ").foregroundStyle(.tertiary) + t; first = false }
         if let dayNote {
             add(Text(Image(systemName: "calendar")).foregroundStyle(Color.delay)
                 + Text(verbatim: " " + dayNote).foregroundStyle(Color.delay))
+        }
+        // "Last connection" first: on that route it is what matters.
+        if badges.contains(.lastConnection) {
+            add(Text(Image(systemName: SmartRouting.Badge.lastConnection.symbol)).foregroundStyle(Color.ink)
+                + Text(verbatim: " " + L10n.t("Last connection")).foregroundStyle(Color.ink))
         }
         if badges.contains(.recommended) {
             var t = Text(Image(systemName: "sparkles")).foregroundStyle(Color.ink)
@@ -37,12 +42,15 @@ struct RouteTagLine: View {
 }
 
 /// On a route: each change with how likely it works and the vehicle that takes over if it does not.
+/// Shown with smart routing off too (feedback on build 98: "no probabilities with smart routing
+/// off"): the chance of a change is information about the route, smart routing only decides
+/// which route is suggested and in which order they are listed.
 struct SmartChangesSection: View {
     let itinerary: Itinerary
     @AppStorage(SmartRouting.enabledKey) private var enabled = true
 
     var body: some View {
-        if enabled, !itinerary.isDirect {
+        if !itinerary.isDirect {
             let changes = SmartRouting.changes(itinerary)
             let lastRide = itinerary.legs.lastIndex(where: \.isTransit)
             Section {
@@ -55,10 +63,12 @@ struct SmartChangesSection: View {
                     ChangeChanceRow(change: change, isLastRide: change.outgoingIndex == lastRide)
                 }
             } header: {
-                Text(L10n.t("Smart routing"))
+                Text(enabled ? L10n.t("Smart routing") : L10n.t("Changes"))
             } footer: {
-                Text(L10n.f("Feels like %@: waiting, walking and changes count more than riding.",
-                            Fmt.duration(seconds: Int(SmartRouting.feltMinutes(itinerary) * 60))))
+                if enabled {
+                    Text(L10n.f("Feels like %@: waiting, walking and changes count more than riding.",
+                                Fmt.duration(seconds: Int(SmartRouting.feltMinutes(itinerary) * 60))))
+                }
             }
         }
     }
@@ -103,25 +113,26 @@ struct ChangeChanceRow: View {
                     .foregroundStyle(tint)
                 Text(L10n.f("Change at %@", change.stopName)).font(.subheadline.weight(.semibold))
                 Spacer(minLength: 8)
-                if !change.isEstimate {
-                    Text(verbatim: "\(change.percent) %")
+                // Estimates too, marked "≈" (their source line below says "Estimate").
+                if change.source != .throughRun {
+                    Text(verbatim: "\(change.isEstimate ? "≈ " : "")\(change.percent) %")
                         .font(.subheadline.weight(.bold).monospacedDigit())
                         .foregroundStyle(tint)
                 }
             }
             Text(verbatim: "\(verdict) · \(spare)")
-                .font(.caption).foregroundStyle(.secondary)
+                .font(.footnote).foregroundStyle(.secondary)
             Text(Self.sourceText(change.source))
-                .font(.caption2).foregroundStyle(.tertiary)
+                .font(.footnote).foregroundStyle(.secondary)
             if let backup = SmartRouting.backup(for: change.outgoing) {
                 let then = isLastRide ? L10n.f("Arrive %@", Fmt.time(backup.arrival, tz: change.outgoing.to.tz))
                     : L10n.t("still makes the next change")
                 Label(L10n.f("If missed: %@ at %@", backup.leg.lineName, Fmt.time(backup.leg.startTime, tz: backup.leg.from.tz)) + " · " + then,
                       systemImage: "arrow.uturn.forward")
-                    .font(.caption.weight(.semibold))
+                    .font(.footnote.weight(.semibold))
                     .foregroundStyle(Color.ink)
             } else if change.level != .safe {
-                Text(L10n.t("No backup found if you miss it.")).font(.caption).foregroundStyle(.secondary)
+                Text(L10n.t("No backup found if you miss it.")).font(.footnote).foregroundStyle(.secondary)
             }
         }
         .padding(.vertical, 2)

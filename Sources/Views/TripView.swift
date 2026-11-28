@@ -39,6 +39,8 @@ struct TripView: View {
     @State private var showsMap = false
     /// A stop of the trip whose departures were opened from its menu (#130).
     @State private var departuresStop: Place?
+    /// "Plan from this vehicle": you are on board and go on from a stop still ahead.
+    @State private var showsOnBoard = false
 
     private var leg: Leg? { trip?.legs.first(where: \.isTransit) }
     private var savedLine: SavedLine {
@@ -64,6 +66,13 @@ struct TripView: View {
                         Label("Track vehicle", systemImage: "scope")
                     }
                     .accessibilityIdentifier("trackVehicle")
+                    // On board: plan from this vehicle, the ride so far counts (idea: BudapestGO, BKK).
+                    if progress != .finished {
+                        Button { showsOnBoard = true } label: {
+                            Label("Plan from this vehicle", systemImage: "arrow.triangle.branch")
+                        }
+                        .accessibilityIdentifier("planFromVehicle")
+                    }
                 }
                 if !leg.trainDivisionAlerts.isEmpty {
                     Section { TrainDivisionNotice(leg: leg) }
@@ -129,6 +138,9 @@ struct TripView: View {
         }
         .navigationDestination(item: $departuresStop) { stop in
             StopDeparturesView(stopId: stop.parentId ?? stop.stopId ?? "", name: stop.name, coordinate: stop.coordinate)
+        }
+        .sheet(isPresented: $showsOnBoard) {
+            if let leg { OnBoardPlanView(trip: leg, lineName: stopTime.lineName) }
         }
         .ticking(every: 15, now: $now)
         .navigationTitle(stopTime.lineName)
@@ -222,7 +234,7 @@ extension TripView {
             TripMap(generation: generation, shape: shape, stops: stops.map(\.coordinate),
                     stopNames: stops.map(\.name),
                     color: leg.lineStroke, textColor: leg.lineTextColor, mode: leg.mode,
-                    vehicle: TripProgress.position(TripProgress.at(now, stops: stops), stops: stops),
+                    vehicle: TripProgress.position(TripProgress.at(now, stops: stops), stops: stops, path: shape),
                     controls: controls)
                 .equatable()
         }
@@ -365,7 +377,7 @@ struct LineDeparturesView: View {
                     .linkIndicatorHidden()
                 }
             } header: {
-                HStack { LineBadge(line); Text(L10n.f("At %@", line.stopName)).textCase(nil) }
+                HStack { LineBadge(line); Text(SavedLineRow.subtitle(line)).textCase(nil) }
             }
         }
         .readableWidth()

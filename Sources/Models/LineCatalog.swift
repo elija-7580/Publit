@@ -32,7 +32,8 @@ struct LineRef: Codable, Hashable, Identifiable, Sendable, RouteStyled {
 
     init(saved: SavedLine) {
         self.init(key: saved.routeKey, mode: saved.mode, routeShortName: saved.routeShortName, displayName: saved.displayName,
-                  routeColor: saved.routeColor, routeTextColor: saved.routeTextColor, agencyName: nil, headsigns: [],
+                  routeColor: saved.routeColor, routeTextColor: saved.routeTextColor, agencyName: nil,
+                  headsigns: saved.headsign.map { [$0] } ?? [],
                   stopId: saved.stopId, stopName: saved.stopName, lat: saved.lat, lon: saved.lon)
     }
 

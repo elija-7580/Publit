@@ -25,12 +25,22 @@ enum TripProgress: Equatable, Sendable {
         return .notStarted
     }
 
-    /// Estimated position, interpolated in a straight line between stops.
-    static func position(_ progress: TripProgress, stops: [Place]) -> LatLon? {
+    /// Estimated position between stops: along the ride's shape when there is one, else in a
+    /// straight line. A long-distance bus with few stops (Vienna to Venice) went straight across
+    /// the country in a straight line, far away from its road (feedback on build 98).
+    static func position(_ progress: TripProgress, stops: [Place], path: [LatLon] = []) -> LatLon? {
         switch progress {
-        case .atStop(let i): return stops[i].coordinate
+        case .atStop(let i): return stops.indices.contains(i) ? stops[i].coordinate : nil
         case .between(let i, let f):
+            guard i + 1 < stops.count else { return nil }
             let a = stops[i], b = stops[i + 1]
+            if path.count >= 2,
+               let from = PathGeometry.locate(a.coordinate, on: path),
+               let to = PathGeometry.locate(b.coordinate, on: path),
+               from.offset < 2_000, to.offset < 2_000, to.along > from.along,
+               let p = PathGeometry.point(at: from.along + (to.along - from.along) * f, on: path) {
+                return p
+            }
             return LatLon(lat: a.lat + (b.lat - a.lat) * f, lon: a.lon + (b.lon - a.lon) * f)
         case .notStarted, .finished: return nil
         }

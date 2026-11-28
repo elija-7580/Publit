@@ -304,7 +304,9 @@ final class TransitMapModel {
     }
 
     static func zoom(_ r: MKCoordinateRegion) -> Int {
-        Int((log2(360 / max(r.span.longitudeDelta, 0.0001))).rounded())
+        // A map without a size yet reports a span that is not a number.
+        guard r.span.longitudeDelta.isFinite else { return 14 }
+        return Int((log2(360 / min(max(r.span.longitudeDelta, 0.0001), 360))).rounded())
     }
 }
 
@@ -360,6 +362,10 @@ struct StationMapView: View {
         MapLook(base: MapBase(storageValue: storedBase), realistic3D: realistic3D, pointsOfInterest: pointsOfInterest, traffic: traffic)
     }
 
+    /// The safe-area edges the map itself reaches over: all of them behind the panel of the iPad
+    /// layout, only the bottom when it is a screen of its own with a navigation bar (#120).
+    static func mapEdges(embedded: Bool) -> Edge.Set { embedded ? .all : .bottom }
+
     var body: some View {
         NavigationStack {
             TransitMapView(content: model.content, initialCenter: center ?? location.coordinate,
@@ -372,8 +378,12 @@ struct StationMapView: View {
                            recenter: recenter,
                            places: categoryHits, placesVersion: categoryVersion,
                            heading: location.heading)
-                .ignoresSafeArea(edges: .bottom)
-                // Floating over the map, no bar behind it. The map does not reach under the
+                // Behind the panel of the iPad layout the map fills the whole screen, also under the
+                // status bar and the tab bar at the top: with only the bottom ignored, a band in the
+                // background colour stayed above the map (#120). What lies over the map below keeps
+                // to the safe area either way.
+                .ignoresSafeArea(edges: Self.mapEdges(embedded: embedded))
+                // Floating over the map, no bar behind it. On iPhone the map does not reach under the
                 // navigation bar at the top, so the chips always stay visible below it.
                 .overlay(alignment: .top) { header.padding(.top, 8).padding(.leading, leadingInset) }
                 // Map controls in one white column at the edge: layers, then my location.
@@ -388,6 +398,22 @@ struct StationMapView: View {
                         .accessibilityIdentifier("mapMyLocation")
                     }
                     .padding(.trailing, 12).padding(.bottom, 28)
+                }
+                // Back to the departures around you (#17): the board comes back up from the bottom.
+                .overlay(alignment: .bottom) {
+                    if !embedded, selection == nil {
+                        Button { dismiss() } label: {
+                            Label("Departures nearby", systemImage: "list.bullet")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(Color.ink)
+                                .padding(.horizontal, 16).frame(height: 44)
+                                .matteSurface(in: Capsule())
+                                .mapShadow()
+                        }
+                        .buttonStyle(.plain)
+                        .padding(.bottom, 28)
+                        .accessibilityIdentifier("mapBackToNearby")
+                    }
                 }
                 // Loading: the Publit mark in the middle of the map, small and out of the way of taps.
                 .overlay {
@@ -930,6 +956,7 @@ struct RentalDetailView: View {
 struct VehicleTripView: View {
     let vehicle: LiveVehicle
     @State private var leg: Leg?
+    @State private var showsOnBoard = false
     @State private var errorMessage: String?
     @State private var now = Date()
 
@@ -952,6 +979,15 @@ struct VehicleTripView: View {
                 let stops = leg.allStops
                 let progress = TripProgress.at(now, stops: stops)
                 let next = TripProgress.nextStopIndex(progress, count: stops.count) ?? stops.count
+                // Tap the vehicle you are in and plan on from it (idea: BudapestGO, BKK).
+                if progress != .finished {
+                    Section {
+                        Button { showsOnBoard = true } label: {
+                            Label("Plan from this vehicle", systemImage: "arrow.triangle.branch")
+                        }
+                        .accessibilityIdentifier("planFromVehicle")
+                    }
+                }
                 Section("Next stops") {
                     ForEach(Array(stops.enumerated()).filter { $0.offset >= next }, id: \.offset) { _, stop in
                         HStack {
@@ -980,6 +1016,9 @@ struct VehicleTripView: View {
         .ticking(every: 15, now: $now)
         .navigationTitle(vehicle.lineName)
         .screenTrail("Map vehicle")
+        .sheet(isPresented: $showsOnBoard) {
+            if let leg { OnBoardPlanView(trip: leg, lineName: vehicle.lineName) }
+        }
         .navigationBarTitleDisplayMode(.inline)
         .task {
             do {

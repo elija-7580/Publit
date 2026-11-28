@@ -34,7 +34,12 @@ final class StationExits: @unchecked Sendable {
     static let nearPath = 20.0
     /// The main Overpass instance is often busy (504); the second one answers then.
     static let endpoints = [URL(string: "https://overpass-api.de/api/interpreter")!,
-                            URL(string: "https://overpass.kumi.systems/api/interpreter")!]
+                            URL(string: "https://overpass.kumi.systems/api/interpreter")!,
+                            URL(string: "https://overpass.private.coffee/api/interpreter")!]
+    /// No door on the way: the signed one at most this much out of the way towards where the walk heads.
+    static let maxDetour = 150.0
+    /// Where the walk heads, for that: this far along it (or its end).
+    static let headingAhead = 300.0
 
     private let lock = NSLock()
     /// Entrances per station (rounded place where you get off).
@@ -44,8 +49,10 @@ final class StationExits: @unchecked Sendable {
     private var loading: Set<String> = []
     private var failed: [String: Date] = [:]
     private let session: URLSession
+    private let defaults: UserDefaults
 
-    init(session: URLSession? = nil) {
+    init(session: URLSession? = nil, defaults: UserDefaults = .standard) {
+        self.defaults = defaults
         if let session {
             self.session = session
         } else {
@@ -145,6 +152,47 @@ final class StationExits: @unchecked Sendable {
         areas = [:]; walks = [:]; failed = [:]
     }
 
+    // MARK: The user's own exit
+
+    /// Exits the user picked, per station and destination ("Always use exit B2" when going home, another
+    /// one to work): `preferenceKey` → "<OSM id>|<sign>".
+    static let preferredKey = "preferredStationExits"
+
+    /// The station (about 100 m) and where the walk goes (about 1 km): the same exit fits the same trip.
+    static func preferenceKey(_ walk: Leg) -> String {
+        areaKey(walk.from.coordinate) + ">" + String(format: "%.2f,%.2f", walk.to.coordinate.lat, walk.to.coordinate.lon)
+    }
+
+    /// Signed exits of the station this walk leaves, one per sign, in sign order: the ones to choose from.
+    func choices(for walk: Leg) -> [StationEntrance] {
+        var seen: Set<String> = []
+        return (entrances(for: walk) ?? [])
+            .filter { e in e.label.map { seen.insert($0).inserted } ?? false }
+            .sorted { ($0.label ?? "").localizedStandardCompare($1.label ?? "") == .orderedAscending }
+    }
+
+    /// The exit the user picked for this walk's station and destination, if it is still there.
+    func preferred(for walk: Leg) -> StationEntrance? {
+        guard let saved = (defaults.dictionary(forKey: Self.preferredKey) as? [String: String])?[Self.preferenceKey(walk)],
+              let entrances = entrances(for: walk) else { return nil }
+        let parts = saved.split(separator: "|", maxSplits: 1).map(String.init)
+        if let id = parts.first.flatMap(Int64.init), let e = entrances.first(where: { $0.id == id }) { return e }
+        // Same sign, another node (the map was edited).
+        guard parts.count == 2 else { return nil }
+        return entrances.first { $0.label == parts[1] }
+    }
+
+    /// Remembers `entrance` for this walk's station and destination; nil goes back to the automatic choice.
+    func setPreferred(_ entrance: StationEntrance?, for walk: Leg) {
+        var all = defaults.dictionary(forKey: Self.preferredKey) as? [String: String] ?? [:]
+        all[Self.preferenceKey(walk)] = entrance.map { "\($0.id)|\($0.label ?? "")" }
+        defaults.set(all, forKey: Self.preferredKey)
+        NotificationCenter.default.post(name: Self.preferenceChanged, object: self)
+    }
+
+    /// Posted when the user picks an exit: routes and live trips show the new one.
+    static let preferenceChanged = Notification.Name("StationExits.preferenceChanged")
+
     // MARK: Overpass
 
     static func query(around p: LatLon) -> String {
@@ -194,7 +242,7 @@ final class StationExits: @unchecked Sendable {
             let tags = e.tags ?? [:]
             // A closed or staff-only door is no way out.
             if tags["access"] == "private" || tags["access"] == "no" || tags["entrance"] == "emergency" { return nil }
-            return StationEntrance(id: e.id, ref: tags["ref"].flatMap(Self.clean),
+            return StationEntrance(id: e.id, ref: (tags["ref"] ?? tags["local_ref"]).flatMap(Self.clean),
                                    name: tags["name"].flatMap(Self.cleanName), coordinate: point)
         }
     }
@@ -206,6 +254,9 @@ final class StationExits: @unchecked Sendable {
         for word in ["Ausgang", "Eingang", "Zugang", "Exit", "Entrance", "Uscita", "Sortie", "Salida", "Wyjście", "Výstup"] {
             if s.count > word.count + 1, s.lowercased().hasPrefix(word.lowercased() + " ") {
                 s = String(s.dropFirst(word.count + 1)).trimmingCharacters(in: .whitespaces)
+            } else if let r = s.range(of: " " + word + " ", options: .caseInsensitive), r.upperBound < s.endIndex {
+                // "Stephansplatz, Ausgang Graben" or "Karlsplatz – Ausgang 3": the station's name is not the sign.
+                s = String(s[r.upperBound...]).trimmingCharacters(in: .whitespaces)
             }
         }
         guard !s.isEmpty, s.count <= 24, !s.contains(";") else { return nil }
@@ -237,7 +288,16 @@ final class StationExits: @unchecked Sendable {
            near.coordinate.distance(to: exit.point) <= nearExit {
             return near
         }
-        return entrances.compactMap { e in along(e).flatMap { $0.offset <= nearPath && $0.along <= limit ? (e, $0.along) : nil } }
-            .min { $0.1 < $1.1 }?.0
+        if let onTheWay = entrances.compactMap({ e in along(e).flatMap { $0.offset <= nearPath && $0.along <= limit ? (e, $0.along) : nil } })
+            .min(by: { $0.1 < $1.1 })?.0 {
+            return onTheWay
+        }
+        // No door on the way (the walk's path is rough or starts beside the station): the signed door least out
+        // of the way towards where the walk heads, so the number still shows.
+        guard let start = path.first, let ahead = PathGeometry.point(at: min(PathGeometry.length(path), headingAhead), on: path),
+              start.distance(to: ahead) > nearExit else { return nil }
+        let straight = start.distance(to: ahead)
+        func detour(_ e: StationEntrance) -> Double { start.distance(to: e.coordinate) + e.coordinate.distance(to: ahead) - straight }
+        return entrances.filter { $0.label != nil && detour($0) <= maxDetour }.min { detour($0) < detour($1) }
     }
 }

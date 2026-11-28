@@ -1,5 +1,108 @@
 # Changelog
 
+## 0.1.2 (build 113) – the line on the map follows the ride, iPad map up to the top
+
+- **Line of a ride on the map** (`LegShape.withoutDetours`, `Leg.tidyingShape`, `TransitousClient.usable`/`refresh`/`trip`, #114): the router draws a ride along the tracks of OpenStreetMap. Around large stations that line could leave the route between two stops in a row, run along other tracks and come back (Paris, 27 Nov 2026: RER A Châtelet – Auber, 1.7 km apart, came with 14.2 km of line). Such a piece is now replaced by the straight way between the two stops when it is at least 3.5 times as long as the straight way and at least 1 km longer. Rail, suburban rail, metro and tram only; buses, ferries and walks stay as the server sends them. Reported by a user.
+- **iPad: map behind the panel** (`StationMapView.mapEdges`, #120): in the iPad layout the station map ignored only the bottom safe area, so a band in the background colour (black in dark mode) stayed above it. Behind the panel the map now reaches over all edges; on the iPhone it stays below the navigation bar as before. Reported by a user. Not seen on an iPad yet: CI runs on an iPhone simulator.
+- **UI tests** (`openRoute` in F02 and F07, #136): since build 111 the first route in Plan can start behind the tab bar; the tests bring the row up before the tap. Test code only.
+
+## 0.1.2 (build 112) – lock screen and get-off alert while the phone is locked
+
+Second part of the stability review (27 Nov 2026). These change behaviour in the background and were not run on a device: see "to test on an iPhone" in the pull request.
+
+- **Live Activity stays live while Publit follows the trip** (`LiveTripActivity.handOver(keeping:)`, `TripSession.refreshIfDue`): on going to the background every Live Activity was ended (it stays on the lock screen but leaves the Dynamic Island and can no longer be updated). The started trip that the location goes on following now keeps a running activity: live times every two minutes, boarding/riding/arrived and "next stop" as they change. It is handed over as before when the following ends, and ended after the arrival even when no fix comes any more. All other activities are handed over as before.
+- **Location-based get-off alert** (`GetOffAlerts.wantsTracking`, `TripStatus.isBetweenRides`): the location followed each ride only from 2 minutes before it. With the phone locked earlier, or during a change of more than about 12 minutes, tracking was off, iOS suspended the app and the alert never came. It now follows a started trip from 20 minutes before the first ride until 10 minutes after the last one, without a gap.
+- **Nearby widget and watch complication**: up to 10 departures per stop are loaded (4 before), and the Nearby widget has a timeline entry after each departure, so a train that has left drops off without a new load.
+
+## 0.1.2 (build 112) – stability review
+
+Review of the whole app before the first talks with operators (27 Nov 2026). Fixed:
+
+- **Live times from the other direction** (`LiveMatch.towards`): a station board lists both directions of a line, often due in the same minute. The extra live sources (Wiener Linien, ÖBB, search.ch, VRR …) matched a ride by line and timetable time only, so a ride could take the delay or cancellation of the train going the other way. The ride's headsign now picks the departures going its way; with no resemblance at all, everything is as before.
+- **"Later connections" vanished on refresh** (`PlanModel.laterPages`): the minute refresh of a "now" search (and pull to refresh) put the first page back and dropped the pages loaded with "Later connections". They stay now, paging continues where it was, and a page that arrives during a refresh is no longer thrown away.
+- **Reminders did not follow delays with the screen locked** (`TripSession.follow`): background refreshes stored the new times without moving the leave and get-off reminders or announcing a platform change or cancellation; in the app nothing differed any more afterwards, so they were never moved. One failed background refresh also ended the background checks for the trip.
+- **A late answer undid "Switch to this connection"** (`TripStore.update(_:with:replacing:)`): a live refresh asked for the old route and answered after the switch wrote the old route back.
+- **Saved trips and tickets could be lost** (`JSONFile.loadList`, `JSONFileRescue`): one unreadable entry (or a file the iPhone could not read yet) made the store start empty, and its next save replaced the file. Lists are now read entry by entry, and the file as it was is kept as "….unreadable" before anything is written over it.
+- **One odd ride failed the whole answer** (`LossyList`): a route or departure missing a field the API promises is skipped instead of showing "Unexpected response from the routing service".
+- **Crashes on outside input**: a Wallet pass with a number field too large for a whole number; a shared-route link with an absurd time (`d=1e30`); absurd countdowns and delays from operator boards.
+- **Smaller**: an overall time limit for requests that trickle in (90 s, live sources 20 s); the Apple Watch no longer waits for a location forever (20 s); a notification tapped to launch the app is opened once the app is ready instead of being dropped; the get-off alert is posted once when two fixes arrive together; trip tracking switches off when the location permission was taken away; the Departures widget keeps all loaded departures and reloads before a busy stop runs out; the Live Activity countdown reads the clock once.
+
+## 0.1.2 (build 111) – earlier connections above the routes
+
+- **Earlier connections** (`PlanModel.loadEarlier`, `PlanView`): "Now" and "Depart" searches only offered later connections below the list. A button "Earlier connections" above the first route now loads the page before it (the router's previous-page cursor), including trains that already left. A live refresh keeps the earlier routes loaded by hand above the refreshed ones (`PlanModel.keepingEarlier`). Asked for on 27 Nov 2026.
+
+## 0.1.2 (build 110) – late trains stay in the list
+
+- **Late trains in "now" searches** (`LateTrains`, `PlanModel.addLateTrains`): live delays for Austria and other regions come from other operators after the router answered (`LiveOverlay`), so a train whose timetable time had passed was missing although it ran late and could still be caught. A second search from 30 min before the searched time adds the routes whose first ride is due before it but, with live times, has not left yet.
+- **No flip back to "on time" on refresh** (`LateTrains.carry`): a live refresh keeps the delays already on screen until the overlay has them again, and keeps a late train the server no longer lists until it has left. Reported on 27 Nov 2026.
+
+## 0.1.2 (build 109) – leave earlier, still catch the train
+
+- **Still catch the connection** (`CatchEarlier`, `CatchEarlierRow`, `RouteBuilder.lead`): Transitous plans Austria and other regions on the timetable; live delays from Wiener Linien, ÖBB and others arrive afterwards (`LiveOverlay`). When such a delay breaks a change on a route that has not started (or makes it unlikely, under 50 %), Publit now searches a way from the start to the connection's platform that arrives at least 2 minutes before it leaves, with live times, and joins it with the rest of the route. The latest way whose changes are safe (70 % or more) wins. Route details show "Still catch <line> · Leave x min earlier, at HH:MM", and the route list gets the rescued route too. The router never lists it itself: it leaves earlier for the same arrival, so it counts as dominated. Reported on 27 Nov 2026 (U1 → U4 → REX to Krems, U4 late at Wien Heiligenstadt, "no backup found").
+
+## 0.1.2 (build 108) – plan from the vehicle you are on
+
+- **Plan from this vehicle** (`OnBoardPlan`, `OnBoardPlanView`; in a vehicle's trip and in the map's vehicle sheet): you are already on a tram, bus or train and want to go somewhere else. Pick the destination; the search starts at the vehicle's next stop at its live arrival time, and a route that stays on the same vehicle becomes one ride from where you are. Routes that arrive later without fewer changes (get off and wait for the next tram the same way) are left out. A saved or started route refreshes its ride from the vehicle's trip (part ID `ride:<from>:<to>:<tripId>`, `TripRefreshCoordinator.fetch`) and the rest from the planned route.
+- **Credit:** the idea comes from **BudapestGO**, the app of BKK (Centre for Budapest Transport), which introduced "On-board Journey Planning" in 2022. Thank you, BKK!
+
+## 0.1.2 (build 107) – "Arrive by" lists only routes in your direction
+
+- **Plan, "Arrive by"** (`Itinerary.runsBackwards`, `TransitousClient.usable`, #188): with smart routing on, a search by arrival time could list routes that start at the destination and end at the start (the bus in the wrong direction, walks with the lengths of the reversed route). The server answers that way when slower direct rides are asked for together with "Arrive by"; such routes are now dropped from every route search.
+
+## 0.1.2 (build 106) – the Dynamic Island opens on a long press
+
+- **Live Activity in the Dynamic Island** (`TripLiveActivity`, feedback on build 105): a long press on the island did nothing. The expanded view had grown to up to seven rows (two-line sentence, vehicle, "Then", next stop, progress, destination) and so went over the height iOS allows (about 160 pt), and iOS then does not open it at all. It now has a short top row (step icon, sentence in a smaller font, labelled countdown) and below it one line (on board: next stop and stops to go; otherwise the vehicle), the progress bar and the destination with "Show ticket". "Then: …" stays on the lock screen.
+
+## 0.1.2 (build 105) – a faster way while you walk to a ride, Live Activity readable on the watch
+
+- **Live trip** (`TripAlternative.faster`, `FasterWay`, `LiveTripView`, #110): while a trip goes to plan and you walk to a ride, Publit looks once per walk from where you are to the destination. When another stop, an earlier vehicle or another line arrives at least 3 minutes earlier, a green card "Faster" shows it; "Switch to this connection" takes it.
+- **Live Activity on Apple Watch** (#176): in the Smart Stack the trip's card has its own fixed dark ground and light text; before, it took the iPhone's background colour and could hardly be read while the iPhone was in light mode. Lock screen and Dynamic Island are unchanged.
+
+## 0.1.2 (build 104) – exit numbers more often, deleted tickets stay deleted
+
+- Station exits: when no door lies on the walk's path, Publit takes the signed exit with the smallest detour towards where the walk goes, so the exit number shows more often (also `local_ref`, exit names after the station's name, a third Overpass server).
+- Tickets: a ticket from the first ticket version that was deleted no longer comes back on the next launch or update.
+
+## 0.1.2 (build 103) – the station map opens again
+
+- **Pull to open the station map** (`MapHero`, feedback on build 102): in build 102 the pull no longer opened the map. The list bounced back in the same moment the finger let go, and that bounce took the pull back before the release was seen. Now only a pull back while the finger is still on the list cancels; any end of the touch (tracking or interacting ends) opens an armed pull. A device that reports no scroll phases opens at the mark as before build 102.
+
+## 0.1.2 (build 102) – smoother way into the station map
+
+- **Pull to open the station map** (`MapHero`, `NearbyView`, feedback on build 100): the map opens when the finger lets go, not in the middle of the pull; a light tap is felt when the pull is far enough, pulling back before letting go opens nothing. On iOS 18 the station map grows out of the map at the top (zoom transition) instead of sliding up, and the pull no longer also reloads the departures under the opening map.
+
+## 0.1.2 (build 100) – widgets and complications, saved connections and lines, Wallet passes, plan around your ticket
+
+- **Widgets** (`ShortcutsWidget`, `NearbyWidget`, #6, #19): "Shortcuts" opens the routes to Home, Work or your own places with one tap (Home Screen and Lock Screen); "Departures nearby" shows the stops closest to you, favourite stops first when you are near them.
+- **Apple Watch complications** (`PublitComplications`, #18): the next departure at a chosen stop, or Publit with one tap, on the watch face.
+- **Own shortcuts** (`SavedPlace.shortcut`, `ShortcutEntity`, #22): places can become shortcuts with their own symbol next to Home and Work, in Nearby, the watch, the widget and Siri ("Route to … in Publit").
+- **Saved connections** (`SavedConnection`, #28): Plan has a star that saves the connection from → to; Favourites lists it with the next departure and the way back.
+- **Lines in one direction** (`SavedLine.directionId`, #21): a line saved from its detail keeps its direction and opens that direction's departures.
+- **Wallet passes** (`WalletPassImport`, `ZipReader`, #20): .pkpass files can be imported as tickets with their code, colours and fields.
+- **Scanned PDF tickets** (`TicketRecognizer`, #5): text in pictures inside a PDF is read too and merged with the PDF's own text.
+- **Plan around a ticket** (`TicketRoutePlanView`, `SectionPlanModel.aroundTicket`, #23, #24): a ticket's detail has "Plan around this ticket": the ride on the ticket stays fixed, the way to its start and on from its end is planned.
+- **Plan in sections** (`SectionPlanModel.split`, #10): "Change at…" splits a section at a stop of the found route.
+- **Station map** (`MapHero.pullToExpand`, `StationMapView`, #17): pulling Nearby down opens the station map, its "Departures nearby" pill leads back.
+
+## 0.1.2 (build 99) – fixes from build 98, sections in your order, all routes on one map
+
+- **Map at the top** (`MapHero`): whether the map has scrolled away is decided by the list's own scroll offset (iOS 18+), not by a rest position caught once; caught while a screen or sheet slid in, the map stayed hidden for good.
+- **Vehicle position** (`TripProgress.position(path:)`): between two stops the estimated vehicle follows the ride's shape instead of a straight line (a Vienna–Venice bus was drawn in the middle of Styria).
+- **Change chances** (`SmartChangesSection`, `ItineraryRow`): shown with smart routing off too; estimates show their percentage with "≈". Delay history is always loaded for the planned countries.
+- **Plan in sections** (`SectionPlanView`, `SectionPlanModel.moveStops`): places can be dragged into another order (or with "Edit"); times and durations no longer get cut off, line badges wrap instead of being squeezed one letter wide.
+- **All routes on one map** (`CompareRoutesMapView`): iPhone Plan has a map button with every route found, pick one and open it.
+- **Ending a trip** (`LiveTripBar`): a started trip always shows in the bar, also when it was hidden before it started (it kept running out of sight); the X on a started trip ends it.
+- **Ticket shop** (`TicketShop.isTestBuild`): buying in Publit only in TestFlight and development builds, never in the App Store version.
+
+## 0.1.2 (build 98) – plan in sections, your way out, last connection, your trip on the watch
+
+- **Version 0.1.2**: Apple closed 0.1.1 for new builds once it was approved for the App Store (upload of build 97 refused, error 90186), so build 97 never reached TestFlight and its changes below arrive with this build.
+- **Boarding position and exit** (`ExitAdvice`, #162): for metro and train rides that end in a station, the route, the live trip, the Live Activity and the watch say where to board and which exit to take; "Choose exit" remembers your own exit per station and destination.
+- **Last connection** (#161): Plan has a third time option "Last" next to Depart and Arrive; it lists the last connections that still arrive in the night after the chosen day and marks the one that leaves last. Home, Work and saved places have "Last connection" as an action.
+- **Apple Watch and Live Activity** (`WatchAutoOpen`, #160): a started trip opens by itself on the watch; the Live Activity and the Dynamic Island show the step, a labelled countdown, the vehicle with line, direction and platform, and a progress bar.
+- **Plan in sections** (`SectionPlanView`, `SectionPlanModel`, `RouteBuilder.chain`, #144): Plan has "Plan in sections": places in order with stops in between, for each section how to travel (public transport, on foot, by bike, by car) and which departure, and a stay at each stop. The sections chain by time and become one route that can be started and saved; only its public transport parts are asked for live times.
+- **Share links** (`SharedRoute.parts`, `RouteBuilder.assemble`, #145): the link of a route built leg by leg carries its parts and opens with the same legs; older versions get the search as before.
+
 ## 0.1.1 (build 97) – go on another way, appointments as destinations, without long-distance trains, steadier maps
 
 - **Walking** (`StreetComparison.walkIsAChoice`, #110): the walk is listed first among the routes when no ride gets there sooner door to door (waiting counts), also on the watch. Before, only its duration was compared with the fastest ride's.

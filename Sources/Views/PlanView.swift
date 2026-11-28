@@ -3,6 +3,7 @@ import SwiftUI
 struct PlanView: View {
     @AppStorage(SmartRouting.enabledKey) private var smartRouting = true
     @Environment(AppState.self) private var app
+    @Environment(FavoritesStore.self) private var favorites
     @Environment(\.scenePhase) private var scenePhase
     @State private var isVisible = false
     @Environment(LocationManager.self) private var location
@@ -10,6 +11,9 @@ struct PlanView: View {
     @State private var opened: OpenedRoute?
     /// Route rows on screen, to offer a jump to the recommended one while it is out of sight.
     @State private var visibleRows: Set<String> = []
+    /// iPhone: all routes on one map (iPad has them on the big map next to the list).
+    @State private var comparing = false
+    @Environment(WideMapState.self) private var wideMap: WideMapState?
 
     /// Live refresh interval while planning for "now".
     static var refreshInterval: Duration { Energy.duration(60) }
@@ -49,11 +53,15 @@ struct PlanView: View {
                 // Plan is for later (tonight, next week). "From here, now" lives in Nearby.
                 VStack(alignment: .leading, spacing: 12) {
                     BevelSegmented(selection: $plan.timeMode,
-                                   options: [(TimeMode.departAt, L10n.t("Depart")), (TimeMode.arriveBy, L10n.t("Arrive"))],
+                                   options: [(TimeMode.departAt, L10n.t("Depart")), (TimeMode.arriveBy, L10n.t("Arrive")),
+                                             (TimeMode.lastConnection, L10n.t("Last"))],
                                    large: true)
                         .accessibilityLabel(Text("When"))
                     HStack(spacing: 10) {
-                        DatePicker(plan.timeMode == .arriveBy ? L10n.t("Arrive by") : L10n.t("Depart at"), selection: $plan.date)
+                        // Last connection: only the day counts, the time is the end of its service.
+                        DatePicker(plan.timeMode == .arriveBy ? L10n.t("Arrive by") : plan.timeMode == .lastConnection ? L10n.t("Day")
+                                    : L10n.t("Depart at"), selection: $plan.date,
+                                   displayedComponents: plan.timeMode == .lastConnection ? [.date] : [.date, .hourAndMinute])
                             .labelsHidden()
                             .datePickerStyle(.compact)
                             .controlSize(.large)
@@ -81,8 +89,37 @@ struct PlanView: View {
                 }
                 .padding(.vertical, 6)
                 .listRowSeparator(.hidden)
+                if plan.timeMode == .lastConnection {
+                    Text("The latest you can leave and still get there tonight.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .listRowSeparator(.hidden)
+                        .accessibilityIdentifier("lastConnectionHint")
+                }
                 RouteOptionsButton(compact: true)
                     .listRowSeparator(.hidden)
+                // Stops in between, each section its own way to travel (#144).
+                NavigationLink {
+                    SectionPlanView(from: plan.from, to: plan.to, date: plan.timeMode == .arriveBy ? .now : plan.date)
+                } label: {
+                    // The same soft capsule row as "Route options" above (docs/design: one row type).
+                    HStack(spacing: 8) {
+                        Image(systemName: "point.topleft.down.to.point.bottomright.curvepath")
+                            .font(.subheadline.weight(.semibold)).foregroundStyle(Color.secondary)
+                            .accessibilityHidden(true)
+                        Text("Plan in sections").font(.subheadline.weight(.semibold)).foregroundStyle(.primary)
+                        Spacer(minLength: 8)
+                        Image(systemName: "chevron.right").font(.caption.weight(.semibold)).foregroundStyle(.tertiary)
+                            .accessibilityHidden(true)
+                    }
+                    .padding(.horizontal, 14)
+                    .frame(minHeight: 40)
+                    .background(Color.inkFill, in: Capsule())
+                    .contentShape(Capsule())
+                }
+                .linkIndicatorHidden()
+                .accessibilityIdentifier("planInSections")
+                .listRowSeparator(.hidden)
                 // One wide search key under the whole form (as in the ÖBB app), instead of a small
                 // round icon squeezed next to the destination.
                 Button { startSearch() } label: {
@@ -131,8 +168,9 @@ struct PlanView: View {
                 Button {
                     withAnimation(.snappy) { proxy.scrollTo(key, anchor: .center) }
                 } label: {
-                    Label(L10n.f("Recommended: %@", "\(Fmt.time(it.startTime, tz: it.legs.first?.from.tz)) – \(Fmt.time(it.endTime, tz: it.legs.last?.to.tz))"),
-                          systemImage: "sparkles")
+                    let times = "\(Fmt.time(it.startTime, tz: it.legs.first?.from.tz)) – \(Fmt.time(it.endTime, tz: it.legs.last?.to.tz))"
+                    Label(pick.isLast ? L10n.f("Last connection: %@", times) : L10n.f("Recommended: %@", times),
+                          systemImage: pick.isLast ? SmartRouting.Badge.lastConnection.symbol : "sparkles")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(Color.ink)
                         .floatingCapsule()
@@ -167,6 +205,35 @@ struct PlanView: View {
             }
         }
         .navigationDestination(item: $opened) { route in detail(route.itinerary) }
+        .toolbar {
+            // Save this connection (#28): both ends are places, not "here".
+            if case .place(let from) = plan.from, case .place(let to)? = plan.to, from.id != to.id {
+                let saved = favorites.containsConnection(from: from, to: to)
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { favorites.toggleConnection(from: from, to: to) } label: {
+                        Image(systemName: saved ? "star.fill" : "star")
+                    }
+                    .accessibilityLabel(Text(saved ? "Saved connection" : "Save connection"))
+                    .accessibilityIdentifier("saveConnection")
+                }
+            }
+            if wideMap == nil, plan.searchStarted, plan.to != nil, !pick.list.isEmpty {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { comparing = true } label: { Image(systemName: "map") }
+                        .accessibilityLabel(Text("Map"))
+                        .accessibilityIdentifier("compareRoutesMap")
+                }
+            }
+        }
+        .fullScreenCover(isPresented: $comparing) {
+            CompareRoutesMapView(itineraries: pick.list, selected: pick.key, title: plan.to?.title ?? L10n.t("Routes")) { it in
+                // After the map has slid away: a push while it is still going is dropped.
+                Task { @MainActor in
+                    try? await Task.sleep(for: .milliseconds(400))
+                    opened = OpenedRoute(itinerary: it)
+                }
+            }
+        }
         .navigationTitle("Plan")
         // iPad: every route found on the big map, the recommended one strong.
         .wideMapScene(plan.searchStarted && plan.to != nil && !pick.list.isEmpty ? .routes(pick.list, selected: pick.key) : .explore)
@@ -229,13 +296,21 @@ struct PlanView: View {
         var badges: [String: [SmartRouting.Badge]] = [:]
         var key: String?
         var reason: String?
+        /// The picked route is the last connection, not the recommended one.
+        var isLast = false
     }
 
     /// Smart routing: the suggested route and the best in each respect, with the reason in a few words.
     private func smartPick(_ plan: PlanModel) -> Pick {
         guard plan.searchStarted, plan.to != nil else { return Pick() }
         let its = plan.sortedItineraries.uniqueRoutes
-        let badges = smartRouting ? SmartRouting.badges(its, arriveBy: plan.timeMode == .arriveBy) : [:]
+        var badges = smartRouting ? SmartRouting.badges(its, arriveBy: plan.timeMode.searchesBackwards) : [:]
+        // Last connection: the route that leaves last carries it, with or without smart routing.
+        // It is also the one picked out (map, jump to it): late at night that is the route that matters.
+        if plan.timeMode == .lastConnection, let last = LastConnection.last(its) {
+            badges[last.routeKey, default: []].insert(.lastConnection, at: 0)
+            return Pick(list: its, badges: badges, key: last.routeKey, reason: nil, isLast: true)
+        }
         let key = badges.first { $0.value.contains(.recommended) }?.key
         let reason = its.first { $0.routeKey == key }.flatMap { SmartRouting.reason(for: $0, in: its) }
         return Pick(list: its, badges: badges, key: key, reason: reason)
@@ -315,6 +390,18 @@ struct PlanView: View {
                     .accessibilityIdentifier("longWalkNote")
             }
 
+            if plan.canLoadEarlier {
+                Button {
+                    Task { await plan.loadEarlier() }
+                } label: {
+                    HStack {
+                        Label(L10n.t("Earlier connections"), systemImage: "chevron.up")
+                        if plan.isLoadingMore { Spacer(); LogoLoader(size: 24).frame(width: 48) }
+                    }
+                }
+                .accessibilityIdentifier("earlierConnections")
+            }
+
             ForEach(its, id: \.routeKey) { it in
                 Button { opened = OpenedRoute(itinerary: it) } label: {
                     HStack(spacing: 8) {
@@ -337,7 +424,7 @@ struct PlanView: View {
                     Task { await plan.loadMore() }
                 } label: {
                     HStack {
-                        Text(plan.timeMode == .arriveBy ? L10n.t("Earlier connections") : L10n.t("Later connections"))
+                        Text(plan.timeMode.searchesBackwards ? L10n.t("Earlier connections") : L10n.t("Later connections"))
                         if plan.isLoadingMore { Spacer(); LogoLoader(size: 24).frame(width: 48) }
                     }
                 }
@@ -383,7 +470,6 @@ struct EndpointConnector: View {
 /// One route in the comparison list. All rows share one time axis so routes can be compared at a glance.
 struct ItineraryRow: View {
     @AppStorage("routeTimelines") private var showTimeline = true
-    @AppStorage(SmartRouting.enabledKey) private var smartRouting = true
     let itinerary: Itinerary
     let windowStart: Date
     let windowEnd: Date
@@ -407,7 +493,8 @@ struct ItineraryRow: View {
     var body: some View {
         let warnings = TransferRisk.warnings(for: itinerary)
         // The weakest change, when it is not sure to work (the warnings above already cover broken ones).
-        let shaky = smartRouting && warnings.isEmpty
+        // With smart routing off too: how likely a change works is part of the route (feedback on build 98).
+        let shaky = warnings.isEmpty
             ? SmartRouting.changes(itinerary).filter { $0.chance < 0.8 }.min { $0.chance < $1.chance } : nil
         let overnight = Fmt.dayOffset(from: itinerary.startTime, to: itinerary.endTime, tz: itinerary.legs.last?.to.tz)
         // One calm card per route: label line, times, the bar, one line of facts, at most one note.

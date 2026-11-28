@@ -7,6 +7,9 @@ struct PublitWatchApp: App {
     @State private var library: WatchLibrary
     @State private var nearby = WatchNearbyModel()
     @State private var path: [WatchRoute]
+    /// The trip `WatchAutoOpen` opened since the app came to the front.
+    @State private var autoOpened: String?
+    @Environment(\.scenePhase) private var scenePhase
 
     init() {
         #if DEBUG
@@ -29,8 +32,38 @@ struct PublitWatchApp: App {
                     }
             }
             .environment(library)
+            // A trip started on the iPhone opens by itself, like a route in Maps (also when the app was opened from
+            // the trip's Live Activity in the Smart Stack). The data may arrive a moment after the app opened.
+            .task { openTripUnderWay() }
+            .onChange(of: library.snapshot.activeTripId) { _, _ in openTripUnderWay() }
+            .onChange(of: scenePhase) { _, phase in
+                switch phase {
+                case .background: autoOpened = nil
+                case .active: openTripUnderWay()
+                default: break
+                }
+            }
+            .onOpenURL { url in
+                // The Live Activity's link: publit://trip/<id>; a complication's: publit://stop/<id>.
+                switch DeepLink(url: url) {
+                case .trip(let id)? where library.snapshot.trip(id) != nil:
+                    path = [.trip(id)]
+                    autoOpened = id
+                case .stop(let id, let name, let lat, let lon)?:
+                    // A complication's nearest stop (#18): its departures.
+                    path = [.stop(SavedPlace(id: id, name: name, subtitle: nil, lat: lat, lon: lon, stopId: id))]
+                default:
+                    break
+                }
+            }
             // Same weekly map of data gaps as on the iPhone (one small file a day at most).
             .task { await CoverageAtlasStore.shared.refreshIfNeeded() }
         }
+    }
+
+    private func openTripUnderWay() {
+        guard let id = WatchAutoOpen.trip(in: library.snapshot, now: .now, onHome: path.isEmpty, opened: autoOpened) else { return }
+        path = [.trip(id)]
+        autoOpened = id
     }
 }

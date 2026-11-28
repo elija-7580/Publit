@@ -1,4 +1,7 @@
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 /// Where to buy a ticket for each operator of a route.
 ///
@@ -11,6 +14,8 @@ struct TicketLink: Hashable, Identifiable, Sendable {
     let source: Source
     /// The link goes through a partner program (Publit may get a commission).
     var isPartner = false
+    /// A shop search with start, destination and date; `url` is the shop's start page until it is resolved.
+    var search: ShopSearch? = nil
 
     var id: String { operatorName + "|" + url.absoluteString }
     var title: String {
@@ -67,10 +72,18 @@ enum TicketLinks {
         return u
     }
 
-    static func link(for leg: Leg, userLinked: [String: String] = [:]) -> TicketLink? {
+    /// `to`: where the user leaves this operator (the last stop of its last ride), for a search over several rides.
+    static func link(for leg: Leg, userLinked: [String: String] = [:], to: Place? = nil) -> TicketLink? {
         guard leg.isTransit else { return nil }
         let name = leg.agencyName?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty ?? leg.lineName
         if let u = url(userLink(for: name, in: userLinked)) { return TicketLink(operatorName: name, url: u, source: .userLinked) }
+        // A local network's own shop (e.g. MVV for "DB Regio AG S-Bahn München") beats a DB search.
+        let local = userLink(for: name, in: knownShops).map { $0 != knownShops["db"] } ?? false
+        if !local, let search = ShopSearch(operatorName: name, from: leg.from, to: to ?? leg.to, departure: leg.scheduledStartTime) {
+            var link = shop(name, search.dbURL ?? search.startPage, .booking)
+            link.search = search
+            return link
+        }
         if let u = webURL(leg.ticketUrls?.ios) ?? webURL(leg.ticketUrls?.web) {
             return shop(name, u, .booking)
         }
@@ -90,9 +103,27 @@ enum TicketLinks {
     /// One link per operator, in the order the operators are used.
     static func links(for itinerary: Itinerary, userLinked: [String: String] = [:]) -> [TicketLink] {
         var seen = Set<String>()
-        return itinerary.legs.compactMap { link(for: $0, userLinked: userLinked) }.filter {
-            seen.insert(operatorKey($0.operatorName)).inserted
+        let legs = itinerary.transitLegs
+        return legs.compactMap { leg -> TicketLink? in
+            let key = operatorKey(operatorName(leg))
+            guard !seen.contains(key) else { return nil }
+            let last = legs.last { operatorKey(operatorName($0)) == key }
+            guard let l = link(for: leg, userLinked: userLinked, to: last?.to) else { return nil }
+            seen.insert(operatorKey(l.operatorName))
+            return l
         }
+    }
+
+    private static func operatorName(_ leg: Leg) -> String {
+        leg.agencyName?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty ?? leg.lineName
+    }
+
+    /// The link to open: for a shop search the finished search (through the partner program when there is one),
+    /// else the link itself. Falls back to the shop's start page when the search cannot be built.
+    static func resolve(_ link: TicketLink, session: URLSession = .shared) async -> URL {
+        guard let search = link.search, search.shop != .db else { return link.url }
+        guard let u = await search.resolve(session: session) else { return link.url }
+        return PartnerLinks.wrap(u) ?? u
     }
 
     /// Operators of a route that have no link at all (shown so the user can link an app).
@@ -107,7 +138,7 @@ enum TicketLinks {
 
 /// A ticket shop's affiliate program. `template` is the program's tracking link with `{url}` where the
 /// shop link goes (percent-encoded). An empty template means the program is off.
-struct PartnerProgram: Sendable {
+struct PartnerProgram: Codable, Sendable {
     let name: String
     /// Hosts of the shop; subdomains match too ("bahn.de" covers "int.bahn.de").
     let hosts: [String]
@@ -117,8 +148,20 @@ struct PartnerProgram: Sendable {
 /// Partner links for ticket shops, so a ticket bought through Publit can earn a commission.
 /// The app records nothing about the user: the network only sees the click, as with any web link.
 /// Templates are filled in once the program has accepted Publit; until then every link stays as it was.
+/// The ticket-link service (services/ticket-shop, `GET /v1/partners`) can switch programs on without an app update.
 enum PartnerLinks {
-    static let programs: [PartnerProgram] = [
+    /// The programs in use: the ones last loaded from the ticket-link service, else the built-in list.
+    static var programs: [PartnerProgram] {
+        lock.lock(); defer { lock.unlock() }
+        if remote == nil { remote = cached() }
+        return remote ?? builtIn
+    }
+
+    private static let lock = NSLock()
+    nonisolated(unsafe) private static var remote: [PartnerProgram]?
+    private static let cacheKey = "partnerPrograms"
+
+    static let builtIn: [PartnerProgram] = [
         // Awin:       https://www.awin1.com/cread.php?awinmid=<advertiser id>&awinaffid=<publisher id>&ued={url}
         PartnerProgram(name: "Deutsche Bahn", hosts: ["bahn.de", "bahn.com"], template: ""),
         PartnerProgram(name: "FlixBus", hosts: ["flixbus.de", "flixbus.com", "flixbus.at", "flixbus.ch", "flixbus.fr", "flixbus.it",
@@ -133,6 +176,42 @@ enum PartnerLinks {
         PartnerProgram(name: "SNCF Connect", hosts: ["sncf-connect.com"], template: ""),
         PartnerProgram(name: "Eurostar", hosts: ["eurostar.com"], template: ""),
     ]
+
+    /// The ticket-link service: `PublitTicketLinksURL`, else the ticket shop's address. Nil: built-in list only.
+    static var serviceURL: URL? {
+        let raw = (Bundle.main.object(forInfoDictionaryKey: "PublitTicketLinksURL") as? String)?.trimmingCharacters(in: .whitespaces)
+        return TicketShop.validURL(raw) ?? TicketShop.configuredURL
+    }
+
+    struct Response: Decodable { let programs: [PartnerProgram] }
+
+    /// Programs from a service answer, keeping only https templates with one {url}. Nil when the answer is unusable.
+    static func decode(_ data: Data) -> [PartnerProgram]? {
+        guard let response = try? JSONDecoder().decode(Response.self, from: data) else { return nil }
+        return response.programs.filter { p in
+            !p.hosts.isEmpty && p.template.hasPrefix("https://") && p.template.components(separatedBy: "{url}").count == 2
+        }
+    }
+
+    /// Loads the current programs (one small request, no user data). Keeps the last list when offline.
+    static func refresh(session: URLSession = .shared) async {
+        guard let base = serviceURL else { return }
+        var request = URLRequest(url: base.appendingPathComponent("v1/partners"), timeoutInterval: 10)
+        request.cachePolicy = .reloadRevalidatingCacheData
+        guard let (data, response) = try? await session.data(for: request),
+              (response as? HTTPURLResponse)?.statusCode == 200, let list = decode(data) else { return }
+        UserDefaults.standard.set(data, forKey: cacheKey)
+        set(list)
+    }
+
+    static func set(_ list: [PartnerProgram]?) {
+        lock.lock(); defer { lock.unlock() }
+        remote = list
+    }
+
+    private static func cached() -> [PartnerProgram]? {
+        UserDefaults.standard.data(forKey: cacheKey).flatMap(decode)
+    }
 
     static func program(for url: URL, in programs: [PartnerProgram] = PartnerLinks.programs) -> PartnerProgram? {
         guard let scheme = url.scheme?.lowercased(), scheme == "http" || scheme == "https",

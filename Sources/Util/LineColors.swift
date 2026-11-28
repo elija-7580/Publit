@@ -60,6 +60,11 @@ enum LineColors {
     static let darkSurface = RGB(hex: "1C1C1E")!
     static let lightSurface = RGB(hex: "FFFFFF")!
 
+    /// Ground of the Live Activity in the small family (Apple Watch Smart Stack, CarPlay). Fixed and
+    /// dark, never the iPhone's own background: the watch draws the card's text light whatever
+    /// appearance the iPhone has, and on a light ground that text could hardly be read (#176).
+    static let smallActivitySurface = darkSurface
+
     /// Below this a line colour melts into the background: near-black lines (Munich S8 #2D2B29,
     /// 1.2:1) in dark mode, white or pale yellow ones in light mode. Ordinary dark blues and greens
     /// (U-Bahn blue #0065AE: 2.8:1) stay above and keep their colour exactly.

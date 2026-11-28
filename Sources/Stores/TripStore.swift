@@ -15,7 +15,7 @@ final class TripStore {
     init(directory: URL? = nil) {
         file = JSONFile(name: "trips.json", directory: directory)
         activeFile = JSONFile(name: "active-trip.json", directory: directory)
-        trips = file.load() ?? []
+        trips = file.loadList() ?? []
         let active = activeFile.load() ?? ""
         activeTripId = trips.contains { $0.id == active } ? active : nil
     }
@@ -157,12 +157,19 @@ final class TripStore {
     }
 
     /// Replace the stored route with a fresh real-time version.
-    func update(_ id: String, with itinerary: Itinerary, at date: Date = .now) {
-        guard let i = trips.firstIndex(where: { $0.id == id }) else { return }
+    /// - Parameter old: the route the refresh was asked for. When the trip holds another route by now
+    ///   (switched to a new connection while the request ran), the answer belongs to the old route and
+    ///   is dropped: it used to write the old route back over the new one, for good.
+    /// - Returns: false when nothing was stored.
+    @discardableResult
+    func update(_ id: String, with itinerary: Itinerary, replacing old: Itinerary? = nil, at date: Date = .now) -> Bool {
+        guard let i = trips.firstIndex(where: { $0.id == id }) else { return false }
+        if let old, Self.matchKey(old) != Self.matchKey(trips[i].itinerary) { return false }
         trips[i].itinerary = Self.keepingSteps(of: trips[i].itinerary,
                                                in: Self.keepingFares(of: trips[i].itinerary, in: itinerary))
         trips[i].refreshedAt = date
         persistSoon()
+        return true
     }
 
     /// Live refreshes come without fares (smaller answers); the fares saved with the trip stay.

@@ -27,6 +27,8 @@ struct LiveTripView: View {
     @State private var overview = false
     /// The way on foot from where you are, when you are away from the planned walk.
     @State private var detour = WalkDetour()
+    /// Routes from where you are, looked up once per walk to a ride, to offer a clearly faster one (#110).
+    @State private var faster = FasterWay()
     @Environment(\.horizontalSizeClass) private var sizeClass
     @State private var screenWidth: CGFloat = 0
 
@@ -65,10 +67,15 @@ struct LiveTripView: View {
         // Searched from the stop of the shaky change at the time you get there, not from where you are now.
         let searchFrom: (point: LatLon, time: Date)? = risk.map { ($0.incoming.to.coordinate, $0.incoming.endTime) }
         let riskKey = risk.map { "\($0.stopName)|\($0.outgoing.tripId ?? $0.outgoing.lineName)" } ?? ""
+        // Nothing wrong and walking to a ride: one quiet look from here whether another stop or an
+        // earlier vehicle arrives clearly sooner. Shown only when one does.
+        let fasterKey = index == live && !wrong && here != nil && TripAlternative.worthLooking(step, it, at: now)
+            ? "\(trip.id)|\(step.id)" : ""
+        let fasterWays = !fasterKey.isEmpty && faster.key == fasterKey ? TripAlternative.faster(faster.options, than: it, at: now) : []
         // On board (your fix lies on the line): your own dot is the vehicle. A second, estimated
         // marker beside it (straight between stops, or from the timetable) only looks like another bus.
         let vehicle = step.kind == .ride && ride?.fromGPS != true
-            ? ride.flatMap { TripProgress.position($0.progress, stops: leg.allStops) } : nil
+            ? ride.flatMap { TripProgress.position($0.progress, stops: leg.allStops, path: leg.overviewPath) } : nil
         // Away from the planned walk (it started where the trip was planned): walk from where you are now.
         let detourTarget: LatLon? = index == live && step.kind == .walk && walkPos == nil && here != nil ? leg.to.coordinate : nil
         let detourRoute = detourTarget.flatMap { t in detour.route?.to == t ? detour.route : nil }
@@ -103,11 +110,13 @@ struct LiveTripView: View {
                      if away { picked = nil; overview = false } else { overview = true }
                  }
              })
-        let stages = VStack(spacing: 10) {
-            StageStrip(steps: steps, itinerary: it, destination: trip.toName, live: live, shown: overview ? nil : index) { tapped in
-                overview = false
-                picked = tapped == live ? nil : steps[tapped].id
-            }
+        // Layout A (Nov 2026): what to do now (the stage card, swipe for the others) and the next change
+        // under it, always in view; the whole trip as a timeline in the panel. The stage strip is gone:
+        // the timeline below shows every stage, change and exit.
+        let changeTarget = overview ? LiveChanges.target(for: steps[live], in: it) : LiveChanges.target(for: step, in: it)
+        let nextChange = changeTarget.flatMap { t in TransferInfo(before: t, in: it).map { (index: t, info: $0) } }
+        let peek = TripPanelMetrics.peek - 48 + (nextChange != nil ? NextChangeCard.height + 8 : 0)
+        let stages = VStack(spacing: 8) {
             StagePager(steps: steps, itinerary: it, destination: trip.toName, live: live, now: now, shown: overview ? nil : index) { shown in
                 if let shown {
                     overview = false
@@ -116,11 +125,20 @@ struct LiveTripView: View {
                     overview = true
                 }
             }
+            if let nextChange {
+                NextChangeCard(info: nextChange.info, chance: LiveChanges.chance(into: nextChange.index, in: it),
+                               exit: LiveChanges.exit(before: nextChange.index, in: it)) {
+                    // Open the change itself: the wait for the next vehicle, with platforms and the change guide.
+                    if let i = steps.firstIndex(where: { $0.kind == .wait && $0.legIndex == nextChange.index }) {
+                        withAnimation(.snappy) { overview = false; picked = i == live ? nil : steps[i].id }
+                    }
+                }
+            }
         }
         .padding(.horizontal, 12)
         let panelDetails = details(it: it, steps: steps, step: step, leg: leg, index: index, live: live, here: here, walk: walk,
                 walkPos: walkPos, detour: detourRoute, ride: ride, check: check, wrong: wrong, wrongMessage: wrongMessage,
-                searchFrom: searchFrom)
+                searchFrom: searchFrom, fasterWays: fasterWays)
         Group {
             if WideLayout.isWide(width: screenWidth, sizeClass: sizeClass) {
                 // iPad and iPhone Duo unfolded: the map over the whole screen, the stages and details
@@ -150,9 +168,9 @@ struct LiveTripView: View {
                 ZStack(alignment: .bottom) {
                     map
                         // Frame the route in the part of the map the panel leaves free.
-                        .safeAreaPadding(.bottom, TripPanelMetrics.peek + 24)
+                        .safeAreaPadding(.bottom, peek + 24)
                         .ignoresSafeArea(edges: .bottom)
-                    TripPanel { stages } content: { panelDetails }
+                    TripPanel(peek: peek) { stages } content: { panelDetails }
                 }
             }
         }
@@ -175,8 +193,10 @@ struct LiveTripView: View {
             ToolbarItem(placement: .topBarTrailing) { tripMenu }
         }
         .task(id: detourKey) { await detour.update(from: here, to: detourTarget) }
+        .task(id: fasterKey) { await faster.look(key: fasterKey, from: here, trip: trip, options: app.routeOptions) }
         // Exit numbers of the underground stations on the way ("Take exit B2"), from OpenStreetMap.
         .task(id: it.id) { if await StationExits.shared.load(it) { now = Date() } }
+        .onReceive(NotificationCenter.default.publisher(for: StationExits.preferenceChanged)) { _ in now = Date() }
         // At the destination the trip ends by itself.
         .onChange(of: finished) { _, done in
             if done { Task { await TripSession.stop(trip, in: trips) } }
@@ -214,18 +234,25 @@ struct LiveTripView: View {
         }
     }
 
-    /// What the panel shows under the stages: the live stage in detail, then the trip actions.
+    /// What the panel shows under the stage card: the shown stage in detail, then the whole trip as a timeline.
     @ViewBuilder
     private func details(it: Itinerary, steps: [GuideStep], step: GuideStep, leg: Leg, index: Int, live: Int, here: LatLon?,
                          walk: WalkRoute?, walkPos: WalkRoute.Position?, detour: WalkDetour.Route?,
                          ride: (progress: TripProgress, fromGPS: Bool)?,
                          check: TripGuide.Check, wrong: Bool, wrongMessage: String,
-                         searchFrom: (point: LatLon, time: Date)? = nil) -> some View {
+                         searchFrom: (point: LatLon, time: Date)? = nil, fasterWays: [Itinerary] = []) -> some View {
         List {
             if wrong {
                 Section {
                     AlternativeRow(trip: trip, from: searchFrom?.point ?? here, time: searchFrom?.time, message: wrongMessage)
                         .listRowBackground(NoticeBackground(tint: .danger, tinted: true))
+                }
+            } else if !fasterWays.isEmpty {
+                // Nothing is wrong, but from here another stop or an earlier vehicle arrives clearly sooner (#110).
+                Section {
+                    AlternativeRow(trip: trip, from: here, message: L10n.t("Faster"), offered: fasterWays)
+                        .listRowBackground(NoticeBackground(tint: .live, tinted: true))
+                        .accessibilityIdentifier("guideFasterWay")
                 }
             }
 
@@ -252,18 +279,42 @@ struct LiveTripView: View {
                 .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
             }
 
-            if overview {
-                // The whole trip, stage by stage; a tap opens that stage.
-                Section("Trip overview") {
-                    ForEach(steps.indices, id: \.self) { i in stageButton(i, steps: steps, it: it, index: index, live: live) }
-                }
-            } else {
+            if !overview {
                 // Only the stage in front: the others are the cards above and the route details.
                 switch step.kind {
                 case .walk: walkSections(leg, index: step.legIndex, in: it, route: walk!, position: walkPos, detour: detour, check: check, isLive: index == live)
                 case .wait: waitSection(leg, index: step.legIndex, in: it)
                 case .ride: rideSections(leg, index: step.legIndex, in: it, progress: ride?.progress ?? .notStarted, fromGPS: ride?.fromGPS ?? false, check: check)
                 case .arrive: arriveSection(it, here: here)
+                }
+            }
+
+            // The whole trip as a timeline: every stage, each change as its own row (platforms, time to spare,
+            // how sure, exit) and the exit under each ride. A tap opens that stage in detail.
+            Section("Trip overview") {
+                ForEach(steps.indices, id: \.self) { i in
+                    let s = steps[i]
+                    if s.kind == .wait, let info = TransferInfo(before: s.legIndex, in: it) {
+                        Button {
+                            withAnimation(.snappy) { overview = false; picked = i == live ? nil : s.id }
+                        } label: {
+                            LiveChangeRow(info: info, chance: LiveChanges.chance(into: s.legIndex, in: it),
+                                          exit: LiveChanges.exit(before: s.legIndex, in: it), done: i < live)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("liveChangeRow")
+                    }
+                    stageButton(i, steps: steps, it: it, index: index, live: live)
+                    // Where to stand and which way out, under the ride it belongs to (not again before a change,
+                    // whose row already says it).
+                    if s.kind == .ride, TransferInfo(before: it.legs.indices.first { $0 > s.legIndex && it.legs[$0].isTransit } ?? -1, in: it) == nil,
+                       let advice = ExitAdvice.forRide(s.legIndex, in: it.legs), advice.short != nil {
+                        ExitAdviceLine(advice: advice)
+                            .font(.footnote)
+                            .padding(.leading, 44)
+                            .opacity(i < live ? 0.5 : 1)
+                            .listRowBackground(!overview && i == index ? Color.inkFill : Color.surface)
+                    }
                 }
             }
 
@@ -451,6 +502,8 @@ struct LiveTripView: View {
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(w.level == .missed ? Color.danger : Color.delay)
             }
+            // Where to stand on the platform: the part of the train nearest the way out or the next train.
+            if let advice = ExitAdvice.forRide(legIndex, in: it.legs) { ExitAdviceRow(advice: advice) }
             if let transfer = TransferInfo(before: legIndex, in: it) { TransferCard(info: transfer) }
             if changeGuide, let guide = ChangeGuideCard(before: legIndex, in: it) { guide }
             TrainDivisionNotice(leg: leg)
@@ -489,6 +542,8 @@ struct LiveTripView: View {
                 if let line = Self.whereNow(progress, stops: stops) {
                     Text(line).font(.subheadline).foregroundStyle(.secondary)
                 }
+                // Which end of the train to be at when the doors open, and the exit.
+                if let advice = ExitAdvice.forRide(index, in: it.legs) { ExitAdviceLine(advice: advice) }
                 InkProgress(value: value, tint: leg.lineStroke).padding(.top, 2)
                 Text(fromGPS ? L10n.t("Position from your location.") : leg.realTime
                      ? L10n.t("Position estimated from live stop times.") : L10n.t("Position estimated from the timetable."))
@@ -663,68 +718,9 @@ struct LiveTripView: View {
     }
 }
 
-/// The stages as a row of chips: done, now (yellow dot), ahead. Tap one to look at it.
-private struct StageStrip: View {
-    let steps: [GuideStep]
-    let itinerary: Itinerary
-    let destination: String
-    let live: Int
-    /// The stage on the map; nil while the whole trip is shown.
-    let shown: Int?
-    let onTap: (Int) -> Void
-
-    var body: some View {
-        ScrollViewReader { proxy in
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 6) {
-                    ForEach(Array(steps.enumerated()), id: \.element.id) { i, step in
-                        if i > 0 {
-                            Image(systemName: "chevron.compact.right").font(.caption).foregroundStyle(.tertiary)
-                        }
-                        Button { onTap(i) } label: { chip(step, index: i) }
-                            .buttonStyle(.plain)
-                            .id(step.id)
-                    }
-                }
-                .padding(.vertical, 2)
-            }
-            .frame(height: 38)
-            .onAppear { if let s = shown, let id = steps[safe: s]?.id { proxy.scrollTo(id, anchor: .center) } }
-            .onChange(of: shown) { _, s in
-                guard let s, let id = steps[safe: s]?.id else { return }
-                withAnimation { proxy.scrollTo(id, anchor: .center) }
-            }
-        }
-    }
-
-    @ViewBuilder
-    private func chip(_ step: GuideStep, index: Int) -> some View {
-        let leg = itinerary.legs[step.legIndex]
-        let selected = index == shown
-        HStack(spacing: 4) {
-            switch step.kind {
-            case .walk:
-                Image(systemName: leg.rental.map { $0.kind.symbol } ?? ModeStyle.symbol(leg.mode))
-                Text(verbatim: "\(max(1, leg.duration / 60))")
-            case .wait:
-                Image(systemName: "clock")
-                Text(Fmt.time(leg.startTime, tz: leg.from.tz)).monospacedDigit()
-            case .ride:
-                LineBadge(leg, compact: true)
-            case .arrive:
-                Image(systemName: "flag.checkered")
-            }
-            if index == live { SignatureDot(size: 7) }
-        }
-        .font(.caption.weight(.semibold))
-        .padding(.horizontal, 8).padding(.vertical, 6)
-        .background(selected ? Color.inkFill : Color.clear, in: Capsule())
-        .overlay(Capsule().strokeBorder(selected ? Color.ink.opacity(0.5) : Color.primary.opacity(0.1)))
-        .opacity(index < live ? 0.5 : 1)
-        .accessibilityLabel(Text(Self.label(step, in: itinerary, destination: destination)))
-        .accessibilityAddTraits(selected ? .isSelected : [])
-    }
-
+/// The words for a stage, shared by the stage cards and the timeline. (The stage strip that once showed
+/// them above the cards gave way to the timeline in layout A.)
+private enum StageStrip {
     /// What the stage is about, with a place: where to walk to, which line, where to get off.
     fileprivate static func label(_ step: GuideStep, in it: Itinerary, destination: String) -> String {
         let leg = it.legs[step.legIndex]
@@ -1181,6 +1177,9 @@ private struct AlternativeRow: View {
     /// When to leave `from`; nil = now.
     var time: Date? = nil
     let message: String
+    /// Faster ways found while nothing is wrong (a better stop on the walk): shown as they are,
+    /// without a search of its own, in the calm colour of a tip instead of a warning.
+    var offered: [Itinerary]? = nil
     @Environment(TripStore.self) private var trips
     @Environment(AppState.self) private var app
     @State private var choices: [Itinerary] = []
@@ -1194,11 +1193,13 @@ private struct AlternativeRow: View {
             Label {
                 Text(message).foregroundStyle(Color.ink)
             } icon: {
-                Image(systemName: "exclamationmark.circle.fill").foregroundStyle(Color.danger)
+                Image(systemName: offered == nil ? "exclamationmark.circle.fill" : "bolt.circle.fill")
+                    .foregroundStyle(offered == nil ? Color.danger : Color.live)
             }
             .font(.subheadline.weight(.semibold))
             Text(verbatim: L10n.f("Your trip: arrive %@", Fmt.time(trip.itinerary.endTime, tz: trip.itinerary.legs.last?.to.tz)))
                 .font(.footnote).foregroundStyle(.secondary)
+            let choices = offered ?? self.choices
             ForEach(Array((showAll ? choices : Array(choices.prefix(1))).enumerated()), id: \.element.routeKey) { i, option in
                 if i > 0 { Divider() }
                 choice(option, primary: i == 0)
@@ -1216,7 +1217,7 @@ private struct AlternativeRow: View {
                 }
                 .buttonStyle(.soft)
                 .accessibilityIdentifier("guideOtherConnections")
-            } else if !searching {
+            } else if !searching, offered == nil {
                 Button { Task { await search() } } label: {
                     Label("New route from here", systemImage: "arrow.triangle.turn.up.right.diamond")
                         .font(.subheadline.weight(.semibold))
@@ -1225,7 +1226,7 @@ private struct AlternativeRow: View {
             }
         }
         .padding(.vertical, 4)
-        .task(id: trip.itinerary.id) { await search() }
+        .task(id: trip.itinerary.id) { if offered == nil { await search() } }
     }
 
     @ViewBuilder private func choice(_ option: Itinerary, primary: Bool) -> some View {
@@ -1465,6 +1466,33 @@ private struct StageRow: View {
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(selected ? [.isButton, .isSelected] : .isButton)
+    }
+}
+
+/// One look per walk to a ride for a way that arrives clearly sooner (#110): the routes from where you
+/// are to the trip's destination, leaving now. Asked once per walk (`key`), not as you move; what is
+/// shown of them is decided on every redraw (`TripAlternative.faster`), so a route that has left or
+/// no longer beats the trip drops out by itself.
+@MainActor @Observable
+final class FasterWay {
+    private(set) var key = ""
+    private(set) var options: [Itinerary] = []
+
+    func look(key: String, from: LatLon?, trip: SavedTrip, options routeOptions: RouteOptions) async {
+        guard !key.isEmpty, key != self.key, let from, let dest = trip.itinerary.legs.last?.to else { return }
+        self.key = key
+        options = []
+        guard let res = try? await TransitousClient.shared.plan(from: from, to: dest.coordinate, time: nil, arriveBy: false,
+                                                                 options: routeOptions,
+                                                                 stops: PlanStops(from: nil, to: dest.stopId)),
+              !Task.isCancelled else {
+            // Not answered (offline, or the walk ended meanwhile): the next walk, or this one again, may ask anew.
+            if self.key == key { self.key = "" }
+            return
+        }
+        let enriched = await LiveOverlay.apply(res.itineraries, budget: 3)
+        guard self.key == key else { return }
+        options = enriched
     }
 }
 

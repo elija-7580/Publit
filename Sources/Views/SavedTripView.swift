@@ -30,14 +30,14 @@ struct SavedTripView: View {
             // On the live trip the panel covers the bottom: the note sits at the top there.
             .safeAreaInset(edge: .top, spacing: 0) {
                 if let errorMessage, trips.activeTrip?.id == tripId {
-                    Text(errorMessage).font(.caption).padding(8)
+                    Text(errorMessage).font(.footnote).padding(8)
                         .matteSurface(in: RoundedRectangle(cornerRadius: 12))
                         .padding(.horizontal, 12).padding(.top, 4)
                 }
             }
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 if let errorMessage, trips.activeTrip?.id != tripId {
-                    Text(errorMessage).font(.caption).padding(8)
+                    Text(errorMessage).font(.footnote).padding(8)
                         .matteSurface(in: RoundedRectangle(cornerRadius: 12))
                         .padding(.horizontal, 12).padding(.bottom, 8)
                 }
@@ -73,7 +73,8 @@ struct SavedTripView: View {
         do {
             let fresh = try await TripRefreshCoordinator.shared.refresh(route: t.itinerary)
             try Task.checkCancellation()
-            trips.update(t.id, with: fresh)
+            // Switched to another connection meanwhile: the answer is for the old route.
+            guard trips.update(t.id, with: fresh, replacing: t.itinerary) else { return true }
             if let updated = trips.trip(t.id) {
                 await LiveTripActivity.update(updated)
                 await LeaveReminder.follow(t, to: updated)

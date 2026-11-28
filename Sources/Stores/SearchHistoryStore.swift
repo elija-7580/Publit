@@ -32,7 +32,8 @@ struct RecentSearch: Codable, Identifiable, Equatable, Sendable {
         plan.from = from
         plan.to = to
         plan.source = source ?? .search
-        plan.timeMode = mode == .now || date < now ? .now : mode
+        // "Last connection" stays what was asked: tonight's last one, not the routes leaving now.
+        plan.timeMode = mode == .lastConnection ? mode : mode == .now || date < now ? .now : mode
         plan.date = max(date, now)
     }
 }
@@ -47,7 +48,7 @@ final class SearchHistoryStore {
 
     init(directory: URL? = nil) {
         file = JSONFile(name: "search-history.json", directory: directory)
-        entries = Array((file.load() ?? []).sorted { $0.searchedAt > $1.searchedAt }.prefix(Self.limit))
+        entries = Array((file.loadList() ?? []).sorted { $0.searchedAt > $1.searchedAt }.prefix(Self.limit))
     }
 
     func record(from: Endpoint, to: Endpoint, mode: TimeMode, date: Date, source: RecentSearch.Source? = nil, now: Date = .now) {

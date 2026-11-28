@@ -10,8 +10,8 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "0.1.1"
-    CURRENT_PROJECT_VERSION: "97"
+    MARKETING_VERSION: "0.1.2"
+    CURRENT_PROJECT_VERSION: "113"
     # Personal Team — Automatic Signing for local device installs.
     DEVELOPMENT_TEAM: "3D6S8GFSGK"
 packages:
@@ -69,6 +69,11 @@ targets:
             CFBundleTypeRole: Viewer
             LSHandlerRank: Alternate
             LSItemContentTypes: [public.image]
+          # Apple Wallet passes (#20): shared from Wallet, Mail or a website.
+          - CFBundleTypeName: Wallet pass
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: Alternate
+            LSItemContentTypes: [com.apple.pkpass]
         ITSAppUsesNonExemptEncryption: false
         # Contact sent in the User-Agent, required by the Transitous usage policy.
         PublitContact: https://github.com/elija-7580/Publit
@@ -77,6 +82,10 @@ targets:
         # Optional ticket shop (services/ticket-shop), e.g. https://shop.example.org. Empty: no "Buy tickets in Publit".
         # In an .xcconfig write the URL as https:/$()/shop.example.org, since // starts a comment there.
         PublitTicketShopURL: $(TICKET_SHOP_URL)
+        # Optional ticket-link service (partner programs, /v1/partners). Empty: the ticket shop's address, else built-in list.
+        PublitTicketLinksURL: $(TICKET_LINKS_URL)
+        # Optional own routing server (services/routing, MOTIS with commercially usable feeds). Empty: Transitous.
+        PublitRouterURL: $(ROUTER_URL)
     # Apple Health: read the walking speed for smart routing (read only).
     entitlements:
       path: Config/Publit.entitlements
@@ -135,6 +144,9 @@ targets:
       - Sources/Models/TransitModels.swift
       # Routes built leg by leg are refreshed part by part (TripRefreshCoordinator).
       - Sources/Models/RouteBuilder.swift
+      # Rides planned from a vehicle are refreshed from its trip (TripRefreshCoordinator).
+      - Sources/Models/OnBoardPlan.swift
+      - Sources/Models/TripProgress.swift
       - Sources/Models/ServiceAlerts.swift
       - Sources/Models/Fares.swift
       - Sources/Models/ModeStyle.swift
@@ -168,8 +180,12 @@ targets:
       properties:
         CFBundleDisplayName: Publit
         PublitContact: https://github.com/elija-7580/Publit
+        PublitRouterURL: $(ROUTER_URL)
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        # "Departures nearby" uses the location the app may use (asked once in the app, never in the widget).
+        NSWidgetWantsLocation: true
+        NSLocationWhenInUseUsageDescription: Publit uses your location to show departures near you.
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     settings:
@@ -191,6 +207,8 @@ targets:
       - Sources/Models/TransitModels.swift
       # Routes built leg by leg are refreshed part by part (TripRefreshCoordinator).
       - Sources/Models/RouteBuilder.swift
+      # Rides planned from a vehicle are refreshed from its trip (TripRefreshCoordinator).
+      - Sources/Models/OnBoardPlan.swift
       - Sources/Models/ServiceAlerts.swift
       - Sources/Models/Fares.swift
       - Sources/Models/ModeStyle.swift
@@ -218,6 +236,7 @@ targets:
       - Sources/Models/CityGuide.swift
       - Sources/Models/WalkGuide.swift
       - Sources/Models/StationExits.swift
+      - Sources/Models/ExitAdvice.swift
       - Sources/Models/TripGuide.swift
       - Sources/Models/Coverage.swift
       - Sources/Models/CoverageAtlasData.swift
@@ -244,14 +263,21 @@ targets:
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         WKApplication: true
         WKCompanionAppBundleIdentifier: io.github.elija7580.publit
+        # A tap on the trip's Live Activity in the Smart Stack opens this app (on the trip) instead of "Open on iPhone".
+        WKSupportsLiveActivityLaunchAttributeTypes:
+          - TripActivityAttributes
         NSLocationWhenInUseUsageDescription: Publit uses your location to show departures near you.
         PublitContact: https://github.com/elija-7580/Publit
+        PublitRouterURL: $(ROUTER_URL)
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: io.github.elija7580.publit.watchkitapp
         CODE_SIGN_STYLE: Automatic
         SKIP_INSTALL: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    dependencies:
+      # Complications on the watch face (embedded in the watch app).
+      - target: PublitWatchWidgets
     preBuildScripts:
       # Same icon as the iPhone app, decoded from Config/AppIcon (see the README there).
       - name: Decode app icon
@@ -263,6 +289,67 @@ targets:
         script: |
           set -e
           /usr/bin/base64 -D -i "$SRCROOT/Config/AppIcon/AppIcon.png.b64" -o "$SRCROOT/Watch/Assets.xcassets/AppIcon.appiconset/AppIcon.png"
+  PublitWatchWidgets:
+    type: app-extension
+    platform: watchOS
+    sources:
+      # Complications (#18): the next departures at the stop nearest to the watch.
+      - WatchWidgets
+      - Sources/Shared/DirectionLabel.swift
+      - Sources/Shared/Localizable.xcstrings
+      - Sources/Shared/NearbyBoard.swift
+      - Sources/Shared/OneShotLocator.swift
+      - Sources/API
+      - Sources/App/AppInfo.swift
+      - Sources/Models/TransitModels.swift
+      - Sources/Models/RouteBuilder.swift
+      # Rides planned from a vehicle are refreshed from its trip (TripRefreshCoordinator).
+      - Sources/Models/OnBoardPlan.swift
+      - Sources/Models/TripProgress.swift
+      - Sources/Models/ServiceAlerts.swift
+      - Sources/Models/Fares.swift
+      - Sources/Models/ModeStyle.swift
+      - Sources/Models/RouteStyle.swift
+      - Sources/Models/DeepLink.swift
+      - Sources/Models/PlaceRole.swift
+      - Sources/Models/TransitFilter.swift
+      - Sources/Models/OwnTicket.swift
+      - Sources/Models/SmartRouting.swift
+      - Sources/Models/DelayHistory.swift
+      - Sources/Models/TransferWalk.swift
+      - Sources/Models/TripLearning.swift
+      - Sources/Models/ChangeWatch.swift
+      - Sources/Models/TransitExtras.swift
+      - Sources/Models/Reach.swift
+      - Sources/Models/CircularLine.swift
+      - Sources/Stores/StopGrouping.swift
+      - Sources/Views/Components/LineBadge.swift
+      - Sources/Util/Geo.swift
+      - Sources/Util/Polyline.swift
+      - Sources/Util/LineColors.swift
+      - Sources/Util/Formatting.swift
+      - Sources/Util/Palette.swift
+      - Sources/Util/L10n.swift
+      - Sources/Util/PerformanceTrace.swift
+      - Sources/Util/HangLog.swift
+      - Sources/Util/MainThreadSampler.swift
+    info:
+      path: Config/WatchWidgets-Info.plist
+      properties:
+        CFBundleDisplayName: Publit
+        PublitContact: https://github.com/elija-7580/Publit
+        PublitRouterURL: $(ROUTER_URL)
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSWidgetWantsLocation: true
+        NSLocationWhenInUseUsageDescription: Publit uses your location to show departures near you.
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.elija7580.publit.watchkitapp.widgets
+        CODE_SIGN_STYLE: Automatic
+        SKIP_INSTALL: YES
   PublitShare:
     type: app-extension
     platform: iOS
