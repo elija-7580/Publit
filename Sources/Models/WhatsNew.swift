@@ -20,6 +20,12 @@ enum WhatsNew {
 
     /// Newest first.
     static let entries: [WhatsNewEntry] = [
+        WhatsNewEntry(build: 113, items: [
+            WhatsNewItem(symbol: "map", title: "Map line follows your ride",
+                         text: "Around large stations, the line on the map no longer runs over tracks your train never takes."),
+            WhatsNewItem(symbol: "ipad.landscape", title: "iPad: map reaches the top",
+                         text: "On the iPad, the map now reaches the top edge instead of leaving a black band."),
+        ]),
         WhatsNewEntry(build: 112, items: [
             WhatsNewItem(symbol: "lock.iphone", title: "Lock screen stays live on board",
                          text: "While Publit follows your started trip, the lock screen and Dynamic Island keep showing delays, platforms and the next stop."),

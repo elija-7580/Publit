@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.2 (build 113) – the line on the map follows the ride, iPad map up to the top
+
+- **Line of a ride on the map** (`LegShape.withoutDetours`, `Leg.tidyingShape`, `TransitousClient.usable`/`refresh`/`trip`, #114): the router draws a ride along the tracks of OpenStreetMap. Around large stations that line could leave the route between two stops in a row, run along other tracks and come back (Paris, 27 Nov 2026: RER A Châtelet – Auber, 1.7 km apart, came with 14.2 km of line). Such a piece is now replaced by the straight way between the two stops when it is at least 3.5 times as long as the straight way and at least 1 km longer. Rail, suburban rail, metro and tram only; buses, ferries and walks stay as the server sends them. Reported by a user.
+- **iPad: map behind the panel** (`StationMapView.mapEdges`, #120): in the iPad layout the station map ignored only the bottom safe area, so a band in the background colour (black in dark mode) stayed above it. Behind the panel the map now reaches over all edges; on the iPhone it stays below the navigation bar as before. Reported by a user. Not seen on an iPad yet: CI runs on an iPhone simulator.
+- **UI tests** (`openRoute` in F02 and F07, #136): since build 111 the first route in Plan can start behind the tab bar; the tests bring the row up before the tap. Test code only.
+
 ## 0.1.2 (build 112) – lock screen and get-off alert while the phone is locked
 
 Second part of the stability review (27 Nov 2026). These change behaviour in the background and were not run on a device: see "to test on an iPhone" in the pull request.
