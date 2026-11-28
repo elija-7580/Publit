@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.2 (build 114) – vehicles on the map glide and stay
+
+- **Vehicles on the map** (`LiveMap.glide`, `TransitMapModel.tick`, #210): pins glide a little longer than the 2 s tick, toward where the vehicle will be when the glide ends, so they no longer stop before every tick and are no longer a tick behind. The tick keeps a fixed beat. Reported by a user in Munich (lines 187 to 189, iPad Split View next to MVGO).
+- **Buses standing at a stop** (`LiveMap.lookBack`): live trips are asked for from 3 min ago instead of 1 min, so a bus that stands at a stop does not vanish until it leaves.
+
 ## 0.1.2 (build 113) – the line on the map follows the ride, iPad map up to the top
 
 - **Line of a ride on the map** (`LegShape.withoutDetours`, `Leg.tidyingShape`, `TransitousClient.usable`/`refresh`/`trip`, #114): the router draws a ride along the tracks of OpenStreetMap. Around large stations that line could leave the route between two stops in a row, run along other tracks and come back (Paris, 27 Nov 2026: RER A Châtelet – Auber, 1.7 km apart, came with 14.2 km of line). Such a piece is now replaced by the straight way between the two stops when it is at least 3.5 times as long as the straight way and at least 1 km longer. Rail, suburban rail, metro and tram only; buses, ferries and walks stay as the server sends them. Reported by a user.
