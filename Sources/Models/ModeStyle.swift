@@ -11,12 +11,15 @@ protocol RouteStyled {
     var routeLongName: String? { get }
     /// GTFS route ID; some feeds encode the public line only there (see `TransitLabels.line(fromRouteId:)`).
     var routeId: String? { get }
+    /// GTFS `trip_short_name`: the train's own number in many rail feeds ("RE_6 - 2625" at Trenord).
+    var tripShortName: String? { get }
 }
 
 extension RouteStyled {
     /// The compact, operator-defined line identifier. Never use a destination as a line name.
     var routeLongName: String? { nil }
     var routeId: String? { nil }
+    var tripShortName: String? { nil }
 
     var lineName: String {
         if let line = TransitLabels.line(fromRouteId: routeId) { return line }
@@ -31,10 +34,29 @@ extension RouteStyled {
     /// Additional service identity (e.g. ICE 615), retained separately from the line badge.
     var serviceDetail: String? {
         guard let display = TransitLabels.clean(displayName),
-              TransitLabels.identity(display) != TransitLabels.identity(lineName) else { return nil }
+              TransitLabels.identity(display) != TransitLabels.identity(lineName) else { return tripNumberDetail }
         // "xpress 66" under "RJX 66": the same train, written worse.
         if let n = TransitLabels.trainNumber(display), n == TransitLabels.trainNumber(lineName) { return nil }
         return display
+    }
+
+    /// The train number next to the line ("RE6" · "RE 2625"): in Italy riders find their train on the
+    /// station board by this number. Trenord's badge only says the line, the number is in
+    /// `trip_short_name` ("RE_6 - 2625"). Nil off the rails and when the badge already shows it.
+    var tripNumberDetail: String? {
+        guard let number = tripNumber else { return nil }
+        let code = String((TransitLabels.clean(tripShortName) ?? "").prefix { $0.isLetter }).uppercased()
+        return VehicleKind.categories[code] != nil ? "\(code) \(number)" : number
+    }
+
+    /// Just the number of `tripNumberDetail` ("2625"), for "RE6 · 2625".
+    var tripNumber: String? {
+        guard VehicleKind.railModes.contains(mode),
+              let short = TransitLabels.clean(tripShortName?.replacingOccurrences(of: "_", with: " ")),
+              let number = TransitLabels.trainNumber(short), number.count >= 3 else { return nil }
+        if TransitLabels.trainNumber(lineName) == number { return nil }
+        if let display = TransitLabels.clean(displayName), TransitLabels.trainNumber(display) == number { return nil }
+        return number
     }
 
     /// Feeds without route colours (e.g. many Italian operators) still get a clear colour per mode.

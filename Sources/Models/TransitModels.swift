@@ -163,6 +163,8 @@ struct Leg: Codable, Sendable, RouteStyled {
     var wheelchairAccessible: String? = nil
     /// Last stop of the vehicle's trip.
     var tripTo: SegmentStop? = nil
+    /// First stop of the vehicle's trip.
+    var tripFrom: SegmentStop? = nil
     /// Where to ride and which way out, worked out on the iPhone for the watch (nil elsewhere).
     var exitAdvice: ExitAdvice? = nil
 
@@ -488,6 +490,10 @@ struct StopTime: Decodable, Identifiable, Sendable, RouteStyled {
     var directionId: String? = nil
     /// Last stop of the trip.
     var tripTo: SegmentStop? = nil
+    /// First stop of the trip.
+    var tripFrom: SegmentStop? = nil
+    /// The train's own number in many rail feeds ("RE_6 - 2625"), see `tripNumberDetail`.
+    var tripShortName: String? = nil
     /// Some feeds keep the train category only here ("rjx 66"), see `TransitLabels.trainName`.
     var routeLongName: String? = nil
     /// The stops after this one (`fetchStops=true`), first few only.

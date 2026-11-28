@@ -43,6 +43,8 @@ struct TransitMapContent {
     var stationsVersion = 0
     var shapes: [LineShape] = []
     var shapesVersion = 0
+    /// Zoomed out (trains only): lines drawn thin.
+    var overview = false
     var vehicles: [LiveVehicle] = []
     var vehiclesVersion = 0
     var rentals: RentalsResponse = RentalsResponse()
@@ -249,13 +251,13 @@ struct TransitMapView: UIViewRepresentable {
             }
             if versions.shapes != c.shapesVersion {
                 versions.shapes = c.shapesVersion
-                setShapes(c.shapes, on: map)
+                setShapes(c.shapes, thin: c.overview, on: map)
             }
             if versions.vehicles != c.vehiclesVersion {
                 versions.vehicles = c.vehiclesVersion
                 let glide = parent.glide
                 diff(c.vehicles.filter { $0.coordinate.isValidCoordinate }.map { ($0.id, $0) }, into: &vehiclePins, map: map, make: VehiclePin.init) { pin, v in
-                    let changedLook = pin.vehicle.name != v.name || pin.vehicle.colorHex != v.colorHex
+                    let changedLook = pin.vehicle.name != v.name || pin.vehicle.colorHex != v.colorHex || pin.vehicle.compact != v.compact
                     pin.vehicle = v
                     let target = v.coordinate.clCoordinate
                     if abs(pin.coordinate.latitude - target.latitude) > 1e-7 || abs(pin.coordinate.longitude - target.longitude) > 1e-7 {
@@ -299,7 +301,7 @@ struct TransitMapView: UIViewRepresentable {
         }
 
         /// One overlay per colour and mode instead of one per piece of line.
-        private func setShapes(_ shapes: [LineShape], on map: MKMapView) {
+        private func setShapes(_ shapes: [LineShape], thin: Bool, on map: MKMapView) {
             var groups: [String: (mode: String, color: String, lines: [MKPolyline])] = [:]
             var order: [String] = []
             for s in shapes {
@@ -318,9 +320,11 @@ struct TransitMapView: UIViewRepresentable {
                 casing.colorHex = g.color
                 casing.mode = g.mode
                 casing.isCasing = true
+                casing.isThin = thin
                 let multi = LineOverlay(g.lines)
                 multi.colorHex = g.color
                 multi.mode = g.mode
+                multi.isThin = thin
                 return (casing, multi)
             }
             let fresh: [MKOverlay] = made.map(\.casing) + made.map(\.line)
@@ -372,10 +376,10 @@ struct TransitMapView: UIViewRepresentable {
             let dark = mapView.traitCollection.userInterfaceStyle == .dark
             if line.isCasing {
                 r.strokeColor = dark ? UIColor(white: 0.08, alpha: 0.9) : UIColor(white: 1, alpha: 0.95)
-                r.lineWidth = LineOverlay.width(line.mode) + 3
+                r.lineWidth = line.isThin ? 3 : LineOverlay.width(line.mode) + 3
             } else {
                 r.strokeColor = UIColor(hex: LineColors.strokeHex(line.colorHex, dark: dark))
-                r.lineWidth = LineOverlay.width(line.mode)
+                r.lineWidth = line.isThin ? 2 : LineOverlay.width(line.mode)
             }
             r.lineCap = .round
             r.lineJoin = .round
@@ -548,6 +552,8 @@ final class LineOverlay: MKMultiPolyline {
     var mode = "BUS"
     /// The light edge drawn under the line.
     var isCasing = false
+    /// Zoomed out over a region: a hairline, so the dots of the trains lead.
+    var isThin = false
 
     /// Bolder than before: the lines are what this map is about.
     static func width(_ mode: String) -> CGFloat {
@@ -757,7 +763,23 @@ final class VehiclePinView: MKAnnotationView {
     required init?(coder: NSCoder) { fatalError("not used") }
 
     func show(_ v: LiveVehicle, restyle: Bool) {
+        if restyle, v.compact {
+            // Zoomed out: a dot in the line's colour on a white ring, no name, no arrow. Hundreds of
+            // them stay readable (and cheap to draw); tapping one still opens the train.
+            let d: CGFloat = 12
+            badge.text = nil
+            badge.backgroundColor = UIColor(hex: LiveMap.colorHex(v.colorHex, mode: v.mode))
+            badge.layer.cornerRadius = d / 2
+            frame.size = CGSize(width: 28, height: 28)
+            badge.frame = CGRect(x: (bounds.width - d) / 2, y: (bounds.height - d) / 2, width: d, height: d)
+            centerOffset = .zero
+            arrow.isHidden = true
+            accessibilityLabel = "\(ModeStyle.label(v.mode)) \(v.lineName)"
+            return
+        }
+        if v.compact { return }
         if restyle {
+            badge.layer.cornerRadius = 5
             let colors = v.lineColors
             badge.text = v.lineName
             badge.backgroundColor = UIColor(hex: colors.background)

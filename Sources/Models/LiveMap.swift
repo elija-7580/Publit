@@ -69,6 +69,8 @@ struct LiveVehicle: Identifiable, Hashable, Sendable {
     let nextStop: String
     let delayMinutes: Int
     let realTime: Bool
+    /// Zoomed out: drawn as a small dot in the line's colour, without the name.
+    var compact = false
 }
 
 /// Part of a line's route, drawn once however many vehicles use it.
@@ -95,6 +97,8 @@ struct VehicleTrack: Sendable {
     let colorHex: String
     let realTime: Bool
     let pieces: [Piece]
+    /// Overview (zoomed out): the vehicle is drawn as a dot.
+    var compact = false
 
     /// Where the vehicle is at `t`; nil before it comes or after it has left the area.
     func vehicle(at t: Date) -> LiveVehicle? {
@@ -117,15 +121,18 @@ struct VehicleTrack: Sendable {
 
     private func make(_ pos: LatLon, heading: Double?, next: String, delay: Int) -> LiveVehicle {
         LiveVehicle(id: id, name: name, mode: mode, colorHex: colorHex, coordinate: pos, heading: heading,
-                    nextStop: next, delayMinutes: delay, realTime: realTime)
+                    nextStop: next, delayMinutes: delay, realTime: realTime, compact: compact)
     }
 }
 
 /// Turns `/map/trips` segments into line shapes and vehicle tracks. Runs off the main thread;
 /// the map then only asks the tracks for positions, which is cheap.
 enum LiveMap {
-    /// Flights cross the whole map; very long segments are long-distance trains passing through.
+    /// Flights cross the whole map.
     static let excludedModes: Set<String> = ["AIRPLANE"]
+    /// A hop without a shape longer than this would be a straight line across the country, off the
+    /// tracks. Measured stop to stop: the segment's `distance` from the server is the whole trip's,
+    /// and filtering on it hid every long-distance and high-speed train (Frecciarossa, Italo, ICE).
     static let maxSegmentMeters = 200_000.0
     /// Upper bounds that keep MapKit smooth on older phones.
     static let maxShapes = 1500
@@ -157,7 +164,9 @@ enum LiveMap {
     /// - Parameters:
     ///   - precision: polyline precision that was requested.
     ///   - tolerance: simplification in metres (larger when zoomed out).
-    static func build(_ segments: [TripSegment], filter: ModeFilter, precision: Int, tolerance: Double) -> Snapshot {
+    ///   - overview: zoomed out: only trains (they are what is left to see), as dots without names.
+    static func build(_ segments: [TripSegment], filter: ModeFilter, precision: Int, tolerance: Double,
+                      overview: Bool = false) -> Snapshot {
         var shapes: [String: LineShape] = [:]
         var pieces: [String: [VehicleTrack.Piece]] = [:]
         var info: [String: (name: String, mode: String, color: String, realTime: Bool)] = [:]
@@ -166,12 +175,13 @@ enum LiveMap {
             guard let id = s.trips.first?.tripId, Polyline.decode(s.polyline, precision: precision).count > 2 else { return nil }
             return id
         })
-        for s in segments where !excludedModes.contains(s.mode) && s.distance <= maxSegmentMeters && filter.allows(s.mode) {
-            guard s.distance.isFinite, s.distance >= 0, s.from.coordinate.isValidCoordinate,
+        for s in segments where !excludedModes.contains(s.mode) && filter.allows(s.mode) && (!overview || isRail(s.mode)) {
+            guard s.from.coordinate.isValidCoordinate,
                   s.to.coordinate.isValidCoordinate, s.arrival >= s.departure,
                   let trip = s.trips.first else { continue }
             let color = colorHex(s.routeColor, mode: s.mode)
             let raw = Polyline.decode(s.polyline, precision: precision)
+            if raw.count <= 2, s.from.coordinate.distance(to: s.to.coordinate) > maxSegmentMeters { continue }
             let points = Polyline.simplify(raw, toleranceMeters: tolerance)
             guard points.count > 1 else { continue }
             let shapeKey = "\(s.from.stopId ?? s.from.name)>\(s.to.stopId ?? s.to.name)|\(color)"
@@ -192,10 +202,18 @@ enum LiveMap {
         let tracks = pieces.compactMap { id, list -> VehicleTrack? in
             guard let i = info[id] else { return nil }
             return VehicleTrack(id: id, name: i.name, mode: i.mode, colorHex: i.color, realTime: i.realTime,
-                                pieces: list.sorted { $0.departure < $1.departure })
+                                pieces: list.sorted { $0.departure < $1.departure }, compact: overview)
         }
         let orderedShapes = shapes.values.sorted { rank($0.mode) != rank($1.mode) ? rank($0.mode) < rank($1.mode) : $0.id < $1.id }
         return Snapshot(shapes: Array(orderedShapes.prefix(maxShapes)), tracks: tracks)
+    }
+
+    /// Trains of every kind: what the zoomed-out map still shows.
+    static func isRail(_ mode: String) -> Bool {
+        switch ModeGroup.of(mode) {
+        case .train, .suburban: return true
+        default: return false
+        }
     }
 
     /// A line that runs A to B and back (not a circle) can come with one stop-to-stop hop from one
@@ -220,5 +238,6 @@ enum LiveMap {
     }
 
     /// Simplification for a map showing `spanMeters` across: about a pixel or two.
-    static func tolerance(spanMeters: Double) -> Double { Swift.max(2, Swift.min(40, spanMeters / 800)) }
+    /// Up to a few hundred metres zoomed out over a region, where a pixel is that much.
+    static func tolerance(spanMeters: Double) -> Double { Swift.max(2, Swift.min(500, spanMeters / 800)) }
 }
