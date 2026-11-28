@@ -416,6 +416,78 @@ struct SLSource: LiveSource {
     }
 }
 
+// MARK: Carris Metropolitana (Lisbon area buses)
+
+/// Carris Metropolitana's open API (no key): estimated arrivals of the buses around Lisbon
+/// (Almada, Amadora, Barreiro, Cascais, Loures, Oeiras, Seixal, Setúbal, Sintra …). Transitous has
+/// the timetable and vehicle positions, but no live times for them. A ride is found by its trip
+/// (Transitous' trip ID ends with Carris Metropolitana's), otherwise by line, direction and time.
+struct CarrisMetropolitanaSource: LiveSource {
+    let name = "Carris Metropolitana"
+    let horizon: TimeInterval = 90 * 60
+    let onlyWithoutLive = true
+    static let prefix = "pt-Carris-Metropolitana_"
+    private static let boards = TTLCache<[Arrival]>(limit: 80)
+
+    func covers(_ ride: LiveRide) -> Bool { ride.stopId?.hasPrefix(Self.prefix) ?? false }
+
+    func fix(for ride: LiveRide, now: Date) async throws -> LiveFix? {
+        let candidates = Self.stopIds(ride.stopId)
+        for id in candidates {
+            let deps = try? await Self.boards.value(id, ttl: 30) { try await Self.arrivals(id) }
+            guard let deps, !deps.isEmpty else { continue }
+            if let trip = Self.tripKey(ride.tripId), let hit = deps.first(where: { $0.trip == trip }) {
+                return LiveMatch.fix(hit.departure, source: name)
+            }
+            return LiveMatch.best(for: ride, in: deps.map(\.departure)).map { LiveMatch.fix($0, source: name) }
+        }
+        return nil
+    }
+
+    /// Carris Metropolitana's stop IDs for a Transitous stop: the same number, and for stops in
+    /// Lisbon, Barreiro and a few more towns the one Transitous spells with a leading 3 instead of
+    /// 0 ("360322" is "060322", checked 28 Nov 2026).
+    static func stopIds(_ stopId: String?) -> [String] {
+        guard let stopId, stopId.hasPrefix(prefix) else { return [] }
+        let id = String(stopId.dropFirst(prefix.count))
+        guard id.count == 6, id.allSatisfy(\.isNumber) else { return [] }
+        return id.hasPrefix("3") ? [id, "0" + id.dropFirst()] : [id]
+    }
+
+    /// "20261128_11:00_pt-Carris-Metropolitana_[FBZQZ][A2L1N]4701_0_1|2800|1100" → the part after the prefix.
+    static func tripKey(_ tripId: String?) -> String? {
+        guard let tripId, let r = tripId.range(of: prefix) else { return nil }
+        let key = String(tripId[r.upperBound...])
+        return key.isEmpty ? nil : key
+    }
+
+    struct Arrival: Sendable, Hashable {
+        let trip: String?
+        let departure: LiveDeparture
+    }
+
+    static func arrivals(_ id: String) async throws -> [Arrival] {
+        let raw = try await LiveHTTP.json(LiveHTTP.request(URL(string: "https://api.carrismetropolitana.pt/v2/arrivals/by_stop/\(id)")!))
+        return parseArrivals(raw)
+    }
+
+    /// "[A2L1N]4701" → "4701".
+    static func line(_ id: String) -> String {
+        guard let close = id.lastIndex(of: "]") else { return id }
+        return String(id[id.index(after: close)...])
+    }
+
+    static func parseArrivals(_ root: Any) -> [Arrival] {
+        J.list(root).map { J.dict($0) }.compactMap { a in
+            guard let lineId = J.str(a["line_id"]), let sched = J.double(a["scheduled_arrival_unix"]) else { return nil }
+            let estimated = J.double(a["estimated_arrival_unix"]).map { Date(timeIntervalSince1970: $0) }
+            let dep = LiveDeparture(lines: [line(lineId)], destination: J.str(a["headsign"]),
+                                    scheduled: Date(timeIntervalSince1970: sched), expected: estimated)
+            return Arrival(trip: J.str(a["trip_id"]), departure: dep)
+        }
+    }
+}
+
 // MARK: TfL (London line status)
 
 /// Transport for London line status (Powered by TfL Open Data): delays, closures and

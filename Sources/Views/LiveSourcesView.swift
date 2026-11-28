@@ -22,6 +22,7 @@ struct LiveSourcesView: View {
         Source(name: "VRN", area: L10n.t("Rhineland-Palatinate"), what: L10n.t("Live times of buses, trams and trains where Transitous has none")),
         Source(name: "ACTV", area: L10n.t("Venice"), what: L10n.t("Live times of waterbuses and buses")),
         Source(name: "SL", area: L10n.t("Stockholm"), what: L10n.t("Live departures and disruptions")),
+        Source(name: "Carris Metropolitana", area: L10n.t("Lisbon area"), what: L10n.t("Live times of buses around Lisbon")),
         Source(name: "TfL", area: L10n.t("London"), what: L10n.t("Line status and disruptions (Powered by TfL Open Data)")),
     ]
 

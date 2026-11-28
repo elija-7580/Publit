@@ -196,7 +196,8 @@ final class TransitousClient: @unchecked Sendable {
         return res.direct
     }
 
-    static func streetQuery(from: LatLon, to: LatLon, time: Date?, arriveBy: Bool, mode: String) -> [URLQueryItem] {
+    static func streetQuery(from: LatLon, to: LatLon, time: Date?, arriveBy: Bool, mode: String,
+                            cyclingSpeed: Double? = SmartRouting.ownCyclingSpeed()) -> [URLQueryItem] {
         var q = [
             URLQueryItem(name: "fromPlace", value: from.apiValue),
             URLQueryItem(name: "toPlace", value: to.apiValue),
@@ -206,6 +207,7 @@ final class TransitousClient: @unchecked Sendable {
             URLQueryItem(name: "maxDirectTime", value: String(walkLimits.direct)),
         ]
         if let time { q.append(URLQueryItem(name: "time", value: DateParsing.format(time))) }
+        if mode == "BIKE", let speed = cyclingSpeed { q.append(URLQueryItem(name: "cyclingSpeed", value: String(speed))) }
         return q
     }
 

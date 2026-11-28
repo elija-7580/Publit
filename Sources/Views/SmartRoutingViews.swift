@@ -148,6 +148,9 @@ struct SmartRoutingSettingsSection: View {
     @AppStorage(SmartRouting.extraTransferKey) private var extraTransfer = 0
     @AppStorage(SmartRouting.ownSpeedKey) private var ownSpeed = false
     @AppStorage(SmartRouting.measuredSpeedKey) private var measuredSpeed = 0.0
+    @AppStorage(SmartRouting.ownCyclingSpeedKey) private var ownCyclingSpeed = false
+    @AppStorage(SmartRouting.measuredCyclingSpeedKey) private var measuredCyclingSpeed = 0.0
+    @State private var measuringBike = false
     @AppStorage(SmartRouting.flatWalksKey) private var flatWalks = false
     @AppStorage(SmartRouting.learnKey) private var learn = true
     @AppStorage(SmartRouting.learnTripsKey) private var learnTrips = false
@@ -216,6 +219,30 @@ struct SmartRoutingSettingsSection: View {
                         }
                     }
                 }
+                if CyclingPace.isAvailable {
+                    Toggle(isOn: $ownCyclingSpeed) {
+                        Label {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(L10n.t("Use my cycling speed"))
+                                Text(L10n.t("From your bike rides in Apple Health"))
+                                    .font(.caption).foregroundStyle(.secondary)
+                            }
+                        } icon: {
+                            Image(systemName: "bicycle").foregroundStyle(Color.ink)
+                        }
+                    }
+                    .accessibilityIdentifier("cyclingSpeedHealth")
+                    .onChange(of: ownCyclingSpeed) { _, on in if on { Task { await measureBike() } } }
+                    if ownCyclingSpeed {
+                        if measuringBike {
+                            ProgressView()
+                        } else if SmartRouting.cyclingSpeedRange.contains(measuredCyclingSpeed) {
+                            LabeledContent(L10n.t("Your cycling speed"), value: Self.speedText(measuredCyclingSpeed))
+                        } else {
+                            Text(L10n.t("No bike rides found in Apple Health yet.")).font(.caption).foregroundStyle(.secondary)
+                        }
+                    }
+                }
                 Toggle(L10n.t("Avoid steep walks"), isOn: $flatWalks)
                 Toggle(L10n.t("Learn from my choices"), isOn: $learn)
                 Toggle(isOn: $learnTrips) {
@@ -245,7 +272,16 @@ struct SmartRoutingSettingsSection: View {
                 ? "Routes stay in time order. The one that feels shortest is marked “Recommended”: waiting, walking and changes count more than riding. Each change shows how likely it works and what to take if you miss it. Your choices tune this on your iPhone only."
                 : "Routes are listed by departure, as the planner returns them."))
         }
-        .task { if enabled && ownSpeed { await measure() } }
+        .task {
+            if enabled && ownSpeed { await measure() }
+            if enabled && ownCyclingSpeed { await measureBike() }
+        }
+    }
+
+    private func measureBike() async {
+        measuringBike = true
+        if let v = await CyclingPace.measure() { measuredCyclingSpeed = v }
+        measuringBike = false
     }
 
     private func measure() async {

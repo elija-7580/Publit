@@ -6,7 +6,8 @@ import FoundationNetworking
 // Extra real-time sources for regions where Transitous has timetables but (almost) no live data:
 // Austria (ÖBB/VAO), Vienna (Wiener Linien), Switzerland (search.ch), in Germany North Rhine-Westphalia
 // (VRR), Berlin/Brandenburg (VBB), Hesse (RMV), Lower Saxony/Bremen (VBN), Schleswig-Holstein (NAH.SH)
-// and Rhineland-Palatinate (VRN), Venice (ACTV), Stockholm (SL) and London (TfL line status).
+// and Rhineland-Palatinate (VRN), Venice (ACTV), Stockholm (SL), the Lisbon area (Carris Metropolitana)
+// and London (TfL line status).
 // Transitous stays the router; these only correct times, cancellations, platforms and add alerts
 // to rides it already found. A live time from Transitous always wins.
 
@@ -24,6 +25,8 @@ struct LiveRide: Sendable, Hashable {
     var tz: String? = nil
     /// Transitous already has a live time for it.
     var live = false
+    /// Transitous' trip ID, for sources that can look a ride up by its trip.
+    var tripId: String? = nil
 }
 
 /// A departure as an extra source reports it.
@@ -300,7 +303,7 @@ enum LiveOverlay {
 
     static let sources: [any LiveSource] = [WienerLinienSource(), HafasSource.oebb, SearchChSource(), EFASource.vrr,
                                             HafasSource.vbb, HafasSource.rmv, HafasSource.vbn, HafasSource.nahsh, EFASource.vrn,
-                                            ACTVSource(), SLSource(), TfLStatusSource()]
+                                            ACTVSource(), SLSource(), CarrisMetropolitanaSource(), TfLStatusSource()]
 
     /// Names of all extra sources, for the credits in Settings.
     static var sourceNames: [String] { sources.map { $0.name } }
@@ -308,14 +311,15 @@ enum LiveOverlay {
     static func ride(_ leg: Leg) -> LiveRide {
         LiveRide(point: leg.from.coordinate, stopId: leg.from.stopId, stopName: leg.from.name,
                  lines: [leg.routeShortName, leg.displayName].compactMap { $0 }.filter { !$0.isEmpty },
-                 headsign: leg.headsign, scheduled: leg.scheduledStartTime, mode: leg.mode, tz: leg.from.tz, live: leg.realTime)
+                 headsign: leg.headsign, scheduled: leg.scheduledStartTime, mode: leg.mode, tz: leg.from.tz, live: leg.realTime,
+                 tripId: leg.tripId)
     }
 
     static func ride(_ st: StopTime) -> LiveRide {
         LiveRide(point: st.place.coordinate, stopId: st.place.stopId, stopName: st.place.name,
                  lines: [st.routeShortName, st.displayName].compactMap { $0 }.filter { !$0.isEmpty },
                  headsign: st.headsign, scheduled: st.scheduledDepartureTime ?? st.departureTime, mode: st.mode, tz: st.place.tz,
-                 live: st.realTime)
+                 live: st.realTime, tripId: st.tripId)
     }
 
     static func wanted(_ ride: LiveRide, now: Date) -> Bool {
