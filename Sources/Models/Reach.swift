@@ -18,12 +18,22 @@ enum Reach {
     static func isAtStop(meters: Double) -> Bool { meters.isFinite && meters <= atStopMeters }
 
     /// "Leave in 6 min", or "Departs in 4 min" when the route starts with the ride (you are at the stop).
+    /// More than an hour ahead the clock time reads better than a count: "Leave at 18:02",
+    /// not "Leave in 320 min" (feedback on build 113).
     static func leaveText(_ it: Itinerary, minutes: Int) -> String {
-        if it.legs.first?.isTransit == true {
+        let boards = it.legs.first?.isTransit == true
+        if minutes > countdownMinutes {
+            let at = Fmt.time(it.startTime, tz: it.legs.first?.from.tz)
+            return boards ? L10n.f("Departs at %@", at) : L10n.f("Leave at %@", at)
+        }
+        if boards {
             return minutes >= 1 ? L10n.f("Departs in %lld min", minutes) : L10n.t("Board here")
         }
         return minutes >= 1 ? L10n.f("Leave in %lld min", minutes) : L10n.t("Leave now")
     }
+
+    /// Up to this many minutes ahead the time to leave is a countdown, beyond it a clock time.
+    static let countdownMinutes = 60
 
     /// Routes planned from your position while you stand at the first stop start with boarding,
     /// not with a one-minute walk: the leading walk goes and the route starts when the vehicle leaves.

@@ -60,17 +60,8 @@ struct GoNowView: View {
                     NavigationLink {
                         ItineraryDetailView(itinerary: it, fromName: plan.from.title, toName: plan.to?.title ?? "")
                     } label: {
-                        VStack(alignment: .leading, spacing: 4) {
-                            if let dep = it.firstDeparture {
-                                Text(leaveText(it, firstDeparture: dep))
-                                    .font(.footnote.weight(.semibold))
-                                    .foregroundStyle(it.startTime < .now.addingTimeInterval(120) ? Color.delay : .secondary)
-                            } else {
-                                Text("Walk all the way").font(.footnote.weight(.semibold)).foregroundStyle(.secondary)
-                            }
-                            ItineraryRow(itinerary: it, windowStart: it.startTime, windowEnd: it.startTime.addingTimeInterval(span),
-                                         badges: badges[it.routeKey] ?? [], showLeave: false)
-                        }
+                        ItineraryRow(itinerary: it, windowStart: it.startTime, windowEnd: it.startTime.addingTimeInterval(span),
+                                     badges: badges[it.routeKey] ?? [], leaveAlways: true)
                     }
                     .linkIndicatorHidden()
                 }
@@ -135,10 +126,5 @@ struct GoNowView: View {
         .onChange(of: location.hasFix) { _, hasFix in
             if hasFix, plan.itineraries.isEmpty { Task { await plan.search(current: location.coordinate) } }
         }
-    }
-
-    private func leaveText(_ it: Itinerary, firstDeparture: Date) -> String {
-        let mins = Int(ceil(it.startTime.timeIntervalSinceNow / 60))
-        return Reach.leaveText(it, minutes: mins)
     }
 }

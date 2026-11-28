@@ -3,7 +3,7 @@
 > Nicht von Hand bearbeiten. Erzeugt von `scripts/feature_inventory.py` (CI: `features-doc.yml`).
 > Die ausführliche Beschreibung steht in [FUNKTIONEN.md](FUNKTIONEN.md).
 
-**239 Views, 8 App Intents, 5 Widgets in 92 Dateien.**
+**240 Views, 8 App Intents, 5 Widgets in 92 Dateien.**
 
 ## `Sources/App/DesignSamples.swift`
 - Views: `DesignSampleView`
@@ -81,7 +81,7 @@
 - Sichtbare Texte: Original ticket
 
 ## `Sources/Views/BoardingViews.swift`
-- Views: `BoardingLine`, `BoardingSteps`
+- Views: `BoardingLine`, `RouteFacts`, `BoardingSteps`
 - Sichtbare Texte: Walk to %@ · Board at %@ · Pl. %@ · → %@ · Get off at %@
 
 ## `Sources/Views/CalendarSuggestionViews.swift`
@@ -158,7 +158,7 @@
 
 ## `Sources/Views/GoNowView.swift`
 - Views: `GoNowView`
-- Sichtbare Texte: From · Change · Walk all the way · Later connections · From your location · from %@ · Route · Done
+- Sichtbare Texte: From · Change · Later connections · From your location · from %@ · Route · Done
 
 ## `Sources/Views/ItineraryDetailView.swift`
 - Views: `CompareMapView`, `ItineraryDetailView`, `RouteSummary`, `RouteMap`, `RouteMark`, `VehicleKindLine`, `LegRow`, `GetOffButton`, `StatusBanner`, `TimelineLegRow`, `TimelineEndRow`, `TimelineRail`, `LeaveHero`
@@ -217,7 +217,7 @@
 
 ## `Sources/Views/PlanView.swift`
 - Views: `PlanView`, `EndpointConnector`, `ItineraryRow`, `TimelineBar`
-- Sichtbare Texte: Swap · Depart · Arrive · Last · When · Arrive by · Day · Depart at · Now · The latest you can leave and still get there tonight. · Plan in sections · Search routes · Last connection: %@ · Recommended: %@ · Map · Routes · Plan · Where to? · not set · Earlier connections · Later connections · Updated %@ · Cancelled · Change at %@ may be tight · Change at %@: %lld %% chance · Service changes on this route · Live data
+- Sichtbare Texte: Swap · Depart · Arrive · Last · When · Arrive by · Day · Depart at · Now · The latest you can leave and still get there tonight. · Plan in sections · Search routes · Last connection: %@ · Recommended: %@ · Map · Routes · Plan · Where to? · not set · Earlier connections · Later connections · Updated %@ · Walk all the way · Cancelled · Change at %@ may be tight · Change at %@: %lld %% chance · Service changes on this route · Live data
 
 ## `Sources/Views/PublitLogo.swift`
 - Views: `PublitLogo`, `PublitAppIcon`

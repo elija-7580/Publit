@@ -20,6 +20,12 @@ enum WhatsNew {
 
     /// Newest first.
     static let entries: [WhatsNewEntry] = [
+        WhatsNewEntry(build: 114, items: [
+            WhatsNewItem(symbol: "list.bullet.rectangle", title: "Clearer route list",
+                         text: "Each route now shows when to leave as a clock time, where to get on with the walk there, and how often you change, each in its own place."),
+            WhatsNewItem(symbol: "square.on.square", title: "Fewer look-alike routes",
+                         text: "A route on the same rides that arrives much later no longer shows up next to the faster one."),
+        ]),
         WhatsNewEntry(build: 113, items: [
             WhatsNewItem(symbol: "map", title: "Map line follows your ride",
                          text: "Around large stations, the line on the map no longer runs over tracks your train never takes."),

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.2 (build 114) – a calmer, clearer route list
+
+Feedback from a user on build 113 (Go now, Krems, 28 Nov 2026): the route cards read as a jumble of text.
+
+- **When to leave** (`Reach.leaveText`, `ItineraryRow.leave`): more than an hour ahead the card says the clock time ("Leave at 18:02", "Departs at 18:02") instead of "Leave in 320 min". Go now uses the same line in the card as Plan (`leaveAlways`), "Walk all the way" included.
+- **Facts under the bar** (`RouteFacts`): instead of one run of text ("2 changes · Walk to Unter-Meisling Ort · 6 min") two facts with their own symbol: on the left the walk to the first stop and the stop with its platform ("🚶 6 min  Unter-Meisling Ort"), on the right the changes. VoiceOver reads the full sentence as before.
+- **Short rides in the bar** (`TimelineBar`): a ride of a minute or two keeps a block wide enough for its mode symbol instead of a blank sliver, so the number of changes matches what the bar shows.
+- **Look-alike routes** (`SmartRouting.pruned`): of two routes leaving together, one that arrives at least 10 min later with no fewer changes goes when the faster one walks no longer than it saves (the same buses at 19:41 twice: walk 23 min and arrive 22:06, or change again and arrive 22:32).
+
 ## 0.1.2 (build 113) – the line on the map follows the ride, iPad map up to the top
 
 - **Line of a ride on the map** (`LegShape.withoutDetours`, `Leg.tidyingShape`, `TransitousClient.usable`/`refresh`/`trip`, #114): the router draws a ride along the tracks of OpenStreetMap. Around large stations that line could leave the route between two stops in a row, run along other tracks and come back (Paris, 27 Nov 2026: RER A Châtelet – Auber, 1.7 km apart, came with 14.2 km of line). Such a piece is now replaced by the straight way between the two stops when it is at least 3.5 times as long as the straight way and at least 1 km longer. Rail, suburban rail, metro and tram only; buses, ferries and walks stay as the server sends them. Reported by a user.

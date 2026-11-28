@@ -478,16 +478,20 @@ struct ItineraryRow: View {
     var reason: String? = nil
     /// "Tomorrow" or a date when the route leaves on another day than the one searched for.
     var dayNote: String? = nil
-    /// "Leave in 6 min" in the row; off where the list says it above each row (Go now).
+    /// "Leave in 6 min" at the top of the card.
     var showLeave = true
+    /// Also for routes more than an hour ahead ("Leave at 18:02"), and "Walk all the way" for a walk
+    /// (Go now, where when to set off is the point of the list). Otherwise only within the hour.
+    var leaveAlways = false
 
     private var tz: String? { itinerary.legs.first?.from.tz }
 
     /// "Leave in 6 min" / "Departs in 4 min" for routes that leave within the hour.
-    static func leave(_ it: Itinerary, now: Date) -> String? {
+    static func leave(_ it: Itinerary, now: Date, always: Bool = false) -> String? {
+        if always, it.isDirect { return L10n.t("Walk all the way") }
         let minutes = Int(ceil(it.startTime.timeIntervalSince(now) / 60))
-        guard (0...60).contains(minutes) else { return nil }
-        return Reach.leaveText(it, minutes: minutes)
+        guard always || (0...Reach.countdownMinutes).contains(minutes) else { return nil }
+        return Reach.leaveText(it, minutes: max(0, minutes))
     }
 
     var body: some View {
@@ -512,7 +516,15 @@ struct ItineraryRow: View {
             }
             return nil
         }()
+        let leaveText = showLeave && !itinerary.isCancelled ? Self.leave(itinerary, now: Ticker.minute.now, always: leaveAlways) : nil
         VStack(alignment: .leading, spacing: 8) {
+            // When to set off: the first thing to read, above the times.
+            if let leaveText {
+                Text(verbatim: leaveText)
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(itinerary.startTime < Ticker.minute.now.addingTimeInterval(120) && !itinerary.isDirect ? Color.delay : .secondary)
+                    .accessibilityIdentifier("leaveLine")
+            }
             if dayNote != nil || !badges.isEmpty {
                 RouteTagLine(dayNote: dayNote, badges: badges, reason: reason)
             }
@@ -538,13 +550,9 @@ struct ItineraryRow: View {
             if showTimeline {
                 TimelineBar(itinerary: itinerary, windowStart: windowStart, windowEnd: windowEnd).frame(height: 42)
             }
-            // When to leave, how often you change and where to get on: one line.
-            Text(verbatim: factsLine)
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-                .truncationMode(.tail)
-                .accessibilityIdentifier("boardingLine")
+            // Where to get on (and how long the walk there is) on the left, the changes on the right:
+            // two facts with their own symbol instead of one run of text joined by dots.
+            RouteFacts(itinerary: itinerary)
             if let note {
                 InlineNotice(text: note.text, tint: note.tint)
                     .lineLimit(1)
@@ -562,18 +570,6 @@ struct ItineraryRow: View {
 }
 
 extension ItineraryRow {
-    /// "Leave in 6 min · 2 changes · Walk to Hauptbahnhof · Pl. 3 · 4 min".
-    fileprivate var factsLine: String {
-        var parts: [String] = []
-        if showLeave, !itinerary.isCancelled, let leave = Self.leave(itinerary, now: Ticker.minute.now) { parts.append(leave) }
-        parts.append(Fmt.changes(itinerary.transfers))
-        if let leg = itinerary.firstTransitLeg {
-            let walk = itinerary.legs.prefix { !$0.isTransit }.reduce(0) { $0 + $1.duration }
-            parts.append(BoardingLine.text(leg: leg, walkSeconds: walk))
-        }
-        return parts.joined(separator: " · ")
-    }
-
     /// Spoken form of "+1": the arrival day in words ("tomorrow").
     fileprivate func dayNoteA11y(_ days: Int) -> String {
         Fmt.dayNote(itinerary.endTime, reference: itinerary.startTime, tz: itinerary.legs.last?.to.tz) ?? "+\(days)"
@@ -601,7 +597,8 @@ struct TimelineBar: View {
                     }
                     let x = max(0, min(width, leg.startTime.timeIntervalSince(windowStart) / span * width))
                     let end = max(x, min(width, leg.endTime.timeIntervalSince(windowStart) / span * width))
-                    let w = max(0, min(width - x, max(end - x, 2)))
+                    // A short ride keeps room for its symbol, so no block stays a blank sliver.
+                    let w = max(0, min(width - x, max(end - x, leg.isTransit ? 16 : 2)))
                     if leg.isTransit {
                         RoundedRectangle(cornerRadius: 4, style: .continuous)
                             .fill(leg.lineStroke)

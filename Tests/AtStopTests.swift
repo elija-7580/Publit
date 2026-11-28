@@ -44,6 +44,8 @@ final class AtStopTests: XCTestCase {
         let across = Reach.boardingHere([try route(walkMeters: 90, here: here)], here: LatLon(lat: here.0, lon: here.1))[0]
         XCTAssertEqual(across.legs.first?.mode, "WALK")
         XCTAssertEqual(Reach.leaveText(across, minutes: 3), L10n.f("Leave in %lld min", 3))
+        // More than an hour ahead: the clock time, not "Leave in 320 min".
+        XCTAssertEqual(Reach.leaveText(across, minutes: 320), L10n.f("Leave at %@", Fmt.time(across.startTime, tz: across.legs.first?.from.tz)))
         // 150 m away.
         let far = (48.20135, 16.37000)
         let away = Reach.boardingHere([try route(walkMeters: 40, here: far)], here: LatLon(lat: far.0, lon: far.1))[0]
