@@ -18,6 +18,12 @@ enum SmartRouting {
     static let ownSpeedKey = "smartOwnWalkingSpeed"
     /// Measured walking speed in m/s (`WalkingPace`).
     static let measuredSpeedKey = "smartMeasuredSpeed"
+    /// "Use my cycling speed" (wish #30): the bike speed from Apple Health for bike routes.
+    static let ownCyclingSpeedKey = "smartOwnCyclingSpeed"
+    /// Measured cycling speed in m/s (`CyclingPace`).
+    static let measuredCyclingSpeedKey = "smartMeasuredCyclingSpeed"
+    /// Plausible cycling speeds in m/s (9 to 40 km/h); anything else is not used.
+    static let cyclingSpeedRange = 2.5...11.0
     static let flatWalksKey = "smartFlatWalks"
     static let learnKey = "smartLearn"
     /// "Learn from my trips": walking times and changes from the user's own trips, on the device only (off by default).
@@ -359,6 +365,8 @@ enum SmartRouting {
     struct Request: Equatable, Sendable {
         var enabled = false
         var pedestrianSpeed: Double? = nil
+        /// m/s for own bike rides (whole way and Bike & Ride); the server's default is 4.2.
+        var cyclingSpeed: Double? = nil
         var extraTransferMinutes = 0
         var flatWalks = false
 
@@ -369,6 +377,7 @@ enum SmartRouting {
             if d.bool(forKey: ownSpeedKey), let v = d.object(forKey: measuredSpeedKey) as? Double, (0.6...2.2).contains(v) {
                 r.pedestrianSpeed = (v * 100).rounded() / 100
             }
+            r.cyclingSpeed = SmartRouting.ownCyclingSpeed(d)
             r.extraTransferMinutes = max(0, d.integer(forKey: extraTransferKey))
             r.flatWalks = d.bool(forKey: flatWalksKey)
             return r
@@ -381,12 +390,33 @@ enum SmartRouting {
                      URLQueryItem(name: "slowDirect", value: "true"),
                      URLQueryItem(name: "fastestSlowDirectFactor", value: "1.5")]
             if let pedestrianSpeed { q.append(URLQueryItem(name: "pedestrianSpeed", value: String(pedestrianSpeed))) }
+            if let cyclingSpeed { q.append(URLQueryItem(name: "cyclingSpeed", value: String(cyclingSpeed))) }
             if extraTransferMinutes > 0 { q.append(URLQueryItem(name: "additionalTransferTime", value: String(extraTransferMinutes))) }
             if flatWalks { q.append(URLQueryItem(name: "elevationCosts", value: "LOW")) }
             return q
         }
 
-        var key: String { enabled ? "s\(pedestrianSpeed.map { String($0) } ?? "-")|\(extraTransferMinutes)|\(flatWalks)" : "off" }
+        var key: String {
+            enabled ? "s\(pedestrianSpeed.map { String($0) } ?? "-")|\(extraTransferMinutes)|\(flatWalks)\(cyclingSpeed.map { "|b\($0)" } ?? "")" : "off"
+        }
+    }
+
+    /// Average speed of bike rides (`CyclingPace`): total distance over total time. Needs at least
+    /// 3 km in all, so one short test ride does not set it; rides under 200 m or a minute, or faster
+    /// than 72 km/h (a car trip logged as a ride), are left out.
+    static func cyclingSpeed(fromRides rides: [(meters: Double, seconds: Double)]) -> Double? {
+        let usable = rides.filter { $0.meters > 200 && $0.seconds > 60 && $0.meters / $0.seconds < 20 }
+        let meters = usable.reduce(0) { $0 + $1.meters }, seconds = usable.reduce(0) { $0 + $1.seconds }
+        guard meters >= 3_000, seconds > 0 else { return nil }
+        return meters / seconds
+    }
+
+    /// The measured cycling speed, rounded to cm/s, when "Use my cycling speed" is on and it is plausible.
+    /// Also used for the bike comparison under the routes.
+    static func ownCyclingSpeed(_ d: UserDefaults = .standard) -> Double? {
+        guard d.object(forKey: enabledKey) as? Bool ?? true, d.bool(forKey: ownCyclingSpeedKey), let v = d.object(forKey: measuredCyclingSpeedKey) as? Double,
+              cyclingSpeedRange.contains(v) else { return nil }
+        return (v * 100).rounded() / 100
     }
 
     // MARK: Learning
