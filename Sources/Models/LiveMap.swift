@@ -221,4 +221,14 @@ enum LiveMap {
 
     /// Simplification for a map showing `spanMeters` across: about a pixel or two.
     static func tolerance(spanMeters: Double) -> Double { Swift.max(2, Swift.min(40, spanMeters / 800)) }
+
+    /// Vehicles are asked for from this long ago: a bus that stands at a stop for a minute or two
+    /// keeps the hop it came on and stays on the map, instead of vanishing until it leaves again.
+    static let lookBack: TimeInterval = 3 * 60
+
+    /// How long a pin glides to its next position when positions are worked out every `tick` seconds.
+    /// A little longer than the tick, so a pin never stops between two ticks (a late tick made the
+    /// vehicles move in hops, "like pigeons", Munich, 18.11.2026). Each target is where the vehicle
+    /// will be when the glide ends (`now + glide`), so the pin is on time instead of a tick behind.
+    static func glide(tick: TimeInterval) -> TimeInterval { tick + Swift.max(0.5, tick * 0.25) }
 }

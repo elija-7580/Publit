@@ -59,7 +59,7 @@ struct TransitMapView: UIViewRepresentable {
     var coverage = false
     /// Search hit to show with a marker; nil removes the marker.
     var focus: MapFocus?
-    /// Seconds a vehicle takes to glide to its next position (the refresh tick).
+    /// Seconds a vehicle takes to glide to its next position (a little longer than the refresh tick).
     let glide: TimeInterval
     let onRegion: (MKCoordinateRegion) -> Void
     let onSelect: (MapSelection) -> Void
