@@ -110,6 +110,15 @@ final class LiveMapTests: XCTestCase {
         XCTAssertNil(waiting.heading)
     }
 
+    /// The pin glides a little longer than the tick, so it never stops between two ticks.
+    func testGlideOutlastsTheTick() {
+        for tick in [1.0, 2.0, 4.0] {
+            XCTAssertGreaterThan(LiveMap.glide(tick: tick), tick)
+            XCTAssertLessThanOrEqual(LiveMap.glide(tick: tick), tick * 1.5)
+        }
+        XCTAssertGreaterThanOrEqual(LiveMap.lookBack, 120, "a bus standing a minute or two at a stop stays")
+    }
+
     func testVehiclesInsideBounds() throws {
         let snap = LiveMap.build(try segments(), filter: .all, precision: 5, tolerance: 2)
         let t = date("2026-10-13T09:47:30Z")

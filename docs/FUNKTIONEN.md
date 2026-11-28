@@ -1,6 +1,6 @@
 # Publit iOS – Funktionen und Screens (vollständige Übersicht)
 
-> Stand: Version 0.1.2 (Build 113). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
+> Stand: Version 0.1.2 (Build 114). Diese Datei beschreibt **jede Funktion und jeden Screen** der iOS-App, der Apple-Watch-App, der Widgets/Live Activity, der Share-Extension und der Siri-Kurzbefehle.
 > **Pflege:** Jede Änderung an `Sources/`, `Watch/`, `Widgets/` oder `Share/` muss diese Datei im selben Commit/PR mitändern (siehe Abschnitt „Aktualisierung“ ganz unten). Die maschinell erzeugte Liste aller Views steht in [`FUNKTIONEN-INVENTAR.md`](FUNKTIONEN-INVENTAR.md) und wird von der CI automatisch aktualisiert.
 
 ## Inhalt
@@ -134,6 +134,7 @@ Bewegung reduzieren zeigt jede Demo im Endzustand. Schließen, „Continue“ od
 - **Suche** „Search places, sights and stops“ und **„Find nearby“**-Kategorien wie Apple Maps (Restaurants, Apotheken, Ladestationen …, farbcodiert) → „All … in this area“ / „No places found“.
 - **„Departures nearby“** (Kapsel unten in der Mitte, nur aus Nearby, nicht im iPad-Layout und nicht bei offener Auswahl, #17): schließt die Karte, die Nearby-Liste kommt von unten zurück.
 - Linien auf der Karte stammen aus Fahrt-Abschnitten (`LiveMap`). Ein langer, gerader Abschnitt ohne Streckenverlauf auf einer Fahrt, deren übrige Abschnitte den Gleisen folgen (Metro/Tram/Bus, > 2,5 km), wird nicht gezeichnet: Linien, die von A nach B und zurück fahren, sahen sonst wie ein geschlossener Ring aus.
+- **Fahrzeuge auf der Karte** (`TransitMapModel.tick`, `LiveMap.glide`): Positionen sind geschätzt aus den Live-Abfahrtszeiten (Transitous, keine GPS-Daten). Alle 2 s (Stromsparmodus/heißes Gerät: 4 s) wird für jedes Fahrzeug berechnet, wo es am Ende des nächsten Gleitens ist; der Pin gleitet etwas länger als der Takt (2,5 s), damit er zwischen zwei Takten nie stehen bleibt (vorher ruckelten die Busse, München, Nov. 2026), und ist dadurch nicht mehr einen Takt hinterher. Der Takt hält feste Abstände (Fristen statt „2 s nach der Arbeit“). Neue Fahrtdaten alle 30 s, abgefragt ab 3 min in der Vergangenheit (`LiveMap.lookBack`), damit ein Bus, der ein, zwei Minuten an einer Haltestelle steht, nicht verschwindet. Nur solange die Karte sichtbar ist.
 - **Ebenen** (`MapLayersSheet`, „Map layers“): Kartenstil (Standard, Transit/gedämpft, Satellite, Satellite ohne Namen), 3D-Gelände und Gebäude, Places of interest, Traffic, Lines, Vehicles, Bikes and scooters, **Data gaps** (Abdeckungslücken orange; gefüllt = keine Daten, gestrichelt = teilweise).
 - **Auswahl** (`MapSelectionView`): Station → nächste Abfahrten, „Route here/from here“; Ort/Pin (`MapPlaceView`, auch „Dropped pin“ per langem Drücken ab 0,5 s; das Loslassen schließt den Pin nicht wieder) → Distanz, Gehzeit, Routen.
 - **Fahrzeug** (`VehicleTripView`): Live-Position oder aus Fahrplan, „x min late“, **„Plan from this vehicle“** (wie §6: im Fahrzeug sitzen und von dort weiterplanen), „Next stops“, „Line …: route and timetable“.

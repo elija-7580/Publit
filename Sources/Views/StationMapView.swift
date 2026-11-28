@@ -59,6 +59,7 @@ final class TransitMapModel {
     static let refreshWindow: TimeInterval = 4 * 60
     static var refreshEvery: TimeInterval { Energy.interval(30) }
     static var tickSeconds: TimeInterval { Energy.interval(2) }
+    static var glideSeconds: TimeInterval { LiveMap.glide(tick: tickSeconds) }
 
     func regionChanged(_ r: MKCoordinateRegion) {
         region = r
@@ -98,11 +99,13 @@ final class TransitMapModel {
         if let region { regionChanged(region) }
     }
 
-    /// Called every `tickSeconds` while the map is open.
+    /// Called every `tickSeconds` while the map is open. Positions are for the end of the glide
+    /// (`glideSeconds` ahead): the pin glides there and arrives just when the vehicle does.
     func tick(now: Date = .now) {
         guard active, let r = region else { return }
         let (lo, hi) = Self.box(r, grow: 0.1)
-        let list = showVehicles && !liveHidden ? LiveMap.vehicles(tracks, at: now, min: lo, max: hi) : []
+        let at = now.addingTimeInterval(Self.glideSeconds)
+        let list = showVehicles && !liveHidden ? LiveMap.vehicles(tracks, at: at, min: lo, max: hi) : []
         if list.isEmpty && content.vehicles.isEmpty { return }
         content.vehicles = list
         content.vehiclesVersion += 1
@@ -216,7 +219,7 @@ final class TransitMapModel {
             if liveQueued, active { liveQueued = false; liveTask = Task { await loadLive(force: false) } }
         }
         guard let segs = try? await TransitousClient.shared.mapTrips(
-            min: lo, max: hi, zoom: zoom, start: now.addingTimeInterval(-60),
+            min: lo, max: hi, zoom: zoom, start: now.addingTimeInterval(-LiveMap.lookBack),
             end: now.addingTimeInterval(first ? Self.firstWindow : Self.refreshWindow)) else {
                 liveBox = nil
                 if !Task.isCancelled { liveError = L10n.t("Live layer unavailable. Stations still work."); liveRetryAt = Date().addingTimeInterval(10) }
@@ -367,7 +370,7 @@ struct StationMapView: View {
         NavigationStack {
             TransitMapView(content: model.content, initialCenter: center ?? location.coordinate,
                            look: look, coverage: showCoverage, focus: focus,
-                           glide: TransitMapModel.tickSeconds,
+                           glide: TransitMapModel.glideSeconds,
                            onRegion: { model.regionChanged($0); region = $0 },
                            onSelect: { selection = $0 },
                            onPick: { place, refined in pick(place, refined: refined) },
@@ -493,11 +496,15 @@ struct StationMapView: View {
             guard scenePhase == .active else { model.pause(); return }
             model.resume()
             // Vehicles glide every 2 s and are fetched again every 30 s, only while the map is on screen.
+            // Ticks keep to a fixed beat (deadlines, not "sleep 2 s after the work"), so they do not drift.
             guard scenePhase == .active else { return }
+            let clock = ContinuousClock()
+            var next = clock.now
             while !Task.isCancelled {
                 model.tick()
                 await model.refreshIfDue()
-                try? await Task.sleep(for: .seconds(TransitMapModel.tickSeconds))
+                next = max(next.advanced(by: .seconds(TransitMapModel.tickSeconds)), clock.now)
+                try? await Task.sleep(until: next, clock: clock)
             }
         }
     }
